@@ -1,0 +1,54 @@
+import Vuex from 'vuex';
+import createPersistedState from 'vuex-persistedstate';
+import Cookies from 'js-cookie';
+
+export default new Vuex.Store({
+    state: {
+        tenantInitialized: false,
+        userProfile: {
+            language: "pt", // Default language = pt
+            image: "",
+            name: "",
+            login: "",
+            tokenAzure: "",
+            tokenApi: "",
+            tenant: "",
+            keyMongoAccess: ""
+        }
+    },
+    getters: {
+        //
+    },
+    mutations: {
+        updateUserProfile(state, payload) {
+            state.userProfile = payload.amount;
+        },
+        updateUserProfileLanguage(state, payload) {
+            state.userProfile.language = payload.amount;
+        },
+        updateUserProfileImage(state, payload) {
+            state.userProfile.image = payload.amount;
+        },
+        updateUserProfileTenant(state, payload) {
+            state.userProfile.tenant = payload.amount;
+        },
+        updateUserProfileKeyMongo(state, payload) {
+            state.userProfile.keyMongoAccess = payload.amount;
+        },
+        setTenantInitialized(state, value) {
+            state.tenantInitialized = value;
+        },
+    },
+    actions: {
+        //
+    },
+    plugins: [
+        createPersistedState({
+            storage: {
+                getItem: key => Cookies.get(key),
+                setItem: (key, value) => Cookies.set(key, value, { expires: 3, secure: true }),
+                removeItem: key => Cookies.remove(key)
+            }
+        })
+    ],
+});

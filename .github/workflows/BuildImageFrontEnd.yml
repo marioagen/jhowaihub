@@ -1,0 +1,29 @@
+name: 'Build image front-end'
+
+on:
+  push:
+    branches:
+      - 'develop'
+    paths:
+      - 'front-end/**'
+
+jobs:
+  build-image:
+    name: "Build image front-end"
+    runs-on: ["azure-identity"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Image
+        working-directory: ./front-end/vueapp
+        run: docker image build -t acrapplications.azurecr.io/woopi-ai/doc-front-end:latest .
+
+      - name: Azure login
+        run: az login --identity
+  
+      - name: ACR login
+        run: az acr login -n acrapplications
+      
+      - name: Push Image
+        run: docker image push acrapplications.azurecr.io/woopi-ai/doc-front-end:latest

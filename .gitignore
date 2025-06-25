@@ -1,0 +1,11 @@
+front-end/vueapp/dist
+front-end/vueapp/node_modules
+front-end/vueapp/package-lock.json
+
+.vs/
+bin/
+obj/
+packages/
+*.map
+*.user
+.config/

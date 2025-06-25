@@ -1,0 +1,29 @@
+name: 'Build image back-end'
+
+on:
+  push:
+    branches:
+      - 'develop'
+    paths:
+     - 'back-end/**'
+
+jobs:
+  build-image:
+    name: "Build image back-end"
+    runs-on: ["azure-identity"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Image
+        working-directory: ./back-end
+        run: docker image build -t acrapplications.azurecr.io/woopi-ai/back-end-doc-analyzer:latest .
+
+      - name: Azure login
+        run: az login --identity
+  
+      - name: ACR login
+        run: az acr login -n acrapplications
+      
+      - name: Push Image
+        run: docker image push acrapplications.azurecr.io/woopi-ai/back-end-doc-analyzer:latest

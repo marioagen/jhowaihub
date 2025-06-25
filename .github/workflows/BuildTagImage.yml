@@ -1,0 +1,46 @@
+name: 'Build tag images'
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-image:
+    name: "Build tag image"
+    runs-on: ["azure-identity"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Declare variables
+        id: vars
+        run: |
+          echo "nameBranch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Azure login
+        run: az login --identity
+  
+      - name: ACR login
+        run: az acr login -n acrapplications
+
+      - name: Build Back Image
+        working-directory: ./back-end
+        run: docker image build -t acrapplications.azurecr.io/woopi-ai/back-end-doc-analyzer:${{steps.vars.outputs.nameBranch}} .
+      
+      - name: Push Back Image
+        run: docker image push acrapplications.azurecr.io/woopi-ai/back-end-doc-analyzer:${{steps.vars.outputs.nameBranch}}
+
+      - name: Build Front Image
+        working-directory: ./front-end/vueapp
+        run: docker image build -t acrapplications.azurecr.io/woopi-ai/doc-front-end:${{steps.vars.outputs.nameBranch}} .
+      
+      - name: Push Front Image
+        run: docker image push acrapplications.azurecr.io/woopi-ai/doc-front-end:${{steps.vars.outputs.nameBranch}}
+
+      - name: Build File-Repository Image
+        working-directory: ./external-api
+        run: docker image build -t acrapplications.azurecr.io/woopi-ai/doc-file-repository:${{steps.vars.outputs.nameBranch}} .
+      
+      - name: Push File-Repository Image
+        run: docker image push acrapplications.azurecr.io/woopi-ai/doc-file-repository:${{steps.vars.outputs.nameBranch}}
