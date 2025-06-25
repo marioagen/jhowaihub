@@ -3,7 +3,7 @@ name: 'Build image front-end'
 on:
   push:
     branches:
-      - 'develop'
+      - 'trocar_develop'
     paths:
       - 'front-end/**'
 
