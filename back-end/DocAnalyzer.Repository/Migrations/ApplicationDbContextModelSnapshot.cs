@@ -4,28 +4,25 @@ using DocAnalyzer.Repository.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DocAnalyzer.Repository.Migrations.applicationDB
+namespace DocAnalyzer.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241213195113_change-value-models")]
-    partial class changevaluemodels
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DocAnalyzer.Domain.Models.Inquiry", b =>
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.Document", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -56,8 +53,8 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(251)
+                        .HasColumnType("varchar(251)")
                         .HasColumnName("Name");
 
                     b.Property<string>("ReferenceFile")
@@ -72,10 +69,10 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
 
                     b.HasKey("Id");
 
-                    b.ToTable("Inquiries", (string)null);
+                    b.ToTable("Documents", (string)null);
                 });
 
-            modelBuilder.Entity("DocAnalyzer.Domain.Models.InquiryHistory", b =>
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.DocumentHistory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,9 +85,9 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
-                    b.Property<int>("IdInquiry")
+                    b.Property<int>("IdDocument")
                         .HasColumnType("int")
-                        .HasColumnName("Id_Inquiry");
+                        .HasColumnName("Id_Document");
 
                     b.Property<string>("Input")
                         .IsRequired()
@@ -108,12 +105,12 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdInquiry");
+                    b.HasIndex("IdDocument");
 
-                    b.ToTable("InquiryHistories", (string)null);
+                    b.ToTable("DocumentHistories", (string)null);
                 });
 
-            modelBuilder.Entity("DocAnalyzer.Domain.Models.InquiryNormalized", b =>
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.DocumentNormalized", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -131,16 +128,16 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
-                    b.Property<int>("IdInquiry")
+                    b.Property<int>("IdDocument")
                         .HasColumnType("int")
-                        .HasColumnName("Id_Inquiry");
+                        .HasColumnName("Id_Document");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdInquiry")
+                    b.HasIndex("IdDocument")
                         .IsUnique();
 
-                    b.ToTable("InquiryNormalized", (string)null);
+                    b.ToTable("DocumentNormalized", (string)null);
                 });
 
             modelBuilder.Entity("DocAnalyzer.Domain.Models.Question", b =>
@@ -208,7 +205,7 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("varchar(max)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("Title");
 
                     b.Property<int>("TypeDocId")
@@ -220,6 +217,29 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
                     b.HasIndex("TypeDocId");
 
                     b.ToTable("Questionnaires", (string)null);
+                });
+
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.Team", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teams", (string)null);
                 });
 
             modelBuilder.Entity("DocAnalyzer.Domain.Models.TypeDoc", b =>
@@ -250,26 +270,72 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
                     b.ToTable("TypeDoc", (string)null);
                 });
 
-            modelBuilder.Entity("DocAnalyzer.Domain.Models.InquiryHistory", b =>
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.User", b =>
                 {
-                    b.HasOne("DocAnalyzer.Domain.Models.Inquiry", "Inquiry")
-                        .WithMany("InquiryHistories")
-                        .HasForeignKey("IdInquiry")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("Id");
 
-                    b.Navigation("Inquiry");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("varchar(254)")
+                        .HasColumnName("Email");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("DocAnalyzer.Domain.Models.InquiryNormalized", b =>
+            modelBuilder.Entity("UserTeam", b =>
                 {
-                    b.HasOne("DocAnalyzer.Domain.Models.Inquiry", "Inquiry")
-                        .WithOne("InquiryNormalized")
-                        .HasForeignKey("DocAnalyzer.Domain.Models.InquiryNormalized", "IdInquiry")
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int")
+                        .HasColumnName("TeamId");
+
+                    b.HasKey("UserId", "TeamId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("UserTeams", (string)null);
+                });
+
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.DocumentHistory", b =>
+                {
+                    b.HasOne("DocAnalyzer.Domain.Models.Document", "Document")
+                        .WithMany("DocumentHistories")
+                        .HasForeignKey("IdDocument")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Inquiry");
+                    b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.DocumentNormalized", b =>
+                {
+                    b.HasOne("DocAnalyzer.Domain.Models.Document", "Document")
+                        .WithOne("DocumentNormalized")
+                        .HasForeignKey("DocAnalyzer.Domain.Models.DocumentNormalized", "IdDocument")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
                 });
 
             modelBuilder.Entity("DocAnalyzer.Domain.Models.QuestionQuestionnaire", b =>
@@ -302,11 +368,26 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
                     b.Navigation("TypeDoc");
                 });
 
-            modelBuilder.Entity("DocAnalyzer.Domain.Models.Inquiry", b =>
+            modelBuilder.Entity("UserTeam", b =>
                 {
-                    b.Navigation("InquiryHistories");
+                    b.HasOne("DocAnalyzer.Domain.Models.Team", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("InquiryNormalized");
+                    b.HasOne("DocAnalyzer.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.Document", b =>
+                {
+                    b.Navigation("DocumentHistories");
+
+                    b.Navigation("DocumentNormalized");
                 });
 
             modelBuilder.Entity("DocAnalyzer.Domain.Models.Question", b =>

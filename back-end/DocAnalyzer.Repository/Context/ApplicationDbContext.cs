@@ -24,6 +24,8 @@ namespace DocAnalyzer.Repository.Context
         public DbSet<Question> Questions { get; set; }
         public DbSet<QuestionQuestionnaire> QuestionQuestionnaire { get; set; }
         public DbSet<TypeDoc> TypeDoc { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Team> Teams { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -45,6 +47,8 @@ namespace DocAnalyzer.Repository.Context
             modelBuilder.Entity<Question>(new QuestionMap().Configure);
             modelBuilder.Entity<QuestionQuestionnaire>(new QuestionQuestionnaireMap().Configure);
             modelBuilder.Entity<TypeDoc>(new TypeDocMap().Configure);
+            modelBuilder.Entity<User>(new UserMap().Configure);
+            modelBuilder.Entity<Team>(new TeamMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }
