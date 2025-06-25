@@ -3,7 +3,7 @@ name: 'Build tag images'
 on:
   push:
     tags:
-      - '*'
+      - 'trocar_*'
 
 jobs:
   build-image:
