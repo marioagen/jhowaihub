@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocAnalyzer.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250625203340_FirstMigration")]
+    [Migration("20250625203916_FirstMigration")]
     partial class FirstMigration
     {
         /// <inheritdoc />

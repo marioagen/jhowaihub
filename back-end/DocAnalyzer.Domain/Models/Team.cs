@@ -7,7 +7,7 @@ namespace DocAnalyzer.Domain.Models
         [Column("Name", TypeName = "varchar(100)")]
         public string Name { get; private set; } = string.Empty;
 
-        public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<User>? Users { get; set; }
 
         public Team(string name,
                     int id,
