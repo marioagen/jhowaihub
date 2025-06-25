@@ -13,13 +13,13 @@ namespace DocAnalyzer.Repository.Mappings
             builder.HasKey(t => t.Id);
 
             builder.Property(t => t.Name)
-                .HasColumnName("Name")
-                .HasColumnType("varchar(100)")
-                .IsRequired();
+                   .HasColumnName("Name")
+                   .HasColumnType("varchar(100)")
+                   .IsRequired();
 
             builder.HasMany(t => t.Users)
-                .WithMany(u => u.Teams)
-                .UsingEntity(j => j.ToTable("UserTeams"));
+                   .WithMany(u => u.Teams)
+                   .UsingEntity(j => j.ToTable("UserTeams"));
         }
     }
 }

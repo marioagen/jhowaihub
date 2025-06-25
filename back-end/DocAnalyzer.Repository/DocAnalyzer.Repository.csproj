@@ -31,8 +31,4 @@
     <ProjectReference Include="..\DocAnalyzer.Domain\DocAnalyzer.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Migrations\ApplicationDb\" />
-  </ItemGroup>
-
 </Project>
