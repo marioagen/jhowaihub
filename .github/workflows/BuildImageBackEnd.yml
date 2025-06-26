@@ -3,9 +3,10 @@ name: 'Build image back-end'
 on:
   push:
     branches:
-      - 'trocar_develop'
+      - 'develop'
+      - 'release'
     paths:
-     - 'back-end/**'
+      - 'back-end/**'
 
 jobs:
   build-image:
@@ -15,9 +16,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Declare variables
+        id: vars
+        run: |
+          echo "imageRepository=woopi-ai" >> $GITHUB_OUTPUT
+          echo "imageName=woopiai-hub-backend" >> $GITHUB_OUTPUT
+
+          echo "imageVersion=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          
       - name: Build Image
         working-directory: ./back-end
-        run: docker image build -t acrapplications.azurecr.io/woopi-ai/back-end-doc-analyzer:latest .
+        run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
 
       - name: Azure login
         run: az login --identity
@@ -26,4 +35,4 @@ jobs:
         run: az acr login -n acrapplications
       
       - name: Push Image
-        run: docker image push acrapplications.azurecr.io/woopi-ai/back-end-doc-analyzer:latest
+        run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}}
