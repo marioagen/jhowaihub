@@ -12,7 +12,7 @@ namespace DocAnalyzer.Domain.Models
         [Column("Name", TypeName = "varchar(150)")]
         public string Name { get; private set; } = string.Empty;
 
-        [Column("Email", TypeName = "varchar(254)")]
+        [Column("Email", TypeName = "varchar(256)")]
         public string Email { get; private set; } = string.Empty;
 
         [Column("IsActive", TypeName = "bit")]
