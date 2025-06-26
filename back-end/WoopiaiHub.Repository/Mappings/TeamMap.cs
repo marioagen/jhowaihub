@@ -1,8 +1,8 @@
-﻿using DocAnalyzer.Domain.Models;
+﻿using WoopiAiHub.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DocAnalyzer.Repository.Mappings
+namespace WoopiAiHub.Repository.Mappings
 {
     public class TeamMap : IEntityTypeConfiguration<Team>
     {

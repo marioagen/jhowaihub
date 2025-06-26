@@ -27,7 +27,7 @@ namespace WoopiAiHub.Repository.Middleware
                 tenantName = values.ToString();
 
                 var tenant = await tenantCacheService.FindTenantAsync(tenantName,
-                                                                      ColTypeModule.DocAnalyzer);
+                                                                      ColTypeModule.WoopiAiHub);
 
                 if (tenant != null)
                 {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DocAnalyzer.Domain.Models
+namespace WoopiAiHub.Domain.Models
 {
     public class Team : BaseEntity
     {
