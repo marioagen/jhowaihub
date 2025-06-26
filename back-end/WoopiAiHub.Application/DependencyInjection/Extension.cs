@@ -1,0 +1,33 @@
+﻿using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace WoopiAiHub.Application.DependencyInjection
+{
+    public static class Extension
+    {
+        public static IServiceCollection AddApplication(this IServiceCollection services)
+        {
+            services.AddSingleton<IServiceCollection, ServiceCollection>();
+            services.AddScoped<IDocumentServices, DocumentServices>();
+            services.AddScoped<IDocumentHistoryServices, DocumentHistoryServices>();
+            services.AddScoped<IDocumentNormalizedServices, DocumentNormalizedServices>();
+            services.AddScoped<IAccountServices, AccountServices>();
+            services.AddScoped<ITenantServices, TenantServices>();
+            services.AddScoped<IValidateDocument, ValidateDocument>();
+            services.AddScoped<IOcrGoogle, OcrGoogle>();
+            services.AddScoped<IOcrAzure, OcrAzure>();
+            services.AddScoped<IQuestionnaireServices, QuestionnaireServices>();
+            services.AddScoped<IQuestionServices, QuestionServices>();
+            services.AddScoped<ITypeDocServices, TypeDocServices>();
+            services.AddScoped<ICoreDependencies, CoreDependencies>();
+            services.AddScoped<IApiDependencies, ApiDependencies>();
+            services.AddLogging();
+            services.AddMemoryCache();
+
+            return services;
+        }
+    }
+}
