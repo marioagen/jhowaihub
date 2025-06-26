@@ -18,10 +18,10 @@
                     <router-link class="d-flex align-items-center link-dark text-decoration-none"
                                  :to="{ name: 'DocumentList' }">
                         <span class="fs-5 logo">
-                            <img src="./../../assets/img/doc-analyzer-logo.png"
+                            <img src="./../../assets/img/woopiai-hub-logo.png"
                                  :title="$t('labelGoHome')"
                                  v-if="!showLogoDarkMode" />
-                            <img src="./../../assets/img/doc-analyzer-logo-dark.png"
+                            <img src="./../../assets/img/woopiai-hub-logo-dark.png"
                                  :title="$t('labelGoHome')"
                                  v-else />
                         </span>
