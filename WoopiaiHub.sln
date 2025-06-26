@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoopiAiHub.Domain", "back-e
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoopiAiHub.Application", "back-end\WoopiAiHub.Application\WoopiAiHub.Application.csproj", "{A7BF8093-2A69-809A-7929-6BB08E01E82E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoopiAiHub.Repository", "back-end\WoopiaiHub.Repository\WoopiAiHub.Repository.csproj", "{2A6373E4-034C-F16D-9777-14809328C359}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoopiAiHub.Repository", "back-end\WoopiAiHub.Repository\WoopiAiHub.Repository.csproj", "{2A6373E4-034C-F16D-9777-14809328C359}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoopiAiHub.Api", "back-end\WoopiAiHub.Api\WoopiAiHub.Api.csproj", "{6C674DA8-EFEC-718E-14B3-B16852563175}"
 EndProject
