@@ -5,8 +5,8 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches:
-      - 'trocar_master'
-      - 'trocar_develop'
+      - 'master'
+      - 'develop'
 
 jobs:
   build-and-test:
@@ -30,9 +30,9 @@ jobs:
 
       - name: Build
         run: |
-          dotnet build back-end/DocAnalyzer.Api/DocAnalyzer.Api.csproj
+          dotnet build back-end/WoopiAiHub.Api/WoopiAiHub.Api.csproj
           dotnet build external-api/FileRepository.Api/FileRepository.Api.csproj
-          dotnet build tests/DocAnalyzer.UnitTests/DocAnalyzer.UnitTests.csproj
+          dotnet build tests/WoopiAiHub.UnitTests/WoopiAiHub.UnitTests.csproj
 
       - name: Unit Tests
         run: |
@@ -44,6 +44,6 @@ jobs:
         if: success() || failure()
         with:
           name: DOTNET Tests
-          path: tests/DocAnalyzer.UnitTests/TestResults/test-results.trx
+          path: tests/WoopiAiHub.UnitTests/TestResults/test-results.trx
           reporter: dotnet-trx
           output-to: 'step-summary'

@@ -5,8 +5,9 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches:
-      - 'trocar_master'
-      - 'trocar_develop'
+      - 'master'
+      - 'develop'
+      - 'release'
 
 jobs:
   build-and-test:
@@ -47,19 +48,19 @@ jobs:
 
       - name: Sonar Properties
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"woopiai-docanalyser" \
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"woopiai-hub" \
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
           /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
           /d:sonar.exclusions=**/*.xml,**/*.config,**/src/assets/**,**/front-end/** \
-          /d:sonar.coverage.exclusions=**/back-end/DocAnalyzer.Repository/**,**/back-end/DocAnalyzer.Api/**,**/DependencyInjection/**,**/DTOs/**,**/front-end/** \
+          /d:sonar.coverage.exclusions=**/back-end/WoopiAiHub.Repository/**,**/back-end/WoopiAiHub.Api/**,**/DependencyInjection/**,**/DTOs/**,**/front-end/** \
           /d:sonar.cpd.exclusions=**/Migrations/**
 
       - name: Build and analyze
         run: |
-          dotnet build back-end/DocAnalyzer.Api/DocAnalyzer.Api.csproj
+          dotnet build back-end/WoopiAiHub.Api/WoopiAiHub.Api.csproj
           dotnet build external-api/FileRepository.Api/FileRepository.Api.csproj
-          dotnet build tests/DocAnalyzer.UnitTests/DocAnalyzer.UnitTests.csproj
+          dotnet build tests/WoopiAiHub.UnitTests/WoopiAiHub.UnitTests.csproj
           ./dotnet-coverage/dotnet-coverage collect "dotnet test --no-restore --no-build --verbosity normal ." -f xml -o "coverage.xml"
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
