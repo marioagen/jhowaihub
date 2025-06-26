@@ -36,3 +36,4 @@ jobs:
       
       - name: Push Image
         run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}}
+

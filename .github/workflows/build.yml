@@ -30,6 +30,7 @@ jobs:
 
       - name: Build
         run: |
+          dotnet build WoopiaiHub.sln
           dotnet build back-end/WoopiAiHub.Api/WoopiAiHub.Api.csproj
           dotnet build external-api/FileRepository.Api/FileRepository.Api.csproj
           dotnet build tests/WoopiAiHub.UnitTests/WoopiAiHub.UnitTests.csproj
