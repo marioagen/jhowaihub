@@ -4,19 +4,16 @@ using DocAnalyzer.Repository.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace DocAnalyzer.Repository.Migrations.applicationDB
+namespace DocAnalyzer.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250224151421_change-document-keys-indices")]
-    partial class changedocumentkeysindices
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,7 +53,7 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(251)
                         .HasColumnType("varchar(251)")
                         .HasColumnName("Name");
 
@@ -222,6 +219,29 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
                     b.ToTable("Questionnaires", (string)null);
                 });
 
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.Team", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teams", (string)null);
+                });
+
             modelBuilder.Entity("DocAnalyzer.Domain.Models.TypeDoc", b =>
                 {
                     b.Property<int>("Id")
@@ -248,6 +268,52 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
                     b.HasKey("Id");
 
                     b.ToTable("TypeDoc", (string)null);
+                });
+
+            modelBuilder.Entity("DocAnalyzer.Domain.Models.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("Id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("varchar(254)")
+                        .HasColumnName("Email");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users", (string)null);
+                });
+
+            modelBuilder.Entity("UserTeam", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int")
+                        .HasColumnName("TeamId");
+
+                    b.HasKey("UserId", "TeamId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("UserTeams", (string)null);
                 });
 
             modelBuilder.Entity("DocAnalyzer.Domain.Models.DocumentHistory", b =>
@@ -300,6 +366,21 @@ namespace DocAnalyzer.Repository.Migrations.applicationDB
                         .IsRequired();
 
                     b.Navigation("TypeDoc");
+                });
+
+            modelBuilder.Entity("UserTeam", b =>
+                {
+                    b.HasOne("DocAnalyzer.Domain.Models.Team", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DocAnalyzer.Domain.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DocAnalyzer.Domain.Models.Document", b =>
