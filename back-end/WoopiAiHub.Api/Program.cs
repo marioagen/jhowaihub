@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.AspNetCore.HttpOverrides;
+using WoopiAiHub.Api.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +83,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 });
 builder.Services.AddHealthChecks();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -100,6 +104,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMultiTenantExtension();
 app.MapControllers();
+app.UseExceptionHandler();
 
 app.MapHealthChecks("/healthz");
 
