@@ -15,12 +15,10 @@ namespace WoopiAiHub.Api.Controllers
     public class TeamController : ControllerBase
     {
         private readonly ITeamServices _teamServices;
-        private readonly ILogger<TeamController> _logger;
 
-        public TeamController(ITeamServices teamServices, ILogger<TeamController> logger)
+        public TeamController(ITeamServices teamServices)
         {
             _teamServices = teamServices;
-            _logger = logger;
         }
 
         /// <summary>

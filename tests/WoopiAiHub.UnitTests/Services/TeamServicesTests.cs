@@ -49,7 +49,8 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindById_NonExistingId_ThrowsArgumentException()
         {
             // Arrange
-            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns((TeamDto)null);
+            TeamDto? teamDto = null;
+            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => _service.FindById(999));
@@ -132,8 +133,9 @@ namespace WoopiAiHub.UnitTests.Services
         public void Update_TeamNotFound_ThrowsArgumentException()
         {
             // Arrange
+            TeamDto? teamDto = null;
             var updateDto = _fixture.CreateValidTeamUpdateDto(999);
-            _teamRepositoryMock.Setup(r => r.FindById(updateDto.Id)).Returns((TeamDto)null);
+            _teamRepositoryMock.Setup(r => r.FindById(updateDto.Id)).Returns(teamDto);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => _service.Update(updateDto));
@@ -243,9 +245,9 @@ namespace WoopiAiHub.UnitTests.Services
             var team2 = _fixture.CreateValidTeamDto();
             team2.Name = "Special Team";
             var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true, Search = "special" };
-            var teamDtos = new List<TeamDto> { team1, team2 }.AsQueryable();
 
-            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teamDtos);
+            var filtered = new List<TeamDto> { team2 }.AsQueryable();
+            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(filtered);
 
             // Act
             var result = _service.FindAllPaged(pagedData);

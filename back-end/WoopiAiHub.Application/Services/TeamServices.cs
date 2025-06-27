@@ -1,4 +1,5 @@
 using Humanizer;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -49,7 +50,7 @@ namespace WoopiAiHub.Application.Services
                     totalList.OrderBy(team => team.Name) :
                     totalList.OrderByDescending(team => team.Name);
 
-                var result = this.Pagination(totalList, pagedDataDto);
+                var result = Pagination(totalList, pagedDataDto);
                 return result;
             }
             else
@@ -122,7 +123,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private static Team GenerateTeamToUpdate(TeamUpdateDto teamUpdateDto, TeamDto team)
         {
-            if (team.Users != null && team.Users.Count() > 0)
+            if (team.Users != null && team.Users.Any())
             {
                 var userIdsToKeep = teamUpdateDto.UserIds.Select(id => new Guid(id.ToString())).ToHashSet();
                 var usersToRemove = team.Users.Where(u => !userIdsToKeep.Contains(u.Id)).ToList();
@@ -161,16 +162,15 @@ namespace WoopiAiHub.Application.Services
         /// <param name="totalList"></param>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
-        private TeamPagedResultDto Pagination(IQueryable<TeamDto> totalList,
+        private static TeamPagedResultDto Pagination(IQueryable<TeamDto> totalList,
                                                       PagedDataDto pagedDataDto)
         {
             int pageCount, currentPage = 0;
 
-            if (string.IsNullOrEmpty(pagedDataDto.Search) is false)
+            if (!string.IsNullOrEmpty(pagedDataDto.Search))
             {
-                totalList = totalList.Where(i => i.Name.ToLower()
-                                     .Contains(pagedDataDto.Search.ToLower()) ||
-                                               i.Id.ToString().Contains(pagedDataDto.Search));
+                totalList = totalList.Where(i => EF.Functions.Like(i.Name, $"%{pagedDataDto.Search}%") ||
+                                                 i.Id.ToString().Contains(pagedDataDto.Search));
             }
 
             var totalListCount = totalList.Count();

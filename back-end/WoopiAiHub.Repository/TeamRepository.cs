@@ -100,7 +100,7 @@ namespace WoopiAiHub.Repository
         {
             var types = _context.Teams.Where(a => ids.Contains(a.Id));
 
-            if (types.Count() > 0)
+            if (types.Any())
             {
                 _context.Teams.RemoveRange(types);
                 _context.SaveChanges();
