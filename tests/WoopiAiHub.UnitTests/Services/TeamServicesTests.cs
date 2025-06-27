@@ -245,9 +245,9 @@ namespace WoopiAiHub.UnitTests.Services
             var team2 = _fixture.CreateValidTeamDto();
             team2.Name = "Special Team";
             var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true, Search = "special" };
+            var teamDtos = new List<TeamDto> { team1, team2 }.AsQueryable();
 
-            var filtered = new List<TeamDto> { team2 }.AsQueryable();
-            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(filtered);
+            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teamDtos);
 
             // Act
             var result = _service.FindAllPaged(pagedData);
