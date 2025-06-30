@@ -1,5 +1,4 @@
 ﻿<template>
-    <!-- Sidebar fixo, sem offcanvas -->
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
         <!-- Logo -->
         <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px;">
@@ -15,7 +14,6 @@
             </router-link>
         </div>
 
-        <!-- Botão de colapsar -->
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
             <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
                 <i :class="isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
