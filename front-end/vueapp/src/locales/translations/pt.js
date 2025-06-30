@@ -62,6 +62,7 @@
     labelHistoric: "Registro de respostas",
     labelInclusionDate: "Data de inclusão",
     labelListing: "Listagem",
+    labelManageUsers: "Gestão de usuários",
     labelLoading: "Carregando",
     labelLines: "Linhas por página",
     labelLoadingTheText: "Carregando o texto",
@@ -157,6 +158,7 @@
     labelNotReloadThePage: "Para não interromper o processo de upload, não recarregue a página",
     labelFailed: "falhou!",
     labelChangeTenant: "Alternar Tenant",
+    labelNewDocument: "Novo documento",
 }
 
 export default portuguese;

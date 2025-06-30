@@ -1,54 +1,71 @@
-﻿<template>
-    <div class="d-flex flex-column" style="height: 100vh !important;">
-        <router-view :key="$route.fullPath" />
-        <!-- Component ToastAlert -->
-        <toast-notification :showToast="toastShow" @close="closeToast" />
-    </div>
-</template>
+﻿<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
-<script>
-    import GlobalEventService from './services/globalEventService';
-    import ToastNotification from '@/components/common/toast-notification';
-    export default {
-        name: 'App',
-        data() {
-            return {
-                title: "App",
-                toastShow: false,
-                toastColor: "",
-                toastMessage: "",
-            }
-        },
-        components:
-        {
-            ToastNotification,
-        },
-        methods: {
-            handleUploadComplete(payload) {
-            },
-            handleUploadInProgress(payload) {
-            },
-            handleUploadStarted(payload) {
-                this.alertToast();
-            },
-            alertToast: function (msg, color) {
-                this.toastShow = true;
-            },
-            closeToast: function () {
-                this.toastShow = false;
-            },
-        },
-        created() {
-            GlobalEventService.on('uploadInProgress', this.handleUploadInProgress);
-            GlobalEventService.on('uploadComplete', this.handleUploadComplete);
-            GlobalEventService.on('uploadStarted', this.handleUploadStarted);
+import AuthLayout from '@/layouts/authLayout.vue'
+import DefaultLayout from '@/layouts/defaultLayout.vue'
 
-        },
-    }
+const route = useRoute()
+const layout = computed(() => route.meta.layout || 'auth')
+
 </script>
+
+<template>
+  <component :is="layout === 'auth' ? AuthLayout : DefaultLayout" />
+</template>
 
 <style>
     /* CSS Themes */
+.sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 240px;
+  background: white;
+  transition: width 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar-wrapper.collapsed {
+  width: 60px;
+}
+
+.content-wrapper {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.content-wrapper.collapsed {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
+/* Linha vertical entre menu e conteúdo */
+.vertical-menu-separator {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  width: 1px;
+  background-color: #ccc;
+  z-index: 1050;
+  transition: left 0.3s ease;
+}
+
+/* Linha horizontal que atravessa toda largura da tela */
+.horizontal-separator-fixed {
+  position: fixed;
+  top: 60px; /* Altura do logo/navbar - ajuste conforme necessário */
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: #d0d4d9;
+  z-index: 1050;
+}
     .css-theme-light {
         --color-bg-sidebar-content: #ffffff;
         --color-sidebar-li: rgba(0, 0, 0, .85);
@@ -214,7 +231,7 @@
 
             body .overlay.active {
                 display: block;
-                z-index: 1;
+                z-index: 1060;
             }
 
     main {
@@ -225,6 +242,7 @@
         max-height: 100vh;
         overflow-x: auto;
         overflow-y: hidden;
+        background-color: #f8f9fb !important;
     }
 
         main > .initial-sidebar,
@@ -297,7 +315,7 @@
     main > .container-fluid {
         /*padding: 15px 10px 15px 0px;*/
         padding: 15px 15px 0px 0px;
-        background: var(--color-bg-body-content) !important;
+        background: #f8f9fb !important;
     }
 
         main > .container-fluid > .custom-padding > .row > .col-auto > .card {

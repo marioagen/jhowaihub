@@ -46,7 +46,7 @@ namespace WoopiAiHub.Application.Services
         public async Task<IEnumerable<string>> FindAllByUserEmail(string email)
         {
             var tenants = await _marketPlaceApi.FindTenantsByUserEmail(_configuration["keyAccess"]!,
-                                                                       email);
+                                                                                        email);
 
             return tenants;
         }

@@ -1,11 +1,6 @@
 ﻿<template>
     <main>
-        <div class="container-fluid">
-            <div class="mb-2 navbar-container">
-                <div class="row">
-                    <nav-bar :sidebarData="sidebarData" />
-                </div>
-            </div>
+        <div class="container-fluid mt-4">
             <div class="custom-padding">
                 <div class="row">
                     <!-- Component Breadcrumb -->
@@ -59,11 +54,7 @@
                                     <td class="content-left-middle">{{ $t('labelName') }} <i id="1" class="fas fa-sort" @click="orderList(1)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
                                     <td class="content-center-middle">{{ $t('labelInclusionDate') }} <i id="2" class="fas fa-sort" @click="orderList(2)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
                                     <td class="content-center-middle">{{ $t('labelOwner') }} <i id="3" class="fas fa-sort" @click="orderList(3)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-center-middle">
-                                        <div class="content-center-middle" style="width: 64px;float: right;">
-                                            {{ $t('labelAction') }}
-                                        </div>
-                                    </td>
+                                    <td class="content-center-middle">  {{ $t('labelAction') }}  </td>
                                 </tr>
                                 <tr v-for="(item, index) in dataType" :key="index">
                                     <td class="content-center-middle" style="width: 10px;">
