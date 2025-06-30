@@ -24,6 +24,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<ITypeDocServices, TypeDocServices>();
             services.AddScoped<ICoreDependencies, CoreDependencies>();
             services.AddScoped<IApiDependencies, ApiDependencies>();
+            services.AddScoped<ITeamServices, TeamServices>();
             services.AddLogging();
             services.AddMemoryCache();
 

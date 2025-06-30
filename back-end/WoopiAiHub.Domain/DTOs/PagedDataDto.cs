@@ -9,6 +9,7 @@ namespace WoopiAiHub.Domain.DTOs
     public class PagedDataDto
     {
         public int Page { get; set; }
+        public int PageSize { get; set; }
         public string? Search { get; set; }
         public bool IsAscending { get; set; }
     }
