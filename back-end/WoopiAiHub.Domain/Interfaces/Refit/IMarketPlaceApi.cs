@@ -2,6 +2,7 @@
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using Refit;
+using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.Interfaces.Refit
 {
@@ -29,7 +30,7 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
 
         [Get("/user/CheckIsAdmin")]
         Task<bool> CheckIsAdmin([Header("KeyAccess")] string KeyAccess,
-                                         RequestCheckIsAdminDto requestCheckIsAdmin);
+                                RequestCheckIsAdminDto requestCheckIsAdmin);
 
         [Get("/user/CheckAccessKey")]
         Task<ResponseCheckAccessDto> CheckAccessKey([Header("KeyAccess")] string KeyAccess,
@@ -39,5 +40,8 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<TenantInfoDto> FindTenantByNameAndModule([Header("KeyAccess")] string KeyAccess,
                                                       [AliasAs("tenantName")] string tenantName,
                                                       [AliasAs("module")] ColTypeModule module);
+        [Post("/subscription/AssignByHub")]
+        Task<UserEnabledResponse> AssignLicensesByHub([Header("KeyAccess")] string KeyAccess,
+                                                      RequestAssignLicensesByHub requestAssignLicensesByHub);
     }
 }
