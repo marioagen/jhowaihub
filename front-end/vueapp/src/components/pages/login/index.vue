@@ -4,8 +4,8 @@
             <div class="row">
                 <div class="col-auto col-fix">
                     <form @submit="login" style="text-align: center;">
-                        <img src="./../../../assets/img/logo-login-light.png" style="padding-bottom: 10px;" width="200" v-if="showLogoDarkMode" />
-                        <img src="./../../../assets/img/logo-login.png" style="padding-bottom: 10px;" v-else />
+                        <img src="./../../../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px;" width="120" height="40" v-if="showLogoDarkMode" />
+                        <img src="./../../../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px;" width="180" height="60" v-else />
                         <button type="submit" class="btn btn-primary" v-if="!loading">
                             <i class="fab fa-windows"></i> Microsoft Login
                         </button>

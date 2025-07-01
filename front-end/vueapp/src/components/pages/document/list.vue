@@ -1,19 +1,14 @@
 ﻿<template>
     <main>
         <!-- Component NavBar -->
-        <div class="container-fluid">
-            <div class="mb-2 navbar-container">
-                <div class="row">
-                    <nav-bar :sidebarData="sidebarData" />
-                </div>
-            </div>
+        <div class="container-fluid mt-4">
             <div class="custom-padding">
                 <div class="row">
                     <!-- Component Breadcrumb -->
                     <breadcrumb :crumbs="crumbsData" />
                 </div>
                 <!-- Component SearchBar -->
-                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="getList" />
+                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="getList" @action="redirectToNewUpload"/>
                 <div class="row" v-if="loading">
                     <div class="table-responsive">
                         <table class="table table-striped">
@@ -363,7 +358,10 @@
                 var itemClone = {...item};
                 itemClone.name = null;
                 return itemClone;
-            }
+            },
+             redirectToNewUpload: function (quiz) {
+                this.$router.push({ name: 'DocumentUpload' });
+            },
             },
         computed: {},
         created() {

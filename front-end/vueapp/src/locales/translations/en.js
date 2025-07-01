@@ -61,6 +61,7 @@
     labelHistoric: "Responses log",
     labelInclusionDate: "Inclusion date",
     labelListing: "Listing",
+    labelManageUsers: "User management",
     labelLoading: "Loading",
     labelLines: "Lines per page",
     labelLoadingTheText: "Loading the text",
@@ -157,6 +158,7 @@
     labelNotReloadThePage: "To avoid interrupting the upload process, do not reload the page",
     labelFailed: "failed!",
     labelChangeTenant: "Toggle Tenant",
+    labelNewDocument: "New document",
 }
 
 export default english;
