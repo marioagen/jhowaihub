@@ -15,10 +15,6 @@ namespace WoopiAiHub.Domain.DTOs.Request
 
         public string Email { get;  set; } = string.Empty;
 
-        public bool IsActive { get;  set; }
-
-        public DateTime Created { get;  set; }
-
         public ICollection<Team>? Teams { get; set; }
 
     }

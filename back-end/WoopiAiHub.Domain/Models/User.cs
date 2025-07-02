@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
@@ -34,6 +35,17 @@ namespace WoopiAiHub.Domain.Models
             this.Email = email;
             this.IsActive = isActive;
             this.Created = created;
+        }
+
+        public void AddTeam(Team team)
+        {
+            if (team == null)
+                throw new ArgumentNullException(nameof(team));
+
+            if (Teams.Any(t => t.Id == team.Id))
+                return; // já está na lista, não adiciona novamente
+
+            Teams.Add(team);
         }
     }
 }

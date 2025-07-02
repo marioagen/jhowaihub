@@ -49,12 +49,17 @@ namespace WoopiAiHub.Application.Services
             {
                 User user = new User
                 (
-                        Guid.Parse(userEnabled.ReferenceUser),
+                        userEnabled,
                         userCreateDto.Name,
-                        headersDto.EmailCreator,
-                        userCreateDto.IsActive,
+                        userCreateDto.Email,
+                        true,
                         DateTime.Now
                 );
+
+                foreach( var team in userCreateDto.Teams)
+                {
+                    user.AddTeam(team);
+                }
 
                 return _userRepository.Create(user);
             }

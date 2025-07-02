@@ -30,12 +30,12 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPost]
         [SwaggerOperation("Endpoint that receives the request to create a question in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Create([FromQuery] UserCreateDto userCreateDto,
-                                    [FromHeader] HeadersDto headersDto)
+        public async Task<IActionResult> Create([FromBody] UserCreateDto userCreateDto,
+                                                [FromHeader] HeadersDto headersDto)
         {
             try
             {
-                var result = _userServices.Create(userCreateDto,
+                var result =  await _userServices.Create(userCreateDto,
                                                   headersDto);
                 return Ok(result);
             }
@@ -46,5 +46,55 @@ namespace WoopiAiHub.Api.Controllers
             }
 
         }
+
+        ///// <summary>
+        ///// Endpoint that receives the request to create an user in the database
+        ///// </summary>
+        ///// <param name="userCreateDto"></param>
+        ///// <returns></returns>
+        //[HttpDelete]
+        //[SwaggerOperation("Endpoint that receives the request to create a question in the database")]
+        //[ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        //public async Task<IActionResult> Delete(List<int> ids,
+        //                                        [FromHeader] HeadersDto headersDto)
+        //{
+        //    try
+        //    {
+        //        var result = await _userServices.Delete(ids,
+        //                                                headersDto);
+        //        return Ok(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"An exception occurred in the {nameof(QuestionController)} in the {nameof(Create)} method");
+        //        return BadRequest("Error when creating user: " + ex);
+        //    }
+
+        //}
+
+        //// <summary>
+        ///// Endpoint that receives the request to create an user in the database
+        ///// </summary>
+        ///// <param name="userCreateDto"></param>
+        ///// <returns></returns>
+        //[HttpDelete]
+        //[SwaggerOperation("Endpoint that receives the request to create a question in the database")]
+        //[ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        //public async Task<IActionResult> Update([FromBody] UserCreateDto userCreateDto,
+        //                                        [FromHeader] HeadersDto headersDto)
+        //{
+        //    try
+        //    {
+        //        var result = await _userServices.Update(userCreateDto,
+        //                                                headersDto);
+        //        return Ok(result);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"An exception occurred in the {nameof(QuestionController)} in the {nameof(Create)} method");
+        //        return BadRequest("Error when creating user: " + ex);
+        //    }
+
+        //}
     }
 }

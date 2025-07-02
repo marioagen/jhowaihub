@@ -40,8 +40,8 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<TenantInfoDto> FindTenantByNameAndModule([Header("KeyAccess")] string KeyAccess,
                                                       [AliasAs("tenantName")] string tenantName,
                                                       [AliasAs("module")] ColTypeModule module);
-        [Post("/subscription/AssignByHub")]
-        Task<UserEnabledResponse> AssignLicensesByHub([Header("KeyAccess")] string KeyAccess,
-                                                      RequestAssignLicensesByHub requestAssignLicensesByHub);
+        [Post("/user/AssignByHub")]
+        Task<Guid> AssignLicensesByHub([Header("KeyAccess")] string KeyAccess,
+                                       RequestAssignLicensesByHub requestAssignLicensesByHub);
     }
 }
