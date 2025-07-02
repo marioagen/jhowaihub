@@ -23,10 +23,11 @@ function authenticate(to, from, next) {
 }
 
 const routes = [
-    {
+   {
         path: '/',
         name: 'Login',
         component: LoginIndex,
+        meta: { layout: 'auth' }
     },
     {
         path: '/logout',
@@ -37,54 +38,63 @@ const routes = [
         path: '/document-upload',
         name: 'DocumentUpload',
         component: DocumentUpload,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
     {
         path: '/document-list',
         name: 'DocumentList',
         component: DocumentList,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
     {
         path: '/manage-type',
         name: 'Type',
         component: TypeManager,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
     {
         path: '/manage-question',
         name: 'Question',
         component: QuestionManager,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
     {
         path: '/quiz-new',
         name: 'QuizNew',
         component: QuizFormNew,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
     {
         path: '/quiz-edit/:id',
         name: 'QuizEdit',
         component: QuizFormEdit,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
     {
         path: '/manage-quiz',
         name: 'Quiz',
         component: QuizManager,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
     {
         path: '/normalize/:id',
         name: 'Normalize',
         component: NormalizeIndex,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
     {
         path: '/analyzer/:id',
         name: 'Analyzer',
         component: AnalyzerIndex,
+        meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
 ];

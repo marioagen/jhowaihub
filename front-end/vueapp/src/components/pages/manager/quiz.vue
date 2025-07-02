@@ -1,11 +1,6 @@
 ﻿<template>
     <main>
-        <div class="container-fluid">
-            <div class="mb-2 navbar-container">
-                <div class="row">
-                    <nav-bar :sidebarData="sidebarData" />
-                </div>
-            </div>
+        <div class="container-fluid mt-4">
             <div class="custom-padding">
                 <div class="row">
                     <!-- Component Breadcrumb -->
@@ -61,14 +56,10 @@
                                     <td class="content-center-middle">{{ $t('labelQuestions') }}</td>
                                     <td class="content-center-middle">{{ $t('labelInclusionDate') }} <i id="4" class="fas fa-sort" @click="orderList(4)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
                                     <td class="content-center-middle">{{ $t('labelOwner') }} <i id="5" class="fas fa-sort" @click="orderList(5)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-center-middle">
-                                        <div style="width: 64px;float: right;">
-                                            {{ $t('labelAction') }}
-                                        </div>
-                                    </td>
+                                      <td class="content-center-middle">  {{ $t('labelAction') }}  </td>
                                 </tr>
                                 <tr v-for="(item, index) in dataQuiz" :key="index">
-                                    <td class="content-center-middle">
+                                    <td class="content-center-middle" style="width: 20px;">
                                         <a>
                                             <div class="form-check" v-if="item.emailCreator === $store.state.userProfile.login">
                                                 <input class="form-check-input checkbox" type="checkbox" value="" :id="item.id" @click="countChecks(item.id)">

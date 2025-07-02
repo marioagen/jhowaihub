@@ -65,5 +65,35 @@ namespace WoopiAiHub.Application.Services
             }
             return false;
         }
+
+        // <summary>
+        /// Delete users by ids
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public bool DeleteByIds(List<Guid> ids)
+        {
+            var result = _userRepository.DeleteByIds(ids);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Update user by dto
+        /// </summary>
+        /// <param name="userUpdateDto"></param>
+        /// <returns></returns>
+        public bool Update(UserUpdateDto userUpdateDto)
+        {
+            var questionResult = _userRepository.Update(userUpdateDto);
+            if (!questionResult)
+            {
+                throw new ArgumentException("Duplicated User");
+
+            }
+
+            return questionResult;
+        }
+
     }
 }
