@@ -6,15 +6,20 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
+using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
 {
+    [Collection(nameof(UserCollection))]
     public class UserServicesTests
     {
         private readonly AutoMocker _mocker;
@@ -22,13 +27,17 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<ILogger<UserServices>> _loggerMock;
         private readonly Mock<IMarketPlaceApi> _marketPlaceApiMock;
         private readonly UserServices _userServices;
+        private readonly Mock<ITeamRepository> _teamRepositoryMock;
+        private readonly UserFixture _fixture;
 
         public UserServicesTests()
         {
+            _fixture = new UserFixture();
             _mocker = new AutoMocker();
             _userRepositoryMock = new Mock<IUserRepository>();
             _loggerMock = new Mock<ILogger<UserServices>>();
             _marketPlaceApiMock = new Mock<IMarketPlaceApi>();
+            _teamRepositoryMock = new Mock<ITeamRepository>();
 
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(config => config[It.Is<string>(s => s == "keyAccess")]).Returns("mockKeyAccess");
@@ -40,25 +49,36 @@ namespace WoopiAiHub.UnitTests.Services
                 _userRepositoryMock.Object,
                 _loggerMock.Object,
                 _marketPlaceApiMock.Object,
-                configMock.Object
+                 configMock.Object,
+                _teamRepositoryMock.Object
+                
             );
         }
 
-        [Fact]
+        [Fact(DisplayName = "CreateUser")]
+        [Trait("CreateUser", "Success")]
         public async Task Create_ShouldReturnTrue_WhenUserIsCreated()
         {
             // Arrange
-            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", Teams = new List<Team>() };
+            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", TeamIds = [1] };
             var headersDto = new HeadersDto { Tenant = "tenant" };
+            var requestDto = _fixture.FindValidRequestAssignLicensesByHub();
             var userId = Guid.NewGuid();
+            var user = new User(userId, userCreateDto.Name, userCreateDto.Email, true, DateTime.Now);
 
             _marketPlaceApiMock
-                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), requestDto))
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
                 .Setup(repo => repo.Create(It.IsAny<User>()))
                 .Returns(true);
+            _teamRepositoryMock
+                .Setup(repo => repo.FindByIds(userCreateDto.TeamIds))
+                .Returns(new List<Team>
+                {
+                    new Team("Team 1", 1, DateTime.Now)
+                });
 
             // Act
             var result = await _userServices.Create(userCreateDto, headersDto);
@@ -68,11 +88,12 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Verify(repo => repo.Create(It.IsAny<User>()), Times.Once);
         }
 
-        [Fact]
+        [Fact(DisplayName = "CreateUser")]
+        [Trait("CreateUser", "Fail")]
         public async Task Create_ShouldReturnFalse_WhenUserNotEnabled()
         {
             // Arrange
-            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", Teams = new List<Team>() };
+            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", TeamIds = [] };
             var headersDto = new HeadersDto { Tenant = "tenant" };
 
             // Act
@@ -82,59 +103,237 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
-        //[Fact]
-        //public void DeleteByIds_ShouldReturnTrue_WhenRepositoryReturnsTrue()
-        //{
-        //    // Arrange
-        //    var ids = new List<Guid> { Guid.NewGuid() };
-        //    _userRepositoryMock.Setup(repo => repo.DeleteByIds(ids)).Returns(true);
+        [Fact(DisplayName = "DeactivateMultipleUsers")]
+        [Trait("Deactivate", "Success")]
+        public async Task DeactivateRange_ShouldReturnTrue_WhenAllUsersExistAndMarketplaceReturnsTrue()
+        {
+            // Arrange
+            var ids = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+            var users = ids.Select(id => new User(id, "Name", "email@email.com", true, DateTime.Now)).ToList();
 
-        //    // Act
-        //    var result = _userServices.DeleteByIds(ids);
+            _userRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(users);
+            _marketPlaceApiMock
+                .Setup(api => api.DeactivateUsersEnabledByReference(It.IsAny<string>(), It.IsAny<DeactivateUsersDto>()))
+                .ReturnsAsync(true);
+            _userRepositoryMock.Setup(r => r.DeactivateRange(ids)).Returns(true);
 
-        //    // Assert
-        //    Assert.True(result);
-        //}
+            // Act
+            var result = await _userServices.DeactivateRange(ids);
 
-        //[Fact]
-        //public void DeleteByIds_ShouldReturnFalse_WhenRepositoryReturnsFalse()
-        //{
-        //    // Arrange
-        //    var ids = new List<Guid> { Guid.NewGuid() };
-        //    _userRepositoryMock.Setup(repo => repo.DeleteByIds(ids)).Returns(false);
+            // Assert
+            Assert.True(result);
+            _userRepositoryMock.Verify(r => r.DeactivateRange(ids), Times.Once);
+        }
 
-        //    // Act
-        //    var result = _userServices.DeleteByIds(ids);
 
-        //    // Assert
-        //    Assert.False(result);
-        //}
+        [Fact(DisplayName = "DeactivateMultipleUsers")]
+        [Trait("Deactivate", "Fail")]
+        public async Task DeactivateRange_ShouldReturnFalse_WhenNotAllUsersExist()
+        {
+            // Arrange
+            var ids = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+            var users = new List<User> { new User(ids[0], "Name", "email@email.com", true, DateTime.Now) };
 
-        //[Fact]
-        //public void Update_ShouldReturnTrue_WhenRepositoryReturnsTrue()
-        //{
-        //    // Arrange
-        //    var updateDto = new UserUpdateDto { Id = Guid.NewGuid(), Name = "Test", Email = "test@email.com" };
-        //    _userRepositoryMock.Setup(repo => repo.Update(updateDto)).Returns(true);
+            _userRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(users);
 
-        //    // Act
-        //    var result = _userServices.Update(updateDto);
+            // Act
+            var result = await _userServices.DeactivateRange(ids);
 
-        //    // Assert
-        //    Assert.True(result);
-        //}
+            // Assert
+            Assert.False(result);
+            _userRepositoryMock.Verify(r => r.DeactivateRange(It.IsAny<List<Guid>>()), Times.Never);
+        }
 
-        //[Fact]
-        //public void Update_ShouldThrowArgumentException_WhenRepositoryReturnsFalse()
-        //{
-        //    // Arrange
-        //    var updateDto = new UserUpdateDto { Id = Guid.NewGuid(), Name = "Test", Email = "test@email.com" };
-        //    _userRepositoryMock.Setup(repo => repo.Update(updateDto)).Returns(false);
+        [Fact(DisplayName = "DeactivateMultipleUsers")]
+        [Trait("Deactivate", "Fail")]
+        public async Task DeactivateRange_ShouldReturnFalse_WhenMarketplaceReturnsFalse()
+        {
+            // Arrange
+            var ids = new List<Guid> { Guid.NewGuid() };
+            var users = ids.Select(id => new User(id, "Name", "email@email.com", true, DateTime.Now)).ToList();
 
-        //    // Act & Assert
-        //    var ex = Assert.Throws<ArgumentException>(() => _userServices.Update(updateDto));
-        //    Assert.Equal("Duplicated User", ex.Message);
-        //}
+            _userRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(users);
+            _marketPlaceApiMock
+                .Setup(api => api.DeactivateUsersEnabledByReference(It.IsAny<string>(), It.IsAny<DeactivateUsersDto>()))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _userServices.DeactivateRange(ids);
+
+            // Assert
+            Assert.False(result);
+            _userRepositoryMock.Verify(r => r.DeactivateRange(It.IsAny<List<Guid>>()), Times.Never);
+        }
+
+
+        [Fact(DisplayName = "FindAllUsers")]
+        [Trait("FindAll", "Success")]
+        public void FindAllPaged_ShouldReturnPagedResult_WhenPageIsGreaterThanZero()
+        {
+            // Arrange
+            var pagedDataDto = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true };
+            var users = new List<UserDtoPaged>
+        {
+            new UserDtoPaged { Id = Guid.NewGuid(), Name = "A", Email = "a@a.com", IsActive = true, Created = DateTime.Now }
+        }.AsQueryable();
+
+            _userRepositoryMock.Setup(r => r.FindAllPaged(pagedDataDto)).Returns(users);
+
+            // Act
+            var result = _userServices.FindAllPaged(pagedDataDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(1, result.Content.Count());
+        }
+
+        [Fact(DisplayName = "FindAllUsers")]
+        [Trait("FindAll", "Fail")]
+        public void FindAllPaged_ShouldThrowArgumentException_WhenPageIsZeroOrLess()
+        {
+            // Arrange
+            var pagedDataDto = new PagedDataDto { Page = 0, PageSize = 10 };
+
+            // Act & Assert
+            Assert.Throws<ArgumentException>(() => _userServices.FindAllPaged(pagedDataDto));
+        }
+
+        [Fact(DisplayName = "UpdateUsers")]
+        [Trait("Update", "Success")]
+        public async Task Update_ShouldReturnTrue_WhenUpdateSucceed()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = userId,
+                Name = "Novo Nome",
+                Email = "novo@email.com",
+                TeamIds = new List<int> { 1, 2 }
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+            var user = new User(userId, "Antigo Nome", "antigo@email.com", true, DateTime.Now)
+            {
+                Teams = new List<Team>()
+            };
+            var teams = new List<Team>
+            {
+                new Team("Time 1", 1, DateTime.Now),
+                new Team("Time 2", 2, DateTime.Now)
+            };
+
+            _marketPlaceApiMock
+                .Setup(api => api.UpdateUserEnabled(It.IsAny<string>(), It.IsAny<UpdateByHubDto>()))
+                .ReturnsAsync(true);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByIds(It.Is<List<Guid>>(l => l.Contains(userId))))
+                .Returns(new List<User> { user });
+
+            _teamRepositoryMock
+                .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(teams);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()))
+                .Returns(true);
+
+            // Act
+            var result = await _userServices.Update(userUpdateDto, headersDto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal("Novo Nome", user.Name);
+            Assert.Equal("novo@email.com", user.Email);
+            Assert.Equal(2, user.Teams.Count);
+        }
+
+
+        [Fact(DisplayName = "UpdateUsers")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldReturnFalse_WhenUserNotFound()
+        {
+            // Arrange
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "Nome",
+                Email = "email@email.com"
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+
+            _marketPlaceApiMock
+                .Setup(api => api.UpdateUserEnabled(It.IsAny<string>(), It.IsAny<UpdateByHubDto>()))
+                .ReturnsAsync(true);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByIds(It.IsAny<List<Guid>>()))
+                .Returns(new List<User>());
+
+            // Act
+            var result = await _userServices.Update(userUpdateDto, headersDto);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "UpdateUsers")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldReturnFalse_MktFail()
+        {
+            // Arrange
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "Nome",
+                Email = "email@email.com"
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+
+            _marketPlaceApiMock
+                .Setup(api => api.UpdateUserEnabled(It.IsAny<string>(), It.IsAny<UpdateByHubDto>()))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _userServices.Update(userUpdateDto, headersDto);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "UpdateUsers")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldThrowArgumentException_WhenDuplicatedUser()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = userId,
+                Name = "Nome",
+                Email = "email@email.com"
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+            var user = new User(userId, "Nome", "email@email.com", true, DateTime.Now);
+
+            _marketPlaceApiMock
+                .Setup(api => api.UpdateUserEnabled(It.IsAny<string>(), It.IsAny<UpdateByHubDto>()))
+                .ReturnsAsync(true);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByIds(It.IsAny<List<Guid>>()))
+                .Returns(new List<User> { user });
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()))
+                .Returns(false);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _userServices.Update(userUpdateDto, headersDto));
+            Assert.Equal("Duplicated User", ex.Message);
+        }
+
     }
+
 }
 

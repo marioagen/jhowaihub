@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
@@ -9,7 +8,6 @@ using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -59,14 +57,16 @@ namespace WoopiAiHub.Application.Services
                     DateTime.Now
                 );
 
-                // Busque os times existentes pelo ID
-                var teams = _teamRepository.FindByIds(userCreateDto.TeamIds); // Implemente esse método no repositório
-
-                foreach (var team in teams)
+                if (userCreateDto.TeamIds.Count > 0)
                 {
-                    user.AddTeam(team);
-                }
+                    var teams = _teamRepository.FindByIds(userCreateDto.TeamIds);
 
+                    foreach (var team in teams)
+                    {
+                        user.AddTeam(team);
+                    }
+
+                }
                 return _userRepository.Create(user);
             }
             return false;
@@ -116,17 +116,15 @@ namespace WoopiAiHub.Application.Services
             var updateMkt = await _marketPlaceApi.UpdateUserEnabled(KeyAccess, updateByHubDto);
             if (updateMkt)
             {
-                // Buscar o usuário atual do banco
+
                 var users = _userRepository.FindByIds(new List<Guid> { userUpdateDto.Id });
                 var user = users.FirstOrDefault();
                 if (user == null)
                     return false;
 
-                // Atualizar propriedades básicas
                 user.Name = userUpdateDto.Name;
                 user.Email = userUpdateDto.Email;
 
-                // Atualizar times se informado
                 if (userUpdateDto.TeamIds != null)
                 {
                     var teams = _teamRepository.FindByIds(userUpdateDto.TeamIds);
@@ -137,7 +135,7 @@ namespace WoopiAiHub.Application.Services
                     }
                 }
 
-                var updateResult = _userRepository.Update(user); // Aqui, ajuste o repositório para aceitar User se necessário
+                var updateResult = _userRepository.Update(user); 
                 if (!updateResult)
                 {
                     throw new ArgumentException("Duplicated User");

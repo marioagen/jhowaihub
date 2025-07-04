@@ -15,7 +15,7 @@ namespace WoopiAiHub.Domain.DTOs.Request
 
         public string Email { get;  set; } = string.Empty;
 
-        public ICollection<int> TeamIds { get; set; } // Use os IDs dos times
+        public ICollection<int> TeamIds { get; set; } 
     }
 
 }
