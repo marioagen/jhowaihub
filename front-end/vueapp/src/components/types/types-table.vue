@@ -1,8 +1,9 @@
 <template>
     <div>
-        <TableComponent
+        <table-component
             modalName="Tipos"
             totalRows="100"
+            emptyMessage="labelNoDocumentTypeWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -22,14 +23,14 @@
                     Delete
                 </button>
             </template>
-        </TableComponent>
+        </table-component>
     </div>
 </template>
 
 <script>
     import dates from "@/helpers/Dates";
     import TypesService from "@/services/types/TypesService";
-    import TableComponent from "@/components/global/TableComponent.vue";
+    import TableComponent from "@/components/global/table-component.vue";
     export default {
         name: "TypesTable",
         components: {

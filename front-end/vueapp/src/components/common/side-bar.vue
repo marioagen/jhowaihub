@@ -130,7 +130,6 @@
 </template>
 
 <script>
-import TableComponent from '@/components/global/TableComponent.vue';
 export default {
     name: "SideBar",
     props: {
@@ -158,9 +157,6 @@ export default {
             title: "Component SideBarTest",
             showLogoDarkMode: this.theme,
         }
-    },
-    components: {
-        TableComponent,
     },
     watch: {},
     methods: {},

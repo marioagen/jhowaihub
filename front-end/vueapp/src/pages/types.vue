@@ -8,108 +8,13 @@
                 </div>
                 <!-- Component SearchBar -->
                 <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="getList" @action="addType" />
-                <div class="row" v-if="loading">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <tbody>
-                                <tr class="tr-head-1">
-                                    <td class="text-secondary" style="text-align: center;">
-                                        <i class="fas fa-sync-alt fa-spin text-secondary"></i>&nbsp;{{ $t('labelLoading') }}..
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
                 <div class="mb-2" style="height: 30px;">
                     <button type="button" class="btn delete-custom d-flex align-items-center" @click="confirmationDialog(item)" v-if="this.listIds.length > 0">
                         <i class="fas fa-trash text-danger" style="font-size: .9em; margin-right: 8px"></i>
                         {{$t('labelDelete')}}
                     </button>
                 </div>
-                <div class="row" v-if="dataType.length === 0 && !loading">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <tbody>
-                                <tr class="tr-head-1">
-                                    <td style="text-align: center;">
-                                        <i class="fas fa-exclamation-circle text-secondary"></i>&nbsp;{{ $t('labelNoDocumentTypeWasFound') }}.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="row scroll-area" v-if="!loading && dataType.length > 0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered-vertical table-striped">
-                            <tbody>
-                                <tr class="tr-head-1">
-                                    <td class="content-left-middle">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" @click="checkAll($event)">
-                                        </div>
-                                    </td>
-                                    <td class="content-center-middle">ID <i id="2" class="fas fa-sort" @click="orderList(2)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-left-middle">{{ $t('labelName') }} <i id="1" class="fas fa-sort" @click="orderList(1)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-center-middle">{{ $t('labelInclusionDate') }} <i id="2" class="fas fa-sort" @click="orderList(2)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-center-middle">{{ $t('labelOwner') }} <i id="3" class="fas fa-sort" @click="orderList(3)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-center-middle">  {{ $t('labelAction') }}  </td>
-                                </tr>
-                                <tr v-for="(item, index) in dataType" :key="index">
-                                    <td class="content-center-middle" style="width: 10px;">
-                                        <a>
-                                            <div class="form-check">
-                                                <input class="form-check-input checkbox" type="checkbox" value="" :id="item.id" @click="countChecks(item.id)" v-if="item.emailCreator === $store.state.userProfile.login">
-                                            </div>
-                                        </a>
-                                    </td>
-                                    <td class="content-center-middle" style="width: 85px;"> {{ item.id }} </td>
-                                    <td class="content-left-middle">
-                                        <truncate-text :item="item" :text="item.name"/>
-                                    </td>
-                                    <td class="content-center-middle" style="width: 164px;"> {{ dateFormat(item.created) }} </td>
-                                    <td class="content-center-middle" style="width: 164px; font-size: 14px"> {{ item.emailCreator }} </td>
-                                    <td class="content-right-middle" style="width: 95px;" v-if="item.emailCreator === $store.state.userProfile.login">
-                                        <a class="btn btn-success btn-sm" :title="$t('labelEdit')" @click="openModal(item)">
-                                            <i class="fas fa-pen" style="font-size: .75em;"></i>
-                                        </a>
-                                    </td>
-                                    <td class="content-right-middle" style="width: 51px;" v-else>
-                                        <a class="btn btn-secondary btn-sm" :title="$t('labelNotAllowed')">
-                                            <i class="fas fa-pen" style="font-size: .75em;"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div>
-                        <TableComponent
-                            modalName="Tipos"
-                            totalRows="100"
-                            :data="table.data"
-                            :columns="table.columns"
-                            :isLoading="table.isLoading"
-                        >
-                            <template #cell-created="{ data }">
-                                {{ formatDate(data.row.created) }}
-                            </template>
-                            <template #cell-actions="{ data }">
-                                <button
-                                    class="btn btn-outline-success btn-sm"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    class="btn btn-outline-danger btn-sm ms-2"
-                                >
-                                    Delete
-                                </button>
-                            </template>
-                        </TableComponent>
-                    </div>
-                </div>
+                <TypesTable />
                 <div class="row mt-1" v-if="!loading && dataType.length > 0">
                     <div class="col">
                         <div class="d-inline-block lines">
@@ -162,7 +67,6 @@
                         </nav>
                     </div>
                 </div>
-                <TypesTable />
             </div>
         </div>
 
@@ -212,8 +116,8 @@
     import paginationDivider from "@/utils/paginationDivider";
     import Pagination from '@/components/common/pagination';
     import TruncateText from "@/components/common/truncate-text.vue";
-    import TableComponent from "@/components/global/TableComponent.vue";
-    import TypesTable from "@/components/types/TypesTable.vue";
+    import TableComponent from "@/components/global/table-component.vue";
+    import TypesTable from "@/components/types/types-table.vue";
 
     export default {
         name: "TypeManager",

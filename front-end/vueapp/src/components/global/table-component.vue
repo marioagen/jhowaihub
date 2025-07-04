@@ -73,7 +73,7 @@
                         :colspan="columns.length + (hasSelection ? 1 : 0)" 
                         class="text-center text-primary bg-primary/5 py-4 italic"
                     >
-                        No data available.
+                        {{ $t(emptyMessage) }}
                     </td>
                 </tr>
             </tbody>
@@ -91,6 +91,11 @@
             totalRows: {
                 type: Number,
                 required: true,
+            },
+            emptyMessage: {
+                type: String,
+                required: false,
+                default: "No data available."
             },
             data: {
                 type: Array,
@@ -150,7 +155,7 @@
     };
 </script>
 
-<style>
+<style scoped>
 .custom-table {
   overflow: hidden;
 }
