@@ -10,6 +10,7 @@ import QuizFormEdit from '@/components/pages/quiz/form-edit';
 import QuizManager from '@/components/pages/manager/quiz';
 import NormalizeIndex from '@/components/pages/normalize/loading';
 import AnalyzerIndex from '@/components/pages/analyzer';
+import UserIndex from '@/components/pages/user/index';
 
 function authenticate(to, from, next) {
     var usuario = JSON.parse(window.localStorage.getItem('project'));
@@ -94,6 +95,13 @@ const routes = [
         path: '/analyzer/:id',
         name: 'Analyzer',
         component: AnalyzerIndex,
+        meta: { layout: 'default' },
+        beforeEnter: authenticate,
+    },
+{
+        path: '/manage-user',
+        name: 'User',
+        component: UserIndex,
         meta: { layout: 'default' },
         beforeEnter: authenticate,
     },

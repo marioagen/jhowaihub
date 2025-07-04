@@ -43,7 +43,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet]
         [Route("Paged")]
         [SwaggerOperation("Endpoint that receives the request to return all teams paginated")]
-        [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TeamPagedResultDto), StatusCodes.Status200OK)]
         public ActionResult<TeamPagedResultDto> FindAllPaged([FromQuery] PagedDataDto pagedDataDto)
         {
             var result = _teamServices.FindAllPaged(pagedDataDto);

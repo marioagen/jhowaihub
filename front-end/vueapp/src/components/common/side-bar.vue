@@ -30,7 +30,7 @@
                     menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
                     isCollapsed ? 'justify-content-center' : '',
                     'custom-menu-item'
-                ]" to="/document-list">
+                ]" to="/manage-user">
                     <img src="./../../assets/img/manage-users.svg" :title="$t('labelManageUsers')" width="20"
                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t('labelManageUsers') }}</span>
