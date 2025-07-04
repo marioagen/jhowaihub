@@ -104,19 +104,14 @@
 
 <script>
     import dates from "@/helpers/Dates";
-    import * as moment from "moment/moment";
-    import NavBar from '@/components/common/nav-bar';
     import Breadcrumb from '@/components/common/breadcrumb';
     import SearchBar from '@/components/common/search-bar';
     import ModalForm from '@/components/pages/type/modal-form';
     import ModalAlert from '@/components/common/modal-alert';
     import ToastAlert from '@/components/common/toast-alert';
     import api from "@/services/api";
-    import store from "@/store";
     import paginationDivider from "@/utils/paginationDivider";
     import Pagination from '@/components/common/pagination';
-    import TruncateText from "@/components/common/truncate-text.vue";
-    import TableComponent from "@/components/global/table-component.vue";
     import TypesTable from "@/components/types/types-table.vue";
 
     export default {
@@ -160,15 +155,12 @@
             }
         },
         components: {
-            NavBar,
             Breadcrumb,
             SearchBar,
             ModalForm,
             ModalAlert,
             ToastAlert,
             Pagination,
-            TruncateText,
-            TableComponent,
             TypesTable
         },
         watch: {
@@ -333,13 +325,6 @@
             },
             formatDate(date) {
                 return dates.formatDate(date);
-            },
-            dateFormat: function (str) {
-                if (this.$store.state.userProfile.language === "en") {
-                    return moment(str).format("YYYY/MM/DD");
-                } else {
-                    return moment(str).format("DD/MM/YYYY");
-                }
             },
             upperFormat: function (str) {
                 return str.toUpperCase();
