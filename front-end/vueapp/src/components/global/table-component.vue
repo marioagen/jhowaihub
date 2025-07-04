@@ -1,5 +1,5 @@
 <template>
-    <div class="table-div">
+    <div class="table-div shadow-sm">
         <p class="mx-2 my-2">
             <small>
                 {{ $t(modalName) }} ({{ totalRows }})
