@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
@@ -30,7 +32,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="userCreateDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [SwaggerOperation("Endpoint that receives the request to create a question in the database")]
+        [SwaggerOperation("Endpoint that receives the request to create a user in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> Create([FromBody] UserCreateDto userCreateDto,
                                                 [FromHeader] HeadersDto headersDto)
@@ -43,7 +45,7 @@ namespace WoopiAiHub.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(QuestionController)} in the {nameof(Create)} method");
+                _logger.LogError(ex, $"An exception occurred in the {nameof(UserController)} in the {nameof(Create)} method");
                 return BadRequest("Error when creating user: " + ex);
             }
 
@@ -54,19 +56,19 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpDelete("DeleteByIds")]
+        [HttpDelete("DeactivateByEmails")]
         [SwaggerOperation("Endpoint that receives the request to remove questions from the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult DeleteByIds(List<Guid> ids)
+        public async Task <IActionResult> DeactivateByEmails([FromBody] List<Guid> ids)
         {
             try
             {
-                var result = _userServices.DeleteByIds(ids);
+                var result = await _userServices.DeactivateRange(ids);
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(QuestionController)} in the {nameof(DeleteByIds)} method");
+                _logger.LogError(ex, $"An exception occurred in the {nameof(QuestionController)} in the {nameof(DeactivateByEmails)} method");
                 return BadRequest("Error while deleting question: " + ex);
             }
         }
@@ -79,23 +81,39 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut]
         [SwaggerOperation("EndPoint that update a question by passing an UpdateQuestionDto")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Update(QuestionUpdateDto updatequestionDto)
+        public async Task<IActionResult> Update([FromBody]UserUpdateDto userUpdateDto,
+                                                [FromHeader] HeadersDto headersDto)
         {
             try
             {
-                var result = _userServices.Update(updatequestionDto);
+                var result = await _userServices.Update(userUpdateDto, headersDto);
                 return Ok(result);
             }
             catch (ArgumentException ex)
             {
-                _logger.LogError(ex, $"Argument Exception ocurred in the {nameof(QuestionController)} in the {nameof(Update)} method");
-                return Conflict(new { message = "Duplicated questions" });
+                _logger.LogError(ex, $"Argument Exception ocurred in the {nameof(UserController)} in the {nameof(Update)} method");
+                return Conflict(new { message = "Duplicated user" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(QuestionController)} in the {nameof(Update)} method");
-                return BadRequest("Error while updating question: " + ex);
+                _logger.LogError(ex, $"An exception occurred in the {nameof(UserController)} in the {nameof(Update)} method");
+                return BadRequest("Error while updating user: " + ex);
             }
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to return all teams paginated.
+        /// </summary>
+        /// <param name="pagedDataDto"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Paged")]
+        [SwaggerOperation("Endpoint that receives the request to return all teams paginated")]
+        [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
+        public ActionResult<UserPagedResultDto> FindAllPaged([FromQuery] PagedDataDto pagedDataDto)
+        {
+            var result = _userServices.FindAllPaged(pagedDataDto);
+            return Ok(result);
         }
 
     }

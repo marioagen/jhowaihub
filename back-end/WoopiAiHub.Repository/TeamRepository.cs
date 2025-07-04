@@ -143,5 +143,10 @@ namespace WoopiAiHub.Repository
 
             return query;
         }
+
+        public List<Team> FindByIds(IEnumerable<int> ids)
+        {
+            return _context.Teams.Where(t => ids.Contains(t.Id)).ToList();
+        }
     }
 }

@@ -3,6 +3,8 @@ using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using Refit;
 using WoopiAiHub.Domain.DTOs.Response;
+using Microsoft.AspNetCore.Mvc;
+using WoopiAiHub.Domain.DTOs.Request;
 
 namespace WoopiAiHub.Domain.Interfaces.Refit
 {
@@ -43,5 +45,12 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         [Post("/user/AssignByHub")]
         Task<Guid> AssignLicensesByHub([Header("KeyAccess")] string KeyAccess,
                                        RequestAssignLicensesByHub requestAssignLicensesByHub);
+
+        [Delete("/user/DeactivateUsers")]
+        Task<bool> DeactivateUsersEnabledByReference([Header("KeyAccess")] string KeyAccess,
+                                                    [FromBody] DeactivateUsersDto deactivateUsersDto);
+        [Put("/user/UpdateUsers")]
+        public Task<bool> UpdateUserEnabled([Header("KeyAccess")] string KeyAccess,
+                                            [FromBody] UpdateByHubDto updateByHubDto);
     }
 }

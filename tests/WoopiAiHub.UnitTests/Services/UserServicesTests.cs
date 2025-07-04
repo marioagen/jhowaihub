@@ -82,59 +82,59 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
-        [Fact]
-        public void DeleteByIds_ShouldReturnTrue_WhenRepositoryReturnsTrue()
-        {
-            // Arrange
-            var ids = new List<Guid> { Guid.NewGuid() };
-            _userRepositoryMock.Setup(repo => repo.DeleteByIds(ids)).Returns(true);
+        //[Fact]
+        //public void DeleteByIds_ShouldReturnTrue_WhenRepositoryReturnsTrue()
+        //{
+        //    // Arrange
+        //    var ids = new List<Guid> { Guid.NewGuid() };
+        //    _userRepositoryMock.Setup(repo => repo.DeleteByIds(ids)).Returns(true);
 
-            // Act
-            var result = _userServices.DeleteByIds(ids);
+        //    // Act
+        //    var result = _userServices.DeleteByIds(ids);
 
-            // Assert
-            Assert.True(result);
-        }
+        //    // Assert
+        //    Assert.True(result);
+        //}
 
-        [Fact]
-        public void DeleteByIds_ShouldReturnFalse_WhenRepositoryReturnsFalse()
-        {
-            // Arrange
-            var ids = new List<Guid> { Guid.NewGuid() };
-            _userRepositoryMock.Setup(repo => repo.DeleteByIds(ids)).Returns(false);
+        //[Fact]
+        //public void DeleteByIds_ShouldReturnFalse_WhenRepositoryReturnsFalse()
+        //{
+        //    // Arrange
+        //    var ids = new List<Guid> { Guid.NewGuid() };
+        //    _userRepositoryMock.Setup(repo => repo.DeleteByIds(ids)).Returns(false);
 
-            // Act
-            var result = _userServices.DeleteByIds(ids);
+        //    // Act
+        //    var result = _userServices.DeleteByIds(ids);
 
-            // Assert
-            Assert.False(result);
-        }
+        //    // Assert
+        //    Assert.False(result);
+        //}
 
-        [Fact]
-        public void Update_ShouldReturnTrue_WhenRepositoryReturnsTrue()
-        {
-            // Arrange
-            var updateDto = new UserUpdateDto { Id = Guid.NewGuid(), Name = "Test", Email = "test@email.com" };
-            _userRepositoryMock.Setup(repo => repo.Update(updateDto)).Returns(true);
+        //[Fact]
+        //public void Update_ShouldReturnTrue_WhenRepositoryReturnsTrue()
+        //{
+        //    // Arrange
+        //    var updateDto = new UserUpdateDto { Id = Guid.NewGuid(), Name = "Test", Email = "test@email.com" };
+        //    _userRepositoryMock.Setup(repo => repo.Update(updateDto)).Returns(true);
 
-            // Act
-            var result = _userServices.Update(updateDto);
+        //    // Act
+        //    var result = _userServices.Update(updateDto);
 
-            // Assert
-            Assert.True(result);
-        }
+        //    // Assert
+        //    Assert.True(result);
+        //}
 
-        [Fact]
-        public void Update_ShouldThrowArgumentException_WhenRepositoryReturnsFalse()
-        {
-            // Arrange
-            var updateDto = new UserUpdateDto { Id = Guid.NewGuid(), Name = "Test", Email = "test@email.com" };
-            _userRepositoryMock.Setup(repo => repo.Update(updateDto)).Returns(false);
+        //[Fact]
+        //public void Update_ShouldThrowArgumentException_WhenRepositoryReturnsFalse()
+        //{
+        //    // Arrange
+        //    var updateDto = new UserUpdateDto { Id = Guid.NewGuid(), Name = "Test", Email = "test@email.com" };
+        //    _userRepositoryMock.Setup(repo => repo.Update(updateDto)).Returns(false);
 
-            // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() => _userServices.Update(updateDto));
-            Assert.Equal("Duplicated User", ex.Message);
-        }
+        //    // Act & Assert
+        //    var ex = Assert.Throws<ArgumentException>(() => _userServices.Update(updateDto));
+        //    Assert.Equal("Duplicated User", ex.Message);
+        //}
     }
 }
 

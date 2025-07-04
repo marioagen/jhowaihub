@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 
@@ -25,8 +27,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Create(User user)
         {
-
-            var existUser = _context.Users.Any(p => p.Name == user.Name);
+            var existUser = _context.Users.Any(p => p.Email == user.Email && p.IsActive == false);
             if (!existUser)
             {
                 _context.Users.Add(user);
@@ -55,20 +56,22 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(List<Guid> ids)
+        public bool DeactivateRange(List<Guid> ids)
         {
-            var users = _context.Users.Where(a => ids.Contains(a.Id));
 
-            if (users.Count() > 0)
-            {
-                _context.Users.RemoveRange(users);
-                _context.SaveChanges();
+            var usersInDb = _context.Users
+                .Where(u => ids.Contains(u.Id))
+                .ToList();
+
+                foreach (var user in usersInDb)
+                {
+                    user.IsActive = false;
+                }
+
+                _context.Users.UpdateRange(usersInDb);
+                _context.SaveChangesAsync();
+
                 return true;
-            }
-            else
-            {
-                return false;
-            }
 
         }
 
@@ -77,23 +80,65 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="userUpdateDto"></param>
         /// <returns></returns>
-        public bool Update(UserUpdateDto userUpdateDto)
+        public bool Update(User user)
         {
-            var existUser= _context.Users.Any(p => p.Email != userUpdateDto.Email);
+            var existing = _context.Users
+                .Include(u => u.Teams)
+                .FirstOrDefault(u => u.Id == user.Id);
 
-            if (!existUser)
+            if (existing == null)
+                return false;
+
+            existing.Name = user.Name;
+            existing.Email = user.Email;
+            existing.IsActive = user.IsActive;
+
+            // Sincronizar times (remove todos e adiciona os novos)
+            existing.Teams.Clear();
+            foreach (var team in user.Teams)
             {
-                _context.Questions.Where(a => a.Id.Equals(userUpdateDto.Id))
-                                  .ExecuteUpdate(b => b
-                                  .SetProperty(u => userUpdateDto.Email, userUpdateDto.Email)
-                                  .SetProperty(u => userUpdateDto.Name, userUpdateDto.Name)
-                                  .SetProperty(u => userUpdateDto.Teams, userUpdateDto.Teams));
+                // Anexa o time ao contexto se necessário
+                if (_context.Entry(team).State == EntityState.Detached)
+                    _context.Teams.Attach(team);
 
-                _context.SaveChanges();
-
-                return true;
+                existing.Teams.Add(team);
             }
-            return false;
+
+            _context.Users.Update(existing);
+            _context.SaveChanges();
+            return true;
         }
+
+        /// <summary>
+        /// Find all teams with pagination and include their users.
+        /// </summary>
+        /// <param name="pagedDataDto"></param>
+        /// <returns></returns>
+        public IQueryable<UserDtoPaged> FindAllPaged(PagedDataDto pagedDataDto)
+        {
+            var query = _context.Users.Where(p=> p.IsActive == true)
+                .Include(t => t.Teams)
+                .Select(t => new UserDtoPaged
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Created = t.Created,
+                    Email = t.Email,
+                    IsActive = t.IsActive,
+                    Teams = t.Teams!
+                        .Select(u => new TeamDto
+                        {
+                            Id = u.Id,
+                            Name = u.Name,
+                            Created = u.Created
+                        })
+                        .ToList()
+                })
+                .AsQueryable()
+                .AsNoTracking();
+
+            return query;
+        }
+
     }
 }

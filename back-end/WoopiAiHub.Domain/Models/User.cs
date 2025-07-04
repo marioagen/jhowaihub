@@ -11,18 +11,18 @@ namespace WoopiAiHub.Domain.Models
         public Guid Id { get; private set; }
 
         [Column("Name", TypeName = "varchar(150)")]
-        public string Name { get; private set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
         [Column("Email", TypeName = "varchar(256)")]
-        public string Email { get; private set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
 
         [Column("IsActive", TypeName = "bit")]
-        public bool IsActive { get; private set; }
+        public bool IsActive { get; set; }
 
         [Column("Created", TypeName = "datetime")]
         public DateTime Created { get; private set; }
 
-        public ICollection<Team>? Teams { get; set; }
+        public ICollection<Team> Teams { get; set; } = new Collection<Team>();
 
         public User(Guid id,
                     string name,
@@ -42,7 +42,7 @@ namespace WoopiAiHub.Domain.Models
             if (team == null)
                 throw new ArgumentNullException(nameof(team));
 
-            if (Teams.Any(t => t.Id == team.Id))
+            if (this.Teams.Any(t => t.Id == team.Id))
                 return; // já está na lista, não adiciona novamente
 
             Teams.Add(team);
