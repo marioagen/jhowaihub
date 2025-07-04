@@ -68,7 +68,6 @@
 
                 TypesService.getTypes(params)
                     .then((response) => {
-                        console.log(response)
                         this.table.data = response.content;
                         this.table.pagination = response.pagination;
                     })

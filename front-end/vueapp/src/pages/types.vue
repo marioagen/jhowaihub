@@ -242,7 +242,6 @@
                 api.get('/TypeDoc/Paged/', { params: paramsReq })
                     .then(function (response) { // Handle success
                         self.dataType = self.table.data = response.data.content;
-                        console.log(response.data)
                         self.pagination = {
                             currentPage: response.data.currentPage,
                             pageCount: response.data.pageCount,
