@@ -11,6 +11,8 @@ import QuizManager from '@/components/pages/manager/quiz';
 import NormalizeIndex from '@/components/pages/normalize/loading';
 import AnalyzerIndex from '@/components/pages/analyzer';
 
+import TypesPage from '@/pages/types.vue';
+
 function authenticate(to, from, next) {
     var usuario = JSON.parse(window.localStorage.getItem('project'));
     if (usuario != null) {
@@ -53,6 +55,15 @@ const routes = [
         name: 'Type',
         component: TypeManager,
         meta: { layout: 'default' },
+        beforeEnter: authenticate,
+    },
+    {
+        path: '/types',
+        name: 'Type2',
+        component: TypesPage,
+        meta: { 
+            layout: 'default' 
+        },
         beforeEnter: authenticate,
     },
     {
