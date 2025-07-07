@@ -15,6 +15,14 @@
                 <button
                     class="btn btn-outline-success btn-sm"
                 >
+                    <IconsComponent
+                        title="Edit"
+                        icon="trash"
+                    />
+                </button>
+                <button
+                    class="btn btn-outline-success btn-sm"
+                >
                     Edit
                 </button>
                 <button
