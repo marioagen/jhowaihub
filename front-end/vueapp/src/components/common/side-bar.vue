@@ -50,31 +50,6 @@
                 </router-link>
             </li>
 
-            <!-- <li class="mb-1">
-                <router-link 
-                    :class="[
-                        'd-flex align-items-center',
-                        menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item'
-                    ]" 
-                    to="/manage-type"
-                >
-                    <img 
-                        src="./../../assets/img/types-icon.svg" 
-                        :title="$t('labelTypes')" 
-                        width="20"
-                        class="icon-sidebar" 
-                    />
-                    <span 
-                        v-show="!isCollapsed" 
-                        class="ms-2"
-                    >
-                        {{ $t('labelTypes') }}
-                    </span>
-                </router-link>
-            </li> -->
-
             <li class="mb-1">
                 <router-link 
                     :class="[
