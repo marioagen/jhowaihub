@@ -86,7 +86,7 @@
                     to="/types"
                 >
                     <img 
-                        src="./../../assets/img/types-icon.svg" 
+                        src="./../../assets/img/type-icon.svg" 
                         :title="$t('labelTypes')" 
                         width="20"
                         class="icon-sidebar" 
