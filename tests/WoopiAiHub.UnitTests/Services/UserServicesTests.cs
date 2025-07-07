@@ -332,8 +332,6 @@ namespace WoopiAiHub.UnitTests.Services
             var ex = await Assert.ThrowsAsync<ArgumentException>(() => _userServices.Update(userUpdateDto, headersDto));
             Assert.Equal("Duplicated User", ex.Message);
         }
-
     }
-
 }
 

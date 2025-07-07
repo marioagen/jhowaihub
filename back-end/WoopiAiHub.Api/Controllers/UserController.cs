@@ -17,7 +17,6 @@ namespace WoopiAiHub.Api.Controllers
         private readonly IUserServices _userServices;
         private readonly ILogger<UserController> _logger;
 
-
         public UserController(IUserServices userServices,
                               ILogger<UserController> logger)
         {
@@ -36,22 +35,13 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> Create([FromBody] UserCreateDto userCreateDto,
                                                 [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
                 var result = await _userServices.Create(userCreateDto,
                                                   headersDto);
                 return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(UserController)} in the {nameof(Create)} method");
-                return BadRequest("Error when creating user: " + ex);
-            }
-
         }
 
         /// <summary>
-        /// Endpoint that receives the request to remove users from the database
+        /// Endpoint that receives the request to deactivate users from the database
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -78,26 +68,13 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="UserUpdateDto"></param>
         /// <returns></returns>
         [HttpPut]
-        [SwaggerOperation("EndPoint that update a question by passing an UpdateQuestionDto")]
+        [SwaggerOperation("EndPoint that update a question by passing an UserUpdateDto")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Update([FromBody]UserUpdateDto UserUpdateDto,
+        public async Task<IActionResult> Update([FromBody]UserUpdateDto userUpdateDto,
                                                 [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
                 var result = await _userServices.Update(userUpdateDto, headersDto);
                 return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, $"Argument Exception ocurred in the {nameof(UserController)} in the {nameof(Update)} method");
-                return Conflict(new { message = "Duplicated user" });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(UserController)} in the {nameof(Update)} method");
-                return BadRequest("Error while updating user: " + ex);
-            }
         }
 
         /// <summary>

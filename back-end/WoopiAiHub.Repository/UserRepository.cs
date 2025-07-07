@@ -48,7 +48,6 @@ namespace WoopiAiHub.Repository
             return _context.Users.Where(u => ids.Contains(u.Id))
                                        .AsNoTracking()
                                        .ToList();
-
         }
 
         /// <summary>
@@ -58,7 +57,6 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool DeactivateRange(List<Guid> ids)
         {
-
             var usersInDb = _context.Users
                 .Where(u => ids.Contains(u.Id))
                 .ToList();
@@ -72,7 +70,6 @@ namespace WoopiAiHub.Repository
                 _context.SaveChangesAsync();
 
                 return true;
-
         }
 
         /// <summary>
