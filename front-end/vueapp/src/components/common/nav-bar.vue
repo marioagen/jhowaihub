@@ -29,11 +29,12 @@
                 </div>
 
                 <div class="dropdown nav-buttons">
-                    <!--  <button class="btn button-nav" type="button" id="flexSwitchCheckThemeOffSidebar" style="cursor: pointer"
-                        @click="toggleTheme">
-                        <i class="theme-icon"></i>
-                    </button> -->
-                    <button class="btn button-nav" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button 
+                        class="btn button-nav" 
+                        type="button" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false"
+                    >
                         <i class="fa fa-globe-americas"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-button text-small shadow">
@@ -271,6 +272,7 @@ export default {
     unmounted() { },
 };
 </script>
+
 <style scoped>
 .navbar {
     padding: 1;
