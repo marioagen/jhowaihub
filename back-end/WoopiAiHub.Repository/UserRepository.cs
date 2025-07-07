@@ -23,7 +23,7 @@ namespace WoopiAiHub.Repository
         /// <summary>
         /// Create an user in the database
         /// </summary>
-        /// <param name="typeDoc"></param>
+        /// <param name="user"></param>
         /// <returns></returns>
         public bool Create(User user)
         {
@@ -39,7 +39,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Find users by ids and convert to a Dto list
+        /// Find users by ids and convert to a User list
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -52,7 +52,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Delete users
+        /// Delete users by ids
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -78,7 +78,7 @@ namespace WoopiAiHub.Repository
         /// <summary>
         /// Update an user
         /// </summary>
-        /// <param name="userUpdateDto"></param>
+        /// <param name="user"></param>
         /// <returns></returns>
         public bool Update(User user)
         {
@@ -93,11 +93,9 @@ namespace WoopiAiHub.Repository
             existing.Email = user.Email;
             existing.IsActive = user.IsActive;
 
-            // Sincronizar times (remove todos e adiciona os novos)
             existing.Teams.Clear();
             foreach (var team in user.Teams)
             {
-                // Anexa o time ao contexto se necessário
                 if (_context.Entry(team).State == EntityState.Detached)
                     _context.Teams.Attach(team);
 

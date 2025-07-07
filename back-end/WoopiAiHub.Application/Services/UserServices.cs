@@ -147,7 +147,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Retrieves all teams paged and their users.
+        /// Retrieves all usrs paged
         /// </summary>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
@@ -172,7 +172,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Ordenates the list of Teams and returns a paged result.
+        /// Ordenates the list of users and returns a paged result.
         /// </summary>
         /// <param name="totalList"></param>
         /// <param name="pagedDataDto"></param>

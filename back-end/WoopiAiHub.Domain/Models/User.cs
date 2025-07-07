@@ -43,7 +43,7 @@ namespace WoopiAiHub.Domain.Models
                 throw new ArgumentNullException(nameof(team));
 
             if (this.Teams.Any(t => t.Id == team.Id))
-                return; // já está na lista, não adiciona novamente
+                return;
 
             Teams.Add(team);
         }

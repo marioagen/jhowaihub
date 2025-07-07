@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -52,9 +51,9 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Endpoint that receives the request to remove questions from the database
+        /// Endpoint that receives the request to remove users from the database
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="ids"></param>
         /// <returns></returns>
         [HttpDelete("DeactivateByEmails")]
         [SwaggerOperation("Endpoint that receives the request to remove questions from the database")]
@@ -74,14 +73,14 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// EndPoint that update a question by passing an UpdateQuestionDto
+        /// EndPoint that update an user by passing an UserUpdateDto
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="UserUpdateDto"></param>
         /// <returns></returns>
         [HttpPut]
         [SwaggerOperation("EndPoint that update a question by passing an UpdateQuestionDto")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Update([FromBody]UserUpdateDto userUpdateDto,
+        public async Task<IActionResult> Update([FromBody]UserUpdateDto UserUpdateDto,
                                                 [FromHeader] HeadersDto headersDto)
         {
             try
@@ -102,7 +101,7 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Endpoint that receives the request to return all teams paginated.
+        /// Endpoint that receives the request to return all users paginated.
         /// </summary>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
