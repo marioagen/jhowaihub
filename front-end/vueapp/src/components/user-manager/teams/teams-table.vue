@@ -11,6 +11,7 @@
             <template #cell-actions="{ data }">
                 <button
                     class="btn btn-outline-success btn-sm"
+                    @click="editTeam(data.row)"
                 >
                     Edit
                 </button>
@@ -30,18 +31,28 @@
             :loading="table.isLoading"
         ></pagination-container>
     </div>
+    <modal-team 
+        v-if="modalTeamShow" 
+        :teamEditing="selectedTeam"
+        @teamCreated="handleTeamCreated"
+        @close="closeModalTeam" 
+    />
 </template>
 
 <script>
     import api from "@/services/api";
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/table-component.vue";
+    import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
+
     import PaginationDivider from "@/utils/paginationDivider";
     const divider = new PaginationDivider();
+
     export default {
         name: "TeamsTable",
         components: {
             TableComponent,
+            ModalTeam,
         },
         data: () => ({
             table: {
@@ -60,11 +71,13 @@
                     listPage: "",
                 },
             },
+            selectedTeam: {},
             queryPage: 1,
             searchInput: "",
             selectedOption: 10,
             isAscending: false,
             colType: 2,
+            modalTeamShow: false,
         }),
         methods: {
             getTeams: function (obj) {
@@ -113,6 +126,10 @@
             formatDate(date) {
                 return dates.formatDate(date);
             },
+            editTeam(team) {
+                this.selectedTeam = team;
+                this.openModalTeam();
+            },
             deleteTeam() {
                 api.delete('/Team/DeleteByIds', { data: this.listIds })
                     .then((response) => { 
@@ -128,6 +145,18 @@
             filterList(input) {
                 this.searchInput = input;
                 this.getTeams({ search: input, page: this.queryPage, type: null });
+            },
+            handleTeamCreated: function() {
+                this.getList({ search: '', page: this.queryPage, type: null });
+                this.closeModalTeam();
+            },
+            openModalTeam: function() {
+                this.modalTeamShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModalTeam: function() {
+                this.modalTeamShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
         },
         created() {
