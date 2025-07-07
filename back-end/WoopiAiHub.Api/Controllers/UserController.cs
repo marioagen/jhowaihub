@@ -50,16 +50,9 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task <IActionResult> DeactivateByEmails([FromBody] List<Guid> ids)
         {
-            try
-            {
+         
                 var result = await _userServices.DeactivateRange(ids);
                 return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(QuestionController)} in the {nameof(DeactivateByEmails)} method");
-                return BadRequest("Error while deleting question: " + ex);
-            }
         }
 
         /// <summary>

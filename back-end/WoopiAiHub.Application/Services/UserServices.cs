@@ -86,7 +86,7 @@ namespace WoopiAiHub.Application.Services
 
             if (allExists)
             {
-                var requestDto = new DeactivateUsersDto { Reference_user = ids };
+                var requestDto = new DeactivateUsersDto { Reference_users = ids };
                 var mktDeactivate = await _marketPlaceApi.DeactivateUsersEnabledByReference(KeyAccess, requestDto);
                 if (mktDeactivate)
                 {
@@ -108,7 +108,7 @@ namespace WoopiAiHub.Application.Services
             var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
             var updateByHubDto = new UpdateByHubDto
             {
-                Reference_user = userUpdateDto.Id,
+                Reference_users = userUpdateDto.Id,
                 UserEmail = userUpdateDto.Email,
                 Tenant = headersDto.Tenant,
             };

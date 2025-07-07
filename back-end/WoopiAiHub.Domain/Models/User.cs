@@ -22,7 +22,7 @@ namespace WoopiAiHub.Domain.Models
         [Column("Created", TypeName = "datetime")]
         public DateTime Created { get; private set; }
 
-        public ICollection<Team> Teams { get; set; } = new Collection<Team>();
+        public ICollection<Team> Teams { get; set; }
 
         public User(Guid id,
                     string name,

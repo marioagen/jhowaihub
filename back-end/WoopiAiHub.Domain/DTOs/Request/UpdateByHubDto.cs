@@ -12,6 +12,6 @@ namespace WoopiAiHub.Domain.DTOs.Request
 
         public string Tenant { get; set; } = string.Empty;
 
-        public Guid Reference_user { get; set; }
+        public Guid Reference_users { get; set; }
     }
 }
