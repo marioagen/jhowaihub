@@ -24,7 +24,6 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly AutoMocker _mocker;
         private readonly Mock<IUserRepository> _userRepositoryMock;
-        private readonly Mock<ILogger<UserServices>> _loggerMock;
         private readonly Mock<IMarketPlaceApi> _marketPlaceApiMock;
         private readonly UserServices _userServices;
         private readonly Mock<ITeamRepository> _teamRepositoryMock;
@@ -35,7 +34,6 @@ namespace WoopiAiHub.UnitTests.Services
             _fixture = new UserFixture();
             _mocker = new AutoMocker();
             _userRepositoryMock = new Mock<IUserRepository>();
-            _loggerMock = new Mock<ILogger<UserServices>>();
             _marketPlaceApiMock = new Mock<IMarketPlaceApi>();
             _teamRepositoryMock = new Mock<ITeamRepository>();
 
@@ -47,7 +45,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             _userServices = new UserServices(
                 _userRepositoryMock.Object,
-                _loggerMock.Object,
                 _marketPlaceApiMock.Object,
                  configMock.Object,
                 _teamRepositoryMock.Object
@@ -65,6 +62,13 @@ namespace WoopiAiHub.UnitTests.Services
             var requestDto = _fixture.FindValidRequestAssignLicensesByHub();
             var userId = Guid.NewGuid();
             var user = new User(userId, userCreateDto.Name, userCreateDto.Email, true, DateTime.Now);
+            var listTeams = new List<Team>
+            {
+                new Team("Team 1", 1, DateTime.Now)
+            };
+            _teamRepositoryMock
+            .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
+            .Returns(new List<Team>());
 
             _marketPlaceApiMock
                 .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), requestDto))
@@ -73,12 +77,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock
                 .Setup(repo => repo.Create(It.IsAny<User>()))
                 .Returns(true);
-            _teamRepositoryMock
-                .Setup(repo => repo.FindByIds(userCreateDto.TeamIds))
-                .Returns(new List<Team>
-                {
-                    new Team("Team 1", 1, DateTime.Now)
-                });
+           
 
             // Act
             var result = await _userServices.Create(userCreateDto, headersDto);

@@ -14,20 +14,17 @@ namespace WoopiAiHub.Application.Services
     public class UserServices : IUserServices
     {
         private readonly IUserRepository _userRepository;
-        private readonly ILogger<UserServices> _logger;
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _config;
         private readonly ITeamRepository _teamRepository;
 
         public UserServices(IUserRepository userRepository,
-                            ILogger<UserServices> logger,
                             IMarketPlaceApi marketPlaceApi,
                             IConfiguration config,
                             ITeamRepository teamRepository)
         {
             _userRepository = userRepository;
             _teamRepository = teamRepository;
-            _logger = logger;
             _marketPlaceApi = marketPlaceApi;
             _config = config;
         }
