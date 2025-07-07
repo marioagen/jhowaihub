@@ -29,14 +29,6 @@
                 </div>
 
                 <div class="dropdown nav-buttons">
-                    <!-- <button 
-                        class="btn button-nav" 
-                        type="button" id="flexSwitchCheckThemeOffSidebar" 
-                        style="cursor: pointer"
-                        @click="toggleTheme"
-                    >
-                        <i class="theme-icon"></i>
-                    </button> -->
                     <button 
                         class="btn button-nav" 
                         type="button" 
