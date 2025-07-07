@@ -50,7 +50,7 @@
                 </router-link>
             </li>
 
-            <li class="mb-1">
+            <!-- <li class="mb-1">
                 <router-link 
                     :class="[
                         'd-flex align-items-center',
@@ -73,7 +73,7 @@
                         {{ $t('labelTypes') }}
                     </span>
                 </router-link>
-            </li>
+            </li> -->
 
             <li class="mb-1">
                 <router-link 
