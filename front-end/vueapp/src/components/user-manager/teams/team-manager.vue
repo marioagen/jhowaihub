@@ -1,11 +1,16 @@
 <template>
     <div class="scroll-area mt-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h6 class="mb-0"> {{ $t('labelTeams') }}</h6>
-            <p><small class="text-muted">{{ $t('labelTeamsMessage') }}</small></p>
-        </div>
-        <button class="btn btn-primary btn-sm" @click="openModalTeam">+ {{ $t('labelNewTeam')}}</button>
+            <div>
+                <h6 class="mb-0"> {{ $t('labelTeams') }}</h6>
+                <p><small class="text-muted">{{ $t('labelTeamsMessage') }}</small></p>
+            </div>
+            <button 
+                class="btn btn-primary btn-sm" 
+                @click="openModalTeam"
+            >
+                + {{ $t('labelNewTeam')}}
+            </button>
         </div>
 
         <div class="card mb-3">
@@ -15,57 +20,24 @@
                     type="text"
                     class="form-control form-control-sm"
                     placeholder="Buscar times..."
+                    @keydown.enter="filterList"
                 />
             </div>
         </div>
 
-        <div class="card">
-        <div class="card-body">
-                <table class="table table-hover caption-top">
-                    <caption>{{ $t('labelTeams') }} ({{ pagination.rowCount }})</caption>
-                    <thead>
-                        <tr>
-                            <th class="content-left-middle">{{ $t('labelId') }} <img class="icon-order" src="@/assets/img/order-item.svg" @click="orderList(1)"/></th>
-                            <th class="content-left-middle">{{ $t('labelTeamName') }} <img class="icon-order" src="@/assets/img/order-item.svg" @click="orderList(2)"/></th>
-                            <th class="content-center-middle">{{ $t('labelMembers') }} <img class="icon-order" src="@/assets/img/order-item.svg" @click="orderList(3)"/></th>
-                            <th class="content-right-middle">{{ $t('labelAction') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="team in teams" :key="team.id">
-                            <td class="content-left-middle">#{{ team.id }}</td>
-                            <td class="content-left-middle">{{ team.name }}</td>
-                            <td class="content-center-middle">
-                                <img class="icon-pill" src="@/assets/img/users-tab.svg" width="16"/>
-                                {{ team.users.length }}
-                            </td>
-                            <td class="content-right-middle">
-                                <dropdown-menu :menuOptions="menuActions" @action="handleMenuAction($event, team)" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div>
-                    <pagination-container
-                        :pagination="{currentPage: 1, pageCount: 2, rowCount: 20, listPage: 1}"
-                        :dataList="teams"
-                        :loading="false"
-                    ></pagination-container>
-                </div>
-            </div>
-        </div>
+        <teams-table 
+            ref="TeamTable"
+        />
     </div>
     <modal-alert v-if="modalAlertShow" :type="'Confirm'" :entity="modalEntity" :alertTitle="$t('labelYouAreAboutToDeleteTeam')" :alertMessage="$t('labelThisActionCannotBeUndone')" :okLabel="$t('labelConfirm')" :cancelLabel="$t('labelCancel')" @open="deleteItem" @close="closeModal" />
     <modal-team v-if="modalTeamShow" @teamCreated="handleTeamCreated" @close="closeModalTeam" :teamEditing="teamEditing"/>
 </template>
 
 <script>
-import api from "@/services/api";
-import PaginationContainer from '@/components/common/pagination-container.vue';
-import DropdownMenu from '@/components/common/dropdown-menu.vue';
 import ModalAlert from '@/components/common/modal-alert';
 import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
 import paginationDivider from "@/utils/paginationDivider";
+import TeamsTable from "@/components/user-manager/teams/teams-table.vue";
 
 export default {
     name: 'TeamsManager',
@@ -100,54 +72,11 @@ export default {
         },
     },
     components: {
-        PaginationContainer,
-        DropdownMenu,
         ModalAlert,
-        ModalTeam
+        ModalTeam,
+        TeamsTable
     },
     methods: {
-        getList: function (obj) {
-            this.loading = true;
-            this.searching = false;
-            this.dataDocument = [];
-            this.listIds = [];
-            var paramsReq = {
-                search: obj.search.trim() ?obj.search.trim() : '',
-                pageSize: this.selectedOption,
-                page: obj.page,
-                isAscending: this.isAscending,
-                colType: this.colType,
-            }
-            let self = this;
-            api.get('/Team/Paged', { params: paramsReq })
-                .then(function (response) {
-                    self.teams = response.data.content;
-                    self.pagination = {
-                        currentPage: response.data.currentPage,
-                        pageCount: response.data.pageCount,
-                        rowCount: response.data.rowCount,
-                        listPage: self.divider.calculatePageCount(response.data.pageCount, response.data.currentPage)
-                    };
-                    self.loading = false;
-                    if (obj.type === "search") self.searching = true;
-                }).catch(function (e) {
-                    console.log(e);
-                    self.loading = false;
-                    if (obj.type === "search") self.searching = true;
-                }).finally(function () {
-                    console.log("Finished request.");
-                });                    
-        },
-        orderList: function (col) {
-            if (this.isAscending) {
-                this.isAscending = false;
-            }
-            else {
-                this.isAscending = true;
-            }
-            this.colType = col;
-            this.getList({ search: '', page: this.queryPage, type: null })
-        },
         setMenuActions: function () {
             this.menuActions = {
                 options: [
@@ -191,25 +120,13 @@ export default {
             this.modalTeamShow = false;
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
-        deleteItem: function () {
-            self = this;
-            api.delete('/Team/DeleteByIds', { data: this.listIds })
-                .then(function (response) { 
-                    self.closeModal();
-                    self.getList({ search: '', page: 1, type: null });
-                }).catch(function (e) { 
-                    console.log(e);
-                }).finally(function () { 
-                    console.log("Finished request.");
-                });
-            this.listIds = [];
+        filterList(input) {
+            this.$refs.TeamTable.filterList();
         },
     },
     created() {
         this.setMenuActions();
-        if (this.$store.state.userProfile.keyMongoAccess) {
-            this.getList({ search: '', page: this.queryPage, type: null });
-        };
+        console.log(this.$store.state.userProfile.keyMongoAccess)
     },
 };
 </script>
