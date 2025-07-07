@@ -2,6 +2,9 @@
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using Refit;
+using WoopiAiHub.Domain.DTOs.Response;
+using Microsoft.AspNetCore.Mvc;
+using WoopiAiHub.Domain.DTOs.Request;
 
 namespace WoopiAiHub.Domain.Interfaces.Refit
 {
@@ -29,7 +32,7 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
 
         [Get("/user/CheckIsAdmin")]
         Task<bool> CheckIsAdmin([Header("KeyAccess")] string KeyAccess,
-                                         RequestCheckIsAdminDto requestCheckIsAdmin);
+                                RequestCheckIsAdminDto requestCheckIsAdmin);
 
         [Get("/user/CheckAccessKey")]
         Task<ResponseCheckAccessDto> CheckAccessKey([Header("KeyAccess")] string KeyAccess,
@@ -39,5 +42,15 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<TenantInfoDto> FindTenantByNameAndModule([Header("KeyAccess")] string KeyAccess,
                                                       [AliasAs("tenantName")] string tenantName,
                                                       [AliasAs("module")] ColTypeModule module);
+        [Post("/user/AssignByHub")]
+        Task<Guid> AssignLicensesByHub([Header("KeyAccess")] string KeyAccess,
+                                       RequestAssignLicensesByHub requestAssignLicensesByHub);
+
+        [Delete("/user/DeactivateUsers")]
+        Task<bool> DeactivateUsersEnabledByReference([Header("KeyAccess")] string KeyAccess,
+                                                    [FromBody] DeactivateUsersDto deactivateUsersDto);
+        [Put("/user/UpdateUsers")]
+        public Task<bool> UpdateUserEnabled([Header("KeyAccess")] string KeyAccess,
+                                            [FromBody] UpdateByHubDto updateByHubDto);
     }
 }
