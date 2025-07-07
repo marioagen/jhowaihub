@@ -13,6 +13,7 @@ import AnalyzerIndex from '@/components/pages/analyzer';
 import UserIndex from '@/components/pages/user/index';
 
 import TypesPage from '@/pages/types.vue';
+import UserManagePage from '@/pages/user-manager.vue';
 
 function authenticate(to, from, next) {
     var usuario = JSON.parse(window.localStorage.getItem('project'));
@@ -111,8 +112,8 @@ const routes = [
     },
 {
         path: '/manage-user',
-        name: 'User',
-        component: UserIndex,
+        name: 'UserManage',
+        component: UserManagePage,
         meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
