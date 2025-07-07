@@ -164,6 +164,7 @@ export default {
 /* Hover: fundo azul clarinho e texto mantendo cor padrão */
 .btn-toggle-nav a:hover {
     color: #676879 !important;
+    background-color: #e1e9f8 !important;
     cursor: pointer;
 }
 
