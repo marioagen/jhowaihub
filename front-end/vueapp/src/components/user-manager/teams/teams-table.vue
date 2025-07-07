@@ -17,7 +17,7 @@
                 </button>
                 <button
                     class="btn btn-outline-danger btn-sm ms-2"
-                    @click="deleteTeam"
+                    @click="confirmationDialog(data.row)"
                 >
                     Delete
                 </button>
@@ -37,6 +37,17 @@
         @teamCreated="handleTeamCreated"
         @close="closeModalTeam" 
     />
+    <modal-alert 
+        v-if="modalAlertShow" 
+        :type="'Confirm'" 
+        :entity="selectedTeam" 
+        :alertTitle="$t('labelYouAreAboutToDeleteTeam')" 
+        :alertMessage="$t('labelThisActionCannotBeUndone')" 
+        :okLabel="$t('labelConfirm')" 
+        :cancelLabel="$t('labelCancel')" 
+        @open="deleteTeam"
+        @close="closeModal" 
+    />
 </template>
 
 <script>
@@ -44,6 +55,7 @@
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/table-component.vue";
     import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
+    import ModalAlert from '@/components/common/modal-alert';
 
     import PaginationDivider from "@/utils/paginationDivider";
     const divider = new PaginationDivider();
@@ -53,6 +65,7 @@
         components: {
             TableComponent,
             ModalTeam,
+            ModalAlert
         },
         data: () => ({
             table: {
@@ -78,6 +91,7 @@
             isAscending: false,
             colType: 2,
             modalTeamShow: false,
+            modalAlertShow: false,
         }),
         methods: {
             getTeams: function (obj) {
@@ -131,8 +145,9 @@
                 this.openModalTeam();
             },
             deleteTeam() {
-                api.delete('/Team/DeleteByIds', { data: this.listIds })
-                    .then((response) => { 
+                let teamId = this.selectedTeam.id;
+                api.delete('/Team/DeleteByIds', { data: [teamId] })
+                    .then((response) => {
                         this.closeModal();
                         this.getTeams({ search: '', page: 1, type: null });
                     }).catch(function (e) { 
@@ -156,6 +171,15 @@
             },
             closeModalTeam: function() {
                 this.modalTeamShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            confirmationDialog(team) {
+                this.selectedTeam = team;
+                this.modalAlertShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModal() {
+                this.modalAlertShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
         },
