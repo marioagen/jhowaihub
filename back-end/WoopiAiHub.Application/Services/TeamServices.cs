@@ -71,7 +71,7 @@ namespace WoopiAiHub.Application.Services
         {
             if (string.IsNullOrEmpty(teamCreateDto.Name))
             {
-                throw new AppException(ErrorCode.RequiredField, "Team name cannot be empty");
+                throw new ArgumentException("Team name cannot be empty");
             }
 
             var team = new Team(teamCreateDto.Name, 0, DateTime.Now)
@@ -82,7 +82,7 @@ namespace WoopiAiHub.Application.Services
             var createResult = _teamRepository.CreateUniqueTeam(team);
             if (!createResult)
             {
-                throw new AppException(ErrorCode.Duplicated, "Duplicated Team Name");
+                throw new ArgumentException("Duplicated Team Name");
             }
             return createResult;
         }
@@ -97,7 +97,7 @@ namespace WoopiAiHub.Application.Services
         {
             if (string.IsNullOrEmpty(teamUpdateDto.Name))
             {
-                throw new AppException(ErrorCode.RequiredField, "Team name cannot be empty");
+                throw new ArgumentException("Team name cannot be empty");
             }
 
             var team = _teamRepository.FindById(teamUpdateDto.Id);
@@ -111,7 +111,7 @@ namespace WoopiAiHub.Application.Services
             var updateResult = _teamRepository.Update(teamUpdate);
             if (!updateResult)
             {
-                throw new AppException(ErrorCode.Duplicated, "Duplicated Team Name");
+                throw new ArgumentException("Duplicated Team Name");
             }
             return true;
         }
