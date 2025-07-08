@@ -8,6 +8,9 @@
             :columns="table.columns"
             :isLoading="table.isLoading"
         >
+            <template #cell-members="{ data }">
+                {{ data.row.users.length }}
+            </template>
             <template #cell-actions="{ data }">
                 <button
                     class="btn btn-outline-success btn-sm"
@@ -106,25 +109,23 @@
                     isAscending: this.isAscending,
                     colType: this.colType,
                 }
-                console.log(paramsReq)
-                let self = this;
+
                 api.get('/Team/Paged', { params: paramsReq })
-                    .then(function (response) {
-                        self.table.data = response.data.content;
-                        self.table.pagination = {
-                            currentPage: response.data.currentPage,
-                            pageCount: response.data.pageCount,
-                            rowCount: response.data.rowCount,
-                            listPage: divider.calculatePageCount(response.data.pageCount, response.data.currentPage)
+                    .then(({ data }) => {
+                        this.table.data = data.content;
+                        this.table.pagination = {
+                            currentPage: data.currentPage,
+                            pageCount: data.pageCount,
+                            rowCount: data.rowCount,
+                            listPage: divider.calculatePageCount(data.pageCount, data.currentPage)
                         };
-                        console.log(self.table.pagination)
-                        if (obj.type === "search") self.searching = true;
-                    }).catch(function (e) {
+                        // console.log(this.table.pagination)
+                        if (obj.type === "search") this.searching = true;
+                    }).catch((e) => {
                         console.log(e);
-                        if (obj.type === "search") self.searching = true;
-                    }).finally(function () {
-                        console.log("Finished request.");
-                        self.table.isLoading = false;
+                        if (obj.type === "search") this.searching = true;
+                    }).finally(() => {
+                        this.table.isLoading = false;
                     });                    
             },
             orderList: function (col) {
