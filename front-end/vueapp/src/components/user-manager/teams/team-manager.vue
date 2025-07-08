@@ -119,9 +119,8 @@ export default {
             this.modalTeamShow = false;
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
-        filterList(input) {
-            console.log(input)
-            this.$refs.TeamTable.filterList(input);
+        filterList() {
+            this.$refs.TeamTable.filterList(this.search);
         },
     },
     created() {
