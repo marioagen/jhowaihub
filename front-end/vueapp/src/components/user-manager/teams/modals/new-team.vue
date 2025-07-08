@@ -86,8 +86,20 @@
             </div>
         </div>
     </div>
-    <modal-team-user v-if="showModalTeamUser" @close="closeModalTeamUser" @userCreated="userCreated"></modal-team-user>
-    <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
+    
+    <modal-team-user 
+        v-if="showModalTeamUser" 
+        :teamId="teamEditing.id" 
+        @close="closeModalTeamUser" 
+        @userCreated="userCreated"
+    ></modal-team-user>
+
+    <toast-alert 
+        :showToast="toastShow" 
+        :colorToast="toastColor" 
+        :messageToast="toastMessage" 
+        @close="closeToast" 
+    />
 </template>
 
 <script>
@@ -151,17 +163,16 @@ export default {
                 page: 1,
                 isAscending: this.isAscending
             };
-            self = this;
             api.get('/User/Paged', { params: paramsReq })
-                .then(function (response) {
-                    self.users = response.data.content;
-                    self.loading = false;
-                }).catch(function (e) {
+                .then((response) => {
+                    this.users = response.data.content;
+                    this.loading = false;
+                }).catch((e) => {
                     console.log(e);
-                    self.loading = false;
-                }).finally(function () {
+                    this.loading = false;
+                }).finally(() => {
                     console.log("Finished request.");
-                    self.loading = false;
+                    this.loading = false;
                 });  
         },
         selectAll() {
