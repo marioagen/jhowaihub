@@ -46,7 +46,7 @@
         :okLabel="$t('labelConfirm')" 
         :cancelLabel="$t('labelCancel')" 
         @open="deleteTeam"
-        @close="closeModal" 
+        @close="closeModal"
     />
 </template>
 

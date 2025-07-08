@@ -173,7 +173,7 @@ export default {
         addNewUser() {
             this.showModalTeamUser = true;
         },
-        saveTeam: function (e) {
+        saveTeam(e) {
             e.preventDefault();
             const team = {
                 id: this.teamData.id,
@@ -186,25 +186,25 @@ export default {
             let response = team.id == 0 ? 
                 api.post('Team', team) : 
                 api.put('Team', team);
-            let self = this;
-            response.then(function (response) {
-                    self.$emit('teamCreated', team)
-            
-                    self.resetForm() 
+
+            response.then((response) => {
+                    this.$emit('teamCreated', team)
+                    this.resetForm();
                 }).catch(function (e) {
                     if (e.response && e.response.data && e.response.data.errorCode !== ErrorCode.DefaultError) {
                         switch (e.response.data.errorCode) {
                             case ErrorCode.Duplicated:
-                                self.nameError = self.$t('labelErrorTeamAlreadyExists');
+                                this.nameError = this.$t('labelErrorTeamAlreadyExists');
                                 break;
                             default:
-                                self.alertToast(self.$t('labelUserError'), "toast-warning");
+                                this.alertToast(this.$t('labelUserError'), "toast-warning");
                         }
                     }
                     else {
-                        self.alertToast(self.$t('labelUserError'), "toast-warning");
+                        this.alertToast(this.$t('labelUserError'), "toast-warning");
                     }
-                }).finally(function () {
+                }).finally(() => {
+                    this.close();
                     console.log("Finished request.");
                 });             
         },
