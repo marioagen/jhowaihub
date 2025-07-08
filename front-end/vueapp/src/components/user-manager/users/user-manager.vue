@@ -1,0 +1,142 @@
+<template>
+    <div class="scroll-area mt-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h6 class="mb-0"> {{ $t('labelUsers') }}</h6>
+                <p><small class="text-muted">{{ $t('labelTeamsMessage') }}</small></p>
+            </div>
+            <button 
+                class="btn btn-primary btn-sm" 
+                @click="openModalUsers"
+            >
+                + {{ $t('labelNewUser')}}
+            </button>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <input
+                    v-model="search"
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="Buscar times..."
+                    @keydown.enter="filterList"
+                />
+            </div>
+        </div>
+
+        <users-table 
+            ref="UserTable"
+        />
+    </div>
+    <modal-alert v-if="modalAlertShow" :type="'Confirm'" :entity="modalEntity" :alertTitle="$t('labelYouAreAboutToDeleteTeam')" :alertMessage="$t('labelThisActionCannotBeUndone')" :okLabel="$t('labelConfirm')" :cancelLabel="$t('labelCancel')" @open="deleteItem" @close="closeModal" />
+    <modal-user v-if="modalUserShow" @userCreated="handleTeamCreated" @close="closeModalUser" :userEditing="teamEditing"/>
+</template>
+
+<script>
+import ModalAlert from '@/components/common/modal-alert';
+import ModalUser from '@/components/user-manager/users/modals/new-user.vue';
+import paginationDivider from "@/utils/paginationDivider";
+import UsersTable from "@/components/user-manager/users/users-table.vue";
+
+export default {
+    name: 'UsersManager',
+    data() {
+        return {
+            menuActions: {},
+            loading: false,
+            searching: false,
+            modalAlertShow: false,
+            modalUserShow: false,
+            modalEntity: {},
+            search: '',
+            queryPage: this.$route.query.page ? this.$route.query.page : 1,
+            pagination: { currentPage: 0, pageCount: 0, rowCount: 0, listPage: 0 }, 
+            teams: [],
+            divider: new paginationDivider(),
+            listIds: [],
+            teamEditing: {},
+        };
+    },
+    watch: {
+        searchInput: function (val) {
+            this.searching = false;
+        },
+        '$store.state.userProfile.language': function () {
+            this.setMenuActions();
+        },
+        '$store.state.userProfile.keyMongoAccess'(newValue) {
+            if (newValue) {
+                this.getList({ search: '', page: this.queryPage, type: null });
+            }
+        },
+    },
+    components: {
+        ModalAlert,
+        ModalUser,
+        UsersTable
+    },
+    methods: {
+        setMenuActions: function () {
+            this.menuActions = {
+                options: [
+                    { label: this.$t('labelEdit'), value: "edit", icon: require("@/assets/img/edit-outlined.svg") },
+                    { label: this.$t('labelDelete'), value: "delete", icon: require("@/assets/img/delete-outlined.svg"), color: "text-danger" },
+                ],
+            };
+        },
+        handleMenuAction: function(option, item) {
+            if (option.value === "edit") {
+                this.teamEditing = {
+                    id: item.id,
+                    name: item.name,
+                    users: item.users
+                };
+                this.openModalTeam();
+                
+            } else if (option.value === "delete") {
+                this.listIds = [item.id];
+                this.confirmationDialog(item);
+            }
+        },
+        confirmationDialog: function (item) {
+            this.modalEntity = item;
+            this.modalAlertShow = true;
+            document.getElementsByTagName("BODY")[0].children[1].className += " active";
+        },
+        closeModal: function () {
+            this.modalAlertShow = false;
+            document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+        },
+        handleTeamCreated: function() {
+            this.getList({ search: '', page: this.queryPage, type: null });
+            this.closeModalUser();
+        },
+        openModalUsers: function() {
+            this.modalUserShow = true;
+            document.getElementsByTagName("BODY")[0].children[1].className += " active";
+        },
+        closeModalUser: function() {
+            this.modalUserShow = false;
+            document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+        },
+        filterList(input) {
+            this.$refs.TeamTable.filterList();
+        },
+    },
+    created() {
+        this.setMenuActions();
+        console.log(this.$store.state.userProfile.keyMongoAccess)
+    },
+};
+</script>
+
+<style scoped>
+    .show {
+        display: block;
+    }
+    .table td,
+    .table th {
+        vertical-align: middle;
+    }
+</style>

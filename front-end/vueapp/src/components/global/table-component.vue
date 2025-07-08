@@ -156,26 +156,33 @@
 </script>
 
 <style scoped>
-.custom-table {
-  overflow: hidden;
-}
+    .custom-table {
+        overflow: hidden;
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        width: 100%;
+    }
 
 .custom-table thead th {
   border-bottom: 1px solid #d3d3d3 !important;
+  background:white;
 }
 
-.custom-table th,
-.custom-table td {
-  padding: 12px;
-  vertical-align: middle;
-  font-size: 14px;
-  font-weight: 500;
-  color: #343a40;
-}
+        .custom-table th,
+        .custom-table td {
+            padding: 12px;
+            vertical-align: middle;
+            font-size: 14px;
+            font-weight: 500;
+            color: #343a40;
+            background: white;
+        }
 
-.table-div {
-    border: 1px solid #d3d3d3;
-    border-radius: 8px;
-    overflow: hidden;
-}
+    .table-div {
+        border: 1px solid #d3d3d3;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+        padding: 20px 24px; /* AQUI! padding interno da linha */
+    }
 </style>

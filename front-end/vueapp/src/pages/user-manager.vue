@@ -20,7 +20,7 @@
                     <div class="tab-content mt-3">
                         <div class="tab-pane active" id="user" role="tabpanel" aria-labelledby="user-tab">
                             <!-- Users -->
-                            {{ $t('labelUsers') }}
+                            <users-manager />
                         </div>
                         <div class="tab-pane" id="team" role="tabpanel" aria-labelledby="team-tab">
                             <!-- Teams -->
@@ -34,7 +34,8 @@
 </template>
 
 <script>
-import TeamsManager from '@/components/user-manager/teams/team-manager.vue';
+    import TeamsManager from '@/components/user-manager/teams/team-manager.vue';
+    import UsersManager from '@/components/user-manager/users/user-manager.vue';
 export default {
     name: 'UserIndex',
     data() {
@@ -44,6 +45,7 @@ export default {
     },
     components: {
         TeamsManager,
+        UsersManager
     },
     methods: {
         // Methods can be added here if needed
