@@ -125,7 +125,7 @@ export default {
     },
     created() {
         this.setMenuActions();
-        console.log(this.$store.state.userProfile.keyMongoAccess)
+        // console.log(this.$store.state.userProfile.keyMongoAccess)
     },
 };
 </script>

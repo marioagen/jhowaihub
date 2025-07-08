@@ -35,8 +35,7 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> Create([FromBody] UserCreateDto userCreateDto,
                                                 [FromHeader] HeadersDto headersDto)
         {
-                var result = await _userServices.Create(userCreateDto,
-                                                  headersDto);
+                var result = await _userServices.Create(userCreateDto, headersDto);
                 return Ok(result);
         }
 

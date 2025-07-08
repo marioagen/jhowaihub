@@ -6,7 +6,7 @@
 
         public string Email { get;  set; } = string.Empty;
 
-        public ICollection<int> TeamIds { get; set; } 
+        public ICollection<int> TeamIds { get; set; }
     }
 
 }
