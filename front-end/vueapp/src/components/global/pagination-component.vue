@@ -3,7 +3,7 @@
         <ul class="pagination justify-content-center">
             <li class="page-item" :class="{ disabled: current === 1 }">
                 <a class="page-link" href="#" @click.prevent="changePage(current - 1)">
-                    «
+                    « {{ $t("labelPrevious") }}
                 </a>
             </li>
 
@@ -20,7 +20,7 @@
 
             <li class="page-item" :class="{ disabled: current === totalPages }">
                 <a class="page-link" href="#" @click.prevent="changePage(current + 1)">
-                    »
+                    {{ $t("labelNext") }} »
                 </a>
             </li>
         </ul>
