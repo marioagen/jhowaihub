@@ -86,8 +86,20 @@
             </div>
         </div>
     </div>
-    <modal-team-user v-if="showModalTeamUser" @close="closeModalTeamUser" @userCreated="userCreated"></modal-team-user>
-    <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
+    
+    <modal-team-user 
+        v-if="showModalTeamUser" 
+        :teamId="teamEditing.id" 
+        @close="closeModalTeamUser" 
+        @userCreated="userCreated"
+    ></modal-team-user>
+
+    <toast-alert 
+        :showToast="toastShow" 
+        :colorToast="toastColor" 
+        :messageToast="toastMessage" 
+        @close="closeToast" 
+    />
 </template>
 
 <script>
@@ -151,17 +163,16 @@ export default {
                 page: 1,
                 isAscending: this.isAscending
             };
-            self = this;
             api.get('/User/Paged', { params: paramsReq })
-                .then(function (response) {
-                    self.users = response.data.content;
-                    self.loading = false;
-                }).catch(function (e) {
+                .then((response) => {
+                    this.users = response.data.content;
+                    this.loading = false;
+                }).catch((e) => {
                     console.log(e);
-                    self.loading = false;
-                }).finally(function () {
+                    this.loading = false;
+                }).finally(() => {
                     console.log("Finished request.");
-                    self.loading = false;
+                    this.loading = false;
                 });  
         },
         selectAll() {
@@ -173,7 +184,7 @@ export default {
         addNewUser() {
             this.showModalTeamUser = true;
         },
-        saveTeam: function (e) {
+        saveTeam(e) {
             e.preventDefault();
             const team = {
                 id: this.teamData.id,
@@ -186,25 +197,25 @@ export default {
             let response = team.id == 0 ? 
                 api.post('Team', team) : 
                 api.put('Team', team);
-            let self = this;
-            response.then(function (response) {
-                    self.$emit('teamCreated', team)
-            
-                    self.resetForm() 
+
+            response.then((response) => {
+                    this.$emit('teamCreated', team)
+                    this.resetForm();
                 }).catch(function (e) {
                     if (e.response && e.response.data && e.response.data.errorCode !== ErrorCode.DefaultError) {
                         switch (e.response.data.errorCode) {
                             case ErrorCode.Duplicated:
-                                self.nameError = self.$t('labelErrorTeamAlreadyExists');
+                                this.nameError = this.$t('labelErrorTeamAlreadyExists');
                                 break;
                             default:
-                                self.alertToast(self.$t('labelUserError'), "toast-warning");
+                                this.alertToast(this.$t('labelUserError'), "toast-warning");
                         }
                     }
                     else {
-                        self.alertToast(self.$t('labelUserError'), "toast-warning");
+                        this.alertToast(this.$t('labelUserError'), "toast-warning");
                     }
-                }).finally(function () {
+                }).finally(() => {
+                    this.close();
                     console.log("Finished request.");
                 });             
         },

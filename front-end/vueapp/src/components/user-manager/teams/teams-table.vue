@@ -3,45 +3,62 @@
         <table-component
             modalName="labelUsers"
             emptyMessage="labelNoDocumentTypeWasFound"
-            :totalRows="table.pagination.rowCount"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
+            :pagination="table.pagination"
         >
+            <template #cell-members="{ data }">
+                {{ data.row.users.length }}
+            </template>
             <template #cell-actions="{ data }">
                 <button
                     class="btn btn-outline-success btn-sm"
+                    @click="editTeam(data.row)"
                 >
                     Edit
                 </button>
                 <button
                     class="btn btn-outline-danger btn-sm ms-2"
-                    @click="deleteTeam"
+                    @click="confirmationDialog(data.row)"
                 >
                     Delete
                 </button>
             </template>
         </table-component>
     </div>
-    <div>
-        <pagination-container
-            :pagination="{currentPage: 1, pageCount: 2, rowCount: 20, listPage: 1}"
-            :dataList="teams"
-            :loading="table.isLoading"
-        ></pagination-container>
-    </div>
+    <modal-team 
+        v-if="modalTeamShow" 
+        :teamEditing="selectedTeam"
+        @teamCreated="handleTeamCreated"
+        @close="closeModalTeam" 
+    />
+    <modal-alert 
+        v-if="modalAlertShow" 
+        :type="'Confirm'" 
+        :entity="selectedTeam" 
+        :alertTitle="$t('labelYouAreAboutToDeleteTeam')" 
+        :alertMessage="$t('labelThisActionCannotBeUndone')" 
+        :okLabel="$t('labelConfirm')" 
+        :cancelLabel="$t('labelCancel')" 
+        @open="deleteTeam"
+        @close="closeModal"
+    />
 </template>
 
 <script>
-    import api from "@/services/api";
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/table-component.vue";
-    import PaginationDivider from "@/utils/paginationDivider";
-    const divider = new PaginationDivider();
+    import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
+    import ModalAlert from '@/components/common/modal-alert';
+    import TeamsService from "@/services/teams/TeamsService";
+
     export default {
         name: "TeamsTable",
         components: {
             TableComponent,
+            ModalTeam,
+            ModalAlert
         },
         data: () => ({
             table: {
@@ -54,20 +71,23 @@
                 ],
                 data: [],
                 pagination: {
-                    currentPage: "",
-                    pageCount: "",
-                    rowCount: "",
-                    listPage: "",
+                    currentPage: 1,
+                    totalPages: 100,
+                    itemsPerPage: 10,
+                    totalItems: 2000,
                 },
             },
+            selectedTeam: {},
             queryPage: 1,
             searchInput: "",
             selectedOption: 10,
             isAscending: false,
             colType: 2,
+            modalTeamShow: false,
+            modalAlertShow: false,
         }),
         methods: {
-            getTeams: function (obj) {
+            getTeams(obj) {
                 this.table.isLoading = true;
                 this.searching = false;
                 this.dataDocument = [];
@@ -79,25 +99,15 @@
                     isAscending: this.isAscending,
                     colType: this.colType,
                 }
-                console.log(paramsReq)
-                let self = this;
-                api.get('/Team/Paged', { params: paramsReq })
-                    .then(function (response) {
-                        self.table.data = response.data.content;
-                        self.table.pagination = {
-                            currentPage: response.data.currentPage,
-                            pageCount: response.data.pageCount,
-                            rowCount: response.data.rowCount,
-                            listPage: divider.calculatePageCount(response.data.pageCount, response.data.currentPage)
-                        };
-                        console.log(self.table.pagination)
-                        if (obj.type === "search") self.searching = true;
-                    }).catch(function (e) {
-                        console.log(e);
-                        if (obj.type === "search") self.searching = true;
-                    }).finally(function () {
-                        console.log("Finished request.");
-                        self.table.isLoading = false;
+
+                TeamsService.getTeams(paramsReq)
+                    .then((response) => {
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
+                    })
+                    .finally(() => {
+                        if (obj.type === "search") this.searching = true;
+                        this.table.isLoading = false;
                     });                    
             },
             orderList: function (col) {
@@ -113,22 +123,51 @@
             formatDate(date) {
                 return dates.formatDate(date);
             },
+            editTeam(team) {
+                this.selectedTeam = team;
+                this.openModalTeam();
+            },
             deleteTeam() {
-                api.delete('/Team/DeleteByIds', { data: this.listIds })
-                    .then((response) => { 
-                        this.closeModal();
-                        this.getTeams({ search: '', page: 1, type: null });
-                    }).catch(function (e) { 
-                        console.log(e);
-                    }).finally(function () { 
-                        console.log("Finished request.");
+                let teamId = this.selectedTeam.id;
+                TeamsService.deleteTeamById(teamId)
+                    .then((status) => {
+                        if(status) {
+                            this.closeModal();
+                            this.getTeams({ search: '', page: 1, type: null });
+                        }
+                    })
+                    .finally(() => {
+                        this.listIds = [];
                     });
-                this.listIds = [];
             },
             filterList(input) {
                 this.searchInput = input;
                 this.getTeams({ search: input, page: this.queryPage, type: null });
             },
+            handleTeamCreated: function() {
+                this.getList({ search: '', page: this.queryPage, type: null });
+                this.closeModalTeam();
+            },
+            openModalTeam: function() {
+                this.modalTeamShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModalTeam: function() {
+                this.modalTeamShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            confirmationDialog(team) {
+                this.selectedTeam = team;
+                this.modalAlertShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModal() {
+                this.modalAlertShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            changePage(page) {
+                this.getTeams({ search: '', page: page, type: null });
+            }
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;

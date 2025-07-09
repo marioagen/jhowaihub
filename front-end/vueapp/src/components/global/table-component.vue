@@ -2,7 +2,7 @@
     <div class="table-div shadow-sm">
         <p class="mx-2 my-2">
             <small>
-                {{ $t(modalName) }} ({{ totalRows }})
+                {{ $t(modalName) }} ({{ pagination.totalItems }})
             </small>
         </p>
         <table 
@@ -78,19 +78,24 @@
                 </tr>
             </tbody>
         </table>
+        <pagination-component
+            class="mt-4" 
+            :current-page="pagination.currentPage"
+            :total-pages="pagination.totalPages"
+            :items-per-page="pagination.itemsPerPage"
+            :total-items="pagination.totalItems"
+            @change-page="changePage"
+        />
     </div>
 </template>
   
 <script>
+    import PaginationComponent from "@/components/global/pagination-component.vue";
     export default {
         props: {
             modalName: {
                 type: String,
                 required: true
-            },
-            totalRows: {
-                type: Number,
-                required: true,
             },
             emptyMessage: {
                 type: String,
@@ -113,6 +118,13 @@
                 type: Boolean,
                 default: true,
             },
+            pagination: {
+                type: Object,
+                required: false,
+            }
+        },
+        components: {
+            PaginationComponent,
         },
         data() {
             return {
@@ -142,7 +154,10 @@
             },
             cleanSelection() {
                 this.selectedRows = [];
-            }
+            },
+            changePage(page) {
+                this.$emit('change-page', page)
+            },
         },
         computed: {
             allSelected() {

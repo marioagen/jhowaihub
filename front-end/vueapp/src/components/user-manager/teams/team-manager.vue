@@ -29,7 +29,6 @@
             ref="TeamTable"
         />
     </div>
-    <modal-alert v-if="modalAlertShow" :type="'Confirm'" :entity="modalEntity" :alertTitle="$t('labelYouAreAboutToDeleteTeam')" :alertMessage="$t('labelThisActionCannotBeUndone')" :okLabel="$t('labelConfirm')" :cancelLabel="$t('labelCancel')" @open="deleteItem" @close="closeModal" />
     <modal-team v-if="modalTeamShow" @teamCreated="handleTeamCreated" @close="closeModalTeam" :teamEditing="teamEditing"/>
 </template>
 
@@ -120,13 +119,13 @@ export default {
             this.modalTeamShow = false;
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
-        filterList(input) {
-            this.$refs.TeamTable.filterList();
+        filterList() {
+            this.$refs.TeamTable.filterList(this.search);
         },
     },
     created() {
         this.setMenuActions();
-        console.log(this.$store.state.userProfile.keyMongoAccess)
+        // console.log(this.$store.state.userProfile.keyMongoAccess)
     },
 };
 </script>
