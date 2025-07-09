@@ -7,6 +7,7 @@
             :columns="table.columns"
             :isLoading="table.isLoading"
             :pagination="table.pagination"
+            @change-page="changePage"
         >
             <template #cell-members="{ data }">
                 {{ data.row.users.length }}
