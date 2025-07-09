@@ -106,12 +106,12 @@
                 api.get('/Team/Paged', { params: paramsReq })
                     .then(({ data }) => {
                         this.table.data = data.content;
-                        // this.table.pagination = {
-                        //     currentPage: data.currentPage,
-                        //     totalPages: data.pageCount,
-                        //     rowCount: data.rowCount,
-                        //     totalItems: divider.calculatePageCount(data.pageCount, data.currentPage)
-                        // };
+                        this.table.pagination = {
+                            currentPage: data.currentPage,
+                            totalPages: data.pageCount,
+                            rowCount: data.rowCount,
+                            totalItems: divider.calculatePageCount(data.pageCount, data.currentPage)
+                        };
                         if (obj.type === "search") this.searching = true;
                     }).catch((e) => {
                         console.log(e);
