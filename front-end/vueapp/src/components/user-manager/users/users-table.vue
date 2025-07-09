@@ -1,11 +1,11 @@
 <template>
     <div>
-        <table-component modalName="labelTeams"
+        <table-component modalName="labelUsers"
                          emptyMessage="labelNoDocumentTypeWasFound"
-                         :totalRows="table.pagination.rowCount"
                          :data="table.data"
                          :columns="table.columns"
-                         :isLoading="table.isLoading">
+                         :isLoading="table.isLoading"
+                         :pagination="table.pagination">
             <template #cell-name="{ data }">
                 <div v-if="!loading" class="p-1">
                     <div class="d-flex">
@@ -30,30 +30,37 @@
                         <i class="fas fa-ellipsis-v"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#">Editar</a></li>
-                        <li><a class="dropdown-item" href="#">Excluir</a></li>
+                        <li><a class="dropdown-item" href="#" @click="editUser(data.row)">EditLabel</a></li>
+                        <li><a class="dropdown-item" href="#" @click="confirmationDialog(data.row)">ExcluirLabel</a></li>
                     </ul>
                 </div>
             </template>
         </table-component>
-    </div>
-    <div>
-        <!--<pagination-container :pagination="{currentPage: 1, pageCount: 2, rowCount: 20, listPage: 1}"
-                              :dataList="users"
-                              :loading="table.isLoading"></pagination-container>-->
+        <modal-user v-if="modalUserShow" @userCreated="handleTeamCreated" @close="closeModalUser" :userEditing="selectedUser" />
+        <modal-alert v-if="modalAlertShow"
+                     :type="'Confirm'"
+                     :entity="selectedUser"
+                     :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
+                     :alertMessage="$t('labelThisActionCannotBeUndone')"
+                     :okLabel="$t('labelConfirm')"
+                     :cancelLabel="$t('labelCancel')"
+                     @open="deleteUser"
+                     @close="closeModal" />
     </div>
 </template>
-
 <script>
     import api from "@/services/api";
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/table-component.vue";
-    import PaginationDivider from "@/utils/paginationDivider";
-    const divider = new PaginationDivider();
+    import ModalUser from '@/components/user-manager/users/modals/new-user.vue';
+    import ModalAlert from '@/components/common/modal-alert';
+    import UserService from "@/services/users/UserService";
     export default {
         name: "UsersTable",
         components: {
             TableComponent,
+            ModalUser,
+            ModalAlert
         },
         data: () => ({
             table: {
@@ -66,10 +73,9 @@
                 ],
                 data: [],
                 pagination: {
-                    currentPage: "",
-                    pageCount: "",
-                    rowCount: "",
-                    listPage: "",
+                    currentPage: 1,
+                    totalPages: 100,
+                    itemsPerPage: 10,
                     totalItems: 2000,
                 },
             },
@@ -78,6 +84,9 @@
             selectedOption: 10,
             isAscending: false,
             colType: 2,
+            modalUserShow: false,
+            modalAlertShow: false,
+            selectedUser: {},
         }),
         methods: {
             getUsers: function (obj) {
@@ -94,50 +103,29 @@
                 }
                 console.log(paramsReq)
                 let self = this;
-                api.get('/User/Paged', { params: paramsReq })
-                    .then(function (response) {
-                        self.table.data = response.data.content;
-                        self.table.pagination = {
-                            currentPage: response.data.currentPage,
-                            pageCount: response.data.pageCount,
-                            rowCount: response.data.rowCount,
-                            listPage: divider.calculatePageCount(response.data.pageCount, response.data.currentPage)
-                        };
-                        console.log(self.table.pagination)
-                        console.log(self.table.data);
-                        if (obj.type === "search") self.searching = true;
-                    }).catch(function (e) {
-                        console.log(e);
-                        if (obj.type === "search") self.searching = true;
-                    }).finally(function () {
-                        console.log("Finished request.");
-                        self.table.isLoading = false;
-                    });
-            },
-            orderList: function (col) {
-                if (this.isAscending) {
-                    this.isAscending = false;
-                }
-                else {
-                    this.isAscending = true;
-                }
-                this.colType = col;
-                this.getList({ search: '', page: this.queryPage, type: null })
-            },
-            formatDate(date) {
-                return dates.formatDate(date);
-            },
-            deleteTeam() {
-                api.delete('/Team/DeleteByIds', { data: this.listIds })
+                UserService.getUsers(paramsReq)
                     .then((response) => {
-                        this.closeModal();
-                        this.getTeams({ search: '', page: 1, type: null });
-                    }).catch(function (e) {
-                        console.log(e);
-                    }).finally(function () {
-                        console.log("Finished request.");
-                    });
-                this.listIds = [];
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
+                    })
+                    .finally(() => {
+                        if (obj.type === "search") this.searching = true;
+                        this.table.isLoading = false;
+                    });                    
+            },
+            editUser(user) {
+                this.selectedUser = user;
+                this.openModalUser();
+            },
+            deleteUser() {
+                let userId = this.selectedTeam.id;
+                UserService.deleteUsersById(userId)
+                    .then((status) => {
+                        if (status) {
+                            this.closeModal();
+                            this.getUsers({ search: '', page: 1, type: null });
+                        }
+                    })
             },
             filterList(input) {
                 this.searchInput = input;
@@ -153,6 +141,27 @@
                 const first = parts[0][0] || '';
                 const last = parts[parts.length - 1].slice(-1) || '';
                 return (first + last).toUpperCase();
+            },
+            handleUserCreated: function () {
+                this.getUsers({ search: '', page: this.queryPage, type: null });
+                this.closeModalUser();
+            },
+            openModalUser: function () {
+                this.modalUserShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModalUser: function () {
+                this.modalUserShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            confirmationDialog(user) {
+                this.selectedUser = user;
+                this.modalAlertShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModal() {
+                this.modalAlertShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
         },
         created() {

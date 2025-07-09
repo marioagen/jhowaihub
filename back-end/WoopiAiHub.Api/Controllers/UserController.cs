@@ -44,10 +44,10 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        [HttpDelete("DeactivateByEmails")]
+        [HttpDelete("DeactivateByIds")]
         [SwaggerOperation("Endpoint that receives the request to remove questions from the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task <IActionResult> DeactivateByEmails([FromBody] List<Guid> ids)
+        public async Task <IActionResult> DeactivateByIds([FromBody] List<Guid> ids)
         {
          
                 var result = await _userServices.DeactivateRange(ids);
