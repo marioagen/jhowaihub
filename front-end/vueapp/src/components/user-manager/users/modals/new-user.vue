@@ -138,7 +138,7 @@ export default {
             nameError: '',
         }
     },
-    emits: ['close', 'teamCreated'],
+    emits: ['close', 'userCreated'],
     computed: {
         filteredUsers() {
             if (!this.searchTerm) {
@@ -160,17 +160,17 @@ export default {
                 page: 1,
                 isAscending: this.isAscending
             };
-            self = this;
+
             api.get('/Team/Paged', { params: paramsReq })
-                .then(function (response) {
-                    self.teams = response.data.content;
-                    self.loading = false;
-                }).catch(function (e) {
+                .then((response) => {
+                    this.teams = response.data.content;
+                    this.loading = false;
+                }).catch((e) => {
                     console.log(e);
-                    self.loading = false;
-                }).finally(function () {
+                    this.loading = false;
+                }).finally(() => {
                     console.log("Finished request.");
-                    self.loading = false;
+                    this.loading = false;
                 });  
         },
         selectAll() {
@@ -190,26 +190,26 @@ export default {
                 teamIds: this.selectedTeams,
                 ...(this.userData.id == null && { id: this.userData.id })
             }    
+
             let response = this.userData.id == null ? 
                 api.post('User', user) :
                 api.put('User', user);
-            let self = this;
-            response.then(function (response) {
-                    self.$emit('userCreated', team)
-            
-                    self.resetForm() 
-                }).catch(function (e) {
+
+            response.then((response) => {
+                    this.$emit('userCreated', user);            
+                    this.resetForm() ;
+                }).catch((e) => {
                     if (e.response && e.response.data && e.response.data.errorCode !== ErrorCode.DefaultError) {
                         switch (e.response.data.errorCode) {
                             case ErrorCode.Duplicated:
-                                self.nameError = self.$t('labelErrorTeamAlreadyExists');
+                                this.nameError = this.$t('labelErrorTeamAlreadyExists');
                                 break;
                             default:
-                                self.alertToast(self.$t('labelUserError'), "toast-warning");
+                                this.alertToast(this.$t('labelUserError'), "toast-warning");
                         }
                     }
                     else {
-                        self.alertToast(self.$t('labelUserError'), "toast-warning");
+                        this.alertToast(this.$t('labelUserError'), "toast-warning");
                     }
                 }).finally(function () {
                     console.log("Finished request.");
