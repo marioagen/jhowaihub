@@ -57,6 +57,12 @@ import ToastAlert from '@/components/common/toast-alert';
 
 export default {
     name: 'ModalTeamUser',
+    props: {
+        teamId: {
+            type: Number,
+            required: true,
+        },
+    },
     data() {
         return {
             form: {
@@ -108,7 +114,7 @@ export default {
                     console.log("Finished request.");
                 });  
         },
-        handleSubmit: function (e) {
+        handleSubmit(e) {
             e.preventDefault();
             if (!this.form.name || this.form.name.trim() === '') {
                 this.nameError =  this.$t('labelRequiredField');
@@ -120,25 +126,26 @@ export default {
             }
 
             this.loading = true;
-            let self = this;
             api.post('User', {
                     name: this.form.name.trim(),
-                    email: this.form.email.trim()
-                }).then(function (response) {
-                    self.loading = false;
-                    self.resetForm();
-                    self.$emit('userCreated');
-                }).catch(function (e) {
-                    self.alertToast(this.$t('labelUserError'), "toast-warning");
-                }).finally(function () {
+                    email: this.form.email.trim(),
+                    teamIds: [this.teamId],
+                }).then((response) => {
+                    this.loading = false;
+                    this.resetForm();
+                    this.$emit('userCreated');
+                }).catch((e) => {
+                    this.alertToast(this.$t('labelUserError'), "toast-warning");
+                }).finally(() => {
                     console.log("Finished request.");
-                    self.loading = false;
+                    this.loading = false;
                 });
         },
         resetForm() {
             this.form = {
                 name: '',
-                email: ''
+                email: '',
+                teamId: 1,
             };
             this.errors = {};
             this.emailError = '';
@@ -172,6 +179,9 @@ export default {
             clearInterval(this.myInterval);
             this.myInterval = null;
         },
+    },
+    created() {
+        console.log(this.teamId)
     }
 }
 </script>

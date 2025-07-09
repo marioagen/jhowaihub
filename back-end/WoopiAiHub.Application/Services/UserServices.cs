@@ -69,7 +69,6 @@ namespace WoopiAiHub.Application.Services
             return false;
         }
 
-
         // <summary>
         /// Delete users by ids
         /// </summary>
