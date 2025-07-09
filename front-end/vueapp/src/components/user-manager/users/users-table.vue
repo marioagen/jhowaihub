@@ -7,9 +7,9 @@
                          :columns="table.columns"
                          :isLoading="table.isLoading">
             <template #cell-name="{ data }">
-                <div v-if="!loading" :key="data.id" class="p-1">
-                    <div class="form-check d-flex align-items-center">
-                        <label class="form-check-label d-flex align-items-center w-100" :for="`user-${data.id}`">
+                <div v-if="!loading" class="p-1">
+                    <div class="d-flex">
+                        <label class="form-check-label d-flex align-items-center w-100">
                             <div class="rounded-circle d-flex align-items-center justify-content-center btn-primary fw-bold me-3 initials">
                                 {{ getInitials(data.row.name) }}
                             </div>
@@ -21,15 +21,26 @@
                     </div>
                 </div>
             </template>
+            <template #cell-teams="{ data }">
+                <span class="badge">{{ data.row.teams.namw }}</span>
+            </template>
             <template #cell-actions="{ data }">
-                <i class="fas fa-ellipsis-v"></i>
+                <div class="dropdown">
+                    <a class="btn p-0 border-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Editar</a></li>
+                        <li><a class="dropdown-item" href="#">Excluir</a></li>
+                    </ul>
+                </div>
             </template>
         </table-component>
     </div>
     <div>
-        <pagination-container :pagination="{currentPage: 1, pageCount: 2, rowCount: 20, listPage: 1}"
-                              :dataList="teams"
-                              :loading="table.isLoading"></pagination-container>
+        <!--<pagination-container :pagination="{currentPage: 1, pageCount: 2, rowCount: 20, listPage: 1}"
+                              :dataList="users"
+                              :loading="table.isLoading"></pagination-container>-->
     </div>
 </template>
 
@@ -59,6 +70,7 @@
                     pageCount: "",
                     rowCount: "",
                     listPage: "",
+                    totalItems: 2000,
                 },
             },
             queryPage: 1,
@@ -149,3 +161,20 @@
         },
     }
 </script>
+<style scoped>
+
+    .badge {
+        display: inline-block;
+        background-color: #e0ecff;
+        color: #0057d8;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin-right: 4px;
+    }
+
+    .initials{
+    width: 30px;
+    height: 30px;
+}
+</style>
