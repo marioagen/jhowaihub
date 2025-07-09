@@ -7,6 +7,7 @@
             :columns="table.columns"
             :isLoading="table.isLoading"
             :pagination="table.pagination"
+            @change-page="changePage"
         >
             <template #cell-members="{ data }">
                 {{ data.row.users.length }}
@@ -118,7 +119,7 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getList({ search: '', page: this.queryPage, type: null })
+                this.getTeams({ search: '', page: this.queryPage, type: null })
             },
             formatDate(date) {
                 return dates.formatDate(date);
@@ -145,7 +146,7 @@
                 this.getTeams({ search: input, page: this.queryPage, type: null });
             },
             handleTeamCreated: function() {
-                this.getList({ search: '', page: this.queryPage, type: null });
+                this.getTeams({ search: '', page: this.queryPage, type: null });
                 this.closeModalTeam();
             },
             openModalTeam: function() {
