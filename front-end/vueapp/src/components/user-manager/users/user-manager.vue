@@ -109,7 +109,7 @@ export default {
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
         handleTeamCreated: function() {
-            this.getList({ search: '', page: this.queryPage, type: null });
+            // this.getList({ search: '', page: this.queryPage, type: null });
             this.closeModalUser();
         },
         openModalUsers: function() {
