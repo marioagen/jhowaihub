@@ -3,10 +3,10 @@
         <table-component
             modalName="labelUsers"
             emptyMessage="labelNoDocumentTypeWasFound"
-            :totalRows="table.pagination.rowCount"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
+            :pagination="table.pagination"
         >
             <template #cell-members="{ data }">
                 {{ data.row.users.length }}
@@ -26,13 +26,6 @@
                 </button>
             </template>
         </table-component>
-    </div>
-    <div>
-        <pagination-container
-            :pagination="{currentPage: 1, pageCount: 2, rowCount: 20, listPage: 1}"
-            :dataList="teams"
-            :loading="table.isLoading"
-        ></pagination-container>
     </div>
     <modal-team 
         v-if="modalTeamShow" 
@@ -81,10 +74,10 @@
                 ],
                 data: [],
                 pagination: {
-                    currentPage: "",
-                    pageCount: "",
-                    rowCount: "",
-                    listPage: "",
+                    currentPage: 1,
+                    totalPages: 100,
+                    itemsPerPage: 10,
+                    totalItems: 2000,
                 },
             },
             selectedTeam: {},
@@ -113,13 +106,12 @@
                 api.get('/Team/Paged', { params: paramsReq })
                     .then(({ data }) => {
                         this.table.data = data.content;
-                        this.table.pagination = {
-                            currentPage: data.currentPage,
-                            pageCount: data.pageCount,
-                            rowCount: data.rowCount,
-                            listPage: divider.calculatePageCount(data.pageCount, data.currentPage)
-                        };
-                        // console.log(this.table.pagination)
+                        // this.table.pagination = {
+                        //     currentPage: data.currentPage,
+                        //     totalPages: data.pageCount,
+                        //     rowCount: data.rowCount,
+                        //     totalItems: divider.calculatePageCount(data.pageCount, data.currentPage)
+                        // };
                         if (obj.type === "search") this.searching = true;
                     }).catch((e) => {
                         console.log(e);
@@ -183,6 +175,9 @@
                 this.modalAlertShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
+            changePage(page) {
+                this.getTeams({ search: '', page: page, type: null });
+            }
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
