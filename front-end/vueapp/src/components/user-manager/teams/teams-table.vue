@@ -47,14 +47,11 @@
 </template>
 
 <script>
-    import api from "@/services/api";
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/table-component.vue";
     import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
     import ModalAlert from '@/components/common/modal-alert';
-
-    import PaginationDivider from "@/utils/paginationDivider";
-    const divider = new PaginationDivider();
+    import TeamsService from "@/services/teams/TeamsService";
 
     export default {
         name: "TeamsTable",
@@ -90,7 +87,7 @@
             modalAlertShow: false,
         }),
         methods: {
-            getTeams: function (obj) {
+            getTeams(obj) {
                 this.table.isLoading = true;
                 this.searching = false;
                 this.dataDocument = [];
@@ -103,20 +100,13 @@
                     colType: this.colType,
                 }
 
-                api.get('/Team/Paged', { params: paramsReq })
-                    .then(({ data }) => {
-                        this.table.data = data.content;
-                        this.table.pagination = {
-                            currentPage: data.currentPage,
-                            totalPages: data.pageCount,
-                            rowCount: data.rowCount,
-                            totalItems: divider.calculatePageCount(data.pageCount, data.currentPage)
-                        };
+                TeamsService.getTeams(paramsReq)
+                    .then((response) => {
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
+                    })
+                    .finally(() => {
                         if (obj.type === "search") this.searching = true;
-                    }).catch((e) => {
-                        console.log(e);
-                        if (obj.type === "search") this.searching = true;
-                    }).finally(() => {
                         this.table.isLoading = false;
                     });                    
             },
@@ -139,16 +129,16 @@
             },
             deleteTeam() {
                 let teamId = this.selectedTeam.id;
-                api.delete('/Team/DeleteByIds', { data: [teamId] })
-                    .then((response) => {
-                        this.closeModal();
-                        this.getTeams({ search: '', page: 1, type: null });
-                    }).catch(function (e) { 
-                        console.log(e);
-                    }).finally(function () { 
-                        console.log("Finished request.");
+                TeamsService.deleteTeamById(teamId)
+                    .then((status) => {
+                        if(status) {
+                            this.closeModal();
+                            this.getTeams({ search: '', page: 1, type: null });
+                        }
+                    })
+                    .finally(() => {
+                        this.listIds = [];
                     });
-                this.listIds = [];
             },
             filterList(input) {
                 this.searchInput = input;
