@@ -201,7 +201,7 @@ export default {
             response.then((response) => {
                     this.$emit('teamCreated', team)
                     this.resetForm();
-                }).catch(function (e) {
+                }).catch((e) => {
                     if (e.response && e.response.data && e.response.data.errorCode !== ErrorCode.DefaultError) {
                         switch (e.response.data.errorCode) {
                             case ErrorCode.Duplicated:
@@ -216,7 +216,6 @@ export default {
                     }
                 }).finally(() => {
                     this.close();
-                    console.log("Finished request.");
                 });             
         },
         resetForm() {
@@ -224,10 +223,6 @@ export default {
             this.teamData.name = '';
             this.selectedUsers = [];
             this.searchTerm = '';
-            
-            if (this.$refs.formRef) {
-                this.$refs.formRef.resetForm();
-            }
         },
         close: function () {
             this.$emit('close');
@@ -251,16 +246,15 @@ export default {
             this.loadUsers();
             this.closeModalTeamUser();
         },
-        alertToast: function (msg, color) {
+        alertToast(msg, color) {
             this.toastMessage = msg;
             this.toastColor = color;
             this.toastShow = true;
-            let self = this;
             this.myInterval = setInterval(function () {
-                self.toastMessage = "";
-                self.toastColor = "";
-                self.toastShow = false;
-                clearInterval(self.myInterval);
+                this.toastMessage = "";
+                this.toastColor = "";
+                this.toastShow = false;
+                clearInterval(this.myInterval);
             }, 4000);
         },
         closeToast: function () {

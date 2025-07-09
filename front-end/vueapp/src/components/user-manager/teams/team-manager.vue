@@ -26,14 +26,13 @@
         </div>
 
         <teams-table 
-            ref="TeamTable"
+            ref="TeamsTable"
         />
     </div>
     <modal-team v-if="modalTeamShow" @teamCreated="handleTeamCreated" @close="closeModalTeam" :teamEditing="teamEditing"/>
 </template>
 
 <script>
-import ModalAlert from '@/components/common/modal-alert';
 import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
 import paginationDivider from "@/utils/paginationDivider";
 import TeamsTable from "@/components/user-manager/teams/teams-table.vue";
@@ -66,12 +65,11 @@ export default {
         },
         '$store.state.userProfile.keyMongoAccess'(newValue) {
             if (newValue) {
-                this.getList({ search: '', page: this.queryPage, type: null });
+                this.$refs.TeamsTable.getTeams({ search: '', page: this.queryPage, type: null })
             }
         },
     },
     components: {
-        ModalAlert,
         ModalTeam,
         TeamsTable
     },
@@ -107,8 +105,8 @@ export default {
             this.modalAlertShow = false;
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
-        handleTeamCreated: function() {
-            this.getList({ search: '', page: this.queryPage, type: null });
+        handleTeamCreated() {
+            this.$refs.TeamsTable.getTeams({ search: '', page: this.queryPage, type: null })
             this.closeModalTeam();
         },
         openModalTeam: function() {
