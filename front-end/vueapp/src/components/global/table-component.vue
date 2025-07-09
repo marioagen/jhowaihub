@@ -6,7 +6,7 @@
             </small>
         </p>
         <table 
-            class="table table-hover table-light table-sm table-responsive mt-2 mb-2 custom-table"
+            class="table table-hover table-light table-sm table-responsive mt-2 mb-4 custom-table"
         >
             <thead>
                 <tr>
@@ -79,7 +79,8 @@
             </tbody>
         </table>
         <pagination-component
-            class="mt-4" 
+            v-if="showPagination"
+            class="mt-2" 
             :current-page="pagination.currentPage"
             :total-pages="pagination.totalPages"
             :items-per-page="pagination.itemsPerPage"
@@ -121,6 +122,12 @@
             pagination: {
                 type: Object,
                 required: false,
+                default: () => ({
+                    currentPage: 1,
+                    totalPages: 1,
+                    itemsPerPage: 10,
+                    totalItems: 0,
+                })
             }
         },
         components: {
@@ -163,6 +170,9 @@
             allSelected() {
                 return this.data.length > 0 && this.selectedRows.length === this.data.length;
             },
+            showPagination() {
+                return this.pagination.totalPages > 1;
+            }
         },
         mounted() {
             this.cleanSelection();

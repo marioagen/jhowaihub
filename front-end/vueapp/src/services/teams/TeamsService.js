@@ -12,7 +12,7 @@ export default {
                         currentPage: data.currentPage,
                         totalPages: data.pageCount,
                         rowCount: data.rowCount,
-                        totalItems: divider.calculatePageCount(data.pageCount, data.currentPage)
+                        totalItems: data.rowCount,
                     }
                 }
             }).catch(function (e) {
