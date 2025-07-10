@@ -22,16 +22,23 @@
                 </div>
             </template>
             <template #cell-teams="{ data }">
-                <span class="badge">{{ data.row.teams.namw }}</span>
+                <div v-if="data.row.teams.length > 0">
+                    <div v-for="team in data.row.teams">
+                        <span class="badge">{{ team.name }}</span>
+                    </div>
+                </div>
+                <div v-else>
+                        <span class="badge">-</span>
+                </div>
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown">
-                    <a class="btn p-0 border-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="dropdown column-align"> 
+                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-ellipsis-v"></i>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#" @click="editUser(data.row)">EditLabel</a></li>
-                        <li><a class="dropdown-item" href="#" @click="confirmationDialog(data.row)">ExcluirLabel</a></li>
+                        <li><a class="dropdown-item" @click="editUser(data.row)">{{$t('labelEdit')}}</a></li>
+                        <li><a class="dropdown-item" @click="confirmationDialog(data.row)">{{$t('labelDelete')}}</a></li>
                     </ul>
                 </div>
             </template>
@@ -67,8 +74,8 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "Id" },
-                    { key: "name", label: "labelUserName" },
-                    { key: "teams", label: "labelTeamsNames" },
+                    { key: "name", label: "labelUser" },
+                    { key: "teams", label: "labelTeams" },
                     { key: "actions", label: "labelAction" },
                 ],
                 data: [],
@@ -115,10 +122,11 @@
             },
             editUser(user) {
                 this.selectedUser = user;
+                console.log(this.selectedUser);
                 this.openModalUser();
             },
             deleteUser() {
-                let userId = this.selectedTeam.id;
+                let userId = this.selectedUser.id;
                 UserService.deleteUsersById(userId)
                     .then((status) => {
                         if (status) {
@@ -163,6 +171,7 @@
                 this.modalAlertShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
+
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
@@ -182,8 +191,14 @@
         margin-right: 4px;
     }
 
-    .initials{
-    width: 30px;
-    height: 30px;
-}
+    .initials {
+        width: 30px;
+        height: 30px;
+    }
+
+    .column-align
+    {
+        justify-content: center;
+        display: flex;
+    }
 </style>

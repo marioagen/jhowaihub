@@ -3,11 +3,11 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h6 class="mb-0"> {{ $t('labelUsers') }}</h6>
-                <p><small class="text-muted">{{ $t('labelTeamsMessage') }}</small></p>
+                <p><small class="text-muted">{{ $t('labelUsersMessage') }}</small></p>
             </div>
             <button 
                 class="btn btn-primary btn-sm" 
-                @click="openModalUsers"
+                @click="openModalUser"
             >
                 + {{ $t('labelNewUser')}}
             </button>
@@ -15,13 +15,7 @@
 
         <div class="card mb-3">
             <div class="card-body">
-                <input
-                    v-model="search"
-                    type="text"
-                    class="form-control form-control-sm"
-                    placeholder="Buscar times..."
-                    @keydown.enter="filterList"
-                />
+                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
             </div>
         </div>
 
@@ -30,7 +24,7 @@
         />
     </div>
     <modal-alert v-if="modalAlertShow" :type="'Confirm'" :entity="modalEntity" :alertTitle="$t('labelYouAreAboutToDeleteTeam')" :alertMessage="$t('labelThisActionCannotBeUndone')" :okLabel="$t('labelConfirm')" :cancelLabel="$t('labelCancel')" @open="deleteItem" @close="closeModal" />
-    <modal-user v-if="modalUserShow" @userCreated="handleTeamCreated" @close="closeModalUser" :userEditing="teamEditing"/>
+    <modal-user v-if="modalUserShow" @userCreated="handleUserCreated" @close="closeModalUser" :userEditing="userEditing"/>
 </template>
 
 <script>
@@ -38,6 +32,7 @@ import ModalAlert from '@/components/common/modal-alert';
 import ModalUser from '@/components/user-manager/users/modals/new-user.vue';
 import paginationDivider from "@/utils/paginationDivider";
 import UsersTable from "@/components/user-manager/users/users-table.vue";
+import SearchBar from '@/components/common/search-bar';
 
 export default {
     name: 'UsersManager',
@@ -50,12 +45,13 @@ export default {
             modalUserShow: false,
             modalEntity: {},
             search: '',
+            entitySearch: {},
             queryPage: this.$route.query.page ? this.$route.query.page : 1,
             pagination: { currentPage: 0, pageCount: 0, rowCount: 0, listPage: 0 }, 
             teams: [],
             divider: new paginationDivider(),
             listIds: [],
-            teamEditing: {},
+            userEditing: {},
         };
     },
     watch: {
@@ -64,17 +60,19 @@ export default {
         },
         '$store.state.userProfile.language': function () {
             this.setMenuActions();
+            this.setEntitySearch();
         },
         '$store.state.userProfile.keyMongoAccess'(newValue) {
             if (newValue) {
-                this.getList({ search: '', page: this.queryPage, type: null });
+                this.$refs.UserTable.getUsers({ search: '', page: this.queryPage, type: null })
             }
         },
     },
     components: {
         ModalAlert,
         ModalUser,
-        UsersTable
+        UsersTable,
+        SearchBar
     },
     methods: {
         setMenuActions: function () {
@@ -87,12 +85,13 @@ export default {
         },
         handleMenuAction: function(option, item) {
             if (option.value === "edit") {
-                this.teamEditing = {
+                this.userEditing = {
                     id: item.id,
                     name: item.name,
-                    users: item.users
+                    email: item.email,
+                    teams: item.teams
                 };
-                this.openModalTeam();
+                this.openModalUser();
                 
             } else if (option.value === "delete") {
                 this.listIds = [item.id];
@@ -108,11 +107,11 @@ export default {
             this.modalAlertShow = false;
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
-        handleTeamCreated: function() {
-            // this.getList({ search: '', page: this.queryPage, type: null });
+        handleUserCreated: function () {
+            this.$refs.UserTable.getUsers({ search: '', page: this.queryPage, type: null })
             this.closeModalUser();
         },
-        openModalUsers: function() {
+        openModalUser: function() {
             this.modalUserShow = true;
             document.getElementsByTagName("BODY")[0].children[1].className += " active";
         },
@@ -120,12 +119,21 @@ export default {
             this.modalUserShow = false;
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
-        filterList(input) {
-            this.$refs.TeamTable.filterList();
+        filterList(obj) {
+            console.log(obj);
+            this.$refs.UserTable.filterList(obj.search);
+        },
+        setEntitySearch: function () {
+            this.entitySearch = {
+                screen: "user",
+                labelInput: this.$t('labelSearchUsers'),
+                placeholderInput: this.$t('labelTypeUserName'),
+            };
         },
     },
     created() {
         this.setMenuActions();
+        this.setEntitySearch();
         console.log(this.$store.state.userProfile.keyMongoAccess)
     },
 };

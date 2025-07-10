@@ -2,7 +2,7 @@
     <div class="modal fade show" id="novoTimeModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">            
             <div class="modal-content">
-                <div class="overlay" :class="{ active: showModalTeamUser }"></div>
+                <div class="overlay" :class="{ active: showModalUserTeam }"></div>
                 <div class="modal-header custom-header">
                     <h6 class="modal-title" id="novoTimeModalLabel">
                         {{ $t('labelNewUser') }}                            
@@ -95,21 +95,22 @@
             </div>
         </div>
     </div>
-    <modal-team-user v-if="showModalTeamUser" @close="closeModalTeamUser" @userCreated="userCreated"></modal-team-user>
+    <modal-user-team v-if="showModalUserTeam" @close="closeModalUserTeam" @teamCreated="teamCreated"></modal-user-team>
     <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
 </template>
 
 <script>
 import api from "@/services/api";
-import ModalTeamUser from "@/components/user-manager/teams/modals/new-user.vue";
+import ModalUserTeam from "@/components/user-manager/users/modals/new-team.vue";
 import ToastAlert from '@/components/common/toast-alert';
 import ErrorCode from '@/constants/Errorcode';
 
 export default {
     name: 'ModalUser',
     components: {
-        ModalTeamUser,
-        ToastAlert
+        ModalUserTeam,
+        ToastAlert,
+        ErrorCode
     },
     props: {
         userEditing: {
@@ -180,21 +181,32 @@ export default {
             this.selectedTeams = []
         },
         addNewTeam() {
-            this.showModalTeamUser = true;
+            this.showModalUserTeam = true;
         },
         saveUser: function (e) {
             e.preventDefault();
-            const user = {
-                name: this.userData.name,
-                email: this.userData.email,
-                teamIds: this.selectedTeams,
-                ...(this.userData.id == null && { id: this.userData.id })
-            }    
+            let response; 
+            let self = this;
 
-            let response = this.userData.id == null ? 
-                api.post('User', user) :
-                api.put('User', user);
+            if (this.userData.id == null) {
 
+                const user = {
+                    name: this.userData.name,
+                    email: this.userData.email,
+                    teamIds: this.selectedTeams,
+                }
+                response = api.post('User', user)
+            }
+            else
+            {
+                const userEdit = {
+                    name: this.userData.name,
+                    email: this.userData.email,
+                    teamIds: this.selectedTeams,
+                    id: this.userData.id
+                }
+                response = api.put('User', userEdit);
+            }
             response.then((response) => {
                     this.$emit('userCreated', user);            
                     this.resetForm() ;
@@ -202,22 +214,20 @@ export default {
                     if (e.response && e.response.data && e.response.data.errorCode !== ErrorCode.DefaultError) {
                         switch (e.response.data.errorCode) {
                             case ErrorCode.Duplicated:
-                                this.nameError = this.$t('labelErrorTeamAlreadyExists');
+                                self.nameError = self.$t('labelErrorTeamAlreadyExists');
                                 break;
                             default:
-                                this.alertToast(this.$t('labelUserError'), "toast-warning");
+                                self.alertToast(self.$t('labelUserError'), "toast-warning");
                         }
-                    }
-                    else {
-                        this.alertToast(this.$t('labelUserError'), "toast-warning");
                     }
                 }).finally(function () {
                     console.log("Finished request.");
+                    handleUserCreated
                 });             
         },
         resetForm() {
-            this.teamData.id = 0;
-            this.teamData.name = '';
+            this.userData.id = 0;
+            this.userData.name = '';
             this.selectedTeams = [];
             this.searchTerm = '';
             
@@ -239,13 +249,13 @@ export default {
             const last = parts[parts.length - 1].slice(-1) || '';
             return (first + last).toUpperCase();
         },
-        closeModalTeamUser() {
-            this.showModalTeamUser = false;
-            this.loadUsers();
+        closeModalUserTeam() {
+            this.showModalUserTeam = false;
+            this.loadTeams();
         },
-        userCreated() {
-            this.loadUsers();
-            this.closeModalTeamUser();
+        teamCreated() {
+            this.loadTeams();
+            this.closeModalUserTeam();
         },
         alertToast: function (msg, color) {
             this.toastMessage = msg;
