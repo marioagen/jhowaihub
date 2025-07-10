@@ -121,9 +121,10 @@
 
                             this.alertToast(this.$t(messageKey), 'toast-warning')
                         }
-                        self.closeModal();
-                        self.resetInputSearch = !self.resetInputSearch;
-                        self.$refs.TypesTable.getTypes({ search: '', page: self.queryPage, type: null })
+                        else {
+                            self.$refs.TypesTable.getTypes({ search: '', page: self.queryPage, type: null })
+                            self.resetInputSearch = !self.resetInputSearch;
+                        }
                     })
                     .finally(() => {
                         console.log('Finished request.')
