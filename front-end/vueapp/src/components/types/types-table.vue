@@ -125,7 +125,6 @@
                 this.getTypes({ search: '', page: this.queryPage, type: null })
             },
             editType(type) {
-                console.log(type);
                 this.selectedType = type;
                 this.openModalType();
             },

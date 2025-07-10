@@ -48,4 +48,23 @@ export default {
                 return false;
             });
     },
+    addType(name) {
+        return api.post('/TypeDoc?name=' + name)
+             .then(({ data, status }) => {
+                return {
+                    success: true,
+                    status,
+                    data
+                }
+            })
+            .catch((e) => {
+                const status = e?.response?.status ?? 500
+                const message = e?.response?.data?.message || 'Erro desconhecido'
+                return {
+                    success: false,
+                    status,
+                    error: message
+                }
+            })
+    },
 }

@@ -44,6 +44,7 @@
     import paginationDivider from "@/utils/paginationDivider";
     import Pagination from '@/components/common/pagination';
     import TypesTable from "@/components/types/types-table.vue";
+    import TypesService from "@/services/types/TypesService";
 
     export default {
         name: "TypeManager",
@@ -111,25 +112,22 @@
             },
             addType: function (name) {
                 const self = this;
-                api.post('/TypeDoc?name=' + name)
-                    .then(function (response) { // Handle success
+                TypesService.addType(name)
+                    .then((result) => {
+                        if (!result.success) {
+                            const messageKey = result.status === 409
+                                ? 'labelDocumentTypeAlreadyExists'
+                                : 'labelDocumentTypeError'
+
+                            this.alertToast(this.$t(messageKey), 'toast-warning')
+                        }
                         self.closeModal();
                         self.resetInputSearch = !self.resetInputSearch;
                         self.$refs.TypesTable.getTypes({ search: '', page: self.queryPage, type: null })
-                    }).catch(function (e) { // Handle error
-                        console.log(e);
-                        self.closeModal();
-                        if (e.response.status == 409) {
-                            self.alertToast(self.$t('labelTypeDocAlreadyExists'), "toast-warning");
-                        }
-                        else {
-                            self.alertToast(self.$t('labelTypeDocError'), "toast-warning");
-                        }
-                        console.log(e);
-                        self.closeModal();
-                    }).finally(function () { // Always executed
-                        console.log("Finished request.");
-                    });
+                    })
+                    .finally(() => {
+                        console.log('Finished request.')
+                    })                   
             },
             confirmationDialog: function (item) {
                 this.modalEntity = item;
