@@ -9,7 +9,6 @@ import VueGtag from "vue-gtag";
 
 window.$ = window.jQuery = require('jquery');
 
-import IconsComponent from '@/components/global/icons-component.vue';
 import './assets/css/bootstrap-5.0.2/css/bootstrap.min.css';
 import './assets/webfont/fontawesome-5.15.4/css/all.min.css';
 import './assets/css/bootstrap-5.0.2/js/bootstrap.bundle.min';
@@ -29,7 +28,6 @@ app.use(VueGtag, {
         id: ENV_CONFIG.VUE_APP_GTAG_ID
     }
 }, router)
-app.component('IconsComponent', IconsComponent);
 app.config.globalProperties.$appName = ENV_CONFIG.VUE_APP_NAME;
 app.config.globalProperties.$clientIdAzure = ENV_CONFIG.VUE_APP_CLIENT_ID_AZURE;
 
