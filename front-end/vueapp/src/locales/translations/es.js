@@ -163,6 +163,7 @@
     labelUserManagementDescription: "Gestionar usuarios, equipos y permisos del sistema",
     labelUsers: "Usuarios",
     labelTeams: "Equipos",
+    labelTypes: "Tipos",
     labelTeamsMessage: "Gestionar equipos y sus miembros",
     labelNewTeam: "Nuevo equipo",
     labelId: "ID",

@@ -163,6 +163,7 @@
     labelUserManagementDescription: "Gerencie usuários, times e permissões do sistema",
     labelUsers: "Usuários",
     labelTeams: "Times",
+    labelTypes: "Tipos",
     labelTeamsMessage: "Gerencie os times e suas equipes",
     labelNewTeam: "Novo time",
     labelId: "ID",

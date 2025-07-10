@@ -1,40 +1,67 @@
 <template>
     <div>
         <table-component
-            modalName="Tipos"
-            totalRows="100"
+            modalName="labelTypes"
             emptyMessage="labelNoDocumentTypeWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
+            :pagination="table.pagination"
+            @change-page="changePage"
         >
-            <template #cell-created="{ data }">
+           <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
-            <template #cell-actions="{ data }">
+           <template #cell-actions="{ data }">
                 <button
                     class="btn btn-outline-success btn-sm"
+                    @click="editType(data.row)"
                 >
                     Edit
                 </button>
                 <button
                     class="btn btn-outline-danger btn-sm ms-2"
+                    @click="confirmationDialog(data.row)"
                 >
                     Delete
                 </button>
             </template>
         </table-component>
     </div>
+    <modal-form 
+        v-if="modalTypeShow"
+        :dataEditing="selectedType" 
+        @openEdit="editTypeRequest" 
+        @close="closeModal" 
+    />
+    <modal-alert 
+        v-if="modalAlertShow" 
+        :type="'Confirm'" 
+        :entity="modalEntity" 
+        :alertTitle="$t('labelYouAreAboutToDeleteDocumentType')" 
+        :alertMessage="$t('labelThisActionCannotBeUndone')" 
+        :okLabel="$t('labelConfirm')" 
+        :cancelLabel="$t('labelCancel')" 
+        @open="deleteType" 
+        @close="closeModal" 
+    />
 </template>
 
 <script>
     import dates from "@/helpers/Dates";
     import TypesService from "@/services/types/TypesService";
     import TableComponent from "@/components/global/table-component.vue";
+    import ModalForm from '@/components/pages/type/modal-form';
+    import ModalAlert from '@/components/common/modal-alert';
+    import ToastAlert from '@/components/common/toast-alert';
+
     export default {
         name: "TypesTable",
         components: {
             TableComponent,
+            ModalForm,
+            ModalAlert,
+            ToastAlert,
         },
         data: () => ({
             table: {
@@ -49,15 +76,23 @@
                 data: [],
                 pagination: {},
             },
+            selectedType: {},
             queryPage: 1,
-            searchInput: "",
             selectedOption: 10,
             isAscending: false,
             colType: 2,
+            modalTypeShow: false,
+            modalAlertShow: false,
+            toastShow: false,
+            toastColor: "",
+            toastMessage: "",
+            searchInput: "",
         }),
         methods: {
             getTypes(obj) {
                 this.table.isLoading = true;
+                this.searching = false;
+
                 let params = {
                     search: this.searchInput.trim() ? this.searchInput.trim() : '',
                     page: obj.page,
@@ -72,11 +107,117 @@
                         this.table.pagination = response.pagination;
                     })
                     .finally(() => {
+                        if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
                     });
             },
             formatDate(date) {
                 return dates.formatDate(date);
+            },
+            orderList: function (col) {
+                if (this.isAscending) {
+                    this.isAscending = false;
+                }
+                else {
+                    this.isAscending = true;
+                }
+                this.colType = col;
+                this.getTypes({ search: '', page: this.queryPage, type: null })
+            },
+            editType(type) {
+                console.log(type);
+                this.selectedType = type;
+                this.openModalType();
+            },
+            editTypeRequest(item) {
+                const params = {
+                    id: item.id,
+                    name: item.name,
+                };
+
+                TypesService.editType(params)
+                    .then((result) => {
+                        if (!result.success) {
+                            const messageKey = result.status === 409
+                                ? 'labelDocumentTypeAlreadyExists'
+                                : 'labelDocumentTypeError'
+
+                            this.emitToast(this.$t(messageKey), 'toast-warning')
+                            this.finishEdit()
+                            return
+                        }
+
+                        this.emitToast(this.$t('labelDocumentTypeSuccess'), 'toast-success')
+                        this.finishEdit()
+                    })
+                    .finally(() => {
+                        console.log('Finished request.')
+                    })
+            },
+            emitToast(message, color) {
+                this.$emit('toast', { message, color })
+            },
+            finishEdit() {
+                this.closeModal()
+                this.getTypes({ search: '', page: 1, type: null })
+            },
+            deleteType() {
+                let teamId = this.selectedTeam.id;
+                TypesService.deleteTypeById(teamId)
+                    .then((status) => {
+                        if(status) {
+                            this.closeModal();
+                            this.getTypes({ search: '', page: 1, type: null });
+                        }
+                    })
+                    .finally(() => {
+                        this.listIds = [];
+                    });
+            },
+            filterList(input) {
+                this.searchInput = input;
+                this.getTypes({ search: input, page: this.queryPage, type: null });
+            },
+            openModalType: function() {
+                this.modalTypeShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModalType: function() {
+                this.modalTypeShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            confirmationDialog(team) {
+                this.selectedTeam = team;
+                this.modalAlertShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModal() {
+                this.modalAlertShow = false;
+                this.modalTypeShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            changePage(page) {
+                this.getTypes({ search: '', page: page, type: null });
+            },
+            alertToast: function (msg, color) {
+                this.toastMessage = msg;
+                this.toastColor = color;
+                this.toastShow = true;
+                let self = this;
+                this.myInterval = setInterval(function () {
+                    self.toastMessage = "";
+                    self.toastColor = "";
+                    self.toastShow = false;
+                    clearInterval(self.myInterval);
+                }, 4000);
+            },
+            closeToast: function () {
+                this.toastShow = false;
+                this.clearMyInterval();
+            },
+            clearMyInterval: function () {
+                clearInterval(this.myInterval);
+                this.myInterval = null;
             },
         },
         created() {
