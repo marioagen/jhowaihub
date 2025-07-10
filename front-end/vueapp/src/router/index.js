@@ -53,15 +53,8 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: '/manage-type',
-        name: 'Type',
-        component: TypeManager,
-        meta: { layout: 'default' },
-        beforeEnter: authenticate,
-    },
-    {
         path: '/types',
-        name: 'Type2',
+        name: 'Type',
         component: TypesPage,
         meta: { 
             layout: 'default' 
