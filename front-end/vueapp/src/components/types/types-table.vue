@@ -13,22 +13,18 @@
             </template>
             <template #cell-actions="{ data }">
                 <button
-                    class="btn btn-outline-success btn-sm"
+                    class="btn btn-outline-success btn-sm table-btn"
                 >
-                    <IconsComponent
-                        title="Edit"
-                        icon="trash"
+                    <LucideIcon
+                        icon="SquarePen"
                     />
                 </button>
                 <button
-                    class="btn btn-outline-success btn-sm"
+                    class="btn btn-outline-danger btn-sm table-btn"
                 >
-                    Edit
-                </button>
-                <button
-                    class="btn btn-outline-danger btn-sm ms-2"
-                >
-                    Delete
+                    <LucideIcon
+                        icon="Trash2"
+                    />
                 </button>
             </template>
         </table-component>

@@ -798,3 +798,33 @@ dropzone .dz-preview .dz-details {
 .showContent {
     margin-left: 2%;
 }
+
+.table-btn {
+  border: none !important;
+  background-color: transparent;
+  color: inherit;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.table-btn.btn-outline-primary:hover {
+  background-color: #a6b7cf !important;
+  color: #0d6efd !important;
+  border-color: #0d6efd !important;
+}
+
+.table-btn.btn-outline-success:hover {
+  background-color: #b1d3c3 !important;
+  color: #198754 !important;
+  border-color: #198754 !important;
+}
+
+.table-btn.btn-outline-danger:hover {
+  background-color: #d3aaae !important;
+  color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+.table-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
