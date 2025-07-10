@@ -13,5 +13,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         bool Update(Team team);
         bool DeleteByIds(List<int> ids);
         IQueryable<TeamDto> FindAllPaged(PagedDataDto pagedDataDto);
+        List<Team> FindByIds(IEnumerable<int> ids);
     }
 }
