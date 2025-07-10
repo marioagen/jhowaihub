@@ -36,6 +36,10 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Create(UserCreateDto userCreateDto, HeadersDto headersDto)
         {
+            if (string.IsNullOrEmpty(userCreateDto.Name) || string.IsNullOrEmpty(userCreateDto.Email))
+            {
+                throw new ArgumentException("Data cannot be empty");
+            }
             var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
             var requestAssignLicensesByHub = new RequestAssignLicensesByHub
             {

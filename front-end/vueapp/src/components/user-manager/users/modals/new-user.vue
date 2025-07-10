@@ -11,7 +11,6 @@
                     <button type="button" class="btn-close"  @click="close"></button>
                 </div>
                 <div class="modal-body">
-          
                     <form ref="formRef">
                         <div class="mb-3">
                             <label for="userName" class="form-label">{{ $t('labelName')}}</label>
@@ -23,7 +22,7 @@
                                    name="userName"
                                    :rules="'required|min:2|max:50'"
                                    v-model="userData.name"
-                                   :placeholder="$t('labelTypeTeamName')"
+                                   :placeholder="$t('labelTypeUserName')"
                                    @blur="nameError = userData.name ? '' : $t('labelRequiredField')"
                                    @input="nameError = ''" />
                             <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
@@ -38,21 +37,21 @@
                                    name="userEmail"
                                    :rules="'required|min:2|max:50'"
                                    v-model="userData.email"
-                                   :placeholder="$t('labelTypeTeamName')"
+                                   :placeholder="$t('labelTypeUserEmail')"
                                    @blur="emailError = userData.email ? '' : $t('labelRequiredField')"
                                    @input="emailError = ''" />
                             <div v-if="emailError" class="invalid-feedback d-block">{{ emailError }}</div>
                         </div>
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label class="form-label mb-0">{{ $t('labelTeamMembers') }}</label>
-                                <span class="text-muted">{{ selectedTeams.length }} {{$t('labelTeamsSelected')}}</span>
+                                <label class="form-label mb-0">{{ $t('labelTeams') }}</label>
+                                <span class="text-muted">{{ selectedTeams.length }} {{$t('labelSelectedWithO')}}</span>
                             </div>
 
                             <div class="mb-3">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
-                                    <input type="text" class="form-control form-control-sm" :placeholder="$t('labelSearchTeam')" v-model="searchTerm" />
+                                    <input type="text" class="form-control form-control-sm" :placeholder="$t('labelSearchTeams')" v-model="searchTerm" />
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -207,22 +206,12 @@ export default {
                 }
                 response = api.put('User', userEdit);
             }
-            response.then((response) => {
-                    this.$emit('userCreated', user);            
-                    this.resetForm() ;
+            response.then((response) => {       
                 }).catch((e) => {
-                    if (e.response && e.response.data && e.response.data.errorCode !== ErrorCode.DefaultError) {
-                        switch (e.response.data.errorCode) {
-                            case ErrorCode.Duplicated:
-                                self.nameError = self.$t('labelErrorTeamAlreadyExists');
-                                break;
-                            default:
-                                self.alertToast(self.$t('labelUserError'), "toast-warning");
-                        }
-                    }
+                     self.alertToast(self.$t('labelUserError'), "toast-warning");
                 }).finally(function () {
                     console.log("Finished request.");
-                    handleUserCreated
+                    self.$emit('userCreated');
                 });             
         },
         resetForm() {

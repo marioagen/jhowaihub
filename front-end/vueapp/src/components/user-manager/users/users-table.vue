@@ -1,7 +1,7 @@
 <template>
     <div>
         <table-component modalName="labelUsers"
-                         emptyMessage="labelNoDocumentTypeWasFound"
+                         emptyMessage="labelNoUsersWasFound"
                          :data="table.data"
                          :columns="table.columns"
                          :isLoading="table.isLoading"

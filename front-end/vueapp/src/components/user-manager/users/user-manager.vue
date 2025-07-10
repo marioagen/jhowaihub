@@ -12,13 +12,11 @@
                 + {{ $t('labelNewUser')}}
             </button>
         </div>
-
         <div class="card mb-3">
             <div class="card-body">
                 <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
             </div>
         </div>
-
         <users-table 
             ref="UserTable"
         />
@@ -120,7 +118,6 @@ export default {
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
         filterList(obj) {
-            console.log(obj);
             this.$refs.UserTable.filterList(obj.search);
         },
         setEntitySearch: function () {

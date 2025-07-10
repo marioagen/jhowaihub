@@ -4,13 +4,12 @@
             <div class="modal-content">
                 <div class="modal-header custom-header">
                     <h6 class="modal-title" id="novoTimeModalLabel">
-                        {{ $t('labelNewUser') }}                            
-                        <small class="text-muted d-block text-sm">{{ $t('labelNewUserTeamMessage') }}</small>
+                        {{ $t('labelNewTeam') }}                            
+                        <small class="text-muted d-block text-sm">{{ $t('labelNewTeamMessage') }}</small>
                     </h6>
                     <button type="button" class="btn-close"  @click="close"></button>
                 </div>
                 <div class="modal-body">
-            
                    <form @submit="handleSubmit">
                         <div class="mb-3">
                             <label for="name" class="form-label">{{ $t('labelName') }}</label>
@@ -18,7 +17,7 @@
                                 name="name"
                                 type="text"
                                 class="form-control form-control-sm"
-                                :placeholder="$t('labelTypeName')"
+                                :placeholder="$t('labelTypeTeamName')"
                                 v-model="form.name"
                                 @blur="nameError = form.name ? '' : $t('labelRequiredField')"
                                 @input="nameError = ''"                                
@@ -27,7 +26,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary btn-sm" @click="close">{{ $t('labelCancel') }}</button>
-                            <button type="submit" class="btn btn-primary btn-sm">{{ $t('labelCreateUserTeam') }}</button>
+                            <button type="submit" class="btn btn-primary btn-sm">{{ $t('labelCreate') }}</button>
                         </div>
                     </form>
                 </div>

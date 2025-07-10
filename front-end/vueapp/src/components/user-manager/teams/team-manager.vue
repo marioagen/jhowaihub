@@ -5,29 +5,17 @@
                 <h6 class="mb-0"> {{ $t('labelTeams') }}</h6>
                 <p><small class="text-muted">{{ $t('labelTeamsMessage') }}</small></p>
             </div>
-            <button 
-                class="btn btn-primary btn-sm" 
-                @click="openModalTeam"
-            >
+            <button class="btn btn-primary btn-sm"
+                    @click="openModalTeam">
                 + {{ $t('labelNewTeam')}}
             </button>
         </div>
-
         <div class="card mb-3">
             <div class="card-body">
-                <input
-                    v-model="search"
-                    type="text"
-                    class="form-control form-control-sm"
-                    placeholder="Buscar times..."
-                    @keydown.enter="filterList"
-                />
+                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
             </div>
         </div>
-
-        <teams-table 
-            ref="TeamsTable"
-        />
+        <teams-table ref="TeamsTable" />
     </div>
     <modal-team v-if="modalTeamShow" @teamCreated="handleTeamCreated" @close="closeModalTeam" :teamEditing="teamEditing"/>
 </template>
@@ -36,6 +24,7 @@
 import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
 import paginationDivider from "@/utils/paginationDivider";
 import TeamsTable from "@/components/user-manager/teams/teams-table.vue";
+import SearchBar from '@/components/common/search-bar';
 
 export default {
     name: 'TeamsManager',
@@ -54,6 +43,7 @@ export default {
             divider: new paginationDivider(),
             listIds: [],
             teamEditing: {},
+            entitySearch: {}, 
         };
     },
     watch: {
@@ -62,6 +52,7 @@ export default {
         },
         '$store.state.userProfile.language': function () {
             this.setMenuActions();
+            this.setEntitySearch();
         },
         '$store.state.userProfile.keyMongoAccess'(newValue) {
             if (newValue) {
@@ -71,7 +62,8 @@ export default {
     },
     components: {
         ModalTeam,
-        TeamsTable
+        TeamsTable,
+        SearchBar
     },
     methods: {
         setMenuActions: function () {
@@ -117,13 +109,20 @@ export default {
             this.modalTeamShow = false;
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },
-        filterList() {
-            this.$refs.TeamTable.filterList(this.search);
+        filterList(obj) {
+             this.$refs.TeamsTable.filterList(obj.search);
+        },
+        setEntitySearch: function () {
+            this.entitySearch = {
+                screen: "team",
+                labelInput: this.$t('labelSearchTeams'),
+                placeholderInput: this.$t('labelTypeTeamName'),
+            };
         },
     },
     created() {
         this.setMenuActions();
-        // console.log(this.$store.state.userProfile.keyMongoAccess)
+        this.setEntitySearch();
     },
 };
 </script>

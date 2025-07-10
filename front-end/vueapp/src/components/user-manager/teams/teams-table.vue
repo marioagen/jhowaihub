@@ -1,8 +1,8 @@
 <template>
     <div>
         <table-component
-            modalName="labelUsers"
-            emptyMessage="labelNoDocumentTypeWasFound"
+            modalName="labelTeams"
+            emptyMessage="labelNoTeamWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"

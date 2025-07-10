@@ -33,7 +33,7 @@
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label class="form-label mb-0">{{ $t('labelTeamMembers') }}</label>
-                                <span class="text-muted">{{ selectedUsers.length }} {{$t('labelUsersSelected')}}</span>
+                                <span class="text-muted">{{ selectedUsers.length }} {{$t('labelSelectedWithO')}}</span>
                             </div>
                 
                             <div class="mb-3">
