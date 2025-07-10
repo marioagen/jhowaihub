@@ -164,6 +164,7 @@
     labelUsers: "Usuarios",
     labelTeams: "Equipos",
     labelTypes: "Tipos",
+    labelDocumentTypeSuccess: "Tipo de documento insertado exitosamente",
     labelTeamsMessage: "Gestionar equipos y sus miembros",
     labelNewTeam: "Nuevo equipo",
     labelId: "ID",

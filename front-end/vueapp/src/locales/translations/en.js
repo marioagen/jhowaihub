@@ -37,6 +37,7 @@
     labelDocumentType: "Document type",
     labelDocumentNameOrDescription: "Document name or description",
     labelDocumentTypeError: "Invalid document type",
+    labelDocumentTypeSuccess: "Document type inserted successfully",
     labelDocumentHasAlreadyBeenStandardizedPreviously: "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
     labelDownloadCsv: "Download CSV",
     labelDownloadSuccessfully: "Download successfully",

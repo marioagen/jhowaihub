@@ -135,6 +135,7 @@
     labelTheFileMayBeUnreadableOrHaveAnError: "O Arquivo pode estar <br/> ilegível ou com erro. <br/> Por favor, tente novamente.",
     labelThereIsNotEnoughCredit: "Não há crédito suficiente para aplicar todas as perguntas deste questionário.",
     labelTypeDoc: "Tipo de Documento",
+    labelDocumentTypeSuccess: "Tipo de documento inserido com sucesso",
     labelTypeDocAlreadyExists: "Tipo duplicado",
     labelTypeDocError: "Tipo inválido",
     labelUpload: "Carregar",

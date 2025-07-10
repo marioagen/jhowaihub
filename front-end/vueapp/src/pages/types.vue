@@ -124,6 +124,7 @@
                         else {
                             self.$refs.TypesTable.getTypes({ search: '', page: self.queryPage, type: null })
                             self.resetInputSearch = !self.resetInputSearch;
+                            self.alertToast(self.$t('labelDocumentTypeSuccess'), "toast-success");
                         }
                     })
                     .finally(() => {
