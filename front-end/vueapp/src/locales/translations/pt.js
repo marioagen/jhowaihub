@@ -136,6 +136,7 @@
     labelThereIsNotEnoughCredit: "Não há crédito suficiente para aplicar todas as perguntas deste questionário.",
     labelTypeDoc: "Tipo de Documento",
     labelDocumentTypeSuccess: "Tipo de documento inserido com sucesso",
+    labelDocumentTypeEditSuccess: "Tipo de documento atualizado com sucesso",
     labelTypeDocAlreadyExists: "Tipo duplicado",
     labelTypeDocError: "Tipo inválido",
     labelUpload: "Carregar",

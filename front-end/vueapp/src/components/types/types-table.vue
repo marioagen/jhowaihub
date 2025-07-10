@@ -146,7 +146,7 @@
                             return
                         }
 
-                        this.emitToast(this.$t('labelDocumentTypeSuccess'), 'toast-success')
+                        this.emitToast(this.$t('labelDocumentTypeEditSuccess'), 'toast-success')
                         this.finishEdit()
                     })
                     .finally(() => {
