@@ -39,8 +39,8 @@ export default {
             })
     },
 
-    deleteTypeById(teamId) {
-        return api.delete('/TypeDoc/DeleteByIds', { data: [teamId] })
+    deleteTypeById(teamIds) {
+        return api.delete('/TypeDoc/DeleteByIds', { data: teamIds })
             .then(() => {
                 return true;
             }).catch(function (e) {

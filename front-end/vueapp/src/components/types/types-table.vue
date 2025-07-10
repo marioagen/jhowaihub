@@ -1,4 +1,11 @@
 <template>
+    <button
+        v-if="showMultiDelete"
+        class="btn btn-outline-danger btn-sm mb-2 ms-2"
+        @click="deleteMultipleTypes"
+    >
+        {{ $t("labelDelete") }}
+    </button>
     <div>
         <table-component
             modalName="labelTypes"
@@ -7,6 +14,7 @@
             :columns="table.columns"
             :isLoading="table.isLoading"
             :pagination="table.pagination"
+            @selectedRows="selectedRows"
             @change-page="changePage"
         >
            <template #cell-created="{ data }">
@@ -75,6 +83,7 @@
                 ],
                 data: [],
                 pagination: {},
+                selectedRows: [],
             },
             selectedType: {},
             queryPage: 1,
@@ -124,6 +133,9 @@
                 this.colType = col;
                 this.getTypes({ search: '', page: this.queryPage, type: null })
             },
+            selectedRows(selectedRows) {
+                this.table.selectedRows = selectedRows;
+            },
             editType(type) {
                 this.selectedType = type;
                 this.openModalType();
@@ -160,9 +172,17 @@
                 this.closeModal()
                 this.getTypes({ search: '', page: 1, type: null })
             },
-            deleteType() {
-                let teamId = this.selectedTeam.id;
-                TypesService.deleteTypeById(teamId)
+            deleteSingleType() {
+                this.deleteType([
+                    this.selectedTeam.id
+                ]);
+            },
+            deleteMultipleTypes() {
+                const teamIds = this.table.selectedRows.map(item => item.id);
+                this.deleteType(teamIds);
+            },
+            deleteType(teamIds) {
+                TypesService.deleteTypeById(teamIds)
                     .then((status) => {
                         if(status) {
                             this.closeModal();
@@ -223,5 +243,10 @@
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
             this.getTypes({ search: '', page: this.queryPage, type: null });
         },
+        computed: {
+            showMultiDelete() {
+                return this.table.selectedRows.length > 1;
+            }
+        }
     }
 </script>
