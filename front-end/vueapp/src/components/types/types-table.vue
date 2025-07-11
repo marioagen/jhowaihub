@@ -180,7 +180,6 @@
             },
             deleteType(typeIds) {
                 const idsToDelete = typeIds || [this.selectedTeam.id];
-                console.log(idsToDelete);
                 TypesService.deleteTypeById(idsToDelete)
                     .then((success) => {
                         if(success) {

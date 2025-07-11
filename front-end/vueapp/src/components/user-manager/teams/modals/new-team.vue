@@ -186,8 +186,6 @@ export default {
         },
         saveTeam(e) {
             e.preventDefault();
-            console.log('selectedUsers:', this.selectedUsers);
-             console.log('selectedUsers:', this.users);
             const team = {
                 id: this.teamData.id,
                 name: this.teamData.name,
