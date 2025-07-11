@@ -124,7 +124,6 @@
             },
             editUser(user) {
                 this.selectedUser = user;
-                console.log(this.selectedUser);
                 this.openModalUser();
             },
             deleteUser() {
