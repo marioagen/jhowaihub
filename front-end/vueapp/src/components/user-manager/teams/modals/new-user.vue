@@ -4,7 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header custom-header">
                     <h6 class="modal-title" id="novoTimeModalLabel">
-                        {{ $t('labelNewTeam') }}                            
+                        {{ $t('labelNewUser') }}                            
                         <small class="text-muted d-block text-sm">{{ $t('labelNewTeamUserMessage') }}</small>
                     </h6>
                     <button type="button" class="btn-close"  @click="close"></button>
@@ -124,23 +124,23 @@ export default {
                 this.emailError =  this.$t('labelRequiredField');
                 return;
             }
-
             this.loading = true;
-            api.post('User', {
-                    name: this.form.name.trim(),
-                    email: this.form.email.trim(),
-                    teamIds: [this.teamId],
-                }).then((response) => {
-                    this.loading = false;
-                    this.resetForm();
-                    this.$emit('userCreated');
-                }).catch((e) => {
-                    this.alertToast(this.$t('labelUserError'), "toast-warning");
-                }).finally(() => {
-                    console.log("Finished request.");
-                    this.loading = false;
-                    this.close();
-                });
+            const user = {
+                name: this.form.name,
+                email: this.form.email,
+                teamIds: [],
+            }
+            api.post('User', user
+            ).then((response) => {
+                this.loading = false;
+                this.resetForm();
+                this.$emit('userCreated');
+            }).catch((e) => {
+                this.alertToast(this.$t('labelUserError'), "toast-warning");
+            }).finally(() => {
+                console.log("Finished request.");
+                this.loading = false;
+            });
         },
         close: function () {
             this.$emit('close');
