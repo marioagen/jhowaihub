@@ -2,11 +2,11 @@
     <div class="table-div shadow-sm">
         <p class="mx-2 my-2">
             <small>
-                {{ $t(modalName) }} ({{ totalRows }})
+                {{ $t(modalName) }} ({{ pagination.totalItems }})
             </small>
         </p>
         <table 
-            class="table table-hover table-light table-sm table-responsive mt-2 mb-2 custom-table"
+            class="table table-hover table-light table-sm table-responsive mt-2 mb-4 custom-table"
         >
             <thead>
                 <tr>
@@ -78,19 +78,25 @@
                 </tr>
             </tbody>
         </table>
+        <pagination-component
+            v-if="showPagination"
+            class="mt-2" 
+            :current-page="pagination.currentPage"
+            :total-pages="pagination.totalPages"
+            :items-per-page="pagination.itemsPerPage"
+            :total-items="pagination.totalItems"
+            @change-page="changePage"
+        />
     </div>
 </template>
   
 <script>
+    import PaginationComponent from "@/components/global/pagination-component.vue";
     export default {
         props: {
             modalName: {
                 type: String,
                 required: true
-            },
-            totalRows: {
-                type: Number,
-                required: true,
             },
             emptyMessage: {
                 type: String,
@@ -113,6 +119,19 @@
                 type: Boolean,
                 default: true,
             },
+            pagination: {
+                type: Object,
+                required: false,
+                default: () => ({
+                    currentPage: 1,
+                    totalPages: 1,
+                    itemsPerPage: 10,
+                    totalItems: 0,
+                })
+            }
+        },
+        components: {
+            PaginationComponent,
         },
         data() {
             return {
@@ -142,12 +161,18 @@
             },
             cleanSelection() {
                 this.selectedRows = [];
-            }
+            },
+            changePage(page) {
+                this.$emit('change-page', page)
+            },
         },
         computed: {
             allSelected() {
                 return this.data.length > 0 && this.selectedRows.length === this.data.length;
             },
+            showPagination() {
+                return this.pagination.totalPages > 1;
+            }
         },
         mounted() {
             this.cleanSelection();
@@ -156,26 +181,31 @@
 </script>
 
 <style scoped>
-.custom-table {
-  overflow: hidden;
-}
+    .custom-table {
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        width: 100%;
+    }
 
-.custom-table thead th {
-  border-bottom: 1px solid #d3d3d3 !important;
-}
+        .custom-table thead th {
+            border-bottom: 1px solid #d3d3d3 !important;
+            background: white;
+        }
 
-.custom-table th,
-.custom-table td {
-  padding: 12px;
-  vertical-align: middle;
-  font-size: 14px;
-  font-weight: 500;
-  color: #343a40;
-}
-
-.table-div {
-    border: 1px solid #d3d3d3;
-    border-radius: 8px;
-    overflow: hidden;
-}
+        .custom-table th,
+        .custom-table td {
+            padding: 12px;
+            vertical-align: middle;
+            font-size: 14px;
+            font-weight: 500;
+            color: #343a40;
+            background: white;
+        }
+    .table-div {
+        border: 1px solid #d3d3d3;
+        border-radius: 8px;
+        background: white;
+        padding: 20px 24px;
+        overflow: auto;
+    }
 </style>

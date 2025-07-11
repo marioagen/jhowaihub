@@ -36,6 +36,10 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Create(UserCreateDto userCreateDto, HeadersDto headersDto)
         {
+            if (string.IsNullOrEmpty(userCreateDto.Name) || string.IsNullOrEmpty(userCreateDto.Email))
+            {
+                throw new ArgumentException("Data cannot be empty");
+            }
             var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
             var requestAssignLicensesByHub = new RequestAssignLicensesByHub
             {
@@ -68,7 +72,6 @@ namespace WoopiAiHub.Application.Services
             }
             return false;
         }
-
 
         // <summary>
         /// Delete users by ids
@@ -105,7 +108,7 @@ namespace WoopiAiHub.Application.Services
             var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
             var updateByHubDto = new UpdateByHubDto
             {
-                Reference_users = userUpdateDto.Id,
+                Reference_user = userUpdateDto.Id,
                 UserEmail = userUpdateDto.Email,
                 Tenant = headersDto.Tenant,
             };

@@ -10,8 +10,10 @@ import QuizFormEdit from '@/components/pages/quiz/form-edit';
 import QuizManager from '@/components/pages/manager/quiz';
 import NormalizeIndex from '@/components/pages/normalize/loading';
 import AnalyzerIndex from '@/components/pages/analyzer';
+import UserIndex from '@/components/pages/user/index';
 
 import TypesPage from '@/pages/types.vue';
+import UserManagePage from '@/pages/user-manager.vue';
 
 function authenticate(to, from, next) {
     var usuario = JSON.parse(window.localStorage.getItem('project'));
@@ -51,15 +53,8 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: '/manage-type',
-        name: 'Type',
-        component: TypeManager,
-        meta: { layout: 'default' },
-        beforeEnter: authenticate,
-    },
-    {
         path: '/types',
-        name: 'Type2',
+        name: 'Type',
         component: TypesPage,
         meta: { 
             layout: 'default' 
@@ -105,6 +100,13 @@ const routes = [
         path: '/analyzer/:id',
         name: 'Analyzer',
         component: AnalyzerIndex,
+        meta: { layout: 'default' },
+        beforeEnter: authenticate,
+    },
+{
+        path: '/manage-user',
+        name: 'UserManage',
+        component: UserManagePage,
         meta: { layout: 'default' },
         beforeEnter: authenticate,
     },
