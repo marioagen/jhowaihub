@@ -112,8 +112,11 @@
                 let self = this;
                 UserService.getUsers(paramsReq)
                     .then((response) => {
-                        this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        const content = response?.content || [];
+                        const pagination = response?.pagination || {};
+
+                        this.table.data = content;
+                        this.table.pagination = pagination;
                     })
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;

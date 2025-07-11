@@ -40,7 +40,6 @@
     import ModalForm from '@/components/pages/type/modal-form';
     import ModalAlert from '@/components/common/modal-alert';
     import ToastAlert from '@/components/common/toast-alert';
-    import api from "@/services/api";
     import paginationDivider from "@/utils/paginationDivider";
     import Pagination from '@/components/common/pagination';
     import TypesTable from "@/components/types/types-table.vue";

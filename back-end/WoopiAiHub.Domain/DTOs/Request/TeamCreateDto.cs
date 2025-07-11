@@ -3,6 +3,6 @@
     public class TeamCreateDto
     {
         public string Name { get; set; } = string.Empty;
-        public List<Guid> UserIds { get; set; } = new List<Guid>();
+        public List<string> UserIds { get; set; } = new List<string>();
     }
 }

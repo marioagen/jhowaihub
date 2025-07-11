@@ -172,6 +172,8 @@
     labelTypes: "Tipos",
     labelDocumentTypeSuccess: "Tipo de documento insertado exitosamente",
     labelDocumentTypeEditSuccess: "Tipo de documento actualizado exitosamente",
+    labelDocumentTypeRemoveSuccess: "Tipo de documento eliminado correctamente",
+    labelDocumentTypeRemoveError: "Error al eliminar tipo de documento",
     labelTeamsMessage: "Gestionar equipos y sus miembros",
     labelNewTeam: "Nuevo equipo",
     labelId: "ID",

@@ -114,6 +114,7 @@ export default {
             document.getElementsByTagName("BODY")[0].children[1].className += " active";
         },
         closeModalUser: function() {
+            console.log("oi");
             this.modalUserShow = false;
             document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
         },

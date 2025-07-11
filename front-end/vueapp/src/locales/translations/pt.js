@@ -140,6 +140,8 @@
     labelTypeDoc: "Tipo de Documento",
     labelDocumentTypeSuccess: "Tipo de documento inserido com sucesso",
     labelDocumentTypeEditSuccess: "Tipo de documento atualizado com sucesso",
+    labelDocumentTypeRemoveSuccess: "Tipo de documento removido com sucesso",
+    labelDocumentTypeRemoveError: "Erro ao remover tipo de documento",
     labelTypeDocAlreadyExists: "Tipo duplicado",
     labelTypeDocError: "Tipo inválido",
     labelUpload: "Carregar",

@@ -45,7 +45,7 @@
     <modal-alert 
         v-if="modalAlertShow" 
         :type="'Confirm'" 
-        :entity="modalEntity" 
+        :entity="selectedType" 
         :alertTitle="$t('labelYouAreAboutToDeleteDocumentType')" 
         :alertMessage="$t('labelThisActionCannotBeUndone')" 
         :okLabel="$t('labelConfirm')" 
@@ -101,7 +101,6 @@
             getTypes(obj) {
                 this.table.isLoading = true;
                 this.searching = false;
-
                 let params = {
                     search: this.searchInput.trim() ? this.searchInput.trim() : '',
                     page: obj.page,
@@ -112,12 +111,16 @@
 
                 TypesService.getTypes(params)
                     .then((response) => {
-                        this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        const content = response?.content || [];
+                        const pagination = response?.pagination || {};
+
+                        this.table.data = content;
+                        this.table.pagination = pagination;
                     })
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
+                        this.searchInput = "";
                     });
             },
             formatDate(date) {
@@ -145,7 +148,6 @@
                     id: item.id,
                     name: item.name,
                 };
-
                 TypesService.editType(params)
                     .then((result) => {
                         if (!result.success) {
@@ -172,25 +174,26 @@
                 this.closeModal()
                 this.getTypes({ search: '', page: 1, type: null })
             },
-            deleteSingleType() {
-                this.deleteType([
-                    this.selectedTeam.id
-                ]);
-            },
             deleteMultipleTypes() {
-                const teamIds = this.table.selectedRows.map(item => item.id);
-                this.deleteType(teamIds);
+                const typeIds = this.table.selectedRows.map(item => item.id);
+                this.deleteType(typeIds);
             },
-            deleteType(teamIds) {
-                TypesService.deleteTypeById(teamIds)
-                    .then((status) => {
-                        if(status) {
+            deleteType(typeIds) {
+                const idsToDelete = typeIds || [this.selectedTeam.id];
+                console.log(idsToDelete);
+                TypesService.deleteTypeById(idsToDelete)
+                    .then((success) => {
+                        if(success) {
                             this.closeModal();
                             this.getTypes({ search: '', page: 1, type: null });
+                            this.emitToast(this.$t('labelDocumentTypeRemoveSuccess'), 'toast-success')
+                        } else {
+                            this.emitToast(this.$t('labelDocumentTypeRemoveError'), 'toast-warning')
                         }
                     })
                     .finally(() => {
                         this.listIds = [];
+                        this.table.selectedRows = [];
                     });
             },
             filterList(input) {

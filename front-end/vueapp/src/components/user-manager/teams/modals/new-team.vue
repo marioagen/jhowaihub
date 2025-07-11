@@ -186,37 +186,41 @@ export default {
         },
         saveTeam(e) {
             e.preventDefault();
+            console.log('selectedUsers:', this.selectedUsers);
+             console.log('selectedUsers:', this.users);
             const team = {
                 id: this.teamData.id,
                 name: this.teamData.name,
                 users: this.selectedUsers.map(userId => 
                     this.users.find(user => user.id === userId)
                 )
-            }    
-            
-            let response = team.id == 0 ? 
-                api.post('Team', team) : 
-                api.put('Team', team);
+            };
+            console.log(team);
+            const request = team.id === 0
+                ? api.post('Team', team)
+                : api.put('Team', team);
 
-            response.then((response) => {
-                    this.$emit('teamCreated', team)
+            request
+                .then(() => {
+                    this.$emit('teamCreated', team);
                     this.resetForm();
-                }).catch((e) => {
-                    if (e.response && e.response.data && e.response.data.errorCode !== ErrorCode.DefaultError) {
-                        switch (e.response.data.errorCode) {
-                            case ErrorCode.Duplicated:
-                                this.nameError = this.$t('labelErrorTeamAlreadyExists');
-                                break;
-                            default:
-                                this.alertToast(this.$t('labelUserError'), "toast-warning");
+                })
+                .catch((err) => {
+                    const errorCode = err?.response?.data?.errorCode;
+
+                    if (errorCode && errorCode !== ErrorCode.DefaultError) {
+                        if (errorCode === ErrorCode.Duplicated) {
+                            this.nameError = this.$t('labelErrorTeamAlreadyExists');
+                        } else {
+                            this.alertToast(this.$t('labelUserError'), 'toast-warning');
                         }
+                    } else {
+                        this.alertToast(this.$t('labelUserError'), 'toast-warning');
                     }
-                    else {
-                        this.alertToast(this.$t('labelUserError'), "toast-warning");
-                    }
-                }).finally(() => {
+                })
+                .finally(() => {
                     this.close();
-                });             
+                });
         },
         resetForm() {
             this.teamData.id = 0;

@@ -27,7 +27,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Create(User user)
         {
-            var existUser = _context.Users.Any(p => p.Email == user.Email && p.IsActive == false);
+            var existUser = _context.Users.Any(p => p.Email == user.Email && p.IsActive == true);
             if (!existUser)
             {
                 _context.Users.Add(user);
