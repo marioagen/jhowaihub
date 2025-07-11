@@ -108,7 +108,6 @@
                     isAscending: this.isAscending,
                     colType: this.colType,
                 }
-                console.log(paramsReq)
                 let self = this;
                 UserService.getUsers(paramsReq)
                     .then((response) => {

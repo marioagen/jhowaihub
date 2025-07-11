@@ -132,7 +132,6 @@ export default {
     created() {
         this.setMenuActions();
         this.setEntitySearch();
-        console.log(this.$store.state.userProfile.keyMongoAccess)
     },
 };
 </script>
