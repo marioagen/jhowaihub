@@ -1,11 +1,6 @@
 ﻿<template>
     <main>
-        <div class="container-fluid">
-            <div class="mb-2 navbar-container">
-                <div class="row">
-                    <nav-bar :sidebarData="sidebarData" />
-                </div>
-            </div>
+        <div class="container-fluid mt-4">
             <div class="custom-padding">
                 <div class="row">
                     <breadcrumb :crumbs="crumbsData" />

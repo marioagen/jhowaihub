@@ -1,4 +1,6 @@
-﻿import { createApp } from 'vue';
+﻿import '@/assets/css/global.css';
+
+import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
@@ -7,9 +9,9 @@ import VueGtag from "vue-gtag";
 
 window.$ = window.jQuery = require('jquery');
 
-import './assets/css/bootstrap-5.0.2/css/bootstrap.min.css';
-import './assets/webfont/fontawesome-5.15.4/css/all.min.css';
-import './assets/css/bootstrap-5.0.2/js/bootstrap.bundle.min';
+import '@/assets/css/bootstrap-5.0.2/css/bootstrap.min.css';
+import '@/assets/webfont/fontawesome-5.15.4/css/all.min.css';
+import '@/assets/css/bootstrap-5.0.2/js/bootstrap.bundle.min';
 
 const app = createApp(App);
 app.use(router);
