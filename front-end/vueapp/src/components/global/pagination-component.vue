@@ -96,7 +96,7 @@
 </script>
 
 <style scoped>
-/* Estilização geral */
+
 .pagination {
   --bs-pagination-padding-x: 0.6rem;
   --bs-pagination-padding-y: 0.35rem;
