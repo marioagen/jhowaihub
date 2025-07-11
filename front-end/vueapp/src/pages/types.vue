@@ -1,6 +1,6 @@
 <template>
-    <main>
-        <div class="container-fluid mt-4">
+    <main class="scroll-area">
+        <div class="container-fluid mt-4 my-3">
             <div class="custom-padding">
                 <div class="row">
                     <breadcrumb :crumbs="crumbsData" />
@@ -12,12 +12,10 @@
                         {{$t('labelDelete')}}
                     </button>
                 </div>
-                <TypesTable 
-                    ref="TypesTable"
-                    @toast="handleToast"
-                />
-                </div>
-            </div>
+                <TypesTable ref="TypesTable"
+        @toast="handleToast" />
+        </div>
+     </div>
     </main>
         <modal-form 
             v-if="modalAlertShow"
@@ -227,9 +225,7 @@
 
     .scroll-area {
         display: list-item;
-        max-height: calc(100% - 280px);
         overflow-y: auto;
-        min-height: 5%;
     }
 
     @media (max-width: 768px) {
