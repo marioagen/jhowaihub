@@ -95,41 +95,42 @@
     };
 </script>
 
-<style scooped>
+<style scoped>
+/* Estilização geral */
 .pagination {
-  --bs-pagination-padding-x: 0.75rem;
-  --bs-pagination-padding-y: 0.375rem;
+  --bs-pagination-padding-x: 0.6rem;
+  --bs-pagination-padding-y: 0.35rem;
   --bs-pagination-font-size: 0.875rem;
-  --bs-pagination-color: #24292f;
+  --bs-pagination-color: #0969da;
   --bs-pagination-bg: transparent;
   --bs-pagination-border-color: transparent;
-  --bs-pagination-border-radius: 8px;
-  --bs-pagination-hover-color: #0d6efd;
-  --bs-pagination-hover-bg: #e7f1ff;
+  --bs-pagination-border-radius: 6px;
   --bs-pagination-hover-color: #0969da;
   --bs-pagination-hover-bg: #f6f8fa;
   --bs-pagination-hover-border-color: #d0d7de;
+  --bs-pagination-focus-box-shadow: none;
   --bs-pagination-active-color: #24292f;
   --bs-pagination-active-bg: #eaeef2;
   --bs-pagination-active-border-color: #d0d7de;
   --bs-pagination-disabled-color: #8c959f;
+  --bs-pagination-disabled-bg: transparent;
+  --bs-pagination-disabled-border-color: transparent;
 }
 
 .page-item {
-  margin: 0 2px;
+  margin: 0 4px;
 }
 
 .page-link {
+  border-radius: 6px;
   border: 1px solid transparent;
-  box-shadow: none;
   font-weight: 500;
-  border-radius: 8px;
-  color: #24292f;
+  transition: background-color 0.2s ease;
 }
 
 .page-item.active .page-link {
-  border: 1px solid #d0d7de;
   background-color: #eaeef2;
+  border: 1px solid #d0d7de;
   color: #24292f;
 }
 
@@ -138,5 +139,9 @@
   color: #8c959f;
   background-color: transparent;
   border: none;
+}
+
+.page-link:hover {
+  background-color: #f6f8fa;
 }
 </style>
