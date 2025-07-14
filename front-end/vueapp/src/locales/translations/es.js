@@ -201,8 +201,9 @@
     labelErrorEmailAlreadyExists: "El correo electrónico ya está registrado",
     labelUserError: "Usuario no válido",
     labelTeamError: "Equipo no válido",
-    labelErrorTeamAlreadyExists: "Equipo ya registrado"
-
+    labelErrorTeamAlreadyExists: "Equipo ya registrado",
+    labelConfirmTitle: "Certeza?",
+    labelConfirmMessage: "Confirmar",
 }
 
 export default spanish;

@@ -202,7 +202,8 @@
     labelUserError: "Usuário inválido",
     labelTeamError: "Time inválido",
     labelErrorTeamAlreadyExists: "Time já cadastrado",
-
+    labelConfirmTitle: "Tem certeza?",
+    labelConfirmMessage: "Confirmar",
 }
 
 export default portuguese;

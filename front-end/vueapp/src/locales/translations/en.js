@@ -203,6 +203,8 @@
     labelUserError: "Invalid user",
     labelTeamError: "Invalid team",
     labelErrorTeamAlreadyExists: "Team already registered",
+    labelConfirmTitle: "Are you sure?",
+    labelConfirmMessage: "Confirm",
 }
 
 export default english;

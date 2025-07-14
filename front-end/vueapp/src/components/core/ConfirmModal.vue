@@ -62,12 +62,12 @@
             title: { 
                 type: String, 
                 required: false,
-                default: "Are you sure?"
+                default: "labelConfirmTitle"
             },
             message: { 
                 type: String, 
                 required: false,
-                default: "Are you sure of this action?"
+                default: "labelConfirmMessage"
             },
         },
     }
