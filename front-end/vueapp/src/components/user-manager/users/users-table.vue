@@ -5,7 +5,8 @@
                          :data="table.data"
                          :columns="table.columns"
                          :isLoading="table.isLoading"
-                         :pagination="table.pagination">
+                         :pagination="table.pagination"
+                          @change-page="changePage">
             <template #cell-name="{ data }">
                 <div v-if="!loading" class="p-1">
                     <div class="d-flex">
@@ -172,6 +173,9 @@
                 this.modalAlertShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
+            changePage(page) {
+                this.getUsers({ search: '', page: page, type: null });
+            }
 
         },
         created() {
