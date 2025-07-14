@@ -69,12 +69,18 @@ export default {
     },
     emits: ['close', 'teamCreated'],
     methods: {
+        validateForm() {
+            let valid = true;
+            if (!this.teamData.name || this.teamData.name.length < 2) {
+                this.nameError = this.$t('labelRequiredField');
+                valid = false;
+            }
+            return valid;
+        },
         handleSubmit(e) {
             e.preventDefault();
-            if (!this.form.name || this.form.name.trim() === '') {
-                this.nameError =  this.$t('labelRequiredField');
-                return;
-            }
+            if(!this.validateForm()) return;
+            
             this.loading = true;
             api.post('Team', {
                     id: 0,

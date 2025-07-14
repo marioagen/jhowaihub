@@ -156,6 +156,14 @@ export default {
         this.loadUsers()
     },
     methods: {
+        validateForm() {
+            let valid = true;
+            if (!this.teamData.name || this.teamData.name.length < 2) {
+                this.nameError = this.$t('labelRequiredField');
+                valid = false;
+            }
+            return valid;
+        },
         loadUsers() {
             var paramsReq = {
                 search: '',
@@ -186,6 +194,8 @@ export default {
         },
         saveTeam(e) {
             e.preventDefault();
+            if(!this.validateForm()) return;
+
             const team = {
                 id: this.teamData.id,
                 name: this.teamData.name,
@@ -193,7 +203,7 @@ export default {
                     this.users.find(user => user.id === userId)
                 )
             };
-            console.log(team);
+
             const request = team.id === 0
                 ? api.post('Team', team)
                 : api.put('Team', team);
