@@ -1,11 +1,13 @@
 <template>
     <div>
-        <table-component modalName="labelUsers"
-                         emptyMessage="labelNoUsersWasFound"
-                         :data="table.data"
-                         :columns="table.columns"
-                         :isLoading="table.isLoading"
-                         :pagination="table.pagination">
+        <TableComponent
+            modalName="labelUsers"
+            emptyMessage="labelNoUsersWasFound"
+            :data="table.data"
+            :columns="table.columns"
+            :isLoading="table.isLoading"
+            :pagination="table.pagination"
+        >
             <template #cell-name="{ data }">
                 <div v-if="!loading" class="p-1">
                     <div class="d-flex">
@@ -42,23 +44,29 @@
                     </ul>
                 </div>
             </template>
-        </table-component>
-        <modal-user v-if="modalUserShow" @userCreated="handleTeamCreated" @close="closeModalUser" :userEditing="selectedUser" />
-        <modal-alert v-if="modalAlertShow"
-                     :type="'Confirm'"
-                     :entity="selectedUser"
-                     :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
-                     :alertMessage="$t('labelThisActionCannotBeUndone')"
-                     :okLabel="$t('labelConfirm')"
-                     :cancelLabel="$t('labelCancel')"
-                     @open="deleteUser"
-                     @close="closeModal" />
+        </TableComponent>
+
+        <modal-user 
+            v-if="modalUserShow" 
+            @userCreated="handleTeamCreated" 
+            @close="closeModalUser" 
+            :userEditing="selectedUser" 
+        />
+        <modal-alert 
+            v-if="modalAlertShow"
+            :type="'Confirm'"
+            :entity="selectedUser"
+            :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
+            :alertMessage="$t('labelThisActionCannotBeUndone')"
+            :okLabel="$t('labelConfirm')"
+            :cancelLabel="$t('labelCancel')"
+            @open="deleteUser"
+            @close="closeModal" 
+        />
     </div>
 </template>
 <script>
-    import api from "@/services/api";
-    import dates from "@/helpers/Dates";
-    import TableComponent from "@/components/global/table-component.vue";
+    import TableComponent from "@/components/global/TableComponent.vue";
     import ModalUser from '@/components/user-manager/users/modals/new-user.vue';
     import ModalAlert from '@/components/common/modal-alert';
     import UserService from "@/services/users/UserService";
@@ -180,6 +188,7 @@
         },
     }
 </script>
+
 <style scoped>
 
     .badge {

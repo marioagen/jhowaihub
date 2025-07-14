@@ -2,7 +2,7 @@
   <div class="app-layout d-flex flex-column h-100" style="height: 100vh;">
     <div class="d-flex flex-grow-1" style="overflow: hidden; position: relative; height: 100%;">
       <div :class="['sidebar-wrapper', { collapsed: isSidebarCollapsed }]">
-        <side-bar
+        <SidebarComponent
           :isCollapsed="isSidebarCollapsed"
           :menuActive="sidebarData"
           @toggle-collapse="toggleSidebar"
@@ -10,7 +10,9 @@
       </div>
 
       <div :class="['content-wrapper', { collapsed: isSidebarCollapsed }]">
-        <navbar :isSidebarCollapsed="isSidebarCollapsed" />
+        <NavbarComponent 
+          :isSidebarCollapsed="isSidebarCollapsed" 
+        />
         <router-view :key="$route.fullPath" />
         <toast-notification :showToast="toastShow" @close="closeToast" />
       </div>
@@ -27,8 +29,8 @@
 
 <script>
 import GlobalEventService from '@/services/globalEventService'
-import SideBar from '@/components/common/side-bar.vue'
-import Navbar from '@/components/common/nav-bar.vue'
+import SidebarComponent from '@/components/layout/SidebarComponent.vue';
+import NavbarComponent from '@/components/layout/NavbarComponent.vue';
 import ToastNotification from '@/components/common/toast-notification.vue'
 
 const SIDEBAR_COLLAPSE_WIDTH = 768
@@ -36,8 +38,8 @@ const SIDEBAR_COLLAPSE_WIDTH = 768
 export default {
   name: 'DefaultLayout',
   components: {
-    SideBar,
-    Navbar,
+    NavbarComponent,
+    SidebarComponent,
     ToastNotification,
   },
   data() {

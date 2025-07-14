@@ -1,6 +1,6 @@
 <template>
     <div>
-        <table-component
+        <TableComponent
             modalName="labelTeams"
             emptyMessage="labelNoTeamWasFound"
             :data="table.data"
@@ -26,7 +26,7 @@
                     Delete
                 </button>
             </template>
-        </table-component>
+        </TableComponent>
     </div>
     <modal-team 
         v-if="modalTeamShow" 
@@ -49,7 +49,7 @@
 
 <script>
     import dates from "@/helpers/Dates";
-    import TableComponent from "@/components/global/table-component.vue";
+    import TableComponent from "@/components/global/TableComponent.vue";
     import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
     import ModalAlert from '@/components/common/modal-alert';
     import TeamsService from "@/services/teams/TeamsService";

@@ -7,7 +7,7 @@
         {{ $t("labelDelete") }}
     </button>
     <div>
-        <table-component
+        <TableComponent
             modalName="labelTypes"
             emptyMessage="labelNoDocumentTypeWasFound"
             :data="table.data"
@@ -34,7 +34,7 @@
                     Delete
                 </button>
             </template>
-        </table-component>
+        </TableComponent>
     </div>
     <modal-form 
         v-if="modalTypeShow"
@@ -58,7 +58,7 @@
 <script>
     import dates from "@/helpers/Dates";
     import TypesService from "@/services/types/TypesService";
-    import TableComponent from "@/components/global/table-component.vue";
+    import TableComponent from "@/components/global/TableComponent.vue";
     import ModalForm from '@/components/pages/type/modal-form';
     import ModalAlert from '@/components/common/modal-alert';
     import ToastAlert from '@/components/common/toast-alert';
