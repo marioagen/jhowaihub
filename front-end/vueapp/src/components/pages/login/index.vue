@@ -103,13 +103,13 @@
                 this.loading = true;
                 let clientIdResponse = "";
                 api.get('/Account/clientId')
-                    .then(function (response) {
+                    .then((response) => {
                       this.microsoftLogin(response.data);
-                    }).catch(function (e) {
+                    }).catch((e) => {
                         console.log(e);
                         this.loading = false;
                         alert("Usuário sem autorização para acessar a plataforma!\nPor favor, entre em contato com suporte@woopi.com.br solicitando acesso ao seu usuário.");
-                    }).finally(function () {
+                    }).finally(() => {
                         console.log("Finished request.");
                     });
             },
@@ -120,7 +120,7 @@
                 api.post('/Account/Authenticate', formData,
                     {
                         headers: { 'Authorization': `Bearer ${userAzure}` }
-                    }).then(function (response) {
+                    }).then((response) => {
                         var dataUser = {
                             language: this.$store.state.userProfile.language,
                             image: "",
@@ -134,11 +134,11 @@
                         this.$store.commit('updateUserProfile', { amount: dataUser });
                         window.localStorage.setItem('project', JSON.stringify({ isLogged: true }));
                         this.$router.push({ name: 'DocumentList' });
-                    }).catch(function (e) {
+                    }).catch((e) =>{
                         console.log(e);
                         this.loading = false;
                         alert("Usuário sem autorização para acessar a plataforma!\nPor favor, entre em contato com suporte@woopi.com.br solicitando acesso ao seu usuário.");
-                    }).finally(function () {
+                    }).finally(() => {
                         console.log("Finished request.");
                     });
             },
