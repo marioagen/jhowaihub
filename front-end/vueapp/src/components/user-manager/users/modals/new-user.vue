@@ -206,12 +206,13 @@ export default {
                 }
                 response = api.put('User', userEdit);
             }
-            response.then((response) => {       
+            response.then((response) => {
+                this.$emit('userCreated');
+                this.close();
                 }).catch((e) => {
                      self.alertToast(self.$t('labelUserError'), "toast-warning");
                 }).finally(function () {
                     console.log("Finished request.");
-                    self.$emit('userCreated');
                 });             
         },
         resetForm() {

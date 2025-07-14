@@ -125,14 +125,14 @@ export default {
                     name: this.form.name.trim(),
                     email: this.form.email.trim()
                 }).then(function (response) {
-                    self.loading = false;
-                    self.resetForm();
-                    self.$emit('userCreated');
+                    this.loading = false;
+                    this.resetForm();
+                    this.$emit('userCreated');
                 }).catch(function (e) {
                     self.alertToast(this.$t('labelUserError'), "toast-warning");
                 }).finally(function () {
                     console.log("Finished request.");
-                    self.loading = false;
+                    this.loading = false;
                 });
         },
         resetForm() {
