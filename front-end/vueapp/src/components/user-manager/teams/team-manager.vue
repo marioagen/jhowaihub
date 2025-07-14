@@ -1,5 +1,5 @@
 <template>
-    <div class="scroll-area mt-3 mb-3">
+    <div class="mt-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h6 class="mb-0"> {{ $t('labelTeams') }}</h6>

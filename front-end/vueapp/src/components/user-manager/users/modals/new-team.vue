@@ -95,6 +95,7 @@ export default {
                 }).finally(() => {
                     console.log("Finished request.");
                     this.loading = false;
+                    this.close();
                 });
         },
         resetForm() {

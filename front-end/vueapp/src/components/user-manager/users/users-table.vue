@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 <div v-else>
-                        <span class="badge">-</span>
+                        <span>-</span>
                 </div>
             </template>
             <template #cell-actions="{ data }">
@@ -116,7 +116,7 @@
                     isAscending: this.isAscending,
                     colType: this.colType,
                 }
-                let self = this;
+                
                 UserService.getUsers(paramsReq)
                     .then((response) => {
                         const content = response?.content || [];
@@ -180,6 +180,9 @@
                 this.modalAlertShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
+            changePage(page) {
+                this.getUsers({ search: '', page: page, type: null });
+            }
 
         },
         created() {

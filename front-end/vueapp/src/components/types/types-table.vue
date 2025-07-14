@@ -1,5 +1,5 @@
 <template>
-    <button
+    <button 
         v-if="showMultiDelete"
         class="btn btn-outline-danger btn-sm mb-2 ms-2"
         @click="deleteMultipleTypes"
@@ -35,24 +35,25 @@
                 </button>
             </template>
         </TableComponent>
+        
+        <modal-form 
+            v-if="modalTypeShow"
+            :dataEditing="selectedType"
+            @openEdit="editTypeRequest"
+            @close="closeModal" 
+        />
+        <modal-alert 
+            v-if="modalAlertShow"
+            :type="'Confirm'"
+            :entity="selectedType"
+            :alertTitle="$t('labelYouAreAboutToDeleteDocumentType')"
+            :alertMessage="$t('labelThisActionCannotBeUndone')"
+            :okLabel="$t('labelConfirm')"
+            :cancelLabel="$t('labelCancel')"
+            @open="deleteType"
+            @close="closeModal" 
+        />
     </div>
-    <modal-form 
-        v-if="modalTypeShow"
-        :dataEditing="selectedType" 
-        @openEdit="editTypeRequest" 
-        @close="closeModal" 
-    />
-    <modal-alert 
-        v-if="modalAlertShow" 
-        :type="'Confirm'" 
-        :entity="selectedType" 
-        :alertTitle="$t('labelYouAreAboutToDeleteDocumentType')" 
-        :alertMessage="$t('labelThisActionCannotBeUndone')" 
-        :okLabel="$t('labelConfirm')" 
-        :cancelLabel="$t('labelCancel')" 
-        @open="deleteType" 
-        @close="closeModal" 
-    />
 </template>
 
 <script>
@@ -82,7 +83,12 @@
                     { key: "actions", label: "labelAction" },
                 ],
                 data: [],
-                pagination: {},
+                pagination: {
+                    currentPage: 1,
+                    totalPages: 100,
+                    itemsPerPage: 10,
+                    totalItems: 2000,
+                },
                 selectedRows: [],
             },
             selectedType: {},
