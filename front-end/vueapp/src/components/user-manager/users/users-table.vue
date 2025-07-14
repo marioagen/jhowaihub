@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 <div v-else>
-                        <span class="badge">-</span>
+                        <span>-</span>
                 </div>
             </template>
             <template #cell-actions="{ data }">
@@ -43,7 +43,7 @@
                 </div>
             </template>
         </table-component>
-        <modal-user v-if="modalUserShow" @userCreated="handleTeamCreated" @close="closeModalUser" :userEditing="selectedUser" />
+        <modal-user v-if="modalUserShow" @userCreated="handleUserCreated" @close="closeModalUser" :userEditing="selectedUser" />
         <modal-alert v-if="modalAlertShow"
                      :type="'Confirm'"
                      :entity="selectedUser"
