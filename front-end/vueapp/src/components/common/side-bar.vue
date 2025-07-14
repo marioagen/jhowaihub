@@ -30,7 +30,7 @@
                     menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
                     isCollapsed ? 'justify-content-center' : '',
                     'custom-menu-item'
-                ]" to="/document-list">
+                ]" to="/manage-user">
                     <img src="./../../assets/img/manage-users.svg" :title="$t('labelManageUsers')" width="20"
                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t('labelManageUsers') }}</span>
@@ -58,35 +58,10 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item'
                     ]" 
-                    to="/manage-type"
-                >
-                    <img 
-                        src="./../../assets/img/types-icon.svg" 
-                        :title="$t('labelTypes')" 
-                        width="20"
-                        class="icon-sidebar" 
-                    />
-                    <span 
-                        v-show="!isCollapsed" 
-                        class="ms-2"
-                    >
-                        {{ $t('labelTypes') }}
-                    </span>
-                </router-link>
-            </li>
-
-            <li class="mb-1">
-                <router-link 
-                    :class="[
-                        'd-flex align-items-center',
-                        menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item'
-                    ]" 
                     to="/types"
                 >
                     <img 
-                        src="./../../assets/img/types-icon.svg" 
+                        src="./../../assets/img/type-icon.svg" 
                         :title="$t('labelTypes')" 
                         width="20"
                         class="icon-sidebar" 
@@ -189,6 +164,7 @@ export default {
 /* Hover: fundo azul clarinho e texto mantendo cor padrão */
 .btn-toggle-nav a:hover {
     color: #676879 !important;
+    background-color: #e1e9f8 !important;
     cursor: pointer;
 }
 
