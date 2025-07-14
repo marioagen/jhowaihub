@@ -6,6 +6,7 @@ import router from './router';
 import store from './store';
 import i18n from './locales/i18n';
 import VueGtag from "vue-gtag";
+import LucideIcon from '@/components/global/LucideIcon.vue';
 
 window.$ = window.jQuery = require('jquery');
 
@@ -29,6 +30,7 @@ app.use(VueGtag, {
     }
 }, router)
 
+app.component("LucideIcon", LucideIcon);
 app.config.globalProperties.$appName = ENV_CONFIG.VUE_APP_NAME;
 app.config.globalProperties.$clientIdAzure = ENV_CONFIG.VUE_APP_CLIENT_ID_AZURE;
 

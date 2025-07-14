@@ -19,11 +19,15 @@
                 <template #cell-actions="{ data }">
                     <button class="btn btn-outline-success btn-sm"
                             @click="editType(data.row)">
-                        Edit
+                        <LucideIcon
+                            icon="SquarePen"
+                        />
                     </button>
                     <button class="btn btn-outline-danger btn-sm ms-2"
                             @click="confirmationDialog(data.row)">
-                        Delete
+                        <LucideIcon
+                            icon="Trash2"
+                        />
                     </button>
                 </template>
             </table-component>
