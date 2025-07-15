@@ -14,7 +14,7 @@
                         class="modal-title" 
                         :id="`${id}-label`"
                     >
-                        {{ title }}
+                        {{ $t(title) }}
                     </h5>
                     <button 
                         type="button" 
@@ -25,7 +25,7 @@
                 </div>
                 
                 <div class="modal-body">
-                    {{ message }}
+                    {{ $t(message) }}
                 </div>
 
                 <div class="justify-content-center mx-4 my-4">
@@ -35,7 +35,7 @@
                         data-bs-dismiss="modal"
                         @click="$emit('cancel')"
                     >
-                        Cancel
+                        {{ $t(cancelText) }}
                     </button>
                     <button
                         type="button"
@@ -43,7 +43,7 @@
                         data-bs-dismiss="modal"
                         @click="$emit('confirm')"
                     >
-                        Confirm
+                        {{ $t(confirmText) }}
                     </button>
                 </div>
             </div>
@@ -65,6 +65,16 @@
                 default: "labelConfirmTitle"
             },
             message: { 
+                type: String, 
+                required: false,
+                default: "labelMessage"
+            },
+            cancelText: { 
+                type: String, 
+                required: false,
+                default: "labelCancelMessage"
+            },
+            confirmText: { 
                 type: String, 
                 required: false,
                 default: "labelConfirmMessage"
