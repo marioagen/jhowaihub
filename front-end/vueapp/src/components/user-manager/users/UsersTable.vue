@@ -36,11 +36,19 @@
             <template #cell-actions="{ data }">
                 <div class="dropdown column-align"> 
                     <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v"></i>
+                        <LucideIcon
+                            icon="Ellipsis"
+                        />
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" @click="editUser(data.row)">{{$t('labelEdit')}}</a></li>
-                        <li><a class="dropdown-item" @click="confirmationDialog(data.row)">{{$t('labelDelete')}}</a></li>
+                        <li>
+                            <LucideIcon icon="SquarePen" />
+                            <a class="dropdown-item" @click="editUser(data.row)">{{$t('labelEdit')}}</a>
+                        </li>
+                        <li>
+                            <LucideIcon icon="Trash2" />
+                            <a class="dropdown-item" @click="confirmationDialog(data.row)">{{$t('labelDelete')}}</a>
+                        </li>
                     </ul>
                 </div>
             </template>
@@ -67,7 +75,7 @@
 </template>
 <script>
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalUser from '@/components/user-manager/users/modals/new-user.vue';
+    import ModalUser from '@/components/user-manager/users/modals/UserModal.vue';
     import ModalAlert from '@/components/common/modal-alert';
     import UserService from "@/services/users/UserService";
     export default {

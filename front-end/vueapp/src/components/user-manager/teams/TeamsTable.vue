@@ -10,20 +10,24 @@
             @change-page="changePage"
         >
             <template #cell-members="{ data }">
-                {{ data.row.users.length }}
+                <LucideIcon icon="UsersRound" size="15" /> {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">
                 <button
-                    class="btn btn-outline-success btn-sm"
+                    class="btn btn-outline-success btn-sm table-btn"
                     @click="editTeam(data.row)"
                 >
-                    Edit
+                    <LucideIcon
+                        icon="SquarePen"
+                    />
                 </button>
                 <button
-                    class="btn btn-outline-danger btn-sm ms-2"
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn"
                     @click="confirmationDialog(data.row)"
                 >
-                    Delete
+                    <LucideIcon
+                        icon="Trash2"
+                    />
                 </button>
             </template>
         </TableComponent>
@@ -50,7 +54,7 @@
 <script>
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
+    import ModalTeam from '@/components/user-manager/teams/modals/TeamModal.vue';
     import ModalAlert from '@/components/common/modal-alert';
     import TeamsService from "@/services/teams/TeamsService";
 

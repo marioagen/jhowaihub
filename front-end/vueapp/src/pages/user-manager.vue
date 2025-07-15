@@ -19,12 +19,10 @@
                     </ul>
                     <div class="tab-content mt-3">
                         <div class="tab-pane active" id="user" role="tabpanel" aria-labelledby="user-tab">
-                            <!-- Users -->
-                            <users-manager />
+                            <UsersComponent />
                         </div>
                         <div class="tab-pane" id="team" role="tabpanel" aria-labelledby="team-tab">
-                            <!-- Teams -->
-                            <teams-manager />
+                            <TeamsComponent />
                         </div>
                     </div>
                 </div>
@@ -34,22 +32,14 @@
 </template>
 
 <script>
-    import TeamsManager from '@/components/user-manager/teams/team-manager.vue';
-    import UsersManager from '@/components/user-manager/users/user-manager.vue';
+    import TeamsComponent from '@/components/user-manager/teams/TeamsComponent.vue';
+    import UsersComponent from '@/components/user-manager/users/UsersComponent.vue';
 export default {
     name: 'UserIndex',
-    data() {
-        return {
-        // Data properties can be added here if needed
-        };
-    },
     components: {
-        TeamsManager,
-        UsersManager
+        TeamsComponent,
+        UsersComponent
     },
-    methods: {
-        // Methods can be added here if needed
-    }
 };
 </script>
 

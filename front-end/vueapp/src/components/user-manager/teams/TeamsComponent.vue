@@ -21,9 +21,9 @@
 </template>
 
 <script>
-import ModalTeam from '@/components/user-manager/teams/modals/new-team.vue';
+import ModalTeam from '@/components/user-manager/teams/modals/TeamModal.vue';
 import paginationDivider from "@/utils/paginationDivider";
-import TeamsTable from "@/components/user-manager/teams/teams-table.vue";
+import TeamsTable from "@/components/user-manager/teams/TeamsTable.vue";
 import SearchBar from '@/components/common/search-bar';
 
 export default {

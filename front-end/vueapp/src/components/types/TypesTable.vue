@@ -22,16 +22,20 @@
             </template>
            <template #cell-actions="{ data }">
                 <button
-                    class="btn btn-outline-success btn-sm"
+                    class="btn btn-outline-success btn-sm table-btn"
                     @click="editType(data.row)"
                 >
-                    Edit
+                    <LucideIcon
+                        icon="SquarePen"
+                    />
                 </button>
                 <button
-                    class="btn btn-outline-danger btn-sm ms-2"
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn"
                     @click="confirmationDialog(data.row)"
                 >
-                    Delete
+                    <LucideIcon
+                        icon="Trash2"
+                    />
                 </button>
             </template>
         </TableComponent>
