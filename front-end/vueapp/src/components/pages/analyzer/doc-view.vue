@@ -1,35 +1,85 @@
 ﻿<template>
     <div class="col-md-6">
-        <div class="mb-2" style="margin-top: 12px !important;">
+        <div class="mb-2" style="margin-top: 12px !important">
             <div v-if="isPdf">
                 <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
-                <a @click="openTab" v-if="srcPdf"> <i class="fas fa-expand text-primary" style="cursor:pointer" :title="$t('labelExpand')"></i> </a>
-                <img src="../../../assets/img/go-to-text.png" @click="getDocumentNormalized" style="cursor: pointer; float: right;" :title="$t('labelDocumentTranscript')" v-if="srcPdf" />
-                <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()"><i class="fas fa-sync-alt"></i> {{ $t('labelReprocess') }}</button>
+                <a @click="openTab" v-if="srcPdf">
+                    <i
+                        class="fas fa-expand text-primary"
+                        style="cursor: pointer"
+                        :title="$t('labelExpand')"
+                    ></i>
+                </a>
+                <img
+                    src="../../../assets/img/go-to-text.png"
+                    @click="getDocumentNormalized"
+                    style="cursor: pointer; float: right"
+                    :title="$t('labelDocumentTranscript')"
+                    v-if="srcPdf"
+                />
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm mb-1 reindex-button"
+                    @click="openModal()"
+                >
+                    <i class="fas fa-sync-alt"></i>
+                    {{ $t('labelReprocess') }}
+                </button>
                 <div class="view-pdf" v-if="srcPdf">
-                    <object :data="srcPdf +`#zoom=80`" type="application/pdf" width="100%" height="100%">
+                    <object
+                        :data="srcPdf + `#zoom=80`"
+                        type="application/pdf"
+                        width="100%"
+                        height="100%"
+                    >
                         <embed :src="srcPdf" type="application/pdf" />
                     </object>
                 </div>
-                <div class="mt-1 p-2" v-if="errorPdf" style="border: 1px solid #dc3545; text-align: center; cursor: pointer;" @click="reloadPage">
-                    <span class="text-danger" style="text-decoration: none;">
-                        <i class="fas fa-exclamation-circle"></i> {{ $t('labelAttentionPDFDisplayFailed') }}.
+                <div
+                    class="mt-1 p-2"
+                    v-if="errorPdf"
+                    style="border: 1px solid #dc3545; text-align: center; cursor: pointer"
+                    @click="reloadPage"
+                >
+                    <span class="text-danger" style="text-decoration: none">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ $t('labelAttentionPDFDisplayFailed') }}.
                     </span>
                 </div>
                 <div class="mt-1 p-2 loading-div" v-if="loading" @click="reloadPage">
-                    <div class="spinner-border spinner-border-sm text-primary" style="margin-right: 1%;" role="status" v-if="loading"></div>
-                    <span class="text-primary" style="text-decoration: none;">
+                    <div
+                        class="spinner-border spinner-border-sm text-primary"
+                        style="margin-right: 1%"
+                        role="status"
+                        v-if="loading"
+                    ></div>
+                    <span class="text-primary" style="text-decoration: none">
                         {{ $t('labelLoadingFilePleaseWait') }}.
                     </span>
                 </div>
             </div>
             <div v-else>
                 <div>
-                    <strong class="form-label mb-3"> {{ upperFormat($t('labelStandardizedFullText')) }}&nbsp;&nbsp;</strong>
-                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingDocumentNormalized"></i>
-                    <img src="../../../assets/img/go-to-pdf.png" @click="isPdf=true" style="cursor: pointer; float: right;" :title="$t('labelPdfBack')" />
+                    <strong class="form-label mb-3">
+                        {{ upperFormat($t('labelStandardizedFullText')) }}&nbsp;&nbsp;
+                    </strong>
+                    <i
+                        class="fas fa-spinner fa-pulse text-primary"
+                        v-if="loadingDocumentNormalized"
+                    ></i>
+                    <img
+                        src="../../../assets/img/go-to-pdf.png"
+                        @click="isPdf = true"
+                        style="cursor: pointer; float: right"
+                        :title="$t('labelPdfBack')"
+                    />
                 </div>
-                <textarea type="text" class="form-control custom-textarea textarea-norm-full" v-model="contentDocumentNormalized" readonly></textarea>
+                <textarea
+                    type="text"
+                    class="form-control custom-textarea textarea-norm-full"
+                    v-model="contentDocumentNormalized"
+                    readonly
+                ></textarea>
             </div>
         </div>
         <modal-reprocess v-if="showModalForm" @close="closeModal" @formatData="updateModel" />
@@ -37,12 +87,12 @@
 </template>
 
 <script>
-    import DocumentsServices from '@/services/documents/DocumentsServices.js';
-    import ModalReprocess from '@/components/pages/analyzer/modal-reprocess';
-    import ModalAlert from '@/components/common/modal-alert';
+    import DocumentsServices from '@/services/documents/DocumentsServices.js'
+    import ModalReprocess from '@/components/pages/analyzer/modal-reprocess'
+    import ModalAlert from '@/components/common/modal-alert'
 
     export default {
-        name: "DocView",
+        name: 'DocView',
         data() {
             return {
                 idAnalyzer: this.$route.params.id,
@@ -51,19 +101,18 @@
                 errorPdf: false,
                 loading: true,
                 loadingDocumentNormalized: false,
-                contentDocumentNormalized: "",
+                contentDocumentNormalized: '',
                 controllAttempt: 0,
                 showModalForm: false,
                 showLoading: false,
-                message: "",
+                message: '',
                 loadingNormalize: false,
                 modalAlertShow: false,
-                dataView:
-                {
+                dataView: {
                     Id: parseInt(this.idAnalyzer),
-                    Embeddings_model_name: "",
+                    Embeddings_model_name: '',
                 },
-                isReprocessing: true
+                isReprocessing: true,
             }
         },
         components: {
@@ -72,109 +121,114 @@
         },
         methods: {
             getDocument() {
-                this.controllAttempt++;
-                this.srcPdf = null;
-                this.errorPdf = false;
+                this.controllAttempt++
+                this.srcPdf = null
+                this.errorPdf = false
                 DocumentsServices.findDocument(this.idAnalyzer)
                     .then((response) => {
                         if (response.error !== undefined) {
                             if (this.controllAttempt < attempt) {
-                                this.getPdf(fileGuidId, attempt);
+                                this.getPdf(fileGuidId, attempt)
                             } else {
-                                this.loading = false;
-                                this.errorPdf = true;
+                                this.loading = false
+                                this.errorPdf = true
                             }
-                            return console.log(response.error);
+                            return console.log(response.error)
                         }
 
-                        this.srcPdf = window.URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
-                        this.loading = false;
+                        this.srcPdf = window.URL.createObjectURL(
+                            new Blob([response], { type: 'application/pdf' })
+                        )
+                        this.loading = false
                     })
                     .finally(() => {
-                        console.log("Finished request.");
-                    });
+                        console.log('Finished request.')
+                    })
             },
-            updateModel (model) {
+            updateModel(model) {
                 this.dataView.Embeddings_model_name = model
-                this.$emit('showNormalize', this.dataView, this.isReprocessing);
+                this.$emit('showNormalize', this.dataView, this.isReprocessing)
             },
-            getDocumentNormalized () {
-                this.loadingDocumentNormalized = false;
-                this.isPdf = false;
-                if (this.contentDocumentNormalized == "") {
-                    this.loadingDocumentNormalized = true;
+            getDocumentNormalized() {
+                this.loadingDocumentNormalized = false
+                this.isPdf = false
+                if (this.contentDocumentNormalized == '') {
+                    this.loadingDocumentNormalized = true
                     DocumentsServices.getNormalizedDocument(this.idAnalyzer)
                         .then((response) => {
-                            if(response.error !== undefined) {
-                                this.modalAlertShow = true;
-                                this.loadingDocumentNormalized = false;
+                            if (response.error !== undefined) {
+                                this.modalAlertShow = true
+                                this.loadingDocumentNormalized = false
                             }
-                            this.contentDocumentNormalized = response.content;
-                            this.loadingDocumentNormalized = false;
+                            this.contentDocumentNormalized = response.content
+                            this.loadingDocumentNormalized = false
                         })
                         .finally(() => {
-                            console.log("Finished request.");
-                        });                    
+                            console.log('Finished request.')
+                        })
                 }
             },
-            openTab () {
-                window.open(this.srcPdf, '_blank');
+            openTab() {
+                window.open(this.srcPdf, '_blank')
             },
-            upperFormat (str) {
-                return str.toUpperCase();
+            upperFormat(str) {
+                return str.toUpperCase()
             },
-            reloadPage () {
-                location.reload();
+            reloadPage() {
+                location.reload()
             },
-            openModal () {
-                this.showModalForm = true;
-                this.dataView.Id = parseInt(this.idAnalyzer);
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            openModal() {
+                this.showModalForm = true
+                this.dataView.Id = parseInt(this.idAnalyzer)
+                document.getElementsByTagName('BODY')[0].children[1].className += ' active'
             },
-            closeModal () {
-                this.showModalForm = false;
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            closeModal() {
+                this.showModalForm = false
+                this.modalAlertShow = false
+                document.getElementsByTagName('BODY')[0].children[1].className = 'overlay'
             },
-            normalizeDoc () {
-                window.onbeforeunload = function () { return true; };
+            normalizeDoc() {
+                window.onbeforeunload = function () {
+                    return true
+                }
                 let paramsReq = {
                     Id: parseInt(this.idAnalyzer),
-                    Embeddings_model_name: "",
+                    Embeddings_model_name: '',
                 }
-                this.loadingNormalize = true;
+                this.loadingNormalize = true
                 DocumentsServices.normalizeDocument(paramsReq)
                     .then((response) => {
-                        if(response.error !== undefined) {
-                            window.onbeforeunload = null;
-                            return console.log(response.error);
+                        if (response.error !== undefined) {
+                            window.onbeforeunload = null
+                            return console.log(response.error)
                         }
-                        window.onbeforeunload = null;
-                        this.message = this.$t('labelNormalizingTheDocument');
+                        window.onbeforeunload = null
+                        this.message = this.$t('labelNormalizingTheDocument')
                     })
                     .finally(() => {
-                        console.log("Finished request.");
-                        this.loadingNormalize = false;
-                    });
+                        console.log('Finished request.')
+                        this.loadingNormalize = false
+                    })
             },
         },
         created() {
-            this.getDocument();
+            this.getDocument()
         },
     }
 </script>
 
 <style scoped>
-    .fas, .far {
+    .fas,
+    .far {
         font-weight: 900 !important;
     }
 
     .text-primary {
-        color: #47AAFF !important;
+        color: #47aaff !important;
     }
 
     .custom-textarea {
-        border-color: #0073E6 !important;
+        border-color: #0073e6 !important;
     }
 
     .view-pdf {
@@ -213,7 +267,7 @@
     }
 
     .loading-div {
-        border: 1px solid #0D6EFD;
+        border: 1px solid #0d6efd;
         text-align: center;
         cursor: pointer;
     }
@@ -221,5 +275,4 @@
     .reindex-button {
         margin-left: 5%;
     }
-
 </style>

@@ -5,39 +5,86 @@
                 <div class="row">
                     <breadcrumb :crumbs="crumbsData" />
                 </div>
-                <div class="row" style="height: 100%; overflow-y: auto;">
+                <div class="row" style="height: 100%; overflow-y: auto">
                     <div class="col-md-12">
                         <div class="form-save">
                             <form @submit="save">
-                                <h5 class="mb-3"> {{ $t('labelGeneralInformation') }} </h5>
+                                <h5 class="mb-3">{{ $t('labelGeneralInformation') }}</h5>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label class="form-label" for="title"> {{ $t('labelName') }} </label>
-                                            <input type="text" class="form-control" id="title" v-validate
-                                                ref="titleInpt" autocomplete="off" v-model="form.title" required />
+                                            <label class="form-label" for="title">
+                                                {{ $t('labelName') }}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                id="title"
+                                                v-validate
+                                                ref="titleInpt"
+                                                autocomplete="off"
+                                                v-model="form.title"
+                                                required
+                                            />
                                         </div>
                                         <div class="mb-2" v-if="form.title.length <= 50">
-                                            <a style="text-decoration: none; color: #AEB2BA; cursor: default;">
-                                                {{ 50 - form.title.length }} {{ (50 - form.title.length) > 1 ?
-                                                $t('labelCharacters') : $t('labelCharacter') }}
+                                            <a
+                                                style="
+                                                    text-decoration: none;
+                                                    color: #aeb2ba;
+                                                    cursor: default;
+                                                "
+                                            >
+                                                {{ 50 - form.title.length }}
+                                                {{
+                                                    50 - form.title.length > 1
+                                                        ? $t('labelCharacters')
+                                                        : $t('labelCharacter')
+                                                }}
                                             </a>
                                         </div>
                                         <div class="mb-2" v-if="form.title.length > 50">
-                                            <a style="text-decoration: none; color: #dc3545; cursor: default;">
-                                                {{ 50 - form.title.length }} {{ $t('labelCharacters') }}
+                                            <a
+                                                style="
+                                                    text-decoration: none;
+                                                    color: #dc3545;
+                                                    cursor: default;
+                                                "
+                                            >
+                                                {{ 50 - form.title.length }}
+                                                {{ $t('labelCharacters') }}
                                             </a>
-                                            <a class="exceedDesc"
-                                                style="float:right; text-decoration: none; color: #dc3545; cursor: default;">{{ $t('labelExceedTitle') }}</a>
+                                            <a
+                                                class="exceedDesc"
+                                                style="
+                                                    float: right;
+                                                    text-decoration: none;
+                                                    color: #dc3545;
+                                                    cursor: default;
+                                                "
+                                            >
+                                                {{ $t('labelExceedTitle') }}
+                                            </a>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label" for="typeDocId"> {{ $t('labelDocumentType') }}
+                                            <label class="form-label" for="typeDocId">
+                                                {{ $t('labelDocumentType') }}
                                             </label>
-                                            <select class="form-select" id="typeDocId" v-validate
-                                                v-model="form.typeDocId" required>
-                                                <option value=""> {{ $t('labelSelect') }} </option>
-                                                <option :value="item.id" v-for="(item, index) in typeDocs" :key="index">
-                                                    {{ item.id }} - {{ item.name }} </option>
+                                            <select
+                                                class="form-select"
+                                                id="typeDocId"
+                                                v-validate
+                                                v-model="form.typeDocId"
+                                                required
+                                            >
+                                                <option value="">{{ $t('labelSelect') }}</option>
+                                                <option
+                                                    :value="item.id"
+                                                    v-for="(item, index) in typeDocs"
+                                                    :key="index"
+                                                >
+                                                    {{ item.id }} - {{ item.name }}
+                                                </option>
                                             </select>
                                         </div>
                                     </div>
@@ -46,37 +93,75 @@
                                             <label class="form-label" for="questionsId">
                                                 {{ $t('labelQuestions') }}
                                                 <span v-if="form.questions.length == 1">
-                                                    (<strong>{{ form.questions.length }}</strong> {{ $t('labelSelected')
-                                                    }})
+                                                    (
+                                                    <strong>{{ form.questions.length }}</strong>
+                                                    {{ $t('labelSelected') }})
                                                 </span>
                                                 <span v-if="form.questions.length > 1">
-                                                    (<strong>{{ form.questions.length }}</strong> {{
-                                                    $t('labelSelecteds') }})
+                                                    (
+                                                    <strong>{{ form.questions.length }}</strong>
+                                                    {{ $t('labelSelecteds') }})
                                                 </span>
-                                                <span class="badge rounded-pill bg-primary badge-custom"
-                                                    style="cursor: pointer;" :title="$t('labelClearSelection')"
-                                                    @click="form.questions = []" v-if="form.questions.length > 0">
-                                                    <i class="fas fa-trash"
-                                                        style="font-size: .8em;float: left;margin: 2px 4px 0 auto;"></i>
+                                                <span
+                                                    class="badge rounded-pill bg-primary badge-custom"
+                                                    style="cursor: pointer"
+                                                    :title="$t('labelClearSelection')"
+                                                    @click="form.questions = []"
+                                                    v-if="form.questions.length > 0"
+                                                >
+                                                    <i
+                                                        class="fas fa-trash"
+                                                        style="
+                                                            font-size: 0.8em;
+                                                            float: left;
+                                                            margin: 2px 4px 0 auto;
+                                                        "
+                                                    ></i>
                                                     {{ $t('labelClearSelection') }}
                                                 </span>
                                             </label>
                                             <div>
-                                                <Multiselect v-model="form.questions" :options="questionsOptions"
-                                                    mode="tags" :breakTags="true" :object="true"
-                                                    :close-on-select="false" :searchable="true" :create-option="false"
-                                                    ref="questionsInpt" :placeholder="$t('labelSelectQuestions')"
-                                                    :noOptionsText="$t('labelNoQuestionsRegistered')"
-                                                    :noResultsText="form.questions.length === questionsOptions.length ? $t('labelNoMoreQuestionsAvailable') : $t('labelQuestionNotFound')" />
+                                                <Multiselect
+                                                    v-model="form.questions"
+                                                    :options="questionsOptions"
+                                                    mode="tags"
+                                                    :breakTags="true"
+                                                    :object="true"
+                                                    :close-on-select="false"
+                                                    :searchable="true"
+                                                    :create-option="false"
+                                                    ref="questionsInpt"
+                                                    :placeholder="$t('labelSelectQuestions')"
+                                                    :noOptionsText="
+                                                        $t('labelNoQuestionsRegistered')
+                                                    "
+                                                    :noResultsText="
+                                                        form.questions.length ===
+                                                        questionsOptions.length
+                                                            ? $t('labelNoMoreQuestionsAvailable')
+                                                            : $t('labelQuestionNotFound')
+                                                    "
+                                                />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary m-2" :title="$t('labelCreate')"
-                                    style="float:right"> {{ $t('labelCreate') }} </button>
-                                <router-link class="btn btn-secondary m-2 btn-custom-cancel" style="float:right"
-                                    :to="{ name: 'Quiz', query: { page: '1' } }" :title="$t('labelCancel')"> {{
-                                    $t('labelCancel') }} </router-link>
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary m-2"
+                                    :title="$t('labelCreate')"
+                                    style="float: right"
+                                >
+                                    {{ $t('labelCreate') }}
+                                </button>
+                                <router-link
+                                    class="btn btn-secondary m-2 btn-custom-cancel"
+                                    style="float: right"
+                                    :to="{ name: 'Quiz', query: { page: '1' } }"
+                                    :title="$t('labelCancel')"
+                                >
+                                    {{ $t('labelCancel') }}
+                                </router-link>
                             </form>
                         </div>
                     </div>
@@ -85,189 +170,212 @@
             </div>
         </div>
         <!-- Component ToastAlert -->
-        <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
+        <toast-alert
+            :showToast="toastShow"
+            :colorToast="toastColor"
+            :messageToast="toastMessage"
+            @close="closeToast"
+        />
     </main>
 </template>
 
 <script>
-import NavBar from '@/components/common/nav-bar';
-import Breadcrumb from '@/components/common/breadcrumb';
-import Multiselect from '@vueform/multiselect';
-import ToastAlert from '@/components/common/toast-alert';
-import api from "@/services/api";
+    import NavBar from '@/components/common/nav-bar'
+    import Breadcrumb from '@/components/common/breadcrumb'
+    import Multiselect from '@vueform/multiselect'
+    import ToastAlert from '@/components/common/toast-alert'
+    import api from '@/services/api'
 
-export default {
-    name: "QuizFormNew",
-    directives: {
-        validate: {
-            inserted: function (el, binding) {
-                el.addEventListener('input', function () {
-                    el.setCustomValidity('');
-                    if (!el.checkValidity()) {
-                        el.reportValidity();
-                    }
-                });
+    export default {
+        name: 'QuizFormNew',
+        directives: {
+            validate: {
+                inserted: function (el, binding) {
+                    el.addEventListener('input', function () {
+                        el.setCustomValidity('')
+                        if (!el.checkValidity()) {
+                            el.reportValidity()
+                        }
+                    })
 
-                el.addEventListener('invalid', function (event) {
-                    event.preventDefault();
-                    if (el.validity.valueMissing) {
-                        el.setCustomValidity(this.$t('labelFillInThisField'));
-                    }
-                    el.reportValidity();
-                });
-            }
-        }
-    },
-    data() {
-        return {
-            crumbsData: [],
-            sidebarData: "QuizNew",
-            typeDocs: [],
-            questionsOptions: [],
-            form: {
-                title: this.$route.query.title ? this.$route.query.title : '',
-                typeDocId: '',
-                questions: [],
+                    el.addEventListener('invalid', function (event) {
+                        event.preventDefault()
+                        if (el.validity.valueMissing) {
+                            el.setCustomValidity(this.$t('labelFillInThisField'))
+                        }
+                        el.reportValidity()
+                    })
+                },
             },
-            myInterval: null,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
-        }
-    },
-    components: {
-        NavBar,
-        Breadcrumb,
-        Multiselect,
-        ToastAlert,
-    },
-    watch: {
-        '$store.state.userProfile.language': function () {
-            this.setCrumbsData();
         },
-    },
-    methods: {
-        setCrumbsData: function () {
-            this.crumbsData = [
-                { crumb: this.$t('labelQuestionnaires'), link: { to: 'Quiz' } },
-                { crumb: this.$t('labelNew'), link: { to: 'QuizNew' } },
-            ];
-        },
-        getTypeDocs: function () {
-            let self = this;
-            api.get('/TypeDoc/FindAll')
-                .then(function (response) { // Handle success
-                    self.typeDocs = response.data;
-                }).catch(function (e) { // Handle error
-                    console.log(e);
-                }).finally(function () { // Always executed
-                    console.log("Finished request.");
-                });
-        },
-        getQuestions: function () {
-            let self = this;
-            api.get('/Question/FindAll')
-                .then(function (response) { // Handle success
-                    for (let i = 0; i < response.data.length; i++) {
-                        var item = {
-                            value: response.data[i].id,
-                            label: response.data[i].id + " - " + response.data[i].description
-                        };
-                        self.questionsOptions.push(item);
-                    }
-                }).catch(function (e) { // Handle error
-                    console.log(e);
-                }).finally(function () { // Always executed
-                    console.log("Finished request.");
-                });
-        },
-        save: function (e) {
-            e.preventDefault();
-            var paramsData = {
-                title: this.form.title,
-                typeDocId: this.form.typeDocId,
-                questionsId: this.form.questions.map(obj => obj.value),
-            };
-            if (paramsData.questionsId.length == 0) { // If no question is selected
-                this.$refs.questionsInpt.focus();
-                this.clearMyInterval();
-                this.alertToast(this.$t('labelNoQuestionsWereSelected'), "toast-danger");
-            } else {
-                let self = this;
-                api.post('/Questionnaire', paramsData)
-                    .then(function (response) { // Handle success
-                        self.$router.push({ name: 'Quiz' });
-                    }).catch(function (e) { // Handle error
-                        if (e.response.status == 409) {
-                            self.alertToast(self.$t('labelDuplicatedQuestionnaire'), "toast-warning");
-                        }
-                        else {
-                            self.alertToast(self.$t('labelQuestionnaireError'), "toast-warning");
-                        }
-                    }).finally(function () { // Always executed
-                        console.log("Finished request.");
-                    });
+        data() {
+            return {
+                crumbsData: [],
+                sidebarData: 'QuizNew',
+                typeDocs: [],
+                questionsOptions: [],
+                form: {
+                    title: this.$route.query.title ? this.$route.query.title : '',
+                    typeDocId: '',
+                    questions: [],
+                },
+                myInterval: null,
+                toastShow: false,
+                toastColor: '',
+                toastMessage: '',
             }
         },
-        alertToast: function (msg, color) {
-            this.toastMessage = msg;
-            this.toastColor = color;
-            this.toastShow = true;
-            let self = this;
-            this.myInterval = setInterval(function () {
-                self.toastMessage = "";
-                self.toastColor = "";
-                self.toastShow = false;
-                clearInterval(self.myInterval);
-            }, 4000);
+        components: {
+            NavBar,
+            Breadcrumb,
+            Multiselect,
+            ToastAlert,
         },
-        closeToast: function () {
-            this.toastShow = false;
-            this.clearMyInterval();
+        watch: {
+            '$store.state.userProfile.language': function () {
+                this.setCrumbsData()
+            },
         },
-        clearMyInterval: function () {
-            clearInterval(this.myInterval);
-            this.myInterval = null;
+        methods: {
+            setCrumbsData: function () {
+                this.crumbsData = [
+                    { crumb: this.$t('labelQuestionnaires'), link: { to: 'Quiz' } },
+                    { crumb: this.$t('labelNew'), link: { to: 'QuizNew' } },
+                ]
+            },
+            getTypeDocs: function () {
+                let self = this
+                api.get('/TypeDoc/FindAll')
+                    .then(function (response) {
+                        // Handle success
+                        self.typeDocs = response.data
+                    })
+                    .catch(function (e) {
+                        // Handle error
+                        console.log(e)
+                    })
+                    .finally(function () {
+                        // Always executed
+                        console.log('Finished request.')
+                    })
+            },
+            getQuestions: function () {
+                let self = this
+                api.get('/Question/FindAll')
+                    .then(function (response) {
+                        // Handle success
+                        for (let i = 0; i < response.data.length; i++) {
+                            var item = {
+                                value: response.data[i].id,
+                                label: response.data[i].id + ' - ' + response.data[i].description,
+                            }
+                            self.questionsOptions.push(item)
+                        }
+                    })
+                    .catch(function (e) {
+                        // Handle error
+                        console.log(e)
+                    })
+                    .finally(function () {
+                        // Always executed
+                        console.log('Finished request.')
+                    })
+            },
+            save: function (e) {
+                e.preventDefault()
+                var paramsData = {
+                    title: this.form.title,
+                    typeDocId: this.form.typeDocId,
+                    questionsId: this.form.questions.map((obj) => obj.value),
+                }
+                if (paramsData.questionsId.length == 0) {
+                    // If no question is selected
+                    this.$refs.questionsInpt.focus()
+                    this.clearMyInterval()
+                    this.alertToast(this.$t('labelNoQuestionsWereSelected'), 'toast-danger')
+                } else {
+                    let self = this
+                    api.post('/Questionnaire', paramsData)
+                        .then(function (response) {
+                            // Handle success
+                            self.$router.push({ name: 'Quiz' })
+                        })
+                        .catch(function (e) {
+                            // Handle error
+                            if (e.response.status == 409) {
+                                self.alertToast(
+                                    self.$t('labelDuplicatedQuestionnaire'),
+                                    'toast-warning'
+                                )
+                            } else {
+                                self.alertToast(self.$t('labelQuestionnaireError'), 'toast-warning')
+                            }
+                        })
+                        .finally(function () {
+                            // Always executed
+                            console.log('Finished request.')
+                        })
+                }
+            },
+            alertToast: function (msg, color) {
+                this.toastMessage = msg
+                this.toastColor = color
+                this.toastShow = true
+                let self = this
+                this.myInterval = setInterval(function () {
+                    self.toastMessage = ''
+                    self.toastColor = ''
+                    self.toastShow = false
+                    clearInterval(self.myInterval)
+                }, 4000)
+            },
+            closeToast: function () {
+                this.toastShow = false
+                this.clearMyInterval()
+            },
+            clearMyInterval: function () {
+                clearInterval(this.myInterval)
+                this.myInterval = null
+            },
+            cleanForm: function () {
+                this.form = {
+                    title: '',
+                    typeDocId: '',
+                    questions: [],
+                }
+            },
         },
-        cleanForm: function () {
-            this.form = {
-                title: '',
-                typeDocId: '',
-                questions: [],
-            };
+        computed: {},
+        created() {
+            this.setCrumbsData()
+            this.getTypeDocs()
+            this.getQuestions()
         },
-    },
-    computed: {},
-    created() {
-        this.setCrumbsData();
-        this.getTypeDocs();
-        this.getQuestions();
-    },
-    mounted() {
-        this.$refs.titleInpt.focus();
-    },
-    unmounted() { },
-}
+        mounted() {
+            this.$refs.titleInpt.focus()
+        },
+        unmounted() {},
+    }
 </script>
 
 <style scoped>
-@import "@vueform/multiselect/themes/default.css";
+    @import '@vueform/multiselect/themes/default.css';
 
-.multiselect-dropdown {
-    max-height: var(--ms-max-height) !important;
-}
+    .multiselect-dropdown {
+        max-height: var(--ms-max-height) !important;
+    }
 
-.form-save {
-    padding-top: 20px !important;
-}
+    .form-save {
+        padding-top: 20px !important;
+    }
 
-.btn-custom-cancel {
-    font-weight: inherit !important;
-    padding: 8px 12px !important;
-    border: 0 !important;
-}
+    .btn-custom-cancel {
+        font-weight: inherit !important;
+        padding: 8px 12px !important;
+        border: 0 !important;
+    }
 
-.container-fluid {
-    padding: 0 13px;
-}
+    .container-fluid {
+        padding: 0 13px;
+    }
 </style>

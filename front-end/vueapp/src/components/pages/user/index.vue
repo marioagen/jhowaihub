@@ -7,18 +7,51 @@
                     <p>{{ $t('labelUserManagementDescription') }}</p>
                     <ul class="nav nav-pills nav-fill mt-3" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link rounded-pill btn-custom active" id="user-tab" data-bs-toggle="tab" data-bs-target="#user" type="button" role="tab" aria-controls="user" aria-selected="true">
-                                <img class="icon-pill" src="@/assets/img/users-tab.svg" width="16"/>{{ $t('labelUsers') }}
+                            <a
+                                class="nav-link rounded-pill btn-custom active"
+                                id="user-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#user"
+                                type="button"
+                                role="tab"
+                                aria-controls="user"
+                                aria-selected="true"
+                            >
+                                <img
+                                    class="icon-pill"
+                                    src="@/assets/img/users-tab.svg"
+                                    width="16"
+                                />
+                                {{ $t('labelUsers') }}
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link rounded-pill btn-custom" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button" role="tab" aria-controls="profile" aria-selected="false">
-                                <img class="icon-pill" src="@/assets/img/teams-tab.svg" width="16"/> {{ $t('labelTeams') }}
+                            <a
+                                class="nav-link rounded-pill btn-custom"
+                                id="team-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#team"
+                                type="button"
+                                role="tab"
+                                aria-controls="profile"
+                                aria-selected="false"
+                            >
+                                <img
+                                    class="icon-pill"
+                                    src="@/assets/img/teams-tab.svg"
+                                    width="16"
+                                />
+                                {{ $t('labelTeams') }}
                             </a>
                         </li>
                     </ul>
                     <div class="tab-content mt-3">
-                        <div class="tab-pane active" id="user" role="tabpanel" aria-labelledby="user-tab">
+                        <div
+                            class="tab-pane active"
+                            id="user"
+                            role="tabpanel"
+                            aria-labelledby="user-tab"
+                        >
                             <!-- Users -->
                             {{ $t('labelUsers') }}
                         </div>
@@ -33,22 +66,22 @@
     </main>
 </template>
 <script>
-import TeamsManager from '@/components/pages/user/team.vue';
+    import TeamsManager from '@/components/pages/user/team.vue'
 
-export default {
-    name: 'UserIndex',
-    data() {
-        return {
-        // Data properties can be added here if needed
-        };
-    },
-    components: {
-        TeamsManager,
-    },
-    methods: {
-        // Methods can be added here if needed
+    export default {
+        name: 'UserIndex',
+        data() {
+            return {
+                // Data properties can be added here if needed
+            }
+        },
+        components: {
+            TeamsManager,
+        },
+        methods: {
+            // Methods can be added here if needed
+        },
     }
-};
 </script>
 <style>
     .nav-pills {
@@ -56,8 +89,8 @@ export default {
         border-radius: 50rem !important;
     }
     .nav-pills .nav-link.btn-custom {
-        padding: .25rem .5rem;
-        font-size: .775rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.775rem;
         font-weight: 500;
         color: #323338;
     }
@@ -72,7 +105,7 @@ export default {
     }
 
     .manage-user {
-        font-size: .775rem;
+        font-size: 0.775rem;
         color: #323338;
     }
 

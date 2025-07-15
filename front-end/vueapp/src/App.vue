@@ -1,5 +1,5 @@
 ﻿<template>
-  <component :is="layout === 'auth' ? AuthLayout : DefaultLayout" />
+    <component :is="layout === 'auth' ? AuthLayout : DefaultLayout" />
 </template>
 
 <script setup>

@@ -1,9 +1,9 @@
-import mitt from 'mitt';
+import mitt from 'mitt'
 
-const emitter = mitt();
+const emitter = mitt()
 
 export default {
     emit: emitter.emit,
     on: emitter.on,
-    off: emitter.off
-};
+    off: emitter.off,
+}

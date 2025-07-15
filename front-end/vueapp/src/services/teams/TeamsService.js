@@ -1,10 +1,11 @@
-import api from "@/services/api";
-import PaginationDivider from "@/utils/paginationDivider";
-const divider = new PaginationDivider();
+import api from '@/services/api'
+import PaginationDivider from '@/utils/paginationDivider'
+const divider = new PaginationDivider()
 
 export default {
     getTeams(params) {
-        return api.get('/Team/Paged/', { params: params })
+        return api
+            .get('/Team/Paged/', { params: params })
             .then(({ data }) => {
                 return {
                     content: data.content,
@@ -13,19 +14,22 @@ export default {
                         totalPages: data.pageCount,
                         rowCount: data.rowCount,
                         totalItems: data.rowCount,
-                    }
+                    },
                 }
-            }).catch(function (e) {
-                console.log(e);
-            });
+            })
+            .catch(function (e) {
+                console.log(e)
+            })
     },
     deleteTeamById(teamId) {
-        return api.delete('/Team/DeleteByIds', { data: [teamId] })
+        return api
+            .delete('/Team/DeleteByIds', { data: [teamId] })
             .then(() => {
-                return true;
-            }).catch(function (e) { 
-                console.log(e);
-                return false;
-            });
+                return true
+            })
+            .catch(function (e) {
+                console.log(e)
+                return false
+            })
     },
 }

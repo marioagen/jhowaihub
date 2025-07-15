@@ -1,26 +1,73 @@
 ﻿<template>
-    <div class="modal fade show" id="exampleModalForm" tabindex="-1" aria-labelledby="exampleModalLabel">
+    <div
+        class="modal fade show"
+        id="exampleModalForm"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+    >
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel" v-if="form.id > 0">{{ $t('labelEditQuestion') }}</h5>
-                    <h5 class="modal-title" id="exampleModalLabel" v-else>{{ $t('labelNewQuestion') }}</h5>
-                    <button type="button" class="btn-close" :title="$t('labelClose')" data-bs-dismiss="modal" aria-label="Close" @click="close"></button>
+                    <h5 class="modal-title" id="exampleModalLabel" v-if="form.id > 0">
+                        {{ $t('labelEditQuestion') }}
+                    </h5>
+                    <h5 class="modal-title" id="exampleModalLabel" v-else>
+                        {{ $t('labelNewQuestion') }}
+                    </h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        :title="$t('labelClose')"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        @click="close"
+                    ></button>
                 </div>
                 <div class="modal-body prevent-text-select">
                     <div>
                         <form @submit="save">
                             <div class="mb-3">
-                                <label class="form-label" for="descId">{{ $t('labelDescription') }}</label>
-                                <textarea class="form-control" rows="5" id="descId" 
-                                v-validate 
-                                name="text" v-model="form.description" required></textarea>
+                                <label class="form-label" for="descId">
+                                    {{ $t('labelDescription') }}
+                                </label>
+                                <textarea
+                                    class="form-control"
+                                    rows="5"
+                                    id="descId"
+                                    v-validate
+                                    name="text"
+                                    v-model="form.description"
+                                    required
+                                ></textarea>
                             </div>
                             <!-- Create button -->
-                            <button type="submit" class="btn btn-primary m-2" :title="$t('labelCreate')" style="float:right" v-if="form.id === 0">{{ $t('labelCreate') }}</button>
+                            <button
+                                type="submit"
+                                class="btn btn-primary m-2"
+                                :title="$t('labelCreate')"
+                                style="float: right"
+                                v-if="form.id === 0"
+                            >
+                                {{ $t('labelCreate') }}
+                            </button>
                             <!-- Save button -->
-                            <button type="submit" class="btn btn-primary m-2" :title="$t('labelSave')" style="float:right" v-else>{{ $t('labelSave') }}</button>
-                            <a  class="btn btn-light m-2 btn-custom-cancel" :title="$t('labelCancel')" style="float:right" @click="close">{{ $t('labelCancel') }}</a>
+                            <button
+                                type="submit"
+                                class="btn btn-primary m-2"
+                                :title="$t('labelSave')"
+                                style="float: right"
+                                v-else
+                            >
+                                {{ $t('labelSave') }}
+                            </button>
+                            <a
+                                class="btn btn-light m-2 btn-custom-cancel"
+                                :title="$t('labelCancel')"
+                                style="float: right"
+                                @click="close"
+                            >
+                                {{ $t('labelCancel') }}
+                            </a>
                         </form>
                     </div>
                 </div>
@@ -30,32 +77,32 @@
 </template>
 <script>
     export default {
-        name: "ModalForm",
+        name: 'ModalForm',
         directives: {
             validate: {
                 inserted: function (el, binding) {
                     el.addEventListener('input', function () {
-                        el.setCustomValidity('');
+                        el.setCustomValidity('')
                         if (!el.checkValidity()) {
-                            el.reportValidity();
+                            el.reportValidity()
                         }
-                    });
+                    })
 
                     el.addEventListener('invalid', function (event) {
-                        event.preventDefault();
+                        event.preventDefault()
                         if (el.validity.valueMissing) {
-                            el.setCustomValidity(this.$t('labelFillInThisField'));
+                            el.setCustomValidity(this.$t('labelFillInThisField'))
                         }
-                        el.reportValidity();
-                    });
-                }
-            }
+                        el.reportValidity()
+                    })
+                },
+            },
         },
         props: {
             dataEditing: {
                 required: true,
                 type: Object,
-                default: {}
+                default: {},
             },
         },
         data() {
@@ -68,19 +115,20 @@
         },
         methods: {
             save: function (e) {
-                e.preventDefault();
-                if (this.form.id != 0) { // Edit
-                    this.$emit('openEdit', this.form);
-                } else { // Create
-                    this.$emit('openAdd', this.form.description);
+                e.preventDefault()
+                if (this.form.id != 0) {
+                    // Edit
+                    this.$emit('openEdit', this.form)
+                } else {
+                    // Create
+                    this.$emit('openAdd', this.form.description)
                 }
             },
             close: function () {
-                this.$emit('close');
+                this.$emit('close')
             },
         },
-        mounted() {
-        },
+        mounted() {},
     }
 </script>
 <style scoped>

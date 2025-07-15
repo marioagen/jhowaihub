@@ -6,10 +6,10 @@
 
 <script>
     export default {
-        name: "ExampleCmpnt",
+        name: 'ExampleCmpnt',
         data() {
             return {
-                title: "Component Example",
+                title: 'Component Example',
             }
         },
         components: {},

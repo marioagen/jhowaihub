@@ -1,80 +1,80 @@
 <template>
-    <span 
-        ref="textElement" 
+    <span
+        ref="textElement"
         class="truncate-text"
-        :class="{ 'truncate-text-icon': isTruncated }"            
+        :class="{ 'truncate-text-icon': isTruncated }"
         v-html="processedText"
         @resize="checkTruncation"
-        @click="openModalShow">
-    </span>    
+        @click="openModalShow"
+    ></span>
     <modal-show v-if="modalShowDesc" @close="closeModal" :dataShow="dataShow"></modal-show>
 </template>
-  
+
 <script>
-    import ModalShow from '@/components/common/modal-show.vue';
+    import ModalShow from '@/components/common/modal-show.vue'
 
     export default {
-        name: "TruncateText",
+        name: 'TruncateText',
         props: {
             item: {
                 required: true,
                 type: Object,
-                default: {}
+                default: {},
             },
             text: {
                 required: true,
                 type: String,
-                default: ''
-            }
+                default: '',
+            },
         },
         data() {
             return {
-                title: "Component TruncateText",
+                title: 'Component TruncateText',
                 isTruncated: false,
-                processedText: "",
+                processedText: '',
                 modalShowDesc: false,
-                dataShow: {}
-            };
+                dataShow: {},
+            }
         },
         components: {
-            ModalShow
+            ModalShow,
         },
         mounted() {
-            this.processText();
-            this.checkTruncation();
-            window.addEventListener("resize", this.checkTruncation);
+            this.processText()
+            this.checkTruncation()
+            window.addEventListener('resize', this.checkTruncation)
         },
         beforeDestroy() {
-            window.removeEventListener("resize", this.checkTruncation);
+            window.removeEventListener('resize', this.checkTruncation)
         },
         methods: {
             processText() {
-                this.processedText = this.text.replace(/\n/g, "<br />");;
+                this.processedText = this.text.replace(/\n/g, '<br />')
             },
             checkTruncation() {
                 this.$nextTick(() => {
-                    const span = this.$refs.textElement;                    
-                    this.isTruncated = false;
+                    const span = this.$refs.textElement
+                    this.isTruncated = false
                     if (span) {
-                        this.isTruncated = span.scrollWidth > span.clientWidth;
+                        this.isTruncated = span.scrollWidth > span.clientWidth
                     }
-                });
+                })
             },
             openModalShow: function () {
-                if (this.isTruncated){
-                    this.modalShowDesc = true;
-                    this.dataShow = this.item;
-                    document.getElementsByTagName("BODY")[0].children[1].className += " active";
+                if (this.isTruncated) {
+                    this.modalShowDesc = true
+                    this.dataShow = this.item
+                    document.getElementsByTagName('BODY')[0].children[1].className += ' active'
                 }
             },
             closeModal: function () {
-                this.modalShowDesc = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+                this.modalShowDesc = false
+                document.getElementsByTagName('BODY')[0].children[1].className = 'overlay'
             },
-        }
-    };
+        },
+    }
 </script>
-  
+
 <style>
     .truncate-text {
         display: inline-block;
@@ -83,18 +83,17 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         position: relative;
-        padding-right: 25px; 
+        padding-right: 25px;
     }
     .truncate-text-icon::after {
-        content: "\f06e"; 
-        font-family: "Font Awesome 5 Free"; 
+        content: '\f06e';
+        font-family: 'Font Awesome 5 Free';
         font-weight: 900;
         position: absolute;
-        right: 5px; 
-        top: 50%; 
-        transform: translateY(-50%); 
-        cursor: pointer; 
-        pointer-events: auto; 
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        pointer-events: auto;
     }
 </style>
-  
