@@ -27,9 +27,9 @@
 
 <script>
 import ModalAlert from '@/components/common/modal-alert';
-import ModalUser from '@/components/user-manager/users/modals/new-user.vue';
+import ModalUser from '@/components/user-manager/users/modals/UserModal.vue';
 import paginationDivider from "@/utils/paginationDivider";
-import UsersTable from "@/components/user-manager/users/users-table.vue";
+import UsersTable from "@/components/user-manager/users/UsersTable.vue";
 import SearchBar from '@/components/common/search-bar';
 
 export default {

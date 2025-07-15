@@ -12,8 +12,10 @@
                         {{$t('labelDelete')}}
                     </button>
                 </div>
-                <TypesTable ref="TypesTable"
-        @toast="handleToast" />
+                <TypesTable 
+                    ref="TypesTable"
+                    @toast="handleToast" 
+                />
         </div>
      </div>
     </main>
@@ -36,11 +38,9 @@
     import Breadcrumb from '@/components/common/breadcrumb';
     import SearchBar from '@/components/common/search-bar';
     import ModalForm from '@/components/pages/type/modal-form';
-    import ModalAlert from '@/components/common/modal-alert';
     import ToastAlert from '@/components/common/toast-alert';
     import paginationDivider from "@/utils/paginationDivider";
-    import Pagination from '@/components/common/pagination';
-    import TypesTable from "@/components/types/types-table.vue";
+    import TypesTable from "@/components/types/TypesTable.vue";
     import TypesService from "@/services/types/TypesService";
 
     export default {
@@ -75,9 +75,7 @@
             Breadcrumb,
             SearchBar,
             ModalForm,
-            ModalAlert,
             ToastAlert,
-            Pagination,
             TypesTable
         },
         watch: {

@@ -1,57 +1,69 @@
 <template>
+    <button 
+        v-if="showMultiDelete"
+        class="btn btn-outline-danger btn-sm mb-2 ms-2"
+        @click="deleteMultipleTypes"
+    >
+        {{ $t("labelDelete") }}
+    </button>
     <div>
-        <button v-if="showMultiDelete"
-                class="btn btn-outline-danger btn-sm mb-2 ms-2"
-                @click="deleteMultipleTypes">
-            {{ $t("labelDelete") }}
-        </button>
-        <div>
-            <table-component modalName="labelTypes"
-                             emptyMessage="labelNoDocumentTypeWasFound"
-                             :data="table.data"
-                             :columns="table.columns"
-                             :isLoading="table.isLoading"
-                             :pagination="table.pagination"
-                              @change-page="changePage">
-                <template #cell-created="{ data }">
-                    {{ formatDate(data.row.created) }}
-                </template>
-                <template #cell-actions="{ data }">
-                    <button class="btn btn-outline-success btn-sm"
-                            @click="editType(data.row)">
-                        <LucideIcon
-                            icon="SquarePen"
-                        />
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm ms-2"
-                            @click="confirmationDialog(data.row)">
-                        <LucideIcon
-                            icon="Trash2"
-                        />
-                    </button>
-                </template>
-            </table-component>
-        </div>
-        <modal-form v-if="modalTypeShow"
-                    :dataEditing="selectedType"
-                    @openEdit="editTypeRequest"
-                    @close="closeModal" />
-        <modal-alert v-if="modalAlertShow"
-                     :type="'Confirm'"
-                     :entity="selectedType"
-                     :alertTitle="$t('labelYouAreAboutToDeleteDocumentType')"
-                     :alertMessage="$t('labelThisActionCannotBeUndone')"
-                     :okLabel="$t('labelConfirm')"
-                     :cancelLabel="$t('labelCancel')"
-                     @open="deleteType"
-                     @close="closeModal" />
+        <TableComponent
+            modalName="labelTypes"
+            emptyMessage="labelNoDocumentTypeWasFound"
+            :data="table.data"
+            :columns="table.columns"
+            :isLoading="table.isLoading"
+            :pagination="table.pagination"
+            @selectedRows="selectedRows"
+            @change-page="changePage"
+        >
+           <template #cell-created="{ data }">
+                {{ formatDate(data.row.created) }}
+            </template>
+           <template #cell-actions="{ data }">
+                <button
+                    class="btn btn-outline-success btn-sm table-btn"
+                    @click="editType(data.row)"
+                >
+                    <LucideIcon
+                        icon="SquarePen"
+                    />
+                </button>
+                <button
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn"
+                    @click="confirmationDialog(data.row)"
+                >
+                    <LucideIcon
+                        icon="Trash2"
+                    />
+                </button>
+            </template>
+        </TableComponent>
+        
+        <modal-form 
+            v-if="modalTypeShow"
+            :dataEditing="selectedType"
+            @openEdit="editTypeRequest"
+            @close="closeModal" 
+        />
+        <modal-alert 
+            v-if="modalAlertShow"
+            :type="'Confirm'"
+            :entity="selectedType"
+            :alertTitle="$t('labelYouAreAboutToDeleteDocumentType')"
+            :alertMessage="$t('labelThisActionCannotBeUndone')"
+            :okLabel="$t('labelConfirm')"
+            :cancelLabel="$t('labelCancel')"
+            @open="deleteType"
+            @close="closeModal" 
+        />
     </div>
 </template>
 
 <script>
     import dates from "@/helpers/Dates";
     import TypesService from "@/services/types/TypesService";
-    import TableComponent from "@/components/global/table-component.vue";
+    import TableComponent from "@/components/global/TableComponent.vue";
     import ModalForm from '@/components/pages/type/modal-form';
     import ModalAlert from '@/components/common/modal-alert';
     import ToastAlert from '@/components/common/toast-alert';
