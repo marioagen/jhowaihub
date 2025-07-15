@@ -2,7 +2,7 @@
     <div class="mt-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h6 class="mb-0"> {{ $t('labelTeams') }}</h6>
+                <h6 class="mb-0 fw-bold"> {{ $t('labelTeams') }}</h6>
                 <p><small class="text-muted">{{ $t('labelTeamsMessage') }}</small></p>
             </div>
             <button class="btn btn-primary btn-sm"
@@ -12,7 +12,7 @@
         </div>
         <div class="card mb-3">
             <div class="card-body">
-                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
+                <SearchComponent :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
             </div>
         </div>
         <teams-table ref="TeamsTable" />
@@ -24,7 +24,7 @@
 import ModalTeam from '@/components/user-manager/teams/modals/TeamModal.vue';
 import paginationDivider from "@/utils/paginationDivider";
 import TeamsTable from "@/components/user-manager/teams/TeamsTable.vue";
-import SearchBar from '@/components/common/search-bar';
+import SearchComponent from '@/components/global/SearchComponent.vue';
 
 export default {
     name: 'TeamsManager',
@@ -63,7 +63,7 @@ export default {
     components: {
         ModalTeam,
         TeamsTable,
-        SearchBar
+        SearchComponent
     },
     methods: {
         setMenuActions: function () {
