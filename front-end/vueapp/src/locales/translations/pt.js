@@ -202,7 +202,9 @@
     labelUserError: "Usuário inválido",
     labelTeamError: "Time inválido",
     labelErrorTeamAlreadyExists: "Time já cadastrado",
-    labelConfirmTitle: "Tem certeza?",
+    labelConfirmTitle: "Confirmação",
+    labelMessage: "Tem certeza?",
+    labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
 }
 

@@ -202,7 +202,9 @@
     labelUserError: "Usuario no válido",
     labelTeamError: "Equipo no válido",
     labelErrorTeamAlreadyExists: "Equipo ya registrado",
-    labelConfirmTitle: "Certeza?",
+    labelConfirmTitle: "Confirmação",
+    labelMessage: "Tem certeza?",
+    labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
 }
 
