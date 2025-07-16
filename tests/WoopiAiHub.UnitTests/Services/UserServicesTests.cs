@@ -48,7 +48,6 @@ namespace WoopiAiHub.UnitTests.Services
                 _marketPlaceApiMock.Object,
                  configMock.Object,
                 _teamRepositoryMock.Object
-
             );
         }
 

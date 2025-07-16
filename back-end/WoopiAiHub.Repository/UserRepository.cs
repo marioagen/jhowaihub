@@ -44,6 +44,12 @@ namespace WoopiAiHub.Repository
                                        .ToListAsync();
         }
 
+        /// <summary>
+        /// Asynchronously retrieves a user by their unique reference identifier.
+        /// </summary>
+        /// <param name="referenceUserId">The unique identifier of the user to retrieve. This value must not be empty.</param>
+        /// <returns>A <see cref="User"/> object representing the user with the specified identifier,  or <see langword="null"/>
+        /// if no matching user is found.</returns>
         public async Task<User> FindByReferenceAsync(Guid referenceUserId)
         {
             return await _context.Users.Where(u => u.Id == referenceUserId)
