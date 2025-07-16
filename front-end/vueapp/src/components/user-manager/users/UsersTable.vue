@@ -25,13 +25,15 @@
             </template>
             <template #cell-teams="{ data }">
                 <div v-if="data.row.teams.length > 0">
-                    <div v-for="team in data.row.teams">
-                        <span class="badge">{{ team.name }}</span>
-                    </div>
+                    <BadgeOutlinedComponent
+                        v-for="team in data.row.teams"
+                        :key="team.id"
+                        :text="team.name"
+                        variant="primary"
+                        @setClick="filterByTeam(team)"
+                    />
                 </div>
-                <div v-else>
-                        <span>-</span>
-                </div>
+                <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
                 <div class="dropdown column-align"> 
@@ -78,9 +80,12 @@
     import ModalUser from '@/components/user-manager/users/modals/UserModal.vue';
     import ModalAlert from '@/components/common/modal-alert';
     import UserService from "@/services/users/UserService";
+    import BadgeOutlinedComponent from "@/components/core/BadgeOutlinedComponent.vue";
+
     export default {
         name: "UsersTable",
         components: {
+            BadgeOutlinedComponent,
             TableComponent,
             ModalUser,
             ModalAlert
@@ -190,8 +195,10 @@
             },
             changePage(page) {
                 this.getUsers({ search: '', page: page, type: null });
-            }
-
+            },
+            filterByTeam(team) {
+                console.log(team)
+            },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
@@ -201,17 +208,6 @@
 </script>
 
 <style scoped>
-
-    .badge {
-        display: inline-block;
-        background-color: #e0ecff;
-        color: #0057d8;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 12px;
-        margin-right: 4px;
-    }
-
     .initials {
         width: 30px;
         height: 30px;
