@@ -1,11 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -25,13 +19,13 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public bool Create(User user)
+        public async Task<bool> CreateAsync(User user)
         {
-            var existUser = _context.Users.Any(p => p.Email == user.Email && p.IsActive == true);
+            var existUser = await _context.Users.AnyAsync(p => p.Email == user.Email && p.IsActive == true);
             if (!existUser)
             {
-                _context.Users.Add(user);
-                _context.SaveChanges();
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
 
                 return true;
             }
@@ -43,11 +37,24 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public List<User> FindByIds(List<Guid> ids)
+        public async Task<List<User>> FindByIdsAsync(List<Guid> ids)
         {
-            return _context.Users.Where(u => ids.Contains(u.Id))
+            return await _context.Users.Where(u => ids.Contains(u.Id))
                                        .AsNoTracking()
-                                       .ToList();
+                                       .ToListAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a user by their unique reference identifier.
+        /// </summary>
+        /// <param name="referenceUserId">The unique identifier of the user to retrieve. This value must not be empty.</param>
+        /// <returns>A <see cref="User"/> object representing the user with the specified identifier,  or <see langword="null"/>
+        /// if no matching user is found.</returns>
+        public async Task<User> FindByReferenceAsync(Guid referenceUserId)
+        {
+            return await _context.Users.Where(u => u.Id == referenceUserId)
+                                       .AsNoTracking()
+                                       .FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -61,15 +68,15 @@ namespace WoopiAiHub.Repository
                 .Where(u => ids.Contains(u.Id))
                 .ToList();
 
-                foreach (var user in usersInDb)
-                {
-                    user.IsActive = false;
-                }
+            foreach (var user in usersInDb)
+            {
+                user.Deactivate();
+            }
 
-                _context.Users.UpdateRange(usersInDb);
-                _context.SaveChangesAsync();
+            _context.Users.UpdateRange(usersInDb);
+            _context.SaveChangesAsync();
 
-                return true;
+            return true;
         }
 
         /// <summary>
@@ -79,27 +86,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Update(User user)
         {
-            var existing = _context.Users
-                .Include(u => u.Teams)
-                .FirstOrDefault(u => u.Id == user.Id);
-
-            if (existing == null)
-                return false;
-
-            existing.Name = user.Name;
-            existing.Email = user.Email;
-            existing.IsActive = user.IsActive;
-
-            existing.Teams.Clear();
-            foreach (var team in user.Teams)
-            {
-                if (_context.Entry(team).State == EntityState.Detached)
-                    _context.Teams.Attach(team);
-
-                existing.Teams.Add(team);
-            }
-
-            _context.Users.Update(existing);
+            _context.Users.Update(user);
             _context.SaveChanges();
             return true;
         }
@@ -111,7 +98,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public IQueryable<UserDtoPaged> FindAllPaged(PagedDataDto pagedDataDto)
         {
-            var query = _context.Users.Where(p=> p.IsActive == true)
+            var query = _context.Users.Where(p => p.IsActive == true)
                 .Include(t => t.Teams)
                 .Select(t => new UserDtoPaged
                 {

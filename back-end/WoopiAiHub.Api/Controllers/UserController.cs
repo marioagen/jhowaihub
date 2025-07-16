@@ -35,8 +35,8 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> Create([FromBody] UserCreateDto userCreateDto,
                                                 [FromHeader] HeadersDto headersDto)
         {
-                var result = await _userServices.Create(userCreateDto, headersDto);
-                return Ok(result);
+            var result = await _userServices.Create(userCreateDto, headersDto);
+            return Ok(result);
         }
 
         /// <summary>
@@ -47,11 +47,11 @@ namespace WoopiAiHub.Api.Controllers
         [HttpDelete("DeactivateByIds")]
         [SwaggerOperation("Endpoint that receives the request to remove questions from the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task <IActionResult> DeactivateByIds([FromBody] List<Guid> ids)
+        public async Task<IActionResult> DeactivateByIds([FromBody] List<Guid> ids)
         {
-         
-                var result = await _userServices.DeactivateRange(ids);
-                return Ok(result);
+
+            var result = await _userServices.DeactivateRange(ids);
+            return Ok(result);
         }
 
         /// <summary>
@@ -62,11 +62,11 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut]
         [SwaggerOperation("EndPoint that update a question by passing an UserUpdateDto")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Update([FromBody]UserUpdateDto userUpdateDto,
+        public async Task<IActionResult> Update([FromBody] UserUpdateDto userUpdateDto,
                                                 [FromHeader] HeadersDto headersDto)
         {
-                var result = await _userServices.Update(userUpdateDto, headersDto);
-                return Ok(result);
+            var result = await _userServices.Update(userUpdateDto, headersDto);
+            return Ok(result);
         }
 
         /// <summary>
