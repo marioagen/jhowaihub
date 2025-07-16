@@ -48,7 +48,7 @@
                                 aria-controls="profile" 
                                 aria-selected="false"
                             >
-                                <LucideIcon icon="ClipboardList" size="16" />  {{ $t('labelTeams') }}
+                                <LucideIcon icon="Building" size="16" />  {{ $t('labelTeams') }}
                             </a>
                         </li>
                     </ul>
