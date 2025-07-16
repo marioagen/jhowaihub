@@ -2,7 +2,7 @@
     <div class="scroll-area mt-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h6 class="mb-0"> {{ $t('labelUsers') }}</h6>
+                <h6 class="mb-0 fw-bold"> {{ $t('labelUsers') }}</h6>
                 <p><small class="text-muted">{{ $t('labelUsersMessage') }}</small></p>
             </div>
             <button 
@@ -14,10 +14,14 @@
         </div>
         <div class="card mb-3">
             <div class="card-body">
-                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
+                <SearchComponent 
+                    :entity="entitySearch" 
+                    :resetInput="resetInputSearch" 
+                    @search="filterList" 
+                />
             </div>
         </div>
-        <users-table 
+        <UsersTable
             ref="UserTable"
         />
     </div>
@@ -31,6 +35,7 @@ import ModalUser from '@/components/user-manager/users/modals/UserModal.vue';
 import paginationDivider from "@/utils/paginationDivider";
 import UsersTable from "@/components/user-manager/users/UsersTable.vue";
 import SearchBar from '@/components/common/search-bar';
+import SearchComponent from '@/components/global/SearchComponent.vue';
 
 export default {
     name: 'UsersManager',
@@ -70,7 +75,8 @@ export default {
         ModalAlert,
         ModalUser,
         UsersTable,
-        SearchBar
+        SearchBar,
+        SearchComponent
     },
     methods: {
         setMenuActions: function () {
