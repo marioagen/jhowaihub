@@ -304,6 +304,121 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.False(result);
         }
+
+        [Theory(DisplayName = "Create should throw when required fields are missing")]
+        [Trait("CreateUser", "Validation")]
+        [InlineData("", "valid@email.com")]
+        [InlineData("Valid Name", "")]
+        [InlineData("", "")]
+        public async Task Create_ShouldThrowArgumentException_WhenNameOrEmailIsEmpty(string name, string email)
+        {
+            // Arrange
+            var dto = new UserCreateDto { Name = name, Email = email };
+            var headers = new HeadersDto { Tenant = "tenant" };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+                _userServices.Create(dto, headers));
+
+            Assert.Equal("Data cannot be empty", exception.Message);
+        }
+
+        [Fact(DisplayName = "Create should reactivate existing user")]
+        [Trait("CreateUser", "Reactivation")]
+        public async Task Create_ShouldReactivateUser_WhenUserAlreadyExists()
+        {
+            // Arrange
+            var dto = new UserCreateDto { Name = "Reactivated User", Email = "reactivate@test.com", TeamIds = [] };
+            var headers = new HeadersDto { Tenant = "tenant" };
+            var userId = Guid.NewGuid();
+
+            var existingUser = new User(userId, "Old Name", "old@email.com", false, DateTime.Now);
+
+            _marketPlaceApiMock
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(userId);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()))
+                .Returns(true);
+
+            // Act
+            var result = await _userServices.Create(dto, headers);
+
+            // Assert
+            Assert.True(result);
+            _userRepositoryMock.Verify(repo => repo.Update(It.Is<User>(u =>
+                u.Email == dto.Email && u.Name == dto.Name)), Times.Once);
+        }
+
+        [Fact(DisplayName = "Create should assign teams when TeamIds are present")]
+        [Trait("CreateUser", "Teams")]
+        public async Task Create_ShouldAssignTeams_WhenTeamIdsArePresent()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var dto = new UserCreateDto
+            {
+                Name = "Test User",
+                Email = "test@email.com",
+                TeamIds = new List<int> { 1, 2 }
+            };
+
+            var headers = new HeadersDto { Tenant = "tenant" };
+
+            var teams = new List<Team>
+            {
+                new Team("Team 1", 1, DateTime.Now),
+                new Team("Team 2", 2, DateTime.Now)
+            };
+
+            _marketPlaceApiMock
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(userId);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .ReturnsAsync((User?)null);
+
+            _teamRepositoryMock
+                .Setup(repo => repo.FindByIds(dto.TeamIds))
+                .Returns(teams);
+
+            _userRepositoryMock
+                .Setup(repo => repo.CreateAsync(It.IsAny<User>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _userServices.Create(dto, headers);
+
+            // Assert
+            Assert.True(result);
+            _userRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<User>(u =>
+                u.Teams.Count == 2)), Times.Once);
+        }
+
+        [Fact(DisplayName = "Create should return false when marketplace returns Guid.Empty")]
+        [Trait("CreateUser", "Marketplace Failure")]
+        public async Task Create_ShouldReturnFalse_WhenMarketplaceReturnsEmptyGuid()
+        {
+            // Arrange
+            var dto = new UserCreateDto { Name = "Test", Email = "fail@test.com", TeamIds = [] };
+            var headers = new HeadersDto { Tenant = "tenant" };
+
+            _marketPlaceApiMock
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(Guid.Empty);
+
+            // Act
+            var result = await _userServices.Create(dto, headers);
+
+            // Assert
+            Assert.False(result);
+        }
     }
 }
 
