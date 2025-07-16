@@ -48,7 +48,7 @@ namespace WoopiAiHub.UnitTests.Services
                 _marketPlaceApiMock.Object,
                  configMock.Object,
                 _teamRepositoryMock.Object
-                
+
             );
         }
 
@@ -77,7 +77,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock
                 .Setup(repo => repo.CreateAsync(It.IsAny<User>()))
                 .ReturnsAsync(true);
-           
+
 
             // Act
             var result = await _userServices.Create(userCreateDto, headersDto);
@@ -195,6 +195,115 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => _userServices.FindAllPaged(pagedDataDto));
+        }
+
+        [Fact(DisplayName = "UpdateUsers")]
+        [Trait("Update", "Success")]
+        public async Task Update_ShouldReturnTrue_WhenUpdateSucceed()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = userId,
+                Name = "Novo Nome",
+                Email = "novo@email.com",
+                TeamIds = new List<int> { 1, 2 }
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+            var user = new User(userId, "Antigo Nome", "antigo@email.com", true, DateTime.Now)
+            {
+                Teams = new List<Team>()
+            };
+            var teams = new List<Team>
+            {
+                new Team("Time 1", 1, DateTime.Now),
+                new Team("Time 2", 2, DateTime.Now)
+            };
+
+            _marketPlaceApiMock
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(userId);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByIdsAsync(It.Is<List<Guid>>(l => l.Contains(userId))))
+                .ReturnsAsync(new List<User> { user });
+
+            _userRepositoryMock
+               .Setup(repo => repo.FindByReferenceAsync(It.IsAny<Guid>()))
+               .ReturnsAsync(user);
+
+            _teamRepositoryMock
+                .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(teams);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()))
+                .Returns(true);
+
+            // Act
+            var result = await _userServices.Update(userUpdateDto, headersDto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal("Novo Nome", user.Name);
+            Assert.Equal("novo@email.com", user.Email);
+            Assert.Equal(2, user.Teams.Count);
+        }
+
+
+        [Fact(DisplayName = "UpdateUsers")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldReturnFalse_WhenUserNotFound()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "Nome",
+                Email = "email@email.com"
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+
+            _marketPlaceApiMock
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(userId);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByIdsAsync(It.Is<List<Guid>>(l => l.Contains(userId))))
+                .ReturnsAsync(new List<User>());
+
+            // Act
+            var result = await _userServices.Update(userUpdateDto, headersDto);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "UpdateUsers")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldReturnFalse_MktFail()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "Nome",
+                Email = "email@email.com"
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+
+            _marketPlaceApiMock
+               .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+               .ReturnsAsync(userId);
+
+            // Act
+            var result = await _userServices.Update(userUpdateDto, headersDto);
+
+            // Assert
+            Assert.False(result);
         }
     }
 }
