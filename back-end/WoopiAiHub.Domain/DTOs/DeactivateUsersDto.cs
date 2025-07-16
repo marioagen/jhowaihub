@@ -8,7 +8,7 @@ namespace WoopiAiHub.Domain.DTOs
 {
     public class DeactivateUsersDto
     {
-        public IEnumerable<Guid> Reference_users { get; set; }
+        public IEnumerable<Guid> ReferenceUsers { get; set; } = new List<Guid>();
     }
 
 }

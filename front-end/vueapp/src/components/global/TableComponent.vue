@@ -1,12 +1,12 @@
 <template>
     <div class="table-div shadow-sm">
-        <p class="mx-2 my-2">
+        <p class="mx-1 my-1">
             <small>
                 {{ $t(modalName) }} ({{ pagination.totalItems }})
             </small>
         </p>
         <table 
-            class="table table-hover table-light table-sm table-responsive mt-2 mb-4 custom-table"
+            class="table table-hover table-light table-sm table-responsive custom-table"
         >
             <thead>
                 <tr>
@@ -78,7 +78,7 @@
                 </tr>
             </tbody>
         </table>
-        <pagination-component
+        <PaginationComponent
             v-if="showPagination"
             class="mt-2" 
             :current-page="pagination.currentPage"
@@ -91,7 +91,7 @@
 </template>
   
 <script>
-    import PaginationComponent from "@/components/global/pagination-component.vue";
+    import PaginationComponent from "@/components/global/PaginationComponent.vue";
     export default {
         props: {
             modalName: {
@@ -183,24 +183,24 @@
 <style scoped>
     .custom-table {
         border-collapse: separate;
-        border-spacing: 0 12px;
+        border-spacing: 0 1px;
         width: 100%;
     }
 
-        .custom-table thead th {
-            border-bottom: 1px solid #d3d3d3 !important;
-            background: white;
-        }
+    .custom-table thead th {
+        border-bottom: 1px solid #d3d3d3 !important;
+        background: white;
+    }
 
-        .custom-table th,
-        .custom-table td {
-            padding: 12px;
-            vertical-align: middle;
-            font-size: 14px;
-            font-weight: 500;
-            color: #343a40;
-            background: white;
-        }
+    .custom-table th,
+    .custom-table td {
+        vertical-align: middle;
+        font-size: 12px;
+        font-weight: 500;
+        color: #343a40;
+        background: white;
+    }
+    
     .table-div {
         border: 1px solid #d3d3d3;
         border-radius: 8px;

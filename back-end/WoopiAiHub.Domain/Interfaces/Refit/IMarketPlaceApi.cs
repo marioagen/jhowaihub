@@ -49,8 +49,5 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         [Delete("/user/DeactivateUsers")]
         Task<bool> DeactivateUsersEnabledByReference([Header("KeyAccess")] string KeyAccess,
                                                     [FromBody] DeactivateUsersDto deactivateUsersDto);
-        [Put("/user/UpdateUsers")]
-        public Task<bool> UpdateUserEnabled([Header("KeyAccess")] string KeyAccess,
-                                            [FromBody] UpdateByHubDto updateByHubDto);
     }
 }

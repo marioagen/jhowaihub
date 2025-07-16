@@ -11,13 +11,13 @@ namespace WoopiAiHub.Domain.Models
         public Guid Id { get; private set; }
 
         [Column("Name", TypeName = "varchar(150)")]
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; private set; } = string.Empty;
 
         [Column("Email", TypeName = "varchar(256)")]
-        public string Email { get; set; } = string.Empty;
+        public string Email { get; private set; } = string.Empty;
 
         [Column("IsActive", TypeName = "bit")]
-        public bool IsActive { get; set; }
+        public bool IsActive { get; private set; }
 
         [Column("Created", TypeName = "datetime")]
         public DateTime Created { get; private set; }
@@ -46,6 +46,27 @@ namespace WoopiAiHub.Domain.Models
                 return;
 
             Teams.Add(team);
+        }
+
+        public void Reactivate(string name,
+                               string email)
+        {
+            IsActive = true;
+            Name = name;
+            Email = email;
+            Created = DateTime.Now;
+        }
+
+        public void Update(string name,
+                           string email)
+        {
+            Name = name;
+            Email = email;
+        }
+
+        public void Deactivate()
+        {
+            IsActive = false;
         }
     }
 }

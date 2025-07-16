@@ -10,5 +10,6 @@ namespace WoopiAiHub.Domain.DTOs.Refit
     {
         public string UserEmail { get; set; } = string.Empty;
         public string Tenant { get; set; } = string.Empty;
+        public Guid IdUser { get; set; } = Guid.Empty;
     }
 }
