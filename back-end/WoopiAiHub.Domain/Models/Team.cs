@@ -7,13 +7,29 @@ namespace WoopiAiHub.Domain.Models
         [Column("Name", TypeName = "varchar(100)")]
         public string Name { get; private set; } = string.Empty;
 
-        public virtual ICollection<User>? Users { get; set; }
+        public virtual ICollection<User> Users { get; set; }
 
         public Team(string name,
                     int id,
                     DateTime created) : base(id, created)
         {
             this.Name = name;
+        }
+
+        public void EditName(string newName)
+        {
+            Name = newName;
+        }
+
+        public void AddUser(User user)
+        {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+
+            if (this.Users.Any(t => t.Id == user.Id))
+                return;
+
+            Users.Add(user);
         }
 
         /// <summary>

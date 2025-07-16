@@ -1,12 +1,8 @@
-using Humanizer;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
@@ -14,10 +10,13 @@ namespace WoopiAiHub.Application.Services
     public class TeamServices : ITeamServices
     {
         private readonly ITeamRepository _teamRepository;
+        private readonly IUserRepository _userRepository;
 
-        public TeamServices(ITeamRepository teamRepository)
+        public TeamServices(ITeamRepository teamRepository,
+                            IUserRepository userRepository)
         {
             _teamRepository = teamRepository;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -100,15 +99,21 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Team name cannot be empty");
             }
 
-            var team = _teamRepository.FindById(teamUpdateDto.Id);
-            if (team == null)
+            var team = _teamRepository.FindByIdReturnModel(teamUpdateDto.Id);
+
+            team.EditName(teamUpdateDto.Name);
+
+            if (team.Users != null)
             {
-                throw new ArgumentException("Team not found");
+                var users = _userRepository.FindByIds(teamUpdateDto.UserIds);
+                team.Users.Clear();
+                foreach (var user in users)
+                {
+                    team.AddUser(user);
+                }
             }
 
-            var teamUpdate = GenerateTeamToUpdate(teamUpdateDto, team);
-
-            var updateResult = _teamRepository.Update(teamUpdate);
+            var updateResult = _teamRepository.Update(team);
             if (!updateResult)
             {
                 throw new ArgumentException("Duplicated Team Name");

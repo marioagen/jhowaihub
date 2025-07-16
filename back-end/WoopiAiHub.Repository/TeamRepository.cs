@@ -3,6 +3,7 @@ using WoopiAiHub.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Request;
 
 namespace WoopiAiHub.Repository
 {
@@ -74,6 +75,20 @@ namespace WoopiAiHub.Repository
                 .FirstOrDefault(t => t.Id == id);
         }
 
+
+        /// <summary>
+        /// Find a team by its ID and include its users.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Team FindByIdReturnModel(int id)
+        {
+            return _context.Teams.Where(u => u.Id == id)
+                                        .Include(t => t.Users)
+                                        .AsNoTracking()
+                                        .FirstOrDefault();
+        }
+
         /// <summary>
         /// Update a team if it does not already exist with the same name.
         /// </summary>
@@ -81,14 +96,26 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Update(Team team)
         {
-            var exists = _context.Teams.Any(t => t.Name == team.Name && t.Id != team.Id);
-            if (!exists)
+
+            var existing = _context.Teams
+               .Include(u => u.Users)
+               .FirstOrDefault(u => u.Id == team.Id);
+
+            if (existing == null)
+                return false;
+
+            existing.EditName(team.Name);
+            existing.Users.Clear();
+            foreach (var user in team.Users)
             {
-                _context.Teams.Update(team);
-                _context.SaveChanges();
-                return true;
+                if (_context.Entry(user).State == EntityState.Detached)
+                    _context.Users.Attach(user);
+                existing.Users.Add(user);
             }
-            return false;
+
+            _context.Teams.Update(existing);
+            _context.SaveChanges();
+            return true;
         }
 
         /// <summary>
