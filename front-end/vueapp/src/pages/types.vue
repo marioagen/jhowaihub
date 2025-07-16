@@ -6,6 +6,7 @@
                     <breadcrumb :crumbs="crumbsData" />
                 </div>
                 <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" @action="addType" />
+                
                 <div class="mb-2" style="height: 30px;">
                     <button type="button" class="btn delete-custom d-flex align-items-center" @click="confirmationDialog(item)" v-if="this.listIds.length > 0">
                         <i class="fas fa-trash text-danger" style="font-size: .9em; margin-right: 8px"></i>
