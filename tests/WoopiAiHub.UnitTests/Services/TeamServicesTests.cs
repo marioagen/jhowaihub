@@ -9,6 +9,7 @@ using WoopiAiHub.UnitTests.Fixture;
 using WoopiAiHub.Domain.DTOs;
 using Moq.AutoMock;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.DTOs.Request;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -18,14 +19,16 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly AutoMocker _mocker;
         private readonly TeamFixture _fixture;
         private readonly Mock<ITeamRepository> _teamRepositoryMock;
+        private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly TeamServices _service;
 
         public TeamServicesTests()
         {
-            _fixture = new TeamFixture();            
+            _fixture = new TeamFixture();
             _mocker = new AutoMocker();
             _service = _mocker.CreateInstance<TeamServices>();
             _teamRepositoryMock = _mocker.GetMock<ITeamRepository>();
+            _userRepositoryMock = _mocker.GetMock<IUserRepository>();
         }
 
         [Fact(DisplayName = "FindById should return TeamDto when ID exists")]
@@ -95,63 +98,94 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Throws<ArgumentException>(() => _service.CreateUniqueTeam(dto));
         }
 
-        [Fact(DisplayName = "Update should return true when data is valid")]
+        [Fact(DisplayName = "Update should return true when update succeeds")]
         [Trait("Update", "Success")]
-        public void Update_ValidData_ReturnsTrue()
+        public async Task Update_ShouldReturnTrue_WhenUpdateSucceeds()
         {
             // Arrange
-            var teamDto = _fixture.CreateValidTeamDto();
-            var updateDto = _fixture.CreateValidTeamUpdateDto(teamDto.Id);
+            var teamId = 1;
+            var teamUpdateDto = new TeamUpdateDto
+            {
+                Id = teamId,
+                Name = "Novo Nome",
+                UserIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            };
 
-            _teamRepositoryMock.Setup(r => r.FindById(updateDto.Id)).Returns(teamDto);
-            _teamRepositoryMock.Setup(r => r.Update(It.IsAny<Team>())).Returns(true);
+            var team = new Team("Antigo Nome", teamId, DateTime.Now)
+            {
+                Users = new List<User>()
+            };
+
+            var users = new List<User>
+        {
+            new User(teamUpdateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
+            new User(teamUpdateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
+        };
+
+            _teamRepositoryMock.Setup(r => r.FindByIdReturnModel(teamId)).Returns(team);
+            _userRepositoryMock.Setup(r => r.FindByIdsAsync(teamUpdateDto.UserIds)).ReturnsAsync(users);
+            _teamRepositoryMock.Setup(r => r.Update(team)).Returns(true);
 
             // Act
-            var result = _service.Update(updateDto);
+            var result = await _service.Update(teamUpdateDto);
 
             // Assert
             Assert.True(result);
+            Assert.Equal("Novo Nome", team.Name);
+            Assert.Equal(2, team.Users.Count);
         }
 
-        [Fact(DisplayName = "Update should throw ArgumentException when name already exists")]
-        [Trait("Update", "Failure/Exception")]
-        public void Update_DuplicateName_ThrowsArgumentException()
+        [Fact(DisplayName = "Update should return fakse when team is not found")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldReturnFalse_WhenTeamNotFound()
         {
             // Arrange
-            var teamDto = _fixture.CreateValidTeamDto();
-            var updateDto = _fixture.CreateValidTeamUpdateDto(teamDto.Id);
+            var teamUpdateDto = new TeamUpdateDto
+            {
+                Id = 99,
+                Name = "Nome",
+                UserIds = new List<Guid> { Guid.NewGuid() }
+            };
 
-            _teamRepositoryMock.Setup(r => r.FindById(updateDto.Id)).Returns(teamDto);
-            _teamRepositoryMock.Setup(r => r.Update(It.IsAny<Team>())).Returns(false);
+            _teamRepositoryMock.Setup(r => r.FindByIdReturnModel(teamUpdateDto.Id)).Returns((Team)null);
 
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => _service.Update(updateDto));
+            // Act
+            var result = await _service.Update(teamUpdateDto);
+
+            // Assert
+            Assert.False(result);
         }
 
-        [Fact(DisplayName = "Update should throw ArgumentException when team is not found")]
-        [Trait("Update", "Failure/Exception")]
-        public void Update_TeamNotFound_ThrowsArgumentException()
+        [Fact(DisplayName = "Update should throw exception when team is duplicated")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldThrowArgumentException_WhenDuplicatedTeam()
         {
             // Arrange
-            TeamDto? teamDto = null;
-            var updateDto = _fixture.CreateValidTeamUpdateDto(999);
-            _teamRepositoryMock.Setup(r => r.FindById(updateDto.Id)).Returns(teamDto);
+            var teamId = 1;
+            var teamUpdateDto = new TeamUpdateDto
+            {
+                Id = teamId,
+                Name = "Duplicado",
+                UserIds = new List<Guid> { Guid.NewGuid() }
+            };
 
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => _service.Update(updateDto));
-        }
+            var team = new Team("Antigo Nome", teamId, DateTime.Now)
+            {
+                Users = new List<User>()
+            };
 
-        [Fact(DisplayName = "Update should throw ArgumentException when name is empty")]
-        [Trait("Update", "Failure/Exception")]
-        public void Update_EmptyName_ThrowsArgumentException()
+            var users = new List<User>
         {
-            // Arrange
-            var teamDto = _fixture.CreateValidTeamDto();
-            var updateDto = _fixture.CreateValidTeamUpdateDto(teamDto.Id);
-            updateDto.Name = string.Empty;
+            new User(teamUpdateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now)
+        };
+
+            _teamRepositoryMock.Setup(r => r.FindByIdReturnModel(teamId)).Returns(team);
+            _userRepositoryMock.Setup(r => r.FindByIdsAsync(teamUpdateDto.UserIds)).ReturnsAsync(users);
+            _teamRepositoryMock.Setup(r => r.Update(team)).Returns(false);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => _service.Update(updateDto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.Update(teamUpdateDto));
+            Assert.Equal("Duplicated Team", ex.Message);
         }
 
         [Fact(DisplayName = "DeleteByIds should return true when IDs are valid")]

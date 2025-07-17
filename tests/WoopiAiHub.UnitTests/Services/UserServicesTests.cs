@@ -196,9 +196,9 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Throws<ArgumentException>(() => _userServices.FindAllPaged(pagedDataDto));
         }
 
-        [Fact(DisplayName = "UpdateUsers")]
-        [Trait("Update", "Success")]
-        public async Task Update_ShouldReturnTrue_WhenUpdateSucceed()
+        [Fact(DisplayName = "Update should return true when update is sucess")]
+        [Trait("Update", "Sucess")]
+        public async Task Update_ShouldReturnTrue_WhenUpdateSucceeds()
         {
             // Arrange
             var userId = Guid.NewGuid();
@@ -210,27 +210,24 @@ namespace WoopiAiHub.UnitTests.Services
                 TeamIds = new List<int> { 1, 2 }
             };
             var headersDto = new HeadersDto { Tenant = "tenant" };
+
             var user = new User(userId, "Antigo Nome", "antigo@email.com", true, DateTime.Now)
             {
                 Teams = new List<Team>()
             };
             var teams = new List<Team>
-            {
-                new Team("Time 1", 1, DateTime.Now),
-                new Team("Time 2", 2, DateTime.Now)
-            };
+        {
+            new Team("Time 1", 1, DateTime.Now),
+            new Team("Time 2", 2, DateTime.Now)
+        };
 
             _marketPlaceApiMock
                 .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
-                .Setup(repo => repo.FindByIdsAsync(It.Is<List<Guid>>(l => l.Contains(userId))))
-                .ReturnsAsync(new List<User> { user });
-
-            _userRepositoryMock
-               .Setup(repo => repo.FindByReferenceAsync(It.IsAny<Guid>()))
-               .ReturnsAsync(user);
+                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .ReturnsAsync(user);
 
             _teamRepositoryMock
                 .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
@@ -250,8 +247,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(2, user.Teams.Count);
         }
 
-
-        [Fact(DisplayName = "UpdateUsers")]
+        [Fact(DisplayName = "Update should return false when user is not found")]
         [Trait("Update", "Fail")]
         public async Task Update_ShouldReturnFalse_WhenUserNotFound()
         {
@@ -259,7 +255,7 @@ namespace WoopiAiHub.UnitTests.Services
             var userId = Guid.NewGuid();
             var userUpdateDto = new UserUpdateDto
             {
-                Id = Guid.NewGuid(),
+                Id = userId,
                 Name = "Nome",
                 Email = "email@email.com"
             };
@@ -270,8 +266,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
-                .Setup(repo => repo.FindByIdsAsync(It.Is<List<Guid>>(l => l.Contains(userId))))
-                .ReturnsAsync(new List<User>());
+                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .ReturnsAsync((User)null);
 
             // Act
             var result = await _userServices.Update(userUpdateDto, headersDto);
@@ -280,29 +276,61 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
-        [Fact(DisplayName = "UpdateUsers")]
+        [Fact(DisplayName = "Update should return false when mkt fails")]
         [Trait("Update", "Fail")]
-        public async Task Update_ShouldReturnFalse_MktFail()
+        public async Task Update_ShouldReturnFalse_WhenMarketplaceFails()
         {
             // Arrange
             var userId = Guid.NewGuid();
             var userUpdateDto = new UserUpdateDto
             {
-                Id = Guid.NewGuid(),
+                Id = userId,
                 Name = "Nome",
                 Email = "email@email.com"
             };
             var headersDto = new HeadersDto { Tenant = "tenant" };
 
             _marketPlaceApiMock
-               .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
-               .ReturnsAsync(userId);
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(Guid.Empty);
 
             // Act
             var result = await _userServices.Update(userUpdateDto, headersDto);
 
             // Assert
             Assert.False(result);
+        }
+
+        [Fact(DisplayName = "Update should throw exception when duplicated")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldThrowArgumentException_WhenDuplicatedUser()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = userId,
+                Name = "Nome",
+                Email = "email@email.com"
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+            var user = new User(userId, "Nome", "email@email.com", true, DateTime.Now);
+
+            _marketPlaceApiMock
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(userId);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .ReturnsAsync(user);
+
+            _userRepositoryMock
+                .Setup(repo => repo.Update(It.IsAny<User>()))
+                .Returns(false);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _userServices.Update(userUpdateDto, headersDto));
+            Assert.Equal("Duplicated User", ex.Message);
         }
 
         [Theory(DisplayName = "Create should throw when required fields are missing")]

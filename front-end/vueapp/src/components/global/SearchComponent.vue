@@ -5,16 +5,24 @@
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
                 </span>
-                <input
-                    id="InputSearch"
-                    type="text"
+                <input 
+                    id="InputSearch" 
+                    type="text" 
                     class="form-control form-control-sm border-start-0"
-                    ref="searchInpt"
-                    v-model="searchInput"
-                    :placeholder="entity.placeholderInput"
-                    @keydown.enter="search(1, 'search')"
+                    :class="{ 'border-end-0': showCleanBtn }"
+                    ref="searchInpt" 
+                    v-model="searchInput" 
+                    :placeholder="entity.placeholderInput" 
+                    @keydown.enter="search(1, 'search')" 
                     @keydown.delete="search(1, 'search')"
-                />
+                >
+                <span 
+                    v-if="showCleanBtn"
+                    class="input-group-text border-start-0 bg-white"
+                    @click="cleanBtn"
+                >
+                    <LucideIcon icon="X" size="16" />
+                </span>
             </div>
         </div>
 
@@ -53,7 +61,7 @@
             entity: {
                 required: true,
                 type: Object,
-                default: {},
+                default: () => {}
             },
             resetInput: {
                 required: true,
@@ -68,26 +76,35 @@
             };
         },
         watch: {
-            resetInput: function (val) {
+            resetInput () {
                 this.searchInput = "";
             },
         },
         methods: {
-            search: function (page, type) {
-                let self = this;
-                setTimeout(function () {
-                    if (self.searchInput.length > 0 || (!isNaN(self.searchInput) && parseInt(self.searchInput) > 0)) {
-                        self.$emit("search", { search: self.searchInput, page: page, type: type });
-                    } else {
-                        self.$emit("search", { search: "", page: page, type: type });
+            search(page, type) {
+                setTimeout(() => {
+                    if (this.searchInput.length > 0 || (!isNaN(this.searchInput) && parseInt(this.searchInput) > 0)) {
+                        this.$emit('search', { search: this.searchInput, page: page, type: type });
+                    }
+                    else {
+                        this.$emit('search', { search: "", page: page, type: type });
                     }
                 }, 100);
             },
-            action: function () {
-                this.$emit("action", this.searchInput);
+            action() {
+                this.$emit('action', this.searchInput);
             },
-            upperFormat: function (str) {
+            upperFormat(str) {
                 return str.toUpperCase();
+            },
+            cleanBtn() {
+                this.searchInput = "";
+                this.$emit('clean', { search: "" });
+            },
+        },
+        computed: {
+            showCleanBtn() {
+                return this.searchInput !== "";
             },
         },
         mounted() {

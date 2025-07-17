@@ -137,8 +137,8 @@ namespace WoopiAiHub.Application.Services
 
                 if (userUpdateDto.TeamIds != null)
                 {
-                    var teams = _teamRepository.FindByIds(userUpdateDto.TeamIds);
                     user.Teams.Clear();
+                    var teams =  _teamRepository.FindByIds(userUpdateDto.TeamIds);
                     foreach (var team in teams)
                     {
                         user.AddTeam(team);
@@ -172,7 +172,7 @@ namespace WoopiAiHub.Application.Services
                     totalList.OrderByDescending(user => user.Name);
 
                 var result = Pagination(totalList, pagedDataDto);
-                return result;
+               return result;
             }
             else
             {
@@ -194,9 +194,11 @@ namespace WoopiAiHub.Application.Services
 
             if (!string.IsNullOrEmpty(pagedDataDto.Search))
             {
-                totalList = totalList.Where(i => i.Name.ToLower()
-                                                        .Contains(pagedDataDto.Search.ToLower()) ||
-                                                 i.Id.ToString().Contains(pagedDataDto.Search));
+                totalList = totalList.Where(i => 
+                    i.Name.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
+                    i.Id.ToString().Contains(pagedDataDto.Search) ||
+                    i.Teams.Any(t => t.Name.ToLower().Contains(pagedDataDto.Search.ToLower())
+                ));
             }
 
             var totalListCount = totalList.Count();
