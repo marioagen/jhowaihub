@@ -1,4 +1,5 @@
 ﻿import "@/assets/css/global.css";
+import 'bootstrap';
 
 import { createApp } from "vue";
 import App from "./App.vue";
