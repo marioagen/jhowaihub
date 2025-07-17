@@ -1,11 +1,11 @@
 ﻿<script>
-    import store from '@/store';
+    import store from "@/store";
 
     export default {
-        name: 'Logout',
+        name: "Logout",
         beforeRouteEnter: function (to, from, next) {
             document.documentElement.className = to.query.darkMode === "true" ? "css-theme-dark" : "css-theme-light";
-            window.localStorage.removeItem('project');
+            window.localStorage.removeItem("project");
             var dataUser = {
                 language: store.state.userProfile.language,
                 image: "",
@@ -16,9 +16,9 @@
                 tenant: "",
                 keyMongoAccess: "",
             };
-            store.commit('updateUserProfile', { amount: dataUser });
+            store.commit("updateUserProfile", { amount: dataUser });
             store.commit("setTenantInitialized", false);
-            next({ path: '/' });
-        }
-    }
+            next({ path: "/" });
+        },
+    };
 </script>

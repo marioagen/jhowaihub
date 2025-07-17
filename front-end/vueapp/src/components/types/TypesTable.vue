@@ -1,9 +1,5 @@
 <template>
-    <button 
-        v-if="showMultiDelete"
-        class="btn btn-outline-danger btn-sm mb-2 ms-2"
-        @click="deleteMultipleTypes"
-    >
+    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="deleteMultipleTypes">
         {{ $t("labelDelete") }}
     </button>
     <div>
@@ -17,36 +13,21 @@
             @selectedRows="selectedRows"
             @change-page="changePage"
         >
-           <template #cell-created="{ data }">
+            <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
-           <template #cell-actions="{ data }">
-                <button
-                    class="btn btn-outline-success btn-sm table-btn"
-                    @click="editType(data.row)"
-                >
-                    <LucideIcon
-                        icon="SquarePen"
-                    />
+            <template #cell-actions="{ data }">
+                <button class="btn btn-outline-success btn-sm table-btn" @click="editType(data.row)">
+                    <LucideIcon icon="SquarePen" />
                 </button>
-                <button
-                    class="btn btn-outline-danger btn-sm ms-2 table-btn"
-                    @click="confirmationDialog(data.row)"
-                >
-                    <LucideIcon
-                        icon="Trash2"
-                    />
+                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="confirmationDialog(data.row)">
+                    <LucideIcon icon="Trash2" />
                 </button>
             </template>
         </TableComponent>
-        
-        <modal-form 
-            v-if="modalTypeShow"
-            :dataEditing="selectedType"
-            @openEdit="editTypeRequest"
-            @close="closeModal" 
-        />
-        <modal-alert 
+
+        <modal-form v-if="modalTypeShow" :dataEditing="selectedType" @openEdit="editTypeRequest" @close="closeModal" />
+        <modal-alert
             v-if="modalAlertShow"
             :type="'Confirm'"
             :entity="selectedType"
@@ -55,7 +36,7 @@
             :okLabel="$t('labelConfirm')"
             :cancelLabel="$t('labelCancel')"
             @open="deleteType"
-            @close="closeModal" 
+            @close="closeModal"
         />
     </div>
 </template>
@@ -64,9 +45,9 @@
     import dates from "@/helpers/Dates";
     import TypesService from "@/services/types/TypesService";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalForm from '@/components/pages/type/modal-form';
-    import ModalAlert from '@/components/common/modal-alert';
-    import ToastAlert from '@/components/common/toast-alert';
+    import ModalForm from "@/components/pages/type/modal-form";
+    import ModalAlert from "@/components/common/modal-alert";
+    import ToastAlert from "@/components/common/toast-alert";
 
     export default {
         name: "TypesTable",
@@ -112,12 +93,12 @@
                 this.table.isLoading = true;
                 this.searching = false;
                 let params = {
-                    search: this.searchInput.trim() ? this.searchInput.trim() : '',
+                    search: this.searchInput.trim() ? this.searchInput.trim() : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
                     isAscending: this.isAscending,
-                    colType: this.colType
-                }
+                    colType: this.colType,
+                };
 
                 TypesService.getTypes(params)
                     .then((response) => {
@@ -139,12 +120,11 @@
             orderList: function (col) {
                 if (this.isAscending) {
                     this.isAscending = false;
-                }
-                else {
+                } else {
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getTypes({ search: '', page: this.queryPage, type: null })
+                this.getTypes({ search: "", page: this.queryPage, type: null });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
@@ -161,43 +141,42 @@
                 TypesService.editType(params)
                     .then((result) => {
                         if (!result.success) {
-                            const messageKey = result.status === 409
-                                ? 'labelDocumentTypeAlreadyExists'
-                                : 'labelDocumentTypeError'
+                            const messageKey =
+                                result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
 
-                            this.emitToast(this.$t(messageKey), 'toast-warning')
-                            this.finishEdit()
-                            return
+                            this.emitToast(this.$t(messageKey), "toast-warning");
+                            this.finishEdit();
+                            return;
                         }
 
-                        this.emitToast(this.$t('labelDocumentTypeEditSuccess'), 'toast-success')
-                        this.finishEdit()
+                        this.emitToast(this.$t("labelDocumentTypeEditSuccess"), "toast-success");
+                        this.finishEdit();
                     })
                     .finally(() => {
-                        console.log('Finished request.')
-                    })
+                        console.log("Finished request.");
+                    });
             },
             emitToast(message, color) {
-                this.$emit('toast', { message, color })
+                this.$emit("toast", { message, color });
             },
             finishEdit() {
-                this.closeModal()
-                this.getTypes({ search: '', page: 1, type: null })
+                this.closeModal();
+                this.getTypes({ search: "", page: 1, type: null });
             },
             deleteMultipleTypes() {
-                const typeIds = this.table.selectedRows.map(item => item.id);
+                const typeIds = this.table.selectedRows.map((item) => item.id);
                 this.deleteType(typeIds);
             },
             deleteType(typeIds) {
                 const idsToDelete = typeIds || [this.selectedTeam.id];
                 TypesService.deleteTypeById(idsToDelete)
                     .then((success) => {
-                        if(success) {
+                        if (success) {
                             this.closeModal();
-                            this.getTypes({ search: '', page: 1, type: null });
-                            this.emitToast(this.$t('labelDocumentTypeRemoveSuccess'), 'toast-success')
+                            this.getTypes({ search: "", page: 1, type: null });
+                            this.emitToast(this.$t("labelDocumentTypeRemoveSuccess"), "toast-success");
                         } else {
-                            this.emitToast(this.$t('labelDocumentTypeRemoveError'), 'toast-warning')
+                            this.emitToast(this.$t("labelDocumentTypeRemoveError"), "toast-warning");
                         }
                     })
                     .finally(() => {
@@ -209,11 +188,11 @@
                 this.searchInput = input;
                 this.getTypes({ search: input, page: this.queryPage, type: null });
             },
-            openModalType: function() {
+            openModalType: function () {
                 this.modalTypeShow = true;
                 document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
-            closeModalType: function() {
+            closeModalType: function () {
                 this.modalTypeShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
@@ -228,7 +207,7 @@
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             changePage(page) {
-                this.getTypes({ search: '', page: page, type: null });
+                this.getTypes({ search: "", page: page, type: null });
             },
             alertToast: function (msg, color) {
                 this.toastMessage = msg;
@@ -253,12 +232,12 @@
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getTypes({ search: '', page: this.queryPage, type: null });
+            this.getTypes({ search: "", page: this.queryPage, type: null });
         },
         computed: {
             showMultiDelete() {
                 return this.table.selectedRows.length > 1;
-            }
-        }
-    }
+            },
+        },
+    };
 </script>

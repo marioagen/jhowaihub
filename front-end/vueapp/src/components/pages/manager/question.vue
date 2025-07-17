@@ -1,30 +1,41 @@
 ﻿<template>
     <main>
-         <div class="container-fluid mt-4">
+        <div class="container-fluid mt-4">
             <div class="custom-padding">
                 <div class="row">
                     <!-- Component Breadcrumb -->
                     <breadcrumb :crumbs="crumbsData" />
                 </div>
                 <!-- Component SearchBar -->
-                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="getList" @action="addQuestion" />
+                <search-bar
+                    :entity="entitySearch"
+                    :resetInput="resetInputSearch"
+                    @search="getList"
+                    @action="addQuestion"
+                />
                 <div class="row" v-if="loading">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <tbody>
                                 <tr class="tr-head-1">
-                                    <td style="text-align: center;">
-                                        <i class="fas fa-sync-alt fa-spin text-secondary"></i>&nbsp;{{ $t('labelLoading') }}..
+                                    <td style="text-align: center">
+                                        <i class="fas fa-sync-alt fa-spin text-secondary"></i>
+                                        &nbsp;{{ $t("labelLoading") }}..
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="mb-2" style="height: 30px;">
-                    <button type="button" class="btn delete-custom d-flex align-items-center" @click="confirmationDialog(item)" v-if="this.listIds.length > 0">
-                        <i class="fas fa-trash text-danger" style="font-size: .9em; margin-right: 8px"></i>
-                        {{$t('labelDelete')}}
+                <div class="mb-2" style="height: 30px">
+                    <button
+                        type="button"
+                        class="btn delete-custom d-flex align-items-center"
+                        @click="confirmationDialog(item)"
+                        v-if="this.listIds.length > 0"
+                    >
+                        <i class="fas fa-trash text-danger" style="font-size: 0.9em; margin-right: 8px"></i>
+                        {{ $t("labelDelete") }}
                     </button>
                 </div>
                 <div class="row" v-if="dataQuestion.length === 0 && !loading && (searching || !searching)">
@@ -32,8 +43,9 @@
                         <table class="table table-striped">
                             <tbody>
                                 <tr class="tr-head-1">
-                                    <td style="text-align: center;">
-                                        <i class="fas fa-exclamation-circle text-secondary"></i>&nbsp;{{ $t('labelNoQuestionsWereFound') }}.
+                                    <td style="text-align: center">
+                                        <i class="fas fa-exclamation-circle text-secondary"></i>
+                                        &nbsp;{{ $t("labelNoQuestionsWereFound") }}.
                                     </td>
                                 </tr>
                             </tbody>
@@ -47,37 +59,99 @@
                                 <tr class="tr-head-1">
                                     <td class="content-left-middle">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" @click="checkAll($event)">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                value=""
+                                                @click="checkAll($event)"
+                                            />
                                         </div>
                                     </td>
-                                    <td class="content-center-middle">ID <i id="1" class="fas fa-sort" @click="orderList(1)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-left-middle">{{ $t('labelDescription') }} <i id="2" class="fas fa-sort" @click="orderList(2)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-center-middle">{{ $t('labelInclusionDate') }} <i id="3" class="fas fa-sort" @click="orderList(3)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-center-middle">{{ $t('labelOwner') }} <i id="4" class="fas fa-sort" @click="orderList(4)" style="cursor: pointer;" :title="$t('labelOrder')"></i></td>
-                                    <td class="content-center-middle">  {{ $t('labelAction') }}  </td>
+                                    <td class="content-center-middle">
+                                        ID
+                                        <i
+                                            id="1"
+                                            class="fas fa-sort"
+                                            @click="orderList(1)"
+                                            style="cursor: pointer"
+                                            :title="$t('labelOrder')"
+                                        ></i>
+                                    </td>
+                                    <td class="content-left-middle">
+                                        {{ $t("labelDescription") }}
+                                        <i
+                                            id="2"
+                                            class="fas fa-sort"
+                                            @click="orderList(2)"
+                                            style="cursor: pointer"
+                                            :title="$t('labelOrder')"
+                                        ></i>
+                                    </td>
+                                    <td class="content-center-middle">
+                                        {{ $t("labelInclusionDate") }}
+                                        <i
+                                            id="3"
+                                            class="fas fa-sort"
+                                            @click="orderList(3)"
+                                            style="cursor: pointer"
+                                            :title="$t('labelOrder')"
+                                        ></i>
+                                    </td>
+                                    <td class="content-center-middle">
+                                        {{ $t("labelOwner") }}
+                                        <i
+                                            id="4"
+                                            class="fas fa-sort"
+                                            @click="orderList(4)"
+                                            style="cursor: pointer"
+                                            :title="$t('labelOrder')"
+                                        ></i>
+                                    </td>
+                                    <td class="content-center-middle">{{ $t("labelAction") }}</td>
                                 </tr>
                                 <tr v-for="(item, index) in dataQuestion" :key="index">
-                                    <td class="content-center-middle" style="width: 20px;">
+                                    <td class="content-center-middle" style="width: 20px">
                                         <a>
-                                            <div class="form-check" v-if="item.emailCreator === $store.state.userProfile.login">
-                                                <input class="form-check-input checkbox" type="checkbox" value="" :id="item.id" @click="countChecks(item.id)">
+                                            <div
+                                                class="form-check"
+                                                v-if="item.emailCreator === $store.state.userProfile.login"
+                                            >
+                                                <input
+                                                    class="form-check-input checkbox"
+                                                    type="checkbox"
+                                                    value=""
+                                                    :id="item.id"
+                                                    @click="countChecks(item.id)"
+                                                />
                                             </div>
                                         </a>
                                     </td>
-                                    <td class="content-center-middle" style="width: 80px;"> {{ item.id }} </td>
+                                    <td class="content-center-middle" style="width: 80px">{{ item.id }}</td>
                                     <td class="content-left-middle">
-                                        <truncate-text :item="item" :text="item.description"/>
+                                        <truncate-text :item="item" :text="item.description" />
                                     </td>
-                                    <td class="content-center-middle" style="width: 164px;"> {{ dateFormat(item.created) }} </td>
-                                    <td class="content-center-middle" style="width: 164px; font-size: 14px"> {{ item.emailCreator }} </td>
-                                    <td class="content-right-middle" style="width: 95px;" v-if="item.emailCreator === $store.state.userProfile.login">
-                                        <a class="btn btn-success btn-sm" :title="$t('labelEdit')" @click="openModal(item)">
-                                            <i class="fas fa-pen" style="font-size: .75em;"></i>
+                                    <td class="content-center-middle" style="width: 164px">
+                                        {{ dateFormat(item.created) }}
+                                    </td>
+                                    <td class="content-center-middle" style="width: 164px; font-size: 14px">
+                                        {{ item.emailCreator }}
+                                    </td>
+                                    <td
+                                        class="content-right-middle"
+                                        style="width: 95px"
+                                        v-if="item.emailCreator === $store.state.userProfile.login"
+                                    >
+                                        <a
+                                            class="btn btn-success btn-sm"
+                                            :title="$t('labelEdit')"
+                                            @click="openModal(item)"
+                                        >
+                                            <i class="fas fa-pen" style="font-size: 0.75em"></i>
                                         </a>
                                     </td>
-                                    <td class="content-right-middle" style="width: 95px;" v-else>
+                                    <td class="content-right-middle" style="width: 95px" v-else>
                                         <a class="btn btn-secondary btn-sm" :title="$t('labelNotAllowed')">
-                                            <i class="fas fa-pen" style="font-size: .75em;"></i>
+                                            <i class="fas fa-pen" style="font-size: 0.75em"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -88,15 +162,19 @@
                 <div class="row mt-1" v-if="!loading && dataQuestion.length > 0">
                     <div class="col">
                         <div class="d-inline-block lines">
-                            <p class="d-inline">{{$t('labelLines')}}</p>
+                            <p class="d-inline">{{ $t("labelLines") }}</p>
                         </div>
                         <div class="d-inline-block" style="margin-left: 1%">
-                            <select class="form-select form-select-sm d-inline" v-model="selectedOption" @change="getList({ search: '', page: 1, type: null })">
+                            <select
+                                class="form-select form-select-sm d-inline"
+                                v-model="selectedOption"
+                                @change="getList({ search: '', page: 1, type: null })"
+                            >
                                 <option selected>10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
                                 <option value="100">100</option>
-                                <option value="0">{{$t('labelAll')}}</option>
+                                <option value="0">{{ $t("labelAll") }}</option>
                             </select>
                         </div>
                         <Pagination :paginationData="pagination" :dataList="dataQuestion"></Pagination>
@@ -106,7 +184,10 @@
                             <ul class="pagination justify-content-center">
                                 <!-- Chevrons left -->
                                 <li class="page-item" v-if="pagination.currentPage != 1">
-                                    <a class="page-link" @click="getList({ search: '', page: pagination.currentPage-1, type: null })">
+                                    <a
+                                        class="page-link"
+                                        @click="getList({ search: '', page: pagination.currentPage - 1, type: null })"
+                                    >
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 </li>
@@ -116,15 +197,25 @@
                                     </a>
                                 </li>
                                 <!-- Pages -->
-                                <li :class="pagination.currentPage === i ? `page-item active` : `page-item`" v-for="i in pagination.listPage">
-                                    <a class="page-link" @click="getList({ search: '', page: i, type: null })" v-if="pagination.currentPage != i">
+                                <li
+                                    :class="pagination.currentPage === i ? `page-item active` : `page-item`"
+                                    v-for="i in pagination.listPage"
+                                >
+                                    <a
+                                        class="page-link"
+                                        @click="getList({ search: '', page: i, type: null })"
+                                        v-if="pagination.currentPage != i"
+                                    >
                                         {{ i }}
                                     </a>
-                                    <a class="page-link" v-else> {{ i }} </a>
+                                    <a class="page-link" v-else>{{ i }}</a>
                                 </li>
                                 <!-- Chevrons right -->
-                                <li class="page-item" v-if="pagination.currentPage <= pagination.pageCount-1">
-                                    <a class="page-link" @click="getList({ search: '', page: pagination.currentPage+1, type: null })">
+                                <li class="page-item" v-if="pagination.currentPage <= pagination.pageCount - 1">
+                                    <a
+                                        class="page-link"
+                                        @click="getList({ search: '', page: pagination.currentPage + 1, type: null })"
+                                    >
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 </li>
@@ -143,27 +234,43 @@
         <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
     </main>
     <!-- Component ModalForm -->
-    <modal-form v-if="showModalForm" :dataEditing="dataModal" @openAdd="addQuestion" @openEdit="editQuestion" @close="closeModal" />
+    <modal-form
+        v-if="showModalForm"
+        :dataEditing="dataModal"
+        @openAdd="addQuestion"
+        @openEdit="editQuestion"
+        @close="closeModal"
+    />
     <!-- Component ModalAlert -->
-    <modal-alert v-if="modalAlertShow" :type="'Confirm'" :entity="modalEntity" :alertTitle="$t('labelYouAreAboutToDeleteQuestion')" :alertMessage="$t('labelThisActionCannotBeUndone')" :okLabel="$t('labelConfirm')" :cancelLabel="$t('labelCancel')" @open="deleteItem" @close="closeModal" />
+    <modal-alert
+        v-if="modalAlertShow"
+        :type="'Confirm'"
+        :entity="modalEntity"
+        :alertTitle="$t('labelYouAreAboutToDeleteQuestion')"
+        :alertMessage="$t('labelThisActionCannotBeUndone')"
+        :okLabel="$t('labelConfirm')"
+        :cancelLabel="$t('labelCancel')"
+        @open="deleteItem"
+        @close="closeModal"
+    />
 </template>
 
 <script>
     import * as moment from "moment/moment";
-    import NavBar from '@/components/common/nav-bar';
-    import Breadcrumb from '@/components/common/breadcrumb';
-    import SearchBar from '@/components/common/search-bar';
-    import ModalForm from '@/components/pages/question/modal-form';
-    import ModalAlert from '@/components/common/modal-alert';
-    import ToastAlert from '@/components/common/toast-alert';
+    import NavBar from "@/components/common/nav-bar";
+    import Breadcrumb from "@/components/common/breadcrumb";
+    import SearchBar from "@/components/common/search-bar";
+    import ModalForm from "@/components/pages/question/modal-form";
+    import ModalAlert from "@/components/common/modal-alert";
+    import ToastAlert from "@/components/common/toast-alert";
     import api from "@/services/api";
     import paginationDivider from "@/utils/paginationDivider";
-    import Pagination from '@/components/common/pagination';
+    import Pagination from "@/components/common/pagination";
     import TruncateText from "@/components/common/truncate-text.vue";
 
     export default {
         name: "QuestionManager",
-        emits: ['showAlertToast'],
+        emits: ["showAlertToast"],
         data() {
             return {
                 crumbsData: [],
@@ -187,8 +294,8 @@
                 toastMessage: "",
                 selectedOption: 10,
                 divider: new paginationDivider(),
-                listIds: []
-            }
+                listIds: [],
+            };
         },
         components: {
             NavBar,
@@ -198,23 +305,23 @@
             ModalAlert,
             ToastAlert,
             Pagination,
-            TruncateText
+            TruncateText,
         },
         watch: {
             searchInput: function (val) {
                 this.searching = false;
             },
-            '$store.state.userProfile.language': function () {
+            "$store.state.userProfile.language": function () {
                 this.setCrumbsData();
                 this.setEntitySearch();
             },
         },
         methods: {
             checkAll: function (event) {
-                const checkboxes = document.querySelectorAll('.checkbox');
+                const checkboxes = document.querySelectorAll(".checkbox");
                 let checkboxIds = [];
                 this.listIds = [];
-                checkboxes.forEach(checkbox => {
+                checkboxes.forEach((checkbox) => {
                     checkbox.checked = event.target.checked;
                     checkboxIds.push(parseInt(checkbox.id));
                 });
@@ -225,84 +332,97 @@
                 if (checkBox && checkBox.checked) {
                     this.listIds.push(id);
                 } else {
-                    this.listIds = this.listIds.filter(i => i !== id);
+                    this.listIds = this.listIds.filter((i) => i !== id);
                 }
             },
             countMultipleChecks: function (checkboxIds) {
                 parseInt(checkboxIds);
-                checkboxIds.forEach(id => {
+                checkboxIds.forEach((id) => {
                     let checkBox = document.querySelector(`input[type="checkbox"][id="${id}"]`);
                     if (checkBox && checkBox.checked) {
                         this.listIds.push(id);
                     } else {
-                        this.listIds = this.listIds.filter(i => i !== id);
+                        this.listIds = this.listIds.filter((i) => i !== id);
                     }
-                })
+                });
             },
             setCrumbsData: function () {
                 this.crumbsData = [
-                    { crumb: this.$t('labelManage'), link: { to: 'Question' } },
-                    { crumb: this.$t('labelQuestions'), link: { to: 'Question', queryPage: this.$route.query.page } },
+                    { crumb: this.$t("labelManage"), link: { to: "Question" } },
+                    { crumb: this.$t("labelQuestions"), link: { to: "Question", queryPage: this.$route.query.page } },
                 ];
             },
             setEntitySearch: function () {
                 this.entitySearch = {
                     screen: "question",
-                    labelInput: this.$t('labelSearchQuestion'),
-                    placeholderInput: this.$t('labelDescriptionOrQuestionId'),
-                    labelButton: this.$t('labelNewQuestion'),
+                    labelInput: this.$t("labelSearchQuestion"),
+                    placeholderInput: this.$t("labelDescriptionOrQuestionId"),
+                    labelButton: this.$t("labelNewQuestion"),
                 };
             },
-            getList: function (obj) { // obj = { search, page, type }
+            getList: function (obj) {
+                // obj = { search, page, type }
                 this.listIds = [];
                 this.searchInput = obj.search;
                 this.loading = true;
                 this.searching = false;
                 this.dataQuestion = [];
                 var paramsReq = {
-                    search: this.searchInput.trim() ? this.searchInput.trim() : '',
+                    search: this.searchInput.trim() ? this.searchInput.trim() : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
                     isAscending: this.isAscending,
                     colType: this.colType,
                 };
                 let self = this;
-                api.get('/Question/Paged', { params: paramsReq })
-                    .then(function (response) { // Handle success
+                api.get("/Question/Paged", { params: paramsReq })
+                    .then(function (response) {
+                        // Handle success
                         self.dataQuestion = response.data.content;
                         self.pagination = {
                             currentPage: response.data.currentPage,
                             pageCount: response.data.pageCount,
                             rowCount: response.data.rowCount,
-                            listPage: self.divider.calculatePageCount(response.data.pageCount, response.data.currentPage)
+                            listPage: self.divider.calculatePageCount(
+                                response.data.pageCount,
+                                response.data.currentPage
+                            ),
                         };
                         self.loading = false;
                         if (obj.type === "search") self.searching = true;
-                    }).catch(function (e) { // Handle error
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         console.log(e);
                         self.loading = false;
                         if (obj.type === "search") self.searching = true;
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
             addQuestion: function (description) {
                 let self = this;
-                api.post('/Question?description=' + description)
-                    .then(function (response) { // Handle success
+                api.post("/Question?description=" + description)
+                    .then(function (response) {
+                        // Handle success
                         self.closeModal();
                         self.resetInputSearch = !self.resetInputSearch;
-                        self.getList({ search: '', page: 1, type: null });
-                    }).catch(function (e) { // Handle error
-                         if (e.response.status == 409) {
-                            self.alertToast(self.$t('labelQuestionAlreadyExists'), "toast-warning");
-                         }
-                         else {
-                            self.alertToast(self.$t('labelQuestionError'), "toast-warning");
-                         }
+                        self.getList({ search: "", page: 1, type: null });
+                    })
+                    .catch(function (e) {
+                        // Handle error
+                        if (e.response.status == 409) {
+                            self.alertToast(self.$t("labelQuestionAlreadyExists"), "toast-warning");
+                        } else {
+                            self.alertToast(self.$t("labelQuestionError"), "toast-warning");
+                        }
                         console.log(e);
                         self.closeModal();
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
@@ -312,19 +432,23 @@
                     description: item.description,
                 };
                 let self = this;
-                api.put('/Question', paramsReq)
-                    .then(function (response) { // Handle success
+                api.put("/Question", paramsReq)
+                    .then(function (response) {
+                        // Handle success
                         self.closeModal();
-                        self.getList({ search: '', page: 1, type: null });
-                    }).catch(function (e) { // Handle error
+                        self.getList({ search: "", page: 1, type: null });
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         if (e.response.status == 409) {
-                            self.alertToast(self.$t('labelQuestionAlreadyExists'), 'toast-warning');
-                        }
-                        else {
-                            console.log(e)
+                            self.alertToast(self.$t("labelQuestionAlreadyExists"), "toast-warning");
+                        } else {
+                            console.log(e);
                             self.closeModal();
                         }
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
@@ -335,13 +459,18 @@
             },
             deleteItem: function () {
                 let self = this;
-                api.delete('/Question/DeleteByIds', { data: this.listIds })
-                    .then(function (response) { // Handle success
+                api.delete("/Question/DeleteByIds", { data: this.listIds })
+                    .then(function (response) {
+                        // Handle success
                         self.closeModal();
-                        self.getList({ search: '', page: 1, type: null });
-                    }).catch(function (e) { // Handle error
+                        self.getList({ search: "", page: 1, type: null });
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         console.log(e);
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
@@ -368,12 +497,11 @@
             orderList: function (col) {
                 if (this.isAscending) {
                     this.isAscending = false;
-                }
-                else {
+                } else {
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getList({ search: '', page: this.queryPage, type: null });
+                this.getList({ search: "", page: this.queryPage, type: null });
             },
             alertToast: function (msg, color) {
                 this.toastMessage = msg;
@@ -394,17 +522,17 @@
             clearMyInterval: function () {
                 clearInterval(this.myInterval);
                 this.myInterval = null;
-            }
+            },
         },
         computed: {},
         created() {
             this.setCrumbsData();
             this.setEntitySearch();
-            this.getList({ search: '', page: this.queryPage, type: null });
+            this.getList({ search: "", page: this.queryPage, type: null });
         },
-        mounted() { },
-        unmounted() { },
-    }
+        mounted() {},
+        unmounted() {},
+    };
 </script>
 
 <style scoped>
@@ -437,8 +565,8 @@
     }
 
     .bg-success {
-        background-color: #EDFEF2 !important;
-        color: #0EAA42 !important;
+        background-color: #edfef2 !important;
+        color: #0eaa42 !important;
         font-weight: inherit !important;
         padding: 8px 12px !important;
     }

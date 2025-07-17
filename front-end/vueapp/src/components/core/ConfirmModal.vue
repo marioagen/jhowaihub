@@ -1,29 +1,14 @@
 <template>
-    <div
-        class="modal fade"
-        tabindex="-1"
-        aria-hidden="true"
-        ref="modalEl"
-        :aria-labelledby="`${id}-label`"
-        :id="id"
-    >
+    <div class="modal fade" tabindex="-1" aria-hidden="true" ref="modalEl" :aria-labelledby="`${id}-label`" :id="id">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 
-                        class="modal-title" 
-                        :id="`${id}-label`"
-                    >
+                    <h5 class="modal-title" :id="`${id}-label`">
                         {{ $t(title) }}
                     </h5>
-                    <button 
-                        type="button" 
-                        class="btn-close" 
-                        data-bs-dismiss="modal" 
-                        aria-label="Close" 
-                    />
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                 </div>
-                
+
                 <div class="modal-body">
                     {{ $t(message) }}
                 </div>
@@ -37,12 +22,7 @@
                     >
                         {{ $t(cancelText) }}
                     </button>
-                    <button
-                        type="button"
-                        class="btn btn-danger mx-4"
-                        data-bs-dismiss="modal"
-                        @click="$emit('confirm')"
-                    >
+                    <button type="button" class="btn btn-danger mx-4" data-bs-dismiss="modal" @click="$emit('confirm')">
                         {{ $t(confirmText) }}
                     </button>
                 </div>
@@ -55,30 +35,30 @@
     export default {
         name: "ConfirmDialog",
         props: {
-            id: { 
-                type: String, 
-                required: true 
+            id: {
+                type: String,
+                required: true,
             },
-            title: { 
-                type: String, 
+            title: {
+                type: String,
                 required: false,
-                default: "labelConfirmTitle"
+                default: "labelConfirmTitle",
             },
-            message: { 
-                type: String, 
+            message: {
+                type: String,
                 required: false,
-                default: "labelMessage"
+                default: "labelMessage",
             },
-            cancelText: { 
-                type: String, 
+            cancelText: {
+                type: String,
                 required: false,
-                default: "labelCancelMessage"
+                default: "labelCancelMessage",
             },
-            confirmText: { 
-                type: String, 
+            confirmText: {
+                type: String,
                 required: false,
-                default: "labelConfirmMessage"
+                default: "labelConfirmMessage",
             },
         },
-    }
+    };
 </script>

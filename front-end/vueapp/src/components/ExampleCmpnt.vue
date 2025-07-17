@@ -10,7 +10,7 @@
         data() {
             return {
                 title: "Component Example",
-            }
+            };
         },
         components: {},
         watch: {},
@@ -19,7 +19,7 @@
         created() {},
         mounted() {},
         unmounted() {},
-    }
+    };
 </script>
 
 <style scoped>
