@@ -45,12 +45,16 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <LucideIcon icon="SquarePen" />
-                            <a class="dropdown-item" @click="editUser(data.row)">{{ $t("labelEdit") }}</a>
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="editUser(data.row)">
+                                <LucideIcon icon="SquarePen" />
+                                {{ $t("labelEdit") }}
+                            </a>
                         </li>
                         <li>
-                            <LucideIcon icon="Trash2" />
-                            <a class="dropdown-item" @click="confirmationDialog(data.row)">{{ $t("labelDelete") }}</a>
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="confirmationDialog(data.row)">
+                                <LucideIcon icon="Trash2" />
+                                {{ $t("labelDelete") }}
+                            </a>
                         </li>
                     </ul>
                 </div>
