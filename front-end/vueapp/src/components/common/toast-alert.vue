@@ -1,25 +1,9 @@
 ﻿<template>
     <div class="position-fixed mt-5 end-0 p-3" style="z-index: 11">
-        <div
-            id="liveToast"
-            :class="showToast ? 'toast fade show' : 'toast fade hide'"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-        >
+        <div id="liveToast" :class="showToast ? 'toast fade show' : 'toast fade hide'" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
-                <strong class="me-auto">
-                    <i class="fas fa-bell bell-animated"></i>
-                    {{ $t('labelNotice') }}
-                </strong>
-                <button
-                    type="button"
-                    class="btn-close"
-                    :title="$t('labelClose')"
-                    data-bs-dismiss="toast"
-                    aria-label="Close"
-                    @click="close"
-                ></button>
+                <strong class="me-auto"> <i class="fas fa-bell bell-animated"></i> {{ $t('labelNotice') }} </strong>
+                <button type="button" class="btn-close" :title="$t('labelClose')" data-bs-dismiss="toast" aria-label="Close" @click="close"></button>
             </div>
             <div :class="'toast-body ' + colorToast">
                 {{ messageToast }}
@@ -30,34 +14,34 @@
 
 <script>
     export default {
-        name: 'ToastAlert',
+        name: "ToastAlert",
         props: {
             showToast: {
                 required: true,
                 type: Boolean,
-                default: false,
+                default: false
             },
             colorToast: {
                 required: true,
                 type: String,
-                default: '',
+                default: ""
             },
             messageToast: {
                 required: true,
                 type: String,
-                default: '',
+                default: ""
             },
         },
         data() {
             return {
-                title: 'Toast Alert',
+                title: "Toast Alert",
             }
         },
         components: {},
         watch: {},
         methods: {
             close: function () {
-                this.$emit('close')
+                this.$emit('close');
             },
         },
         computed: {},

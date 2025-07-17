@@ -1,11 +1,10 @@
-import api from '@/services/api'
-import PaginationDivider from '@/utils/paginationDivider'
-const divider = new PaginationDivider()
+import api from "@/services/api";
+import PaginationDivider from "@/utils/paginationDivider";
+const divider = new PaginationDivider();
 
 export default {
     getUsers(params) {
-        return api
-            .get('/User/Paged/', { params: params })
+        return api.get('/User/Paged/', { params: params })
             .then(({ data }) => {
                 return {
                     content: data.content,
@@ -14,22 +13,19 @@ export default {
                         totalPages: data.pageCount,
                         rowCount: data.rowCount,
                         totalItems: data.rowCount,
-                    },
+                    }
                 }
-            })
-            .catch(function (e) {
-                console.log(e)
-            })
+            }).catch(function (e) {
+                console.log(e);
+            });
     },
     deleteUsersById(userId) {
-        return api
-            .delete('/User/DeactivateByIds', { data: [userId] })
+        return api.delete('/User/DeactivateByIds', { data: [userId] })
             .then(() => {
-                return true
-            })
-            .catch(function (e) {
-                console.log(e)
-                return false
-            })
+                return true;
+            }).catch(function (e) {
+                console.log(e);
+                return false;
+            });
     },
 }

@@ -5,44 +5,42 @@
             alt="Menu"
             class="menu-icon"
             data-bs-toggle="dropdown"
-            aria-expanded="false"
-        />
+            aria-expanded="false"/>
         <ul class="dropdown-menu">
             <li v-for="(option, index) in menuOptions.options" :key="index">
                 <a
                     class="dropdown-item text-sm"
                     :class="option.color"
                     href="#"
-                    @click.prevent="handleMenuAction(option)"
-                >
+                    @click.prevent="handleMenuAction(option)">
                     <span class="option-icon">
-                        <img v-if="option.icon" :src="option.icon" />
+                        <img v-if="option.icon" :src="option.icon"/>
                     </span>
                     {{ option.label }}
                 </a>
             </li>
         </ul>
-    </div>
+    </div>    
 </template>
 <script>
     export default {
-        name: 'DropdownMenu',
+        name: "DropdownMenu",
         props: {
             menuOptions: {
                 required: true,
                 type: Object,
-                default: {},
-            },
+                default: {}
+            }
         },
         data() {
             return {
-                title: 'Component DropdownMenu',
+                title: "Component DropdownMenu",
             }
         },
         methods: {
             handleMenuAction(option) {
-                this.$emit('action', option)
-            },
+                this.$emit('action', option );
+            }
         },
     }
 </script>
@@ -54,15 +52,15 @@
     }
 
     .option-icon {
-        display: inline-block;
-        width: 20px;
-        text-align: center;
+        display: inline-block; 
+        width: 20px; 
+        text-align: center; 
         vertical-align: middle;
     }
 
     .option-icon img {
-        height: 16px;
-        width: 16px;
+        height: 16px; 
+        width: 16px; 
         vertical-align: baseline;
     }
 </style>

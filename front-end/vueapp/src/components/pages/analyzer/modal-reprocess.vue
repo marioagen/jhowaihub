@@ -1,22 +1,10 @@
 <template>
-    <div
-        class="modal fade show"
-        id="exampleModalForm"
-        tabindex="-1"
-        aria-labelledby="exampleModalLabel"
-    >
+    <div class="modal fade show" id="exampleModalForm" tabindex="-1" aria-labelledby="exampleModalLabel">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">{{ $t('labelReprocess') }}</h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        :title="$t('labelClose')"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                        @click="close"
-                    ></button>
+                    <button type="button" class="btn-close" :title="$t('labelClose')" data-bs-dismiss="modal" aria-label="Close" @click="close"></button>
                 </div>
                 <div class="modal-body prevent-text-select">
                     <div>
@@ -24,28 +12,12 @@
                             <div class="mb-3">
                                 <label class="form-label">{{ $t('labelModel') }}</label>
                                 <select class="form-select" v-model="modelSelected">
-                                    <option value="">{{ $t('labelSelect') }}</option>
-                                    <option value="text-embedding-3-large">
-                                        text-embedding-3-large
-                                    </option>
+                                    <option value=""> {{ $t('labelSelect') }} </option>
+                                    <option value="text-embedding-3-large">text-embedding-3-large</option>
                                 </select>
                             </div>
-                            <button
-                                type="submit"
-                                class="btn btn-primary m-2"
-                                :title="$t('labelSave')"
-                                style="float: right"
-                            >
-                                {{ $t('labelSave') }}
-                            </button>
-                            <a
-                                class="btn btn-light m-2 btn-custom-cancel"
-                                :title="$t('labelCancel')"
-                                style="float: right"
-                                @click="close"
-                            >
-                                {{ $t('labelCancel') }}
-                            </a>
+                            <button type="submit" class="btn btn-primary m-2" :title="$t('labelSave')" style="float:right">{{ $t('labelSave') }}</button>
+                            <a class="btn btn-light m-2 btn-custom-cancel" :title="$t('labelCancel')" style="float:right" @click="close">{{ $t('labelCancel') }}</a>
                         </form>
                     </div>
                 </div>
@@ -54,8 +26,9 @@
     </div>
 </template>
 <script>
+   
     export default {
-        name: 'ModalReprocess',
+        name: "ModalReprocess",
         data() {
             return {
                 modelSelected: '',
@@ -63,14 +36,16 @@
         },
         methods: {
             close: function () {
-                this.$emit('close')
+                this.$emit('close');
             },
             save: function (e) {
+
                 if (this.modelSelected != '') {
-                    this.$emit('formatData', this.modelSelected)
-                    this.close()
+                    this.$emit('formatData', this.modelSelected);
+                    this.close();
                 }
             },
+
         },
     }
 </script>

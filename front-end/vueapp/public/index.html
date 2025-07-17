@@ -1,29 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" class="css-theme-light">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-        <script src="<%= BASE_URL %>config/appsettings.js"></script>
-        <link rel="icon" href="<%= BASE_URL %>ico-woopi.png" sizes="32x32" />
-        <title><%= htmlWebpackPlugin.options.title %></title>
-        <!-- msal.min.js can be used in the place of msal.js; included msal.js to make debug easy -->
-        <script
-            src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.js"
-            integrity="sha256-8tfHnHZsnykP+HC+eETDO9SISFwqrny2njODmGTsS8A="
-            crossorigin="anonymous"
-        ></script>
-    </head>
-    <body>
-        <noscript>
-            <strong>
-                We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without
-                JavaScript enabled. Please enable it to continue.
-            </strong>
-        </noscript>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <script src="<%= BASE_URL %>config/appsettings.js"></script>
+    <link rel="icon" href="<%= BASE_URL %>ico-woopi.png" sizes="32x32">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <!-- msal.min.js can be used in the place of msal.js; included msal.js to make debug easy -->
+    <script src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.js" integrity="sha256-8tfHnHZsnykP+HC+eETDO9SISFwqrny2njODmGTsS8A=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <noscript>
+        <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
 
-        <div class="overlay"></div>
-        <div id="app"></div>
-        <!-- built files will be auto injected -->
-    </body>
+    <div class="overlay"></div>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+</body>
 </html>

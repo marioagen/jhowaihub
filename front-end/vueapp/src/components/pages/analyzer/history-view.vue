@@ -1,80 +1,31 @@
 ﻿<template>
     <div class="div-row background-white shadow">
-        <div class="row" style="margin-top: 35px !important">
+        <div class="row" style="margin-top: 35px !important;">
             <div class="col mt-2">
                 <h6 class="mt-0 text-primary">
-                    <i
-                        class="fas fa-compress"
-                        :title="$t('labelReduceHistory')"
-                        @click="expandHistory"
-                        v-show="isExpandedHistory"
-                        style="margin-left: 1%; cursor: pointer"
-                    ></i>
-                    <i
-                        class="fas fa-expand text-primary"
-                        :title="$t('labelExpandHistory')"
-                        @click="expandHistory"
-                        v-show="!isExpandedHistory"
-                        style="margin-left: 4%; cursor: pointer"
-                    ></i>
+                    <i class="fas fa-compress" :title="$t('labelReduceHistory')" @click="expandHistory" v-show="isExpandedHistory" style="margin-left: 1%; cursor: pointer;"></i>
+                    <i class="fas fa-expand text-primary" :title="$t('labelExpandHistory')" @click="expandHistory" v-show="!isExpandedHistory" style="margin-left: 4%; cursor: pointer;"></i>
                     {{ $t('labelHistoric') }}
-                    <a style="margin-left: 1%" @click="expandSort">
-                        <i
-                            class="fas fa-sort"
-                            style="color: #0073e6; cursor: pointer"
-                            :title="$t('labelOrder')"
-                        ></i>
+                    <a style="margin-left: 1%;" @click="expandSort">
+                        <i class="fas fa-sort" style="color: #0073E6; cursor: pointer" :title="$t('labelOrder')"></i>
                     </a>
                     <container class="flex-shrink">
-                        <span
-                            class="badge rounded-pill bg-primary badge-custom"
-                            style="margin-left: 1.5%; cursor: pointer"
-                            :title="$t('labelDownloadCsv')"
-                            @click="downloadHistory"
-                            v-if="historyList.length > 0"
-                        >
-                            <i class="fas fa-cloud-download-alt"></i>
-                            {{ historyList.length }}
+                        <span class="badge rounded-pill bg-primary badge-custom" style="margin-left: 1.5%;cursor: pointer;" :title="$t('labelDownloadCsv')" @click="downloadHistory" v-if="historyList.length > 0">
+                            <i class="fas fa-cloud-download-alt"></i> {{ historyList.length }}
                         </span>
-                        <span
-                            class="badge rounded-pill bg-danger badge-custom"
-                            style="margin-left: 1.5%; cursor: pointer"
-                            :title="$t('labelDeleteHistory')"
-                            @click="confirmationDialog(idAnalyzer)"
-                            v-if="historyList.length > 0"
-                        >
-                            <i class="fas fa-trash" style="font-size: 0.9em"></i>
+                        <span class="badge rounded-pill bg-danger badge-custom" style="margin-left: 1.5%;cursor: pointer;" :title="$t('labelDeleteHistory')" @click="confirmationDialog(idAnalyzer)" v-if="historyList.length > 0">
+                            <i class="fas fa-trash" style="font-size: .9em;"></i>
                         </span>
                     </container>
                     <span class="dropdown-menu" v-show="isExpandedSort" style="display: block">
                         <a class="dropdown-item" @click="sortHistoryListAsc">
-                            <i
-                                class="fas fa-check"
-                                style="color: #0073e6"
-                                title="check"
-                                v-show="historyListOrder == 'desc'"
-                            ></i>
-                            <i
-                                class="far fa-circle"
-                                style="color: #0073e6"
-                                title="circle"
-                                v-show="historyListOrder == 'asc'"
-                            ></i>
+                            <i class="fas fa-check" style="color: #0073E6;" title="check" v-show="historyListOrder == 'desc'"></i>
+                            <i class="far fa-circle" style="color: #0073E6;" title="circle" v-show="historyListOrder == 'asc'"></i>
                             &nbsp;{{ $t('labelMostRecent') }}
                         </a>
                         <a class="dropdown-item" @click="sortHistoryListDesc">
-                            <i
-                                class="fas fa-check"
-                                style="color: #0073e6"
-                                title="check"
-                                v-show="historyListOrder == 'asc'"
-                            ></i>
-                            <i
-                                class="far fa-circle"
-                                style="color: #0073e6"
-                                title="circle"
-                                v-show="historyListOrder == 'desc'"
-                            ></i>
+                            <i class="fas fa-check" style="color: #0073E6;" title="check" v-show="historyListOrder == 'asc'"></i>
+                            <i class="far fa-circle" style="color: #0073E6;" title="circle" v-show="historyListOrder == 'desc'"></i>
                             &nbsp;{{ $t('labelMostOlder') }}
                         </a>
                     </span>
@@ -83,76 +34,40 @@
         </div>
         <div :class="historyList.length == 0 ? 'row mb-2' : 'row'" v-if="loadingHistory">
             <span>
-                &nbsp;&nbsp;&nbsp;
-                <i class="fas fa-sync-alt fa-spin"></i>
-                &nbsp;{{ $t('labelLoading') }}..
+                &nbsp;&nbsp;&nbsp;<i class="fas fa-sync-alt fa-spin"></i>&nbsp;{{ $t('labelLoading') }}..
             </span>
         </div>
         <div class="row mb-2" v-if="!loadingHistory && historyList.length == 0">
-            <span>&nbsp;&nbsp;&nbsp;{{ $t('labelQueryWithoutHistory') }}.</span>
+            <span>
+                &nbsp;&nbsp;&nbsp;{{ $t('labelQueryWithoutHistory') }}.
+            </span>
         </div>
         <div class="div-row-overflow">
-            <div class="row" v-for="(history, index) in historyList" :key="index">
+            <div class="row" v-for="(history,index) in historyList" :key="index">
                 <div class="col-md-12">
                     <div class="div-card">
                         <div class="card shadow">
                             <div class="card-body">
-                                <h5 class="card-title" style="margin-bottom: 8px">
-                                    {{ history.input }}
-                                </h5>
+                                <h5 class="card-title" style="margin-bottom: 8px;"> {{history.input}} </h5>
                                 <div class="card-subtitle mb-1 text-primary">
-                                    <div style="float: right; margin-left: 2%">
-                                        <a @click="copyToClipboard(history.output)">
-                                            <i
-                                                class="fas fa-clone text-primary"
-                                                :title="$t('labelCopy')"
-                                                style="cursor: pointer"
-                                            ></i>
-                                        </a>
+                                    <div style="float: right; margin-left:2%">
+                                        <a @click="copyToClipboard(history.output)"> <i class="fas fa-clone text-primary" :title="$t('labelCopy')" style="cursor:pointer"></i></a>
                                     </div>
-                                    <div style="float: right">
-                                        <a @click="changeTextArea(index)">
-                                            <i
-                                                class="fas fa-pen text-primary"
-                                                :title="$t('labelEdit')"
-                                                style="cursor: pointer"
-                                            ></i>
-                                        </a>
+                                    <div style="float: right;">
+                                        <a @click="changeTextArea(index)"> <i class="fas fa-pen text-primary" :title="$t('labelEdit')" style="cursor:pointer"></i></a>
                                     </div>
                                 </div>
-                                <textarea
-                                    class="form-control mb-1 blue-textarea"
-                                    rows="5"
-                                    :id="index"
-                                    v-model="history.output"
-                                    readonly
-                                ></textarea>
+                                <textarea class="form-control mb-1 blue-textarea" rows="5" :id="index" v-model="history.output" readonly></textarea>
                                 <div v-if="history.isEditing == true">
                                     <div style="float: right; margin-left: 2%">
-                                        <a>
-                                            <i
-                                                class="fa fa-check text-primary"
-                                                @click="editHistory(index)"
-                                                :title="$t('labelConfirm')"
-                                            ></i>
-                                        </a>
+                                        <a> <i class="fa fa-check text-primary" @click="editHistory(index)" :title="$t('labelConfirm')"></i></a>
                                     </div>
-                                    <div style="float: right">
-                                        <a>
-                                            <i
-                                                class="fa fa-times text-secondary"
-                                                @click="stopEditing(index)"
-                                                :title="$t('labelCancel')"
-                                            ></i>
-                                        </a>
+                                    <div style="float: right;">
+                                        <a> <i class="fa fa-times text-secondary" @click="stopEditing(index)" :title="$t('labelCancel')"></i></a>
                                     </div>
                                 </div>
-                                <div v-if="history.isEdited == true" class="text-primary edited">
-                                    {{ $t('labelEdited') }}
-                                </div>
-                                <div v-if="history.isEditedFail == true" class="text-danger fail">
-                                    {{ $t('labelEditedFail') }}
-                                </div>
+                                <div v-if="history.isEdited == true" class="text-primary edited">{{$t('labelEdited')}}</div>
+                                <div v-if="history.isEditedFail == true" class="text-danger fail">{{$t('labelEditedFail')}}</div>
                             </div>
                         </div>
                     </div>
@@ -161,47 +76,37 @@
         </div>
     </div>
     <!-- Component ModalAlert -->
-    <modal-alert
-        v-if="modalAlertShow"
-        :type="'Confirm'"
-        :entity="modalEntity"
-        :alertTitle="$t('labelYouAreAboutToDeleteDocumentQuery')"
-        :alertMessage="$t('labelThisActionCannotBeUndone')"
-        :okLabel="$t('labelConfirm')"
-        :cancelLabel="$t('labelCancel')"
-        @open="deleteHistory"
-        @close="closeModal"
-    />
+    <modal-alert v-if="modalAlertShow" :type="'Confirm'" :entity="modalEntity" :alertTitle="$t('labelYouAreAboutToDeleteDocumentQuery')" :alertMessage="$t('labelThisActionCannotBeUndone')" :okLabel="$t('labelConfirm')" :cancelLabel="$t('labelCancel')" @open="deleteHistory" @close="closeModal" />
 </template>
 
 <script>
-    import * as moment from 'moment/moment'
-    import api from '@/services/api'
-    import ModalAlert from '@/components/common/modal-alert'
+    import * as moment from "moment/moment";
+    import api from "@/services/api";
+    import ModalAlert from '@/components/common/modal-alert';
 
     export default {
-        name: 'HistoryView',
-        emits: ['expandHistory', 'showAlertToast', 'clearMyInterval', 'updateHistoryListOrder'],
+        name: "HistoryView",
+        emits: ["expandHistory", "showAlertToast", "clearMyInterval", "updateHistoryListOrder"],
         props: {
             dataShowHistory: {
                 required: true,
                 type: Boolean,
-                default: true,
+                default: true
             },
             dataIsExpandedHistory: {
                 required: true,
                 type: Boolean,
-                default: false,
+                default: false
             },
             dataUnshiftHistoryList: {
                 required: true,
                 type: Object,
-                default: {},
+                default: {}
             },
             dataPushHistoryList: {
                 required: true,
                 type: Object,
-                default: {},
+                default: {}
             },
         },
         data() {
@@ -211,10 +116,10 @@
                 loadingHistory: false,
                 isExpandedHistory: this.dataIsExpandedHistory,
                 isExpandedSort: false,
-                historyListOrder: 'asc',
+                historyListOrder: "asc",
                 modalAlertShow: false,
                 modalEntity: {},
-                oldOutput: '',
+                oldOutput: "",
                 isEditing: false,
                 isEditedFail: false,
             }
@@ -225,243 +130,221 @@
         watch: {
             dataShowHistory: {
                 handler(val, oldVal) {
-                    this.showHistory()
+                    this.showHistory();
                 },
-                deep: true,
+                deep: true
             },
             dataIsExpandedHistory: {
                 handler(val, oldVal) {
-                    this.isExpandedHistory = val
+                    this.isExpandedHistory = val;
                 },
-                deep: true,
+                deep: true
             },
             dataUnshiftHistoryList: {
                 handler(val, oldVal) {
-                    this.unshiftHistoryList(val)
+                    this.unshiftHistoryList(val);
                 },
-                deep: true,
+                deep: true
             },
             dataPushHistoryList: {
                 handler(val, oldVal) {
-                    this.pushHistoryList(val)
+                    this.pushHistoryList(val);
                 },
-                deep: true,
+                deep: true
             },
         },
         methods: {
             showHistory: function () {
-                this.loadingHistory = true
-                let self = this
+                this.loadingHistory = true;
+                let self = this;
                 api.get('/Document/History/' + this.idAnalyzer)
-                    .then(function (response) {
-                        // Handle success
+                    .then(function (response) { // Handle success
                         setTimeout(function () {
-                            self.loadingHistory = false
-                            self.historyList = response.data.value.reverse()
+                            self.loadingHistory = false;
+                            self.historyList = response.data.value.reverse();
                             const result = self.historyList.reduce((acc, cur, index) => {
                                 acc.push({ ...cur, isEditedFail: false, isEditing: false })
                                 return acc
                             }, [])
-                            self.historyList = result
-                        }, 1000)
-                    })
-                    .catch(function (e) {
-                        // Handle error
-                        console.log(e)
-                        self.historyList = []
-                        self.loadingHistory = false
-                        self.clearMyInterval()
-                        self.alertToast(self.$t('labelFailedToLoadHistory'), 'toast-danger')
-                    })
-                    .finally(function () {
-                        // Always executed
-                        console.log('Finished request.')
-                    })
+                            self.historyList = result;
+                        }, 1000);
+                    }).catch(function (e) { // Handle error
+                        console.log(e);
+                        self.historyList = [];
+                        self.loadingHistory = false;
+                        self.clearMyInterval();
+                        self.alertToast(self.$t('labelFailedToLoadHistory'), "toast-danger");
+                    }).finally(function () { // Always executed
+                        console.log("Finished request.");
+                    });
             },
             downloadHistory: function () {
-                var csv = 'Input;Output'
+                var csv = "Input;Output";
                 for (var i = 0; i < this.historyList.length; i++) {
-                    csv +=
-                        '\n' +
-                        this.historyList[i].input +
-                        ';' +
-                        this.historyList[i].output.replaceAll(/[\r\n\s]+/g, ' ')
+                    csv += "\n" + this.historyList[i].input + ";" + (this.historyList[i].output).replaceAll(/[\r\n\s]+/g, ' ');
                     if (i == this.historyList.length - 1) {
                         // Download forced - Begin
-                        var fileURL = window.URL.createObjectURL(
-                            new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' })
-                        )
-                        var fileLink = document.createElement('a')
-                        fileLink.href = fileURL
-                        fileLink.setAttribute(
-                            'download',
-                            this.$t('labelHistoric') + ' - ' + this.dateFormat(Date.now()) + '.csv'
-                        )
-                        document.body.appendChild(fileLink)
-                        fileLink.click()
+                        var fileURL = window.URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+                        var fileLink = document.createElement('a');
+                        fileLink.href = fileURL;
+                        fileLink.setAttribute('download', this.$t('labelHistoric') + ' - ' + this.dateFormat(Date.now()) + '.csv');
+                        document.body.appendChild(fileLink);
+                        fileLink.click();
                         // Download forced - End
-                        this.clearMyInterval()
-                        this.alertToast(this.$t('labelDownloadSuccessfully'), 'toast-success')
+                        this.clearMyInterval();
+                        this.alertToast(this.$t('labelDownloadSuccessfully'), "toast-success");
                     }
                 }
             },
             confirmationDialog: function (item) {
-                this.modalEntity = { id: item }
-                this.modalAlertShow = true
-                document.getElementsByTagName('BODY')[0].children[1].className += ' active'
+                this.modalEntity = { id: item };
+                this.modalAlertShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
             deleteHistory: function (id) {
-                let self = this
+                let self = this;
                 api.delete('/Document/History/' + id)
-                    .then(function (response) {
-                        // Handle success
-                        self.closeModal()
-                        setTimeout(() => self.showHistory(), 100)
-                    })
-                    .catch(function (e) {
-                        // Handle error
-                        console.log(e)
-                    })
-                    .finally(function () {
-                        // Always executed
-                        console.log('Finished request.')
-                    })
+                    .then(function (response) { // Handle success
+                        self.closeModal();
+                        setTimeout(() => self.showHistory(), 100);
+                    }).catch(function (e) { // Handle error
+                        console.log(e);
+                    }).finally(function () { // Always executed
+                        console.log("Finished request.");
+                    });
             },
             closeModal: function () {
-                this.modalAlertShow = false
-                document.getElementsByTagName('BODY')[0].children[1].className = 'overlay'
+                this.modalAlertShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             expandHistory: function () {
-                this.isExpandedHistory = !this.isExpandedHistory
-                this.$emit('expandHistory')
+                this.isExpandedHistory = !this.isExpandedHistory;
+                this.$emit('expandHistory');
             },
             unshiftHistoryList: function (data) {
                 this.historyList.unshift({
                     input: data.input,
-                    output: data.output,
-                })
-                $('.div-row-overflow').animate({ scrollTop: 0 }, 500)
+                    output: data.output
+                });
+                $(".div-row-overflow").animate(
+                    { scrollTop: 0 }, 500
+                );
             },
             pushHistoryList: function (data) {
                 this.historyList.push({
                     input: data.input,
-                    output: data.output,
-                })
-                let self = this
-                setTimeout(function () {
-                    self.moveSidebar()
-                }, 100)
+                    output: data.output
+                });
+                let self = this;
+                setTimeout(function () { self.moveSidebar(); }, 100);
             },
             moveSidebar: function () {
-                $('.div-row-overflow').animate(
-                    { scrollTop: $('.div-row-overflow')[0].scrollHeight },
-                    500
-                )
+                $(".div-row-overflow").animate(
+                    { scrollTop: $('.div-row-overflow')[0].scrollHeight }, 500
+                );
             },
             copyToClipboard: function (content) {
-                navigator.clipboard.writeText(content)
-                this.clearMyInterval()
-                this.alertToast(this.$t('labelTextCopiedToClipboard'), 'toast-primary')
+                navigator.clipboard.writeText(content);
+                this.clearMyInterval();
+                this.alertToast(this.$t('labelTextCopiedToClipboard'), "toast-primary");
             },
             changeTextArea: function (id) {
-                this.historyList[id].isEditing = true
-                var textarea = document.getElementById(id)
-                this.oldOutput = textarea.value
-                textarea.removeAttribute('readonly')
+                this.historyList[id].isEditing = true;
+                var textarea = document.getElementById(id);
+                this.oldOutput = textarea.value;
+                textarea.removeAttribute('readonly');
             },
             editHistory: function (id) {
-                var textarea = document.getElementById(id)
-                textarea.setAttribute('readonly', 'readonly')
-                var textUpdated = textarea.value
+                var textarea = document.getElementById(id);
+                textarea.setAttribute('readonly', 'readonly');
+                var textUpdated = textarea.value;
 
-                self = this
+                self = this;
                 var paramsData = {
                     idDocument: this.idAnalyzer,
                     oldOutput: this.oldOutput,
                     updatedOutput: textUpdated,
-                }
+                };
                 api.put('/Document', paramsData)
-                    .then(function (response) {
-                        // Handle success
-                        self.oldOutput = ''
-                        self.historyList[id].isEditing = false
-                    })
-                    .catch(function (e) {
-                        // Handle error
-                        self.historyList[id].output = self.oldOutput
-                        console.log(e)
-                        self.historyList[id].isEditedFail = true
-                        textarea.classList.remove('blue-textarea')
-                        textarea.classList.add('red-textarea')
+                    .then(function (response) { // Handle success
+                        self.oldOutput = "";
+                        self.historyList[id].isEditing = false;
+                    }).catch(function (e) { // Handle error
+                        self.historyList[id].output = self.oldOutput;
+                        console.log(e);
+                        self.historyList[id].isEditedFail = true;
+                        textarea.classList.remove('blue-textarea');
+                        textarea.classList.add('red-textarea');
                         setTimeout(() => {
-                            self.historyList[id].isEditedFail = false
-                            textarea.classList.remove('red-textarea')
-                            textarea.classList.add('blue-textarea')
-                        }, 5000)
-                    })
-                    .finally(function () {
-                        // Always executed
-                        self.showHistory()
-                        console.log('Finished request.')
-                    })
+                            self.historyList[id].isEditedFail = false;
+                            textarea.classList.remove('red-textarea');
+                            textarea.classList.add('blue-textarea');
+                        }, 5000);
+
+                    }).finally(function () { // Always executed
+                        self.showHistory();
+                        console.log("Finished request.");
+                    });
             },
             stopEditing: function (id) {
-                var textarea = document.getElementById(id)
-                this.historyList[id].output = this.oldOutput
-                textarea.setAttribute('readonly', 'readonly')
-                this.oldOutput = ''
-                this.historyList[id].isEditing = false
+                var textarea = document.getElementById(id);
+                this.historyList[id].output = this.oldOutput;
+                textarea.setAttribute('readonly', 'readonly');
+                this.oldOutput = "";
+                this.historyList[id].isEditing = false;
             },
             alertToast: function (msg, color) {
-                this.$emit('showAlertToast', { msg: msg, color: color })
+                this.$emit('showAlertToast', { msg: msg, color: color });
             },
             clearMyInterval: function () {
-                this.$emit('clearMyInterval')
+                this.$emit('clearMyInterval');
             },
             expandSort: function () {
-                this.isExpandedSort = !this.isExpandedSort
+                this.isExpandedSort = !this.isExpandedSort;
             },
             sortHistoryListAsc: function () {
-                if (this.historyListOrder == 'desc') {
-                    this.historyListOrder = 'asc'
-                    this.$emit('updateHistoryListOrder', { value: 'asc' })
-                    this.historyList.reverse()
+
+                if (this.historyListOrder == "desc") {
+                    this.historyListOrder = "asc";
+                    this.$emit('updateHistoryListOrder', { value: "asc" });
+                    this.historyList.reverse();
                 }
-                this.isExpandedSort = false
+                this.isExpandedSort = false;
             },
             sortHistoryListDesc: function () {
-                if (this.historyListOrder == 'asc') {
-                    this.historyListOrder = 'desc'
-                    this.$emit('updateHistoryListOrder', { value: 'desc' })
-                    this.historyList.reverse()
+
+                if (this.historyListOrder == "asc")
+                {
+                    this.historyListOrder = "desc";
+                    this.$emit('updateHistoryListOrder', { value: "desc" });
+                    this.historyList.reverse();
                 }
-                this.isExpandedSort = false
+                this.isExpandedSort = false;
             },
             dateFormat: function (str) {
-                if (this.$store.state.userProfile.language === 'en') {
-                    return moment(str).format('YYYY/MM/DD (H:mm:ss)')
+                if (this.$store.state.userProfile.language === "en") {
+                    return moment(str).format("YYYY/MM/DD (H:mm:ss)");
                 } else {
-                    return moment(str).format('DD/MM/YYYY (H:mm:ss)')
+                    return moment(str).format("DD/MM/YYYY (H:mm:ss)");
                 }
             },
         },
         computed: {},
         created() {
-            this.showHistory()
+            this.showHistory();
         },
-        mounted() {},
-        unmounted() {},
+        mounted() { },
+        unmounted() { },
     }
 </script>
 
 <style scoped>
-    .fas,
-    .far {
+    .fas, .far {
         font-weight: 900 !important;
     }
 
     .text-primary {
-        color: #47aaff !important;
+        color: #47AAFF !important;
     }
 
     .div-row {
@@ -494,16 +377,18 @@
     }
 
     .blue-textarea {
-        border-color: #0073e6 !important;
+        border-color: #0073E6 !important;
     }
 
     .red-textarea {
         border-color: darkred !important;
     }
     @media (min-width: 768px) and (max-width: 1023px) {
+
         .flex-shrink {
             justify-content: center;
             display: flex;
         }
     }
+    
 </style>

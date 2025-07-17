@@ -1,11 +1,10 @@
-import api from '@/services/api'
-import PaginationDivider from '@/utils/paginationDivider'
-const divider = new PaginationDivider()
+import api from "@/services/api";
+import PaginationDivider from "@/utils/paginationDivider";
+const divider = new PaginationDivider();
 
 export default {
     getTypes(params) {
-        return api
-            .get('/TypeDoc/Paged/', { params: params })
+        return api.get('/TypeDoc/Paged/', { params: params })
             .then(({ data }) => {
                 return {
                     content: data.content,
@@ -14,21 +13,19 @@ export default {
                         totalPages: data.pageCount,
                         rowCount: data.rowCount,
                         totalItems: data.rowCount,
-                    },
+                    }
                 }
-            })
-            .catch(function (e) {
-                console.log(e)
-            })
+            }).catch(function (e) {
+                console.log(e);
+            });
     },
     editType(params) {
-        return api
-            .put('/TypeDoc', params)
+        return api.put('/TypeDoc', params)
             .then(({ data, status }) => {
                 return {
                     success: true,
                     status,
-                    data,
+                    data
                 }
             })
             .catch((e) => {
@@ -37,30 +34,27 @@ export default {
                 return {
                     success: false,
                     status,
-                    error: message,
+                    error: message
                 }
             })
     },
 
     deleteTypeById(teamIds) {
-        return api
-            .delete('/TypeDoc/DeleteByIds', { data: teamIds })
+        return api.delete('/TypeDoc/DeleteByIds', { data: teamIds })
             .then(() => {
-                return true
-            })
-            .catch(function (e) {
-                console.log(e)
-                return false
-            })
+                return true;
+            }).catch(function (e) {
+                console.log(e);
+                return false;
+            });
     },
     addType(name) {
-        return api
-            .post('/TypeDoc?name=' + name)
-            .then(({ data, status }) => {
+        return api.post('/TypeDoc?name=' + name)
+             .then(({ data, status }) => {
                 return {
                     success: true,
                     status,
-                    data,
+                    data
                 }
             })
             .catch((e) => {
@@ -69,7 +63,7 @@ export default {
                 return {
                     success: false,
                     status,
-                    error: message,
+                    error: message
                 }
             })
     },

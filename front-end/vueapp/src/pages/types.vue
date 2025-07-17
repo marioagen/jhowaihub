@@ -5,67 +5,55 @@
                 <div class="row">
                     <breadcrumb :crumbs="crumbsData" />
                 </div>
-                <search-bar
-                    :entity="entitySearch"
-                    :resetInput="resetInputSearch"
-                    @search="filterList"
-                    @action="addType"
-                />
-                <div class="mb-2" style="height: 30px">
-                    <button
-                        type="button"
-                        class="btn delete-custom d-flex align-items-center"
-                        @click="confirmationDialog(item)"
-                        v-if="this.listIds.length > 0"
-                    >
-                        <i
-                            class="fas fa-trash text-danger"
-                            style="font-size: 0.9em; margin-right: 8px"
-                        ></i>
-                        {{ $t('labelDelete') }}
+                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" @action="addType" />
+                <div class="mb-2" style="height: 30px;">
+                    <button type="button" class="btn delete-custom d-flex align-items-center" @click="confirmationDialog(item)" v-if="this.listIds.length > 0">
+                        <i class="fas fa-trash text-danger" style="font-size: .9em; margin-right: 8px"></i>
+                        {{$t('labelDelete')}}
                     </button>
                 </div>
-                <TypesTable ref="TypesTable" @toast="handleToast" />
-            </div>
+                <TypesTable ref="TypesTable"
+        @toast="handleToast" />
         </div>
+     </div>
     </main>
-    <modal-form
-        v-if="modalAlertShow"
-        :dataEditing="dataModal"
-        @openAdd="addType"
-        @close="closeModal"
-    />
+        <modal-form 
+            v-if="modalAlertShow"
+            :dataEditing="dataModal" 
+            @openAdd="addType" 
+            @close="closeModal" 
+        />
 
-    <toast-alert
-        :showToast="toastShow"
-        :colorToast="toastColor"
-        :messageToast="toastMessage"
-        @close="closeToast"
-    />
+        <toast-alert 
+            :showToast="toastShow" 
+            :colorToast="toastColor" 
+            :messageToast="toastMessage" 
+            @close="closeToast" 
+        />
 </template>
 
 <script>
-    import Breadcrumb from '@/components/common/breadcrumb'
-    import SearchBar from '@/components/common/search-bar'
-    import ModalForm from '@/components/pages/type/modal-form'
-    import ModalAlert from '@/components/common/modal-alert'
-    import ToastAlert from '@/components/common/toast-alert'
-    import paginationDivider from '@/utils/paginationDivider'
-    import Pagination from '@/components/common/pagination'
-    import TypesTable from '@/components/types/types-table.vue'
-    import TypesService from '@/services/types/TypesService'
+    import Breadcrumb from '@/components/common/breadcrumb';
+    import SearchBar from '@/components/common/search-bar';
+    import ModalForm from '@/components/pages/type/modal-form';
+    import ModalAlert from '@/components/common/modal-alert';
+    import ToastAlert from '@/components/common/toast-alert';
+    import paginationDivider from "@/utils/paginationDivider";
+    import Pagination from '@/components/common/pagination';
+    import TypesTable from "@/components/types/types-table.vue";
+    import TypesService from "@/services/types/TypesService";
 
     export default {
-        name: 'TypeManager',
+        name: "TypeManager",
         emits: ['showAlertToast'],
         data() {
             return {
                 crumbsData: [],
                 entitySearch: {},
                 resetInputSearch: false,
-                sidebarData: 'Type',
+                sidebarData: "Type",
                 queryPage: this.$route.query.page ? this.$route.query.page : 1,
-                searchInput: '',
+                searchInput: "",
                 searching: false,
                 dataType: [],
                 loading: false,
@@ -77,8 +65,8 @@
                 colType: 2,
                 selectedOption: 10,
                 toastShow: false,
-                toastColor: '',
-                toastMessage: '',
+                toastColor: "",
+                toastMessage: "",
                 divider: new paginationDivider(),
                 listIds: [],
             }
@@ -90,15 +78,15 @@
             ModalAlert,
             ToastAlert,
             Pagination,
-            TypesTable,
+            TypesTable
         },
         watch: {
             searchInput: function (val) {
-                this.searching = false
+                this.searching = false;
             },
             '$store.state.userProfile.language': function () {
-                this.setCrumbsData()
-                this.setEntitySearch()
+                this.setCrumbsData();
+                this.setEntitySearch();
             },
         },
         methods: {
@@ -106,96 +94,92 @@
                 this.crumbsData = [
                     { crumb: this.$t('labelManage'), link: { to: 'Type' } },
                     { crumb: this.$t('labelTypes'), link: { to: 'Type' } },
-                ]
+                ];
             },
             setEntitySearch: function () {
                 this.entitySearch = {
-                    screen: 'type',
+                    screen: "type",
                     labelInput: this.$t('labelSearchTypes'),
                     placeholderInput: this.$t('labelTypeNameOrId'),
                     labelButton: this.$t('labelNewType'),
-                }
+                };
             },
             filterList(obj) {
-                this.$refs.TypesTable.filterList(obj.search)
+                this.$refs.TypesTable.filterList(obj.search);
             },
             addType: function (name) {
-                const self = this
+                const self = this;
                 TypesService.addType(name)
                     .then((result) => {
                         if (!result.success) {
-                            const messageKey =
-                                result.status === 409
-                                    ? 'labelDocumentTypeAlreadyExists'
-                                    : 'labelDocumentTypeError'
+                            const messageKey = result.status === 409
+                                ? 'labelDocumentTypeAlreadyExists'
+                                : 'labelDocumentTypeError'
 
                             this.alertToast(this.$t(messageKey), 'toast-warning')
-                        } else {
-                            self.$refs.TypesTable.getTypes({
-                                search: '',
-                                page: self.queryPage,
-                                type: null,
-                            })
-                            self.resetInputSearch = !self.resetInputSearch
-                            self.alertToast(self.$t('labelDocumentTypeSuccess'), 'toast-success')
+                        }
+                        else {
+                            self.$refs.TypesTable.getTypes({ search: '', page: self.queryPage, type: null })
+                            self.resetInputSearch = !self.resetInputSearch;
+                            self.alertToast(self.$t('labelDocumentTypeSuccess'), "toast-success");
                         }
                     })
                     .finally(() => {
                         console.log('Finished request.')
-                    })
+                    })                   
             },
             confirmationDialog: function (item) {
-                this.modalEntity = item
-                this.modalAlertShow = true
-                document.getElementsByTagName('BODY')[0].children[1].className += ' active'
+                this.modalEntity = item;
+                this.modalAlertShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
             openModal: function (data = null) {
-                this.modalAlertShow = true
-                if (data) this.dataModal = data
-                document.getElementsByTagName('BODY')[0].children[1].className += ' active'
+                this.modalAlertShow = true;
+                if (data) this.dataModal = data;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
             closeModal: function () {
-                this.modalAlertShow = false
-                this.modalAlertShow = false
-                document.getElementsByTagName('BODY')[0].children[1].className = 'overlay'
+                this.modalAlertShow = false;
+                this.modalAlertShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             upperFormat: function (str) {
-                return str.toUpperCase()
+                return str.toUpperCase();
             },
             alertToast(msg, color) {
-                this.clearMyInterval()
-                this.toastMessage = msg
-                this.toastColor = color
-                this.toastShow = true
+                this.clearMyInterval(); 
+                this.toastMessage = msg;
+                this.toastColor = color;
+                this.toastShow = true;
 
                 this.myInterval = setTimeout(() => {
-                    this.toastMessage = ''
-                    this.toastColor = ''
-                    this.toastShow = false
-                    this.myInterval = null
-                }, 4000)
+                    this.toastMessage = '';
+                    this.toastColor = '';
+                    this.toastShow = false;
+                    this.myInterval = null;
+                }, 4000);
             },
             closeToast: function () {
-                this.toastShow = false
-                this.clearMyInterval()
+                this.toastShow = false;
+                this.clearMyInterval();
             },
             clearMyInterval() {
                 if (this.myInterval) {
-                    clearTimeout(this.myInterval)
-                    this.myInterval = null
+                    clearTimeout(this.myInterval);
+                    this.myInterval = null;
                 }
             },
             handleToast({ message, color }) {
-                this.alertToast(message, color)
-            },
+                this.alertToast(message, color);
+            }
         },
         computed: {},
         created() {
-            this.setCrumbsData()
-            this.setEntitySearch()
+            this.setCrumbsData();
+            this.setEntitySearch();
         },
-        mounted() {},
-        unmounted() {},
+        mounted() { },
+        unmounted() { },
     }
 </script>
 
@@ -229,8 +213,8 @@
     }
 
     .bg-success {
-        background-color: #edfef2 !important;
-        color: #0eaa42 !important;
+        background-color: #EDFEF2 !important;
+        color: #0EAA42 !important;
         font-weight: inherit !important;
         padding: 8px 12px !important;
     }

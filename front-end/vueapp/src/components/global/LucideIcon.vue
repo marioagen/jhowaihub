@@ -1,14 +1,19 @@
 <template>
-    <component :is="iconComponent" v-bind="$attrs" :size="size" :stroke-width="strokeWidth" />
-</template>
-
+    <component 
+        :is="iconComponent" 
+        v-bind="$attrs" 
+        :size="size"
+        :stroke-width="strokeWidth"
+    />
+  </template>
+  
 <script>
-    import * as LucideIcons from 'lucide-vue-next'
+    import * as LucideIcons from "lucide-vue-next";
     export default {
         props: {
             icon: {
                 type: String,
-                required: true,
+                required: true
             },
             size: {
                 type: [Number, String],
@@ -23,8 +28,9 @@
         },
         computed: {
             iconComponent() {
-                return LucideIcons[this.icon] || null
-            },
-        },
-    }
+                return LucideIcons[this.icon] || null;
+            }
+        }
+    };
 </script>
+  

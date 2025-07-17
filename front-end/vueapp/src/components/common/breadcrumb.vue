@@ -1,19 +1,8 @@
 <template>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li
-                class="breadcrumb-item active"
-                aria-current="page"
-                v-for="(item, index) in crumbs"
-                :key="index"
-            >
-                <router-link
-                    :to="
-                        item.link.queryPage
-                            ? { name: item.link.to, query: { page: item.link.queryPage } }
-                            : { name: item.link.to }
-                    "
-                >
+            <li class="breadcrumb-item active" aria-current="page" v-for="(item, index) in crumbs" :key="index">
+                <router-link :to="item.link.queryPage ? { name: item.link.to, query: { page: item.link.queryPage } } : { name: item.link.to }">
                     {{ item.crumb }}
                 </router-link>
             </li>
@@ -23,26 +12,26 @@
 
 <script>
     export default {
-        name: 'Breadcrumb',
+        name: "Breadcrumb",
         props: {
             crumbs: {
                 required: true,
                 type: Array,
-                default: [],
+                default: []
             },
         },
         data() {
             return {
-                title: 'Component Breadcrumb',
+                title: "Component Breadcrumb",
             }
         },
         components: {},
         watch: {},
         methods: {},
         computed: {},
-        created() {},
-        mounted() {},
-        unmounted() {},
+        created() { },
+        mounted() { },
+        unmounted() { },
     }
 </script>
 
