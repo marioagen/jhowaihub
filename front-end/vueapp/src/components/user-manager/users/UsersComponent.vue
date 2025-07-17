@@ -11,10 +11,19 @@
         </div>
         <div class="card mb-3">
             <div class="card-body">
-                <SearchComponent :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
+                <SearchComponent 
+                    :entity="entitySearch" 
+                    :resetInput="resetInputSearch" 
+                    @search="filterList"
+                    @clean="filterList"
+                    ref="SearchComponent"
+                />
             </div>
         </div>
-        <UsersTable ref="UserTable" />
+        <UsersTable
+            @setFilter="setFilter"
+            ref="UserTable"
+        />
     </div>
     <modal-alert
         v-if="modalAlertShow"
@@ -143,6 +152,10 @@
                     labelInput: this.$t("labelSearchUsers"),
                     placeholderInput: this.$t("labelTypeUserName"),
                 };
+            },
+            setFilter(team) {
+                this.$refs.SearchComponent.searchInput = team.name;
+                this.$refs.UserTable.getUsers({ search: team.name, page: this.queryPage, type: null })
             },
         },
         created() {
