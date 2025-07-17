@@ -4,13 +4,15 @@
     labelAnalyze: "Analyze",
     labelAnalyzed: "Analyzed",
     labelAlmost: "You're almost there!",
-    labelAnInconsistencyWasIdentifiedInTheDocument: "An inconsistency was identified in the document. Please reprocess to achieve better results",
+    labelAnInconsistencyWasIdentifiedInTheDocument:
+        "An inconsistency was identified in the document. Please reprocess to achieve better results",
     labelApply: "Apply",
     labelApplyQuestionnaire: "Apply questionnaire",
     labelApplyingQuestionnaire: "Applying questionnaire",
     labelApplyingQuestionnaireWait: "Applying questionnaire, please wait.",
     labelAskTheAi: "Ask AI",
-    labelAttentionDependingOnTheSpeed: "Attention, depending on the speed of your Internet connection and the size of the uploaded file, this operation may take a few minutes.",
+    labelAttentionDependingOnTheSpeed:
+        "Attention, depending on the speed of your Internet connection and the size of the uploaded file, this operation may take a few minutes.",
     labelAttentionPDFDisplayFailed: "An error occurred while loading the PDF. Click here to try again",
     labelAll: "All",
     labelBack: "Back",
@@ -41,7 +43,8 @@
     labelDocumentTypeRemoveSuccess: "Document type successfully removed",
     labelDocumentTypeRemoveError: "Error removing document type",
     labelDocumentTypeEditSuccess: "Document type updated successfully",
-    labelDocumentHasAlreadyBeenStandardizedPreviously: "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
+    labelDocumentHasAlreadyBeenStandardizedPreviously:
+        "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
     labelDownloadCsv: "Download CSV",
     labelDownloadSuccessfully: "Download successfully",
     labelDocumentTranscript: "Document transcription",
@@ -138,7 +141,8 @@
     labelThisActionCannotBeUndone: "This action cannot be undone. <br/> Are you sure you want to <br/> remove it?",
     labelTypeNameOrId: "Name, ID or enter a new type to register",
     labelTheFileMayBeCorrupt: "The file may be <br/> corrupt or have an error. <br/> Please try again.",
-    labelTheFileMayBeUnreadableOrHaveAnError: "The file may be <br/> unreadable or have an error. <br/> Please try again.",
+    labelTheFileMayBeUnreadableOrHaveAnError:
+        "The file may be <br/> unreadable or have an error. <br/> Please try again.",
     labelThereIsNotEnoughCredit: "There is not enough credit to apply all questions in this questionnaire.",
     labelTypeDoc: "Document Type",
     labelTypeDocAlreadyExists: "Duplicated Type",
@@ -203,6 +207,10 @@
     labelUserError: "Invalid user",
     labelTeamError: "Invalid team",
     labelErrorTeamAlreadyExists: "Team already registered",
-}
+    labelConfirmTitle: "Confirmar",
+    labelMessage: "¿Estás seguro?",
+    labelCancelMessage: "Cancelar",
+    labelConfirmMessage: "Confirmar",
+};
 
 export default english;

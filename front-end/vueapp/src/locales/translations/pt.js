@@ -4,13 +4,15 @@
     labelAlmost: "Você está quase lá!",
     labelAnalyze: "Analisar",
     labelAnalyzed: "Analisado",
-    labelAnInconsistencyWasIdentifiedInTheDocument: "Uma inconsistência foi identificada no documento. Por favor, reprocesse para ter melhores resultados",
+    labelAnInconsistencyWasIdentifiedInTheDocument:
+        "Uma inconsistência foi identificada no documento. Por favor, reprocesse para ter melhores resultados",
     labelApply: "Aplicar",
     labelApplyQuestionnaire: "Aplicar questionário",
     labelApplyingQuestionnaire: "Aplicando questionário",
     labelApplyingQuestionnaireWait: "Aplicando questionário, aguarde.",
     labelAskTheAi: "Pergunte a IA",
-    labelAttentionDependingOnTheSpeed: "Atenção, dependendo da velocidade da sua conexão com a Internet e do tamanho do arquivo carregado, essa operação pode demorar alguns minutos.",
+    labelAttentionDependingOnTheSpeed:
+        "Atenção, dependendo da velocidade da sua conexão com a Internet e do tamanho do arquivo carregado, essa operação pode demorar alguns minutos.",
     labelAttentionPDFDisplayFailed: "Ocorreu uma falha ao carregar o PDF. Clique aqui para tentar novamente",
     labelAll: "Tudo",
     labelBack: "Voltar",
@@ -37,7 +39,8 @@
     labelDocumentName: "Nome do documento",
     labelDocumentType: "Tipo de documento",
     labelDocumentNameOrDescription: "Nome ou descrição do documento",
-    labelDocumentHasAlreadyBeenStandardizedPreviously: "O Documento já foi normalizado anteriormente. <br/> Aguarde, você será redirecionado para a página inicial.",
+    labelDocumentHasAlreadyBeenStandardizedPreviously:
+        "O Documento já foi normalizado anteriormente. <br/> Aguarde, você será redirecionado para a página inicial.",
     labelDownloadCsv: "Baixar CSV",
     labelDownloadSuccessfully: "Download com sucesso",
     labelDocumentTranscript: "Transcrição do documento",
@@ -134,8 +137,9 @@
     labelTextCopiedToClipboard: "Texto copiado para a área de transferência.",
     labelThisActionCannotBeUndone: "Esta ação não poderá ser desfeita. <br/> Tem certeza que deseja <br/> removê-lo?",
     labelTypeNameOrId: "Nome, ID ou insira um novo tipo para cadastrar",
-    labelTheFileMayBeCorrupt : "O Arquivo pode estar <br/> corrompido ou com erro. <br/> Por favor, tente novamente.",
-    labelTheFileMayBeUnreadableOrHaveAnError: "O Arquivo pode estar <br/> ilegível ou com erro. <br/> Por favor, tente novamente.",
+    labelTheFileMayBeCorrupt: "O Arquivo pode estar <br/> corrompido ou com erro. <br/> Por favor, tente novamente.",
+    labelTheFileMayBeUnreadableOrHaveAnError:
+        "O Arquivo pode estar <br/> ilegível ou com erro. <br/> Por favor, tente novamente.",
     labelThereIsNotEnoughCredit: "Não há crédito suficiente para aplicar todas as perguntas deste questionário.",
     labelTypeDoc: "Tipo de Documento",
     labelDocumentTypeSuccess: "Tipo de documento inserido com sucesso",
@@ -186,7 +190,7 @@
     labelSearchUsers: "Buscar usuários...",
     labelSelectAll: "Selecionar Todos",
     labelClearSelection: "Limpar Seleção",
-    labelNewUser: "Novo usuário",    
+    labelNewUser: "Novo usuário",
     labelTeamName: "Nome do time",
     labelTypeTeamName: "Digite o nome do time",
     labelTypeUserName: "Digite o nome do usuário",
@@ -202,7 +206,10 @@
     labelUserError: "Usuário inválido",
     labelTeamError: "Time inválido",
     labelErrorTeamAlreadyExists: "Time já cadastrado",
-
-}
+    labelConfirmTitle: "Confirmação",
+    labelMessage: "Tem certeza?",
+    labelCancelMessage: "Cancelar",
+    labelConfirmMessage: "Confirmar",
+};
 
 export default portuguese;

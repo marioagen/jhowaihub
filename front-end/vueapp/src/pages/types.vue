@@ -1,53 +1,49 @@
 <template>
-    <main>
-        <div class="container-fluid mt-4">
+    <main class="scroll-area">
+        <div class="container-fluid mt-4 my-3">
             <div class="custom-padding">
                 <div class="row">
                     <breadcrumb :crumbs="crumbsData" />
                 </div>
-                <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" @action="addType" />
-                <div class="mb-2" style="height: 30px;">
-                    <button type="button" class="btn delete-custom d-flex align-items-center" @click="confirmationDialog(item)" v-if="this.listIds.length > 0">
-                        <i class="fas fa-trash text-danger" style="font-size: .9em; margin-right: 8px"></i>
-                        {{$t('labelDelete')}}
+                <search-bar
+                    :entity="entitySearch"
+                    :resetInput="resetInputSearch"
+                    @search="filterList"
+                    @action="addType"
+                />
+
+                <div class="mb-2" style="height: 30px">
+                    <button
+                        type="button"
+                        class="btn delete-custom d-flex align-items-center"
+                        @click="confirmationDialog(item)"
+                        v-if="this.listIds.length > 0"
+                    >
+                        <i class="fas fa-trash text-danger" style="font-size: 0.9em; margin-right: 8px"></i>
+                        {{ $t("labelDelete") }}
                     </button>
                 </div>
-                <TypesTable 
-                    ref="TypesTable"
-                    @toast="handleToast"
-                />
-                </div>
+                <TypesTable ref="TypesTable" @toast="handleToast" />
             </div>
+        </div>
     </main>
-        <modal-form 
-            v-if="modalAlertShow"
-            :dataEditing="dataModal" 
-            @openAdd="addType" 
-            @close="closeModal" 
-        />
+    <modal-form v-if="modalAlertShow" :dataEditing="dataModal" @openAdd="addType" @close="closeModal" />
 
-        <toast-alert 
-            :showToast="toastShow" 
-            :colorToast="toastColor" 
-            :messageToast="toastMessage" 
-            @close="closeToast" 
-        />
+    <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
 </template>
 
 <script>
-    import Breadcrumb from '@/components/common/breadcrumb';
-    import SearchBar from '@/components/common/search-bar';
-    import ModalForm from '@/components/pages/type/modal-form';
-    import ModalAlert from '@/components/common/modal-alert';
-    import ToastAlert from '@/components/common/toast-alert';
+    import Breadcrumb from "@/components/common/breadcrumb";
+    import SearchBar from "@/components/common/search-bar";
+    import ModalForm from "@/components/pages/type/modal-form";
+    import ToastAlert from "@/components/common/toast-alert";
     import paginationDivider from "@/utils/paginationDivider";
-    import Pagination from '@/components/common/pagination';
-    import TypesTable from "@/components/types/types-table.vue";
+    import TypesTable from "@/components/types/TypesTable.vue";
     import TypesService from "@/services/types/TypesService";
 
     export default {
         name: "TypeManager",
-        emits: ['showAlertToast'],
+        emits: ["showAlertToast"],
         data() {
             return {
                 crumbsData: [],
@@ -71,22 +67,20 @@
                 toastMessage: "",
                 divider: new paginationDivider(),
                 listIds: [],
-            }
+            };
         },
         components: {
             Breadcrumb,
             SearchBar,
             ModalForm,
-            ModalAlert,
             ToastAlert,
-            Pagination,
-            TypesTable
+            TypesTable,
         },
         watch: {
             searchInput: function (val) {
                 this.searching = false;
             },
-            '$store.state.userProfile.language': function () {
+            "$store.state.userProfile.language": function () {
                 this.setCrumbsData();
                 this.setEntitySearch();
             },
@@ -94,16 +88,16 @@
         methods: {
             setCrumbsData: function () {
                 this.crumbsData = [
-                    { crumb: this.$t('labelManage'), link: { to: 'Type' } },
-                    { crumb: this.$t('labelTypes'), link: { to: 'Type' } },
+                    { crumb: this.$t("labelManage"), link: { to: "Type" } },
+                    { crumb: this.$t("labelTypes"), link: { to: "Type" } },
                 ];
             },
             setEntitySearch: function () {
                 this.entitySearch = {
                     screen: "type",
-                    labelInput: this.$t('labelSearchTypes'),
-                    placeholderInput: this.$t('labelTypeNameOrId'),
-                    labelButton: this.$t('labelNewType'),
+                    labelInput: this.$t("labelSearchTypes"),
+                    placeholderInput: this.$t("labelTypeNameOrId"),
+                    labelButton: this.$t("labelNewType"),
                 };
             },
             filterList(obj) {
@@ -114,21 +108,19 @@
                 TypesService.addType(name)
                     .then((result) => {
                         if (!result.success) {
-                            const messageKey = result.status === 409
-                                ? 'labelDocumentTypeAlreadyExists'
-                                : 'labelDocumentTypeError'
+                            const messageKey =
+                                result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
 
-                            this.alertToast(this.$t(messageKey), 'toast-warning')
-                        }
-                        else {
-                            self.$refs.TypesTable.getTypes({ search: '', page: self.queryPage, type: null })
+                            this.alertToast(this.$t(messageKey), "toast-warning");
+                        } else {
+                            self.$refs.TypesTable.getTypes({ search: "", page: self.queryPage, type: null });
                             self.resetInputSearch = !self.resetInputSearch;
-                            self.alertToast(self.$t('labelDocumentTypeSuccess'), "toast-success");
+                            self.alertToast(self.$t("labelDocumentTypeSuccess"), "toast-success");
                         }
                     })
                     .finally(() => {
-                        console.log('Finished request.')
-                    })                   
+                        console.log("Finished request.");
+                    });
             },
             confirmationDialog: function (item) {
                 this.modalEntity = item;
@@ -149,14 +141,14 @@
                 return str.toUpperCase();
             },
             alertToast(msg, color) {
-                this.clearMyInterval(); 
+                this.clearMyInterval();
                 this.toastMessage = msg;
                 this.toastColor = color;
                 this.toastShow = true;
 
                 this.myInterval = setTimeout(() => {
-                    this.toastMessage = '';
-                    this.toastColor = '';
+                    this.toastMessage = "";
+                    this.toastColor = "";
                     this.toastShow = false;
                     this.myInterval = null;
                 }, 4000);
@@ -173,16 +165,16 @@
             },
             handleToast({ message, color }) {
                 this.alertToast(message, color);
-            }
+            },
         },
         computed: {},
         created() {
             this.setCrumbsData();
             this.setEntitySearch();
         },
-        mounted() { },
-        unmounted() { },
-    }
+        mounted() {},
+        unmounted() {},
+    };
 </script>
 
 <style scoped>
@@ -215,8 +207,8 @@
     }
 
     .bg-success {
-        background-color: #EDFEF2 !important;
-        color: #0EAA42 !important;
+        background-color: #edfef2 !important;
+        color: #0eaa42 !important;
         font-weight: inherit !important;
         padding: 8px 12px !important;
     }
@@ -227,9 +219,7 @@
 
     .scroll-area {
         display: list-item;
-        max-height: calc(100% - 280px);
         overflow-y: auto;
-        min-height: 5%;
     }
 
     @media (max-width: 768px) {

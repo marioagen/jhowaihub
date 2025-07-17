@@ -9,4 +9,4 @@ export default {
             return moment(date).format("DD/MM/YYYY");
         }
     },
-}
+};
