@@ -72,9 +72,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut]
         [SwaggerOperation("EndPoint that update a team")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Update([FromBody] TeamUpdateDto teamUpdateDto)
+        public async Task<IActionResult> Update([FromBody] TeamUpdateDto teamUpdateDto)
         {
-            var updated = _teamServices.Update(teamUpdateDto);
+            var updated = await _teamServices.Update(teamUpdateDto);
             return Ok(updated);
         }
 

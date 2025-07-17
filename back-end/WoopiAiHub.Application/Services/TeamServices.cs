@@ -1,12 +1,10 @@
-using Humanizer;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
@@ -14,10 +12,13 @@ namespace WoopiAiHub.Application.Services
     public class TeamServices : ITeamServices
     {
         private readonly ITeamRepository _teamRepository;
+        private readonly IUserRepository _userRepository;
 
-        public TeamServices(ITeamRepository teamRepository)
+        public TeamServices(ITeamRepository teamRepository,
+                            IUserRepository userRepository)
         {
             _teamRepository = teamRepository;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -93,27 +94,32 @@ namespace WoopiAiHub.Application.Services
         /// <param name="teamUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public bool Update(TeamUpdateDto teamUpdateDto)
+        public async Task<bool> Update(TeamUpdateDto teamUpdateDto)
         {
-            if (string.IsNullOrEmpty(teamUpdateDto.Name))
-            {
-                throw new ArgumentException("Team name cannot be empty");
-            }
 
-            var team = _teamRepository.FindById(teamUpdateDto.Id);
+            var team = _teamRepository.FindByIdReturnModel(teamUpdateDto.Id);
             if (team == null)
+                return false;
+
+            team.Update(teamUpdateDto.Name);
+
+            if (teamUpdateDto.UserIds != null)
             {
-                throw new ArgumentException("Team not found");
+                team.Users.Clear();
+                var users = await _userRepository.FindByIdsAsync(teamUpdateDto.UserIds);
+
+                foreach (var user in users)
+                {
+                    team.AddUser(user);
+                }
             }
 
-            var teamUpdate = GenerateTeamToUpdate(teamUpdateDto, team);
-
-            var updateResult = _teamRepository.Update(teamUpdate);
+            var updateResult = _teamRepository.Update(team);
             if (!updateResult)
             {
-                throw new ArgumentException("Duplicated Team Name");
+                throw new ArgumentException("Duplicated Team");
             }
-            return true;
+            return updateResult;
         }
 
         /// <summary>
@@ -154,7 +160,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
-             return _teamRepository.DeleteByIds(ids);
+            return _teamRepository.DeleteByIds(ids);
         }
 
         /// <summary>

@@ -8,6 +8,7 @@
             :isLoading="table.isLoading"
             :pagination="table.pagination"
             :hasSelection="false"
+            @change-page="changePage"
         >
             <template #cell-name="{ data }">
                 <div v-if="!loading" class="p-1">

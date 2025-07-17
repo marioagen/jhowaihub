@@ -222,9 +222,8 @@
                 const team = {
                     id: this.teamData.id,
                     name: this.teamData.name,
-                    users: this.selectedUsers.map((userId) => this.users.find((user) => user.id === userId)),
+                    userIds: this.selectedUsers,
                 };
-
                 const request = team.id === 0 ? api.post("Team", team) : api.put("Team", team);
 
                 request

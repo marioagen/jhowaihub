@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         TeamDto FindById(int id);
         TeamPagedResultDto FindAllPaged(PagedDataDto pagedDataDto);
         bool CreateUniqueTeam(TeamCreateDto teamCreateDto);
-        bool Update(TeamUpdateDto teamUpdateDto);
+        Task<bool> Update(TeamUpdateDto teamUpdateDto);
         bool DeleteByIds(List<int> ids);
     }
 }

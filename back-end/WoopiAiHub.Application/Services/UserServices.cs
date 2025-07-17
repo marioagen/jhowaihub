@@ -137,8 +137,8 @@ namespace WoopiAiHub.Application.Services
 
                 if (userUpdateDto.TeamIds != null)
                 {
-                    var teams = _teamRepository.FindByIds(userUpdateDto.TeamIds);
                     user.Teams.Clear();
+                    var teams =  _teamRepository.FindByIds(userUpdateDto.TeamIds);
                     foreach (var team in teams)
                     {
                         user.AddTeam(team);
