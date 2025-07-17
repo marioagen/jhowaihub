@@ -40,7 +40,6 @@ namespace WoopiAiHub.Repository
         public async Task<List<User>> FindByIdsAsync(List<Guid> ids)
         {
             return await _context.Users.Where(u => ids.Contains(u.Id))
-                                       .AsNoTracking()
                                        .ToListAsync();
         }
 
@@ -53,7 +52,6 @@ namespace WoopiAiHub.Repository
         public async Task<User> FindByReferenceAsync(Guid referenceUserId)
         {
             return await _context.Users.Where(u => u.Id == referenceUserId)
-                                       .AsNoTracking()
                                        .FirstOrDefaultAsync();
         }
 

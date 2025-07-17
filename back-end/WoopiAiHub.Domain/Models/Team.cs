@@ -16,11 +16,6 @@ namespace WoopiAiHub.Domain.Models
             this.Name = name;
         }
 
-        public void EditName(string newName)
-        {
-            Name = newName;
-        }
-
         public void AddUser(User user)
         {
             if (user == null)
@@ -30,6 +25,11 @@ namespace WoopiAiHub.Domain.Models
                 return;
 
             Users.Add(user);
+        }
+
+        public void Update(string name)
+        {
+            Name = name;
         }
 
         /// <summary>

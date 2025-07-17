@@ -85,7 +85,6 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams.Where(u => u.Id == id)
                                         .Include(t => t.Users)
-                                        .AsNoTracking()
                                         .FirstOrDefault();
         }
 
@@ -96,24 +95,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Update(Team team)
         {
-
-            var existing = _context.Teams
-               .Include(u => u.Users)
-               .FirstOrDefault(u => u.Id == team.Id);
-
-            if (existing == null)
-                return false;
-
-            existing.EditName(team.Name);
-            existing.Users.Clear();
-            foreach (var user in team.Users)
-            {
-                if (_context.Entry(user).State == EntityState.Detached)
-                    _context.Users.Attach(user);
-                existing.Users.Add(user);
-            }
-
-            _context.Teams.Update(existing);
+            _context.Teams.Update(team);
             _context.SaveChanges();
             return true;
         }

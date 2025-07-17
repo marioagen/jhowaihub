@@ -1,6 +1,8 @@
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
@@ -92,21 +94,20 @@ namespace WoopiAiHub.Application.Services
         /// <param name="teamUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public bool Update(TeamUpdateDto teamUpdateDto)
+        public async Task<bool> Update(TeamUpdateDto teamUpdateDto)
         {
-            if (string.IsNullOrEmpty(teamUpdateDto.Name))
-            {
-                throw new ArgumentException("Team name cannot be empty");
-            }
 
             var team = _teamRepository.FindByIdReturnModel(teamUpdateDto.Id);
+            if (team == null)
+                return false;
 
-            team.EditName(teamUpdateDto.Name);
+            team.Update(teamUpdateDto.Name);
 
-            if (team.Users != null)
+            if (teamUpdateDto.UserIds != null)
             {
-                var users = _userRepository.FindByIds(teamUpdateDto.UserIds);
                 team.Users.Clear();
+                var users = await _userRepository.FindByIdsAsync(teamUpdateDto.UserIds);
+
                 foreach (var user in users)
                 {
                     team.AddUser(user);
@@ -116,9 +117,9 @@ namespace WoopiAiHub.Application.Services
             var updateResult = _teamRepository.Update(team);
             if (!updateResult)
             {
-                throw new ArgumentException("Duplicated Team Name");
+                throw new ArgumentException("Duplicated Team");
             }
-            return true;
+            return updateResult;
         }
 
         /// <summary>
@@ -159,7 +160,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
-             return _teamRepository.DeleteByIds(ids);
+            return _teamRepository.DeleteByIds(ids);
         }
 
         /// <summary>
