@@ -17,7 +17,10 @@
                 <button class="btn btn-outline-success btn-sm table-btn" @click="editTeam(data.row)">
                     <LucideIcon icon="SquarePen" />
                 </button>
-                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="confirmationDialog(data.row)">
+                <button 
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn"
+                    @click="openConfirmation(data.row)"
+                >
                     <LucideIcon icon="Trash2" />
                 </button>
             </template>
@@ -29,16 +32,17 @@
         @teamCreated="handleTeamCreated"
         @close="closeModalTeam"
     />
-    <modal-alert
-        v-if="modalAlertShow"
-        :type="'Confirm'"
-        :entity="selectedTeam"
-        :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
-        :alertMessage="$t('labelThisActionCannotBeUndone')"
-        :okLabel="$t('labelConfirm')"
-        :cancelLabel="$t('labelCancel')"
-        @open="deleteTeam"
-        @close="closeModal"
+
+    <ConfirmModal
+        id="deleteConfirm"
+        title="labelYouAreAboutToDeleteTeam"
+        message="labelThisActionCannotBeUndone"
+        cancelText="labelCancel"
+        confirmText="labelConfirm"
+        confirmVariant="primary"
+        ref="DeleteDialog"
+        :isLoading="isDeleting"
+        @confirm="deleteTeam"
     />
 </template>
 
@@ -46,15 +50,15 @@
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ModalTeam from "@/components/user-manager/teams/modals/TeamModal.vue";
-    import ModalAlert from "@/components/common/modal-alert";
     import TeamsService from "@/services/teams/TeamsService";
+    import ConfirmModal from "@/components/core/ConfirmModal.vue";
 
     export default {
         name: "TeamsTable",
         components: {
             TableComponent,
             ModalTeam,
-            ModalAlert,
+            ConfirmModal,
         },
         data: () => ({
             table: {
@@ -73,6 +77,7 @@
                     totalItems: 2000,
                 },
             },
+            isDeleting: false,
             selectedTeam: {},
             queryPage: 1,
             searchInput: "",
@@ -125,16 +130,22 @@
                 this.selectedTeam = team;
                 this.openModalTeam();
             },
+            openConfirmation(team) {
+                this.selectedTeam = team;
+                this.$refs.DeleteDialog.open();
+            },
             deleteTeam() {
+                this.isDeleting = true;
                 let teamId = this.selectedTeam.id;
                 TeamsService.deleteTeamById(teamId)
                     .then((status) => {
                         if (status) {
-                            this.closeModal();
+                            this.$refs.DeleteDialog.close();
                             this.getTeams({ search: "", page: 1, type: null });
                         }
                     })
                     .finally(() => {
+                        this.isDeleting = false;
                         this.listIds = [];
                     });
             },
@@ -152,15 +163,6 @@
             },
             closeModalTeam: function () {
                 this.modalTeamShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            confirmationDialog(team) {
-                this.selectedTeam = team;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.modalAlertShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             changePage(page) {
