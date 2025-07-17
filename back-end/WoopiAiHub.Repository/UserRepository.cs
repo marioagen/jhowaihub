@@ -52,6 +52,7 @@ namespace WoopiAiHub.Repository
         public async Task<User> FindByReferenceAsync(Guid referenceUserId)
         {
             return await _context.Users.Where(u => u.Id == referenceUserId)
+                                       .Include(t => t.Teams)
                                        .FirstOrDefaultAsync();
         }
 
