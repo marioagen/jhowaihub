@@ -3,8 +3,15 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
+                    <button 
+                        class="btn-sm table-btn"
+                        :class="`btn btn-outline-${iconVariant}`"
+                        disabled
+                    >
+                        <LucideIcon :icon="iconeName" />
+                    </button>
                     <h5 
-                        class="modal-title" 
+                        class="modal-title ms-2" 
                         :id="`${id}-label`"
                     >
                         {{ $t(title) }}
@@ -84,6 +91,16 @@
                 type: String,
                 required: false,
                 default: 'danger',
+            },
+            iconeName: {
+                type: String,
+                required: false,
+                default: "Trash2"
+            },
+            iconVariant: {
+                type: String,
+                required: false,
+                default: "danger"
             },
         },
         mounted() {
