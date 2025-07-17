@@ -17,11 +17,14 @@
                 <SearchComponent 
                     :entity="entitySearch" 
                     :resetInput="resetInputSearch" 
-                    @search="filterList" 
+                    @search="filterList"
+                    @clean="filterList"
+                    ref="SearchComponent"
                 />
             </div>
         </div>
         <UsersTable
+            @setFilter="setFilter"
             ref="UserTable"
         />
     </div>
@@ -134,6 +137,10 @@ export default {
                 placeholderInput: this.$t('labelTypeUserName'),
             };
         },
+        setFilter(team) {
+            this.$refs.SearchComponent.searchInput = team.name;
+            this.$refs.UserTable.getUsers({ search: team.name, page: this.queryPage, type: null })
+        }
     },
     created() {
         this.setMenuActions();

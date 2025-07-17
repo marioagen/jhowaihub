@@ -117,7 +117,7 @@
             selectedUser: {},
         }),
         methods: {
-            getUsers: function (obj) {
+            getUsers(obj) {
                 this.table.isLoading = true;
                 this.searching = false;
                 this.dataDocument = [];
@@ -197,7 +197,7 @@
                 this.getUsers({ search: '', page: page, type: null });
             },
             filterByTeam(team) {
-                console.log(team)
+                this.$emit("setFilter", team)
             },
         },
         created() {
