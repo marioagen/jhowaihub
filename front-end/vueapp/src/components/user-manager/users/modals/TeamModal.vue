@@ -4,15 +4,15 @@
             <div class="modal-content">
                 <div class="modal-header custom-header">
                     <h6 class="modal-title" id="novoTimeModalLabel">
-                        {{ $t('labelNewTeam') }}                            
-                        <small class="text-muted d-block text-sm">{{ $t('labelNewTeamMessage') }}</small>
+                        {{ $t("labelNewTeam") }}
+                        <small class="text-muted d-block text-sm">{{ $t("labelNewTeamMessage") }}</small>
                     </h6>
-                    <button type="button" class="btn-close"  @click="close"></button>
+                    <button type="button" class="btn-close" @click="close"></button>
                 </div>
                 <div class="modal-body">
-                   <form @submit="handleSubmit">
+                    <form @submit="handleSubmit">
                         <div class="mb-3">
-                            <label for="name" class="form-label">{{ $t('labelName') }}</label>
+                            <label for="name" class="form-label">{{ $t("labelName") }}</label>
                             <input
                                 name="name"
                                 type="text"
@@ -20,13 +20,15 @@
                                 :placeholder="$t('labelTypeTeamName')"
                                 v-model="form.name"
                                 @blur="nameError = form.name ? '' : $t('labelRequiredField')"
-                                @input="nameError = ''"                                
+                                @input="nameError = ''"
                             />
-                             <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
+                            <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary btn-sm" @click="close">{{ $t('labelCancel') }}</button>
-                            <button type="submit" class="btn btn-primary btn-sm">{{ $t('labelCreate') }}</button>
+                            <button type="button" class="btn btn-secondary btn-sm" @click="close">
+                                {{ $t("labelCancel") }}
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-sm">{{ $t("labelCreate") }}</button>
                         </div>
                     </form>
                 </div>
@@ -37,117 +39,120 @@
 </template>
 
 <script>
-import api from "@/services/api";
-import ErrorCode from '@/constants/Errorcode';
-import ToastAlert from '@/components/common/toast-alert';
+    import api from "@/services/api";
+    import ErrorCode from "@/constants/Errorcode";
+    import ToastAlert from "@/components/common/toast-alert";
 
-export default {
-    name: 'ModalUserTeam',
-    props: {
-        teamId: {
-            type: Number,
-            required: true,
-        },
-    },
-    data() {
-        return {
-            form: {
-                name: '',
+    export default {
+        name: "ModalUserTeam",
+        props: {
+            teamId: {
+                type: Number,
+                required: true,
             },
-            nameError: '',
-            emailError: '',
-            loading: false,
-            validatingEmail: false,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
-            myInterval: null,
-        }
-    },
-    components: {
-        ToastAlert
-    },
-    emits: ['close', 'teamCreated'],
-    methods: {
-        validateForm() {
-            let valid = true;
-            if (!this.teamData.name || this.teamData.name.length < 2) {
-                this.nameError = this.$t('labelRequiredField');
-                valid = false;
-            }
-            return valid;
         },
-        handleSubmit(e) {
-            e.preventDefault();
-            if(!this.validateForm()) return;
-            
-            this.loading = true;
-            api.post('Team', {
+        data() {
+            return {
+                form: {
+                    name: "",
+                },
+                nameError: "",
+                emailError: "",
+                loading: false,
+                validatingEmail: false,
+                toastShow: false,
+                toastColor: "",
+                toastMessage: "",
+                myInterval: null,
+            };
+        },
+        components: {
+            ToastAlert,
+        },
+        emits: ["close", "teamCreated"],
+        methods: {
+            validateForm() {
+                let valid = true;
+                if (!this.teamData.name || this.teamData.name.length < 2) {
+                    this.nameError = this.$t("labelRequiredField");
+                    valid = false;
+                }
+                return valid;
+            },
+            handleSubmit(e) {
+                e.preventDefault();
+                if (!this.validateForm()) return;
+
+                this.loading = true;
+                api.post("Team", {
                     id: 0,
                     name: this.form.name.trim(),
                     users: [],
-                }).then((response) => {
-                    this.loading = false;
-                    this.resetForm();
-                    this.$emit('teamCreated');
-                }).catch((e) => {
-                    this.alertToast(this.$t('labelTeamError'), "toast-warning");
-                }).finally(() => {
-                    console.log("Finished request.");
-                    this.loading = false;
-                    this.close();
-                });
+                })
+                    .then((response) => {
+                        this.loading = false;
+                        this.resetForm();
+                        this.$emit("teamCreated");
+                    })
+                    .catch((e) => {
+                        this.alertToast(this.$t("labelTeamError"), "toast-warning");
+                    })
+                    .finally(() => {
+                        console.log("Finished request.");
+                        this.loading = false;
+                        this.close();
+                    });
+            },
+            resetForm() {
+                this.form = {
+                    name: "",
+                    userId: 1,
+                };
+                this.errors = {};
+                this.nameError = "";
+            },
+            openModal() {
+                this.$refs.modal.style.display = "block";
+                this.$refs.modal.classList.add("show");
+                document.body.classList.add("modal-open");
+            },
+            close: function () {
+                this.$emit("close");
+            },
+            alertToast: function (msg, color) {
+                this.toastMessage = msg;
+                this.toastColor = color;
+                this.toastShow = true;
+                let self = this;
+                this.myInterval = setInterval(function () {
+                    self.toastMessage = "";
+                    self.toastColor = "";
+                    self.toastShow = false;
+                    clearInterval(self.myInterval);
+                }, 4000);
+            },
+            closeToast: function () {
+                this.toastShow = false;
+                this.clearMyInterval();
+            },
+            clearMyInterval: function () {
+                clearInterval(this.myInterval);
+                this.myInterval = null;
+            },
         },
-        resetForm() {
-            this.form = {
-                name: '',
-                userId: 1,
-            };
-            this.errors = {};
-            this.nameError = '';
+        created() {
+            console.log(this.teamId);
         },
-        openModal() {
-            this.$refs.modal.style.display = 'block';
-            this.$refs.modal.classList.add('show');
-            document.body.classList.add('modal-open');
-        },
-        close: function () {
-            this.$emit('close');
-        },
-        alertToast: function (msg, color) {
-            this.toastMessage = msg;
-            this.toastColor = color;
-            this.toastShow = true;
-            let self = this;
-            this.myInterval = setInterval(function () {
-                self.toastMessage = "";
-                self.toastColor = "";
-                self.toastShow = false;
-                clearInterval(self.myInterval);
-            }, 4000);
-        },
-        closeToast: function () {
-            this.toastShow = false;
-            this.clearMyInterval();
-        },
-        clearMyInterval: function () {
-            clearInterval(this.myInterval);
-            this.myInterval = null;
-        },
-    },
-    created() {
-        console.log(this.teamId)
-    }
-}
+    };
 </script>
 
 <style scoped>
-.custom-header {
-    padding: 15px 15px 0;
-    border-bottom-width: 0px !important;
-}
+    .custom-header {
+        padding: 15px 15px 0;
+        border-bottom-width: 0px !important;
+    }
 
-.show {
-    display: block;
-}
+    .show {
+        display: block;
+    }
 </style>

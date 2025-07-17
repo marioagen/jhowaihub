@@ -3,15 +3,36 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{label}}</h5>
-                    <button type="button" class="btn-close" :title="$t('labelClose')" data-bs-dismiss="modal" aria-label="Close" @click="close"></button>
+                    <h5 class="modal-title" id="exampleModalLabel">{{ label }}</h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        :title="$t('labelClose')"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        @click="close"
+                    ></button>
                 </div>
                 <div class="modal-body prevent-text-select">
                     <div>
                         <form>
                             <div class="mb-3">
-                                <textarea type="text" class="form-control" v-model="form.name" disabled rows="5" v-if="this.form.name != ''"></textarea>
-                                <textarea type="text" class="form-control" v-model="form.desc" disabled rows="5" v-else></textarea>
+                                <textarea
+                                    type="text"
+                                    class="form-control"
+                                    v-model="form.name"
+                                    disabled
+                                    rows="5"
+                                    v-if="this.form.name != ''"
+                                ></textarea>
+                                <textarea
+                                    type="text"
+                                    class="form-control"
+                                    v-model="form.desc"
+                                    disabled
+                                    rows="5"
+                                    v-else
+                                ></textarea>
                             </div>
                         </form>
                     </div>
@@ -27,29 +48,28 @@
             dataShow: {
                 required: true,
                 type: Object,
-                default: {}
+                default: {},
             },
         },
         data() {
             return {
                 form: {
-                    desc: this.dataShow.description ? this.dataShow.description : '',
-                    name: this.dataShow.name || this.dataShow.title ? this.dataShow.name || this.dataShow.title : '',
+                    desc: this.dataShow.description ? this.dataShow.description : "",
+                    name: this.dataShow.name || this.dataShow.title ? this.dataShow.name || this.dataShow.title : "",
                 },
-            }
+            };
         },
         methods: {
             close: function () {
-                this.$emit('close');
+                this.$emit("close");
             },
         },
-        computed:
-        {
+        computed: {
             label() {
-                return this.form.name != '' ? this.$t('labelName') : this.$t('labelDescription');
+                return this.form.name != "" ? this.$t("labelName") : this.$t("labelDescription");
             },
         },
-    }
+    };
 </script>
 <style scoped>
     .show {
