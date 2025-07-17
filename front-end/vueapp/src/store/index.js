@@ -1,6 +1,6 @@
-import Vuex from 'vuex';
-import createPersistedState from 'vuex-persistedstate';
-import Cookies from 'js-cookie';
+import Vuex from "vuex";
+import createPersistedState from "vuex-persistedstate";
+import Cookies from "js-cookie";
 
 export default new Vuex.Store({
     state: {
@@ -13,8 +13,8 @@ export default new Vuex.Store({
             tokenAzure: "",
             tokenApi: "",
             tenant: "",
-            keyMongoAccess: ""
-        }
+            keyMongoAccess: "",
+        },
     },
     getters: {
         //
@@ -45,10 +45,10 @@ export default new Vuex.Store({
     plugins: [
         createPersistedState({
             storage: {
-                getItem: key => Cookies.get(key),
+                getItem: (key) => Cookies.get(key),
                 setItem: (key, value) => Cookies.set(key, value, { expires: 3, secure: true }),
-                removeItem: key => Cookies.remove(key)
-            }
-        })
+                removeItem: (key) => Cookies.remove(key),
+            },
+        }),
     ],
 });

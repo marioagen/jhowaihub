@@ -3,6 +3,6 @@ const ColTypeModule = Object.freeze({
     Extrator: 2,
     Promptlib: 3,
     WoopiAiHub: 4,
-  });
-  
-  export default ColTypeModule;
+});
+
+export default ColTypeModule;

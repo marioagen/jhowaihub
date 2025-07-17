@@ -4,13 +4,15 @@
     labelAlmost: "Ya casi has llegado!",
     labelAnalyze: "Analizar",
     labelAnalyzed: "Analizado",
-    labelAnInconsistencyWasIdentifiedInTheDocument: "Se identificó una inconsistencia en el documento. Vuelva a procesarlo para obtener mejores resultados.",
+    labelAnInconsistencyWasIdentifiedInTheDocument:
+        "Se identificó una inconsistencia en el documento. Vuelva a procesarlo para obtener mejores resultados.",
     labelApply: "Aplicar",
     labelApplyQuestionnaire: "Aplicar cuestionario",
     labelApplyingQuestionnaire: "Aplicando el cuestionario",
     labelApplyingQuestionnaireWait: "Aplicando el cuestionario, por favor espere.",
     labelAskTheAi: "Pregúntale a la IA",
-    labelAttentionDependingOnTheSpeed: "Atención, dependiendo de la velocidad de su conexión a Internet y del tamaño del archivo subido, esta operación puede tardar unos minutos.",
+    labelAttentionDependingOnTheSpeed:
+        "Atención, dependiendo de la velocidad de su conexión a Internet y del tamaño del archivo subido, esta operación puede tardar unos minutos.",
     labelAttentionPDFDisplayFailed: "Se produjo un error al cargar el PDF. Haga clic aquí para intentarlo de nuevo",
     labelAll: "Todo",
     labelBack: "Volver",
@@ -37,7 +39,8 @@
     labelDocumentName: "Nombre del documento",
     labelDocumentType: "Tipo de documento",
     labelDocumentNameOrDescription: "Nombre o descripción del documento",
-    labelDocumentHasAlreadyBeenStandardizedPreviously: "El documento ya ha sido estandarizado anteriormente. <br/> Espere, será redirigido a la página de inicio.",
+    labelDocumentHasAlreadyBeenStandardizedPreviously:
+        "El documento ya ha sido estandarizado anteriormente. <br/> Espere, será redirigido a la página de inicio.",
     labelDownloadCsv: "Descargar CSV",
     labelDownloadSuccessfully: "Descargar con éxito",
     labelDocumentTranscript: "Transcripción de documentos",
@@ -90,8 +93,10 @@
     labelNotAnalyzed: "No analizado",
     labelNotAllowed: "No permitido",
     labelNormalizingTheDocument: "Normalizando el documento, espera.",
-    labelNumberOfPagesHasBeenExceeded: "Se ha excedido el número de páginas. Comuníquese con el administrador de su plan.",
-    labelNumberOfQuestionsHasBeenExceeded: "Se ha excedido el número de preguntas. Comuníquese con el administrador de su plan.",
+    labelNumberOfPagesHasBeenExceeded:
+        "Se ha excedido el número de páginas. Comuníquese con el administrador de su plan.",
+    labelNumberOfQuestionsHasBeenExceeded:
+        "Se ha excedido el número de preguntas. Comuníquese con el administrador de su plan.",
     labelOutput: "Salida",
     labelOrder: "Orden",
     labelOwner: "Dueño",
@@ -132,16 +137,20 @@
     labelStandardizedFullText: "Texto completo normalizado",
     labelTypes: "Tipos",
     labelTextCopiedToClipboard: "Texto copiado al portapapeles.",
-    labelThisActionCannotBeUndone: "Esta acción no se puede deshacer. <br/> ¿Está seguro de que desea <br/> eliminarlo?",
+    labelThisActionCannotBeUndone:
+        "Esta acción no se puede deshacer. <br/> ¿Está seguro de que desea <br/> eliminarlo?",
     labelTypeNameOrId: "Nombre, ID o introduce un nuevo tipo para registrarte",
-    labelTheFileMayBeCorrupt: "El archivo puede estar <br/> corrupto o tener un error. <br/> Por favor, inténtelo de nuevo.",
-    labelTheFileMayBeUnreadableOrHaveAnError: "El archivo puede ser <br/> ilegible o tener un error. <br/> Por favor, inténtelo de nuevo.",
+    labelTheFileMayBeCorrupt:
+        "El archivo puede estar <br/> corrupto o tener un error. <br/> Por favor, inténtelo de nuevo.",
+    labelTheFileMayBeUnreadableOrHaveAnError:
+        "El archivo puede ser <br/> ilegible o tener un error. <br/> Por favor, inténtelo de nuevo.",
     labelThereIsNotEnoughCredit: "No hay suficiente crédito para aplicar todas las preguntas de este cuestionario.",
     labelTypeDoc: "Tipo de Documento",
     labelTypeDocAlreadyExists: "Tipo de documento duplicado",
     labelTypeDocError: "Tipo no valido",
     labelUpload: "Subir",
-    labelUploadPdf: "Arrastre y suelte sus archivos PDF a continuación para empezar o haga clic en el área para navegar",
+    labelUploadPdf:
+        "Arrastre y suelte sus archivos PDF a continuación para empezar o haga clic en el área para navegar",
     labelUploadFailure: "Fallo en la carga",
     labelUploadedFiles: "Todos los archivos subidos",
     labelUploadedFilesError: "Fallo al cargar archivos!",
@@ -206,6 +215,6 @@
     labelMessage: "Tem certeza?",
     labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
-}
+};
 
 export default spanish;

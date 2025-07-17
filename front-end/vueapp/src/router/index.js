@@ -1,113 +1,114 @@
-﻿import { createRouter, createWebHashHistory } from 'vue-router';
-import LoginIndex from '@/components/pages/login';
-import LogoutIndex from '@/components/pages/logout';
-import DocumentUpload from '@/components/pages/document/upload';
-import DocumentList from '@/components/pages/document/list';
-import TypeManager from '@/components/pages/manager/type';
-import QuestionManager from '@/components/pages/manager/question';
-import QuizFormNew from '@/components/pages/quiz/form-new';
-import QuizFormEdit from '@/components/pages/quiz/form-edit';
-import QuizManager from '@/components/pages/manager/quiz';
-import NormalizeIndex from '@/components/pages/normalize/loading';
-import AnalyzerIndex from '@/components/pages/analyzer';
-import UserIndex from '@/components/pages/user/index';
+﻿import { createRouter, createWebHashHistory } from "vue-router";
+import LoginIndex from "@/components/pages/login";
+import LogoutIndex from "@/components/pages/logout";
+import DocumentUpload from "@/components/pages/document/upload";
+import DocumentList from "@/components/pages/document/list";
+import TypeManager from "@/components/pages/manager/type";
+import QuestionManager from "@/components/pages/manager/question";
+import QuizFormNew from "@/components/pages/quiz/form-new";
+import QuizFormEdit from "@/components/pages/quiz/form-edit";
+import QuizManager from "@/components/pages/manager/quiz";
+import NormalizeIndex from "@/components/pages/normalize/loading";
+import AnalyzerIndex from "@/components/pages/analyzer";
+import UserIndex from "@/components/pages/user/index";
 
-import TypesPage from '@/pages/types.vue';
-import UserManagePage from '@/pages/user-manager.vue';
+import TypesPage from "@/pages/types.vue";
+import UserManagePage from "@/pages/user-manager.vue";
 
 function authenticate(to, from, next) {
-    var usuario = JSON.parse(window.localStorage.getItem('project'));
+    var usuario = JSON.parse(window.localStorage.getItem("project"));
     if (usuario != null) {
         if (usuario.isLogged === true) {
             next();
         }
-    } else next({
-        path: '/'
-    })
+    } else
+        next({
+            path: "/",
+        });
 }
 
 const routes = [
-   {
-        path: '/',
-        name: 'Login',
+    {
+        path: "/",
+        name: "Login",
         component: LoginIndex,
-        meta: { layout: 'auth' }
+        meta: { layout: "auth" },
     },
     {
-        path: '/logout',
-        name: 'Logout',
+        path: "/logout",
+        name: "Logout",
         component: LogoutIndex,
     },
     {
-        path: '/document-upload',
-        name: 'DocumentUpload',
+        path: "/document-upload",
+        name: "DocumentUpload",
         component: DocumentUpload,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: '/document-list',
-        name: 'DocumentList',
+        path: "/document-list",
+        name: "DocumentList",
         component: DocumentList,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: '/types',
-        name: 'Type',
+        path: "/types",
+        name: "Type",
         component: TypesPage,
-        meta: { 
-            layout: 'default' 
+        meta: {
+            layout: "default",
         },
         beforeEnter: authenticate,
     },
     {
-        path: '/manage-question',
-        name: 'Question',
+        path: "/manage-question",
+        name: "Question",
         component: QuestionManager,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: '/quiz-new',
-        name: 'QuizNew',
+        path: "/quiz-new",
+        name: "QuizNew",
         component: QuizFormNew,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: '/quiz-edit/:id',
-        name: 'QuizEdit',
+        path: "/quiz-edit/:id",
+        name: "QuizEdit",
         component: QuizFormEdit,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: '/manage-quiz',
-        name: 'Quiz',
+        path: "/manage-quiz",
+        name: "Quiz",
         component: QuizManager,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: '/normalize/:id',
-        name: 'Normalize',
+        path: "/normalize/:id",
+        name: "Normalize",
         component: NormalizeIndex,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: '/analyzer/:id',
-        name: 'Analyzer',
+        path: "/analyzer/:id",
+        name: "Analyzer",
         component: AnalyzerIndex,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
-{
-        path: '/manage-user',
-        name: 'UserManage',
+    {
+        path: "/manage-user",
+        name: "UserManage",
         component: UserManagePage,
-        meta: { layout: 'default' },
+        meta: { layout: "default" },
         beforeEnter: authenticate,
     },
 ];
