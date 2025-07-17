@@ -78,7 +78,7 @@
                 </tr>
             </tbody>
         </table>
-        <pagination-component
+        <PaginationComponent
             v-if="showPagination"
             class="mt-2" 
             :current-page="pagination.currentPage"
@@ -91,7 +91,7 @@
 </template>
   
 <script>
-    import PaginationComponent from "@/components/global/pagination-component.vue";
+    import PaginationComponent from "@/components/global/PaginationComponent.vue";
     export default {
         props: {
             modalName: {

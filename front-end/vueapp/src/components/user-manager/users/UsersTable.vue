@@ -1,12 +1,13 @@
 <template>
     <div>
-        <table-component modalName="labelUsers"
-                         emptyMessage="labelNoUsersWasFound"
-                         :data="table.data"
-                         :columns="table.columns"
-                         :isLoading="table.isLoading"
-                         :pagination="table.pagination"
-                          @change-page="changePage">
+        <TableComponent
+            modalName="labelUsers"
+            emptyMessage="labelNoUsersWasFound"
+            :data="table.data"
+            :columns="table.columns"
+            :isLoading="table.isLoading"
+            :pagination="table.pagination"
+        >
             <template #cell-name="{ data }">
                 <div v-if="!loading" class="p-1">
                     <div class="d-flex">
@@ -35,32 +36,46 @@
             <template #cell-actions="{ data }">
                 <div class="dropdown column-align"> 
                     <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v"></i>
+                        <LucideIcon
+                            icon="Ellipsis"
+                        />
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" @click="editUser(data.row)">{{$t('labelEdit')}}</a></li>
-                        <li><a class="dropdown-item" @click="confirmationDialog(data.row)">{{$t('labelDelete')}}</a></li>
+                        <li>
+                            <LucideIcon icon="SquarePen" />
+                            <a class="dropdown-item" @click="editUser(data.row)">{{$t('labelEdit')}}</a>
+                        </li>
+                        <li>
+                            <LucideIcon icon="Trash2" />
+                            <a class="dropdown-item" @click="confirmationDialog(data.row)">{{$t('labelDelete')}}</a>
+                        </li>
                     </ul>
                 </div>
             </template>
-        </table-component>
-        <modal-user v-if="modalUserShow" @userCreated="handleUserCreated" @close="closeModalUser" :userEditing="selectedUser" />
-        <modal-alert v-if="modalAlertShow"
-                     :type="'Confirm'"
-                     :entity="selectedUser"
-                     :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
-                     :alertMessage="$t('labelThisActionCannotBeUndone')"
-                     :okLabel="$t('labelConfirm')"
-                     :cancelLabel="$t('labelCancel')"
-                     @open="deleteUser"
-                     @close="closeModal" />
+        </TableComponent>
+
+        <modal-user 
+            v-if="modalUserShow" 
+            @userCreated="handleTeamCreated" 
+            @close="closeModalUser" 
+            :userEditing="selectedUser" 
+        />
+        <modal-alert 
+            v-if="modalAlertShow"
+            :type="'Confirm'"
+            :entity="selectedUser"
+            :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
+            :alertMessage="$t('labelThisActionCannotBeUndone')"
+            :okLabel="$t('labelConfirm')"
+            :cancelLabel="$t('labelCancel')"
+            @open="deleteUser"
+            @close="closeModal" 
+        />
     </div>
 </template>
 <script>
-    import api from "@/services/api";
-    import dates from "@/helpers/Dates";
-    import TableComponent from "@/components/global/table-component.vue";
-    import ModalUser from '@/components/user-manager/users/modals/new-user.vue';
+    import TableComponent from "@/components/global/TableComponent.vue";
+    import ModalUser from '@/components/user-manager/users/modals/UserModal.vue';
     import ModalAlert from '@/components/common/modal-alert';
     import UserService from "@/services/users/UserService";
     export default {
@@ -109,7 +124,7 @@
                     isAscending: this.isAscending,
                     colType: this.colType,
                 }
-                let self = this;
+                
                 UserService.getUsers(paramsReq)
                     .then((response) => {
                         const content = response?.content || [];
@@ -184,6 +199,7 @@
         },
     }
 </script>
+
 <style scoped>
 
     .badge {

@@ -6,14 +6,17 @@
                     <breadcrumb :crumbs="crumbsData" />
                 </div>
                 <search-bar :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" @action="addType" />
+                
                 <div class="mb-2" style="height: 30px;">
                     <button type="button" class="btn delete-custom d-flex align-items-center" @click="confirmationDialog(item)" v-if="this.listIds.length > 0">
                         <i class="fas fa-trash text-danger" style="font-size: .9em; margin-right: 8px"></i>
                         {{$t('labelDelete')}}
                     </button>
                 </div>
-                <TypesTable ref="TypesTable"
-        @toast="handleToast" />
+                <TypesTable 
+                    ref="TypesTable"
+                    @toast="handleToast" 
+                />
         </div>
      </div>
     </main>
@@ -36,11 +39,9 @@
     import Breadcrumb from '@/components/common/breadcrumb';
     import SearchBar from '@/components/common/search-bar';
     import ModalForm from '@/components/pages/type/modal-form';
-    import ModalAlert from '@/components/common/modal-alert';
     import ToastAlert from '@/components/common/toast-alert';
     import paginationDivider from "@/utils/paginationDivider";
-    import Pagination from '@/components/common/pagination';
-    import TypesTable from "@/components/types/types-table.vue";
+    import TypesTable from "@/components/types/TypesTable.vue";
     import TypesService from "@/services/types/TypesService";
 
     export default {
@@ -75,9 +76,7 @@
             Breadcrumb,
             SearchBar,
             ModalForm,
-            ModalAlert,
             ToastAlert,
-            Pagination,
             TypesTable
         },
         watch: {

@@ -46,17 +46,29 @@ namespace WoopiAiHub.Application.Services
                 UserEmail = userCreateDto.Email,
                 Tenant = headersDto.Tenant,
             };
-            var userEnabled = await _marketPlaceApi.AssignLicensesByHub(KeyAccess, requestAssignLicensesByHub);
+            var userEnabledReference = await _marketPlaceApi.AssignLicensesByHub(KeyAccess, requestAssignLicensesByHub);
+            if (userEnabledReference == Guid.Empty)
+                return false;
 
-            if (userEnabled != null)
+            var existingUser = await _userRepository.FindByReferenceAsync(userEnabledReference);
+
+            if (existingUser != null)
+            {
+                existingUser.Reactivate(userCreateDto.Name,
+                                        userCreateDto.Email);
+                _userRepository.Update(existingUser);
+
+                return true;
+            }
+            else
             {
                 User user = new User(
-                    userEnabled,
-                    userCreateDto.Name,
-                    userCreateDto.Email,
-                    true,
-                    DateTime.Now
-                );
+                      userEnabledReference,
+                      userCreateDto.Name,
+                      userCreateDto.Email,
+                      true,
+                      DateTime.Now
+                  );
 
                 if (userCreateDto.TeamIds.Count > 0)
                 {
@@ -68,9 +80,8 @@ namespace WoopiAiHub.Application.Services
                     }
 
                 }
-                return _userRepository.Create(user);
+                return await _userRepository.CreateAsync(user);
             }
-            return false;
         }
 
         // <summary>
@@ -81,17 +92,17 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> DeactivateRange(List<Guid> ids)
         {
             var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
-            var users = _userRepository.FindByIds(ids);
+            var users = await _userRepository.FindByIdsAsync(ids);
             var allExists = ids.All(id => users.Any(u => u.Id == id));
 
             if (allExists)
             {
-                var requestDto = new DeactivateUsersDto { Reference_users = ids };
+                var requestDto = new DeactivateUsersDto { ReferenceUsers = ids };
                 var mktDeactivate = await _marketPlaceApi.DeactivateUsersEnabledByReference(KeyAccess, requestDto);
                 if (mktDeactivate)
                 {
-                   var result = _userRepository.DeactivateRange(ids);
-                   return result;
+                    var result = _userRepository.DeactivateRange(ids);
+                    return result;
                 }
             }
 
@@ -106,24 +117,23 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> Update(UserUpdateDto userUpdateDto, HeadersDto headersDto)
         {
             var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
-            var updateByHubDto = new UpdateByHubDto
+            var requestAssignLicensesByHub = new RequestAssignLicensesByHub
             {
-                Reference_user = userUpdateDto.Id,
                 UserEmail = userUpdateDto.Email,
                 Tenant = headersDto.Tenant,
+                IdUser = userUpdateDto.Id
             };
 
-            var updateMkt = await _marketPlaceApi.UpdateUserEnabled(KeyAccess, updateByHubDto);
-            if (updateMkt)
+            var updateMkt = await _marketPlaceApi.AssignLicensesByHub(KeyAccess, requestAssignLicensesByHub);
+            if (updateMkt != Guid.Empty)
             {
 
-                var users = _userRepository.FindByIds(new List<Guid> { userUpdateDto.Id });
-                var user = users.FirstOrDefault();
+                var user = await _userRepository.FindByReferenceAsync(userUpdateDto.Id);
                 if (user == null)
                     return false;
 
-                user.Name = userUpdateDto.Name;
-                user.Email = userUpdateDto.Email;
+                user.Update(userUpdateDto.Name,
+                            userUpdateDto.Email);
 
                 if (userUpdateDto.TeamIds != null)
                 {
@@ -135,7 +145,7 @@ namespace WoopiAiHub.Application.Services
                     }
                 }
 
-                var updateResult = _userRepository.Update(user); 
+                var updateResult = _userRepository.Update(user);
                 if (!updateResult)
                 {
                     throw new ArgumentException("Duplicated User");

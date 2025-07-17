@@ -100,7 +100,7 @@
 
 <script>
 import api from "@/services/api";
-import ModalUserTeam from "@/components/user-manager/users/modals/new-team.vue";
+import ModalUserTeam from "@/components/user-manager/users/modals/TeamModal.vue";
 import ToastAlert from '@/components/common/toast-alert';
 import ErrorCode from '@/constants/Errorcode';
 
