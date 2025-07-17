@@ -1,4 +1,6 @@
 import api from '@/services/api'
+import PaginationDivider from '@/utils/paginationDivider'
+const divider = new PaginationDivider()
 
 export default {
     getUsers(params) {
