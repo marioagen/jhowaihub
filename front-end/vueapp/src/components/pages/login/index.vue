@@ -16,7 +16,7 @@
                             src="./../../../assets/img/woopiai-hub-logo.png"
                             style="padding-bottom: 10px"
                             width="160"
-                            height="80"
+                            height="61"
                             v-else
                         />
 
