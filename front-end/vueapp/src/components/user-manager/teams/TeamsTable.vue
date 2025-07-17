@@ -10,42 +10,33 @@
             @change-page="changePage"
         >
             <template #cell-members="{ data }">
-                <LucideIcon icon="UsersRound" size="15" /> {{ data.row.users.length }}
+                <LucideIcon icon="UsersRound" size="15" />
+                {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">
-                <button
-                    class="btn btn-outline-success btn-sm table-btn"
-                    @click="editTeam(data.row)"
-                >
-                    <LucideIcon
-                        icon="SquarePen"
-                    />
+                <button class="btn btn-outline-success btn-sm table-btn" @click="editTeam(data.row)">
+                    <LucideIcon icon="SquarePen" />
                 </button>
-                <button
-                    class="btn btn-outline-danger btn-sm ms-2 table-btn"
-                    @click="confirmationDialog(data.row)"
-                >
-                    <LucideIcon
-                        icon="Trash2"
-                    />
+                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="confirmationDialog(data.row)">
+                    <LucideIcon icon="Trash2" />
                 </button>
             </template>
         </TableComponent>
     </div>
-    <modal-team 
-        v-if="modalTeamShow" 
+    <modal-team
+        v-if="modalTeamShow"
         :teamEditing="selectedTeam"
         @teamCreated="handleTeamCreated"
-        @close="closeModalTeam" 
+        @close="closeModalTeam"
     />
-    <modal-alert 
-        v-if="modalAlertShow" 
-        :type="'Confirm'" 
-        :entity="selectedTeam" 
-        :alertTitle="$t('labelYouAreAboutToDeleteTeam')" 
-        :alertMessage="$t('labelThisActionCannotBeUndone')" 
-        :okLabel="$t('labelConfirm')" 
-        :cancelLabel="$t('labelCancel')" 
+    <modal-alert
+        v-if="modalAlertShow"
+        :type="'Confirm'"
+        :entity="selectedTeam"
+        :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
+        :alertMessage="$t('labelThisActionCannotBeUndone')"
+        :okLabel="$t('labelConfirm')"
+        :cancelLabel="$t('labelCancel')"
         @open="deleteTeam"
         @close="closeModal"
     />
@@ -54,8 +45,8 @@
 <script>
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalTeam from '@/components/user-manager/teams/modals/TeamModal.vue';
-    import ModalAlert from '@/components/common/modal-alert';
+    import ModalTeam from "@/components/user-manager/teams/modals/TeamModal.vue";
+    import ModalAlert from "@/components/common/modal-alert";
     import TeamsService from "@/services/teams/TeamsService";
 
     export default {
@@ -63,7 +54,7 @@
         components: {
             TableComponent,
             ModalTeam,
-            ModalAlert
+            ModalAlert,
         },
         data: () => ({
             table: {
@@ -98,12 +89,12 @@
                 this.dataDocument = [];
                 this.listIds = [];
                 var paramsReq = {
-                    search: obj.search.trim() ?obj.search.trim() : '',
+                    search: obj.search.trim() ? obj.search.trim() : "",
                     pageSize: this.selectedOption,
                     page: obj.page,
                     isAscending: this.isAscending,
                     colType: this.colType,
-                }
+                };
 
                 TeamsService.getTeams(paramsReq)
                     .then((response) => {
@@ -116,17 +107,16 @@
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
-                    });                    
+                    });
             },
             orderList: function (col) {
                 if (this.isAscending) {
                     this.isAscending = false;
-                }
-                else {
+                } else {
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getTeams({ search: '', page: this.queryPage, type: null })
+                this.getTeams({ search: "", page: this.queryPage, type: null });
             },
             formatDate(date) {
                 return dates.formatDate(date);
@@ -139,9 +129,9 @@
                 let teamId = this.selectedTeam.id;
                 TeamsService.deleteTeamById(teamId)
                     .then((status) => {
-                        if(status) {
+                        if (status) {
                             this.closeModal();
-                            this.getTeams({ search: '', page: 1, type: null });
+                            this.getTeams({ search: "", page: 1, type: null });
                         }
                     })
                     .finally(() => {
@@ -152,15 +142,15 @@
                 this.searchInput = input;
                 this.getTeams({ search: input, page: this.queryPage, type: null });
             },
-            handleTeamCreated: function() {
-                this.getTeams({ search: '', page: this.queryPage, type: null });
+            handleTeamCreated: function () {
+                this.getTeams({ search: "", page: this.queryPage, type: null });
                 this.closeModalTeam();
             },
-            openModalTeam: function() {
+            openModalTeam: function () {
                 this.modalTeamShow = true;
                 document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
-            closeModalTeam: function() {
+            closeModalTeam: function () {
                 this.modalTeamShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
@@ -174,12 +164,12 @@
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             changePage(page) {
-                this.getTeams({ search: '', page: page, type: null });
-            }
+                this.getTeams({ search: "", page: page, type: null });
+            },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getTeams({ search: '', page: this.queryPage, type: null });
+            this.getTeams({ search: "", page: this.queryPage, type: null });
         },
-    }
+    };
 </script>

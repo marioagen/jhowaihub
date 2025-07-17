@@ -26,38 +26,27 @@
             </div>
         </div>
 
-        <template 
-            v-if="entity.screen !== 'user' && entity.screen !== 'team'"
-        >
-            <div 
-                v-if="entity.screen != 'document'"
-                class="col-auto content-center" 
-            >
+        <template v-if="entity.screen !== 'user' && entity.screen !== 'team'">
+            <div v-if="entity.screen != 'document'" class="col-auto content-center">
                 <div class="mb-2">
-                    <a 
+                    <a
                         v-if="searchInput.length >= 3"
-                        class="btn btn-primary" 
-                        :title="entity.labelButton" 
-                        @click="action" 
+                        class="btn btn-primary"
+                        :title="entity.labelButton"
+                        @click="action"
                     >
                         {{ upperFormat(entity.labelButton) }}
                     </a>
-                    <a 
-                        v-else
-                        class="btn btn-secondary" 
-                        :title="$t('labelNotAllowed')" 
-                    >
+                    <a v-else class="btn btn-secondary" :title="$t('labelNotAllowed')">
                         {{ upperFormat(entity.labelButton) }}
                     </a>
                 </div>
             </div>
-            
+
             <div class="col-auto content-center" v-else>
                 <div class="mb-2">
-                    <a class="btn btn-primary"
-                       :title="$t('labelNewDocument')"
-                       @click="action">
-                        {{ $t('labelNewDocument') }}
+                    <a class="btn btn-primary" :title="$t('labelNewDocument')" @click="action">
+                        {{ $t("labelNewDocument") }}
                     </a>
                 </div>
             </div>
@@ -77,19 +66,19 @@
             resetInput: {
                 required: true,
                 type: Boolean,
-                default: false
+                default: false,
             },
         },
         data() {
             return {
                 title: "Component SearchBar",
                 searchInput: "",
-            }
+            };
         },
         watch: {
             resetInput () {
                 this.searchInput = "";
-            }
+            },
         },
         methods: {
             search(page, type) {
@@ -121,5 +110,5 @@
         mounted() {
             this.$refs.searchInpt.focus();
         },
-    }
+    };
 </script>

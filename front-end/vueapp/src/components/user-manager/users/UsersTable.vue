@@ -12,7 +12,9 @@
                 <div v-if="!loading" class="p-1">
                     <div class="d-flex">
                         <label class="form-check-label d-flex align-items-center w-100">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center btn-primary fw-bold me-3 initials">
+                            <div
+                                class="rounded-circle d-flex align-items-center justify-content-center btn-primary fw-bold me-3 initials"
+                            >
                                 {{ getInitials(data.row.name) }}
                             </div>
                             <div>
@@ -36,33 +38,31 @@
                 <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown column-align"> 
+                <div class="dropdown column-align">
                     <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <LucideIcon
-                            icon="Ellipsis"
-                        />
+                        <LucideIcon icon="Ellipsis" />
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <LucideIcon icon="SquarePen" />
-                            <a class="dropdown-item" @click="editUser(data.row)">{{$t('labelEdit')}}</a>
+                            <a class="dropdown-item" @click="editUser(data.row)">{{ $t("labelEdit") }}</a>
                         </li>
                         <li>
                             <LucideIcon icon="Trash2" />
-                            <a class="dropdown-item" @click="confirmationDialog(data.row)">{{$t('labelDelete')}}</a>
+                            <a class="dropdown-item" @click="confirmationDialog(data.row)">{{ $t("labelDelete") }}</a>
                         </li>
                     </ul>
                 </div>
             </template>
         </TableComponent>
 
-        <modal-user 
-            v-if="modalUserShow" 
-            @userCreated="handleTeamCreated" 
-            @close="closeModalUser" 
-            :userEditing="selectedUser" 
+        <modal-user
+            v-if="modalUserShow"
+            @userCreated="handleTeamCreated"
+            @close="closeModalUser"
+            :userEditing="selectedUser"
         />
-        <modal-alert 
+        <modal-alert
             v-if="modalAlertShow"
             :type="'Confirm'"
             :entity="selectedUser"
@@ -71,14 +71,14 @@
             :okLabel="$t('labelConfirm')"
             :cancelLabel="$t('labelCancel')"
             @open="deleteUser"
-            @close="closeModal" 
+            @close="closeModal"
         />
     </div>
 </template>
 <script>
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalUser from '@/components/user-manager/users/modals/UserModal.vue';
-    import ModalAlert from '@/components/common/modal-alert';
+    import ModalUser from "@/components/user-manager/users/modals/UserModal.vue";
+    import ModalAlert from "@/components/common/modal-alert";
     import UserService from "@/services/users/UserService";
     import BadgeOutlinedComponent from "@/components/core/BadgeOutlinedComponent.vue";
 
@@ -88,7 +88,7 @@
             BadgeOutlinedComponent,
             TableComponent,
             ModalUser,
-            ModalAlert
+            ModalAlert,
         },
         data: () => ({
             table: {
@@ -123,13 +123,13 @@
                 this.dataDocument = [];
                 this.listIds = [];
                 var paramsReq = {
-                    search: obj.search.trim() ?obj.search.trim() : '',
+                    search: obj.search.trim() ? obj.search.trim() : "",
                     pageSize: this.selectedOption,
                     page: obj.page,
                     isAscending: this.isAscending,
                     colType: this.colType,
-                }
-                
+                };
+
                 UserService.getUsers(paramsReq)
                     .then((response) => {
                         const content = response?.content || [];
@@ -141,7 +141,7 @@
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
-                    });                    
+                    });
             },
             editUser(user) {
                 this.selectedUser = user;
@@ -149,31 +149,30 @@
             },
             deleteUser() {
                 let userId = this.selectedUser.id;
-                UserService.deleteUsersById(userId)
-                    .then((status) => {
-                        if (status) {
-                            this.closeModal();
-                            this.getUsers({ search: '', page: 1, type: null });
-                        }
-                    })
+                UserService.deleteUsersById(userId).then((status) => {
+                    if (status) {
+                        this.closeModal();
+                        this.getUsers({ search: "", page: 1, type: null });
+                    }
+                });
             },
             filterList(input) {
                 this.searchInput = input;
                 this.getUsers({ search: input, page: this.queryPage, type: null });
             },
             getInitials(name) {
-                if (!name) return '';
-                const parts = name.trim().split(' ');
+                if (!name) return "";
+                const parts = name.trim().split(" ");
                 if (parts.length === 1) {
                     const n = parts[0];
-                    return (n[0] || '').toUpperCase() + (n[n.length - 1] || '').toUpperCase();
+                    return (n[0] || "").toUpperCase() + (n[n.length - 1] || "").toUpperCase();
                 }
-                const first = parts[0][0] || '';
-                const last = parts[parts.length - 1].slice(-1) || '';
+                const first = parts[0][0] || "";
+                const last = parts[parts.length - 1].slice(-1) || "";
                 return (first + last).toUpperCase();
             },
             handleUserCreated: function () {
-                this.getUsers({ search: '', page: this.queryPage, type: null });
+                this.getUsers({ search: "", page: this.queryPage, type: null });
                 this.closeModalUser();
             },
             openModalUser: function () {
@@ -202,19 +201,28 @@
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getUsers({ search: '', page: this.queryPage, type: null });
+            this.getUsers({ search: "", page: this.queryPage, type: null });
         },
-    }
+    };
 </script>
 
 <style scoped>
+    .badge {
+        display: inline-block;
+        background-color: #e0ecff;
+        color: #0057d8;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        margin-right: 4px;
+    }
+
     .initials {
         width: 30px;
         height: 30px;
     }
 
-    .column-align
-    {
+    .column-align {
         justify-content: center;
         display: flex;
     }

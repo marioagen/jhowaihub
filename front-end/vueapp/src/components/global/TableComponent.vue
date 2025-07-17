@@ -1,35 +1,23 @@
 <template>
     <div class="table-div shadow-sm">
         <p class="mx-1 my-1">
-            <small>
-                {{ $t(modalName) }} ({{ pagination.totalItems }})
-            </small>
+            <small>{{ $t(modalName) }} ({{ pagination.totalItems }})</small>
         </p>
-        <table 
-            class="table table-hover table-light table-sm table-responsive custom-table"
-        >
+        <table class="table table-hover table-light table-sm table-responsive custom-table">
             <thead>
                 <tr>
                     <th v-if="hasSelection">
-                        <input
-                            type="checkbox"
-                            class="form-check-input"
-                            :checked="allSelected"
-                            @change="selectAllRow"
-                        />
+                        <input type="checkbox" class="form-check-input" :checked="allSelected" @change="selectAllRow" />
                     </th>
-                    <th 
-                        v-for="(column, index) in columns" 
-                        :key="index" 
-                    >
+                    <th v-for="(column, index) in columns" :key="index">
                         {{ $t(column.label) }}
                     </th>
                 </tr>
             </thead>
             <tbody v-if="isLoading">
                 <tr>
-                    <td 
-                        :colspan="columns.length + (hasSelection ? 1 : 0)" 
+                    <td
+                        :colspan="columns.length + (hasSelection ? 1 : 0)"
                         class="text-center text-primary bg-primary/5 py-4 italic"
                     >
                         <div class="d-flex justify-content-center">
@@ -41,10 +29,7 @@
                 </tr>
             </tbody>
             <tbody v-else-if="data.length > 0">
-                <tr
-                    v-for="(row, index) in data" 
-                    :key="index"
-                >
+                <tr v-for="(row, index) in data" :key="index">
                     <td v-if="hasSelection">
                         <input
                             type="checkbox"
@@ -54,14 +39,8 @@
                             @change="selectRow(row)"
                         />
                     </td>
-                    <td 
-                        v-for="column in columns" 
-                        :key="column.key"
-                    >
-                        <slot 
-                            :name="`cell-${column.key}`" 
-                            :data="{ row, column }" 
-                        >
+                    <td v-for="column in columns" :key="column.key">
+                        <slot :name="`cell-${column.key}`" :data="{ row, column }">
                             {{ row[column.key] }}
                         </slot>
                     </td>
@@ -69,8 +48,8 @@
             </tbody>
             <tbody v-else>
                 <tr>
-                    <td 
-                        :colspan="columns.length + (hasSelection ? 1 : 0)" 
+                    <td
+                        :colspan="columns.length + (hasSelection ? 1 : 0)"
                         class="text-center text-primary bg-primary/5 py-4 italic"
                     >
                         {{ $t(emptyMessage) }}
@@ -80,7 +59,7 @@
         </table>
         <PaginationComponent
             v-if="showPagination"
-            class="mt-2" 
+            class="mt-2"
             :current-page="pagination.currentPage"
             :total-pages="pagination.totalPages"
             :items-per-page="pagination.itemsPerPage"
@@ -89,19 +68,19 @@
         />
     </div>
 </template>
-  
+
 <script>
     import PaginationComponent from "@/components/global/PaginationComponent.vue";
     export default {
         props: {
             modalName: {
                 type: String,
-                required: true
+                required: true,
             },
             emptyMessage: {
                 type: String,
                 required: false,
-                default: "No data available."
+                default: "No data available.",
             },
             data: {
                 type: Array,
@@ -127,8 +106,8 @@
                     totalPages: 1,
                     itemsPerPage: 10,
                     totalItems: 0,
-                })
-            }
+                }),
+            },
         },
         components: {
             PaginationComponent,
@@ -163,7 +142,7 @@
                 this.selectedRows = [];
             },
             changePage(page) {
-                this.$emit('change-page', page)
+                this.$emit("change-page", page);
             },
         },
         computed: {
@@ -172,7 +151,7 @@
             },
             showPagination() {
                 return this.pagination.totalPages > 1;
-            }
+            },
         },
         mounted() {
             this.cleanSelection();
@@ -200,7 +179,7 @@
         color: #343a40;
         background: white;
     }
-    
+
     .table-div {
         border: 1px solid #d3d3d3;
         border-radius: 8px;

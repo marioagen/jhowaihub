@@ -6,41 +6,82 @@
         <div class="mb-2 mt-1">
             <div class="div-quiz">
                 <select class="form-select custom-input" id="selectText" v-model="quizSelected">
-                    <option value=""> {{ $t('labelSelectQuestionnaire') }} </option>
-                    <option :value="item" v-for="(item, index) in quizzes" :key="index"> {{ item.title }} </option>
+                    <option value="">{{ $t("labelSelectQuestionnaire") }}</option>
+                    <option :value="item" v-for="(item, index) in quizzes" :key="index">{{ item.title }}</option>
                 </select>
-                <a  class="btn btn-outline-primary" style="margin: 0px 4.5px 0px 5px; min-width: max-content; box-shadow: none !important;" :title="$t('labelViewQuestions')" v-if="quizSelected.id && !loadingApplying" @click="openModal">
-                    <span class="badge rounded-pill bg-primary badge-custom"> {{ quizSelected.questions.length }} </span> | <i class="fas fa-search-plus"></i>
+                <a
+                    class="btn btn-outline-primary"
+                    style="margin: 0px 4.5px 0px 5px; min-width: max-content; box-shadow: none !important"
+                    :title="$t('labelViewQuestions')"
+                    v-if="quizSelected.id && !loadingApplying"
+                    @click="openModal"
+                >
+                    <span class="badge rounded-pill bg-primary badge-custom">{{ quizSelected.questions.length }}</span>
+                    |
+                    <i class="fas fa-search-plus"></i>
                 </a>
-                <a  class="btn btn-primary" :title="$t('labelApplyQuestionnaire')" v-if="quizSelected.id && !loadingApplying" @click="sendQuiz">
+                <a
+                    class="btn btn-primary"
+                    :title="$t('labelApplyQuestionnaire')"
+                    v-if="quizSelected.id && !loadingApplying"
+                    @click="sendQuiz"
+                >
                     <i class="far fa-arrow-circle-up"></i>
                 </a>
-                <a  class="btn btn-primary" style="margin: 0px 4.5px 0px 5px; min-width: max-content; box-shadow: none !important;" :title="$t('labelApplyingQuestionnaire')" v-if="quizSelected.id && loadingApplying">
+                <a
+                    class="btn btn-primary"
+                    style="margin: 0px 4.5px 0px 5px; min-width: max-content; box-shadow: none !important"
+                    :title="$t('labelApplyingQuestionnaire')"
+                    v-if="quizSelected.id && loadingApplying"
+                >
                     <i class="fas fa-sync-alt fa-spin"></i>
                 </a>
             </div>
         </div>
         <div class="mb-1 mt-1">
             <div class="input-group custom-input-button">
-                <input type="text" class="form-control custom-input" :placeholder="$t('labelAskTheAi')" id="inputText" v-model="input" @keyup.enter="submitInput">
-                <i class="input-group-text fas fa-arrow-circle-up custom-input" :title="$t('labelSendQuestion')" v-if="input.length > 0" @click="submitInput"></i>
+                <input
+                    type="text"
+                    class="form-control custom-input"
+                    :placeholder="$t('labelAskTheAi')"
+                    id="inputText"
+                    v-model="input"
+                    @keyup.enter="submitInput"
+                />
+                <i
+                    class="input-group-text fas fa-arrow-circle-up custom-input"
+                    :title="$t('labelSendQuestion')"
+                    v-if="input.length > 0"
+                    @click="submitInput"
+                ></i>
             </div>
         </div>
         <div class="mb-2">
-            <div style="width: 100%;">
-                <div style="float: left;">
-                    <strong class="form-label mb-3"> {{ upperFormat($t('labelOutput')) }} </strong>&nbsp;
+            <div style="width: 100%">
+                <div style="float: left">
+                    <strong class="form-label mb-3">{{ upperFormat($t("labelOutput")) }}</strong>
+                    &nbsp;
                     <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingOutput"></i>
                 </div>
-                <div style="float: right;" v-if="output != ''">
-                    <a  @click="copyToClipboard(output)"> <i class="fas fa-clone text-primary" :title="$t('labelCopy')" style="cursor:pointer"></i> </a>
+                <div style="float: right" v-if="output != ''">
+                    <a @click="copyToClipboard(output)">
+                        <i class="fas fa-clone text-primary" :title="$t('labelCopy')" style="cursor: pointer"></i>
+                    </a>
                 </div>
             </div>
-            <textarea type="text" class="form-control custom-textarea" rows="8" v-model="output" :disabled="output.length === 0" :readonly="output.length > 0"></textarea>
+            <textarea
+                type="text"
+                class="form-control custom-textarea"
+                rows="8"
+                v-model="output"
+                :disabled="output.length === 0"
+                :readonly="output.length > 0"
+            ></textarea>
         </div>
         <div class="mb-2">
             <span v-if="hashDocument != ''" title="Hash" id="hashId">
-                <i class="fas fa-hashtag" id="hashIcon"></i> {{ hashDocument }}
+                <i class="fas fa-hashtag" id="hashIcon"></i>
+                {{ hashDocument }}
             </span>
         </div>
     </div>
@@ -49,7 +90,7 @@
 </template>
 
 <script>
-    import ModalQuestion from '@/components/pages/analyzer/modal-question';
+    import ModalQuestion from "@/components/pages/analyzer/modal-question";
     import api from "@/services/api";
 
     export default {
@@ -59,25 +100,25 @@
             hashDocument: {
                 required: true,
                 type: String,
-                default: ''
+                default: "",
             },
             historyListOrder: {
                 required: true,
                 type: String,
-                default: ''
+                default: "",
             },
         },
         data() {
             return {
                 idAnalyzer: this.$route.params.id,
-                input: '',
-                output: '',
+                input: "",
+                output: "",
                 quizzes: [],
-                quizSelected: '',
+                quizSelected: "",
                 loadingApplying: false,
                 loadingOutput: false,
                 showModalQuestion: false,
-            }
+            };
         },
         components: {
             ModalQuestion,
@@ -86,45 +127,55 @@
         methods: {
             getQuizzes: function () {
                 let self = this;
-                api.get('/Questionnaire/FindAll')
-                    .then(function (response) { // Handle success
+                api.get("/Questionnaire/FindAll")
+                    .then(function (response) {
+                        // Handle success
                         self.quizzes = response.data;
-                    }).catch(function (e) { // Handle error
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         console.log(e);
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
             sendQuiz: function () {
                 this.loadingApplying = true;
                 this.clearMyInterval();
-                this.alertToast(this.$t('labelApplyingQuestionnaireWait'), "toast-primary");
+                this.alertToast(this.$t("labelApplyingQuestionnaireWait"), "toast-primary");
                 let paramsReq = {
                     idDocument: parseInt(this.idAnalyzer),
                     idQuestionnaire: this.quizSelected.id,
-                }
+                };
                 let self = this;
-                api.post('/Document/inputQuestionnaire', paramsReq)
-                    .then(function (response) { // Handle success
+                api.post("/Document/inputQuestionnaire", paramsReq)
+                    .then(function (response) {
+                        // Handle success
                         self.loadingApplying = false;
                         self.clearMyInterval();
-                        self.alertToast(self.$t('labelQuestionnaireAppliedSuccessfully'), "toast-success");
-                        setTimeout(() => self.$emit('showHistory'), 3000);
-                    }).catch(function (e) { // Handle error
+                        self.alertToast(self.$t("labelQuestionnaireAppliedSuccessfully"), "toast-success");
+                        setTimeout(() => self.$emit("showHistory"), 3000);
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         console.log(e);
                         self.loadingApplying = false;
                         self.clearMyInterval();
                         if (e.response && e.response.data === "No Credits to send a Question") {
-                            self.alertToast(self.$t('labelNumberOfQuestionsHasBeenExceeded'), "toast-danger");
+                            self.alertToast(self.$t("labelNumberOfQuestionsHasBeenExceeded"), "toast-danger");
                         } else if (e.response.status === 404) {
-                            self.alertToast(self.$t('labelAnInconsistencyWasIdentifiedInTheDocument'), "toast-danger");
+                            self.alertToast(self.$t("labelAnInconsistencyWasIdentifiedInTheDocument"), "toast-danger");
                         } else if (e.response.status === 402) {
-                            self.alertToast(self.$t('labelThereIsNotEnoughCredit'), "toast-warning");
-                            setTimeout(() => self.$emit('showHistory'), 3000);
+                            self.alertToast(self.$t("labelThereIsNotEnoughCredit"), "toast-warning");
+                            setTimeout(() => self.$emit("showHistory"), 3000);
                         } else {
-                            self.alertToast(self.$t('labelFailedToApplyQuestionnaire'), "toast-danger");
+                            self.alertToast(self.$t("labelFailedToApplyQuestionnaire"), "toast-danger");
                         }
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
@@ -133,36 +184,41 @@
                 this.output = "";
                 let paramsReq = {
                     id: this.idAnalyzer,
-                    input: this.input
-                }
+                    input: this.input,
+                };
                 this.input = "";
                 let self = this;
-                api.post('/Document/input/', paramsReq)
-                    .then(function (response) { // Handle success
-                        if (typeof response.data === 'object') {
+                api.post("/Document/input/", paramsReq)
+                    .then(function (response) {
+                        // Handle success
+                        if (typeof response.data === "object") {
                             self.output = JSON.stringify(response.data, undefined, 2);
                         } else {
                             self.output = response.data;
                         }
                         if (self.historyListOrder == "desc") {
-                            self.$emit('unshiftHistoryList', { input: paramsReq.input, output: self.output });
+                            self.$emit("unshiftHistoryList", { input: paramsReq.input, output: self.output });
                         } else {
-                            self.$emit('pushHistoryList', { input: paramsReq.input, output: self.output });
+                            self.$emit("pushHistoryList", { input: paramsReq.input, output: self.output });
                         }
                         self.loadingOutput = false;
-                    }).catch(function (e) { // Handle error
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         console.log(e);
                         self.loadingOutput = false;
                         if (e.response.data === "No Credits to send a Question") {
                             self.output = "";
                             self.clearMyInterval();
-                            self.alertToast(self.$t('labelNumberOfQuestionsHasBeenExceeded'), "toast-danger");
+                            self.alertToast(self.$t("labelNumberOfQuestionsHasBeenExceeded"), "toast-danger");
                         } else if (e.response.status === 404) {
-                            self.output = self.$t('labelAnInconsistencyWasIdentifiedInTheDocument');
+                            self.output = self.$t("labelAnInconsistencyWasIdentifiedInTheDocument");
                         } else {
-                            self.output = self.$t('labelFailedNoResponse');
+                            self.output = self.$t("labelFailedNoResponse");
                         }
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
@@ -177,13 +233,13 @@
             copyToClipboard: function (content) {
                 navigator.clipboard.writeText(content);
                 this.clearMyInterval();
-                this.alertToast(this.$t('labelTextCopiedToClipboard'), "toast-primary");
+                this.alertToast(this.$t("labelTextCopiedToClipboard"), "toast-primary");
             },
             alertToast: function (msg, color) {
-                this.$emit('showAlertToast', { msg: msg, color: color });
+                this.$emit("showAlertToast", { msg: msg, color: color });
             },
             clearMyInterval: function () {
-                this.$emit('clearMyInterval');
+                this.$emit("clearMyInterval");
             },
             upperFormat: function (str) {
                 return str.toUpperCase();
@@ -195,16 +251,17 @@
         },
         mounted() {},
         unmounted() {},
-    }
+    };
 </script>
 
 <style scoped>
-    .fas, .far {
+    .fas,
+    .far {
         font-weight: 900 !important;
     }
 
     .text-primary {
-        color: #47AAFF !important;
+        color: #47aaff !important;
     }
 
     .div-quiz {
@@ -212,7 +269,7 @@
     }
 
     .custom-input {
-        border-color: #0073E6 !important;
+        border-color: #0073e6 !important;
     }
 
     .custom-input-button .input-group-text {
@@ -224,8 +281,8 @@
     }
 
     @media (min-width: 768px) and (max-width: 1439px) {
-        #hashIcon{
-            display:none;
+        #hashIcon {
+            display: none;
         }
         #hashId {
             width: 250px;
@@ -234,15 +291,13 @@
             overflow-wrap: break-word;
         }
     }
-    @media (min-width: 320px) and (max-width: 767px)
-    {
+    @media (min-width: 320px) and (max-width: 767px) {
         .custom-textarea {
             height: calc(100vh - 270px);
-            resize:none;
+            resize: none;
         }
     }
     .custom-textarea {
         max-height: 50vh;
     }
-
 </style>
