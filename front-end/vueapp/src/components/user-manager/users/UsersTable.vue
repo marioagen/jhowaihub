@@ -7,6 +7,7 @@
             :columns="table.columns"
             :isLoading="table.isLoading"
             :pagination="table.pagination"
+            :hasSelection="false"
         >
             <template #cell-name="{ data }">
                 <div v-if="!loading" class="p-1">
@@ -94,7 +95,6 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
                     { key: "name", label: "labelUser" },
                     { key: "teams", label: "labelTeams" },
                     { key: "actions", label: "labelAction" },

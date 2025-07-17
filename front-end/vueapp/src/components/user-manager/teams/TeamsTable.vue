@@ -7,6 +7,7 @@
             :columns="table.columns"
             :isLoading="table.isLoading"
             :pagination="table.pagination"
+            :hasSelection="false"
             @change-page="changePage"
         >
             <template #cell-members="{ data }">
