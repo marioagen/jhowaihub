@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@jaxtheprime/vue3-dropzone": "^3.3.0",
-        "@popperjs/core": "^2.11.7",
+        "@popperjs/core": "^2.11.8",
         "@vueform/multiselect": "^2.6.6",
         "axios": "^1.4.0",
         "core-js": "^3.8.3",

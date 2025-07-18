@@ -1,19 +1,15 @@
 ﻿import "@/assets/css/global.css";
-
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import i18n from "./locales/i18n";
 import VueGtag from "vue-gtag";
-
+import tooltip from "@/directives/bootstrapTooltip";
 import LucideIcon from "@/components/global/LucideIcon.vue";
 
 window.$ = window.jQuery = require("jquery");
-
 import "@/assets/css/bootstrap-5.0.2/css/bootstrap.min.css";
-import "@/assets/webfont/fontawesome-5.15.4/css/all.min.css";
-import "@/assets/css/bootstrap-5.0.2/js/bootstrap.bundle.min";
 
 const app = createApp(App);
 app.use(router);
@@ -35,6 +31,7 @@ app.use(
     router
 );
 
+app.directive("tooltip", tooltip);
 app.component("LucideIcon", LucideIcon);
 
 app.config.globalProperties.$appName = ENV_CONFIG.VUE_APP_NAME;
