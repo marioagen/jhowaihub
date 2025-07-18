@@ -1,5 +1,12 @@
 <template>
-    <div class="modal fade" tabindex="-1" aria-hidden="true" ref="modalEl" :aria-labelledby="`${id}-label`" :id="id">
+    <div 
+        class="modal fade" 
+        tabindex="-1" 
+        aria-hidden="true" 
+        ref="modalEl" 
+        :aria-labelledby="`${id}-label`" 
+        :id="id"
+    >
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -58,8 +65,6 @@
 </template>
 
 <script>
-    import { Modal } from 'bootstrap';
-
     export default {
         name: "ConfirmDialog",
         props: {
@@ -104,18 +109,18 @@
             },
         },
         mounted() {
-            this.modalInstance = new Modal(this.$refs.modalEl, {
+            this.modalInstance = new window.bootstrap.Modal(this.$refs.modalEl, {
                 backdrop: 'static',
                 keyboard: false,
             });
         },
         methods: {
             open() {
-                this.modalInstance.show();
+                this.modalInstance?.show();
             },
             close() {
-                this.modalInstance.hide();
+                this.modalInstance?.hide();
             },
-        },
+        }
     };
 </script>
