@@ -10,6 +10,7 @@ import LucideIcon from "@/components/global/LucideIcon.vue";
 
 window.$ = window.jQuery = require("jquery");
 import "@/assets/css/bootstrap-5.0.2/css/bootstrap.min.css";
+import "@/assets/webfont/fontawesome-5.15.4/css/all.min.css";
 
 const app = createApp(App);
 app.use(router);
