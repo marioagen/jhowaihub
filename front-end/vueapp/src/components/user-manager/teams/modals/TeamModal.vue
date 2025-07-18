@@ -224,7 +224,6 @@
                     name: this.teamData.name,
                     userIds: this.selectedUsers,
                 };
-                console.log(this.team);
                 const request = team.id === 0 ? api.post("Team", team) : api.put("Team", team);
 
                 request
