@@ -183,7 +183,7 @@
     labelId: "ID",
     labelTeamName: "Time",
     labelMembers: "Membros",
-    labelYouAreAboutToDeleteTeam: "Você está prestes a deletar <br/> um Time do sistema",
+    labelYouAreAboutToDeleteTeam: "Você está prestes a deletar um Time do sistema",
     labelNewTeamMessage: "Crie um novo time no sistema",
     labelTeamMembers: "Membros do time",
     labelSelectedWithO: "Selecionados",
@@ -210,6 +210,7 @@
     labelMessage: "Tem certeza?",
     labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
+    labelYouAreAboutToDeleteUser: "Você está prestes a deletar um usuário do sistema",
 };
 
 export default portuguese;
