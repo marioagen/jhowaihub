@@ -7,6 +7,7 @@
             :columns="table.columns"
             :isLoading="table.isLoading"
             :pagination="table.pagination"
+            :hasSelection="false"
             @change-page="changePage"
         >
             <template #cell-name="{ data }">
@@ -45,42 +46,47 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <LucideIcon icon="SquarePen" />
-                            <a class="dropdown-item" @click="editUser(data.row)">{{ $t("labelEdit") }}</a>
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="editUser(data.row)">
+                                <LucideIcon icon="SquarePen" />
+                                {{ $t("labelEdit") }}
+                            </a>
                         </li>
                         <li>
-                            <LucideIcon icon="Trash2" />
-                            <a class="dropdown-item" @click="confirmationDialog(data.row)">{{ $t("labelDelete") }}</a>
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
+                                <LucideIcon icon="Trash2" />
+                                {{ $t("labelDelete") }}
+                            </a>
                         </li>
                     </ul>
                 </div>
             </template>
         </TableComponent>
-
-        <modal-user
-            v-if="modalUserShow"
-            @userCreated="handleTeamCreated"
-            @close="closeModalUser"
-            :userEditing="selectedUser"
-        />
-        <modal-alert
-            v-if="modalAlertShow"
-            :type="'Confirm'"
-            :entity="selectedUser"
-            :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
-            :alertMessage="$t('labelThisActionCannotBeUndone')"
-            :okLabel="$t('labelConfirm')"
-            :cancelLabel="$t('labelCancel')"
-            @open="deleteUser"
-            @close="closeModal"
-        />
     </div>
+
+    <modal-user
+        v-if="modalUserShow"
+        @userCreated="handleTeamCreated"
+        @close="closeModalUser"
+        :userEditing="selectedUser"
+    />
+
+    <ConfirmModal
+        id="deleteConfirm"
+        title="labelYouAreAboutToDeleteUser"
+        message="labelThisActionCannotBeUndone"
+        cancelText="labelCancel"
+        confirmText="labelConfirm"
+        confirmVariant="primary"
+        ref="DeleteDialog"
+        :isLoading="isDeleting"
+        @confirm="deleteUser"
+    />
 </template>
 <script>
+    import UserService from "@/services/users/UserService";
+    import ConfirmModal from "@/components/core/ConfirmModal.vue";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ModalUser from "@/components/user-manager/users/modals/UserModal.vue";
-    import ModalAlert from "@/components/common/modal-alert";
-    import UserService from "@/services/users/UserService";
     import BadgeOutlinedComponent from "@/components/core/BadgeOutlinedComponent.vue";
 
     export default {
@@ -88,14 +94,13 @@
         components: {
             BadgeOutlinedComponent,
             TableComponent,
+            ConfirmModal,
             ModalUser,
-            ModalAlert,
         },
         data: () => ({
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
                     { key: "name", label: "labelUser" },
                     { key: "teams", label: "labelTeams" },
                     { key: "actions", label: "labelAction" },
@@ -116,6 +121,7 @@
             modalUserShow: false,
             modalAlertShow: false,
             selectedUser: {},
+            isDeleting: false,
         }),
         methods: {
             getUsers(obj) {
@@ -148,14 +154,23 @@
                 this.selectedUser = user;
                 this.openModalUser();
             },
+            openConfirmation(user) {
+                this.selectedUser = user;
+                this.$refs.DeleteDialog.open();
+            },
             deleteUser() {
+                this.isDeleting = true;
                 let userId = this.selectedUser.id;
-                UserService.deleteUsersById(userId).then((status) => {
-                    if (status) {
-                        this.closeModal();
-                        this.getUsers({ search: "", page: 1, type: null });
-                    }
-                });
+                UserService.deleteUsersById(userId)
+                    .then((status) => {
+                        if (status) {
+                            this.$refs.DeleteDialog.close();
+                            this.getUsers({ search: "", page: 1, type: null });
+                        }
+                    })
+                    .finally(() => {
+                        this.isDeleting = false;
+                    });
             },
             filterList(input) {
                 this.searchInput = input;
@@ -178,15 +193,6 @@
             },
             openModalUser: function () {
                 this.modalUserShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModalUser: function () {
-                this.modalUserShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            confirmationDialog(user) {
-                this.selectedUser = user;
-                this.modalAlertShow = true;
                 document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
             closeModal() {

@@ -37,27 +37,30 @@ body {
     width: calc(100% - 60px);
 }
 
-/* Linha vertical entre menu e conteúdo */
 .vertical-menu-separator {
     position: fixed;
     top: 0;
     height: 100vh;
     width: 1px;
     background-color: #ccc;
-    z-index: 1050;
+    z-index: 1000;
     transition: left 0.3s ease;
 }
 
-/* Linha horizontal que atravessa toda largura da tela */
 .horizontal-separator-fixed {
     position: fixed;
-    top: 60px; /* Altura do logo/navbar - ajuste conforme necessário */
+    top: 60px;
     left: 0;
     width: 100%;
     height: 1px;
     background-color: #d0d4d9;
-    z-index: 1050;
+    z-index: 1000;
 }
+
+.modal-backdrop.show {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
 .css-theme-light {
     --color-bg-sidebar-content: #ffffff;
     --color-sidebar-li: rgba(0, 0, 0, 0.85);

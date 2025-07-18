@@ -48,8 +48,13 @@
                 </div>
 
                 <div class="dropdown nav-buttons">
-                    <button class="btn button-nav" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-globe-americas"></i>
+                    <button 
+                        class="btn btn-outline-primary table-btn" 
+                        type="button" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false"
+                    >
+                        <LucideIcon icon="Globe" />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-button text-small shadow">
                         <li>
@@ -154,15 +159,14 @@
                         >
                             <li class="remove-hover mt-2">
                                 <router-link
-                                    class="dropdown-item"
+                                    class="dropdown-item mx-2 my-2"
                                     :to="{
                                         name: 'Logout',
                                         query: { darkMode: this.showLogoDarkMode },
                                     }"
                                     title="Sair"
                                 >
-                                    &nbsp;
-                                    <i class="fas fa-sign-out-alt"></i>
+                                    <LucideIcon icon="LogOut" />
                                     {{ $t("labelSignOut") }}
                                 </router-link>
                             </li>
