@@ -196,6 +196,7 @@ namespace WoopiAiHub.Application.Services
             {
                 totalList = totalList.Where(i => 
                     i.Name.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
+                    i.Email.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
                     i.Id.ToString().Contains(pagedDataDto.Search) ||
                     i.Teams.Any(t => t.Name.ToLower().Contains(pagedDataDto.Search.ToLower())
                 ));
