@@ -73,22 +73,22 @@
         methods: {
             validateForm() {
                 let valid = true;
-                if (!this.teamData.name || this.teamData.name.length < 2) {
-                    this.nameError = this.$t("labelRequiredField");
-                    valid = false;
+                if (!this.form.name || this.form.name.length < 2) {
+                   this.nameError = this.$t("labelRequiredField");
+                   valid = false;
                 }
                 return valid;
             },
             handleSubmit(e) {
                 e.preventDefault();
                 if (!this.validateForm()) return;
-
                 this.loading = true;
-                api.post("Team", {
+                let team = {
                     id: 0,
                     name: this.form.name.trim(),
-                    users: [],
-                })
+                    users: []
+                }
+                api.post("Team", team)
                     .then((response) => {
                         this.loading = false;
                         this.resetForm();
