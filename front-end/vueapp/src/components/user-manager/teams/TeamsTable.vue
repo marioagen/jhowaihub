@@ -7,6 +7,7 @@
             :columns="table.columns"
             :isLoading="table.isLoading"
             :pagination="table.pagination"
+            :hasSelection="false"
             @change-page="changePage"
         >
             <template #cell-members="{ data }">
@@ -14,13 +15,27 @@
                 {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">
-                <button class="btn btn-outline-success btn-sm table-btn" @click="editTeam(data.row)">
-                    <LucideIcon icon="SquarePen" />
-                </button>
-                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="confirmationDialog(data.row)">
-                    <LucideIcon icon="Trash2" />
-                </button>
+                <div class="dropdown column-align">
+                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <LucideIcon icon="Ellipsis" />
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="editTeam(data.row)">
+                                <LucideIcon icon="SquarePen" />
+                                {{ $t("labelEdit") }}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="confirmationDialog(data.row)">
+                                <LucideIcon icon="Trash2" />
+                                {{ $t("labelDelete") }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </template>
+
         </TableComponent>
     </div>
     <modal-team
@@ -173,3 +188,9 @@
         },
     };
 </script>
+
+<style>
+.dropdown-toggle::after {
+  display: none;
+}
+</style>
