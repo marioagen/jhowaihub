@@ -5,7 +5,7 @@ using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Profiles
 {
-    public class DocumentProfile:Profile
+    public class DocumentProfile: AutoMapper.Profile
     {
         public DocumentProfile()
         {

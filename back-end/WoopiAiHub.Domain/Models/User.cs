@@ -19,8 +19,17 @@ namespace WoopiAiHub.Domain.Models
         [Column("IsActive", TypeName = "bit")]
         public bool IsActive { get; private set; }
 
+        [Column("PasswordHash", TypeName = "varbinary(64)")]
+        public byte[] PasswordHash { get; private set; } = Array.Empty<byte>();
+
+        [Column("Salt", TypeName = "varbinary(16)")]
+        public byte[] Salt { get; private set; } = Array.Empty<byte>();
+
         [Column("Created", TypeName = "datetime")]
         public DateTime Created { get; private set; }
+
+        public virtual ICollection<Profile> Profiles { get; set; }
+        public virtual ICollection<Permission?> Permissions { get; set; }
 
         public ICollection<Team> Teams { get; set; } = [];
 
@@ -30,11 +39,11 @@ namespace WoopiAiHub.Domain.Models
                     bool isActive,
                     DateTime created)
         {
-            this.Id = id;
-            this.Name = name;
-            this.Email = email;
-            this.IsActive = isActive;
-            this.Created = created;
+            Id = id;
+            Name = name;
+            Email = email;
+            IsActive = isActive;
+            Created = created;
         }
 
         public void AddTeam(Team team)

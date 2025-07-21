@@ -6,6 +6,11 @@ namespace WoopiAiHub.Repository.Mappings
 {
     public class UserMap : IEntityTypeConfiguration<User>
     {
+        private const string UserIdColumn = "UserId";
+        private const string TeamIdColumn = "TeamId";
+        private const string PermissionIdColumn = "PermissionId";
+        private const string ProfileIdColumn = "ProfileId";
+
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("Users");
@@ -37,18 +42,56 @@ namespace WoopiAiHub.Repository.Mappings
                    .HasColumnType("datetime")
                    .IsRequired();
 
+            builder.Property(u => u.PasswordHash)
+                   .HasColumnName("PasswordHash")
+                   .HasColumnType("varbinary(64)")
+                   .IsRequired();
+
+            builder.Property(u => u.Salt)
+                   .HasColumnName("Salt")
+                   .HasColumnType("varbinary(16)")
+                   .IsRequired();
+
             builder.HasMany(u => u.Teams)
                    .WithMany(t => t.Users)
                    .UsingEntity<Dictionary<string, object>>(
-                    "UserTeam",
-                    r => r.HasOne<Team>().WithMany().HasForeignKey("TeamId"),
-                    l => l.HasOne<User>().WithMany().HasForeignKey("UserId"),
+                    "UserTeams",
+                    r => r.HasOne<Team>().WithMany().HasForeignKey(TeamIdColumn),
+                    l => l.HasOne<User>().WithMany().HasForeignKey(UserIdColumn),
                     je =>
                     {
-                        je.HasKey("UserId", "TeamId");
-                        je.ToTable("UserTeam");
-                        je.Property<Guid>("UserId").HasColumnName("UserId");
-                        je.Property<int>("TeamId").HasColumnName("TeamId");
+                        je.HasKey(UserIdColumn, TeamIdColumn);
+                        je.ToTable("UserTeams");
+                        je.Property<Guid>(UserIdColumn).HasColumnName(UserIdColumn);
+                        je.Property<int>(TeamIdColumn).HasColumnName(TeamIdColumn);
+                    });
+
+            builder.HasMany(u => u.Permissions)
+                .WithMany(t => t.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserPermissions",
+                    r => r.HasOne<Permission>().WithMany().HasForeignKey(PermissionIdColumn),
+                    l => l.HasOne<User>().WithMany().HasForeignKey(UserIdColumn),
+                    je =>
+                    {
+                        je.HasKey(UserIdColumn, PermissionIdColumn);
+                        je.ToTable("UserPermissions");
+                        je.Property<Guid>(UserIdColumn).HasColumnName(UserIdColumn);
+                        je.Property<int>(PermissionIdColumn).HasColumnName(PermissionIdColumn);
+                    });
+
+            builder.HasMany(u => u.Profiles)
+                .WithMany(t => t.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserProfiles",
+                    r => r.HasOne<Profile>().WithMany().HasForeignKey(ProfileIdColumn),
+                    l => l.HasOne<User>().WithMany().HasForeignKey(UserIdColumn),
+                    je =>
+                    {
+                        je.HasKey(UserIdColumn, ProfileIdColumn);
+                        je.ToTable("UserProfiles");
+                        je.Property<Guid>(UserIdColumn).HasColumnName(UserIdColumn);
+                        je.Property<int>(ProfileIdColumn).HasColumnName(ProfileIdColumn); 
                     });
         }
     }
