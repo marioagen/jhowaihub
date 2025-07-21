@@ -66,7 +66,7 @@
 
     <modal-user
         v-if="modalUserShow"
-        @userCreated="handleTeamCreated"
+        @userCreated="handleUserCreated"
         @close="closeModalUser"
         :userEditing="selectedUser"
     />
@@ -198,6 +198,10 @@
             },
             closeModal() {
                 this.modalAlertShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            closeModalUser: function () {
+                this.modalUserShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             changePage(page) {
