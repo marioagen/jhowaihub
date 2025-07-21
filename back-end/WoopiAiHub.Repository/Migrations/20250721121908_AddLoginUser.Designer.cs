@@ -12,7 +12,7 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250718183224_AddLoginUser")]
+    [Migration("20250721121908_AddLoginUser")]
     partial class AddLoginUser
     {
         /// <inheritdoc />

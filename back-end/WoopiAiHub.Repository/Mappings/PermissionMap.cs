@@ -4,7 +4,7 @@ using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Repository.Mappings
 {
-    public class PermissionMap
+    public class PermissionMap : IEntityTypeConfiguration<Permission>
     {
         public void Configure(EntityTypeBuilder<Permission> builder)
         {

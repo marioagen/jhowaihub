@@ -4,8 +4,11 @@ using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Repository.Mappings
 {
-    public class ProfileMap
+    public class ProfileMap : IEntityTypeConfiguration<Profile>
     {
+        private const string PermissionIdColumn = "PermissionId";
+        private const string ProfileIdColumn = "ProfileId";
+
         public void Configure(EntityTypeBuilder<Profile> builder)
         {
             builder.ToTable("Profiles");
@@ -22,14 +25,14 @@ namespace WoopiAiHub.Repository.Mappings
                    .WithMany(pr => pr.Profiles)
                    .UsingEntity<Dictionary<string, object>>(
                        "ProfilePermissions",
-                       r => r.HasOne<Permission>().WithMany().HasForeignKey("PermissionId"),
-                       l => l.HasOne<Profile>().WithMany().HasForeignKey("ProfileId"),
+                       r => r.HasOne<Permission>().WithMany().HasForeignKey(PermissionIdColumn),
+                       l => l.HasOne<Profile>().WithMany().HasForeignKey(ProfileIdColumn),
                        je =>
                        {
-                           je.HasKey("PermissionId", "ProfileId");
+                           je.HasKey(PermissionIdColumn, ProfileIdColumn);
                            je.ToTable("ProfilePermissions");
-                           je.Property<int>("ProfileId").HasColumnName("ProfileId");
-                           je.Property<int>("PermissionId").HasColumnName("PermissionId");
+                           je.Property<int>(ProfileIdColumn).HasColumnName(ProfileIdColumn);
+                           je.Property<int>(PermissionIdColumn).HasColumnName(PermissionIdColumn);
                        });
                     }
     }
