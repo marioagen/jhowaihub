@@ -1,4 +1,3 @@
-<!-- ModalComponent.vue -->
 <template>
     <div
         :id="id"
