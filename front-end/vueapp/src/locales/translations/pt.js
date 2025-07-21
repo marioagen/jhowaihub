@@ -49,7 +49,6 @@
     labelEdited: "Editado",
     labelEditedFail: "Falha ao editar",
     labelEditQuestion: "Editar pergunta",
-    labelEditType: "Editar tipo",
     labelExceedDesc: "Descrição excedeu o limite de 250 caracteres",
     labelExceedTitle: "Título excedeu o limite de 50 caracteres",
     labelExpandHistory: "Expandir histórico",
@@ -212,6 +211,10 @@
     labelConfirmMessage: "Confirmar",
     labelYouAreAboutToDeleteUser: "Você está prestes a deletar um usuário do sistema",
     labelYouAreAboutToDeleteType: "Você está prestes a deletar um tipo do sistema",
+    labelEditTitleType: "Edição de tipo",
+    labelSaveTitleType: "Criação de tipo",
+    labelEditType: "Editar tipo",
+    labelSaveType: "Criar tipo",
 };
 
 export default portuguese;

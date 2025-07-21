@@ -53,7 +53,6 @@
     labelEdited: "Edited",
     labelEditedFail: "Edit failed",
     labelEditQuestion: "Edit question",
-    labelEditType: "Edit type",
     labelExceedDesc: "Description exceeded the 250 character limit",
     labelExceedTitle: "Title exceeded the 50 character limit",
     labelExpandHistory: "Expand history",
@@ -213,6 +212,10 @@
     labelConfirmMessage: "Confirmar",
     labelYouAreAboutToDeleteUser: "Delete user",
     labelYouAreAboutToDeleteType: "Delete type",
+    labelEditTitleType: "Edit type",
+    labelSaveTitleType: "Create type",
+    labelEditType: "Edit",
+    labelSaveType: "Create",
 };
 
 export default english;
