@@ -212,6 +212,7 @@
     labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
     labelYouAreAboutToDeleteUser: "Delete user",
+    labelYouAreAboutToDeleteType: "Delete type",
 };
 
 export default english;

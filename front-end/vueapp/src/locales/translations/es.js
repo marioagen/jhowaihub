@@ -216,6 +216,7 @@
     labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
     labelYouAreAboutToDeleteUser: "Estás a punto de eliminar un usuario del sistema",
+    labelYouAreAboutToDeleteType: "Estás a punto de eliminar un tipo del sistema",
 };
 
 export default spanish;
