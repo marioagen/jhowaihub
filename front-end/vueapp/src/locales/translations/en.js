@@ -184,7 +184,7 @@
     labelId: "ID",
     labelTeamName: "Team",
     labelMembers: "Members",
-    labelYouAreAboutToDeleteTeam: "You are about to delete <br/> a Team from the system",
+    labelYouAreAboutToDeleteTeam: "You are about to delete a Team from the system",
     labelNewTeamMessage: "Create a new team in the system",
     labelTeamMembers: "Team members",
     labelSelectedWithO: "Selected",
@@ -211,6 +211,7 @@
     labelMessage: "¿Estás seguro?",
     labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
+    labelYouAreAboutToDeleteUser: "Delete user",
 };
 
 export default english;
