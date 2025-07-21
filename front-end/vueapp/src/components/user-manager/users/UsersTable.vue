@@ -33,6 +33,7 @@
                         v-for="team in data.row.teams"
                         :key="team.id"
                         :text="team.name"
+                        class="ms-2"
                         variant="primary"
                         @setClick="filterByTeam(team)"
                     />
