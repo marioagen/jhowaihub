@@ -26,7 +26,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new TeamCreateDto
             {
                 Name = _faker.Company.CompanyName(),
-                UserIds = new List<string> { "test" }
+                UserIds = new List<Guid> { Guid.NewGuid() }
             };
         }
 

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -68,7 +69,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="teamCreateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public bool CreateUniqueTeam(TeamCreateDto teamCreateDto)
+        public async Task <bool> CreateUniqueTeam(TeamCreateDto teamCreateDto)
         {
             if (string.IsNullOrEmpty(teamCreateDto.Name))
             {
@@ -79,6 +80,17 @@ namespace WoopiAiHub.Application.Services
             {
                 Users = new List<User>()
             };
+
+            if (teamCreateDto.UserIds != null)
+            {
+                team.Users.Clear();
+                var users = await _userRepository.FindByIdsAsync(teamCreateDto.UserIds);
+
+                foreach (var user in users)
+                {
+                    team.AddUser(user);
+                }
+            }
 
             var createResult = _teamRepository.CreateUniqueTeam(team);
             if (!createResult)
