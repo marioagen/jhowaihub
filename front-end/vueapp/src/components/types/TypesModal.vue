@@ -43,7 +43,7 @@
 </template>
 
 <script>
-    import ModalComponent from '../global/ModalComponent.vue';
+    import ModalComponent from '@/components/global/ModalComponent.vue';
     import TypesService from '@/services/types/TypesService';
     
     export default {
@@ -66,10 +66,10 @@
         }),
         computed: {
             titleText() {
-                return this.isEdit ? "Edit" : "Save";
+                return this.isEdit ? "labelEditTitleType" : "labelSaveTitleType";
             },
             saveText() {
-                return this.isEdit ? "Edit" : "Save";
+                return this.isEdit ? "labelEditType" : "labelSaveType";
             },
         },
         methods: {
