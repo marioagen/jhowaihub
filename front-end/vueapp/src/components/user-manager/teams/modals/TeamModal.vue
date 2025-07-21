@@ -218,7 +218,6 @@
             saveTeam(e) {
                 e.preventDefault();
                 if (!this.validateForm()) return;
-
                 const team = {
                     id: this.teamData.id,
                     name: this.teamData.name,

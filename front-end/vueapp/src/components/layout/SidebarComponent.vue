@@ -35,8 +35,13 @@
         </div>
 
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
-            <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
-                <i :class="isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
+            <button 
+                class="btn toggle-button" 
+                type="button" 
+                aria-label="Toggle sidebar"
+            >
+                <LucideIcon v-if="isCollapsed" icon="ChevronRight"  />
+                <LucideIcon v-else icon="ChevronLeft" />
             </button>
         </div>
 
@@ -266,7 +271,7 @@
         color: #737477;
         width: 28px;
         /* ajuste se quiser */
-        height: auto;
+        height: 40px;
         /* deixa a altura ser definida pelo padding */
     }
 

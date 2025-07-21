@@ -2,13 +2,11 @@ using Xunit;
 using Moq;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixture;
 using WoopiAiHub.Domain.DTOs;
 using Moq.AutoMock;
-using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.DTOs.Request;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -59,43 +57,81 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Throws<ArgumentException>(() => _service.FindById(999));
         }
 
-        [Fact(DisplayName = "CreateUniqueTeam should return true when data is valid")]
-        [Trait("CreateUniqueTeam", "Success")]
-        public void CreateUniqueTeam_ValidData_ReturnsTrue()
+        [Fact(DisplayName = "CreateUniqueTeam should retunr true when success")]
+        [Trait("CreateUniqueTeam", "Sucess")]
+        public async Task CreateUniqueTeam_ShouldReturnTrue_WhenSuccess()
         {
             // Arrange
-            var dto = _fixture.CreateValidTeamCreateDto();
-            _teamRepositoryMock.Setup(r => r.CreateUniqueTeam(It.IsAny<Team>())).Returns(true);
+            var teamCreateDto = new TeamCreateDto
+            {
+                Name = "Equipe Teste",
+                UserIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+            };
+
+            var users = new List<User>
+        {
+            new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
+            new User(teamCreateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
+        };
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByIdsAsync(teamCreateDto.UserIds))
+                .ReturnsAsync(users);
+
+            _teamRepositoryMock
+                .Setup(repo => repo.CreateUniqueTeam(It.IsAny<Team>()))
+                .Returns(true);
 
             // Act
-            var result = _service.CreateUniqueTeam(dto);
+            var result = await _service.CreateUniqueTeam(teamCreateDto);
 
             // Assert
             Assert.True(result);
+            _teamRepositoryMock.Verify(repo => repo.CreateUniqueTeam(It.IsAny<Team>()), Times.Once);
         }
 
-        [Fact(DisplayName = "CreateUniqueTeam should throw ArgumentException when name already exists")]
+        [Fact(DisplayName = "CreateUniqueTeam should throw argument exception when name is empty")]
         [Trait("CreateUniqueTeam", "Failure/Exception")]
-        public void CreateUniqueTeam_DuplicateName_ThrowsArgumentException()
+        public async Task CreateUniqueTeam_ShouldThrowArgumentException_WhenNameIsEmpty()
         {
             // Arrange
-            var dto = _fixture.CreateValidTeamCreateDto();
-            _teamRepositoryMock.Setup(r => r.CreateUniqueTeam(It.IsAny<Team>())).Returns(false);
+            var teamCreateDto = new TeamCreateDto
+            {
+                Name = "",
+                UserIds = new List<Guid> { Guid.NewGuid() }
+            };
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => _service.CreateUniqueTeam(dto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateUniqueTeam(teamCreateDto));
+            Assert.Equal("Team name cannot be empty", ex.Message);
         }
-
-        [Fact(DisplayName = "CreateUniqueTeam should throw ArgumentException when name is empty")]
+        [Fact(DisplayName = "CreateUniqueTeam should throw argument exception when name is duplicated")]
         [Trait("CreateUniqueTeam", "Failure/Exception")]
-        public void CreateUniqueTeam_EmptyName_ThrowsArgumentException()
+        public async Task CreateUniqueTeam_ShouldThrowArgumentException_WhenDuplicatedName()
         {
             // Arrange
-            var dto = _fixture.CreateValidTeamCreateDto();
-            dto.Name = string.Empty;
+            var teamCreateDto = new TeamCreateDto
+            {
+                Name = "Equipe Duplicada",
+                UserIds = new List<Guid> { Guid.NewGuid() }
+            };
+
+            var users = new List<User>
+        {
+            new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now)
+        };
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByIdsAsync(teamCreateDto.UserIds))
+                .ReturnsAsync(users);
+
+            _teamRepositoryMock
+                .Setup(repo => repo.CreateUniqueTeam(It.IsAny<Team>()))
+                .Returns(false);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => _service.CreateUniqueTeam(dto));
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateUniqueTeam(teamCreateDto));
+            Assert.Equal("Duplicated Team Name", ex.Message);
         }
 
         [Fact(DisplayName = "Update should return true when update succeeds")]

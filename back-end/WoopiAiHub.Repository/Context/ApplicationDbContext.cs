@@ -26,6 +26,8 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<TypeDoc> TypeDoc { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Team> Teams { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<Profile> Profiles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -49,6 +51,8 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<TypeDoc>(new TypeDocMap().Configure);
             modelBuilder.Entity<User>(new UserMap().Configure);
             modelBuilder.Entity<Team>(new TeamMap().Configure);
+            modelBuilder.Entity<Permission>(new PermissionMap().Configure);
+            modelBuilder.Entity<Profile>(new ProfileMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }

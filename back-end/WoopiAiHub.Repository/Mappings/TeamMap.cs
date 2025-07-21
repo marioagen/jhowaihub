@@ -16,10 +16,6 @@ namespace WoopiAiHub.Repository.Mappings
                    .HasColumnName("Name")
                    .HasColumnType("varchar(100)")
                    .IsRequired();
-
-            builder.HasMany(t => t.Users)
-                   .WithMany(u => u.Teams)
-                   .UsingEntity(j => j.ToTable("UserTeams"));
         }
     }
 }

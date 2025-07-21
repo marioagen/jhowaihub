@@ -58,9 +58,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPost]
         [SwaggerOperation("Endpoint that receives the request to create a team")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Create([FromBody] TeamCreateDto teamCreateDto)
+        public async Task<IActionResult> Create([FromBody] TeamCreateDto teamCreateDto)
         {
-            var result = _teamServices.CreateUniqueTeam(teamCreateDto);
+            var result =  await _teamServices.CreateUniqueTeam(teamCreateDto);
             return Ok(result);
         }
 
