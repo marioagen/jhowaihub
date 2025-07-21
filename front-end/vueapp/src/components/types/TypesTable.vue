@@ -22,17 +22,28 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <button class="btn btn-outline-success btn-sm table-btn" @click="editType(data.row)">
+                <button 
+                    class="btn btn-outline-success btn-sm table-btn" 
+                    @click="openEditModal(data.row)"
+                >
                     <LucideIcon icon="SquarePen" />
                 </button>
-                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="openConfirmation(data.row)">
+                <button 
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn" 
+                    @click="openConfirmation(data.row)"
+                >
                     <LucideIcon icon="Trash2" />
                 </button>
             </template>
         </TableComponent>
     </div>
 
-    <modal-form v-if="modalTypeShow" :dataEditing="selectedType" @openEdit="editTypeRequest" @close="closeModal" />
+    <TypesModal
+        :isEdit="true"
+        @reload="getTypes({ search: '', page: this.queryPage, type: null })"
+        ref="TypesModal"
+    />
+
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteType"
@@ -50,17 +61,15 @@
     import dates from "@/helpers/Dates";
     import TypesService from "@/services/types/TypesService";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalForm from "@/components/pages/type/modal-form";
-    import ModalAlert from "@/components/common/modal-alert";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import TypesModal from "@/components/types/TypesModal.vue";
 
     export default {
         name: "TypesTable",
         components: {
             TableComponent,
             ConfirmModal,
-            ModalForm,
-            ModalAlert,
+            TypesModal,
         },
         data: () => ({
             table: {
@@ -135,32 +144,8 @@
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
-            editType(type) {
-                this.selectedType = type;
-                this.openModalType();
-            },
-            editTypeRequest(item) {
-                const params = {
-                    id: item.id,
-                    name: item.name,
-                };
-                TypesService.editType(params)
-                    .then((result) => {
-                        if (!result.success) {
-                            const messageKey =
-                                result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
-
-                            this.emitToast(this.$t(messageKey), "toast-warning");
-                            this.finishEdit();
-                            return;
-                        }
-
-                        this.emitToast(this.$t("labelDocumentTypeEditSuccess"), "toast-success");
-                        this.finishEdit();
-                    })
-                    .finally(() => {
-                        console.log("Finished request.");
-                    });
+            openEditModal(type) {
+                this.$refs.TypesModal.open(type);
             },
             emitToast(message, color) {
                 this.$emit("toast", { message, color });
