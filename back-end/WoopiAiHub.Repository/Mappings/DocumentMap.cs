@@ -6,6 +6,9 @@ namespace WoopiAiHub.Repository.Mappings
 {
     public class DocumentMap : IEntityTypeConfiguration<Document>
     {
+        private const string TeamIdColumn = "TeamId";
+        private const string DocumentIdColumn = "DocumentId";
+
         public void Configure(EntityTypeBuilder<Document> builder)
         {
             builder.ToTable("Documents");
@@ -40,6 +43,20 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasOne(u => u.DocumentNormalized)
                     .WithOne(s => s.Document)
                     .HasForeignKey<DocumentNormalized>(c => c.IdDocument);
+
+            builder.HasMany(p => p.Teams)
+                   .WithMany(pr => pr.Documents)
+                   .UsingEntity<Dictionary<string, object>>(
+                       "DocumentTeams",
+                       r => r.HasOne<Team>().WithMany().HasForeignKey(TeamIdColumn),
+                       l => l.HasOne<Document>().WithMany().HasForeignKey(DocumentIdColumn),
+                       je =>
+                       {
+                           je.HasKey(TeamIdColumn, DocumentIdColumn);
+                           je.ToTable("DocumentTeams");
+                           je.Property<int>(DocumentIdColumn).HasColumnName(DocumentIdColumn);
+                           je.Property<int>(TeamIdColumn).HasColumnName(TeamIdColumn);
+                       });
         }
     }
 }
