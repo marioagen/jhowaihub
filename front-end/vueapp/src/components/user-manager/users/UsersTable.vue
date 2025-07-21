@@ -85,10 +85,10 @@
 </template>
 <script>
     import UserService from "@/services/users/UserService";
-    import ConfirmModal from "@/components/core/ConfirmModal.vue";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ModalUser from "@/components/user-manager/users/modals/UserModal.vue";
-    import BadgeOutlinedComponent from "@/components/core/BadgeOutlinedComponent.vue";
+    import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent.vue";
 
     export default {
         name: "UsersTable",

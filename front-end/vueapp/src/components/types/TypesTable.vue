@@ -52,7 +52,7 @@
     import TableComponent from "@/components/global/TableComponent.vue";
     import ModalForm from "@/components/pages/type/modal-form";
     import ModalAlert from "@/components/common/modal-alert";
-    import ConfirmModal from "@/components/core/ConfirmModal.vue";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
 
     export default {
         name: "TypesTable",
