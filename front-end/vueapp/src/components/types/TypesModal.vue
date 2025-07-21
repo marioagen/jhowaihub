@@ -7,7 +7,7 @@
     >
         <template #header>
             <div class="modal-header">
-                <h5 class="modal-title"> {{ titleText }} </h5>
+                <h5 class="modal-title"> {{ $t(titleText) }} </h5>
                 <button 
                     class="btn-close" 
                     data-bs-dismiss="modal" 
@@ -29,13 +29,13 @@
                     class="btn btn-secondary btn-sm" 
                     @click="close"
                 >
-                    Cancel
+                    {{ $t("labelCancel") }}
                 </button>
                 <button 
                     class="btn btn-primary btn-sm" 
                     @click="save"
                 >
-                    {{ saveText }}
+                    {{ $t(saveText) }}
                 </button>
             </div>
         </template>
