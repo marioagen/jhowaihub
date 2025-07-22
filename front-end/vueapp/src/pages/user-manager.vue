@@ -11,47 +11,18 @@
                         {{ $t("labelUserManagementDescription") }}
                     </p>
 
-                    <ul class="nav nav-pills nav-fill mt-3" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <a
-                                id="user-tab"
-                                class="nav-link rounded-pill btn-custom active"
-                                data-bs-toggle="tab"
-                                data-bs-target="#user"
-                                aria-controls="user"
-                                aria-selected="true"
-                                type="button"
-                                role="tab"
-                            >
-                                <LucideIcon icon="UsersRound" size="16" />
-                                {{ $t("labelUsers") }}
-                            </a>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <a
-                                id="team-tab"
-                                class="nav-link rounded-pill btn-custom"
-                                data-bs-toggle="tab"
-                                data-bs-target="#team"
-                                type="button"
-                                role="tab"
-                                aria-controls="profile"
-                                aria-selected="false"
-                            >
-                                <LucideIcon icon="Building" size="16" />
-                                {{ $t("labelTeams") }}
-                            </a>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content mt-3">
-                        <div class="tab-pane active" id="user" role="tabpanel" aria-labelledby="user-tab">
+                    <TabsComponent
+                        :tabs="tabsList"
+                        color="custom"
+                    >
+                        <template #users>
                             <UsersComponent />
-                        </div>
-                        <div class="tab-pane" id="team" role="tabpanel" aria-labelledby="team-tab">
+                        </template>
+
+                        <template #teams>
                             <TeamsComponent />
-                        </div>
-                    </div>
+                        </template>
+                    </TabsComponent>
                 </div>
             </div>
         </div>
@@ -59,45 +30,21 @@
 </template>
 
 <script>
+    import TabsComponent from "@/components/global/TabsComponent.vue";
     import TeamsComponent from "@/components/user-manager/teams/TeamsComponent.vue";
     import UsersComponent from "@/components/user-manager/users/UsersComponent.vue";
     export default {
         name: "UserIndex",
         components: {
+            TabsComponent,
             TeamsComponent,
             UsersComponent,
         },
+        data: () => ({
+            tabsList: [
+                { name: 'users', label: 'labelUsers', icon: 'UsersRound' },
+                { name: 'teams', label: 'labelTeams', icon: 'Building' }
+            ],
+        }),
     };
 </script>
-
-<style>
-    .nav-pills {
-        background-color: var(--muted);
-        border-radius: 50rem !important;
-    }
-    .nav-pills .nav-link.btn-custom {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.775rem;
-        font-weight: 500;
-        color: #323338;
-    }
-
-    .nav-pills .nav-link.btn-custom.active {
-        background-color: var(--color-card-content) !important;
-        color: #323338;
-    }
-    .scroll-area {
-        display: list-item;
-        overflow-y: auto;
-    }
-
-    .manage-user {
-        font-size: 0.775rem;
-        color: #323338;
-    }
-
-    .icon-pill {
-        vertical-align: text-bottom;
-        margin-right: 5px;
-    }
-</style>
