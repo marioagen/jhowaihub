@@ -10,8 +10,8 @@
                 <LucideIcon v-if="notification.icon" :icon="notification.icon" size="20" class="me-2" />
 
                 <div class="flex-grow-1">
-                    <strong v-if="notification.title">{{ notification.title }}:</strong>
-                    {{ notification.message }}
+                    <strong v-if="notification.title">{{ $t(notification.title) }}:</strong>
+                    {{ $t(notification.message) }}
                 </div>
 
                 <button
