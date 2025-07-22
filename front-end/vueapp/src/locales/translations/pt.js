@@ -135,7 +135,7 @@
     labelStandardizedFullText: "Texto integral normalizado",
     labelTypes: "Tipos",
     labelTextCopiedToClipboard: "Texto copiado para a área de transferência.",
-    labelThisActionCannotBeUndone: "Esta ação não poderá ser desfeita. <br/> Tem certeza que deseja <br/> removê-lo?",
+    labelThisActionCannotBeUndone: "Esta ação não poderá ser desfeita. Tem certeza que deseja removê-lo?",
     labelTypeNameOrId: "Nome, ID ou insira um novo tipo para cadastrar",
     labelTheFileMayBeCorrupt: "O Arquivo pode estar <br/> corrompido ou com erro. <br/> Por favor, tente novamente.",
     labelTheFileMayBeUnreadableOrHaveAnError:
