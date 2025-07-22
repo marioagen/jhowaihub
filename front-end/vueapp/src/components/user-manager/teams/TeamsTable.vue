@@ -63,7 +63,7 @@
     import TableComponent from "@/components/global/TableComponent.vue";
     import ModalTeam from "@/components/user-manager/teams/modals/TeamModal.vue";
     import TeamsService from "@/services/teams/TeamsService";
-    import ConfirmModal from "@/components/core/ConfirmModal.vue";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
 
     export default {
         name: "TeamsTable",

@@ -1,45 +1,49 @@
 <template>
-    <main class="scroll-area">
-        <div class="container-fluid mt-4 my-3">
-            <div class="custom-padding">
-                <div class="row">
-                    <breadcrumb :crumbs="crumbsData" />
-                </div>
-                <search-bar
-                    :entity="entitySearch"
-                    :resetInput="resetInputSearch"
-                    @search="filterList"
-                    @action="addType"
-                />
-
-                <div class="mb-2" style="height: 30px">
-                    <button
-                        type="button"
-                        class="btn delete-custom d-flex align-items-center"
-                        @click="confirmationDialog(item)"
-                        v-if="this.listIds.length > 0"
+    <main>
+        <div class="container-fluid scroll-area mx-2">
+            <div class="mt-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="mb-0 fw-bold">{{ $t("labelTypes") }}</h5>
+                        <p>
+                            <small class="text-muted">{{ $t("labelTypesMessage") }}</small>
+                        </p>
+                    </div>
+                    <button 
+                        class="btn btn-primary btn-sm" 
+                        @click="openModalType"
                     >
-                        <i class="fas fa-trash text-danger" style="font-size: 0.9em; margin-right: 8px"></i>
-                        {{ $t("labelDelete") }}
+                        <LucideIcon icon="Plus" size="17" />
+                        {{ $t("labelNewType") }}
                     </button>
                 </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <SearchComponent 
+                            :entity="entitySearch" 
+                            :resetInput="resetInputSearch" 
+                            @search="filterList" 
+                        />
+                    </div>
+                </div>
+
                 <TypesTable ref="TypesTable" @toast="handleToast" />
             </div>
-        </div>
-    </main>
-    <modal-form v-if="modalAlertShow" :dataEditing="dataModal" @openAdd="addType" @close="closeModal" />
 
-    <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
+            <TypesModal
+                :isEdit="false"
+                :type="modalType"
+                @reload="$refs.TypesTable.getTypes()"
+                ref="TypesModal"
+            />
+        </div>
+    </main>    
 </template>
 
 <script>
-    import Breadcrumb from "@/components/common/breadcrumb";
-    import SearchBar from "@/components/common/search-bar";
-    import ModalForm from "@/components/pages/type/modal-form";
-    import ToastAlert from "@/components/common/toast-alert";
-    import paginationDivider from "@/utils/paginationDivider";
     import TypesTable from "@/components/types/TypesTable.vue";
-    import TypesService from "@/services/types/TypesService";
+    import SearchComponent from "@/components/global/SearchComponent.vue";
+    import TypesModal from "@/components/types/TypesModal.vue";
 
     export default {
         name: "TypeManager",
@@ -49,50 +53,23 @@
                 crumbsData: [],
                 entitySearch: {},
                 resetInputSearch: false,
-                sidebarData: "Type",
-                queryPage: this.$route.query.page ? this.$route.query.page : 1,
-                searchInput: "",
-                searching: false,
-                dataType: [],
-                loading: false,
-                pagination: { currentPage: 0, pageCount: 0, rowCount: 0, listPage: 0 },
-                modalAlertShow: false,
-                modalEntity: {},
-                isAscending: false,
-                dataModal: {},
-                colType: 2,
-                selectedOption: 10,
-                toastShow: false,
-                toastColor: "",
-                toastMessage: "",
-                divider: new paginationDivider(),
-                listIds: [],
+                modalType: {
+                    name: "",
+                }
             };
         },
         components: {
-            Breadcrumb,
-            SearchBar,
-            ModalForm,
-            ToastAlert,
+            SearchComponent,
             TypesTable,
+            TypesModal,
         },
         watch: {
-            searchInput: function (val) {
-                this.searching = false;
-            },
             "$store.state.userProfile.language": function () {
-                this.setCrumbsData();
                 this.setEntitySearch();
             },
         },
         methods: {
-            setCrumbsData: function () {
-                this.crumbsData = [
-                    { crumb: this.$t("labelManage"), link: { to: "Type" } },
-                    { crumb: this.$t("labelTypes"), link: { to: "Type" } },
-                ];
-            },
-            setEntitySearch: function () {
+            setEntitySearch () {
                 this.entitySearch = {
                     screen: "type",
                     labelInput: this.$t("labelSearchTypes"),
@@ -103,77 +80,13 @@
             filterList(obj) {
                 this.$refs.TypesTable.filterList(obj.search);
             },
-            addType: function (name) {
-                const self = this;
-                TypesService.addType(name)
-                    .then((result) => {
-                        if (!result.success) {
-                            const messageKey =
-                                result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
-
-                            this.alertToast(this.$t(messageKey), "toast-warning");
-                        } else {
-                            self.$refs.TypesTable.getTypes({ search: "", page: self.queryPage, type: null });
-                            self.resetInputSearch = !self.resetInputSearch;
-                            self.alertToast(self.$t("labelDocumentTypeSuccess"), "toast-success");
-                        }
-                    })
-                    .finally(() => {
-                        console.log("Finished request.");
-                    });
-            },
-            confirmationDialog: function (item) {
-                this.modalEntity = item;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            openModal: function (data = null) {
-                this.modalAlertShow = true;
-                if (data) this.dataModal = data;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal: function () {
-                this.modalAlertShow = false;
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            upperFormat: function (str) {
-                return str.toUpperCase();
-            },
-            alertToast(msg, color) {
-                this.clearMyInterval();
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-
-                this.myInterval = setTimeout(() => {
-                    this.toastMessage = "";
-                    this.toastColor = "";
-                    this.toastShow = false;
-                    this.myInterval = null;
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval() {
-                if (this.myInterval) {
-                    clearTimeout(this.myInterval);
-                    this.myInterval = null;
-                }
-            },
-            handleToast({ message, color }) {
-                this.alertToast(message, color);
+            openModalType() {
+                this.$refs.TypesModal.open();
             },
         },
-        computed: {},
         created() {
-            this.setCrumbsData();
             this.setEntitySearch();
         },
-        mounted() {},
-        unmounted() {},
     };
 </script>
 

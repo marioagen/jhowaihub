@@ -26,29 +26,16 @@
             </div>
         </div>
 
-        <template v-if="entity.screen !== 'user' && entity.screen !== 'team'">
-            <div v-if="entity.screen != 'document'" class="col-auto content-center">
-                <div class="mb-2">
-                    <a
-                        v-if="searchInput.length >= 3"
-                        class="btn btn-primary"
-                        :title="entity.labelButton"
-                        @click="action"
-                    >
-                        {{ upperFormat(entity.labelButton) }}
-                    </a>
-                    <a v-else class="btn btn-secondary" :title="$t('labelNotAllowed')">
-                        {{ upperFormat(entity.labelButton) }}
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-auto content-center" v-else>
-                <div class="mb-2">
-                    <a class="btn btn-primary" :title="$t('labelNewDocument')" @click="action">
-                        {{ $t("labelNewDocument") }}
-                    </a>
-                </div>
+        <template>
+            <div class="mb-2 col-auto content-center">
+                <a
+                    v-if="searchInput.length >= 3"
+                    class="btn btn-primary"
+                    :title="entity.labelButton"
+                    @click="action"
+                >
+                    {{ upperFormat(entity.labelButton) }}
+                </a>
             </div>
         </template>
     </div>
