@@ -1,5 +1,6 @@
 ﻿<template>
     <component :is="layout === 'auth' ? AuthLayout : DefaultLayout" />
+    <NotificationComponent />
 </template>
 
 <script setup>
