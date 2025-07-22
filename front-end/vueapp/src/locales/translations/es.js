@@ -137,7 +137,7 @@
     labelTypes: "Tipos",
     labelTextCopiedToClipboard: "Texto copiado al portapapeles.",
     labelThisActionCannotBeUndone:
-        "Esta acción no se puede deshacer. <br/> ¿Está seguro de que desea <br/> eliminarlo?",
+        "Esta acción no se puede deshacer. ¿Está seguro de que desea eliminarlo?",
     labelTypeNameOrId: "Nombre, ID o introduce un nuevo tipo para registrarte",
     labelTheFileMayBeCorrupt:
         "El archivo puede estar <br/> corrupto o tener un error. <br/> Por favor, inténtelo de nuevo.",

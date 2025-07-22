@@ -137,7 +137,7 @@
     labelStandardizedFullText: "Standardized full text",
     labelTypes: "Types",
     labelTextCopiedToClipboard: "Text copied to clipboard.",
-    labelThisActionCannotBeUndone: "This action cannot be undone. <br/> Are you sure you want to <br/> remove it?",
+    labelThisActionCannotBeUndone: "This action cannot be undone. Are you sure you want to remove it?",
     labelTypeNameOrId: "Name, ID or enter a new type to register",
     labelTheFileMayBeCorrupt: "The file may be <br/> corrupt or have an error. <br/> Please try again.",
     labelTheFileMayBeUnreadableOrHaveAnError:
