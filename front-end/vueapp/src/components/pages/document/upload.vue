@@ -80,32 +80,27 @@
                                 </div>
 
                                 <div class="mb-3 team-selector-container rounded p-3"
-                                    :class="{ 'is-invalid': hasError, 'is-valid': !hasError }"
-                                    style="min-height: 150px;">
-                                    <!-- Título e número de selecionados na mesma linha -->
+                                    :class="{ 'is-invalid': hasError, 'is-valid': !hasError }">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <div class="d-flex align-items-center mb-1">
-                                            <LucideIcon icon="Building"
-                                                :style="{ color: '#155dfc', width: '20px', height: '20px' }" />
-                                            <label class="form-label mb-0 ms-2">{{ $t("labelTeamsTitleDocuments") }}</label>
+                                            <LucideIcon icon="Building" class="building-icon" />
+                                            <label class="form-label mb-0 ms-2">{{ $t("labelTeamsTitleDocuments")
+                                            }}</label>
                                         </div>
                                         <span class="selected-count">
                                             {{ selectedTeams.length }} {{ $t("labelSelectedWithO") }}
                                         </span>
                                     </div>
 
-                                    <!-- Subtítulo abaixo do título -->
                                     <div class="text-muted small mb-3">
                                         {{ $t("labelTeamsSubtextDocuments") }}
                                     </div>
 
-                                    <!-- Mensagem de campo obrigatório (aparece só se erro) -->
                                     <div v-if="hasError" class="text-danger small mb-3 d-flex align-items-center gap-1">
                                         <span class="text-danger">*</span>
                                         <span>{{ $t("labelRequiredField") }}</span>
                                     </div>
 
-                                    <!-- Campo de busca -->
                                     <div class="mb-3 p-2 rounded">
                                         <div class="input-group">
                                             <span class="input-group-text"><i
@@ -115,10 +110,10 @@
                                         </div>
                                     </div>
 
-                                    <!-- Botões -->
                                     <div class="mb-3 d-flex gap-2 p-2 rounded">
-                                        <button type="button" class="btn btn-custom-light btn-sm" @click="selectAll($event)">
-                                            <LucideIcon icon="Check" class="me-1" /> <!-- exemplo: ícone de check -->
+                                        <button type="button" class="btn btn-custom-light btn-sm"
+                                            @click="selectAll($event)">
+                                            <LucideIcon icon="Check" class="me-1" />
                                             {{ $t("labelSelectAll") }}
                                         </button>
                                         <button type="button" class="btn btn-custom-light btn-sm"
@@ -128,15 +123,13 @@
                                         </button>
                                     </div>
 
-                                    <!-- Lista de times -->
-                                    <div class="border rounded p-1 user-list scrollable-list bg-white">
+                                    <div class="border rounded user-list scrollable-list bg-white">
                                         <div v-if="loading" class="text-center">
                                             <div class="spinner-border text-primary" role="status">
                                                 <span class="visually-hidden">{{ $t("labelLoading") }}</span>
                                             </div>
                                         </div>
 
-                                        <!-- Mensagem de nenhum time encontrado -->
                                         <div v-else-if="filteredUsers.length === 0" class="text-center text-muted py-3">
                                             {{ $t("labelNoTeamsFound") }}
                                         </div>
@@ -153,13 +146,11 @@
                                         </div>
                                     </div>
 
-                                    <!-- Times selecionados - só aparece se tiver algo -->
                                     <div v-if="selectedTeams.length > 0" class="mt-3">
                                         <label class="form-label">{{ $t("labelSelectedTeamsTitle") }}</label>
                                         <div class="d-flex flex-wrap gap-2">
                                             <div v-for="id in selectedTeams" :key="id"
                                                 class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-team-chip">
-                                                <!-- Ícone Lucide -->
                                                 <LucideIcon icon="Building" class="me-1" />
                                                 <span class="me-1">{{ getTeamName(id) }}</span>
                                             </div>
@@ -529,6 +520,7 @@ export default {
     border: 1.5px solid #bedbff;
     border-radius: 0.375rem;
     transition: border-color 0.3s ease;
+    min-height: 150px;
 }
 
 .team-selector-container.is-invalid {
@@ -554,17 +546,10 @@ export default {
     overflow-y: auto;
 }
 
-.main-scroll {
-    height: 100vh;
-    overflow-y: auto;
-}
-
-.box-upload-form {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 24px;
-    overflow: hidden;
+.building-icon {
+    color: #155dfc;
+    width: 20px;
+    height: 20px;
 }
 
 .btn-custom-light {
