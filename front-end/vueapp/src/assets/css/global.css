@@ -870,3 +870,11 @@ dropzone .dz-preview .dz-details {
     line-height: var(--tw-leading, var(--text-sm--line-height));
     font-weight: normal;
 }
+
+.validation-message {
+    color: #dc3545;
+    font-size: 0.70rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+    display: block;
+}
