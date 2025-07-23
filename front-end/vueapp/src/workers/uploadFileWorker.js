@@ -5,7 +5,6 @@ let isUploading = false;
 // Receives the upload component event to start uploading in the background
 addEventListener("message", (event) => {
     const fileData = event.data.message;
-    console.log(event.data.message);
     chunkQueue.push(fileData);
     self.postMessage({ type: "uploadStarted", success: true, namesFiles: fileData.message.additionalData.filesNames });
     processQueue();
@@ -13,7 +12,6 @@ addEventListener("message", (event) => {
 
 // Processes the chunks in the queue
 async function processQueue() {
-    console.log("processQueue");
     if (isUploading || chunkQueue.length === 0) {
         return;
     }

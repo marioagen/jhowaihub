@@ -59,7 +59,7 @@
     labelFailedNoResponse: "Falló, no hay respuesta del servidor.",
     labelFailedToLoadHistory: "No se pudo cargar el historial.",
     labelFailedToApplyQuestionnaire: "No se pudo aplicar el cuestionario.",
-    labelGeneralInformation: "Informaciones generales",
+    labelGeneralInformation: "Cargar documento",
     labelGoHome: "Ir a home",
     labelHistoric: "Registro de respuestas",
     labelInclusionDate: "Fecha de inclusión",
@@ -220,6 +220,13 @@
     labelSaveTitleType: "Creación de tipo",
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
+    labelBackToListDocuments: "Volver a los documentos",
+    pageTitleDocumentsForm: "Nuevo documento",
+    pageSubtitleDocumentsForm: "Cargar nuevos documentos para su análisis",
+    labelTeamsTitleDocuments: "Asociarse con equipos",
+    labelTeamsSubtextDocuments: "Seleccione al menos un equipo para asociarlo al documento.",
+    labelNoTeamsFound: "Ningún equipo vinculado a su usuario",
+    labelSelectedTeamsTitle: "Selected teams",
 };
 
 export default spanish;

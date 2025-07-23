@@ -79,11 +79,6 @@
                                     </div>
                                 </div>
 
-
-
-
-
-
                                 <div class="mb-3 team-selector-container rounded p-3"
                                     :class="{ 'is-invalid': hasError, 'is-valid': !hasError }"
                                     style="min-height: 150px;">
@@ -92,7 +87,7 @@
                                         <div class="d-flex align-items-center mb-1">
                                             <LucideIcon icon="Building"
                                                 :style="{ color: '#155dfc', width: '20px', height: '20px' }" />
-                                            <label class="form-label mb-0 ms-2">{{ $t("labelTeams") }}</label>
+                                            <label class="form-label mb-0 ms-2">{{ $t("labelTeamsTitleDocuments") }}</label>
                                         </div>
                                         <span class="selected-count">
                                             {{ selectedTeams.length }} {{ $t("labelSelectedWithO") }}
@@ -101,13 +96,13 @@
 
                                     <!-- Subtítulo abaixo do título -->
                                     <div class="text-muted small mb-3">
-                                        {{ $t("labelTeamsSubtext") }}
+                                        {{ $t("labelTeamsSubtextDocuments") }}
                                     </div>
 
                                     <!-- Mensagem de campo obrigatório (aparece só se erro) -->
                                     <div v-if="hasError" class="text-danger small mb-3 d-flex align-items-center gap-1">
                                         <span class="text-danger">*</span>
-                                        <span>{{ $t("labelFieldRequired") }}</span>
+                                        <span>{{ $t("labelRequiredField") }}</span>
                                     </div>
 
                                     <!-- Campo de busca -->
@@ -171,11 +166,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-
-
-
-
 
                                 <button type="submit" class="btn btn-primary m-2" :title="$t('labelSend')"
                                     v-if="form.description.length > 250" disabled style="float: right">
@@ -538,17 +528,13 @@ export default {
     background-color: #eff6ff;
     border: 1.5px solid #bedbff;
     border-radius: 0.375rem;
-    /* arredondamento suave */
     transition: border-color 0.3s ease;
 }
 
-/* Quando tiver erro (nenhum selecionado) borda vermelha */
 .team-selector-container.is-invalid {
     border-color: #dc3545 !important;
-    /* vermelho */
 }
 
-/* Quando estiver válido (pelo menos um selecionado) */
 .team-selector-container.is-valid {
     border-color: #bedbff;
 }
@@ -560,7 +546,6 @@ export default {
     border-radius: 12px;
     font-weight: 600;
     font-size: 0.875rem;
-    /* um pouco menor que o padrão */
     user-select: none;
 }
 
@@ -580,19 +565,12 @@ export default {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     padding: 24px;
     overflow: hidden;
-    /* evita elementos vazarem pra fora */
 }
 
-
-
-
-/* Botões com fundo #f8f9fb, borda e texto padrão */
 .btn-custom-light {
     background-color: #f8f9fb !important;
     border-color: #ced4da !important;
-    /* cor padrão da borda do btn-outline */
     color: #212529 !important;
-    /* texto escuro padrão bootstrap */
     transition: background-color 0.2s ease;
 }
 

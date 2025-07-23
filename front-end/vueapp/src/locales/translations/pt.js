@@ -59,7 +59,7 @@
     labelFailedNoResponse: "Falha, sem resposta do servidor.",
     labelFailedToLoadHistory: "Falha ao carregar histórico.",
     labelFailedToApplyQuestionnaire: "Falha ao aplicar questionário.",
-    labelGeneralInformation: "Informações Gerais",
+    labelGeneralInformation: "Carregar Documento",
     labelGoHome: "Ir para Home",
     labelHistoric: "Registro de respostas",
     labelInclusionDate: "Data de inclusão",
@@ -215,6 +215,13 @@
     labelSaveTitleType: "Criação de tipo",
     labelEditType: "Editar tipo",
     labelSaveType: "Criar tipo",
+    labelBackToListDocuments: "Voltar para documentos",
+    pageTitleDocumentsForm: "Novo Documento",
+    pageSubtitleDocumentsForm: "Faça upload de novos documentos para análise",
+    labelTeamsTitleDocuments: "Associar a times",
+    labelTeamsSubtextDocuments: "Selecione pelo menos um time para associar ao documento.",
+    labelNoTeamsFound: "Nenhum time vinculado ao seu usuário",
+    labelSelectedTeamsTitle: "Times selecionados",
 };
 
 export default portuguese;
