@@ -50,6 +50,7 @@
         components: {
             ModalComponent
         },
+        emits: ['reload'],
         props: {
             isEdit: {
                 type: Boolean,
@@ -98,14 +99,24 @@
                 TypesService.addType(this.typeData.name)
                     .then((result) => {
                         if (result.success) {
-                            this.alertToast(this.$t("labelDocumentTypeSuccess"), "toast-success");
-                            this.close();
+                            this.$notify({
+                                title: 'Tipos',
+                                message: this.$t("labelDocumentTypeSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                             this.resetData();
-                            this.$emit("reload");
+                            this.$emit('reload');
+                            this.close();
                             return;
                         } 
                         const messageKey = result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
-                        this.alertToast(this.$t(messageKey), "toast-warning");
+                        this.$notify({
+                            title: 'Tipos',
+                            message: this.$t(messageKey),
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
                     })
                     .finally(() => {
                         this.isLoading = false;
@@ -117,41 +128,27 @@
                 TypesService.editType(this.typeData)
                     .then((result) => {
                         if (result.success) {
-                            this.alertToast(this.$t("labelDocumentTypeEditSuccess"), "toast-success");
                             this.close();
                             this.$emit("reload");
-                            return;
+                            return this.$notify({
+                                title: 'Tipos',
+                                message: this.$t("labelDocumentTypeEditSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                         }
 
                         const messageKey = result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
-                        this.alertToast(this.$t(messageKey), "toast-warning");
+                        this.$notify({
+                            title: 'Tipos',
+                            message: this.$t(messageKey),
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
                     })
                     .finally(() => {
                         this.isLoading = false;
                     });
-            },
-            alertToast(msg, color) {
-                this.clearMyInterval();
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-
-                this.myInterval = setTimeout(() => {
-                    this.toastMessage = "";
-                    this.toastColor = "";
-                    this.toastShow = false;
-                    this.myInterval = null;
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval() {
-                if (this.myInterval) {
-                    clearTimeout(this.myInterval);
-                    this.myInterval = null;
-                }
             },
         }
     }
