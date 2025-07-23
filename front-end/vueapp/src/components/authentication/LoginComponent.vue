@@ -146,15 +146,25 @@
                         </div>
 
                         <div class="mb-3">
-                            <button v-if="!loading" @click="login" type="submit" class="btn btn-primary w-100">
-                                <i class="fab fa-windows"></i>
+                            <button 
+                                v-if="!loading" 
+                                type="submit" 
+                                class="btn btn-outline-primary w-100"
+                                @click="login" 
+                            >
+                                <img
+                                    src="../../assets/img/microsoft-log.svg"
+                                    width="30"
+                                    height="15"
+                                />
                                 Login com Microsoft
                             </button>
-
-                            <a class="btn btn-primary w-100" v-else>
+                            
+                            <a class="btn btn-outline-primary w-100" v-else>
                                 <i class="fas fa-spinner fa-pulse"></i>
                                 Login com Microsoft
                             </a>
+
                         </div>
                     </div>
                 </div>
