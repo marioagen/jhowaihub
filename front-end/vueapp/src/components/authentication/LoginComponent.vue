@@ -36,50 +36,65 @@
                     <div class="card-body">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <div class="input-group">
-                                <span class="input-group-text border-end-0 bg-white">
-                                    <LucideIcon icon="Mail" size="16" />
-                                </span>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="text"
-                                    class="form-control form-control-sm border-start-0"
-                                    placeholder="user@mail.com"
-                                    v-model="credentials.email"
-                                />
-                            </div>
+                            <Field
+                                name="email"
+                                rules="required|custom_email"
+                                v-slot="{ field, errorMessage }"
+                            >
+                                <div class="input-group">
+                                    <span class="input-group-text border-end-0 bg-white">
+                                        <LucideIcon icon="Mail" size="16" />
+                                    </span>
+                                    <input
+                                        v-bind="field"
+                                        type="text"
+                                        id="email"
+                                        class="form-control form-control-sm border-start-0"
+                                        :class="{ 'is-invalid': errorMessage }"
+                                        placeholder="user@mail.com"
+                                    />
+                                </div>
+                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
+                            </Field>
                         </div>
 
                         <div class="mb-3">
                             <label for="password" class="form-label">Senha</label>
-                            <div class="input-group">
-                                <span class="input-group-text border-end-0 bg-white">
-                                    <LucideIcon icon="Lock" size="16" />
-                                </span>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    placeholder="******"
-                                    class="form-control form-control-sm border-start-0 border-end-0"
-                                    :type="showPassword ? 'text' : 'password'"
-                                    v-model="credentials.password"                               
-                                />
-                                <span class="input-group-text border-start-0 bg-white">
-                                    <LucideIcon
-                                        v-if="showPassword"
-                                        icon="Eye" 
-                                        size="16"
-                                        @click="togglePassword"
+                            <Field
+                                name="password"
+                                rules="required|custom_password"
+                                v-slot="{ field, errorMessage }"
+                            >
+                                <div class="input-group">                                
+                                    <span class="input-group-text border-end-0 bg-white">
+                                        <LucideIcon icon="Lock" size="16" />
+                                    </span>
+                                    <input
+                                        v-bind="field"
+                                        id="password"
+                                        name="password"
+                                        placeholder="******"
+                                        class="form-control form-control-sm border-start-0 border-end-0"
+                                        :type="showPassword ? 'text' : 'password'"                            
+                                        :class="{ 'is-invalid': errorMessage }"
                                     />
-                                    <LucideIcon 
-                                        v-else
-                                        icon="EyeClosed" 
-                                        size="16"
-                                        @click="togglePassword"
-                                    />
-                                </span>
-                            </div>
+                                    <span class="input-group-text border-start-0 bg-white">
+                                        <LucideIcon
+                                            v-if="showPassword"
+                                            icon="Eye" 
+                                            size="16"
+                                            @click="togglePassword"
+                                        />
+                                        <LucideIcon 
+                                            v-else
+                                            icon="EyeClosed" 
+                                            size="16"
+                                            @click="togglePassword"
+                                        />
+                                    </span>
+                                </div>
+                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
+                            </Field>
                         </div>
 
                         <div class="mb-3">
@@ -140,11 +155,22 @@
 </template>
 
 <script>
+    import { Field, useForm } from "vee-validate";
     import { useRouter } from "vue-router";
     import AuthService from "@/services/authenticate/AuthService";
 
     export default {
         name: "LoginIndex",
+        components: {
+            Field
+        },
+        setup() {
+            const { validate, values } = useForm();
+            return {
+                validate,
+                values
+            }
+        },
         data() {
             return {
                 isLoading: false,
@@ -154,20 +180,40 @@
                 credentials: {
                     email: "",
                     password: ""
-                }
+                },
             };
         },
         methods: {
-            login() {
+            async login() {
+               const result = await this.validate();
+                console.log(result);
+                if (!result.valid) {
+                    return this.$notify({
+                        title: 'Login',
+                        message: 'Campo inválidos',
+                        variant: 'warning',
+                        icon: 'CircleAlert',
+                    });
+                }
+
                 this.isLoading = true;
-                console.log(this.credentials)
-                AuthService.Login(this.credentials)
-                    .then((response) => {
-                        console.log(response)
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    })
+                console.log(this.credentials);
+                console.log(this.values.email);
+                console.log(this.values.password);
+                this.$notify({
+                    title: 'Login',
+                    message: 'Request to Login',
+                    variant: 'info',
+                    icon: 'MessageCircle',
+                });
+                this.isLoading = false;
+                // AuthService.Login(this.credentials)
+                //     .then((response) => {
+                //         console.log(response)
+                //     })
+                //     .finally(() => {
+                //         this.isLoading = false;
+                //     })
             },
             loginSSO() {
                 this.isLoadingSSO = true;
@@ -293,5 +339,9 @@
         align-items: center;
         display: flex;
         width: min-content;
+    }
+
+    .is-invalid {
+        border-color: red;
     }
 </style>
