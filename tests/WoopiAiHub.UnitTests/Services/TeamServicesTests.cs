@@ -286,14 +286,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var pagedData = new PagedDataDto { Page = 2, PageSize = 2, IsAscending = false };
-            var teamDtos = new List<TeamDto>
+            var teams = new List<TeamDto>
             {
                 _fixture.CreateValidTeamDto(),
                 _fixture.CreateValidTeamDto(),
                 _fixture.CreateValidTeamDto()
             }.AsQueryable();
 
-            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teamDtos);
+            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teams);
 
             // Act
             var result = _service.FindAllPaged(pagedData);
@@ -345,14 +345,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var pagedData = new PagedDataDto { Page = 1, PageSize = 0, IsAscending = true };
-            var teamDtos = new List<TeamDto>
+            var teams = new List<TeamDto>
             {
                 _fixture.CreateValidTeamDto(),
                 _fixture.CreateValidTeamDto(),
                 _fixture.CreateValidTeamDto()
             }.AsQueryable();
 
-            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teamDtos);
+            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teams);
 
             // Act
             var result = _service.FindAllPaged(pagedData);
