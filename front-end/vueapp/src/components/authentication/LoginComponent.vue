@@ -1,40 +1,3 @@
-<!-- <template>
-    <main class="flex-shrink-0">
-        <div class="container" style="padding: 0">
-            <div class="row">
-                <div class="col-auto ">
-                    <form @submit="login" style="text-align: center">
-                        <img
-                            v-if="showLogoDarkMode"
-                            src="../assets/img/woopiai-hub-logo.png"
-                            style="padding-bottom: 10px"
-                            width="160"
-                            height="80"
-                        />
-
-                        <img
-                            v-else
-                            src="../assets/img/woopiai-hub-logo.png"
-                            style="padding-bottom: 10px"
-                            width="160"
-                            height="61"
-                        />
-
-                        <button v-if="!loading" type="submit" class="btn btn-primary">
-                            <i class="fab fa-windows"></i>
-                            Microsoft Login
-                        </button>
-
-                        <a class="btn btn-primary" v-else>
-                            <i class="fas fa-spinner fa-pulse"></i>
-                            Microsoft Login
-                        </a>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </main>
-</template> -->
 <template>
     <main class="d-flex justify-content-center align-items-center min-vh-100">
         <div class="container" style="padding: 0">
@@ -83,6 +46,7 @@
                                     type="text"
                                     class="form-control form-control-sm border-start-0"
                                     placeholder="user@mail.com"
+                                    v-model="credentials.email"
                                 />
                             </div>
                         </div>
@@ -98,7 +62,8 @@
                                     name="password"
                                     placeholder="******"
                                     class="form-control form-control-sm border-start-0 border-end-0"
-                                    :type="showPassword ? 'text' : 'password'"                                    
+                                    :type="showPassword ? 'text' : 'password'"
+                                    v-model="credentials.password"                               
                                 />
                                 <span class="input-group-text border-start-0 bg-white">
                                     <LucideIcon
@@ -129,6 +94,7 @@
                                 v-else
                                 type="button" 
                                 class="btn btn-primary btn-sm w-100"
+                                @click="login"
                             >
                                 <LucideIcon 
                                     icon="LogIn"
@@ -147,10 +113,10 @@
 
                         <div class="mb-3">
                             <button 
-                                v-if="!loading" 
+                                v-if="!isLoadingSSO" 
                                 type="submit" 
                                 class="btn btn-outline-primary w-100"
-                                @click="login" 
+                                @click="loginSSO" 
                             >
                                 <img
                                     src="../../assets/img/microsoft-log.svg"
@@ -175,20 +141,50 @@
 
 <script>
     import { useRouter } from "vue-router";
-    import api from "@/services/api";
+    import AuthService from "@/services/authenticate/AuthService";
 
     export default {
         name: "LoginIndex",
         data() {
             return {
-                loading: false,
                 isLoading: false,
-                isLoadingMicrosoft: false,
+                isLoadingSSO: false,
                 showLogoDarkMode: false,
                 showPassword: false,
+                credentials: {
+                    email: "",
+                    password: ""
+                }
             };
         },
         methods: {
+            login() {
+                this.isLoading = true;
+                console.log(this.credentials)
+                AuthService.Login(this.credentials)
+                    .then((response) => {
+                        console.log(response)
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    })
+            },
+            loginSSO() {
+                this.isLoadingSSO = true;
+                AuthService.GetClientId()
+                    .then((response) => {
+                        if(response.error !== undefined) {
+                            this.isLoadingSSO = false;
+                            return this.$notify({
+                                title: 'Error',
+                                message: 'Usuário sem autorização para acessar a plataforma!\nPor favor, entre em contato com suporte@woopi.com.br solicitando acesso ao seu usuário.',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        this.microsoftLogin(response);
+                    });
+            },
             microsoftLogin(clientIdResponse) {
                 const msalConfig = {
                     auth: {
@@ -202,11 +198,14 @@
                 };
 
                 const MSALobj = new msal.PublicClientApplication(msalConfig);
-
                 MSALobj.handleRedirectPromise()
-                    .then((response) => {})
                     .catch((error) => {
-                        console.log(error);
+                        this.$notify({
+                            title: 'Error',
+                            message: error,
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
                     });
 
                 const loginRequest = {
@@ -226,64 +225,41 @@
                             keyMongoAccess: "",
                         };
                         this.$store.commit("updateUserProfile", { amount: dataUser });
-                        this.redirectToDocument(response.account.name, response.account.username, response.accessToken);
+                        this.authenticateUser(response.account.name, response.account.username, response.accessToken);
                     })
                     .catch((error) => {
-                        console.log(error);
-                        this.loading = false;
+                        this.$notify({
+                            title: 'Error',
+                            message: error,
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                        this.isLoadingSSO = false;
                     });
             },
-            login(e) {
-                e.preventDefault();
-                this.loading = true;
-                let clientIdResponse = "";
-                api.get("/Account/clientId")
-                    .then((response) => {
-                        this.microsoftLogin(response.data);
-                    })
-                    .catch((e) => {
-                        console.log(e);
-                        this.loading = false;
-                        alert(
-                            "Usuário sem autorização para acessar a plataforma!\nPor favor, entre em contato com suporte@woopi.com.br solicitando acesso ao seu usuário."
-                        );
-                    })
-                    .finally(() => {
-                        console.log("Finished request.");
-                    });
-            },
-            redirectToDocument(userName, userEmail, userAzure) {
+            authenticateUser(userName, userEmail, userAzure) {
                 var formData = new FormData();
                 formData.append("login", userEmail);
 
-                api.post("/Account/Authenticate", formData, {
-                    headers: { Authorization: `Bearer ${userAzure}` },
-                })
+                AuthService.AuthenticateUser(formData, userAzure)
                     .then((response) => {
-                        var dataUser = {
+                        let dataUser = {
                             language: this.$store.state.userProfile.language,
                             image: "",
                             name: userName,
                             login: userEmail,
                             tokenAzure: userAzure,
-                            tokenApi: response.data.token,
-                            tenant: response.data.tenant,
+                            tokenApi: response.token,
+                            tenant: response.tenant,
                             keyMongoAccess: "",
                         };
                         this.$store.commit("updateUserProfile", { amount: dataUser });
                         window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
-                        this.$router.push({ name: "DocumentList" });
-                    })
-                    .catch((e) => {
-                        console.log(e);
-                        this.loading = false;
-                        alert(
-                            "Usuário sem autorização para acessar a plataforma!\nPor favor, entre em contato com suporte@woopi.com.br solicitando acesso ao seu usuário."
-                        );
-                    })
-                    .finally(() => {
-                        console.log("Finished request.");
+                        this.redirectToDocument();
                     });
+            },
+            redirectToDocument() {
+                this.$router.push({ name: "DocumentList" });
             },
             checkTheme() {
                 const element = document.querySelector("html");

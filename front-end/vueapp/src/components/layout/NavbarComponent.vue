@@ -309,9 +309,6 @@
                 .catch(function (e) {
                     console.log(e);
                 })
-                .finally(function () {
-                    console.log("Finished request.");
-                });
             self.selectedTenant = savedTenant;
             if (!self.tenantInitialized) {
                 self.InitializeTenant(self.selectedTenant);
