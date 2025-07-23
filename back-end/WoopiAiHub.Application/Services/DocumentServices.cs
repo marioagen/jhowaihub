@@ -465,7 +465,7 @@ namespace WoopiAiHub.Application.Services
                                         requestCreateDocumentDto.Filename,
                                         requestCreateDocumentDto.Filename);
 
-            var referenceFile = await this.UploadFileToRepositoryApi(formFile, 
+            var referenceFile = await this.UploadFileToRepositoryApi(formFile,
                                                                      tenant);
             var documentForDataBase = this.CreateDocumentForDb(requestCreateDocumentDto,
                                                                referenceFile);
