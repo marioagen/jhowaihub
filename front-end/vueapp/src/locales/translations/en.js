@@ -216,6 +216,15 @@
     labelSaveTitleType: "Create type",
     labelEditType: "Edit",
     labelSaveType: "Create",
+    "validation": {
+      "required": "This field is required.",
+      "email": "Please enter a valid email address.",
+      "min": "Minimum of {length} characters.",
+      "max": "Maximum of {length} characters.",
+      "password_min": "Password must be at least 6 characters.",
+      "password_uppercase": "Password must contain at least one uppercase letter.",
+      "password_number": "Password must contain at least one number."
+    }
 };
 
 export default english;

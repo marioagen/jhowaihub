@@ -220,6 +220,15 @@
     labelSaveTitleType: "Creación de tipo",
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
+    "validation": {
+        "required": "Campo obligatorio.",
+        "email": "Por favor, introduce un correo electrónico válido.",
+        "min": "Mínimo de {length} caracteres.",
+        "max": "Máximo de {length} caracteres.",
+        "password_min": "La contraseña debe tener al menos 6 caracteres.",
+        "password_uppercase": "La contraseña debe contener al menos una letra mayúscula.",
+        "password_number": "La contraseña debe contener al menos un número."
+    }
 };
 
 export default spanish;
