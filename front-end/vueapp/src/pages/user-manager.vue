@@ -11,16 +11,18 @@
                         {{ $t("labelUserManagementDescription") }}
                     </p>
 
-                    <TabsComponent
-                        :tabs="tabsList"
-                        color="custom"
-                    >
+                    <TabsComponent :tabs="tabsList"
+                                   color="custom">
                         <template #users>
                             <UsersComponent />
                         </template>
 
                         <template #teams>
                             <TeamsComponent />
+                        </template>
+
+                        <template #profiles>
+                            <ProfilesComponent />
                         </template>
                     </TabsComponent>
                 </div>
@@ -33,17 +35,20 @@
     import TabsComponent from "@/components/global/TabsComponent.vue";
     import TeamsComponent from "@/components/user-manager/teams/TeamsComponent.vue";
     import UsersComponent from "@/components/user-manager/users/UsersComponent.vue";
+    import ProfilesComponent from "@/components/user-manager/profiles/ProfilesComponent.vue";
     export default {
         name: "UserIndex",
         components: {
             TabsComponent,
             TeamsComponent,
             UsersComponent,
+            ProfilesComponent
         },
         data: () => ({
             tabsList: [
                 { name: 'users', label: 'labelUsers', icon: 'UsersRound' },
-                { name: 'teams', label: 'labelTeams', icon: 'Building' }
+                { name: 'teams', label: 'labelTeams', icon: 'Building' },
+                { name: 'profiles', label: 'labelTeams', icon: 'Shield' }
             ],
         }),
     };

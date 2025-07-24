@@ -1,39 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Refit;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Repository;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
 {
-    public class TeamServices : ITeamServices
+    public class ProfileServices : IProfileServices
     {
-        private readonly ITeamRepository _teamRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IPermissionRepository _permissionRepository;
 
-        public TeamServices(ITeamRepository teamRepository,
-                            IUserRepository userRepository)
+        public ProfileServices(IProfileRepository profileRepository,
+                               IPermissionRepository permissionRepository)
         {
-            _teamRepository = teamRepository;
-            _userRepository = userRepository;
+            _profileRepository = profileRepository;
+            _permissionRepository = permissionRepository;
         }
 
         /// <summary>
-        /// Retrieves a team by its ID.
+        /// Retrieves a profile by its ID.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public TeamDto FindById(int id)
+        public ProfileDto FindById(int id)
         {
-            var team = _teamRepository.FindById(id);
+            var team = _profileRepository.FindById(id);
             if (team == null)
             {
-                throw new ArgumentException("Team not found");
+                throw new ArgumentException("Profile not found");
             }
             return team;
         }
@@ -43,11 +46,11 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
-        public TeamPagedResultDto FindAllPaged(PagedDataDto pagedDataDto)
+        public ProfilePagedResultDto FindAllPaged(PagedDataDto pagedDataDto)
         {
             if (pagedDataDto.Page > 0)
             {
-                var totalList = _teamRepository.FindAllPaged(pagedDataDto);
+                var totalList = _profileRepository.FindAllPaged(pagedDataDto);
 
                 totalList = pagedDataDto.IsAscending ?
                     totalList.OrderBy(team => team.Name) :
@@ -69,33 +72,33 @@ namespace WoopiAiHub.Application.Services
         /// <param name="teamCreateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task <bool> CreateUniqueTeam(TeamCreateDto teamCreateDto)
+        public async Task<bool> CreateUniqueProfile(ProfileCreateDto profileCreateDto)
         {
-            if (string.IsNullOrEmpty(teamCreateDto.Name))
+            if (string.IsNullOrEmpty(profileCreateDto.Name))
             {
-                throw new ArgumentException("Team name cannot be empty");
+                throw new ArgumentException("Profile name cannot be empty");
             }
 
-            var team = new Team(teamCreateDto.Name, 0, DateTime.Now)
+            var profile = new Profile(profileCreateDto.Name, 0, DateTime.Now)
             {
-                Users = new List<User>()
+                Permissions = new List<Permission>()
             };
 
-            if (teamCreateDto.UserIds != null)
+            if (profileCreateDto.PermissionsIds != null)
             {
-                team.Users.Clear();
-                var users = await _userRepository.FindByIdsAsync(teamCreateDto.UserIds);
+                profile.Permissions.Clear();
+                var permissions = await _permissionRepository.FindByIdsAsync(profileCreateDto.PermissionsIds);
 
-                foreach (var user in users)
-                {
-                    team.AddUser(user);
-                }
+               foreach (var permission in permissions)
+               {
+                    profile.AddPermission(permission);
+               }
             }
 
-            var createResult = _teamRepository.CreateUniqueTeam(team);
+            var createResult = _profileRepository.CreateUniqueProfile(profile);
             if (!createResult)
             {
-                throw new ArgumentException("Duplicated Team Name");
+                throw new ArgumentException("Duplicated Profile");
             }
             return createResult;
         }
@@ -106,33 +109,34 @@ namespace WoopiAiHub.Application.Services
         /// <param name="teamUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<bool> Update(TeamUpdateDto teamUpdateDto)
+        public async Task<bool> Update(ProfileUpdateDto profileUpdateDto)
         {
 
-            var team = _teamRepository.FindByIdReturnModel(teamUpdateDto.Id);
-            if (team == null)
+            var profile = _profileRepository.FindByIdReturnModel(profileUpdateDto.Id);
+            if (profile == null)
                 return false;
 
-            team.Update(teamUpdateDto.Name);
+            profile.Update(profileUpdateDto.Name);
 
-            if (teamUpdateDto.UserIds != null)
+            if (profileUpdateDto.PermissionsIds != null)
             {
-                team.Users.Clear();
-                var users = await _userRepository.FindByIdsAsync(teamUpdateDto.UserIds);
+                profile.Permissions.Clear();
+                var permissions = await _permissionRepository.FindByIdsAsync(profileUpdateDto.PermissionsIds);
 
-                foreach (var user in users)
+                foreach (var permission in permissions)
                 {
-                    team.AddUser(user);
+                    profile.AddPermission(permission);
                 }
             }
 
-            var updateResult = _teamRepository.Update(team);
+            var updateResult = _profileRepository.Update(profile);
             if (!updateResult)
             {
-                throw new ArgumentException("Duplicated Team");
+                throw new ArgumentException("Duplicated Profile");
             }
             return updateResult;
         }
+
 
         /// <summary>
         /// Deletes a list of teams by their IDs.
@@ -141,7 +145,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
-            return _teamRepository.DeleteByIds(ids);
+            return _profileRepository.DeleteByIds(ids);
         }
 
         /// <summary>
@@ -150,8 +154,8 @@ namespace WoopiAiHub.Application.Services
         /// <param name="totalList"></param>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
-        private static TeamPagedResultDto Pagination(IQueryable<TeamDto> totalList,
-                                                      PagedDataDto pagedDataDto)
+        private static ProfilePagedResultDto Pagination(IQueryable<ProfileDto> totalList,
+                                                        PagedDataDto pagedDataDto)
         {
             int pageCount, currentPage = 0;
 
@@ -178,7 +182,7 @@ namespace WoopiAiHub.Application.Services
                                      .Take(pagedDataDto.PageSize);
             }
 
-            return new TeamPagedResultDto()
+            return new ProfilePagedResultDto()
             {
                 Content = totalList,
                 CurrentPage = currentPage,
