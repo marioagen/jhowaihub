@@ -1,9 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
-using Microsoft.EntityFrameworkCore;
-using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Request;
 
 namespace WoopiAiHub.Repository
 {
@@ -33,16 +32,29 @@ namespace WoopiAiHub.Repository
             return false;
         }
 
-        /// <summary>
-        /// Find all teams and include their users.
-        /// </summary>
-        /// <returns></returns>
-        public ICollection<Team> FindAll()
+        public IQueryable<TeamDto> FindAllByUser(string userEmail)
         {
             return _context.Teams
-                .Include(t => t.Users)
-                .AsNoTracking()
-                .ToList();
+                           .Include(u => u.Users)
+                           .Select(t => new TeamDto
+                           {
+                               Id = t.Id,
+                               Name = t.Name,
+                               Created = t.Created,
+                               Users = t.Users!
+                                       .Where(u => u.IsActive)
+                                       .Select(u => new UserDto
+                                       {
+                                           Id = u.Id,
+                                           Name = u.Name,
+                                           Email = u.Email,
+                                           IsActive = u.IsActive,
+                                           Created = u.Created
+                                       })
+                                       .ToList()
+                           })
+                           .Where(t => t.Users.Any(u => u.Email == userEmail && u.IsActive))
+                           .AsNoTracking();
         }
 
         /// <summary>
@@ -74,7 +86,6 @@ namespace WoopiAiHub.Repository
                 .AsNoTracking()
                 .FirstOrDefault(t => t.Id == id);
         }
-
 
         /// <summary>
         /// Find a team by its ID and include its users.
@@ -129,33 +140,54 @@ namespace WoopiAiHub.Repository
         public IQueryable<TeamDto> FindAllPaged(PagedDataDto pagedDataDto)
         {
             var query = _context.Teams
-                .Include(t => t.Users)
-                .Select(t => new TeamDto
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    Created = t.Created,
-                    Users = t.Users!
-                        .Where(u => u.IsActive) 
-                        .Select(u => new UserDto
-                        {
-                            Id = u.Id,
-                            Name = u.Name,
-                            Email = u.Email,
-                            IsActive = u.IsActive,
-                            Created = u.Created
-                        })
-                        .ToList()
-                })
-                .AsQueryable()
-                .AsNoTracking();
+                                .Include(u => u.Users)
+                                .Select(t => new TeamDto
+                                {
+                                    Id = t.Id,
+                                    Name = t.Name,
+                                    Created = t.Created,
+                                    Users = t.Users!
+                                        .Where(u => u.IsActive)
+                                        .Select(u => new UserDto
+                                        {
+                                            Id = u.Id,
+                                            Name = u.Name,
+                                            Email = u.Email,
+                                            IsActive = u.IsActive,
+                                            Created = u.Created
+                                        })
+                                        .ToList()
+                                })
+                                .AsQueryable()
+                                .AsNoTracking();
 
             return query;
         }
 
+        /// <summary>
+        /// Retrieves a list of teams that match the specified identifiers.
+        /// </summary>
+        /// <param name="ids">A collection of team identifiers to search for. Each identifier must correspond to a valid team.</param>
+        /// <returns>A list of <see cref="Team"/> objects whose identifiers match the specified <paramref name="ids"/>. If no
+        /// matches are found, an empty list is returned.</returns>
         public List<Team> FindByIds(IEnumerable<int> ids)
         {
             return _context.Teams.Where(t => ids.Contains(t.Id)).ToList();
+        }
+
+        /// <summary>
+        /// Retrieves a collection of teams that match the specified team IDs and are associated with the specified user.
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <param name="emailUser"></param>
+        /// <returns></returns>
+        public ICollection<Team> FindByIdsAndUser(IEnumerable<int> ids,
+                                                  string emailUser)
+        {
+            return _context.Teams
+                           .Where(t => ids.Contains(t.Id) &&
+                                       t.Users.Any(s => s.Email.Equals(emailUser)))
+                           .ToList();
         }
     }
 }

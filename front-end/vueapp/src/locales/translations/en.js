@@ -63,7 +63,7 @@
     labelFailedNoResponse: "Failed, no response from the server.",
     labelFailedToLoadHistory: "Failed to load history.",
     labelFailedToApplyQuestionnaire: "Failed to apply questionnaire.",
-    labelGeneralInformation: "General information",
+    labelGeneralInformation: "Upload Document",
     labelHistoric: "Responses log",
     labelInclusionDate: "Inclusion date",
     labelListing: "Listing",
@@ -216,6 +216,13 @@
     labelSaveTitleType: "Create type",
     labelEditType: "Edit",
     labelSaveType: "Create",
+    labelBackToListDocuments: "Back to documents",
+    pageTitleDocumentsForm: "New Document",
+    pageSubtitleDocumentsForm: "Upload new documents for analysis",
+    labelTeamsTitleDocuments: "Associate with teams",
+    labelTeamsSubtextDocuments: "Select at least one team to associate with the document.",
+    labelNoTeamsFound: "No team linked to your user",
+    labelSelectedTeamsTitle: "Equipos seleccionados",
 };
 
 export default english;

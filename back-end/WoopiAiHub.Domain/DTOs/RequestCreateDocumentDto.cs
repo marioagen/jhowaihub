@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.Text.Json.Serialization;
 
 namespace WoopiAiHub.Application.Dto
 {
-    public class RequestCreateDocumentDto
-    {
-        public IFormFile Chunk { get; set; }
-        public string Filename { get; set; } = string.Empty;
-        public bool IsLast { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string EmailCreator { get; set; } = string.Empty;
-    }
+    public record RequestCreateDocumentDto(
+        IFormFile Chunk,
+        string Filename,
+        bool IsLast,
+        string Name,
+        string Description,
+        string EmailCreator,
+        ICollection<int> TeamsIds
+    );
 }
 
