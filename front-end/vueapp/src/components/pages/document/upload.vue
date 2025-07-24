@@ -1,14 +1,14 @@
 ﻿<template>
     <main class="flex-shrink-0" v-if="loading">
         <div class="container mb-5">
-            <div class="row justify-content-md-center" style="height: 100%">
+            <div class="row justify-content-md-center full-height">
                 <div class="col-md-auto">
                     <div class="div-center">
                         <div>
-                            <div class="mb-3" style="width: 100%; float: left">
+                            <div class="content-box">
                                 <h5 class="h5-custom-modal">{{ message }}</h5>
                             </div>
-                            <div style="text-align: center">
+                            <div class="text-center">
                                 <img svg-inline src="@/assets/img/icon-load-circle.svg" alt="Loading" width="60"
                                     class="refresh-animated" />
                             </div>
@@ -18,6 +18,7 @@
             </div>
         </div>
     </main>
+
     <main class="main-scroll" v-if="!loading">
         <div class="container-fluid mt-4">
             <div class="custom-padding">
@@ -58,34 +59,33 @@
                                 ></textarea>
                                 </div>
                                 <div class="mb-3">
-                                    <div v-if="form.description.length <= 250">
-                                        <a style="text-decoration: none; color: #aeb2ba; cursor: default">
+                                    <div>
+                                        <a :class="[
+                                            'char-counter',
+                                            form.description.length <= 250 ? 'char-normal' : 'char-error'
+                                        ]">
                                             {{ 250 - form.description.length }}
                                             {{
-                                                250 - form.description.length > 1
-                                                    ? $t("labelCharacters")
-                                                    : $t("labelCharacter")
+                                                250 - form.description.length === 1
+                                                    ? $t('labelCharacter')
+                                                    : $t('labelCharacters')
                                             }}
                                         </a>
-                                    </div>
-                                    <div v-if="form.description.length > 250">
-                                        <a style="text-decoration: none; color: #dc3545; cursor: default">
-                                            {{ 250 - form.description.length }} {{ $t("labelCharacters") }}
-                                        </a>
-                                        <a class="exceedDesc"
-                                            style="float: right; text-decoration: none; color: #dc3545; cursor: default">
-                                            {{ $t("labelExceedDesc") }}
+
+                                        <a v-if="form.description.length > 250"
+                                            class="char-counter char-error exceedDesc">
+                                            {{ $t('labelExceedDesc') }}
                                         </a>
                                     </div>
                                 </div>
-
                                 <div class="mb-3 team-selector-container rounded p-3"
                                     :class="{ 'is-invalid': hasError, 'is-valid': !hasError }">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <div class="d-flex align-items-center mb-1">
-                                            <LucideIcon icon="Building" class="building-icon" />
-                                            <label class="form-label mb-0 ms-2">{{ $t("labelTeamsTitleDocuments")
-                                            }}</label>
+                                            <LucideIcon icon="Building" class="icon-blue" />
+                                            <label class="form-label mb-0 ms-2">
+                                                {{ $t("labelTeamsTitleDocuments") }}
+                                            </label>
                                         </div>
                                         <span class="selected-count">
                                             {{ selectedTeams.length }} {{ $t("labelSelectedWithO") }}
@@ -123,7 +123,7 @@
                                         </button>
                                     </div>
 
-                                    <div class="border rounded user-list scrollable-list bg-white">
+                                    <div class="border rounded p-1 user-list scrollable-list bg-white">
                                         <div v-if="loading" class="text-center">
                                             <div class="spinner-border text-primary" role="status">
                                                 <span class="visually-hidden">{{ $t("labelLoading") }}</span>
@@ -158,15 +158,12 @@
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary m-2" :title="$t('labelSend')"
-                                    v-if="form.description.length > 250" disabled style="float: right">
+                                <button type="submit" class="btn btn-primary m-2 float-right" :title="$t('labelSend')"
+                                    :disabled="form.description.length > 250">
                                     {{ $t("labelSend") }}
                                 </button>
-                                <button type="submit" class="btn btn-primary m-2" :title="$t('labelSend')"
-                                    v-if="form.description.length <= 250" style="float: right">
-                                    {{ $t("labelSend") }}
-                                </button>
-                                <router-link class="btn btn-secondary m-2 btn-custom-cancel" style="float: right"
+
+                                <router-link class="btn btn-secondary m-2 btn-custom-cancel float-right"
                                     :to="{ name: 'DocumentList', query: { page: '1' } }" :title="$t('labelCancel')">
                                     {{ $t("labelCancel") }}
                                 </router-link>
@@ -515,6 +512,40 @@ export default {
 </script>
 
 <style scoped>
+.icon-blue {
+    color: #155dfc;
+    width: 20px;
+    height: 20px;
+}
+
+.float-right {
+    float: right;
+}
+
+.char-counter {
+    text-decoration: none;
+    cursor: default;
+}
+
+.char-normal {
+    color: #aeb2ba;
+}
+
+.char-error {
+    color: #dc3545;
+    float: right;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.content-box {
+    width: 100%;
+    float: left;
+    text-align: center;
+}
+
 .team-selector-container {
     background-color: #eff6ff;
     border: 1.5px solid #bedbff;
@@ -546,10 +577,17 @@ export default {
     overflow-y: auto;
 }
 
-.building-icon {
-    color: #155dfc;
-    width: 20px;
-    height: 20px;
+.main-scroll {
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.box-upload-form {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 24px;
+    overflow: hidden;
 }
 
 .btn-custom-light {
