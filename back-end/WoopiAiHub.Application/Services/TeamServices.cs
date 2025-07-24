@@ -1,12 +1,12 @@
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using PdfSharp;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -39,28 +39,61 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Retrieves all teams paged and their users.
+        /// Retrieves a collection of teams based on the specified list of team IDs.
         /// </summary>
-        /// <param name="pagedDataDto"></param>
-        /// <returns></returns>
-        public TeamPagedResultDto FindAllPaged(PagedDataDto pagedDataDto)
+        /// <remarks>This method ensures that all provided IDs correspond to existing teams. If any ID
+        /// does not match an existing team, or if the list of IDs is empty, an exception is thrown.</remarks>
+        /// <param name="ids">A list of team IDs to search for. Each ID must correspond to an existing team.</param>
+        /// <returns>A collection of <see cref="Team"/> objects that match the provided IDs.</returns>
+        /// <exception cref="ArgumentException">Thrown if no teams are found, or if the number of teams found does not match the number of IDs provided.</exception>
+        public ICollection<Team> FindByIdsAndUser(ICollection<int> ids,
+                                                  string emailUser)
         {
-            if (pagedDataDto.Page > 0)
+            var teams = _teamRepository.FindByIdsAndUser(ids,
+                                                         emailUser);
+
+            if (teams == null || teams.Count == 0)
+                throw new ArgumentException("No teams were found");
+
+            if (teams.Count != ids.Count)
+                throw new ArgumentException("Some teams were not found");
+
+            return teams;
+        }
+
+        /// <summary>
+        /// Retrieves a paginated list of teams, optionally filtered by the specified user's email.
+        /// </summary>
+        /// <remarks>The results are sorted by team name in ascending or descending order, based on the
+        /// value of  <see cref="PagedDataDto.IsAscending"/>.</remarks>
+        /// <param name="pagedDataDto">The pagination and sorting information, including the page number, page size, and sort direction. The <see
+        /// cref="PagedDataDto.Page"/> property must be greater than 0.</param>
+        /// <param name="emailUser">An optional email address to filter the teams by user. If null or empty, all teams are retrieved.</param>
+        /// <returns>A <see cref="TeamPagedResultDto"/> containing the paginated list of teams and pagination metadata.</returns>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="pagedDataDto"/> has a <see cref="PagedDataDto.Page"/> value less than or equal to
+        /// 0.</exception>
+        public TeamPagedResultDto FindAllPaged(PagedDataDto pagedDataDto,
+                                               string? emailUser = null)
+        {
+            if (pagedDataDto.Page <= 0)
+                throw new ArgumentException("The number of pages must be greater than 0");
+
+            IQueryable<TeamDto> query;
+
+            if (!string.IsNullOrEmpty(emailUser))
             {
-                var totalList = _teamRepository.FindAllPaged(pagedDataDto);
-
-                totalList = pagedDataDto.IsAscending ?
-                    totalList.OrderBy(team => team.Name) :
-                    totalList.OrderByDescending(team => team.Name);
-
-                var result = Pagination(totalList, pagedDataDto);
-                return result;
+                query = _teamRepository.FindAllByUser(emailUser);
             }
             else
             {
-                var ex = new ArgumentException("The number of pages must be greater than 0");
-                throw ex;
+                query = _teamRepository.FindAllPaged(pagedDataDto);
             }
+
+            query = pagedDataDto.IsAscending
+                ? query.OrderBy(t => t.Name)
+                : query.OrderByDescending(t => t.Name);
+
+            return Pagination(query, pagedDataDto);
         }
 
         /// <summary>
@@ -69,7 +102,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="teamCreateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task <bool> CreateUniqueTeam(TeamCreateDto teamCreateDto)
+        public async Task<bool> CreateUniqueTeam(TeamCreateDto teamCreateDto)
         {
             if (string.IsNullOrEmpty(teamCreateDto.Name))
             {
@@ -150,8 +183,8 @@ namespace WoopiAiHub.Application.Services
         /// <param name="totalList"></param>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
-        private static TeamPagedResultDto Pagination(IQueryable<TeamDto> totalList,
-                                                      PagedDataDto pagedDataDto)
+        private static TeamPagedResultDto Pagination(IQueryable<TeamDto> totalList, 
+                                                     PagedDataDto pagedDataDto)
         {
             int pageCount, currentPage = 0;
 
@@ -186,5 +219,6 @@ namespace WoopiAiHub.Application.Services
                 RowCount = totalListCount,
             };
         }
+
     }
 }
