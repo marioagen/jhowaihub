@@ -181,7 +181,17 @@ namespace WoopiAiHub.Application.Services
                 }
 
                 // Validate Password / Error: Password invalid
-                var isPasswordValid = ValidatePassword(loginDto.Password, user.Salt, user.PasswordHash);
+                bool isPasswordValid = Encryption.VerifyHash(loginDto.Password, user.PasswordHash);
+                if (!isPasswordValid)
+                {
+                    return new LoginResponseDto
+                    {
+                        Success = false,
+                        Message = "Password doesn't match.",
+                        Data = null,
+                    };
+                }
+                
                 // Get Users Permissions -> Must wait another PR
                 // Generate JWT Token -> Exists in the func above - what
                 return new LoginResponseDto
@@ -208,31 +218,6 @@ namespace WoopiAiHub.Application.Services
                     Data = null,
                 };
             }
-        }
-
-        /// <summary>
-        /// Generates an access token for the api that lasts for 1 hour
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        private static bool ValidatePassword(string password, byte[] salt, byte[] dbPassword)
-        {
-            //encrypt password
-            //Compare to dbPassword
-            // Cria o Argon2id com os mesmos parâmetros
-            var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password))
-            {
-                Salt = storedSalt,
-                DegreeOfParallelism = 8, // Número de threads
-                MemorySize = 65536, // Memória usada (em KB)
-                Iterations = 4 // Número de iterações
-            };
-
-            // Gera o hash da senha fornecida
-            var hash = argon2.GetBytes(32);
-
-            // Compara o hash gerado com o hash armazenado
-            return CryptographicOperations.FixedTimeEquals(hash, storedHash);
         }
     }
 }
