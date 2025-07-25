@@ -24,28 +24,48 @@ namespace WoopiAiHub.Api.Controllers
         /// Authenticates the user and returns the token if he has user permission
         /// </summary>
         /// <param name="authenticateDto"></param>
-        /// <param name="authenticateHeaderDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("authenticate")]
+        [Route("login")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [SwaggerOperation("Authenticates the user and returns the token if he has user permission")]
-        public async Task<IActionResult> Authenticate([FromHeader] AuthenticateHeaderDto authenticateHeaderDto,
-                                                      [FromBody] AuthenticateDto authenticateDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             try
             {
-                var authData = await _accountServices.Authenticate(authenticateDto,
-                                                                   authenticateHeaderDto);
+                var authData = await _accountServices.Login(loginDto);
+                return Ok(authData);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized();
+            }
+        }
 
+        /// <summary>
+        /// Authenticates the user and returns the token if he has user permission
+        /// </summary>
+        /// <param name="authenticateDto"></param>
+        /// <param name="authenticateHeaderDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("login-sso")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [SwaggerOperation("Authenticates the user and returns the token if he has user permission")]
+        public async Task<IActionResult> LoginSSO([FromHeader] AuthenticateHeaderDto authenticateHeaderDto, [FromBody] AuthenticateDto authenticateDto)
+        {
+            try
+            {
+                var authData = await _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
                 return Ok(authData);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
                     "An exception occurred in {Controller} in the {Method} method. Login: {LoginSanitized}",
-                    nameof(AccountController), nameof(Authenticate), authenticateDto.Login?.Replace('\n', '_').Replace('\r', '_'));
+                    nameof(AccountController), nameof(LoginSSO), authenticateDto.Login?.Replace('\n', '_').Replace('\r', '_'));
                 return Unauthorized();
             }
         }
@@ -94,21 +114,6 @@ namespace WoopiAiHub.Api.Controllers
                 _logger.LogError(ex, $"An exception occurred in the {nameof(AccountController)} in the {nameof(FindClientId)} method.");
                 return Unauthorized();
             }
-        }
-
-        /// <summary>
-        /// Authenticates the user and returns the token if he has user permission
-        /// </summary>
-        /// <param name="authenticateDto"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("login")]
-        // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LoginResponseDto))]
-        // [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(UnauthorizedDto))]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
-        {
-            var result = await _accountServices.Login(loginDto);
-            return Ok(result);
         }
     }
 }

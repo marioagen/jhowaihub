@@ -2,6 +2,7 @@
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Account;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Response.Account;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -13,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -45,6 +47,66 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Checks if the Azure token is valid, if it is valid it checks and verifies
+        /// that the user has permission to access the application and returns a token
+        /// </summary>
+        /// <param name="tokenAzureAd"></param>
+        /// <param name="authenticateDto"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<AccessDataAuthDto> Login(LoginDto loginDto)
+        {
+            var userAccess = await GetMarketplaceAccesses(loginDto.Email);
+            if (userAccess == null && !userAccess.HasAccess)
+            {
+                return new AccessDataAuthDto
+                {
+                    Success = false,
+                    Message = "Not authorized.",
+                    Data = null,
+                };
+            }
+
+            var user = await _userRepository.FindByEmailAsync(loginDto.Email);
+            if (user == null)
+            {
+                return new AccessDataAuthDto
+                {
+                    Success = false,
+                    Message = "User not found.",
+                    Data = null,
+                };
+            }
+
+            bool isPasswordValid = Encryption.VerifyHash(loginDto.Password, user.PasswordHash);
+            if (!isPasswordValid)
+            {
+                return new AccessDataAuthDto
+                {
+                    Success = false,
+                    Message = "Password doesn't match.",
+                    Data = null,
+                };
+            }
+            
+            // Get Users Permissions -> Must wait another PR
+            return new AccessDataAuthDto
+            {
+                Success = true,
+                Message = "User logged",
+                Data = new LoginDataDto
+                {
+                    Name = user.Name,
+                    Email = user.Email,
+                    Token = GenerateToken(user.Email),
+                    Tenant = userAccess.Tenant,
+                    IsAdmin = true,
+                    Permissions = null,
+                },
+            };
+        }
+
+        /// <summary>
         /// Checks if the Azure token is valid, if it is valid it checks and verifies 
         /// that the user has permission to access the application and returns a token
         /// </summary>
@@ -52,8 +114,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="authenticateHeaderDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<AccessDataAuthDto> Authenticate(AuthenticateDto authenticateDto,
-                                                          AuthenticateHeaderDto authenticateHeaderDto)
+        public async Task<AccessDataAuthDto> LoginSSO(AuthenticateDto authenticateDto, AuthenticateHeaderDto authenticateHeaderDto)
         {
             if (string.IsNullOrWhiteSpace(authenticateHeaderDto.Authorization))
             {
@@ -67,21 +128,31 @@ namespace WoopiAiHub.Application.Services
                (emailUserAzureRequest.Content.UserPrincipalName.Equals(authenticateDto.Login) ||
                 emailUserAzureRequest.Content.Mail.Equals(authenticateDto.Login)))
             {
-                var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
-                var userAccess = await _marketPlaceApi.CheckAccess(KeyAccess,
-                                                                   authenticateDto.Login);
-
-                if (userAccess != null && userAccess.HasAccess)
+                var userAccess = await GetMarketplaceAccesses(authenticateDto.Login);
+                if (userAccess == null && !userAccess.HasAccess)
                 {
-                    var accessDataAuth = new AccessDataAuthDto
+                    return new AccessDataAuthDto
                     {
-                        Token = GenerateToken(emailUserAzureRequest.Content.Mail ??
-                                              emailUserAzureRequest.Content.UserPrincipalName),
-                        Tenant = userAccess.Tenant
+                        Success = false,
+                        Message = "Not authorized.",
+                        Data = null,
                     };
-
-                    return accessDataAuth;
                 }
+
+                return new AccessDataAuthDto
+                {
+                    Success = true,
+                    Message = "User logged",
+                    Data = new LoginDataDto
+                    {
+                        Name = "Askmann",
+                        Email = "askmann@mail.com",
+                        Token = GenerateToken(emailUserAzureRequest.Content.Mail ?? emailUserAzureRequest.Content.UserPrincipalName),
+                        Tenant = userAccess.Tenant,
+                        IsAdmin = true,
+                        Permissions = null,
+                    },
+                };
             }
 
             _logger.LogError(emailUserAzureRequest.Error is null ?
@@ -99,13 +170,11 @@ namespace WoopiAiHub.Application.Services
         public string AuthenticateApi(string key)
         {
             var appSettingsKeySecret = _config["KeyAccess"];
-
             if (key != appSettingsKeySecret)
             {
                 _logger.LogError($"Key is invalid or not provided.");
                 throw new ArgumentException("Key is invalid or not provided.");
             }
-
             return GenerateToken(key);
         }
 
@@ -120,7 +189,6 @@ namespace WoopiAiHub.Application.Services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            //add new roles
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user),
@@ -153,71 +221,13 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Checks if the Azure token is valid, if it is valid it checks and verifies
-        /// that the user has permission to access the application and returns a token
+        /// Returns an client id from appsettings
         /// </summary>
-        /// <param name="tokenAzureAd"></param>
-        /// <param name="authenticateDto"></param>
         /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        public async Task<LoginResponseDto> Login(LoginDto loginDto)
+        private async Task<ResponseCheckAccessDto> GetMarketplaceAccesses(string login)
         {
-            try
-            {
-                //Check Marketplace stuff with Gabriel
-                // Validate MarketPlace User / Error: User not Found in Marketplace
-                // Validate User Active from MarketPlace / Error: User inactive in Marketplace
-
-                // Get User in DB / Error: User not found
-                var user = await _userRepository.FindByEmailAsync(loginDto.Email);
-                if (user == null)
-                {
-                    return new LoginResponseDto
-                    {
-                        Success = false,
-                        Message = "User not found.",
-                        Data = null,
-                    };
-                }
-
-                // Validate Password / Error: Password invalid
-                bool isPasswordValid = Encryption.VerifyHash(loginDto.Password, user.PasswordHash);
-                if (!isPasswordValid)
-                {
-                    return new LoginResponseDto
-                    {
-                        Success = false,
-                        Message = "Password doesn't match.",
-                        Data = null,
-                    };
-                }
-                
-                // Get Users Permissions -> Must wait another PR
-                // Generate JWT Token -> Exists in the func above - what
-                return new LoginResponseDto
-                {
-                    Success = true,
-                    Message = "User logged",
-                    Data = new LoginDataDto
-                    {
-                        UserId = 1,
-                        Email = "askmann@mail.com",
-                        Name = "Askmann",
-                        Token = "",
-                        IsAdmin = true,
-                        Permissions = null,
-                    },
-                };
-            }
-            catch (Exception ex)
-            {
-                return new LoginResponseDto
-                {
-                    Success = false,
-                    Message = ex.Message,
-                    Data = null,
-                };
-            }
+            var keyAccess = _config.GetSection("KeyAccess").Get<string>()!;
+            return await _marketPlaceApi.CheckAccess(keyAccess, login);
         }
     }
 }

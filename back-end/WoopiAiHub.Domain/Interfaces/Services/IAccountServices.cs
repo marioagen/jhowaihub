@@ -7,9 +7,9 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface IAccountServices
     {
-        Task<AccessDataAuthDto> Authenticate(AuthenticateDto authenticateDto, AuthenticateHeaderDto authenticateHeaderDto);
+        Task<AccessDataAuthDto> Login(LoginDto loginDto);
+        Task<AccessDataAuthDto> LoginSSO(AuthenticateDto authenticateDto, AuthenticateHeaderDto authenticateHeaderDto);
         string AuthenticateApi(string key);
         string FindClientId();
-        Task<LoginResponseDto> Login(LoginDto loginDto);
     }
 }
