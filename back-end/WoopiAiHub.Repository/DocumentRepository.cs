@@ -25,20 +25,20 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IQueryable<Document> FindAllOrdered(DocumentPagedDataDto dto, 
+        public IQueryable<Document> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto, 
                                                    string email)
         {
-            var search = dto.Search?.ToLower();
+            var search = documentPagedDataDto.Search?.ToLower();
 
             var query = _context.Documents
                                 .Include(t => t.Teams)
                                 .AsNoTracking()
                                 .Where(i => i.Enable && i.EmailCreator == email);
 
-            if (dto.TeamIds != null && 
-                dto.TeamIds.Any())
+            if (documentPagedDataDto.TeamIds != null &&
+                documentPagedDataDto.TeamIds.Any())
             {
-                query = query.Where(d => d.Teams.Any(t => dto.TeamIds.Contains(t.Id)));
+                query = query.Where(d => d.Teams.Any(t => documentPagedDataDto.TeamIds.Contains(t.Id)));
             }
 
             if (!string.IsNullOrEmpty(search))
@@ -49,9 +49,9 @@ namespace WoopiAiHub.Repository
                              i.Teams.Any(t => EF.Functions.Like(t.Name, $"%{search}%")));
             }
 
-            query = dto.IsAscending ? 
-                    query.OrderByDynamic(dto.ColType.ToString()) : 
-                    query.OrderByDynamic(dto.ColType + " descending");
+            query = documentPagedDataDto.IsAscending ? 
+                    query.OrderByDynamic(documentPagedDataDto.ColType.ToString()) : 
+                    query.OrderByDynamic(documentPagedDataDto.ColType + " descending");
 
             return query;
         }
