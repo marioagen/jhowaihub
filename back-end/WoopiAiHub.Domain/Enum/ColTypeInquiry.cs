@@ -4,7 +4,6 @@
     {
         Description = 1,
         Created = 2,
-        Status = 3,
-        Teams = 4
+        Status = 3
     }
 }

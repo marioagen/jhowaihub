@@ -26,11 +26,11 @@
                             <div class="w-auto">
                                 <select v-model="selectedTeamId" :disabled="noTeams || loadingTeams"
                                     class="form-select form-select-sm w-auto" @change="onTeamChange">
-                                    <option v-if="!noTeams" :value="0">{{ $t('labelAllTeams') }}</option>
+                                    <option v-if="noTeams" :value="null" disabled>{{ $t('labelNoTeams') }}</option>
+                                    <option v-else :value="0">{{ $t('labelAllTeams') }}</option>
                                     <option v-for="team in teamList" :key="team.id" :value="team.id">
                                         {{ team.name }}
                                     </option>
-                                    <option v-if="noTeams" disabled>{{ $t('labelNoTeams') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -536,6 +536,10 @@ export default {
 
         if (this.$store.state.userProfile.keyMongoAccess) {
             this.getList({ search: "", page: this.queryPage, type: null });
+        }
+
+        if (this.noTeams) {
+            this.selectedTeamId = null;
         }
     },
     beforeUnmount() {

@@ -892,7 +892,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="DocumentPagedDataDto"></param>
         /// <returns></returns>
         private DocumentPagedResultDto DocumentPagination(IQueryable<Document> query,
-                                                  DocumentPagedDataDto dto)
+                                                          DocumentPagedDataDto dto)
         {
             int pageCount, currentPage;
 

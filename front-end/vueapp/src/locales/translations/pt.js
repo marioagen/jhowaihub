@@ -222,6 +222,9 @@
     labelTeamsSubtextDocuments: "Selecione pelo menos um time para associar ao documento.",
     labelNoTeamsFound: "Nenhum time vinculado ao seu usuário",
     labelSelectedTeamsTitle: "Times selecionados",
+    labelDocumentsMessage: "Gerencie documentos e extraia informações",
+    labelAllTeams: "Todos os times",
+    labelNoTeams: "Nenhum time disponível",
 };
 
 export default portuguese;

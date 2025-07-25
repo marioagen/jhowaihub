@@ -25,16 +25,18 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IQueryable<Document> FindAllOrdered(DocumentPagedDataDto dto, string email)
+        public IQueryable<Document> FindAllOrdered(DocumentPagedDataDto dto, 
+                                                   string email)
         {
             var search = dto.Search?.ToLower();
 
             var query = _context.Documents
-                .Include(t => t.Teams)
-                .AsNoTracking()
-                .Where(i => i.Enable && i.EmailCreator == email);
+                                .Include(t => t.Teams)
+                                .AsNoTracking()
+                                .Where(i => i.Enable && i.EmailCreator == email);
 
-            if (dto.TeamIds != null && dto.TeamIds.Any())
+            if (dto.TeamIds != null && 
+                dto.TeamIds.Any())
             {
                 query = query.Where(d => d.Teams.Any(t => dto.TeamIds.Contains(t.Id)));
             }
@@ -42,14 +44,14 @@ namespace WoopiAiHub.Repository
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(i =>
-                    EF.Functions.Like(i.Name, $"%{search}%") ||
-                    i.Id.ToString().Contains(search) ||
-                    i.Teams.Any(t => EF.Functions.Like(t.Name, $"%{search}%")));
+                             EF.Functions.Like(i.Name, $"%{search}%") ||
+                             i.Id.ToString().Contains(search) ||
+                             i.Teams.Any(t => EF.Functions.Like(t.Name, $"%{search}%")));
             }
 
-            query = dto.IsAscending
-                ? query.OrderByDynamic(dto.ColType.ToString())
-                : query.OrderByDynamic(dto.ColType + " descending");
+            query = dto.IsAscending ? 
+                    query.OrderByDynamic(dto.ColType.ToString()) : 
+                    query.OrderByDynamic(dto.ColType + " descending");
 
             return query;
         }

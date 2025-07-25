@@ -223,6 +223,9 @@
     labelTeamsSubtextDocuments: "Select at least one team to associate with the document.",
     labelNoTeamsFound: "No team linked to your user",
     labelSelectedTeamsTitle: "Equipos seleccionados",
+    labelDocumentsMessage: "Manage documents and extract information",
+    labelAllTeams: "Todos los equipos",
+    labelNoTeams: "No teams available",
 };
 
 export default english;
