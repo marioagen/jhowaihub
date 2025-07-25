@@ -1,4 +1,14 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Refit;
+using System.Net;
+using System.Text;
 using WoopiAiHub.Application.Dto;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
@@ -12,17 +22,6 @@ using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
-using WoopiAiHub.Repository.Cache;
-using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Refit;
-using System.Net;
-using System.Text;
-using WoopiAiHub.Domain.DTOs;
 
 
 namespace WoopiAiHub.Application.Services
@@ -45,9 +44,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IOcrAzure _ocrAzure;
         private readonly IMemoryCache _cache;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ITenantServices _tenantServices;
         private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly ITenantCacheServices _tenantCacheServices;
+        private readonly ITeamServices _teamServices;
 
         public DocumentServices(IDocumentRepository documentRepository,
                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -64,9 +63,9 @@ namespace WoopiAiHub.Application.Services
                                IOcrAzure ocrAzure,
                                IMemoryCache cache,
                                IHttpContextAccessor httpContextAccessor,
-                               ITenantServices tenantServices,
                                IQuestionnaireRepository questionnaireRepository,
-                               ITenantCacheServices tenantCacheServices)
+                               ITenantCacheServices tenantCacheServices,
+                               ITeamServices teamServices)
         {
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
@@ -83,9 +82,9 @@ namespace WoopiAiHub.Application.Services
             _ocrAzure = ocrAzure;
             _cache = cache;
             _httpContextAccessor = httpContextAccessor;
-            _tenantServices = tenantServices;
             _questionnaireRepository = questionnaireRepository;
             _tenantCacheServices = tenantCacheServices;
+            _teamServices = teamServices;
         }
 
         /// <summary>
@@ -225,7 +224,7 @@ namespace WoopiAiHub.Application.Services
 
             if (requestCreateDocumentDto.IsLast)
             {
-                await this.Create(requestCreateDocumentDto, bytes, tenant);
+                await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
                 _cache.Remove(requestCreateDocumentDto.Name);
             }
         }
@@ -455,9 +454,10 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="requestCreateDocumentDto"></param>
         /// <returns></returns>
-        private async Task Create(RequestCreateDocumentDto requestCreateDocumentDto,
-                                  Byte[] chunks,
-                                  string tenant)
+        /// 
+        private async Task FinalizeUploadAsync(RequestCreateDocumentDto requestCreateDocumentDto,
+                                               Byte[] chunks,
+                                               string tenant)
         {
             _documentDtoValidator.ValidateAndThrow(requestCreateDocumentDto);
             var formFile = new FormFile(new MemoryStream(chunks),
@@ -466,10 +466,14 @@ namespace WoopiAiHub.Application.Services
                                         requestCreateDocumentDto.Filename,
                                         requestCreateDocumentDto.Filename);
 
-            var referenceFile = await this.UploadFileToRepositoryApi(formFile, tenant);
+            var referenceFile = await this.UploadFileToRepositoryApi(formFile,
+                                                                     tenant);
             var documentForDataBase = this.CreateDocumentForDb(requestCreateDocumentDto,
                                                                referenceFile);
 
+            var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
+                                                       requestCreateDocumentDto.EmailCreator);
+            documentForDataBase.Teams = teams;
             _documentRepository.Create(documentForDataBase);
         }
 
@@ -887,37 +891,31 @@ namespace WoopiAiHub.Application.Services
         /// <param name="totalList"></param>
         /// <param name="DocumentPagedDataDto"></param>
         /// <returns></returns>
-        private DocumentPagedResultDto DocumentPagination(IQueryable<Document> totalList,
-                                                          DocumentPagedDataDto documentPagedDataDto)
+        private DocumentPagedResultDto DocumentPagination(IQueryable<Document> query,
+                                                          DocumentPagedDataDto dto)
         {
-            int pageCount, currentPage = 0;
+            int pageCount, currentPage;
 
-            if (string.IsNullOrEmpty(documentPagedDataDto.Search) is false)
-            {
-                totalList = totalList.Where(i => i.Description.ToLower()
-                                     .Contains(documentPagedDataDto.Search.ToLower()) ||
-                                               i.Name.Contains(documentPagedDataDto.Search));
-            }
+            var totalListCount = query.Count();
 
-            var totalListCount = totalList.Count();
-
-            if (documentPagedDataDto.PageSize == 0)
+            if (dto.PageSize == 0)
             {
                 pageCount = 1;
                 currentPage = 1;
-                documentPagedDataDto.PageSize = totalListCount;
+                dto.PageSize = totalListCount;
             }
             else
             {
-                pageCount = (int)Math.Ceiling((double)totalListCount / documentPagedDataDto.PageSize);
-                currentPage = documentPagedDataDto.Page <= pageCount ? documentPagedDataDto.Page : 1;
-                totalList = totalList.Skip((currentPage - 1) * documentPagedDataDto.PageSize)
-                                     .Take(documentPagedDataDto.PageSize);
+                pageCount = (int)Math.Ceiling((double)totalListCount / dto.PageSize);
+                currentPage = dto.Page <= pageCount ? dto.Page : 1;
+
+                query = query.Skip((currentPage - 1) * dto.PageSize)
+                             .Take(dto.PageSize);
             }
 
-            return new DocumentPagedResultDto()
+            return new DocumentPagedResultDto
             {
-                Content = totalList,
+                Content = query, 
                 CurrentPage = currentPage,
                 PageCount = pageCount,
                 RowCount = totalListCount

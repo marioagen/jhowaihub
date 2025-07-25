@@ -50,7 +50,6 @@
     labelEdited: "Editado",
     labelEditedFail: "Error al editar",
     labelEditQuestion: "Editar pregunta",
-    labelEditType: "Editar tipo",
     labelExceedDesc: "La descripción superó el límite de 250 caracteres",
     labelExceedTitle: "O título superó el límite de 50 caracteres",
     labelExpandHistory: "Ampliar historia",
@@ -60,7 +59,7 @@
     labelFailedNoResponse: "Falló, no hay respuesta del servidor.",
     labelFailedToLoadHistory: "No se pudo cargar el historial.",
     labelFailedToApplyQuestionnaire: "No se pudo aplicar el cuestionario.",
-    labelGeneralInformation: "Informaciones generales",
+    labelGeneralInformation: "Cargar documento",
     labelGoHome: "Ir a home",
     labelHistoric: "Registro de respuestas",
     labelInclusionDate: "Fecha de inclusión",
@@ -138,7 +137,7 @@
     labelTypes: "Tipos",
     labelTextCopiedToClipboard: "Texto copiado al portapapeles.",
     labelThisActionCannotBeUndone:
-        "Esta acción no se puede deshacer. <br/> ¿Está seguro de que desea <br/> eliminarlo?",
+        "Esta acción no se puede deshacer. ¿Está seguro de que desea eliminarlo?",
     labelTypeNameOrId: "Nombre, ID o introduce un nuevo tipo para registrarte",
     labelTheFileMayBeCorrupt:
         "El archivo puede estar <br/> corrupto o tener un error. <br/> Por favor, inténtelo de nuevo.",
@@ -216,6 +215,21 @@
     labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
     labelYouAreAboutToDeleteUser: "Estás a punto de eliminar un usuario del sistema",
+    labelYouAreAboutToDeleteType: "Estás a punto de eliminar un tipo del sistema",
+    labelEditTitleType: "Edición de tipo",
+    labelSaveTitleType: "Creación de tipo",
+    labelEditType: "Editar tipo",
+    labelSaveType: "Crear tipo",
+    labelBackToListDocuments: "Volver a los documentos",
+    pageTitleDocumentsForm: "Nuevo documento",
+    pageSubtitleDocumentsForm: "Cargar nuevos documentos para su análisis",
+    labelTeamsTitleDocuments: "Asociarse con equipos",
+    labelTeamsSubtextDocuments: "Seleccione al menos un equipo para asociarlo al documento.",
+    labelNoTeamsFound: "Ningún equipo vinculado a su usuario",
+    labelSelectedTeamsTitle: "Selected teams",
+    labelDocumentsMessage: "Gestione documentos y extraiga información",
+    labelAllTeams: "Todos los equipos",
+    labelNoTeams: "No hay equipos disponibles.",
 };
 
 export default spanish;

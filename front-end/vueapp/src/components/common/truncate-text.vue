@@ -42,10 +42,16 @@
         mounted() {
             this.processText();
             this.checkTruncation();
-            window.addEventListener("resize", this.checkTruncation);
+            // Observa mudanças de tamanho no próprio elemento
+            this.resizeObserver = new window.ResizeObserver(() => {
+                this.checkTruncation();
+            });
+            this.resizeObserver.observe(this.$refs.textElement);
         },
         beforeDestroy() {
-            window.removeEventListener("resize", this.checkTruncation);
+            if (this.resizeObserver) {
+                this.resizeObserver.disconnect();
+            }
         },
         methods: {
             processText() {

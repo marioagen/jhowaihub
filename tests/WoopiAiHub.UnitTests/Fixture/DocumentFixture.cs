@@ -213,16 +213,19 @@ namespace WoopiAiHub.UnitTests.Fixture
             var filePath = @"../../../Files/TestPDF.pdf";
             var file = new FileInfo(filePath);
             var formFile = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, file.Length, "Chunk", file.Name);
+            var faker = new Faker("pt_BR");
 
-            RequestCreateDocumentDto requestCreateDocumentDto = new Faker<RequestCreateDocumentDto>("pt_BR")
-             .RuleFor(a => a.Chunk, formFile)
-             .RuleFor(a => a.Filename, "title")
-             .RuleFor(a => a.IsLast, true)
-             .RuleFor(a => a.Description, "desc")
-             .RuleFor(a => a.Name, "idea")
-             .RuleFor(a => a.EmailCreator, "email");
+            var dto = new RequestCreateDocumentDto(
+                Chunk: formFile,
+                Filename: "title",
+                IsLast: true,
+                Name: "idea",
+                Description: "desc",
+                EmailCreator: faker.Internet.Email(),
+                TeamsIds: new List<int> { 10 }
+            );
 
-            return requestCreateDocumentDto;
+            return dto;
         }
 
         public FileUploadSummaryDto FindValidFileUploadSummaryDto()

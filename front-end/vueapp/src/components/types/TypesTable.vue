@@ -1,5 +1,10 @@
 <template>
-    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="deleteMultipleTypes">
+    <button 
+        v-if="showMultiDelete" 
+        class="btn btn-outline-danger btn-sm mb-2 ms-2" 
+        @click="openConfirmationMultiple"
+    >
+        <LucideIcon icon="Trash2" size="15" />
         {{ $t("labelDelete") }}
     </button>
     <div>
@@ -17,45 +22,54 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <button class="btn btn-outline-success btn-sm table-btn" @click="editType(data.row)">
+                <button 
+                    class="btn btn-outline-success btn-sm table-btn" 
+                    @click="openEditModal(data.row)"
+                >
                     <LucideIcon icon="SquarePen" />
                 </button>
-                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="confirmationDialog(data.row)">
+                <button 
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn" 
+                    @click="openConfirmation(data.row)"
+                >
                     <LucideIcon icon="Trash2" />
                 </button>
             </template>
         </TableComponent>
-
-        <modal-form v-if="modalTypeShow" :dataEditing="selectedType" @openEdit="editTypeRequest" @close="closeModal" />
-        <modal-alert
-            v-if="modalAlertShow"
-            :type="'Confirm'"
-            :entity="selectedType"
-            :alertTitle="$t('labelYouAreAboutToDeleteDocumentType')"
-            :alertMessage="$t('labelThisActionCannotBeUndone')"
-            :okLabel="$t('labelConfirm')"
-            :cancelLabel="$t('labelCancel')"
-            @open="deleteType"
-            @close="closeModal"
-        />
     </div>
+
+    <TypesModal
+        :isEdit="true"
+        @reload="reload"
+        ref="TypesModal"
+    />
+
+    <ConfirmModal
+        id="deleteConfirm"
+        title="labelYouAreAboutToDeleteType"
+        message="labelThisActionCannotBeUndone"
+        cancelText="labelCancel"
+        confirmText="labelConfirm"
+        confirmVariant="primary"
+        ref="DeleteDialog"
+        :isLoading="isDeleting"
+        @confirm="deleteType"
+    />
 </template>
 
 <script>
     import dates from "@/helpers/Dates";
     import TypesService from "@/services/types/TypesService";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalForm from "@/components/pages/type/modal-form";
-    import ModalAlert from "@/components/common/modal-alert";
-    import ToastAlert from "@/components/common/toast-alert";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import TypesModal from "@/components/types/TypesModal.vue";
 
     export default {
         name: "TypesTable",
         components: {
             TableComponent,
-            ModalForm,
-            ModalAlert,
-            ToastAlert,
+            ConfirmModal,
+            TypesModal,
         },
         data: () => ({
             table: {
@@ -83,10 +97,8 @@
             colType: 2,
             modalTypeShow: false,
             modalAlertShow: false,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
             searchInput: "",
+            isDeleting: false,
         }),
         methods: {
             getTypes(obj) {
@@ -129,106 +141,57 @@
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
-            editType(type) {
-                this.selectedType = type;
-                this.openModalType();
+            openEditModal(type) {
+                this.$refs.TypesModal.open(type);
             },
-            editTypeRequest(item) {
-                const params = {
-                    id: item.id,
-                    name: item.name,
-                };
-                TypesService.editType(params)
-                    .then((result) => {
-                        if (!result.success) {
-                            const messageKey =
-                                result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
-
-                            this.emitToast(this.$t(messageKey), "toast-warning");
-                            this.finishEdit();
-                            return;
-                        }
-
-                        this.emitToast(this.$t("labelDocumentTypeEditSuccess"), "toast-success");
-                        this.finishEdit();
-                    })
-                    .finally(() => {
-                        console.log("Finished request.");
-                    });
+            openConfirmation(type) {
+                this.selectedType = [type.id];
+                this.$refs.DeleteDialog.open();
             },
-            emitToast(message, color) {
-                this.$emit("toast", { message, color });
+            openConfirmationMultiple() {
+                const ids = this.table.selectedRows.map((item) => item.id);
+                this.selectedType = ids;
+                this.$refs.DeleteDialog.open();
             },
-            finishEdit() {
-                this.closeModal();
-                this.getTypes({ search: "", page: 1, type: null });
-            },
-            deleteMultipleTypes() {
-                const typeIds = this.table.selectedRows.map((item) => item.id);
-                this.deleteType(typeIds);
-            },
-            deleteType(typeIds) {
-                const idsToDelete = typeIds || [this.selectedTeam.id];
-                TypesService.deleteTypeById(idsToDelete)
+            deleteType() {
+                this.isDeleting = true;
+                TypesService.deleteTypeById(this.selectedType)
                     .then((success) => {
                         if (success) {
-                            this.closeModal();
+                            this.$refs.DeleteDialog.close();
                             this.getTypes({ search: "", page: 1, type: null });
-                            this.emitToast(this.$t("labelDocumentTypeRemoveSuccess"), "toast-success");
+                            this.$notify({
+                                title: 'Tipos',
+                                message: this.$t("labelDocumentTypeRemoveSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                         } else {
-                            this.emitToast(this.$t("labelDocumentTypeRemoveError"), "toast-warning");
+                            this.$notify({
+                                title: 'Tipos',
+                                message: this.$t("labelDocumentTypeRemoveError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
                         }
                     })
                     .finally(() => {
                         this.listIds = [];
                         this.table.selectedRows = [];
+                        this.isDeleting = false;
                     });
             },
             filterList(input) {
                 this.searchInput = input;
                 this.getTypes({ search: input, page: this.queryPage, type: null });
             },
-            openModalType: function () {
-                this.modalTypeShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModalType: function () {
-                this.modalTypeShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            confirmationDialog(team) {
-                this.selectedTeam = team;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.modalAlertShow = false;
-                this.modalTypeShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
             changePage(page) {
                 this.getTypes({ search: "", page: page, type: null });
             },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
-            },
+            reload() {
+                this.$refs.TypesModal.close();
+                this.getTypes({ search: "", page: this.queryPage, type: null });
+            }
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
