@@ -287,8 +287,17 @@
                 var formData = new FormData();
                 formData.append("login", userEmail);
 
-                AuthService.AuthenticateUser(formData, userAzure)
+                AuthService.LoginSSO(formData, userAzure)
                     .then((response) => {
+                        if(response.error !== undefined) {
+                            return this.$notify({
+                                title: 'Login error',
+                                message: response.error,
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+
                         let dataUser = {
                             language: this.$store.state.userProfile.language,
                             image: "",

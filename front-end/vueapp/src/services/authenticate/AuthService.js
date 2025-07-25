@@ -1,33 +1,6 @@
 import api from "@/services/api";
 
 export default {
-    AuthenticateUser(form, userAzure) {
-        return api.post("/Account/Authenticate", form, {
-            headers: { Authorization: `Bearer ${userAzure}` },
-        })
-            .then(({ data }) => {
-                return {
-                    tokenApi: data.token,
-                    tenant: data.tenant,
-                };
-            })
-            .catch(() => {
-                return {
-                    error: "Error"
-                }
-            });
-    },
-    GetClientId() {
-        return api.get("/Account/clientId")
-            .then(({ data }) => {
-                return data;
-            })
-            .catch(() => {
-                return {
-                    error: "Error"
-                }
-            });
-    },
     Login(credentials) {
         return api.post('/Account/Login', credentials, {
                 headers: { 'Authorization': "" }
@@ -46,6 +19,39 @@ export default {
             .catch(() => {
                 return {
                     erro: "Error",
+                }
+            });
+    },
+    LoginSSO(form, userAzure) {
+        return api.post("/Account/Login-sso", form, {
+            headers: { Authorization: `Bearer ${userAzure}` },
+        })
+            .then(({ data }) => {
+                if(!data.success) {
+                    return {
+                        error: data.message,
+                    }
+                }
+                
+                return {
+                    tokenApi: data.data.token,
+                    tenant: data.data.tenant,
+                };
+            })
+            .catch(() => {
+                return {
+                    error: "Error"
+                }
+            });
+    },
+    GetClientId() {
+        return api.get("/Account/clientId")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch(() => {
+                return {
+                    error: "Error"
                 }
             });
     },
