@@ -364,7 +364,7 @@ export default {
                     this.selectedTeamId = null;
                 } else {
                     this.noTeams = false;
-                    this.selectedTeamId = 0; // 0 = todos
+                    this.selectedTeamId = 0;
                 }
             } catch (err) {
                 this.teamList = [];
@@ -385,7 +385,6 @@ export default {
             this.listIds = [];
             let teamIds = [];
             if (this.selectedTeamId === 0) {
-                console.log(this.teamList.length);
                 if (this.teamList.length > 0) {
                     teamIds = this.teamList.map(team => team.id);
                 } else {
@@ -400,7 +399,6 @@ export default {
                     return;
                 }
             } else {
-                // Time específico selecionado
                 teamIds = [this.selectedTeamId];
             }
 
@@ -412,8 +410,6 @@ export default {
                 colType: this.colType,
                 teamIds: teamIds,
             };
-            console.log(paramsReq);
-
 
             let self = this;
             api.get("/Document", { params: paramsReq })
