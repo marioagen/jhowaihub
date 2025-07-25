@@ -377,64 +377,75 @@ export default {
         onTeamChange() {
             this.getList({ page: 1, search: this.searchInput });
         },
-        getList: function (obj) {
+        getList(obj) {
+            this.prepareState(obj);
+
+            const teamIds = this.resolveTeamIds();
+            if (teamIds.length === 0) {
+                this.handleEmptyTeams();
+                return;
+            }
+
+            const queryParams = this.buildQueryParams(obj, teamIds);
+
+            api.get("/Document", { params: queryParams })
+                .then((response) => {
+                    this.dataDocument = response.data.content;
+                    this.pagination = {
+                        currentPage: response.data.currentPage,
+                        pageCount: response.data.pageCount,
+                        rowCount: response.data.rowCount,
+                        listPage: this.divider.calculatePageCount(
+                            response.data.pageCount,
+                            response.data.currentPage
+                        ),
+                    };
+                    this.loading = false;
+                    if (obj.type === "search") this.searching = true;
+                })
+                .catch((e) => {
+                    console.log(e);
+                    this.loading = false;
+                    if (obj.type === "search") this.searching = true;
+                })
+                .finally(() => {
+                    console.log("Finished request.");
+                });
+        },
+        prepareState(obj) {
             this.searchInput = obj.search;
             this.loading = true;
             this.searching = false;
             this.dataDocument = [];
             this.listIds = [];
-            let teamIds = [];
+        },
+        resolveTeamIds() {
             if (this.selectedTeamId === 0) {
-                if (this.teamList.length > 0) {
-                    teamIds = this.teamList.map(team => team.id);
-                } else {
-                    this.loading = false;
-                    this.dataDocument = [];
-                    this.pagination = {
-                        currentPage: 1,
-                        pageCount: 0,
-                        rowCount: 0,
-                        listPage: [],
-                    };
-                    return;
-                }
-            } else {
-                teamIds = [this.selectedTeamId];
+                return this.teamList.length > 0
+                    ? this.teamList.map(team => team.id)
+                    : [];
             }
-
-            const paramsReq = {
+            return [this.selectedTeamId];
+        },
+        handleEmptyTeams() {
+            this.loading = false;
+            this.dataDocument = [];
+            this.pagination = {
+                currentPage: 1,
+                pageCount: 0,
+                rowCount: 0,
+                listPage: [],
+            };
+        },
+        buildQueryParams(obj, teamIds) {
+            return {
                 search: this.searchInput.trim() || "",
                 pageSize: this.selectedOption,
                 page: obj.page,
                 isAscending: this.isAscending,
                 colType: this.colType,
-                teamIds: teamIds,
+                teamIds,
             };
-
-            let self = this;
-            api.get("/Document", { params: paramsReq })
-                .then(function (response) {
-                    self.dataDocument = response.data.content;
-                    self.pagination = {
-                        currentPage: response.data.currentPage,
-                        pageCount: response.data.pageCount,
-                        rowCount: response.data.rowCount,
-                        listPage: self.divider.calculatePageCount(
-                            response.data.pageCount,
-                            response.data.currentPage
-                        ),
-                    };
-                    self.loading = false;
-                    if (obj.type === "search") self.searching = true;
-                })
-                .catch(function (e) {
-                    console.log(e);
-                    self.loading = false;
-                    if (obj.type === "search") self.searching = true;
-                })
-                .finally(function () {
-                    console.log("Finished request.");
-                });
         },
         confirmationDialog: function (item) {
             this.modalEntity = item;
