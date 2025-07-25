@@ -1,7 +1,12 @@
-﻿using WoopiAiHub.Domain.DTOs.Request;
+﻿using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Request.Account;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.Account;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Application.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -19,13 +24,15 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<AccountServices> _logger;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly ITenantServices _tenantServices;
+        private readonly IUserRepository _userRepository;
 
         public AccountServices(IGraphApi graphApi,
                                IMarketPlaceApi marketPlaceApi,
                                IConfiguration config,
                                ILogger<AccountServices> logger,
                                IKeyGeneratorApi keyGeneratorApi,
-                               ITenantServices tenantServices
+                               ITenantServices tenantServices,
+                               IUserRepository userRepository
                                )
         {
             _graphApi = graphApi;
@@ -34,6 +41,7 @@ namespace WoopiAiHub.Application.Services
             _logger = logger;
             _keyGeneratorApi = keyGeneratorApi;
             _tenantServices = tenantServices;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -112,6 +120,7 @@ namespace WoopiAiHub.Application.Services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+            //add new roles
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user),
@@ -134,13 +143,96 @@ namespace WoopiAiHub.Application.Services
         public string FindClientId()
         {
             var clientId = _config["Azure:ClientId"];
-            
+
             if (string.IsNullOrEmpty(clientId))
             {
                 throw new ArgumentException("Client id is not configured.");
             }
 
             return clientId;
+        }
+
+        /// <summary>
+        /// Checks if the Azure token is valid, if it is valid it checks and verifies
+        /// that the user has permission to access the application and returns a token
+        /// </summary>
+        /// <param name="tokenAzureAd"></param>
+        /// <param name="authenticateDto"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<LoginResponseDto> Login(LoginDto loginDto)
+        {
+            try
+            {
+                //Check Marketplace stuff with Gabriel
+                // Validate MarketPlace User / Error: User not Found in Marketplace
+                // Validate User Active from MarketPlace / Error: User inactive in Marketplace
+
+                // Get User in DB / Error: User not found
+                var user = await _userRepository.FindByEmailAsync(loginDto.Email);
+                if (user == null)
+                {
+                    return new LoginResponseDto
+                    {
+                        Success = false,
+                        Message = "User not found.",
+                        Data = null,
+                    };
+                }
+
+                // Validate Password / Error: Password invalid
+                var isPasswordValid = ValidatePassword(loginDto.Password, user.Salt, user.PasswordHash);
+                // Get Users Permissions -> Must wait another PR
+                // Generate JWT Token -> Exists in the func above - what
+                return new LoginResponseDto
+                {
+                    Success = true,
+                    Message = "User logged",
+                    Data = new LoginDataDto
+                    {
+                        UserId = 1,
+                        Email = "askmann@mail.com",
+                        Name = "Askmann",
+                        Token = "",
+                        IsAdmin = true,
+                        Permissions = null,
+                    },
+                };
+            }
+            catch (Exception ex)
+            {
+                return new LoginResponseDto
+                {
+                    Success = false,
+                    Message = ex.Message,
+                    Data = null,
+                };
+            }
+        }
+
+        /// <summary>
+        /// Generates an access token for the api that lasts for 1 hour
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private static bool ValidatePassword(string password, byte[] salt, byte[] dbPassword)
+        {
+            //encrypt password
+            //Compare to dbPassword
+            // Cria o Argon2id com os mesmos parâmetros
+            var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password))
+            {
+                Salt = storedSalt,
+                DegreeOfParallelism = 8, // Número de threads
+                MemorySize = 65536, // Memória usada (em KB)
+                Iterations = 4 // Número de iterações
+            };
+
+            // Gera o hash da senha fornecida
+            var hash = argon2.GetBytes(32);
+
+            // Compara o hash gerado com o hash armazenado
+            return CryptographicOperations.FixedTimeEquals(hash, storedHash);
         }
     }
 }
