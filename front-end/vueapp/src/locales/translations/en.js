@@ -224,7 +224,7 @@
     labelNoTeamsFound: "No team linked to your user",
     labelSelectedTeamsTitle: "Equipos seleccionados",
     labelDocumentsMessage: "Manage documents and extract information",
-    labelAllTeams: "Todos los equipos",
+    labelAllTeams: "All teams",
     labelNoTeams: "No teams available",
 };
 
