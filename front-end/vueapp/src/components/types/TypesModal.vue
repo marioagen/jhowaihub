@@ -99,16 +99,13 @@
                 TypesService.addType(this.typeData.name)
                     .then((result) => {
                         if (result.success) {
-                            this.$notify({
+                            this.$emit('reload');
+                            return this.$notify({
                                 title: 'Tipos',
                                 message: this.$t("labelDocumentTypeSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
-                            this.resetData();
-                            this.$emit('reload');
-                            this.close();
-                            return;
                         } 
                         const messageKey = result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
                         this.$notify({
@@ -128,7 +125,6 @@
                 TypesService.editType(this.typeData)
                     .then((result) => {
                         if (result.success) {
-                            this.close();
                             this.$emit("reload");
                             return this.$notify({
                                 title: 'Tipos',

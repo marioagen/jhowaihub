@@ -97,9 +97,6 @@
             colType: 2,
             modalTypeShow: false,
             modalAlertShow: false,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
             searchInput: "",
             isDeleting: false,
         }),
@@ -192,7 +189,7 @@
                 this.getTypes({ search: "", page: page, type: null });
             },
             reload() {
-                console.log('reload')
+                this.$refs.TypesModal.close();
                 this.getTypes({ search: "", page: this.queryPage, type: null });
             }
         },
