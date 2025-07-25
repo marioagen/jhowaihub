@@ -1,6 +1,7 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -890,37 +891,31 @@ namespace WoopiAiHub.Application.Services
         /// <param name="totalList"></param>
         /// <param name="DocumentPagedDataDto"></param>
         /// <returns></returns>
-        private DocumentPagedResultDto DocumentPagination(IQueryable<Document> totalList,
-                                                          DocumentPagedDataDto documentPagedDataDto)
+        private DocumentPagedResultDto DocumentPagination(IQueryable<Document> query,
+                                                          DocumentPagedDataDto dto)
         {
-            int pageCount, currentPage = 0;
+            int pageCount, currentPage;
 
-            if (string.IsNullOrEmpty(documentPagedDataDto.Search) is false)
-            {
-                totalList = totalList.Where(i => i.Description.ToLower()
-                                     .Contains(documentPagedDataDto.Search.ToLower()) ||
-                                               i.Name.Contains(documentPagedDataDto.Search));
-            }
+            var totalListCount = query.Count();
 
-            var totalListCount = totalList.Count();
-
-            if (documentPagedDataDto.PageSize == 0)
+            if (dto.PageSize == 0)
             {
                 pageCount = 1;
                 currentPage = 1;
-                documentPagedDataDto.PageSize = totalListCount;
+                dto.PageSize = totalListCount;
             }
             else
             {
-                pageCount = (int)Math.Ceiling((double)totalListCount / documentPagedDataDto.PageSize);
-                currentPage = documentPagedDataDto.Page <= pageCount ? documentPagedDataDto.Page : 1;
-                totalList = totalList.Skip((currentPage - 1) * documentPagedDataDto.PageSize)
-                                     .Take(documentPagedDataDto.PageSize);
+                pageCount = (int)Math.Ceiling((double)totalListCount / dto.PageSize);
+                currentPage = dto.Page <= pageCount ? dto.Page : 1;
+
+                query = query.Skip((currentPage - 1) * dto.PageSize)
+                             .Take(dto.PageSize);
             }
 
-            return new DocumentPagedResultDto()
+            return new DocumentPagedResultDto
             {
-                Content = totalList,
+                Content = query, 
                 CurrentPage = currentPage,
                 PageCount = pageCount,
                 RowCount = totalListCount
