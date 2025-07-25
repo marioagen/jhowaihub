@@ -44,6 +44,16 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Find users by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<User> FindByEmailAsync(String email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        /// <summary>
         /// Asynchronously retrieves a user by their unique reference identifier.
         /// </summary>
         /// <param name="referenceUserId">The unique identifier of the user to retrieve. This value must not be empty.</param>
