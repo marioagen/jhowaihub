@@ -21,9 +21,9 @@ export default {
                 console.log(e);
             });
     },
-    deleteProfileById(teamId) {
+    deleteProfileById(ids) {
         return api
-            .delete("/Profile/DeleteByIds", { data: [teamId] })
+            .delete("/Profile/DeleteByIds", { data: ids })
             .then(() => {
                 return true;
             })
@@ -32,4 +32,45 @@ export default {
                 return false;
             });
     },
+    addProfile(profile) {
+        return api
+            .post("/Profile", profile)
+            .then(({ data, status }) => {
+                return {
+                    success: true,
+                    status,
+                    data,
+                };
+            })
+            .catch((e) => {
+                const status = e?.response?.status ?? 500;
+                const message = e?.response?.data?.message || "Erro desconhecido";
+                return {
+                    success: false,
+                    status,
+                    error: message,
+                };
+            });
+    },
+    updateProfile(profile) {
+        return api
+            .put("/Profile", profile)
+            .then(({ data, status }) => {
+                return {
+                    success: true,
+                    status,
+                    data,
+                };
+            })
+            .catch((e) => {
+                const status = e?.response?.status ?? 500;
+                const message = e?.response?.data?.message || "Erro desconhecido";
+                return {
+                    success: false,
+                    status,
+                    error: message,
+                };
+            });
+    },
+
 };

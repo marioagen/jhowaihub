@@ -22,7 +22,7 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2" @click="editTeam(data.row)">
+                            <a class="dropdown-item d-flex align-items-center gap-2"  @click="openEditModal(data.row)">
                                 <LucideIcon icon="SquarePen" />
                                 {{ $t("labelEdit") }}
                             </a>
@@ -36,33 +36,26 @@
                     </ul>
                 </div>
             </template>
-
         </TableComponent>
     </div>
-    <modal-team
-        v-if="modalTeamShow"
-        :teamEditing="selectedTeam"
-        @teamCreated="handleTeamCreated"
-        @close="closeModalTeam"
-    />
-
-    <ConfirmModal
-        id="deleteConfirm"
-        title="labelYouAreAboutToDeleteTeam"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
-        confirmVariant="primary"
-        ref="DeleteDialog"
-        :isLoading="isDeleting"
-        @confirm="deleteTeam"
-    />
+    <ProfilesModal :isEdit="true"
+                   @reload="getProfiles({ search: '', page: this.queryPage, type: null })"
+                   ref="ProfilesModal" />
+    <ConfirmModal id="deleteConfirm"
+                  title="labelYouAreAboutToDeleteTeam"
+                  message="labelThisActionCannotBeUndone"
+                  cancelText="labelCancel"
+                  confirmText="labelConfirm"
+                  confirmVariant="primary"
+                  ref="DeleteDialog"
+                  :isLoading="isDeleting"
+                  @confirm="deleteProfile" />
 </template>
 
 <script>
     import dates from "@/helpers/Dates";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalTeam from "@/components/user-manager/teams/modals/TeamModal.vue";
+    import ProfilesModal from "@/components/user-manager/profiles/modals/ProfilesModal.vue";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
@@ -71,7 +64,7 @@
         name: "RolesTable",
         components: {
             TableComponent,
-            ModalTeam,
+            ProfilesModal,
             ConfirmModal,
         },
         data: () => ({
@@ -93,13 +86,13 @@
                 },
             },
             isDeleting: false,
-            selectedTeam: {},
+            selectedProfile: {},
             queryPage: 1,
             searchInput: "",
             selectedOption: 10,
             isAscending: false,
             colType: 2,
-            modalTeamShow: false,
+            modalProfileShow: false,
             modalAlertShow: false,
             permissionsCount: 0,
         }),
@@ -151,29 +144,6 @@
             formatDate(date) {
                 return dates.formatDate(date);
             },
-            editTeam(team) {
-                this.selectedTeam = team;
-                this.openModalTeam();
-            },
-            openConfirmation(team) {
-                this.selectedTeam = team;
-                this.$refs.DeleteDialog.open();
-            },
-            deleteTeam() {
-                this.isDeleting = true;
-                let teamId = this.selectedTeam.id;
-                TeamsService.deleteTeamById(teamId)
-                    .then((status) => {
-                        if (status) {
-                            this.$refs.DeleteDialog.close();
-                            this.getProfiles({ search: "", page: 1, type: null });
-                        }
-                    })
-                    .finally(() => {
-                        this.isDeleting = false;
-                        this.listIds = [];
-                    });
-            },
             filterList(input) {
                 this.searchInput = input;
                 this.getProfiles({ search: input, page: this.queryPage, type: null });
@@ -182,16 +152,42 @@
                 this.getProfiles({ search: "", page: this.queryPage, type: null });
                 this.closeModalTeam();
             },
-            openModalTeam: function () {
-                this.modalTeamShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            openEditModal(profile) {
+                this.$refs.ProfilesModal.open(profile);
             },
-            closeModalTeam: function () {
-                this.modalTeamShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            openConfirmation(profile) {
+                this.selectedProfile = [profile.id];
+                this.$refs.DeleteDialog.open();
             },
             changePage(page) {
                 this.getProfiles({ search: "", page: page, type: null });
+            },
+            deleteProfile() {
+                this.isDeleting = true;
+                ProfilesService.deleteProfileById(this.selectedProfile)
+                    .then((success) => {
+                        if (success) {
+                            this.$refs.DeleteDialog.close();
+                            this.getProfiles({ search: "", page: 1, type: null });
+                            this.emitToast(
+                                this.$t("labelDocumentTypeRemoveSuccess"),
+                                "toast-success"
+                            );
+                        } else {
+                            this.emitToast(
+                                this.$t("labelDocumentTypeRemoveError"),
+                                "toast-warning"
+                            );
+                        }
+                    })
+                    .finally(() => {
+                        this.listIds = [];
+                        this.table.selectedRows = [];
+                        this.isDeleting = false;
+                    });
+            },
+            emitToast(message, color) {
+                this.$emit("toast", { message, color });
             },
         },
         created() {
