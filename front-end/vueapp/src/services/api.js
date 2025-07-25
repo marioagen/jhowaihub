@@ -53,14 +53,14 @@ api.interceptors.response.use(
     },
     async (error) => {
         const originalRequest = error.config;
-        if (originalRequest.url !== "/Account/Authenticate" && error.response) {
+        if (originalRequest.url !== "/Account/Login-sso" && error.response) {
             if (error.response != null && error.response.status === 401 && !originalRequest._retry) {
                 originalRequest._retry = true;
                 try {
                     var formData = new FormData();
                     formData.append("login", store.state.userProfile.login);
                     const rs = await api
-                        .post("/Account/Authenticate", formData, {
+                        .post("/Account/Login-sso", formData, {
                             headers: { Authorization: `Bearer ${store.state.userProfile.tokenAzure}` },
                         })
                         .catch((err) => {
