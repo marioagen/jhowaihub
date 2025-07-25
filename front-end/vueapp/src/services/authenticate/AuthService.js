@@ -29,15 +29,24 @@ export default {
             });
     },
     Login(credentials) {
-        return credentials;
-        // return api.post("", credentials)
-        //     .then(({ data }) => {
-        //         console.log(data)
-        //     })
-        //     .catch(() => {
-        //         return {
-        //             erro: "Error",
-        //         }
-        //     });
+        return api.post('/Account/Login', credentials, {
+                headers: { 'Authorization': "" }
+            })
+            .then(({ data }) => {
+                console.log(data);
+                return {
+                    id: "",
+                    name: "",
+                    login: "",
+                    isAdmin: "",
+                    tokenAzure: "",
+                    tokenApi: "",
+                };
+            })
+            .catch(() => {
+                return {
+                    erro: "Error",
+                }
+            });
     },
 };

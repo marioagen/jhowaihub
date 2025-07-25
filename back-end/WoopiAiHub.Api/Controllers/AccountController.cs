@@ -2,6 +2,7 @@
 using WoopiAiHub.Domain.Interfaces.Services;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Request.Account;
 
 namespace WoopiAiHub.Api.Controllers
 {
@@ -93,6 +94,21 @@ namespace WoopiAiHub.Api.Controllers
                 _logger.LogError(ex, $"An exception occurred in the {nameof(AccountController)} in the {nameof(FindClientId)} method.");
                 return Unauthorized();
             }
+        }
+
+        /// <summary>
+        /// Authenticates the user and returns the token if he has user permission
+        /// </summary>
+        /// <param name="authenticateDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("login")]
+        // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LoginResponseDto))]
+        // [ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(UnauthorizedDto))]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        {
+            var result = await _accountServices.Login(loginDto);
+            return Ok(result);
         }
     }
 }
