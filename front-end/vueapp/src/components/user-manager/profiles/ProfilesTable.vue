@@ -1,7 +1,7 @@
 <template>
     <div>
         <TableComponent modalName="labelProfile"
-                        emptyMessage="labelNoProfilesWasFound"
+                        emptyMessage="labelNoProfilesWereFound"
                         :data="table.data"
                         :columns="table.columns"
                         :isLoading="table.isLoading"
@@ -13,7 +13,7 @@
                 {{data.row.users.length}}
             </template>
             <template #cell-permissions="{ data }">
-                {{data.row.permissions.length}} - {{this.permissionsCount}}
+                {{data.row.permissions.length}} {{$t("labelShowingToTotal")}} {{this.permissionsCount}}
             </template>
             <template #cell-actions="{ data }">
                 <div class="dropdown column-align">
@@ -42,7 +42,7 @@
                    @reload="getProfiles({ search: '', page: this.queryPage, type: null })"
                    ref="ProfilesModal" />
     <ConfirmModal id="deleteConfirm"
-                  title="labelYouAreAboutToDeleteTeam"
+                  title="labelYouAreAboutToDeleteProfile"
                   message="labelThisActionCannotBeUndone"
                   cancelText="labelCancel"
                   confirmText="labelConfirm"
@@ -72,9 +72,9 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "Id" },
-                    { key: "name", label: "labelTeamName" },
-                    { key: "users", label: "labelMembers" },
-                    { key: "permissions", label: "labelPermission" },
+                    { key: "name", label: "labelProfile" },
+                    { key: "users", label: "labelUsers" },
+                    { key: "permissions", label: "labelPermissions" },
                     { key: "actions", label: "labelAction" }
                 ],
                 data: [],

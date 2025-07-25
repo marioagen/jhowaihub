@@ -48,7 +48,7 @@
             tabsList: [
                 { name: 'users', label: 'labelUsers', icon: 'UsersRound' },
                 { name: 'teams', label: 'labelTeams', icon: 'Building' },
-                { name: 'profiles', label: 'labelTeams', icon: 'Shield' }
+                { name: 'profiles', label: 'labelProfilePermissions', icon: 'Shield' }
             ],
         }),
     };

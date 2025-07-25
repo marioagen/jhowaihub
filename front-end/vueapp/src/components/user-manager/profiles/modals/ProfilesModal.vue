@@ -5,7 +5,10 @@
                     ref="ProfilesModal">
         <template #header>
             <div class="modal-header">
-                <h5 class="modal-title"> {{ $t(titleText) }} </h5>
+                <h6 class="modal-title">
+                    {{ $t(titleText) }}
+                    <small class="text-muted d-block text-sm">{{ $t(subTitleText) }}</small>
+                </h6>
                 <button class="btn-close"
                         data-bs-dismiss="modal"
                         @click="close" />
@@ -14,14 +17,14 @@
 
         <template #body>
             <div class="modal-body">
-                <label>Name</label>
+                <label>{{$t("labelName")}}</label>
                 <input v-model="profileData.name" class="form-control"
                        @blur="nameError = profileData.name ? '' : $t('labelRequiredField')"
                        @input="nameError = ''" />
                 <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label class="form-label mb-0">{{ $t("labelTeamMembers") }}</label>
+                        <label class="form-label mb-0">{{ $t("labelPermissions") }}</label>
                         <span class="text-muted">
                             {{ selectedPermissions.length }} {{ $t("labelSelectedWithO") }}
                         </span>
@@ -32,7 +35,7 @@
                             <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
                             <input type="text"
                                    class="form-control form-control-sm"
-                                   :placeholder="$t('labelSearchUsers')"
+                                   :placeholder="$t('labelSearchPermissions')"
                                    v-model="searchTerm" />
                         </div>
                     </div>
@@ -53,7 +56,7 @@
                                 <span class="visually-hidden">{{ $t("labelLoading") }}</span>
                             </div>
                         </div>
-                        <div v-if="!loading" v-for="permission in permissions" :key="permission.id" class="p-1">
+                        <div v-if="!loading" v-for="permission in filteredPermissions" :key="permission.id" class="p-1">
                             <div class="form-check d-flex align-items-center">
                                 <input class="form-check-input me-3"
                                        type="checkbox"
@@ -116,13 +119,17 @@
             selectedPermissions: [],
             nameError: "",
             permissionError: "",
+            searchTerm: "",
         }),
         computed: {
             titleText() {
-                return this.isEdit ? "labelEditTitleType" : "labelSaveTitleType";
+                return this.isEdit ? "labelEditTitleProfile" : "labelSaveTitleProfile";
+            },
+            subTitleText() {
+                return this.isEdit ? "labelEditSubTitleProfile" : "labelSaveSubTitleProfile";
             },
             saveText() {
-                return this.isEdit ? "labelEditType" : "labelSaveType";
+                return this.isEdit ? "labelEditProfile" : "labelCreateProfile";
             },
             filteredPermissions() {
                 if (!this.searchTerm) {

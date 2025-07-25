@@ -2,12 +2,12 @@
     <div class="mt-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h6 class="mb-0 fw-bold">{{ $t("labelTeams") }}</h6>
+                <h6 class="mb-0 fw-bold">{{ $t("labelProfilePermissions") }}</h6>
                 <p>
-                    <small class="text-muted">{{ $t("labelTeamsMessage") }}</small>
+                    <small class="text-muted">{{ $t("labelProfilesMessage") }}</small>
                 </p>
             </div>
-            <button class="btn btn-primary btn-sm" @click="openModalProfile">+ {{ $t("labelNewTeam") }}</button>
+            <button class="btn btn-primary btn-sm" @click="openModalProfile">+ {{ $t("labelNewProfile") }}</button>
         </div>
         <div class="card mb-3">
             <div class="card-body">
@@ -106,9 +106,9 @@
             },
             setEntitySearch: function () {
                 this.entitySearch = {
-                    screen: "team",
-                    labelInput: this.$t("labelSearchTeams"),
-                    placeholderInput: this.$t("labelTypeTeamName"),
+                    screen: "profile",
+                    labelInput: this.$t("labelSearchProfiles"),
+                    placeholderInput: this.$t("labelTypeProfileName"),
                 };
             },
         },
