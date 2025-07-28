@@ -54,5 +54,16 @@ export default {
                     error: errorMessage,
                 }
             });
+    },
+    deleteQuestionById(ids) {
+        return api.delete("/Question/DeleteByIds", { data: ids })
+            .then(() => {
+                return true;
+            })
+            .catch(function (e) {
+                return {
+                    error: e,
+                }
+            });
     }
 }
