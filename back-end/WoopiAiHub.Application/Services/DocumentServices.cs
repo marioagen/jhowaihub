@@ -39,7 +39,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IDocumentNormalizedServices _documentNormalizedServices;
         private readonly IFileRepositoryApi _fileRepositoryApi;
         private readonly IFunctionFileRetriever _functionFileRetriever;
-        private readonly IValidateDocument _validateDocument;
         private readonly IOcrGoogle _ocrGoogle;
         private readonly IOcrAzure _ocrAzure;
         private readonly IMemoryCache _cache;
@@ -58,7 +57,6 @@ namespace WoopiAiHub.Application.Services
                                IFileRepositoryApi fileRepositoryApi,
                                IFunctionFileRetriever functionFileRetriever,
                                IDocumentNormalizedServices documentNormalizedServices,
-                               IValidateDocument validateDocument,
                                IOcrGoogle ocrGoogle,
                                IOcrAzure ocrAzure,
                                IMemoryCache cache,
@@ -77,7 +75,6 @@ namespace WoopiAiHub.Application.Services
             _fileRepositoryApi = fileRepositoryApi;
             _functionFileRetriever = functionFileRetriever;
             _documentNormalizedServices = documentNormalizedServices;
-            _validateDocument = validateDocument;
             _ocrGoogle = ocrGoogle;
             _ocrAzure = ocrAzure;
             _cache = cache;
@@ -132,9 +129,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> DocumentAnalysis(DocumentAnalysisResponseDto documentAnalysisResponseDto)
         {
-
-            _validateDocument.VerifyCreatorEmail(documentAnalysisResponseDto.Id,
-                                                 documentAnalysisResponseDto.EmailCreator);
 
             var document = _documentRepository.FindById(documentAnalysisResponseDto.Id);
             var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
@@ -239,14 +233,6 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> Delete(List<int> ids, HeadersDto headersDto)
         {
             var hashList = this.FindHashById(ids);
-
-            foreach (var id in ids)
-            {
-                _validateDocument.VerifyCreatorEmail(id,
-                                                     headersDto.EmailCreator);
-
-            }
-
             var result = _documentRepository.Delete(ids);
 
             foreach (var hash in hashList)
@@ -298,9 +284,6 @@ namespace WoopiAiHub.Application.Services
             HttpContext context = _httpContextAccessor.HttpContext!;
             var tenant = context.Request.Headers[HeaderNames.XTenant].ToString();
 
-            _validateDocument.VerifyCreatorEmail(documentQuestionnaireDto.IdDocument,
-                                                 headersDto.EmailCreator);
-
             var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
             var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
 
@@ -341,9 +324,6 @@ namespace WoopiAiHub.Application.Services
         public FindByIdAnalyzeDto FindByIdAnalyze(int id,
                                                   HeadersDto headersDto)
         {
-            _validateDocument.VerifyCreatorEmail(id,
-                                                 headersDto.EmailCreator);
-
             var result = _documentRepository.FindById(id);
 
             if (result == null)
@@ -369,9 +349,6 @@ namespace WoopiAiHub.Application.Services
         public object FindStatusAndName(int id,
                                         string emailCreator)
         {
-            _validateDocument.VerifyCreatorEmail(id,
-                                                 emailCreator);
-
             var document = _documentRepository.FindById(id);
 
             var result = new
@@ -391,9 +368,6 @@ namespace WoopiAiHub.Application.Services
         public bool ChangeStatus(int id,
                                  string emailCreator)
         {
-            _validateDocument.VerifyCreatorEmail(id,
-                                                 emailCreator);
-
             return _documentRepository.ChangeStatus(id);
         }
 
@@ -426,9 +400,6 @@ namespace WoopiAiHub.Application.Services
 
             if (availableBalanceToQuestion)
             {
-                _validateDocument.VerifyCreatorEmail(documentInputDto.Id,
-                                                     headersDto.EmailCreator);
-
                 var documentDb = _documentRepository.FindById(documentInputDto.Id);
                 var customQueryRequestDto = await this.CreateCustomQueryRequestDto(documentInputDto.Input,
                                                                                    headersDto.Tenant,
