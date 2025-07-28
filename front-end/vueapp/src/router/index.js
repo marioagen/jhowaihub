@@ -15,6 +15,8 @@ import UserIndex from "@/components/pages/user/index";
 import TypesPage from "@/pages/types.vue";
 import UserManagePage from "@/pages/user-manager.vue";
 
+import { hasPermission } from "@/utils/permissions";
+
 function authenticate(to, from, next) {
     var usuario = JSON.parse(window.localStorage.getItem("project"));
     if (usuario != null) {
@@ -25,6 +27,28 @@ function authenticate(to, from, next) {
         next({
             path: "/",
         });
+}
+
+function requirePermission(permissionKey) {
+    return (to, from, next) => {
+        authenticate(to, from, () => {
+            const permissionsList = permissionKey.split(',');
+            let isAllowed = false;
+
+            for (const permission of permissionsList) {
+                if(hasPermission(permission)) {
+                    isAllowed = true;
+                    break;
+                }
+            }
+
+            if (isAllowed) {
+                next();
+            } else {
+                next({ path: '/unauthorized' });
+            }
+        });
+    };
 }
 
 const routes = [
@@ -44,14 +68,14 @@ const routes = [
         name: "DocumentUpload",
         component: DocumentUpload,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Documents:Upload"),
     },
     {
         path: "/document-list",
         name: "DocumentList",
         component: DocumentList,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Documents:View"),
     },
     {
         path: "/types",
@@ -60,56 +84,56 @@ const routes = [
         meta: {
             layout: "default",
         },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Types:View"),
     },
     {
         path: "/manage-question",
         name: "Question",
         component: QuestionManager,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Questions:View"),
     },
     {
         path: "/quiz-new",
         name: "QuizNew",
         component: QuizFormNew,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Quiz:Create"),
     },
     {
         path: "/quiz-edit/:id",
         name: "QuizEdit",
         component: QuizFormEdit,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Quiz:Edit"),
     },
     {
         path: "/manage-quiz",
         name: "Quiz",
         component: QuizManager,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Documents:View"),
     },
     {
         path: "/normalize/:id",
         name: "Normalize",
         component: NormalizeIndex,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Documents:View"),
     },
     {
         path: "/analyzer/:id",
         name: "Analyzer",
         component: AnalyzerIndex,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("Documents:View"),
     },
     {
         path: "/manage-user",
         name: "UserManage",
         component: UserManagePage,
         meta: { layout: "default" },
-        beforeEnter: authenticate,
+        beforeEnter: requirePermission("ManageUsers:View"),
     },
 ];
 
