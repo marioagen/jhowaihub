@@ -48,7 +48,7 @@
         <div class="sidebar-horizontal-separator"></div>
 
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li class="mb-1">
+            <li class="mb-1" v-if="permissions['user-manager']">
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -68,7 +68,7 @@
                 </router-link>
             </li>
 
-            <li class="mb-1">
+            <li class="mb-1" v-if="permissions.documents">
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -88,7 +88,7 @@
                 </router-link>
             </li>
 
-            <li class="mb-1">
+            <li class="mb-1" v-if="permissions.types">
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -110,7 +110,7 @@
                 </router-link>
             </li>
 
-            <li>
+            <li v-if="permissions.question">
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -130,7 +130,7 @@
                 </router-link>
             </li>
 
-            <li>
+            <li v-if="permissions.questionnaires">
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -180,6 +180,13 @@
             return {
                 title: "Component SideBarTest",
                 showLogoDarkMode: this.theme,
+                permissions: {
+                    questions: true,
+                    documents: true,
+                    types: true,
+                    questionnaires: true,
+                    "user-manager": true,
+                }
             };
         },
         updated() {
