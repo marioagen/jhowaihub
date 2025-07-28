@@ -46,7 +46,7 @@
     import TypesModal from "@/components/types/TypesModal.vue";
 
     export default {
-        name: "TypeManager",
+        name: "TypePage",
         emits: ["showAlertToast"],
         data() {
             return {
