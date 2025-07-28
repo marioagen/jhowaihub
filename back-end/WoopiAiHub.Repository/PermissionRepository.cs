@@ -20,7 +20,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Find users by ids and convert to a User list
+        /// Find permissions by ids and convert to a Permission list
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -30,6 +30,11 @@ namespace WoopiAiHub.Repository
                                              .ToListAsync();
         }
 
+
+        /// <summary>
+        /// Find all permissions and convert to a PermissionDto list
+        /// </summary>
+        /// <returns></returns>
         public ICollection<PermissionDto> FindAll()
         {
             return _context.Permissions

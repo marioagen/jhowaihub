@@ -23,7 +23,7 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Endpoint that receives the request to return all profiles paginated.
+        /// Endpoint that receives the request to return all permissions paginated.
         /// </summary>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>

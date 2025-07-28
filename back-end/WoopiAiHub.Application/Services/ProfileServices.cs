@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WoopiAiHub.Domain.DTOs.Response;
+﻿using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Repository;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 
@@ -42,7 +36,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Retrieves all teams paged and their users.
+        /// Retrieves all profiles paged.
         /// </summary>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
@@ -67,9 +61,9 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Creates a new team with a unique name.
+        /// Creates a new profile with a unique name.
         /// </summary>
-        /// <param name="teamCreateDto"></param>
+        /// <param name="profileCreateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         public async Task<bool> CreateUniqueProfile(ProfileCreateDto profileCreateDto)
@@ -104,9 +98,9 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Updates an existing team based on the provided DTO.
+        /// Updates an existing profile based on the provided DTO.
         /// </summary>
-        /// <param name="teamUpdateDto"></param>
+        /// <param name="profileUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         public async Task<bool> Update(ProfileUpdateDto profileUpdateDto)
@@ -139,7 +133,7 @@ namespace WoopiAiHub.Application.Services
 
 
         /// <summary>
-        /// Deletes a list of teams by their IDs.
+        /// Deletes a list of profiles by their IDs.
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -149,7 +143,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Ordenates the list of Teams and returns a paged result.
+        /// Ordenates the list of profiles and returns a paged result.
         /// </summary>
         /// <param name="totalList"></param>
         /// <param name="pagedDataDto"></param>

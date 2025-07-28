@@ -23,9 +23,9 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Create a new team if it does not already exist.
+        /// Create a new profile if it does not already exist.
         /// </summary>
-        /// <param name="team"></param>
+        /// <param name="profile"></param>
         /// <returns></returns>
         public bool CreateUniqueProfile(Domain.Models.Profile profile)
         {
@@ -40,7 +40,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Find all teams and include their users.
+        /// Find all profiles
         /// </summary>
         /// <returns></returns>
         public ICollection<Domain.Models.Profile> FindAll()
@@ -53,7 +53,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Find a team by its ID and include its users.
+        /// Find a profile by its ID.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -87,9 +87,9 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Update a team if it does not already exist with the same name.
+        /// Update a profile if it does not already exist with the same name.
         /// </summary>
-        /// <param name="team"></param>
+        /// <param name="profile"></param>
         /// <returns></returns>
         public bool Update(Domain.Models.Profile profile)
         {
@@ -99,7 +99,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Delete teams by their IDs.
+        /// Delete profiles by their IDs.
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -120,7 +120,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Find all teams with pagination and include their users.
+        /// Find all profiles with pagination and include their permissions.
         /// </summary>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
@@ -155,13 +155,18 @@ namespace WoopiAiHub.Repository
             return query;
         }
 
+        /// <summary>
+        /// Find profiles by their IDs.
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         public List<Domain.Models.Profile> FindByIds(IEnumerable<int> ids)
         {
             return _context.Profiles.Where(t => ids.Contains(t.Id)).ToList();
         }
 
         /// <summary>
-        /// Find a team by its ID and include its users.
+        /// Find a profile by its ID and returns a model.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>

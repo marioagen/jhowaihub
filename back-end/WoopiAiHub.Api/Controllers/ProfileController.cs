@@ -56,7 +56,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="profileCreateDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [SwaggerOperation("Endpoint that receives the request to create a team")]
+        [SwaggerOperation("Endpoint that receives the request to create a profile")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> Create([FromBody] ProfileCreateDto profileCreateDto)
         {
@@ -65,12 +65,12 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// EndPoint that updates a team.
+        /// EndPoint that updates a profile.
         /// </summary>
         /// <param name="profileUpdateDto"></param>
         /// <returns></returns>
         [HttpPut]
-        [SwaggerOperation("EndPoint that update a team")]
+        [SwaggerOperation("EndPoint that update a profile")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> Update([FromBody] ProfileUpdateDto profileUpdateDto)
         {
@@ -79,12 +79,12 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// EndPoint that deletes teams by id.
+        /// EndPoint that deletes profiles by ids.
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
         [HttpDelete("DeleteByIds")]
-        [SwaggerOperation("EndPoint that delete teams by id")]
+        [SwaggerOperation("EndPoint that delete profiles by ids")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public IActionResult Delete(List<int> ids)
         {
