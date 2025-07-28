@@ -39,7 +39,7 @@
         </TableComponent>
     </div>
     <ProfilesModal :isEdit="true"
-                   @reload="getProfiles({ search: '', page: this.queryPage, type: null })"
+                   @reload="reload"
                    ref="ProfilesModal" />
     <ConfirmModal id="deleteConfirm"
                   title="labelYouAreAboutToDeleteProfile"
@@ -61,7 +61,7 @@
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
 
     export default {
-        name: "RolesTable",
+        name: "ProfilesTable",
         components: {
             TableComponent,
             ProfilesModal,
@@ -169,15 +169,19 @@
                         if (success) {
                             this.$refs.DeleteDialog.close();
                             this.getProfiles({ search: "", page: 1, type: null });
-                            this.emitToast(
-                                this.$t("labelDocumentTypeRemoveSuccess"),
-                                "toast-success"
-                            );
+                            this.$notify({
+                                title: 'Profiles',
+                                message: this.$t("labelProfileRemoveSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                         } else {
-                            this.emitToast(
-                                this.$t("labelDocumentTypeRemoveError"),
-                                "toast-warning"
-                            );
+                            this.$notify({
+                                title: 'Profiles',
+                                message: this.$t("labelProfileRemoveError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
                         }
                     })
                     .finally(() => {
@@ -186,9 +190,10 @@
                         this.isDeleting = false;
                     });
             },
-            emitToast(message, color) {
-                this.$emit("toast", { message, color });
-            },
+            reload() {
+                this.$refs.ProfilesModal.close();
+                this.getProfiles({ search: "", page: this.queryPage, type: null });
+            }
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;

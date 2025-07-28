@@ -43,6 +43,12 @@
     labelDocumentTypeRemoveSuccess: "Document type successfully removed",
     labelDocumentTypeRemoveError: "Error removing document type",
     labelDocumentTypeEditSuccess: "Document type updated successfully",
+    labelProfileAddSuccess: "Profile inserted successfully",
+    labelProfileEditSuccess: "Profile updated successfully",
+    labelProfileRemoveSuccess: "Profile removed successfully",
+    labelProfileRemoveError: "Error while removinmg profile",
+    labelProfileAddError: "Erro while creating profile",
+    labelProfileEditError: "Erro while editing profile",
     labelDocumentHasAlreadyBeenStandardizedPreviously:
         "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
     labelDownloadCsv: "Download CSV",

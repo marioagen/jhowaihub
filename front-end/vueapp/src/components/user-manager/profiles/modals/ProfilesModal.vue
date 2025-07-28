@@ -101,6 +101,7 @@
         components: {
             ModalComponent
         },
+        emits: ['reload'],
         props: {
             isEdit: {
                 type: Boolean,
@@ -150,7 +151,7 @@
                 }
                 else if (this.selectedPermissions.length == 0) {
                     this.clearMyInterval();
-                    this.alertToast(this.$t("labelNoPermissionChosen") + ".", "toast-warning");
+                    this.permissionError = this.$t("labelRequiredField");
                     valid = false;
                 }
                 return valid;
@@ -187,14 +188,23 @@
                 ProfilesService.addProfile(paramsReq)
                     .then((result) => {
                         if (result.success) {
-                            this.alertToast(this.$t("labelDocumentTypeSuccess"), "toast-success");
                             this.close();
                             this.resetData();
                             this.$emit("reload");
-                            return;
+                            return this.$notify({
+                                title: 'Profiles',
+                                message: this.$t("labelProfileAddSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
+                        } else {
+                            this.$notify({
+                                title: 'Profiles',
+                                message: this.$t("labelProfileAddError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
                         }
-                        const messageKey = result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
-                        this.alertToast(this.$t(messageKey), "toast-warning");
                     })
                     .finally(() => {
                         this.isLoading = false;
@@ -212,35 +222,27 @@
                 ProfilesService.updateProfile(paramsReq)
                     .then((result) => {
                         if (result.success) {
-                            this.alertToast(this.$t("labelDocumentTypeEditSuccess"), "toast-success");
                             this.close();
                             this.$emit("reload");
-                            return;
+                            return this.$notify({
+                                title: 'Profiles',
+                                message: this.$t("labelProfileEditSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                         }
-
-                        const messageKey = result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
-                        this.alertToast(this.$t(messageKey), "toast-warning");
+                        else {
+                            this.$notify({
+                                title: 'Profiles',
+                                message: this.$t("labelProfileEditError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
                     })
                     .finally(() => {
                         this.isLoading = false;
                     });
-            },
-            alertToast(msg, color) {
-                this.clearMyInterval();
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-
-                this.myInterval = setTimeout(() => {
-                    this.toastMessage = "";
-                    this.toastColor = "";
-                    this.toastShow = false;
-                    this.myInterval = null;
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
             },
             clearMyInterval() {
                 if (this.myInterval) {

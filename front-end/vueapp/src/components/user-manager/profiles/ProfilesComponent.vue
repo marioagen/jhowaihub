@@ -14,11 +14,11 @@
                 <SearchComponent :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
             </div>
         </div>
-        <profiles-table ref="TeamsTable" />
+        <profiles-table ref="ProfilesTable" />
     </div>
     <ProfilesModal :isEdit="false"
                    :type="modalType"
-                   @reload="$refs.ProfilesTable.getProfiles({ search: '', page: this.queryPage, type: null })"
+                   @reload="reloadTable"
                    ref="ProfilesModal" />
 </template>
 
@@ -111,6 +111,10 @@
                     placeholderInput: this.$t("labelTypeProfileName"),
                 };
             },
+            reloadTable() {
+                this.$refs.ProfilesModal.close();
+                this.$refs.ProfilesTable.reload();
+            }
         },
         created() {
             this.setMenuActions();
