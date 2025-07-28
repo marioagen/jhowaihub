@@ -285,16 +285,20 @@ export default {
         SearchComponent,
     },
     watch: {
-        searchInput: function (val) {
+        searchInput(val) {
             this.searching = false;
         },
-        "$store.state.userProfile.language": function () {
+        "$store.state.userProfile.language"() {
             this.setCrumbsData();
             this.setEntitySearch();
         },
-        "$store.state.userProfile.keyMongoAccess"(newValue) {
-            if (newValue) {
-                this.getList({ search: "", page: this.queryPage, type: null });
+        keyMongoAccess: {
+            immediate: true,
+            handler: async function (newValue) {
+                if (newValue) {
+                    await this.loadTeams();
+                    this.getList({ search: '', page: this.queryPage, type: null });
+                }
             }
         },
     },
@@ -525,23 +529,24 @@ export default {
             this.getList({ search: obj.search, page: this.queryPage, type: null });
         },
     },
-    computed: {},
-    created() {
+    computed: {
+        keyMongoAccess() {
+            return this.$store.state.userProfile.keyMongoAccess;
+        }
+    },
+    async created() {
         this.setCrumbsData();
         this.setEntitySearch();
-    },
-    async mounted() {
         if (localStorage.getItem("showToast") === "true") {
             this.warningDialog();
             localStorage.removeItem("showToast");
         }
 
         await this.loadTeams();
-
         GlobalEventService.on("all-uploads-complete", this.reloadList);
         GlobalEventService.on("refresh-once", this.reloadList);
-
         if (this.$store.state.userProfile.keyMongoAccess) {
+
             this.getList({ search: "", page: this.queryPage, type: null });
         }
 
@@ -549,6 +554,7 @@ export default {
             this.selectedTeamId = null;
         }
     },
+    mounted() { },
     beforeUnmount() {
         GlobalEventService.off("all-uploads-complete", this.reloadList);
         GlobalEventService.off("refresh-once", this.reloadList);
