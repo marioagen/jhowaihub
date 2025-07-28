@@ -3,16 +3,15 @@ import LoginIndex from "@/components/pages/login";
 import LogoutIndex from "@/components/pages/logout";
 import DocumentUpload from "@/components/pages/document/upload";
 import DocumentList from "@/components/pages/document/list";
-import TypeManager from "@/components/pages/manager/type";
 import QuestionManager from "@/components/pages/manager/question";
 import QuizFormNew from "@/components/pages/quiz/form-new";
 import QuizFormEdit from "@/components/pages/quiz/form-edit";
 import QuizManager from "@/components/pages/manager/quiz";
 import NormalizeIndex from "@/components/pages/normalize/loading";
 import AnalyzerIndex from "@/components/pages/analyzer";
-import UserIndex from "@/components/pages/user/index";
 
 import TypesPage from "@/pages/types.vue";
+import QuestionPage from "@/pages/questions.vue";
 import UserManagePage from "@/pages/user-manager.vue";
 
 function authenticate(to, from, next) {
@@ -63,9 +62,9 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/manage-question",
+        path: "/questions",
         name: "Question",
-        component: QuestionManager,
+        component: QuestionPage,
         meta: { layout: "default" },
         beforeEnter: authenticate,
     },

@@ -118,7 +118,7 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/manage-question"
+                    to="/questions"
                 >
                     <img
                         src="../../assets/img/question-icon.svg"
