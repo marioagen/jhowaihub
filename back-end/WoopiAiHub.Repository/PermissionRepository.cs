@@ -30,7 +30,6 @@ namespace WoopiAiHub.Repository
                                              .ToListAsync();
         }
 
-
         /// <summary>
         /// Find all permissions and convert to a PermissionDto list
         /// </summary>
