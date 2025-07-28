@@ -9,8 +9,8 @@
     </button>
     <div>
         <TableComponent
-            modalName="labelTypes"
-            emptyMessage="labelNoDocumentTypeWasFound"
+            modalName="labelQuestions"
+            emptyMessage="labelQuestionWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -18,9 +18,6 @@
             @selectedRows="selectedRows"
             @change-page="changePage"
         >
-            <template #cell-created="{ data }">
-                {{ formatDate(data.row.created) }}
-            </template>
             <template #cell-actions="{ data }">
                 <button 
                     class="btn btn-outline-success btn-sm table-btn" 
@@ -38,46 +35,45 @@
         </TableComponent>
     </div>
 
-    <TypesModal
+    <QuestionsModal
         :isEdit="true"
-        @reload="getTypes({ search: '', page: this.queryPage, type: null })"
-        ref="TypesModal"
+        @reload="reload"
+        ref="QuestionsModal"
     />
 
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteType"
+        title="labelYouAreAboutToDeleteQuestion"
         message="labelThisActionCannotBeUndone"
         cancelText="labelCancel"
         confirmText="labelConfirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
-        @confirm="deleteType"
+        @confirm="deleteQuestion"
     />
 </template>
 
 <script>
     import dates from "@/helpers/Dates";
-    import TypesService from "@/services/types/TypesService";
+    import QuestionsService from "@/services/questions/QuestionsService";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
-    import TypesModal from "@/components/types/TypesModal.vue";
+    import QuestionsModal from "@/components/questions/QuestionsModal.vue";
 
     export default {
-        name: "TypesTable",
+        name: "QuestionsTable",
         components: {
             TableComponent,
             ConfirmModal,
-            TypesModal,
+            QuestionsModal,
         },
         data: () => ({
             table: {
                 isLoading: true,
                 columns: [
                     { key: "id", label: "Id" },
-                    { key: "name", label: "labelName" },
-                    { key: "created", label: "labelInclusionDate" },
+                    { key: "description", label: "labelName" },
                     { key: "emailCreator", label: "labelOwner" },
                     { key: "actions", label: "labelAction" },
                 ],
@@ -90,7 +86,7 @@
                 },
                 selectedRows: [],
             },
-            selectedType: {},
+            selectedQuestion: {},
             queryPage: 1,
             selectedOption: 10,
             isAscending: false,
@@ -104,13 +100,9 @@
             isDeleting: false,
         }),
         methods: {
-             getList: function (obj) {
-                // obj = { search, page, type }
-                this.listIds = [];
+            getQuestions(obj) {
+                this.table.isLoading = true;
                 this.searchInput = obj.search;
-                this.loading = true;
-                this.searching = false;
-                this.dataQuestion = [];
                 var paramsReq = {
                     search: this.searchInput.trim() ? this.searchInput.trim() : "",
                     page: obj.page,
@@ -118,32 +110,16 @@
                     isAscending: this.isAscending,
                     colType: this.colType,
                 };
-                let self = this;
-                api.get("/Question/Paged", { params: paramsReq })
-                    .then(function (response) {
-                        // Handle success
-                        self.dataQuestion = response.data.content;
-                        self.pagination = {
-                            currentPage: response.data.currentPage,
-                            pageCount: response.data.pageCount,
-                            rowCount: response.data.rowCount,
-                            listPage: self.divider.calculatePageCount(
-                                response.data.pageCount,
-                                response.data.currentPage
-                            ),
-                        };
-                        self.loading = false;
-                        if (obj.type === "search") self.searching = true;
+
+                QuestionsService.getQuestions(paramsReq)
+                    .then((resposne) => {
+                        console.log(resposne)
+                        this.table.data = resposne.content;
+                        this.table.pagination = resposne.pagination;
                     })
-                    .catch(function (e) {
-                        // Handle error
-                        console.log(e);
-                        self.loading = false;
-                        if (obj.type === "search") self.searching = true;
-                    })
-                    .finally(function () {
-                        // Always executed
-                        console.log("Finished request.");
+                    .finally(() => {
+                        if (obj.type === "search") this.searching = true;
+                        this.table.isLoading = false;
                     });
             },
             formatDate(date) {
@@ -156,103 +132,63 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getTypes({ search: "", page: this.queryPage, type: null });
+                this.getQuestions({ search: "", page: this.queryPage, type: null });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
-            openEditModal(type) {
-                this.$refs.TypesModal.open(type);
+            openEditModal(question) {
+                this.$refs.QuestionsModal.open(question);
             },
-            emitToast(message, color) {
-                this.$emit("toast", { message, color });
-            },
-            finishEdit() {
-                this.closeModal();
-                this.getTypes({ search: "", page: 1, type: null });
-            },
-            openConfirmation(type) {
-                this.selectedType = [type.id];
+            openConfirmation(question) {
+                this.selectedQuestion = [question.id];
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
                 const ids = this.table.selectedRows.map((item) => item.id);
-                this.selectedType = ids;
+                this.selectedQuestion = ids;
                 this.$refs.DeleteDialog.open();
             },
-            deleteType() {
+            deleteQuestion() {
                 this.isDeleting = true;
-                TypesService.deleteTypeById(this.selectedType)
+                QuestionsService.deleteQuestionById(this.selectedQuestion)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getTypes({ search: "", page: 1, type: null });
-                            this.emitToast(
-                                this.$t("labelDocumentTypeRemoveSuccess"), 
-                                "toast-success"
-                            );
+                            this.getQuestions({ search: "", page: 1, type: null });
+                            this.$notify({
+                                title: 'Perguntas',
+                                message: this.$t("labelQuestionRemoveSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                         } else {
-                            this.emitToast(
-                                this.$t("labelDocumentTypeRemoveError"), 
-                                "toast-warning"
-                            );
+                            this.$notify({
+                                title: 'Perguntas',
+                                message: this.$t("labelQuestionRemoveError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
                         }
                     })
                     .finally(() => {
                         this.listIds = [];
                         this.table.selectedRows = [];
                         this.isDeleting = false;
-                    });
+                    })
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getTypes({ search: input, page: this.queryPage, type: null });
+                this.getQuestions({ search: input, page: this.queryPage, type: null });
             },
-            openModalType: function () {
-                this.modalTypeShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModalType: function () {
-                this.modalTypeShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            confirmationDialog(team) {
-                this.selectedTeam = team;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.modalAlertShow = false;
-                this.modalTypeShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            changePage(page) {
-                this.getTypes({ search: "", page: page, type: null });
-            },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
+            reload() {
+                this.$refs.QuestionsModal.close();
+                this.getQuestions({ search: "", page: this.queryPage, type: null });
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getTypes({ search: "", page: this.queryPage, type: null });
+            this.getQuestions({ search: "", page: this.queryPage, type: null });
         },
         computed: {
             showMultiDelete() {
