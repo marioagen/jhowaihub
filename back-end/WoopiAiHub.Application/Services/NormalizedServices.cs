@@ -2,8 +2,6 @@
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -11,15 +9,12 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IDocumentNormalizedRepository _documentNormalizedRepository;
         private readonly IValidator<DocumentNormalized> _documentNormalizedValidator;
-        private readonly IValidateDocument _validateDocument;
 
         public DocumentNormalizedServices(IDocumentNormalizedRepository documentNormalizedRepository,
-                                      	  IValidator<DocumentNormalized> documentNormalizedValidator,
-                                          IValidateDocument validateDocument)
+                                            IValidator<DocumentNormalized> documentNormalizedValidator)
         {
             _documentNormalizedRepository = documentNormalizedRepository;
             _documentNormalizedValidator = documentNormalizedValidator;
-            _validateDocument = validateDocument;
         }
 
         /// <summary>
@@ -42,7 +37,7 @@ namespace WoopiAiHub.Application.Services
         public bool Update(DocumentNormalized documentNormalized)
         {
 
-           return _documentNormalizedRepository.Update(documentNormalized);
+            return _documentNormalizedRepository.Update(documentNormalized);
 
         }
 
@@ -54,9 +49,6 @@ namespace WoopiAiHub.Application.Services
         public DocumentNormalized FindById(int id,
                                            string emailCreator)
         {
-            _validateDocument.VerifyCreatorEmail(id,
-                                                 emailCreator);
-
             return _documentNormalizedRepository.FindById(id);
         }
 
