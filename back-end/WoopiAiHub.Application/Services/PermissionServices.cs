@@ -20,7 +20,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Find all questions
+        /// Find all permissions
         /// </summary>
         /// <returns></returns>
         public ICollection<PermissionDto> FindAll()
