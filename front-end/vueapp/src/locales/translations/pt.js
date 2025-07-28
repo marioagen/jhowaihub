@@ -239,6 +239,9 @@
     labelNoTeamsFound: "Nenhum time vinculado ao seu usuário",
     labelNoPermissionChosen: "Nenhuma permissão selecionada",
     labelSelectedTeamsTitle: "Times selecionados",
+    labelDocumentsMessage: "Gerencie documentos e extraia informações",
+    labelAllTeams: "Todos os times",
+    labelNoTeams: "Nenhum time disponível",
 };
 
 export default portuguese;

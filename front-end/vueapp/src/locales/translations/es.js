@@ -244,6 +244,9 @@
     labelNoTeamsFound: "Ningún equipo vinculado a su usuario",
     labelNoPermissionChosen: "Ningún permiso vinculado",
     labelSelectedTeamsTitle: "Selected teams",
+    labelDocumentsMessage: "Gestione documentos y extraiga información",
+    labelAllTeams: "Todos los equipos",
+    labelNoTeams: "No hay equipos disponibles.",
 };
 
 export default spanish;

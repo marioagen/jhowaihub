@@ -16,7 +16,6 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IDocumentNormalizedServices, DocumentNormalizedServices>();
             services.AddScoped<IAccountServices, AccountServices>();
             services.AddScoped<ITenantServices, TenantServices>();
-            services.AddScoped<IValidateDocument, ValidateDocument>();
             services.AddScoped<IOcrGoogle, OcrGoogle>();
             services.AddScoped<IOcrAzure, OcrAzure>();
             services.AddScoped<IQuestionnaireServices, QuestionnaireServices>();

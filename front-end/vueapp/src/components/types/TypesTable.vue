@@ -40,7 +40,7 @@
 
     <TypesModal
         :isEdit="true"
-        @reload="getTypes({ search: '', page: this.queryPage, type: null })"
+        @reload="reload"
         ref="TypesModal"
     />
 
@@ -97,9 +97,6 @@
             colType: 2,
             modalTypeShow: false,
             modalAlertShow: false,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
             searchInput: "",
             isDeleting: false,
         }),
@@ -147,13 +144,6 @@
             openEditModal(type) {
                 this.$refs.TypesModal.open(type);
             },
-            emitToast(message, color) {
-                this.$emit("toast", { message, color });
-            },
-            finishEdit() {
-                this.closeModal();
-                this.getTypes({ search: "", page: 1, type: null });
-            },
             openConfirmation(type) {
                 this.selectedType = [type.id];
                 this.$refs.DeleteDialog.open();
@@ -170,15 +160,19 @@
                         if (success) {
                             this.$refs.DeleteDialog.close();
                             this.getTypes({ search: "", page: 1, type: null });
-                            this.emitToast(
-                                this.$t("labelDocumentTypeRemoveSuccess"), 
-                                "toast-success"
-                            );
+                            this.$notify({
+                                title: 'Tipos',
+                                message: this.$t("labelDocumentTypeRemoveSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                         } else {
-                            this.emitToast(
-                                this.$t("labelDocumentTypeRemoveError"), 
-                                "toast-warning"
-                            );
+                            this.$notify({
+                                title: 'Tipos',
+                                message: this.$t("labelDocumentTypeRemoveError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
                         }
                     })
                     .finally(() => {
@@ -191,47 +185,13 @@
                 this.searchInput = input;
                 this.getTypes({ search: input, page: this.queryPage, type: null });
             },
-            openModalType: function () {
-                this.modalTypeShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModalType: function () {
-                this.modalTypeShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            confirmationDialog(team) {
-                this.selectedTeam = team;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.modalAlertShow = false;
-                this.modalTypeShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
             changePage(page) {
                 this.getTypes({ search: "", page: page, type: null });
             },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
-            },
+            reload() {
+                this.$refs.TypesModal.close();
+                this.getTypes({ search: "", page: this.queryPage, type: null });
+            }
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;

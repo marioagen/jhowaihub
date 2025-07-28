@@ -16,7 +16,7 @@
             </div>
         </div>
         <template v-if="entity.screen !== 'user' && entity.screen !== 'team'">
-            <div class="col-auto content-center" v-if="entity.screen != 'document'">
+            <div class="col-auto content-center" v-if="entity.screen != 'document'">    
                 <div class="mt-5 mb-2">
                     <a
                         class="btn btn-primary"
@@ -28,14 +28,6 @@
                     </a>
                     <a class="btn btn-secondary" :title="$t('labelNotAllowed')" v-else>
                         {{ upperFormat(entity.labelButton) }}
-                    </a>
-                </div>
-            </div>
-
-            <div class="col-auto content-center" v-else>
-                <div class="mt-5 mb-2">
-                    <a class="btn btn-primary" :title="$t('labelNewDocument')" @click="action">
-                        {{ $t("labelNewDocument") }}
                     </a>
                 </div>
             </div>

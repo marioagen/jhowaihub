@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.Models;
 using System.Linq.Dynamic.Core;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Repository.Util;
 namespace WoopiAiHub.Repository
 {
     public class DocumentRepository : IDocumentRepository
@@ -24,23 +25,33 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IQueryable<Document> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto,string email)
+        public IQueryable<Document> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto, 
+                                                   string email)
         {
-            var query = _context.Documents.AsQueryable()
-                                           .AsNoTracking();
+            var search = documentPagedDataDto.Search?.ToLower();
 
-            if (documentPagedDataDto.IsAscending)
+            var query = _context.Documents
+                                .Include(t => t.Teams)
+                                .AsNoTracking()
+                                .Where(i => i.Enable);
+
+            if (documentPagedDataDto.TeamIds != null &&
+                documentPagedDataDto.TeamIds.Any())
             {
-                query = query.Where(i => i.Enable.Equals(true) &&
-                                         i.EmailCreator.Equals(email))
-                             .OrderBy(documentPagedDataDto.ColType.ToString());
+                query = query.Where(d => d.Teams.Any(t => documentPagedDataDto.TeamIds.Contains(t.Id)));
             }
-            else
+
+            if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(i => i.Enable.Equals(true) &&
-                                         i.EmailCreator.Equals(email))
-                             .OrderBy(documentPagedDataDto.ColType.ToString() + " descending");
+                query = query.Where(i =>
+                             EF.Functions.Like(i.Name, $"%{search}%") ||
+                             i.Id.ToString().Contains(search) ||
+                             i.Teams.Any(t => EF.Functions.Like(t.Name, $"%{search}%")));
             }
+
+            query = documentPagedDataDto.IsAscending ? 
+                    query.OrderByDynamic(documentPagedDataDto.ColType.ToString()) : 
+                    query.OrderByDynamic(documentPagedDataDto.ColType + " descending");
 
             return query;
         }

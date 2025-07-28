@@ -239,6 +239,9 @@
     labelNoTeamsFound: "No team linked to your user",
     labelNoPermissionChosen: "No permission selected",
     labelSelectedTeamsTitle: "Equipos seleccionados",
+    labelDocumentsMessage: "Manage documents and extract information",
+    labelAllTeams: "All teams",
+    labelNoTeams: "No teams available",
 };
 
 export default english;

@@ -1,6 +1,7 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -38,7 +39,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IDocumentNormalizedServices _documentNormalizedServices;
         private readonly IFileRepositoryApi _fileRepositoryApi;
         private readonly IFunctionFileRetriever _functionFileRetriever;
-        private readonly IValidateDocument _validateDocument;
         private readonly IOcrGoogle _ocrGoogle;
         private readonly IOcrAzure _ocrAzure;
         private readonly IMemoryCache _cache;
@@ -57,7 +57,6 @@ namespace WoopiAiHub.Application.Services
                                IFileRepositoryApi fileRepositoryApi,
                                IFunctionFileRetriever functionFileRetriever,
                                IDocumentNormalizedServices documentNormalizedServices,
-                               IValidateDocument validateDocument,
                                IOcrGoogle ocrGoogle,
                                IOcrAzure ocrAzure,
                                IMemoryCache cache,
@@ -76,7 +75,6 @@ namespace WoopiAiHub.Application.Services
             _fileRepositoryApi = fileRepositoryApi;
             _functionFileRetriever = functionFileRetriever;
             _documentNormalizedServices = documentNormalizedServices;
-            _validateDocument = validateDocument;
             _ocrGoogle = ocrGoogle;
             _ocrAzure = ocrAzure;
             _cache = cache;
@@ -131,9 +129,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> DocumentAnalysis(DocumentAnalysisResponseDto documentAnalysisResponseDto)
         {
-
-            _validateDocument.VerifyCreatorEmail(documentAnalysisResponseDto.Id,
-                                                 documentAnalysisResponseDto.EmailCreator);
 
             var document = _documentRepository.FindById(documentAnalysisResponseDto.Id);
             var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
@@ -238,14 +233,6 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> Delete(List<int> ids, HeadersDto headersDto)
         {
             var hashList = this.FindHashById(ids);
-
-            foreach (var id in ids)
-            {
-                _validateDocument.VerifyCreatorEmail(id,
-                                                     headersDto.EmailCreator);
-
-            }
-
             var result = _documentRepository.Delete(ids);
 
             foreach (var hash in hashList)
@@ -297,9 +284,6 @@ namespace WoopiAiHub.Application.Services
             HttpContext context = _httpContextAccessor.HttpContext!;
             var tenant = context.Request.Headers[HeaderNames.XTenant].ToString();
 
-            _validateDocument.VerifyCreatorEmail(documentQuestionnaireDto.IdDocument,
-                                                 headersDto.EmailCreator);
-
             var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
             var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
 
@@ -340,9 +324,6 @@ namespace WoopiAiHub.Application.Services
         public FindByIdAnalyzeDto FindByIdAnalyze(int id,
                                                   HeadersDto headersDto)
         {
-            _validateDocument.VerifyCreatorEmail(id,
-                                                 headersDto.EmailCreator);
-
             var result = _documentRepository.FindById(id);
 
             if (result == null)
@@ -368,9 +349,6 @@ namespace WoopiAiHub.Application.Services
         public object FindStatusAndName(int id,
                                         string emailCreator)
         {
-            _validateDocument.VerifyCreatorEmail(id,
-                                                 emailCreator);
-
             var document = _documentRepository.FindById(id);
 
             var result = new
@@ -390,9 +368,6 @@ namespace WoopiAiHub.Application.Services
         public bool ChangeStatus(int id,
                                  string emailCreator)
         {
-            _validateDocument.VerifyCreatorEmail(id,
-                                                 emailCreator);
-
             return _documentRepository.ChangeStatus(id);
         }
 
@@ -425,9 +400,6 @@ namespace WoopiAiHub.Application.Services
 
             if (availableBalanceToQuestion)
             {
-                _validateDocument.VerifyCreatorEmail(documentInputDto.Id,
-                                                     headersDto.EmailCreator);
-
                 var documentDb = _documentRepository.FindById(documentInputDto.Id);
                 var customQueryRequestDto = await this.CreateCustomQueryRequestDto(documentInputDto.Input,
                                                                                    headersDto.Tenant,
@@ -890,37 +862,31 @@ namespace WoopiAiHub.Application.Services
         /// <param name="totalList"></param>
         /// <param name="DocumentPagedDataDto"></param>
         /// <returns></returns>
-        private DocumentPagedResultDto DocumentPagination(IQueryable<Document> totalList,
-                                                          DocumentPagedDataDto documentPagedDataDto)
+        private DocumentPagedResultDto DocumentPagination(IQueryable<Document> query,
+                                                          DocumentPagedDataDto dto)
         {
-            int pageCount, currentPage = 0;
+            int pageCount, currentPage;
 
-            if (string.IsNullOrEmpty(documentPagedDataDto.Search) is false)
-            {
-                totalList = totalList.Where(i => i.Description.ToLower()
-                                     .Contains(documentPagedDataDto.Search.ToLower()) ||
-                                               i.Name.Contains(documentPagedDataDto.Search));
-            }
+            var totalListCount = query.Count();
 
-            var totalListCount = totalList.Count();
-
-            if (documentPagedDataDto.PageSize == 0)
+            if (dto.PageSize == 0)
             {
                 pageCount = 1;
                 currentPage = 1;
-                documentPagedDataDto.PageSize = totalListCount;
+                dto.PageSize = totalListCount;
             }
             else
             {
-                pageCount = (int)Math.Ceiling((double)totalListCount / documentPagedDataDto.PageSize);
-                currentPage = documentPagedDataDto.Page <= pageCount ? documentPagedDataDto.Page : 1;
-                totalList = totalList.Skip((currentPage - 1) * documentPagedDataDto.PageSize)
-                                     .Take(documentPagedDataDto.PageSize);
+                pageCount = (int)Math.Ceiling((double)totalListCount / dto.PageSize);
+                currentPage = dto.Page <= pageCount ? dto.Page : 1;
+
+                query = query.Skip((currentPage - 1) * dto.PageSize)
+                             .Take(dto.PageSize);
             }
 
-            return new DocumentPagedResultDto()
+            return new DocumentPagedResultDto
             {
-                Content = totalList,
+                Content = query, 
                 CurrentPage = currentPage,
                 PageCount = pageCount,
                 RowCount = totalListCount
