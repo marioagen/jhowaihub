@@ -26,6 +26,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IApiDependencies, ApiDependencies>();
             services.AddScoped<ITeamServices, TeamServices>();
             services.AddScoped<IUserServices, UserServices>();
+            services.AddScoped<IProfileServices, ProfileServices>();
+            services.AddScoped<IPasswordHasher, Argon2PasswordHasher>();
             services.AddLogging();
             services.AddMemoryCache();
 

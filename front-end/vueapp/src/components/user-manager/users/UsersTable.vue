@@ -27,6 +27,19 @@
                     </div>
                 </div>
             </template>
+            <template #cell-profiles="{ data }">
+                <div v-if="data.row.profiles.length > 0">
+                    <BadgeComponent
+                        v-for="profile in data.row.profiles"
+                        :key="profile.id"
+                        :text="profile.name"
+                        class="ms-2"
+                        variant="primary"
+                        @setClick="filterByProfile(profile)"
+                    />
+                </div>
+                <span v-else>-</span>
+            </template>
             <template #cell-teams="{ data }">
                 <div v-if="data.row.teams.length > 0">
                     <BadgeOutlinedComponent
@@ -89,11 +102,13 @@
     import TableComponent from "@/components/global/TableComponent.vue";
     import ModalUser from "@/components/user-manager/users/modals/UserModal.vue";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent.vue";
+    import BadgeComponent from "@/components/global/BadgeComponent.vue";
 
     export default {
         name: "UsersTable",
         components: {
             BadgeOutlinedComponent,
+            BadgeComponent,
             TableComponent,
             ConfirmModal,
             ModalUser,
@@ -103,6 +118,7 @@
                 isLoading: true,
                 columns: [
                     { key: "name", label: "labelUser" },
+                    { key: "profiles", label: "labelProfiles" },
                     { key: "teams", label: "labelTeams" },
                     { key: "actions", label: "labelAction" },
                 ],
@@ -208,7 +224,10 @@
                 this.getUsers({ search: '', page: page, type: null });
             },
             filterByTeam(team) {
-                this.$emit("setFilter", team)
+                this.$emit("setFilter", team.name)
+            },
+            filterByProfile(profile) {
+                this.$emit("setFilter", profile.name)
             },
         },
         created() {

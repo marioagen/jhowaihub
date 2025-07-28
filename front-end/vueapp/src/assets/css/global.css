@@ -870,3 +870,11 @@ dropzone .dz-preview .dz-details {
     line-height: var(--tw-leading, var(--text-sm--line-height));
     font-weight: normal;
 }
+
+.fw-semibold {
+    font-weight: 500 !important;
+}
+
+.mfs{
+    font-size: 0.775rem;
+}

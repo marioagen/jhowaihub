@@ -152,9 +152,9 @@
                     placeholderInput: this.$t("labelTypeUserName"),
                 };
             },
-            setFilter(team) {
-                this.$refs.SearchComponent.searchInput = team.name;
-                this.$refs.UserTable.getUsers({ search: team.name, page: this.queryPage, type: null })
+            setFilter(searchValue) {
+                this.$refs.SearchComponent.searchInput = searchValue;
+                this.$refs.UserTable.getUsers({ search: searchValue, page: this.queryPage, type: null })
             },
         },
         created() {

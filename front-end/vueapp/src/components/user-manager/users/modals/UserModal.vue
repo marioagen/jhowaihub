@@ -10,115 +10,105 @@
                     </h6>
                     <button type="button" class="btn-close" @click="close"></button>
                 </div>
-                <div class="modal-body">
-                    <form ref="formRef">
-                        <div class="mb-3">
-                            <label for="userName" class="form-label">{{ $t("labelName") }}</label>
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                id="userName"
-                                ref="userNameInput"
-                                autocomplete="off"
-                                name="userName"
-                                :rules="'required|min:2|max:50'"
-                                v-model="userData.name"
-                                :placeholder="$t('labelTypeUserName')"
-                                @blur="nameError = userData.name ? '' : $t('labelRequiredField')"
-                                @input="nameError = ''"
-                            />
-                            <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="userEmail" class="form-label">{{ $t("labelEmail") }}</label>
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                id="userEmail"
-                                ref="userEmailInput"
-                                autocomplete="off"
-                                name="userEmail"
-                                :rules="'required|min:2|max:50'"
-                                v-model="userData.email"
-                                :placeholder="$t('labelTypeUserEmail')"
-                                @blur="emailError = userData.email ? '' : $t('labelRequiredField')"
-                                @input="emailError = ''"
-                            />
-                            <div v-if="emailError" class="invalid-feedback d-block">{{ emailError }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label class="form-label mb-0">{{ $t("labelTeams") }}</label>
-                                <span class="text-muted">
-                                    {{ selectedTeams.length }} {{ $t("labelSelectedWithO") }}
-                                </span>
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
-                                    <input
+                <Form ref="formRef" @submit="saveUser">
+                    <div class="modal-body">                    
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="userName" class="form-label fw-semibold mb-0">{{ $t("labelName") }}</label>
+                                    <Field
                                         type="text"
                                         class="form-control form-control-sm"
-                                        :placeholder="$t('labelSearchTeams')"
-                                        v-model="searchTerm"
+                                        id="userName"
+                                        ref="userNameInput"
+                                        autocomplete="off"
+                                        name="userName"
+                                        :rules="'required|min:3|max:150'"
+                                        v-model="userData.name"
+                                        :placeholder="$t('labelTypeUserName')"
                                     />
+                                    <ErrorMessage name="userName" class="invalid-feedback d-block" />
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <button type="button" class="btn btn-outline-primary btn-sm me-2" @click="selectAll">
-                                    <i class="bi bi-check-all"></i>
-                                    {{ $t("labelSelectAll") }}
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" @click="clearSelection">
-                                    <i class="bi bi-x-circle"></i>
-                                    {{ $t("labelClearSelection") }}
-                                </button>
-                            </div>
-
-                            <div class="border rounded p-1 user-list">
-                                <div v-if="loading" class="text-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">{{ $t("labelLoading") }}</span>
-                                    </div>
-                                </div>
-                                <div v-if="!loading" v-for="team in filteredUsers" :key="team.id" class="p-1">
-                                    <div class="form-check d-flex align-items-center">
-                                        <input
-                                            class="form-check-input me-3"
-                                            type="checkbox"
-                                            :id="`user-${team.id}`"
-                                            :value="team.id"
-                                            v-model="selectedTeams"
-                                        />
-                                        <label
-                                            class="form-check-label d-flex align-items-center w-100"
-                                            :for="`user-${team.id}`"
-                                        >
-                                            <div>
-                                                <div class="fw-semibold">{{ team.name }}</div>
-                                            </div>
-                                        </label>
-                                    </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="userEmail" class="form-label fw-semibold mb-0">{{ $t("labelEmail") }}</label>
+                                    <Field
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        id="userEmail"
+                                        ref="userEmailInput"
+                                        autocomplete="off"
+                                        name="userEmail"
+                                        :rules="'required|min:5|max:100|email'"
+                                        v-model="userData.email"
+                                        :placeholder="$t('labelTypeUserEmail')"
+                                         @blur="validateEmailBackend"
+                                    />
+                                    <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
                                 </div>
                             </div>
                         </div>
-
-                        <div class="mb-3">
-                            <button type="button" class="btn btn-sm btn-outline-primary w-100" @click="addNewTeam">
-                                + {{ $t("labelNewTeam") }}
-                            </button>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="userPassword" class="form-label fw-semibold mb-0">{{ $t("labelPassword") }}</label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypePassword')"
+                                    :rules="passwordRules"
+                                    name="userPassword"
+                                    v-model="userData.password"
+                                />                            
+                            </div>
+                            <div class="col-6">
+                                <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">{{ $t("labelConfirmedPassword") }}</label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypeConfirmedPassword')"
+                                    :rules="confirmedPasswordRules"
+                                    name="userConfirmedPassword"
+                                    v-model="userData.confirmedPassword"
+                                />  
+                            </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" @click="close">
-                        {{ $t("labelCancel") }}
-                    </button>
-                    <button type="button" class="btn btn-primary btn-sm" @click="saveUser">
-                        {{ $t("labelCreate") }}
-                    </button>
-                </div>
+                        <SelectionListComponent
+                            :id="'profiles'"
+                            :labelPanel="'labelProfiles'"
+                            :labelSelectedQuantity="'labelSelectedProfiles'"
+                            :labelSearch="'labelSearchProfiles'"
+                            :items="profiles"
+                            :loading="loading"
+                            v-model:selectedItems="selectedProfiles"
+                            />
+                        
+                        <SelectionListComponent
+                            :id="'teams'"
+                            :labelPanel="'labelTeams'"
+                            :labelSelectedQuantity="'labelSelectedTeams'"
+                            :labelSearch="'labelSearchTeams'"
+                            :items="teams"
+                            :loading="loading"
+                            v-model:selectedItems="selectedTeams"
+                            >
+                            <template #footer>
+                                <div class="border-top mt-2 pt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" @click="addNewTeam">
+                                    + {{ $t("labelNewTeam") }}
+                                    </button>
+                                </div>
+                            </template>
+                        </SelectionListComponent>                    
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" @click="close">
+                            {{ $t("labelCancel") }}
+                        </button>
+                        <button v-if="userData.id" type="submit" class="btn btn-primary btn-sm">
+                            {{ $t("labelEdit") }}
+                        </button>
+                        <button v-else type="submit" class="btn btn-primary btn-sm">
+                            {{ $t("labelCreate") }}
+                        </button>
+                    </div>
+                </Form>
             </div>
         </div>
     </div>
@@ -131,6 +121,9 @@
     import ModalUserTeam from "@/components/user-manager/users/modals/TeamModal.vue";
     import ToastAlert from "@/components/common/toast-alert";
     import ErrorCode from "@/constants/Errorcode";
+    import {Form, Field, ErrorMessage} from "vee-validate";
+    import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
+    import PasswordInputComponent from "@/components/global/PasswordInputComponent.vue";
 
     export default {
         name: "ModalUser",
@@ -138,6 +131,9 @@
             ModalUserTeam,
             ToastAlert,
             ErrorCode,
+            Form, Field, ErrorMessage,
+            SelectionListComponent,
+            PasswordInputComponent
         },
         props: {
             userEditing: {
@@ -153,32 +149,84 @@
                     name: this.userEditing.name ? this.userEditing.name : "",
                     email: this.userEditing.email ? this.userEditing.email : "",
                     teams: this.userEditing.teams ? this.userEditing.teams : [],
+                    profiles: this.userEditing.profiles ? this.userEditing.profiles : [],
+                    password: "",
                 },
                 selectedTeams: this.userEditing.teams ? this.userEditing.teams.map((u) => u.id) : [],
-                searchTerm: "",
+                selectedProfiles: this.userEditing.teams ? this.userEditing.teams.map((u) => u.id) : [],
+                searchTeams: "",
+                searchProfiles: "",
                 teams: [],
+                profiles: [],
                 loading: false,
                 showModalUserTeam: false,
                 toastShow: false,
                 toastColor: "",
                 toastMessage: "",
                 myInterval: null,
-                nameError: "",
+                showPassword: false,
+                showConfirmedPassword: false,
             };
         },
         emits: ["close", "userCreated"],
         computed: {
-            filteredUsers() {
-                if (!this.searchTerm) {
+            filteredTeams() {
+                if (!this.searchTeams) {
                     return this.teams;
                 }
-                return this.teams.filter((team) => team.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
+                return this.teams.filter((team) => team.name.toLowerCase().includes(this.searchTeams.toLowerCase()));
             },
+            passwordRules() {
+                return {
+                    required: !this.userEditing.id,
+                    custom_password: true,
+                    min: 6,
+                    max: 50
+                };
+            },
+            confirmedPasswordRules() {
+                return {
+                    required: !this.userEditing.id,
+                    confirmed: 'userPassword',
+                    min: 6,
+                    max: 50
+                };
+            }
         },
         mounted() {
             this.loadTeams();
+            this.loadProfiles();
         },
         methods: {
+            async validateEmailBackend() {
+                var paramsReq = {
+                    search: this.userData.email.trim(),
+                    pageSize: 0,
+                    page: 1,
+                    isAscending: this.isAscending,
+                };
+                let self = this;
+                api.get("User/Paged", { params: paramsReq })                    
+                    .then(function (response) {
+                        
+                        if (response.data && 
+                            response.data.content && 
+                            response.data.content.length > 0 &&
+                            response.data.content[0].id !== self.userData.id) {
+                             self.$refs.formRef.setFieldError('userEmail', self.$t("labelErrorEmailAlreadyExists"));
+                        } else {
+                            self.$refs.formRef.setFieldError('userEmail', "");
+                        }
+                        self.loading = false;
+                    })
+                    .catch(function (e) {
+                        self.alertToast(self.$t("labelUserError"), "toast-warning");
+                        self.loading = false;
+                    })
+                    .finally(function () {
+                        console.log("Finished request.");
+                    });
+            },
             loadTeams() {
                 var paramsReq = {
                     search: "",
@@ -201,8 +249,30 @@
                         this.loading = false;
                     });
             },
+            loadProfiles() {
+                var paramsReq = {
+                    search: "",
+                    pageSize: 0,
+                    page: 1,
+                    isAscending: this.isAscending,
+                };
+
+                api.get("/Profile/Paged", { params: paramsReq })
+                    .then((response) => {
+                        this.profiles = response.data.content;
+                        this.loading = false;
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                        this.loading = false;
+                    })
+                    .finally(() => {
+                        console.log("Finished request.");
+                        this.loading = false;
+                    });
+            },
             selectAll() {
-                this.selectedTeams = this.filteredUsers.map((user) => user.id);
+                this.selectedTeams = this.filteredTeams.map((user) => user.id);
             },
             clearSelection() {
                 this.selectedTeams = [];
@@ -211,7 +281,6 @@
                 this.showModalUserTeam = true;
             },
             saveUser: function (e) {
-                e.preventDefault();
                 let response;
                 let self = this;
 
@@ -219,14 +288,18 @@
                     const user = {
                         name: this.userData.name,
                         email: this.userData.email,
+                        password: this.userData.password,
                         teamIds: this.selectedTeams,
+                        profileIds: this.selectedProfiles,
                     };
                     response = api.post("User", user);
                 } else {
                     const userEdit = {
                         name: this.userData.name,
                         email: this.userData.email,
+                        password: this.userData.password,
                         teamIds: this.selectedTeams,
+                        profileIds: this.selectedProfiles,
                         id: this.userData.id,
                     };
                     response = api.put("User", userEdit);
@@ -247,7 +320,7 @@
                 this.userData.id = 0;
                 this.userData.name = "";
                 this.selectedTeams = [];
-                this.searchTerm = "";
+                this.searchTeams = "";
 
                 if (this.$refs.formRef) {
                     this.$refs.formRef.resetForm();
@@ -255,17 +328,6 @@
             },
             close: function () {
                 this.$emit("close");
-            },
-            getInitials(name) {
-                if (!name) return "";
-                const parts = name.trim().split(" ");
-                if (parts.length === 1) {
-                    const n = parts[0];
-                    return (n[0] || "").toUpperCase() + (n[n.length - 1] || "").toUpperCase();
-                }
-                const first = parts[0][0] || "";
-                const last = parts[parts.length - 1].slice(-1) || "";
-                return (first + last).toUpperCase();
             },
             closeModalUserTeam() {
                 this.showModalUserTeam = false;
@@ -308,12 +370,6 @@
     .initials {
         width: 30px;
         height: 30px;
-    }
-
-    .user-list {
-        max-height: 200px;
-        min-height: 200px;
-        overflow-y: auto;
     }
 
     .show {

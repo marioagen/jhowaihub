@@ -196,9 +196,10 @@
     labelTypeUserEmail: "Digite o email do usuário",
     labelRequiredField: "Campo obrigatório",
     labelMaxLength: "Máximo de caracteres é {limit}",
+    labelMinLength: "Mínimo de caracteres é {limit}",
     labelNewTeamUserMessage: "Crie um novo usuário que será automaticamente selecionado",
     labelCreateTeamUser: "Criar Usuário",
-    labelTypeEmail: "usuario@suaempresa.com",
+    labelTypeEmail: "usuario{'@'}suaempresa.com",
     labelEmail: "Email",
     labelTypeName: "Digite o nome completo",
     labelErrorEmailAlreadyExists: "Email já cadastrado",
@@ -225,6 +226,25 @@
     labelDocumentsMessage: "Gerencie documentos e extraia informações",
     labelAllTeams: "Todos os times",
     labelNoTeams: "Nenhum time disponível",
+    labelPassword: "Senha",
+    labelTypePassword: "Digite a senha",
+    labelConfirmedPassword: "Confirmar senha",
+    labelTypeConfirmedPassword: "Digite a confirmação da senha",
+    labelSelectedTeams: "Times selecionados",
+    labelProfiles: "Perfis",
+    labelSelectedProfiles: "Perfis selecionados",
+    labelSearchProfiles: "Buscar perfis",
+    validation: { 
+        required: "Campo obrigatório",
+        max: "Máximo de {limit} caracteres",
+        min: "Mínimo de {limit} caracteres",
+        password_lowercase: "A senha deve conter pelo menos uma letra minúscula.",
+        password_uppercase: "A senha deve conter pelo menos uma letra maiúscula.",
+        password_number: "A senha deve conter pelo menos um número.",
+        password_special: "A senha deve conter pelo menos um caractere especial.",
+        password_confirmed: "A confirmação da senha não confere.",
+        email: "Email inválido",
+    }
 };
 
 export default portuguese;

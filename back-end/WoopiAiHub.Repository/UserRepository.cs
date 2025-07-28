@@ -113,6 +113,13 @@ namespace WoopiAiHub.Repository
                             Name = u.Name,
                             Created = u.Created
                         })
+                        .ToList(),
+                    Profiles = t.Profiles!
+                        .Select(u => new ProfileDto
+                        {
+                            Id = u.Id,
+                            Name = u.Name
+                        })
                         .ToList()
                 })
                 .AsQueryable()

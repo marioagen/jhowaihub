@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
@@ -17,16 +18,22 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _config;
         private readonly ITeamRepository _teamRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IPasswordHasher _passwordHasher;
 
         public UserServices(IUserRepository userRepository,
                             IMarketPlaceApi marketPlaceApi,
                             IConfiguration config,
-                            ITeamRepository teamRepository)
+                            ITeamRepository teamRepository,
+                            IProfileRepository profileRepository,
+                            IPasswordHasher passwordHasher)
         {
             _userRepository = userRepository;
             _teamRepository = teamRepository;
             _marketPlaceApi = marketPlaceApi;
             _config = config;
+            _profileRepository = profileRepository;
+            _passwordHasher = passwordHasher;
         }
 
         /// <summary>
@@ -56,6 +63,10 @@ namespace WoopiAiHub.Application.Services
             {
                 existingUser.Reactivate(userCreateDto.Name,
                                         userCreateDto.Email);
+
+                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, existingUser.Salt);
+                existingUser.SetPassword(hashedPassword, existingUser.Salt);
+
                 _userRepository.Update(existingUser);
 
                 return true;
@@ -68,7 +79,11 @@ namespace WoopiAiHub.Application.Services
                       userCreateDto.Email,
                       true,
                       DateTime.Now
-                  );
+                );
+
+                var salt = _passwordHasher.GenerateSalt();
+                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, salt);
+                user.SetPassword(hashedPassword, salt);
 
                 if (userCreateDto.TeamIds.Count > 0)
                 {
@@ -78,8 +93,18 @@ namespace WoopiAiHub.Application.Services
                     {
                         user.AddTeam(team);
                     }
-
                 }
+
+                if (userCreateDto.ProfileIds.Count > 0)
+                {
+                    var profiles = await _profileRepository.FindByIdsAsync(userCreateDto.ProfileIds);
+
+                    foreach (var profile in profiles)
+                    {
+                        user.AddProfile(profile);
+                    }
+                }
+
                 return await _userRepository.CreateAsync(user);
             }
         }
@@ -135,6 +160,12 @@ namespace WoopiAiHub.Application.Services
                 user.Update(userUpdateDto.Name,
                             userUpdateDto.Email);
 
+                if (!string.IsNullOrEmpty(userUpdateDto.Password))
+                {                    
+                    var hashedPassword = _passwordHasher.Hash(userUpdateDto.Password, user.Salt);
+                    user.SetPassword(hashedPassword, user.Salt);
+                }
+
                 if (userUpdateDto.TeamIds != null)
                 {
                     user.Teams.Clear();
@@ -142,6 +173,16 @@ namespace WoopiAiHub.Application.Services
                     foreach (var team in teams)
                     {
                         user.AddTeam(team);
+                    }
+                }
+
+                if (userUpdateDto.ProfileIds != null)
+                {
+                    user.Profiles.Clear();
+                    var profiles = await _profileRepository.FindByIdsAsync(userUpdateDto.ProfileIds);
+                    foreach (var profile in profiles)
+                    {
+                        user.AddProfile(profile);
                     }
                 }
 

@@ -28,7 +28,7 @@ namespace WoopiAiHub.Domain.Models
         [Column("Created", TypeName = "datetime")]
         public DateTime Created { get; private set; }
 
-        public virtual ICollection<Profile> Profiles { get; set; }
+        public virtual ICollection<Profile> Profiles { get; set; } = [];
         public virtual ICollection<Permission> Permissions { get; set; }
 
         public ICollection<Team> Teams { get; set; } = [];
@@ -57,6 +57,17 @@ namespace WoopiAiHub.Domain.Models
             Teams.Add(team);
         }
 
+        public void AddProfile(Profile profile)
+        {
+            if (profile == null)
+                throw new ArgumentNullException(nameof(profile));
+
+            if (this.Profiles.Any(t => t.Id == profile.Id))
+                return;
+
+            Profiles.Add(profile);
+        }
+
         public void Reactivate(string name,
                                string email)
         {
@@ -76,6 +87,14 @@ namespace WoopiAiHub.Domain.Models
         public void Deactivate()
         {
             IsActive = false;
+        }
+
+        public void SetPassword(byte[] passwordHash, byte[] salt)
+        {
+            if (passwordHash == null || salt == null)
+                throw new ArgumentNullException("Password hash and salt cannot be null");
+            PasswordHash = passwordHash;
+            Salt = salt;
         }
     }
 }

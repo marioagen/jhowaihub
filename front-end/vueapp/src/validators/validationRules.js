@@ -1,0 +1,66 @@
+import { defineRule } from 'vee-validate';
+import i18n from '../locales/i18n';
+
+defineRule('required', value => {
+  if (!value || !value.length) {
+    return i18n.global.t('validation.required') || 'Este campo é obrigatório.';
+  }
+  return true;
+});
+
+defineRule('max', (value, [limit]) => {
+  if (!value || !value.length) {
+    return true;
+  }
+  if (value.length > limit) {
+    return i18n.global.t('validation.max', { limit: limit });
+  }
+  return true;
+});
+
+defineRule('min', (value, [limit]) => {
+  if (!value || !value.length) {
+    return true;
+  }
+  if (value.length < limit) {
+    return i18n.global.t('validation.min', { limit: limit });
+  }
+  return true;
+});
+
+defineRule('confirmed', (value, [target], ctx) => {
+  const targetValue = ctx.form[target];
+  if (value !== targetValue) {
+    return i18n.global.t('validation.password_confirmed') || 'A confirmação da senha não confere.';
+  }
+  return true;
+});
+
+defineRule('email', value => {
+  if (!value || !value.length) {
+    return true;
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(value)) {
+    return i18n.global.t('validation.email') || 'Email inválido';
+  }
+  return true;
+});
+
+defineRule('custom_password', value => {
+  if (!/[a-z]/.test(value)) {
+    return i18n.global.t('validation.password_lowercase') || 'A senha deve conter uma letra maiúscula.'
+  }
+  if (!/[A-Z]/.test(value)) {
+    return i18n.global.t('validation.password_uppercase') || 'A senha deve conter uma letra maiúscula.'
+  }
+  if (!/[0-9]/.test(value)) {
+    return i18n.global.t('validation.password_number') || 'A senha deve conter um número.'
+  }
+  if (!/[^A-Za-z0-9]/.test(value)) {
+    return i18n.global.t('validation.password_special') || 'A senha deve conter um caractere especial.';
+  }
+  return true
+})
+
+
