@@ -11,7 +11,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IValidator<DocumentNormalized> _documentNormalizedValidator;
 
         public DocumentNormalizedServices(IDocumentNormalizedRepository documentNormalizedRepository,
-                                            IValidator<DocumentNormalized> documentNormalizedValidator)
+                                          IValidator<DocumentNormalized> documentNormalizedValidator)
         {
             _documentNormalizedRepository = documentNormalizedRepository;
             _documentNormalizedValidator = documentNormalizedValidator;
