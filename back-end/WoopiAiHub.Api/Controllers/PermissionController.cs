@@ -14,7 +14,6 @@ namespace WoopiAiHub.Api.Controllers
     [Route("api/[controller]")]
     public class PermissionController : ControllerBase
     {
-
         private readonly IPermissionServices _permissionServices;
 
         public PermissionController(IPermissionServices permissionServices)

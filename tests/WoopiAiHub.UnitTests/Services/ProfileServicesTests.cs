@@ -7,7 +7,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using Xunit;
 
-namespace WoopiAiHub.Tests.Application.Services
+namespace WoopiAiHub.UnitTests.Services
 {
     public class ProfileServicesTests
     {
@@ -135,7 +135,7 @@ namespace WoopiAiHub.Tests.Application.Services
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.CreateUniqueProfile(It.IsAny<Profile>())).Returns(false);
 
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateUniqueProfile(dto));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CreateUniqueProfile(dto));
         }
 
         [Fact(DisplayName = "Test Update and return false when profile is not found")]
@@ -162,7 +162,7 @@ namespace WoopiAiHub.Tests.Application.Services
             _profileRepoMock.Setup(r => r.FindByIdReturnModel(dto.Id)).Returns(profile);
             _profileRepoMock.Setup(r => r.Update(profile)).Returns(false);
 
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.Update(dto));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.Update(dto));
         }
     }
 }

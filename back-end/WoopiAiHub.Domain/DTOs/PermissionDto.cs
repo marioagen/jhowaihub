@@ -7,7 +7,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class PermissionDto
+    public record class PermissionDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

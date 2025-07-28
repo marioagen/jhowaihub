@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs.Request
 {
-    public class ProfileUpdateDto
+    public record class ProfileUpdateDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

@@ -14,13 +14,13 @@ namespace WoopiAiHub.Api.Controllers
     [Route("api/[controller]")]
     public class ProfileController : ControllerBase
     {
-
         private readonly IProfileServices _profileServices;
 
         public ProfileController(IProfileServices profileServices)
         {
             _profileServices = profileServices;
         }
+
         /// <summary>
         /// Endpoint that receives the request to return a profile.
         /// </summary>
@@ -83,10 +83,10 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        [HttpDelete("DeleteByIds")]
+        [HttpDelete]
         [SwaggerOperation("EndPoint that delete profiles by ids")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Delete(List<int> ids)
+        public IActionResult DeleteByIds(List<int> ids)
         {
             var deleted = _profileServices.DeleteByIds(ids);
             return Ok(deleted);

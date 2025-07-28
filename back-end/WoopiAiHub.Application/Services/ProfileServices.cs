@@ -42,9 +42,13 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public ProfilePagedResultDto FindAllPaged(PagedDataDto pagedDataDto)
         {
-            if (pagedDataDto.Page > 0)
+            if (pagedDataDto.Page <= 0)
             {
-                var totalList = _profileRepository.FindAllPaged(pagedDataDto);
+                var ex = new ArgumentException("The number of pages must be greater than 0");
+                throw ex;
+            }
+
+            var totalList = _profileRepository.FindAllPaged(pagedDataDto);
 
                 totalList = pagedDataDto.IsAscending ?
                     totalList.OrderBy(team => team.Name) :
@@ -52,12 +56,6 @@ namespace WoopiAiHub.Application.Services
 
                 var result = Pagination(totalList, pagedDataDto);
                 return result;
-            }
-            else
-            {
-                var ex = new ArgumentException("The number of pages must be greater than 0");
-                throw ex;
-            }
         }
 
         /// <summary>
@@ -80,7 +78,6 @@ namespace WoopiAiHub.Application.Services
 
             if (profileCreateDto.PermissionsIds != null)
             {
-                profile.Permissions.Clear();
                 var permissions = await _permissionRepository.FindByIdsAsync(profileCreateDto.PermissionsIds);
 
                foreach (var permission in permissions)
@@ -92,7 +89,7 @@ namespace WoopiAiHub.Application.Services
             var createResult = _profileRepository.CreateUniqueProfile(profile);
             if (!createResult)
             {
-                throw new ArgumentException("Duplicated Profile");
+                throw new InvalidOperationException("Duplicated Profile");
             }
             return createResult;
         }
@@ -126,11 +123,10 @@ namespace WoopiAiHub.Application.Services
             var updateResult = _profileRepository.Update(profile);
             if (!updateResult)
             {
-                throw new ArgumentException("Duplicated Profile");
+                throw new InvalidOperationException("Duplicated Profile");
             }
             return updateResult;
         }
-
 
         /// <summary>
         /// Deletes a list of profiles by their IDs.

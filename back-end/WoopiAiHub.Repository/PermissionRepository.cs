@@ -45,7 +45,6 @@ namespace WoopiAiHub.Repository
                     Name = q.Name,
 
                 }).ToList();
-
         }
     }
 }

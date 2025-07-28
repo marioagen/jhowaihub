@@ -1,6 +1,4 @@
 import api from "@/services/api";
-import PaginationDivider from "@/utils/paginationDivider";
-const divider = new PaginationDivider();
 
 export default {
     getProfiles(params) {
@@ -23,7 +21,7 @@ export default {
     },
     deleteProfileById(ids) {
         return api
-            .delete("/Profile/DeleteByIds", { data: ids })
+            .delete("/Profile", { data: ids })
             .then(() => {
                 return true;
             })
