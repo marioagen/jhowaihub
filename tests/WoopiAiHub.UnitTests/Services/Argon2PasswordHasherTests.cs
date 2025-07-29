@@ -1,5 +1,5 @@
 ﻿using Xunit;
-using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Utils;
 
 namespace WoopiAiHub.UnitTests.Services
 {

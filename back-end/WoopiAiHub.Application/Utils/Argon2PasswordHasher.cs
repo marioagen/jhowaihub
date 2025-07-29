@@ -1,10 +1,9 @@
 ﻿using Isopoh.Cryptography.Argon2;
-using System.Data.SqlTypes;
 using System.Security.Cryptography;
 using System.Text;
 using WoopiAiHub.Domain.Interfaces.Utils;
 
-namespace WoopiAiHub.Application.Services
+namespace WoopiAiHub.Application.Utils
 {
     public class Argon2PasswordHasher : IPasswordHasher
     {

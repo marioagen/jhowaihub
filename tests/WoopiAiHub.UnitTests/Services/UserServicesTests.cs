@@ -216,6 +216,7 @@ namespace WoopiAiHub.UnitTests.Services
                 Id = userId,
                 Name = "Novo Nome",
                 Email = "novo@email.com",
+                Password = "NovaSenha123",
                 TeamIds = new List<int> { 1, 2 }
             };
             var headersDto = new HeadersDto { Tenant = "tenant" };
@@ -225,10 +226,15 @@ namespace WoopiAiHub.UnitTests.Services
                 Teams = new List<Team>()
             };
             var teams = new List<Team>
-        {
-            new Team("Time 1", 1, DateTime.Now),
-            new Team("Time 2", 2, DateTime.Now)
-        };
+            {
+                new Team("Time 1", 1, DateTime.Now),
+                new Team("Time 2", 2, DateTime.Now)
+            };
+            var profiles = new List<Profile>
+            {
+                new Profile("Profile 1", 1, DateTime.Now),
+                new Profile("Profile 2", 2, DateTime.Now)
+            };
 
             _marketPlaceApiMock
                 .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
@@ -241,6 +247,10 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock
                 .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
                 .Returns(teams);
+
+            _profileRepositoryMock
+                .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(profiles);
 
             _userRepositoryMock
                 .Setup(repo => repo.Update(It.IsAny<User>()))
@@ -276,7 +286,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _userRepositoryMock
                 .Setup(repo => repo.FindByReferenceAsync(userId))
-                .ReturnsAsync((User)null);
+                .ReturnsAsync((User?)null);
 
             // Act
             var result = await _userServices.Update(userUpdateDto, headersDto);
@@ -425,6 +435,53 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock
                 .Setup(repo => repo.FindByIds(dto.TeamIds))
                 .Returns(teams);
+
+            _userRepositoryMock
+                .Setup(repo => repo.CreateAsync(It.IsAny<User>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _userServices.Create(dto, headers);
+
+            // Assert
+            Assert.True(result);
+            _userRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<User>(u =>
+                u.Teams.Count == 2)), Times.Once);
+        }
+
+        [Fact(DisplayName = "Create should assign profiles when ProfilesIds are present")]
+        [Trait("CreateUser", "Profiles")]
+        public async Task Create_ShouldAssignProfiles_WhenProfilesIdsArePresent()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var dto = new UserCreateDto
+            {
+                Name = "Test User",
+                Email = "test@email.com",
+                Password = "password123",
+                TeamIds = new List<int> { 1, 2 }
+            };
+
+            var headers = new HeadersDto { Tenant = "tenant" };
+
+            var profiles = new List<Profile>
+            {
+                new Profile("Profile 1", 1, DateTime.Now),
+                new Profile("Profile 2", 2, DateTime.Now)
+            };
+
+            _marketPlaceApiMock
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(userId);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .ReturnsAsync((User?)null);
+
+            _profileRepositoryMock
+                .Setup(repo => repo.FindByIds(dto.TeamIds))
+                .Returns(profiles);
 
             _userRepositoryMock
                 .Setup(repo => repo.CreateAsync(It.IsAny<User>()))
