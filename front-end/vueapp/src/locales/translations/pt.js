@@ -225,6 +225,10 @@
     labelDocumentsMessage: "Gerencie documentos e extraia informações",
     labelAllTeams: "Todos os times",
     labelNoTeams: "Nenhum time disponível",
+    unauthorized: {
+        title: "Você não tem permissão",
+        returnToHome: "Retornar",
+    },
 };
 
 export default portuguese;

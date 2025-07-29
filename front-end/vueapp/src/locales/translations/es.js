@@ -230,6 +230,10 @@
     labelDocumentsMessage: "Gestione documentos y extraiga información",
     labelAllTeams: "Todos los equipos",
     labelNoTeams: "No hay equipos disponibles.",
+    unauthorized: {
+        title: "No tienes permiso",
+        returnToHome: "Volver",
+    },
 };
 
 export default spanish;

@@ -226,6 +226,10 @@
     labelDocumentsMessage: "Manage documents and extract information",
     labelAllTeams: "All teams",
     labelNoTeams: "No teams available",
+    unauthorized: {
+        title: "You do not have permission",
+        returnToHome: "Return",
+    },
 };
 
 export default english;
