@@ -16,7 +16,6 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IDocumentNormalizedServices, DocumentNormalizedServices>();
             services.AddScoped<IAccountServices, AccountServices>();
             services.AddScoped<ITenantServices, TenantServices>();
-            services.AddScoped<IValidateDocument, ValidateDocument>();
             services.AddScoped<IOcrGoogle, OcrGoogle>();
             services.AddScoped<IOcrAzure, OcrAzure>();
             services.AddScoped<IQuestionnaireServices, QuestionnaireServices>();
@@ -25,6 +24,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<ICoreDependencies, CoreDependencies>();
             services.AddScoped<IApiDependencies, ApiDependencies>();
             services.AddScoped<ITeamServices, TeamServices>();
+            services.AddScoped<IProfileServices, ProfileServices>();
+            services.AddScoped<IPermissionServices, PermissionServices>();
             services.AddScoped<IUserServices, UserServices>();
             services.AddScoped<IProfileServices, ProfileServices>();
             services.AddScoped<IPasswordHasher, Argon2PasswordHasher>();

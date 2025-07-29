@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WoopiAiHub.Domain.DTOs.Response;
 
-namespace WoopiAiHub.Domain.DTOs.Response
+namespace WoopiAiHub.Domain.DTOs
 {
-    public record class ProfileDto
+    public record class PermissionDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public DateTime Created { get; set; }
-        public IEnumerable<PermissionDto> Permissions { get; set; } = Enumerable.Empty<PermissionDto>();
-        public IEnumerable<UserDto> Users { get; set; } = Enumerable.Empty<UserDto>();
     }
 }

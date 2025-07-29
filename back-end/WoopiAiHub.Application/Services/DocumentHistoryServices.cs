@@ -11,15 +11,12 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
         private readonly IValidator<DocumentHistory> _documentHistoryValidator;
-        private readonly IValidateDocument _validateDocument;
 
         public DocumentHistoryServices(IDocumentHistoryRepository documentHistoryRepository,
-                                       IValidator<DocumentHistory> documentHistoryValidator,
-                                       IValidateDocument validateDocument)
+                                       IValidator<DocumentHistory> documentHistoryValidator)
         {
             _documentHistoryRepository = documentHistoryRepository;
             _documentHistoryValidator = documentHistoryValidator;
-            _validateDocument = validateDocument;
         }
 
         /// <summary>
@@ -42,9 +39,6 @@ namespace WoopiAiHub.Application.Services
         public JsonResult FindById(int idDocument,
                                    string emailCreator)
         {
-            _validateDocument.VerifyCreatorEmail(idDocument, 
-                                                 emailCreator);
-
             return new JsonResult(_documentHistoryRepository.FindById(idDocument));
         }
 
@@ -56,9 +50,6 @@ namespace WoopiAiHub.Application.Services
         public bool UpdateHistory(UpdateHistoryDto updateHistoryDto,
                                   string emailCreator)
         {
-            _validateDocument.VerifyCreatorEmail(updateHistoryDto.IdDocument,
-                                                 emailCreator);
-
             var result = _documentHistoryRepository.UpdateHistory(updateHistoryDto);
 
             return result;
@@ -72,9 +63,6 @@ namespace WoopiAiHub.Application.Services
         public bool Delete(int idDocument,
                            string emailCreator)
         {
-            _validateDocument.VerifyCreatorEmail(idDocument, 
-                                                 emailCreator);
-
             var result = _documentHistoryRepository.Delete(idDocument);
 
             return result;

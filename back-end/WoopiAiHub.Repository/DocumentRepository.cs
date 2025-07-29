@@ -33,7 +33,7 @@ namespace WoopiAiHub.Repository
             var query = _context.Documents
                                 .Include(t => t.Teams)
                                 .AsNoTracking()
-                                .Where(i => i.Enable && i.EmailCreator == email);
+                                .Where(i => i.Enable);
 
             if (documentPagedDataDto.TeamIds != null &&
                 documentPagedDataDto.TeamIds.Any())

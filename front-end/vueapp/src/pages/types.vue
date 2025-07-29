@@ -27,13 +27,13 @@
                     </div>
                 </div>
 
-                <TypesTable ref="TypesTable" @toast="handleToast" />
+                <TypesTable ref="TypesTable" />
             </div>
 
             <TypesModal
                 :isEdit="false"
                 :type="modalType"
-                @reload="$refs.TypesTable.getTypes()"
+                @reload="reloadTable"
                 ref="TypesModal"
             />
         </div>
@@ -83,6 +83,10 @@
             openModalType() {
                 this.$refs.TypesModal.open();
             },
+            reloadTable() {
+                this.$refs.TypesModal.close();
+                this.$refs.TypesTable.reload();
+            }
         },
         created() {
             this.setEntitySearch();

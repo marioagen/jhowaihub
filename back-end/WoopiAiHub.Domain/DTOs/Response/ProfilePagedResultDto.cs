@@ -1,6 +1,12 @@
-﻿namespace WoopiAiHub.Domain.DTOs.Response
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public  class ProfilePagedResultDto
+    public record class ProfilePagedResultDto
     {
         public IEnumerable<ProfileDto> Content { get; set; } = Enumerable.Empty<ProfileDto>();
         public int CurrentPage { get; set; }
