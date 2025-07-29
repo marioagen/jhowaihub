@@ -460,10 +460,13 @@ namespace WoopiAiHub.UnitTests.Services
                 Name = "Test User",
                 Email = "test@email.com",
                 Password = "password123",
-                TeamIds = new List<int> { 1, 2 }
+                TeamIds = new List<int>(),
+                ProfileIds = new List<int> { 1, 2 }
             };
 
             var headers = new HeadersDto { Tenant = "tenant" };
+
+            var teams = new List<Team>();
 
             var profiles = new List<Profile>
             {
@@ -479,8 +482,12 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(repo => repo.FindByReferenceAsync(userId))
                 .ReturnsAsync((User?)null);
 
-            _profileRepositoryMock
+            _teamRepositoryMock
                 .Setup(repo => repo.FindByIds(dto.TeamIds))
+                .Returns(teams);
+
+            _profileRepositoryMock
+                .Setup(repo => repo.FindByIds(dto.ProfileIds))
                 .Returns(profiles);
 
             _userRepositoryMock
@@ -493,7 +500,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             _userRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<User>(u =>
-                u.Teams.Count == 2)), Times.Once);
+                u.Profiles.Count == 2)), Times.Once);
         }
 
         [Fact(DisplayName = "Create should return false when marketplace returns Guid.Empty")]
