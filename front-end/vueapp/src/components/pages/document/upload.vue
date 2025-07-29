@@ -21,7 +21,7 @@
 
     <main class="main-scroll" v-if="!loading">
         <div class="container-fluid mt-4">
-            <div class="custom-padding">
+            <div>
                 <div class="row align-items-center mb-3">
                     <div class="col-auto">
                         <button type="button" class="btn btn-custom-light btn-sm" @click="backToListDocuments">
@@ -101,7 +101,7 @@
                                         <span>{{ $t("labelRequiredField") }}</span>
                                     </div>
 
-                                    <div class="mb-3 p-2 rounded">
+                                    <div class="mb-3 rounded">
                                         <div class="input-group">
                                             <span class="input-group-text"><i
                                                     class="fas fa-search text-secondary"></i></span>
@@ -110,7 +110,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="mb-3 d-flex gap-2 p-2 rounded">
+                                    <div class="mb-3 d-flex gap-2 rounded">
                                         <button type="button" class="btn btn-custom-light btn-sm"
                                             @click="selectAll($event)">
                                             <LucideIcon icon="Check" class="me-1" />
