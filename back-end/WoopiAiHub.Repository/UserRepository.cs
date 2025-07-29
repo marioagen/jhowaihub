@@ -128,5 +128,27 @@ namespace WoopiAiHub.Repository
             return query;
         }
 
+        /// <summary>
+        /// Check if an email already exists in the database, excluding a specific user if provided.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="excludeUserId"></param>
+        /// <returns></returns>
+        public async Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            var query = _context.Users.AsQueryable();
+
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+
+            if (excludeUserId.HasValue)
+            {
+                query = query.Where(u => u.Id != excludeUserId.Value);
+            }
+
+            return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
+        }
     }
 }

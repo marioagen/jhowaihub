@@ -12,6 +12,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         bool DeactivateRange(List<Guid> ids);
         bool Update(User user);
         IQueryable<UserDtoPaged> FindAllPaged(PagedDataDto pagedDataDto);
-
+        Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null);
     }
 }

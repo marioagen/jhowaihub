@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.AutoMock;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
@@ -12,6 +12,8 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository;
 using WoopiAiHub.UnitTests.Fixture;
@@ -27,6 +29,8 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IMarketPlaceApi> _marketPlaceApiMock;
         private readonly UserServices _userServices;
         private readonly Mock<ITeamRepository> _teamRepositoryMock;
+        private readonly Mock<IProfileRepository> _profileRepositoryMock;
+        private readonly Mock<IPasswordHasher> _passwordHasherMock;
         private readonly UserFixture _fixture;
 
         public UserServicesTests()
@@ -36,6 +40,8 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock = new Mock<IUserRepository>();
             _marketPlaceApiMock = new Mock<IMarketPlaceApi>();
             _teamRepositoryMock = new Mock<ITeamRepository>();
+            _profileRepositoryMock = new Mock<IProfileRepository>();
+            _passwordHasherMock = new Mock<IPasswordHasher>();
 
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(config => config[It.Is<string>(s => s == "keyAccess")]).Returns("mockKeyAccess");
@@ -47,7 +53,9 @@ namespace WoopiAiHub.UnitTests.Services
                 _userRepositoryMock.Object,
                 _marketPlaceApiMock.Object,
                  configMock.Object,
-                _teamRepositoryMock.Object
+                _teamRepositoryMock.Object,
+                _profileRepositoryMock.Object,
+                _passwordHasherMock.Object
             );
         }
 
@@ -56,18 +64,15 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Create_ShouldReturnTrue_WhenUserIsCreated()
         {
             // Arrange
-            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", TeamIds = [1] };
+            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", Password = "Password123", TeamIds = [1], ProfileIds = [1] };
             var headersDto = new HeadersDto { Tenant = "tenant" };
             var requestDto = _fixture.FindValidRequestAssignLicensesByHub();
             var userId = Guid.NewGuid();
             var user = new User(userId, userCreateDto.Name, userCreateDto.Email, true, DateTime.Now);
-            var listTeams = new List<Team>
-            {
-                new Team("Team 1", 1, DateTime.Now)
-            };
+
             _teamRepositoryMock
-            .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
-            .Returns(new List<Team>());
+                .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(new List<Team>());
 
             _marketPlaceApiMock
                 .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
@@ -76,6 +81,10 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock
                 .Setup(repo => repo.CreateAsync(It.IsAny<User>()))
                 .ReturnsAsync(true);
+
+            _profileRepositoryMock
+                .Setup(repo => repo.FindByIdsAsync(It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(new List<Profile>());
 
 
             // Act
@@ -91,7 +100,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Create_ShouldReturnFalse_WhenUserNotEnabled()
         {
             // Arrange
-            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", TeamIds = [] };
+            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", Password = "Password123", TeamIds = [] };
             var headersDto = new HeadersDto { Tenant = "tenant" };
 
             // Act
@@ -341,7 +350,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Create_ShouldThrowArgumentException_WhenNameOrEmailIsEmpty(string name, string email)
         {
             // Arrange
-            var dto = new UserCreateDto { Name = name, Email = email };
+            var dto = new UserCreateDto { Name = name, Email = email, Password = "Password123" };
             var headers = new HeadersDto { Tenant = "tenant" };
 
             // Act & Assert
@@ -356,7 +365,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Create_ShouldReactivateUser_WhenUserAlreadyExists()
         {
             // Arrange
-            var dto = new UserCreateDto { Name = "Reactivated User", Email = "reactivate@test.com", TeamIds = [] };
+            var dto = new UserCreateDto { Name = "Reactivated User", Email = "reactivate@test.com", Password = "Password123", TeamIds = [] };
             var headers = new HeadersDto { Tenant = "tenant" };
             var userId = Guid.NewGuid();
 
@@ -393,6 +402,7 @@ namespace WoopiAiHub.UnitTests.Services
             {
                 Name = "Test User",
                 Email = "test@email.com",
+                Password = "password123",
                 TeamIds = new List<int> { 1, 2 }
             };
 
@@ -434,7 +444,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Create_ShouldReturnFalse_WhenMarketplaceReturnsEmptyGuid()
         {
             // Arrange
-            var dto = new UserCreateDto { Name = "Test", Email = "fail@test.com", TeamIds = [] };
+            var dto = new UserCreateDto { Name = "Test", Email = "fail@test.com", Password = "Password123", TeamIds = [] };
             var headers = new HeadersDto { Tenant = "tenant" };
 
             _marketPlaceApiMock
@@ -446,6 +456,52 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.False(result);
+        }
+
+        [Fact(DisplayName = "IsEmailInUseAsync should return true when email exists in repository")]
+        [Trait("IsEmailInUseAsync", "Success")]
+        public async Task IsEmailInUseAsync_ShouldReturnTrue_WhenEmailExistsInRepository()
+        {
+            // Arrange
+            var userEmailDto = new UserEmailDto
+            {
+                Email = "existing@example.com",
+                UserId = Guid.NewGuid()
+            };
+
+            _userRepositoryMock
+                .Setup(x => x.EmailExistsAsync(userEmailDto.Email, userEmailDto.UserId))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _userServices.IsEmailInUseAsync(userEmailDto);
+
+            // Assert
+            Assert.True(result);
+            _userRepositoryMock.Verify(
+                x => x.EmailExistsAsync(userEmailDto.Email, userEmailDto.UserId),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "IsEmailInUseAsync should throw ArgumentException when email is null")]
+        [Trait("IsEmailInUseAsync", "Exception")]
+        public async Task IsEmailInUseAsync_ShouldThrowArgumentException_WhenEmailIsNull()
+        {
+            // Arrange
+            var userEmailDto = new UserEmailDto
+            {
+                Email = null,
+                UserId = Guid.NewGuid()
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<ArgumentException>(
+                () => _userServices.IsEmailInUseAsync(userEmailDto));
+
+            Assert.Equal("Null or empty email", exception.Message);
+            _userRepositoryMock.Verify(
+                x => x.EmailExistsAsync(It.IsAny<string>(), It.IsAny<Guid?>()),
+                Times.Never);
         }
     }
 }

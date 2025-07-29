@@ -117,24 +117,26 @@
         emits: ["close", "userCreated"],
         methods: {
             async validateEmailBackend() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.form.email.trim())) {
+                    return;
+                }
                 var paramsReq = {
-                    search: this.form.email.trim(),
-                    pageSize: 0,
-                    page: 1,
-                    isAscending: this.isAscending,
+                    email: this.form.email.trim(),
+                    userId: null
                 };
                 let self = this;
-                api.get("User/Paged", { params: paramsReq })
+                api.post("User/IsEmailInUse", paramsReq )
                     .then(function (response) {
-                        if (response.data && response.data.content && response.data.content.length > 0) {
-                            self.$refs.form.setFieldError('email', this.$t("labelErrorEmailAlreadyExists"));
+                        if (response && response.data && response.data === true) {
+                            self.$refs.form.setFieldError('email', self.$t("labelErrorEmailAlreadyExists"));
                         } else {
                             self.$refs.form.setFieldError('email', "");
                         }
                         self.loading = false;
                     })
                     .catch(function (e) {
-                        self.alertToast(this.$t("labelUserError"), "toast-warning");
+                        self.alertToast(self.$t("labelUserError"), "toast-warning");
                         self.loading = false;
                     })
                     .finally(function () {

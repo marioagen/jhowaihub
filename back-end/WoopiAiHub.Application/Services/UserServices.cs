@@ -43,7 +43,9 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Create(UserCreateDto userCreateDto, HeadersDto headersDto)
         {
-            if (string.IsNullOrEmpty(userCreateDto.Name) || string.IsNullOrEmpty(userCreateDto.Email))
+            if (string.IsNullOrEmpty(userCreateDto.Name) || 
+                string.IsNullOrEmpty(userCreateDto.Email) ||
+                string.IsNullOrEmpty(userCreateDto.Password))
             {
                 throw new ArgumentException("Data cannot be empty");
             }
@@ -268,5 +270,20 @@ namespace WoopiAiHub.Application.Services
             };
         }
 
+        /// <summary>
+        /// Checks if an email is already in use by another user.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="excludeUserId"></param>
+        /// <returns></returns>
+        public async Task<bool> IsEmailInUseAsync(UserEmailDto userEmailDto)
+        {
+            if (string.IsNullOrWhiteSpace(userEmailDto.Email))
+            {
+                throw new ArgumentException("Null or empty email");
+            }
+
+            return await _userRepository.EmailExistsAsync(userEmailDto.Email, userEmailDto.UserId);
+        }
     }
 }

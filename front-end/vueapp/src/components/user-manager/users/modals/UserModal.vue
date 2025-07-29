@@ -199,20 +199,19 @@
         },
         methods: {
             async validateEmailBackend() {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.userData.email.trim())) {
+                    return;
+                }
                 var paramsReq = {
-                    search: this.userData.email.trim(),
-                    pageSize: 0,
-                    page: 1,
-                    isAscending: this.isAscending,
+                    email: this.userData.email.trim(),
+                    userId: this.userData.id,
                 };
                 let self = this;
-                api.get("User/Paged", { params: paramsReq })                    
+                api.post("User/IsEmailInUse", paramsReq)                    
                     .then(function (response) {
-                        
-                        if (response.data && 
-                            response.data.content && 
-                            response.data.content.length > 0 &&
-                            response.data.content[0].id !== self.userData.id) {
+
+                        if (response && response.data && response.data === true) {
                              self.$refs.formRef.setFieldError('userEmail', self.$t("labelErrorEmailAlreadyExists"));
                         } else {
                             self.$refs.formRef.setFieldError('userEmail', "");
