@@ -4,9 +4,9 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("labelQuestions") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("questions.title") }}</h5>
                         <p>
-                            <small class="text-muted">{{ $t("labelQuestionMessage") }}</small>
+                            <small class="text-muted">{{ $t("questions.subtitle") }}</small>
                         </p>
                     </div>
                     <button 
@@ -14,7 +14,7 @@
                         @click="openModalType"
                     >
                         <LucideIcon icon="Plus" size="17" />
-                        {{ $t("labelNewQuestion") }}
+                        {{ $t("questions.createBtn") }}
                     </button>
                 </div>
                 <div class="card mb-3">
@@ -73,9 +73,9 @@
             setEntitySearch() {
                 this.entitySearch = {
                     screen: "question",
-                    labelInput: this.$t("labelSearchQuestion"),
-                    placeholderInput: this.$t("labelDescriptionOrQuestionId"),
-                    labelButton: this.$t("labelNewQuestion"),
+                    labelInput: this.$t("questions.filters.input"),
+                    placeholderInput: this.$t("questions.filters.input"),
+                    labelButton: this.$t("questions.createBtn"),
                 };
             },
             filterList(obj) {

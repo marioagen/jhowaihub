@@ -9,8 +9,8 @@
     </button>
     <div>
         <TableComponent
-            modalName="labelQuestions"
-            emptyMessage="labelQuestionWasFound"
+            modalName="questions.title"
+            emptyMessage="questions.notFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -18,6 +18,9 @@
             @selectedRows="selectedRows"
             @change-page="changePage"
         >
+            <template #cell-created="{ data }">
+                {{ formatDate(data.row.created) }}
+            </template>
             <template #cell-actions="{ data }">
                 <button 
                     class="btn btn-outline-success btn-sm table-btn" 
@@ -43,7 +46,7 @@
 
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteQuestion"
+        title="questions.removeTitle"
         message="labelThisActionCannotBeUndone"
         cancelText="labelCancel"
         confirmText="labelConfirm"
@@ -73,9 +76,10 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "Id" },
-                    { key: "description", label: "labelName" },
-                    { key: "emailCreator", label: "labelOwner" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "description", label: "questions.description" },
+                    { key: "created", label: "questions.createdData" },
+                    { key: "emailCreator", label: "questions.owner" },
+                    { key: "actions", label: "questions.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -113,7 +117,6 @@
 
                 QuestionsService.getQuestions(paramsReq)
                     .then((resposne) => {
-                        console.log(resposne)
                         this.table.data = resposne.content;
                         this.table.pagination = resposne.pagination;
                     })

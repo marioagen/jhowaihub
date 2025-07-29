@@ -18,7 +18,7 @@
 
         <template #body>
             <div class="modal-body">
-                <label>Description</label>
+                <label>{{ $t("questions.description") }}</label>
                 <textarea rows="7" v-model="questionData.description" class="form-control" />
             </div>
         </template>
@@ -66,10 +66,10 @@
         }),
         computed: {
             titleText() {
-                return this.isEdit ? "labelEditTitleQuestion" : "labelSaveTitleQuestion";
+                return this.isEdit ? "questions.modalEdit.title" : "questions.modalCreate.title";
             },
             saveText() {
-                return this.isEdit ? "labelEditQuestion" : "labelSaveQuestion";
+                return this.isEdit ? "questions.modalEdit.save" : "questions.modalCreate.save";
             },
         },
         methods: {
@@ -101,12 +101,12 @@
                             this.$emit('reload');
                             return this.$notify({
                                 title: 'Tipos',
-                                message: this.$t("labelQuestionSuccess"),
+                                message: this.$t("questions.createSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } 
-                        const messageKey = result.status === 409 ? "labelQuestionAlreadyExists" : "labelQuestionError";
+                        const messageKey = result.status === 409 ? "questions.errorDuplicated" : "questions.createError";
                         this.$notify({
                             title: 'Tipos',
                             message: this.$t(messageKey),
@@ -127,13 +127,13 @@
                             this.$emit("reload");
                             return this.$notify({
                                 title: 'Tipos',
-                                message: this.$t("labelQuestionEditSuccess"),
+                                message: this.$t("questions.editSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         }
 
-                        const messageKey = result.status === 409 ? "labelQuestionAlreadyExists" : "labelQuestionError";
+                        const messageKey = result.status === 409 ? "questions.errorDuplicated" : "questions.editError";
                         this.$notify({
                             title: 'Tipos',
                             message: this.$t(messageKey),
