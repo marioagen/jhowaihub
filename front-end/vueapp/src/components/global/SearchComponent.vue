@@ -8,7 +8,7 @@
                 <input 
                     id="InputSearch" 
                     type="text" 
-                    class="form-control form-control-sm border-start-0"
+                    class="form-control form-control-sm border-start-0 custom-input"
                     :class="{ 'border-end-0': showCleanBtn }"
                     ref="searchInpt" 
                     v-model="searchInput" 
@@ -99,3 +99,14 @@
         },
     };
 </script>
+
+<style scooped>
+.custom-input {
+  font-size: 12px;
+}
+
+.custom-input::placeholder {
+  font-size: 12px;
+  color: #999;
+}
+</style>
