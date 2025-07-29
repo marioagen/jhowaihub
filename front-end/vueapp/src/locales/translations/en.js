@@ -226,6 +226,35 @@
     labelDocumentsMessage: "Manage documents and extract information",
     labelAllTeams: "All teams",
     labelNoTeams: "No teams available",
+    questions: {
+        title: "Questions",
+        subtitle: "Manage system questions",
+        notFound: "No questions registered",
+        filters: {
+            input: "Search question",
+        },
+        createBtn: "Create question",
+        createSuccess: "Question created successfully",
+        createError: "Error creating question",
+        editSuccess: "Question edited successfully",
+        editError: "Error editing question",
+        removeTitle: "You are about to delete a system question",
+        removeSuccess: "Question removed successfully",
+        removeError: "Error removing question",
+        errorDuplicated: "Duplicated question",
+        description: "Description",
+        owner: "Owner",
+        createdData: "Creation date",
+        actions: "Actions",
+        modalCreate: {
+            title: "Create question",
+            save: "Create question",
+        },
+        modalEdit: {
+            title: "Edit question",
+            save: "Save changes",
+        },
+    },
 };
 
 export default english;
