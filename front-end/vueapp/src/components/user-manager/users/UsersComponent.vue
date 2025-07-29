@@ -11,19 +11,16 @@
         </div>
         <div class="card mb-3">
             <div class="card-body">
-                <SearchComponent 
-                    :entity="entitySearch" 
-                    :resetInput="resetInputSearch" 
+                <SearchComponent
+                    :entity="entitySearch"
+                    :resetInput="resetInputSearch"
                     @search="filterList"
                     @clean="filterList"
                     ref="SearchComponent"
                 />
             </div>
         </div>
-        <UsersTable
-            @setFilter="setFilter"
-            ref="UserTable"
-        />
+        <UsersTable @setFilter="setFilter" ref="UserTable" />
     </div>
     <modal-alert
         v-if="modalAlertShow"
@@ -154,7 +151,7 @@
             },
             setFilter(searchValue) {
                 this.$refs.SearchComponent.searchInput = searchValue;
-                this.$refs.UserTable.getUsers({ search: searchValue, page: this.queryPage, type: null })
+                this.$refs.UserTable.getUsers({ search: searchValue, page: this.queryPage, type: null });
             },
         },
         created() {

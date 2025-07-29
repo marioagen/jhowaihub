@@ -6,7 +6,7 @@ export default {
             .get("/Permission/FindAll/")
             .then(({ data }) => {
                 return {
-                    permissions: data
+                    permissions: data,
                 };
             })
             .catch(function (e) {

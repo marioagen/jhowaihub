@@ -66,7 +66,10 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
+                            <a
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                @click="openConfirmation(data.row)"
+                            >
                                 <LucideIcon icon="Trash2" />
                                 {{ $t("labelDelete") }}
                             </a>
@@ -221,13 +224,13 @@
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             changePage(page) {
-                this.getUsers({ search: '', page: page, type: null });
+                this.getUsers({ search: "", page: page, type: null });
             },
             filterByTeam(team) {
-                this.$emit("setFilter", team.name)
+                this.$emit("setFilter", team.name);
             },
             filterByProfile(profile) {
-                this.$emit("setFilter", profile.name)
+                this.$emit("setFilter", profile.name);
             },
         },
         created() {

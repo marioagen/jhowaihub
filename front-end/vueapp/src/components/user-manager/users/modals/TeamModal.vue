@@ -10,7 +10,7 @@
                     <button type="button" class="btn-close" @click="close"></button>
                 </div>
                 <Form @submit="handleSubmit">
-                    <div class="modal-body">                    
+                    <div class="modal-body">
                         <div class="mb-3">
                             <label for="name" class="form-label fw-semibold mb-0">{{ $t("labelName") }}</label>
                             <Field
@@ -22,14 +22,14 @@
                                 :rules="'required|min:3|max:100'"
                             />
                             <ErrorMessage name="name" class="invalid-feedback d-block" />
-                        </div>             
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary btn-sm" @click="close">
                             {{ $t("labelCancel") }}
                         </button>
                         <button type="submit" class="btn btn-primary btn-sm">{{ $t("labelCreate") }}</button>
-                    </div>       
+                    </div>
                 </Form>
             </div>
         </div>
@@ -39,7 +39,7 @@
 
 <script>
     import api from "@/services/api";
-    import {Form, Field, ErrorMessage} from "vee-validate";
+    import { Form, Field, ErrorMessage } from "vee-validate";
     import ToastAlert from "@/components/common/toast-alert";
 
     export default {
@@ -65,18 +65,19 @@
         },
         components: {
             ToastAlert,
-            Form, Field, ErrorMessage
+            Form,
+            Field,
+            ErrorMessage,
         },
         emits: ["close", "teamCreated"],
         methods: {
             handleSubmit(e) {
-
                 this.loading = true;
                 let team = {
                     id: 0,
                     name: this.form.name.trim(),
-                    users: []
-                }
+                    users: [],
+                };
                 api.post("Team", team)
                     .then((response) => {
                         this.loading = false;

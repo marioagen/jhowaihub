@@ -24,7 +24,7 @@ module.exports = defineConfig({
     },
     chainWebpack: (config) => {
         config.resolve.alias.set("vue$", "vue/dist/vue.runtime.esm-bundler.js");
-        //config.resolve.alias.set("vue-i18n$", "vue-i18n/dist/vue-i18n.runtime.esm-bundler.js");
+        config.resolve.alias.set("vue-i18n$", "vue-i18n/dist/vue-i18n.runtime.esm-bundler.js");
         config.module.rule("vue").use("vue-svg-inline-loader").loader("vue-svg-inline-loader").options({
             /* ... */
         });

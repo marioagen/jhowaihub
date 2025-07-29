@@ -1,4 +1,5 @@
 ﻿using Isopoh.Cryptography.Argon2;
+using System.Data.SqlTypes;
 using System.Security.Cryptography;
 using System.Text;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -21,18 +22,7 @@ namespace WoopiAiHub.Application.Services
             if (saltBytes == null || saltBytes.Length == 0)
                 throw new ArgumentException("Salt cannot be null or empty.", nameof(saltBytes));
 
-            var config = new Argon2Config
-            {
-                Type = Argon2Type.DataIndependentAddressing,
-                Version = Argon2Version.Nineteen,
-                TimeCost = 4,
-                MemoryCost = 1 << 16, // 64 MB
-                Lanes = 4,
-                Threads = 4,
-                Password = Encoding.UTF8.GetBytes(password),
-                Salt = saltBytes,
-                HashLength = 32
-            };
+            var config = CreateConfig(password, saltBytes);
 
             using var argon2 = new Argon2(config);
             using var hashBytes = argon2.Hash();
@@ -42,6 +32,7 @@ namespace WoopiAiHub.Application.Services
             Array.Copy(hashBytes.Buffer, result, hashBytes.Buffer.Length);
             return result;
         }
+
 
         /// <summary>
         /// Verifies whether the provided password matches the stored hash using the Argon2 hashing algorithm.
@@ -58,23 +49,11 @@ namespace WoopiAiHub.Application.Services
             if (storedHash == null || storedSalt == null)
                 return false;
 
-            var config = new Argon2Config
-            {
-                Type = Argon2Type.DataIndependentAddressing,
-                Version = Argon2Version.Nineteen,
-                TimeCost = 4,
-                MemoryCost = 1 << 16, // 64 MB
-                Lanes = 4,
-                Threads = 4,
-                Password = Encoding.UTF8.GetBytes(password),
-                Salt = storedSalt,
-                HashLength = 32
-            };
+            var config = CreateConfig(password, storedSalt);
 
             using var argon2 = new Argon2(config);
             using var hashBytes = argon2.Hash();
 
-            // Compara os arrays de bytes diretamente
             return CompareBytes(hashBytes.Buffer, storedHash);
         }
 
@@ -111,6 +90,29 @@ namespace WoopiAiHub.Application.Services
                 result |= a[i] ^ b[i];
             }
             return result == 0;
+        }
+
+        /// <summary>
+        /// Creates a configuration for the Argon2 hashing algorithm based on the provided password and salt.
+        /// </summary>
+        /// <param name="password"></param>
+        /// <param name="saltBytes"></param>
+        /// <returns></returns>
+        private static Argon2Config CreateConfig(string password, byte[] saltBytes)
+        {
+            var config = new Argon2Config
+            {
+                Type = Argon2Type.DataIndependentAddressing,
+                Version = Argon2Version.Nineteen,
+                TimeCost = 4,
+                MemoryCost = 1 << 16, // 64 MB
+                Lanes = 4,
+                Threads = 4,
+                Password = Encoding.UTF8.GetBytes(password),
+                Salt = saltBytes,
+                HashLength = 32
+            };
+            return config;
         }
     }
 }

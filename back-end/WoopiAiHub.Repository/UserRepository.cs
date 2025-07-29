@@ -95,11 +95,11 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
-        public IQueryable<UserDtoPaged> FindAllPaged(PagedDataDto pagedDataDto)
+        public IQueryable<UserPagedDto> FindAllPaged(PagedDataDto pagedDataDto)
         {
             var query = _context.Users.Where(p => p.IsActive == true)
                 .Include(t => t.Teams)
-                .Select(t => new UserDtoPaged
+                .Select(t => new UserPagedDto
                 {
                     Id = t.Id,
                     Name = t.Name,

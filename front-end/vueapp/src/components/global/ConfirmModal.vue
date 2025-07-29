@@ -1,32 +1,18 @@
 <template>
-    <div 
-        class="modal fade" 
-        tabindex="-1" 
-        aria-hidden="true" 
-        ref="modalEl" 
-        :aria-labelledby="`${id}-label`" 
-        :id="id"
-    >
+    <div class="modal fade" tabindex="-1" aria-hidden="true" ref="modalEl" :aria-labelledby="`${id}-label`" :id="id">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button 
-                        class="btn-sm table-btn"
-                        :class="`btn btn-outline-${iconVariant}`"
-                        disabled
-                    >
+                    <button class="btn-sm table-btn" :class="`btn btn-outline-${iconVariant}`" disabled>
                         <LucideIcon :icon="iconeName" />
                     </button>
-                    <h5 
-                        class="modal-title ms-2" 
-                        :id="`${id}-label`"
-                    >
+                    <h5 class="modal-title ms-2" :id="`${id}-label`">
                         {{ $t(title) }}
                     </h5>
-                    <button 
-                        type="button" 
-                        class="btn-close" 
-                        data-bs-dismiss="modal" 
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
                         aria-label="Close"
                         :disabled="isLoading"
                     />
@@ -46,14 +32,14 @@
                     >
                         {{ $t(cancelText) }}
                     </button>
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         class="mx-4"
                         :class="`btn btn-${confirmVariant}`"
                         :disabled="isLoading"
                         @click="$emit('confirm')"
                     >
-                        <div style="min-width: 80px;" class="text-center">
+                        <div style="min-width: 80px" class="text-center">
                             <span v-if="isLoading" class="spinner-grow spinner-grow-sm" role="status"></span>
                             <span v-else>{{ $t(confirmText) }}</span>
                         </div>
@@ -95,22 +81,22 @@
             confirmVariant: {
                 type: String,
                 required: false,
-                default: 'danger',
+                default: "danger",
             },
             iconeName: {
                 type: String,
                 required: false,
-                default: "Trash2"
+                default: "Trash2",
             },
             iconVariant: {
                 type: String,
                 required: false,
-                default: "danger"
+                default: "danger",
             },
         },
         mounted() {
             this.modalInstance = new window.bootstrap.Modal(this.$refs.modalEl, {
-                backdrop: 'static',
+                backdrop: "static",
                 keyboard: false,
             });
         },
@@ -121,6 +107,6 @@
             close() {
                 this.modalInstance?.hide();
             },
-        }
+        },
     };
 </script>

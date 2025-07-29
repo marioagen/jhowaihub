@@ -179,9 +179,9 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var pagedDataDto = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true };
-            var users = new List<UserDtoPaged>
+            var users = new List<UserPagedDto>
         {
-            new UserDtoPaged { Id = Guid.NewGuid(), Name = "A", Email = "a@a.com", IsActive = true, Created = DateTime.Now }
+            new UserPagedDto { Id = Guid.NewGuid(), Name = "A", Email = "a@a.com", IsActive = true, Created = DateTime.Now }
         }.AsQueryable();
 
             _userRepositoryMock.Setup(r => r.FindAllPaged(pagedDataDto)).Returns(users);

@@ -1,19 +1,21 @@
 <template>
     <div>
-        <TableComponent modalName="labelProfile"
-                        emptyMessage="labelNoProfilesWereFound"
-                        :data="table.data"
-                        :columns="table.columns"
-                        :isLoading="table.isLoading"
-                        :pagination="table.pagination"
-                        :hasSelection="false"
-                        @change-page="changePage">
+        <TableComponent
+            modalName="labelProfile"
+            emptyMessage="labelNoProfilesWereFound"
+            :data="table.data"
+            :columns="table.columns"
+            :isLoading="table.isLoading"
+            :pagination="table.pagination"
+            :hasSelection="false"
+            @change-page="changePage"
+        >
             <template #cell-users="{ data }">
                 <LucideIcon icon="UsersRound" size="15" />
-                {{data.row.users.length}}
+                {{ data.row.users.length }}
             </template>
             <template #cell-permissions="{ data }">
-                {{data.row.permissions.length}} {{$t("labelShowingToTotal")}} {{this.permissionsCount}}
+                {{ data.row.permissions.length }} {{ $t("labelShowingToTotal") }} {{ this.permissionsCount }}
             </template>
             <template #cell-actions="{ data }">
                 <div class="dropdown column-align">
@@ -22,13 +24,16 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2"  @click="openEditModal(data.row)">
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
                                 <LucideIcon icon="SquarePen" />
                                 {{ $t("labelEdit") }}
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
+                            <a
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                @click="openConfirmation(data.row)"
+                            >
                                 <LucideIcon icon="Trash2" />
                                 {{ $t("labelDelete") }}
                             </a>
@@ -38,18 +43,18 @@
             </template>
         </TableComponent>
     </div>
-    <ProfilesModal :isEdit="true"
-                   @reload="reload"
-                   ref="ProfilesModal" />
-    <ConfirmModal id="deleteConfirm"
-                  title="labelYouAreAboutToDeleteProfile"
-                  message="labelThisActionCannotBeUndone"
-                  cancelText="labelCancel"
-                  confirmText="labelConfirm"
-                  confirmVariant="primary"
-                  ref="DeleteDialog"
-                  :isLoading="isDeleting"
-                  @confirm="deleteProfile" />
+    <ProfilesModal :isEdit="true" @reload="reload" ref="ProfilesModal" />
+    <ConfirmModal
+        id="deleteConfirm"
+        title="labelYouAreAboutToDeleteProfile"
+        message="labelThisActionCannotBeUndone"
+        cancelText="labelCancel"
+        confirmText="labelConfirm"
+        confirmVariant="primary"
+        ref="DeleteDialog"
+        :isLoading="isDeleting"
+        @confirm="deleteProfile"
+    />
 </template>
 
 <script>
@@ -75,7 +80,7 @@
                     { key: "name", label: "labelProfile" },
                     { key: "users", label: "labelUsers" },
                     { key: "permissions", label: "labelPermissions" },
-                    { key: "actions", label: "labelAction" }
+                    { key: "actions", label: "labelAction" },
                 ],
                 data: [],
                 pagination: {
@@ -129,8 +134,7 @@
                         const permissions = response.permissions;
                         this.permissionsCount = permissions.length;
                     })
-                    .finally(() => {
-                    });
+                    .finally(() => {});
             },
             orderList: function (col) {
                 if (this.isAscending) {
@@ -170,17 +174,17 @@
                             this.$refs.DeleteDialog.close();
                             this.getProfiles({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: 'Profiles',
+                                title: "Profiles",
                                 message: this.$t("labelProfileRemoveSuccess"),
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: 'Profiles',
+                                title: "Profiles",
                                 message: this.$t("labelProfileRemoveError"),
-                                variant: 'danger',
-                                icon: 'CircleX',
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                     })
@@ -193,7 +197,7 @@
             reload() {
                 this.$refs.ProfilesModal.close();
                 this.getProfiles({ search: "", page: this.queryPage, type: null });
-            }
+            },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
@@ -204,7 +208,7 @@
 </script>
 
 <style>
-.dropdown-toggle::after {
-  display: none;
-}
+    .dropdown-toggle::after {
+        display: none;
+    }
 </style>

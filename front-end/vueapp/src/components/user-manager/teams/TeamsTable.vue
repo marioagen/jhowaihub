@@ -27,7 +27,10 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
+                            <a
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                @click="openConfirmation(data.row)"
+                            >
                                 <LucideIcon icon="Trash2" />
                                 {{ $t("labelDelete") }}
                             </a>
@@ -35,7 +38,6 @@
                     </ul>
                 </div>
             </template>
-
         </TableComponent>
     </div>
     <modal-team
@@ -189,7 +191,7 @@
 </script>
 
 <style>
-.dropdown-toggle::after {
-  display: none;
-}
+    .dropdown-toggle::after {
+        display: none;
+    }
 </style>

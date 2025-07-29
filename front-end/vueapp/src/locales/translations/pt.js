@@ -257,7 +257,7 @@
     labelProfiles: "Perfis",
     labelSelectedProfiles: "Perfis selecionados",
     labelSearchProfiles: "Buscar perfis",
-    validation: { 
+    validation: {
         required: "Campo obrigatório",
         max: "Máximo de {limit} caracteres",
         min: "Mínimo de {limit} caracteres",
@@ -267,7 +267,7 @@
         password_special: "A senha deve conter pelo menos um caractere especial.",
         password_confirmed: "A confirmação da senha não confere.",
         email: "Email inválido",
-    }
+    },
 };
 
 export default portuguese;

@@ -10,58 +10,64 @@
                     <button type="button" class="btn-close" @click="close"></button>
                 </div>
                 <Form @submit="handleSubmit" ref="form">
-                    <div class="modal-body">                    
-                         <div class="row">
+                    <div class="modal-body">
+                        <div class="row">
                             <div class="col-6">
-                        <div class="mb-3">
-                            <label for="name" class="form-label fw-semibold mb-0">{{ $t("labelName") }}</label>
-                            <Field
-                                name="name"
-                                type="text"
-                                class="form-control form-control-sm"
-                                :placeholder="$t('labelTypeName')"
-                                v-model="form.name"
-                                :rules="'required|min:3|max:150'"
-                            />
-                            <ErrorMessage name="name" class="invalid-feedback d-block" />
-                        </div>
-                                                    </div>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label fw-semibold mb-0">{{ $t("labelName") }}</label>
+                                    <Field
+                                        name="name"
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        :placeholder="$t('labelTypeName')"
+                                        v-model="form.name"
+                                        :rules="'required|min:3|max:150'"
+                                    />
+                                    <ErrorMessage name="name" class="invalid-feedback d-block" />
+                                </div>
+                            </div>
                             <div class="col-6">
-                        <div class="mb-3">
-                            <label for="email" class="form-label fw-semibold mb-0">{{ $t("labelEmail") }}</label>
-                            <Field
-                                name="email"
-                                type="email"
-                                class="form-control form-control-sm"
-                                :placeholder="$t('labelTypeEmail')"
-                                v-model="form.email"
-                                @blur="validateEmailBackend"
-                                :rules="'required|min:5|max:100|email'"
-                            />
-                            <ErrorMessage name="email" class="invalid-feedback d-block" />
-                        </div>
-                        </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelEmail") }}
+                                    </label>
+                                    <Field
+                                        name="email"
+                                        type="email"
+                                        class="form-control form-control-sm"
+                                        :placeholder="$t('labelTypeEmail')"
+                                        v-model="form.email"
+                                        @blur="validateEmailBackend"
+                                        :rules="'required|min:5|max:100|email'"
+                                    />
+                                    <ErrorMessage name="email" class="invalid-feedback d-block" />
+                                </div>
+                            </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-6">
-                                <label for="password" class="form-label fw-semibold mb-0">{{ $t("labelPassword") }}</label>
+                                <label for="password" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelPassword") }}
+                                </label>
                                 <PasswordInputComponent
                                     :placeholder="$t('labelTypePassword')"
                                     :rules="'required|min:6|max:50|custom_password'"
                                     name="password"
                                     v-model="form.password"
-                                />                            
+                                />
                             </div>
                             <div class="col-6">
-                                <label for="confirmedPassword" class="form-label fw-semibold mb-0">{{ $t("labelConfirmedPassword") }}</label>
+                                <label for="confirmedPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelConfirmedPassword") }}
+                                </label>
                                 <PasswordInputComponent
                                     :placeholder="$t('labelTypeConfirmedPassword')"
                                     :rules="'required|confirmed:password|min:6|max:50'"
                                     name="confirmedPassword"
                                     v-model="form.confirmedPassword"
-                                />  
+                                />
                             </div>
-                        </div>                                            
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary btn-sm" @click="close">
@@ -70,7 +76,7 @@
                         <button type="submit" class="btn btn-primary btn-sm">
                             {{ $t("labelCreateTeamUser") }}
                         </button>
-                    </div>                    
+                    </div>
                 </Form>
             </div>
         </div>
@@ -82,7 +88,7 @@
     import api from "@/services/api";
     import ErrorCode from "@/constants/Errorcode";
     import ToastAlert from "@/components/common/toast-alert";
-    import {Form, Field, ErrorMessage} from "vee-validate";
+    import { Form, Field, ErrorMessage } from "vee-validate";
     import PasswordInputComponent from "@/components/global/PasswordInputComponent.vue";
 
     export default {
@@ -111,9 +117,11 @@
         },
         components: {
             ToastAlert,
-            Form, Field, ErrorMessage,
-            PasswordInputComponent
-        },    
+            Form,
+            Field,
+            ErrorMessage,
+            PasswordInputComponent,
+        },
         emits: ["close", "userCreated"],
         methods: {
             async validateEmailBackend() {
@@ -123,15 +131,15 @@
                 }
                 var paramsReq = {
                     email: this.form.email.trim(),
-                    userId: null
+                    userId: null,
                 };
                 let self = this;
-                api.post("User/IsEmailInUse", paramsReq )
+                api.post("User/IsEmailInUse", paramsReq)
                     .then(function (response) {
                         if (response && response.data && response.data === true) {
-                            self.$refs.form.setFieldError('email', self.$t("labelErrorEmailAlreadyExists"));
+                            self.$refs.form.setFieldError("email", self.$t("labelErrorEmailAlreadyExists"));
                         } else {
-                            self.$refs.form.setFieldError('email', "");
+                            self.$refs.form.setFieldError("email", "");
                         }
                         self.loading = false;
                     })
@@ -144,7 +152,6 @@
                     });
             },
             handleSubmit(e) {
-
                 this.loading = true;
                 const user = {
                     name: this.form.name,
@@ -161,7 +168,7 @@
                         if (e.response && e.response.data && e.response.data.errorCode !== ErrorCode.DefaultError) {
                             switch (e.response.data.errorCode) {
                                 case ErrorCode.Duplicated:
-                                    this.$refs.form.setFieldError('email', this.$t("labelErrorEmailAlreadyExists"));
+                                    this.$refs.form.setFieldError("email", this.$t("labelErrorEmailAlreadyExists"));
                                     break;
                                 default:
                                     self.alertToast(this.$t("labelUserError"), "toast-warning");

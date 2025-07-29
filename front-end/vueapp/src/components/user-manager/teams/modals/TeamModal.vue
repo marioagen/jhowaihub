@@ -11,7 +11,7 @@
                     <button type="button" class="btn-close" @click="close"></button>
                 </div>
                 <Form @submit="saveTeam" ref="formRef">
-                    <div class="modal-body">                    
+                    <div class="modal-body">
                         <div class="mb-3">
                             <label for="teamName" class="form-label fw-semibold mb-0">{{ $t("labelTeamName") }}</label>
                             <Field
@@ -37,16 +37,20 @@
                             :loading="loading"
                             :type="'user-list'"
                             v-model:selectedItems="selectedUsers"
-                            >
+                        >
                             <template #footer>
                                 <div class="border-top mt-2 pt-2">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" @click="addNewUser">
-                                     <LucideIcon :icon="'UserPlus'" :size="16" /> {{ $t("labelNewUser") }}
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-secondary fw-semibold"
+                                        @click="addNewUser"
+                                    >
+                                        <LucideIcon :icon="'UserPlus'" :size="16" />
+                                        {{ $t("labelNewUser") }}
                                     </button>
                                 </div>
                             </template>
-                        </SelectionListComponent> 
-                    
+                        </SelectionListComponent>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary btn-sm" @click="close">
@@ -56,7 +60,7 @@
                             {{ $t("labelCreate") }}
                         </button>
                     </div>
-                </Form>             
+                </Form>
             </div>
         </div>
     </div>
@@ -85,8 +89,10 @@
         components: {
             ModalTeamUser,
             ToastAlert,
-            Form, Field, ErrorMessage,
-            SelectionListComponent
+            Form,
+            Field,
+            ErrorMessage,
+            SelectionListComponent,
         },
         props: {
             teamEditing: {
@@ -111,7 +117,7 @@
                 toastShow: false,
                 toastColor: "",
                 toastMessage: "",
-                myInterval: null,    
+                myInterval: null,
             };
         },
         emits: ["close", "teamCreated"],
@@ -174,12 +180,12 @@
                         this.resetForm();
                         this.close();
                     })
-                    .catch((err) => {                        
+                    .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
 
                         if (errorCode && errorCode !== ErrorCode.DefaultError) {
                             if (errorCode === ErrorCode.Duplicated) {
-                                this.$refs.formRef.setFieldError('teamName', this.$t("labelErrorTeamAlreadyExists"));
+                                this.$refs.formRef.setFieldError("teamName", this.$t("labelErrorTeamAlreadyExists"));
                                 this.alertToast(this.$t("labelTeamError"), "toast-warning");
                             } else {
                                 this.alertToast(this.$t("labelTeamError"), "toast-warning");

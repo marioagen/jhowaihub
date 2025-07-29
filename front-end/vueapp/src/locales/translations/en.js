@@ -217,7 +217,7 @@
     labelCreateTeamUser: "Create User",
     labelCreateProfile: "Create profile",
     labelEditProfile: "Edit profile",
-    labelTypeEmail: "user@yourcompany.com",
+    labelTypeEmail: "user{'@'}yourcompany.com",
     labelEmail: "Email",
     labelTypeName: "Enter full name",
     labelErrorEmailAlreadyExists: "Email already registered",

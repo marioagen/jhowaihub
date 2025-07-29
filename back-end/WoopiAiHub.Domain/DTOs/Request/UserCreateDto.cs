@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.DTOs.Request
 {
-    public class UserCreateDto
+    public record class UserCreateDto
     {
         public string Name { get;  set; } = string.Empty;
 

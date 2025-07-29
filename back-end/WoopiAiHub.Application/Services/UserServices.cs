@@ -230,7 +230,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="totalList"></param>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
-        private static UserPagedResultDto Pagination(IQueryable<UserDtoPaged> totalList,
+        private static UserPagedResultDto Pagination(IQueryable<UserPagedDto> totalList,
                                                      PagedDataDto pagedDataDto)
         {
             int pageCount, currentPage = 0;

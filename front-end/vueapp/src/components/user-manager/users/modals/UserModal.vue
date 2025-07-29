@@ -11,11 +11,13 @@
                     <button type="button" class="btn-close" @click="close"></button>
                 </div>
                 <Form ref="formRef" @submit="saveUser">
-                    <div class="modal-body">                    
+                    <div class="modal-body">
                         <div class="row">
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label for="userName" class="form-label fw-semibold mb-0">{{ $t("labelName") }}</label>
+                                    <label for="userName" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelName") }}
+                                    </label>
                                     <Field
                                         type="text"
                                         class="form-control form-control-sm"
@@ -32,7 +34,9 @@
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label for="userEmail" class="form-label fw-semibold mb-0">{{ $t("labelEmail") }}</label>
+                                    <label for="userEmail" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelEmail") }}
+                                    </label>
                                     <Field
                                         type="text"
                                         class="form-control form-control-sm"
@@ -43,7 +47,7 @@
                                         :rules="'required|min:5|max:100|email'"
                                         v-model="userData.email"
                                         :placeholder="$t('labelTypeUserEmail')"
-                                         @blur="validateEmailBackend"
+                                        @blur="validateEmailBackend"
                                     />
                                     <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
                                 </div>
@@ -51,22 +55,26 @@
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <label for="userPassword" class="form-label fw-semibold mb-0">{{ $t("labelPassword") }}</label>
+                                <label for="userPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelPassword") }}
+                                </label>
                                 <PasswordInputComponent
                                     :placeholder="$t('labelTypePassword')"
                                     :rules="passwordRules"
                                     name="userPassword"
                                     v-model="userData.password"
-                                />                            
+                                />
                             </div>
                             <div class="col-6">
-                                <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">{{ $t("labelConfirmedPassword") }}</label>
+                                <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelConfirmedPassword") }}
+                                </label>
                                 <PasswordInputComponent
                                     :placeholder="$t('labelTypeConfirmedPassword')"
                                     :rules="confirmedPasswordRules"
                                     name="userConfirmedPassword"
                                     v-model="userData.confirmedPassword"
-                                />  
+                                />
                             </div>
                         </div>
                         <SelectionListComponent
@@ -77,8 +85,8 @@
                             :items="profiles"
                             :loading="loading"
                             v-model:selectedItems="selectedProfiles"
-                            />
-                        
+                        />
+
                         <SelectionListComponent
                             :id="'teams'"
                             :labelPanel="'labelTeams'"
@@ -87,15 +95,19 @@
                             :items="teams"
                             :loading="loading"
                             v-model:selectedItems="selectedTeams"
-                            >
+                        >
                             <template #footer>
                                 <div class="border-top mt-2 pt-2">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold" @click="addNewTeam">
-                                    + {{ $t("labelNewTeam") }}
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-secondary fw-semibold"
+                                        @click="addNewTeam"
+                                    >
+                                        + {{ $t("labelNewTeam") }}
                                     </button>
                                 </div>
                             </template>
-                        </SelectionListComponent>                    
+                        </SelectionListComponent>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary btn-sm" @click="close">
@@ -121,7 +133,7 @@
     import ModalUserTeam from "@/components/user-manager/users/modals/TeamModal.vue";
     import ToastAlert from "@/components/common/toast-alert";
     import ErrorCode from "@/constants/Errorcode";
-    import {Form, Field, ErrorMessage} from "vee-validate";
+    import { Form, Field, ErrorMessage } from "vee-validate";
     import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
     import PasswordInputComponent from "@/components/global/PasswordInputComponent.vue";
 
@@ -131,9 +143,11 @@
             ModalUserTeam,
             ToastAlert,
             ErrorCode,
-            Form, Field, ErrorMessage,
+            Form,
+            Field,
+            ErrorMessage,
             SelectionListComponent,
-            PasswordInputComponent
+            PasswordInputComponent,
         },
         props: {
             userEditing: {
@@ -181,17 +195,17 @@
                     required: !this.userEditing.id,
                     custom_password: true,
                     min: 6,
-                    max: 50
+                    max: 50,
                 };
             },
             confirmedPasswordRules() {
                 return {
                     required: !this.userEditing.id,
-                    confirmed: 'userPassword',
+                    confirmed: "userPassword",
                     min: 6,
-                    max: 50
+                    max: 50,
                 };
-            }
+            },
         },
         mounted() {
             this.loadTeams();
@@ -208,13 +222,12 @@
                     userId: this.userData.id,
                 };
                 let self = this;
-                api.post("User/IsEmailInUse", paramsReq)                    
+                api.post("User/IsEmailInUse", paramsReq)
                     .then(function (response) {
-
                         if (response && response.data && response.data === true) {
-                             self.$refs.formRef.setFieldError('userEmail', self.$t("labelErrorEmailAlreadyExists"));
+                            self.$refs.formRef.setFieldError("userEmail", self.$t("labelErrorEmailAlreadyExists"));
                         } else {
-                            self.$refs.formRef.setFieldError('userEmail', "");
+                            self.$refs.formRef.setFieldError("userEmail", "");
                         }
                         self.loading = false;
                     })

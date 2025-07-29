@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.DTOs.Request
 {
-    public class UserUpdateDto
+    public record class UserUpdateDto
     {
         public Guid Id { get; set; } = Guid.Empty;
 
