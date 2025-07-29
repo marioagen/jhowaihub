@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using AutoMapper;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -48,8 +49,7 @@ namespace WoopiAiHub.Domain.Models
 
         public void AddTeam(Team team)
         {
-            if (team == null)
-                throw new ArgumentNullException(nameof(team));
+            ArgumentNullException.ThrowIfNull(nameof(team));
 
             if (this.Teams.Any(t => t.Id == team.Id))
                 return;
@@ -59,8 +59,7 @@ namespace WoopiAiHub.Domain.Models
 
         public void AddProfile(Profile profile)
         {
-            if (profile == null)
-                throw new ArgumentNullException(nameof(profile));
+            ArgumentNullException.ThrowIfNull(nameof(profile));
 
             if (this.Profiles.Any(t => t.Id == profile.Id))
                 return;
@@ -91,8 +90,9 @@ namespace WoopiAiHub.Domain.Models
 
         public void SetPassword(byte[] passwordHash, byte[] salt)
         {
-            if (passwordHash == null || salt == null)
-                throw new ArgumentNullException("Password hash and salt cannot be null");
+            ArgumentNullException.ThrowIfNull(nameof(passwordHash));
+            ArgumentNullException.ThrowIfNull(nameof(salt));
+
             PasswordHash = passwordHash;
             Salt = salt;
         }

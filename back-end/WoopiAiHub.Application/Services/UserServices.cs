@@ -163,30 +163,14 @@ namespace WoopiAiHub.Application.Services
                             userUpdateDto.Email);
 
                 if (!string.IsNullOrEmpty(userUpdateDto.Password))
-                {                    
+                {
                     var hashedPassword = _passwordHasher.Hash(userUpdateDto.Password, user.Salt);
                     user.SetPassword(hashedPassword, user.Salt);
                 }
 
-                if (userUpdateDto.TeamIds != null)
-                {
-                    user.Teams.Clear();
-                    var teams =  _teamRepository.FindByIds(userUpdateDto.TeamIds);
-                    foreach (var team in teams)
-                    {
-                        user.AddTeam(team);
-                    }
-                }
+                AddTeams(userUpdateDto, user);
 
-                if (userUpdateDto.ProfileIds != null)
-                {
-                    user.Profiles.Clear();
-                    var profiles = _profileRepository.FindByIds(userUpdateDto.ProfileIds);
-                    foreach (var profile in profiles)
-                    {
-                        user.AddProfile(profile);
-                    }
-                }
+                AddProfiles(userUpdateDto, user);
 
                 var updateResult = _userRepository.Update(user);
                 if (!updateResult)
@@ -284,6 +268,42 @@ namespace WoopiAiHub.Application.Services
             }
 
             return await _userRepository.EmailExistsAsync(userEmailDto.Email, userEmailDto.UserId);
+        }
+
+        /// <summary>
+        /// Adds profiles to the user based on the provided UserUpdateDto.
+        /// </summary>
+        /// <param name="userUpdateDto"></param>
+        /// <param name="user"></param>
+        private void AddProfiles(UserUpdateDto userUpdateDto, User user)
+        {
+            if (userUpdateDto.ProfileIds != null)
+            {
+                user.Profiles.Clear();
+                var profiles = _profileRepository.FindByIds(userUpdateDto.ProfileIds);
+                foreach (var profile in profiles)
+                {
+                    user.AddProfile(profile);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds teams to the user based on the provided UserUpdateDto.
+        /// </summary>
+        /// <param name="userUpdateDto"></param>
+        /// <param name="user"></param>
+        private void AddTeams(UserUpdateDto userUpdateDto, User user)
+        {
+            if (userUpdateDto.TeamIds != null)
+            {
+                user.Teams.Clear();
+                var teams = _teamRepository.FindByIds(userUpdateDto.TeamIds);
+                foreach (var team in teams)
+                {
+                    user.AddTeam(team);
+                }
+            }
         }
     }
 }

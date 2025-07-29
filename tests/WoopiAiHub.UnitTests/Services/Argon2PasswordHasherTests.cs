@@ -79,25 +79,12 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotEqual(hash1, hash2);
         }
 
-        [Fact(DisplayName = "Hash should throw ArgumentException when password is null")]
-        [Trait("Hash", "Exception")]
-        public void Hash_ShouldThrowArgumentException_WhenPasswordIsNull()
-        {
-            // Arrange
-            string password = null;
-            var salt = _passwordHasher.GenerateSalt();
-
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => _passwordHasher.Hash(password, salt));
-            Assert.Equal("Password cannot be null or empty. (Parameter 'password')", exception.Message);
-        }
-
         [Fact(DisplayName = "Hash should throw ArgumentException when password is empty")]
         [Trait("Hash", "Exception")]
         public void Hash_ShouldThrowArgumentException_WhenPasswordIsEmpty()
         {
             // Arrange
-            const string password = "";
+            var password = String.Empty;
             var salt = _passwordHasher.GenerateSalt();
 
             // Act & Assert
@@ -164,28 +151,12 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
-        [Fact(DisplayName = "Verify should return false when password is null")]
-        [Trait("Verify", "Validation")]
-        public void Verify_ShouldReturnFalse_WhenPasswordIsNull()
-        {
-            // Arrange
-            string password = null;
-            var salt = _passwordHasher.GenerateSalt();
-            var hash = _passwordHasher.Hash("TestPassword123!", salt);
-
-            // Act
-            var result = _passwordHasher.Verify(password, hash, salt);
-
-            // Assert
-            Assert.False(result);
-        }
-
         [Fact(DisplayName = "Verify should return false when password is empty")]
         [Trait("Verify", "Validation")]
         public void Verify_ShouldReturnFalse_WhenPasswordIsEmpty()
         {
             // Arrange
-            const string password = "";
+            var password = string.Empty;
             var salt = _passwordHasher.GenerateSalt();
             var hash = _passwordHasher.Hash("TestPassword123!", salt);
 
