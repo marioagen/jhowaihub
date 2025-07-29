@@ -136,9 +136,6 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null)
         {
-            if (string.IsNullOrWhiteSpace(email))
-                return false;
-
             var query = _context.Users.AsQueryable();
 
             var normalizedEmail = email.Trim().ToLowerInvariant();
