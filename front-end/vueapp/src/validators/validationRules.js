@@ -1,5 +1,5 @@
 import { defineRule } from 'vee-validate';
-import i18n from '../locales/i18n';
+import i18n from '@/locales/i18n';
 
 defineRule('required', value => {
   if (!value || !value.length) {

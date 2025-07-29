@@ -222,7 +222,7 @@
     labelCreateTeamUser: "Crear Usuario",
     labelCreateProfile: "Crear perfil",
     labelEditProfile: "Editar perfil",
-    labelTypeEmail: "usuario@suaempresa.com",
+    labelTypeEmail: "usuario{'@'}suaempresa.com",
     labelEmail: "Correo electrónico",
     labelTypeName: "Ingrese el nombre completo",
     labelErrorEmailAlreadyExists: "El correo electrónico ya está registrado",

@@ -83,8 +83,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(true);
 
             _profileRepositoryMock
-                .Setup(repo => repo.FindByIdsAsync(It.IsAny<IEnumerable<int>>()))
-                .ReturnsAsync(new List<Profile>());
+                .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(new List<Profile>());
 
 
             // Act

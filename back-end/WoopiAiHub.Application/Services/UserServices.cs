@@ -99,7 +99,7 @@ namespace WoopiAiHub.Application.Services
 
                 if (userCreateDto.ProfileIds.Count > 0)
                 {
-                    var profiles = await _profileRepository.FindByIdsAsync(userCreateDto.ProfileIds);
+                    var profiles = _profileRepository.FindByIds(userCreateDto.ProfileIds);
 
                     foreach (var profile in profiles)
                     {
@@ -181,7 +181,7 @@ namespace WoopiAiHub.Application.Services
                 if (userUpdateDto.ProfileIds != null)
                 {
                     user.Profiles.Clear();
-                    var profiles = await _profileRepository.FindByIdsAsync(userUpdateDto.ProfileIds);
+                    var profiles = _profileRepository.FindByIds(userUpdateDto.ProfileIds);
                     foreach (var profile in profiles)
                     {
                         user.AddProfile(profile);

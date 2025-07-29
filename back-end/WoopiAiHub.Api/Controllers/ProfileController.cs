@@ -5,16 +5,13 @@ using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WoopiAiHub.Api.Controllers
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     [Route("api/[controller]")]
-    [ApiController]
     public class ProfileController : ControllerBase
     {
         private readonly IProfileServices _profileServices;
