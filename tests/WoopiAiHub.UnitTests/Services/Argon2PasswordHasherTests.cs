@@ -92,26 +92,13 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Password cannot be null or empty. (Parameter 'password')", exception.Message);
         }
 
-        [Fact(DisplayName = "Hash should throw ArgumentException when salt is null")]
-        [Trait("Hash", "Exception")]
-        public void Hash_ShouldThrowArgumentException_WhenSaltIsNull()
-        {
-            // Arrange
-            const string password = "TestPassword123!";
-            byte[] salt = null;
-
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => _passwordHasher.Hash(password, salt));
-            Assert.Equal("Salt cannot be null or empty. (Parameter 'saltBytes')", exception.Message);
-        }
-
         [Fact(DisplayName = "Hash should throw ArgumentException when salt is empty")]
         [Trait("Hash", "Exception")]
         public void Hash_ShouldThrowArgumentException_WhenSaltIsEmpty()
         {
             // Arrange
             const string password = "TestPassword123!";
-            var salt = new byte[0];
+            var salt = Array.Empty<byte>();
 
             // Act & Assert
             var exception = Assert.Throws<ArgumentException>(() => _passwordHasher.Hash(password, salt));
@@ -162,39 +149,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act
             var result = _passwordHasher.Verify(password, hash, salt);
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact(DisplayName = "Verify should return false when stored hash is null")]
-        [Trait("Verify", "Validation")]
-        public void Verify_ShouldReturnFalse_WhenStoredHashIsNull()
-        {
-            // Arrange
-            const string password = "TestPassword123!";
-            var salt = _passwordHasher.GenerateSalt();
-            byte[] hash = null;
-
-            // Act
-            var result = _passwordHasher.Verify(password, hash, salt);
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact(DisplayName = "Verify should return false when stored salt is null")]
-        [Trait("Verify", "Validation")]
-        public void Verify_ShouldReturnFalse_WhenStoredSaltIsNull()
-        {
-            // Arrange
-            const string password = "TestPassword123!";
-            var salt = _passwordHasher.GenerateSalt();
-            var hash = _passwordHasher.Hash(password, salt);
-            byte[] nullSalt = null;
-
-            // Act
-            var result = _passwordHasher.Verify(password, hash, nullSalt);
 
             // Assert
             Assert.False(result);

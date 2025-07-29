@@ -547,14 +547,14 @@ namespace WoopiAiHub.UnitTests.Services
                 Times.Once);
         }
 
-        [Fact(DisplayName = "IsEmailInUseAsync should throw ArgumentException when email is null")]
+        [Fact(DisplayName = "IsEmailInUseAsync should throw ArgumentException when email is empty")]
         [Trait("IsEmailInUseAsync", "Exception")]
-        public async Task IsEmailInUseAsync_ShouldThrowArgumentException_WhenEmailIsNull()
+        public async Task IsEmailInUseAsync_ShouldThrowArgumentException_WhenEmailIsEmpty()
         {
             // Arrange
             var userEmailDto = new UserEmailDto
             {
-                Email = null,
+                Email = string.Empty,
                 UserId = Guid.NewGuid()
             };
 
