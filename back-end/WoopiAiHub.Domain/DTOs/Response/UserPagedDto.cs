@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WoopiAiHub.Domain.DTOs.Response
+﻿namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class UserDtoPaged
+    public record class UserPagedDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -14,5 +8,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public bool IsActive { get; set; }
         public DateTime Created { get; set; }
         public IEnumerable<TeamDto> Teams { get; set; } = Enumerable.Empty<TeamDto>();
+        public IEnumerable<ProfileDto> Profiles { get; set; } = Enumerable.Empty<ProfileDto>();
     }
 }

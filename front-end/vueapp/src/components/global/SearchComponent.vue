@@ -5,22 +5,18 @@
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
                 </span>
-                <input 
-                    id="InputSearch" 
-                    type="text" 
-                    class="form-control form-control-sm border-start-0"
+                <input
+                    id="InputSearch"
+                    type="text"
+                    class="form-control form-control-sm border-start-0 custom-input"
                     :class="{ 'border-end-0': showCleanBtn }"
-                    ref="searchInpt" 
-                    v-model="searchInput" 
-                    :placeholder="entity.placeholderInput" 
-                    @keydown.enter="search(1, 'search')" 
+                    ref="searchInpt"
+                    v-model="searchInput"
+                    :placeholder="entity.placeholderInput"
+                    @keydown.enter="search(1, 'search')"
                     @keydown.delete="search(1, 'search')"
-                >
-                <span 
-                    v-if="showCleanBtn"
-                    class="input-group-text border-start-0 bg-white"
-                    @click="cleanBtn"
-                >
+                />
+                <span v-if="showCleanBtn" class="input-group-text border-start-0 bg-white" @click="cleanBtn">
                     <LucideIcon icon="X" size="16" />
                 </span>
             </div>
@@ -28,12 +24,7 @@
 
         <template>
             <div class="mb-2 col-auto content-center">
-                <a
-                    v-if="searchInput.length >= 3"
-                    class="btn btn-primary"
-                    :title="entity.labelButton"
-                    @click="action"
-                >
+                <a v-if="searchInput.length >= 3" class="btn btn-primary" :title="entity.labelButton" @click="action">
                     {{ upperFormat(entity.labelButton) }}
                 </a>
             </div>
@@ -48,7 +39,7 @@
             entity: {
                 required: true,
                 type: Object,
-                default: () => {}
+                default: () => {},
             },
             resetInput: {
                 required: true,
@@ -63,7 +54,7 @@
             };
         },
         watch: {
-            resetInput () {
+            resetInput() {
                 this.searchInput = "";
             },
         },
@@ -71,22 +62,21 @@
             search(page, type) {
                 setTimeout(() => {
                     if (this.searchInput.length > 0 || (!isNaN(this.searchInput) && parseInt(this.searchInput) > 0)) {
-                        this.$emit('search', { search: this.searchInput, page: page, type: type });
-                    }
-                    else {
-                        this.$emit('search', { search: "", page: page, type: type });
+                        this.$emit("search", { search: this.searchInput, page: page, type: type });
+                    } else {
+                        this.$emit("search", { search: "", page: page, type: type });
                     }
                 }, 100);
             },
             action() {
-                this.$emit('action', this.searchInput);
+                this.$emit("action", this.searchInput);
             },
             upperFormat(str) {
                 return str.toUpperCase();
             },
             cleanBtn() {
                 this.searchInput = "";
-                this.$emit('clean', { search: "" });
+                this.$emit("clean", { search: "" });
             },
         },
         computed: {
@@ -99,3 +89,14 @@
         },
     };
 </script>
+
+<style scooped>
+    .custom-input {
+        font-size: 12px;
+    }
+
+    .custom-input::placeholder {
+        font-size: 12px;
+        color: #999;
+    }
+</style>

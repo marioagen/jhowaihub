@@ -1,9 +1,5 @@
 <template>
-    <button 
-        v-if="showMultiDelete" 
-        class="btn btn-outline-danger btn-sm mb-2 ms-2" 
-        @click="openConfirmationMultiple"
-    >
+    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
         <LucideIcon icon="Trash2" size="15" />
         {{ $t("labelDelete") }}
     </button>
@@ -22,27 +18,17 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <button 
-                    class="btn btn-outline-success btn-sm table-btn" 
-                    @click="openEditModal(data.row)"
-                >
+                <button class="btn btn-outline-success btn-sm table-btn" @click="openEditModal(data.row)">
                     <LucideIcon icon="SquarePen" />
                 </button>
-                <button 
-                    class="btn btn-outline-danger btn-sm ms-2 table-btn" 
-                    @click="openConfirmation(data.row)"
-                >
+                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="openConfirmation(data.row)">
                     <LucideIcon icon="Trash2" />
                 </button>
             </template>
         </TableComponent>
     </div>
 
-    <TypesModal
-        :isEdit="true"
-        @reload="reload"
-        ref="TypesModal"
-    />
+    <TypesModal :isEdit="true" @reload="reload" ref="TypesModal" />
 
     <ConfirmModal
         id="deleteConfirm"
@@ -161,17 +147,17 @@
                             this.$refs.DeleteDialog.close();
                             this.getTypes({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: 'Tipos',
+                                title: "Tipos",
                                 message: this.$t("labelDocumentTypeRemoveSuccess"),
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: 'Tipos',
+                                title: "Tipos",
                                 message: this.$t("labelDocumentTypeRemoveError"),
-                                variant: 'danger',
-                                icon: 'CircleX',
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                     })
@@ -191,7 +177,7 @@
             reload() {
                 this.$refs.TypesModal.close();
                 this.getTypes({ search: "", page: this.queryPage, type: null });
-            }
+            },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;

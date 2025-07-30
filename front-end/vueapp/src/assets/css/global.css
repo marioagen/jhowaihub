@@ -740,10 +740,13 @@ tr:last-child {
 }
 
 .dz-message::before {
-    content: "\f093";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    font-size: 30px;
+    content: "";
+    background-repeat: no-repeat;
+    background-position: center;
+    display: inline-block;
+    background-image: url(../../assets/img/upload-dropzone.svg);
+    width: 32px;
+    height: 32px;
     color: var(--color-border-form-control) !important;
 }
 
@@ -869,4 +872,12 @@ dropzone .dz-preview .dz-details {
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
     font-weight: normal;
+}
+
+.fw-semibold {
+    font-weight: 500 !important;
+}
+
+.mfs {
+    font-size: 0.775rem;
 }
