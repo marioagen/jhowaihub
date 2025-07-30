@@ -268,6 +268,35 @@
         password_confirmed: "A confirmação da senha não confere.",
         email: "Email inválido",
     },
+    questions: {
+        title: "Perguntas",
+        subtitle: "Gerencie perguntas do sistema",
+        notFound: "Não há perguntas cadastradas",
+        filters: {
+            input: "Buscar pergunta",
+        },
+        createBtn: "Criar pergunta",
+        createSuccess: "Pergunta criada com sucesso",
+        createError: "Erro ao criar pergunta",
+        editSuccess: "Pergunta editada com sucesso",
+        editError: "Erro ao editar pergunta",
+        removeTitle: "Você está prestes a deletar uma pergunta do sistema",
+        removeSuccess: "Pergunta removida com sucesso",
+        removeError: "Erro ao remover pergunta",
+        errorDuplicated: "Pergunta duplicada",
+        description: "Descrição",
+        owner: "Proprietário",
+        createdData: "Data de criação",
+        actions: "Ações",
+        modalCreate: {
+            title: "Criação de pergunta",
+            save: "Criar pergunta",
+        },
+        modalEdit: {
+            title: "Editar pergunta",
+            save: "Salvar edição",
+        },
+    },
 };
 
 export default portuguese;

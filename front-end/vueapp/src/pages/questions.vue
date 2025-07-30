@@ -4,52 +4,65 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("labelTypes") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("questions.title") }}</h5>
                         <p>
-                            <small class="text-muted">{{ $t("labelTypesMessage") }}</small>
+                            <small class="text-muted">{{ $t("questions.subtitle") }}</small>
                         </p>
                     </div>
-                    <button class="btn btn-primary btn-sm" @click="openModalType">
+                    <button 
+                        class="btn btn-primary btn-sm" 
+                        @click="openModalType"
+                    >
                         <LucideIcon icon="Plus" size="17" />
-                        {{ $t("labelNewType") }}
+                        {{ $t("questions.createBtn") }}
                     </button>
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <SearchComponent :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
+                        <SearchComponent 
+                            :entity="entitySearch" 
+                            :resetInput="resetInputSearch"
+                            @search="filterList" 
+                        />
                     </div>
                 </div>
 
-                <TypesTable ref="TypesTable" />
+                <QuestionsTable 
+                    ref="QuestionsTable"
+                />
             </div>
 
-            <TypesModal :isEdit="false" :type="modalType" @reload="reloadTable" ref="TypesModal" />
+            <QuestionsModal
+                :isEdit="false"
+                :type="modalQuestion"
+                @reload="$refs.QuestionsTable.getQuestions()"
+                ref="QuestionsModal"
+            />
         </div>
-    </main>
+    </main>    
 </template>
 
 <script>
-    import TypesTable from "@/components/types/TypesTable.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
-    import TypesModal from "@/components/types/TypesModal.vue";
+    import QuestionsModal from "@/components/questions/QuestionsModal.vue";
+    import QuestionsTable from "@/components/questions/QuestionsTable.vue";
 
     export default {
-        name: "TypePage",
-        emits: ["showAlertToast"],
+        name: "QuestionsPage",
         data() {
             return {
                 crumbsData: [],
                 entitySearch: {},
                 resetInputSearch: false,
-                modalType: {
+                modalQuestion: {
                     name: "",
-                },
+                }
             };
         },
         components: {
             SearchComponent,
-            TypesTable,
-            TypesModal,
+            QuestionsModal,
+            QuestionsTable
         },
         watch: {
             "$store.state.userProfile.language": function () {
@@ -59,21 +72,17 @@
         methods: {
             setEntitySearch() {
                 this.entitySearch = {
-                    screen: "type",
-                    labelInput: this.$t("labelSearchTypes"),
-                    placeholderInput: this.$t("labelTypeNameOrId"),
-                    labelButton: this.$t("labelNewType"),
+                    screen: "question",
+                    labelInput: this.$t("questions.filters.input"),
+                    placeholderInput: this.$t("questions.filters.input"),
+                    labelButton: this.$t("questions.createBtn"),
                 };
             },
             filterList(obj) {
-                this.$refs.TypesTable.filterList(obj.search);
+                this.$refs.QuestionsTable.filterList(obj.search);
             },
             openModalType() {
-                this.$refs.TypesModal.open();
-            },
-            reloadTable() {
-                this.$refs.TypesModal.close();
-                this.$refs.TypesTable.reload();
+                this.$refs.QuestionsModal.open();
             },
         },
         created() {
