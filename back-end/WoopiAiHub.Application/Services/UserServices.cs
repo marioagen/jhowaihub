@@ -43,7 +43,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Create(UserCreateDto userCreateDto, HeadersDto headersDto)
         {
-            if (string.IsNullOrEmpty(userCreateDto.Name) || 
+            if (string.IsNullOrEmpty(userCreateDto.Name) ||
                 string.IsNullOrEmpty(userCreateDto.Email) ||
                 string.IsNullOrEmpty(userCreateDto.Password))
             {
@@ -59,56 +59,7 @@ namespace WoopiAiHub.Application.Services
             if (userEnabledReference == Guid.Empty)
                 return false;
 
-            var existingUser = await _userRepository.FindByReferenceAsync(userEnabledReference);
-
-            if (existingUser != null)
-            {
-                existingUser.Reactivate(userCreateDto.Name,
-                                        userCreateDto.Email);
-
-                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, existingUser.Salt);
-                existingUser.SetPassword(hashedPassword, existingUser.Salt);
-
-                _userRepository.Update(existingUser);
-
-                return true;
-            }
-            else
-            {
-                User user = new User(
-                      userEnabledReference,
-                      userCreateDto.Name,
-                      userCreateDto.Email,
-                      true,
-                      DateTime.Now
-                );
-
-                var salt = _passwordHasher.GenerateSalt();
-                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, salt);
-                user.SetPassword(hashedPassword, salt);
-
-                if (userCreateDto.TeamIds.Count > 0)
-                {
-                    var teams = _teamRepository.FindByIds(userCreateDto.TeamIds);
-
-                    foreach (var team in teams)
-                    {
-                        user.AddTeam(team);
-                    }
-                }
-
-                if (userCreateDto.ProfileIds.Count > 0)
-                {
-                    var profiles = _profileRepository.FindByIds(userCreateDto.ProfileIds);
-
-                    foreach (var profile in profiles)
-                    {
-                        user.AddProfile(profile);
-                    }
-                }
-
-                return await _userRepository.CreateAsync(user);
-            }
+            return await CreateOrReactivate(userCreateDto, userEnabledReference);
         }
 
         // <summary>
@@ -151,41 +102,7 @@ namespace WoopiAiHub.Application.Services
                 IdUser = userUpdateDto.Id
             };
 
-            var updateMkt = await _marketPlaceApi.AssignLicensesByHub(KeyAccess, requestAssignLicensesByHub);
-            if (updateMkt != Guid.Empty)
-            {
-
-                var user = await _userRepository.FindByReferenceAsync(userUpdateDto.Id);
-                if (user == null)
-                    return false;
-
-                user.Update(userUpdateDto.Name,
-                            userUpdateDto.Email);
-
-                if (!string.IsNullOrEmpty(userUpdateDto.Password))
-                {
-                    var saltBytes = user.Salt;
-                    if (saltBytes == null || saltBytes.Length == 0)
-                    {
-                        saltBytes = _passwordHasher.GenerateSalt();
-                    }
-                    var hashedPassword = _passwordHasher.Hash(userUpdateDto.Password, saltBytes);
-                    user.SetPassword(hashedPassword, saltBytes);
-                }
-
-                AddTeams(userUpdateDto, user);
-
-                AddProfiles(userUpdateDto, user);
-
-                var updateResult = _userRepository.Update(user);
-                if (!updateResult)
-                {
-                    throw new ArgumentException("Duplicated User");
-                }
-                return updateResult;
-            }
-
-            return false;
+            return await VerifyLicensesMkt(KeyAccess, userUpdateDto, requestAssignLicensesByHub);
         }
 
         /// <summary>
@@ -204,7 +121,7 @@ namespace WoopiAiHub.Application.Services
                     totalList.OrderByDescending(user => user.Name);
 
                 var result = Pagination(totalList, pagedDataDto);
-               return result;
+                return result;
             }
             else
             {
@@ -226,7 +143,7 @@ namespace WoopiAiHub.Application.Services
 
             if (!string.IsNullOrEmpty(pagedDataDto.Search))
             {
-                totalList = totalList.Where(i => 
+                totalList = totalList.Where(i =>
                     i.Name.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
                     i.Email.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
                     i.Id.ToString().Contains(pagedDataDto.Search) ||
@@ -280,12 +197,14 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="userUpdateDto"></param>
         /// <param name="user"></param>
-        private void AddProfiles(UserUpdateDto userUpdateDto, User user)
+        private void AddProfiles<T>(T dto, User user)
         {
-            if (userUpdateDto.ProfileIds != null)
+            var profileIdsProp = typeof(T).GetProperty("TeamIds");
+            var profileIds = profileIdsProp?.GetValue(dto) as ICollection<int>;
+            if (profileIds != null)
             {
                 user.Profiles.Clear();
-                var profiles = _profileRepository.FindByIds(userUpdateDto.ProfileIds);
+                var profiles = _profileRepository.FindByIds(profileIds);
                 foreach (var profile in profiles)
                 {
                     user.AddProfile(profile);
@@ -298,17 +217,113 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="userUpdateDto"></param>
         /// <param name="user"></param>
-        private void AddTeams(UserUpdateDto userUpdateDto, User user)
+        private void AddTeams<T>(T dto, User user)
         {
-            if (userUpdateDto.TeamIds != null)
+            var teamIdsProp = typeof(T).GetProperty("TeamIds");
+            var teamIds = teamIdsProp?.GetValue(dto) as ICollection<int>;
+            if (teamIds != null)
             {
                 user.Teams.Clear();
-                var teams = _teamRepository.FindByIds(userUpdateDto.TeamIds);
+                var teams = _teamRepository.FindByIds(teamIds);
                 foreach (var team in teams)
                 {
                     user.AddTeam(team);
                 }
             }
+        }
+
+        private async Task<bool> CreateOrReactivate(UserCreateDto userCreateDto, Guid userEnabledReference)
+        {
+            var existingUser = await _userRepository.FindByReferenceAsync(userEnabledReference);
+
+            if (existingUser != null)
+            {
+                existingUser.Reactivate(userCreateDto.Name,
+                                        userCreateDto.Email);
+
+                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, existingUser.Salt);
+                existingUser.SetPassword(hashedPassword, existingUser.Salt);
+
+                _userRepository.Update(existingUser);
+
+                return true;
+            }
+            else
+            {
+                var user = CreateUser(userEnabledReference,
+                                      userCreateDto.Name,
+                                      userCreateDto.Email);
+
+                var salt = _passwordHasher.GenerateSalt();
+                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, salt);
+                user.SetPassword(hashedPassword, salt);
+
+                if (userCreateDto.TeamIds.Count > 0)
+                {
+                    AddTeams(userCreateDto, user);
+                }
+
+                if (userCreateDto.ProfileIds.Count > 0)
+                {
+                    AddProfiles(userCreateDto, user);
+                }
+
+                return await _userRepository.CreateAsync(user);
+            }
+        }
+
+        private async Task<bool> VerifyLicensesMkt(string keyAccess,
+                                                   UserUpdateDto userUpdateDto,
+                                                   RequestAssignLicensesByHub requestAssignLicensesByHub)
+        {
+            var updateMkt = await _marketPlaceApi.AssignLicensesByHub(keyAccess, requestAssignLicensesByHub);
+            if (updateMkt != Guid.Empty)
+            {
+                var user = await _userRepository.FindByReferenceAsync(userUpdateDto.Id);
+                if (user == null)
+                    return false;
+
+                user.Update(userUpdateDto.Name,
+                            userUpdateDto.Email);
+
+                if (!string.IsNullOrEmpty(userUpdateDto.Password))
+                {
+                    var saltBytes = user.Salt;
+                    if (saltBytes == null || saltBytes.Length == 0)
+                    {
+                        saltBytes = _passwordHasher.GenerateSalt();
+                    }
+                    var hashedPassword = _passwordHasher.Hash(userUpdateDto.Password, saltBytes);
+                    user.SetPassword(hashedPassword, saltBytes);
+                }
+
+                AddTeams(userUpdateDto, user);
+
+                AddProfiles(userUpdateDto, user);
+
+                var updateResult = _userRepository.Update(user);
+                if (!updateResult)
+                {
+                    throw new ArgumentException("Duplicated User");
+                }
+                return updateResult;
+            }
+            return false;
+        }
+
+        private User CreateUser(Guid userEnabledReference,
+                                string name,
+                                string email)
+        {
+            User user = new User(
+                    userEnabledReference,
+                    name,
+                    email,
+                    true,
+                    DateTime.Now
+              );
+
+            return user;
         }
     }
 }
