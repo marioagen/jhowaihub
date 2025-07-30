@@ -8,6 +8,8 @@ using WoopiAiHub.UnitTests.Fixture;
 using WoopiAiHub.Domain.DTOs;
 using Moq.AutoMock;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.Enum;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -130,7 +132,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(false);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateUniqueTeam(teamCreateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.CreateUniqueTeam(teamCreateDto));
             Assert.Equal("Duplicated Team Name", ex.Message);
         }
 
@@ -220,8 +222,9 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock.Setup(r => r.Update(team)).Returns(false);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.Update(teamUpdateDto));
-            Assert.Equal("Duplicated Team", ex.Message);
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.Update(teamUpdateDto));
+            Assert.Equal("Duplicated Team Name", ex.Message);
+            Assert.Equal(ErrorCode.Duplicated, ex.ErrorCode);
         }
 
         [Fact(DisplayName = "DeleteByIds should return true when IDs are valid")]

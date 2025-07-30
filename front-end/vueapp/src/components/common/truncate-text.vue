@@ -42,7 +42,6 @@
         mounted() {
             this.processText();
             this.checkTruncation();
-            // Observa mudanças de tamanho no próprio elemento
             this.resizeObserver = new window.ResizeObserver(() => {
                 this.checkTruncation();
             });

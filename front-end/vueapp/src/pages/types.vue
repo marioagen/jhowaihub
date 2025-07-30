@@ -9,35 +9,23 @@
                             <small class="text-muted">{{ $t("labelTypesMessage") }}</small>
                         </p>
                     </div>
-                    <button 
-                        class="btn btn-primary btn-sm" 
-                        @click="openModalType"
-                    >
+                    <button class="btn btn-primary btn-sm" @click="openModalType">
                         <LucideIcon icon="Plus" size="17" />
                         {{ $t("labelNewType") }}
                     </button>
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <SearchComponent 
-                            :entity="entitySearch" 
-                            :resetInput="resetInputSearch" 
-                            @search="filterList" 
-                        />
+                        <SearchComponent :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
                     </div>
                 </div>
 
                 <TypesTable ref="TypesTable" />
             </div>
 
-            <TypesModal
-                :isEdit="false"
-                :type="modalType"
-                @reload="reloadTable"
-                ref="TypesModal"
-            />
+            <TypesModal :isEdit="false" :type="modalType" @reload="reloadTable" ref="TypesModal" />
         </div>
-    </main>    
+    </main>
 </template>
 
 <script>
@@ -55,7 +43,7 @@
                 resetInputSearch: false,
                 modalType: {
                     name: "",
-                }
+                },
             };
         },
         components: {
@@ -69,7 +57,7 @@
             },
         },
         methods: {
-            setEntitySearch () {
+            setEntitySearch() {
                 this.entitySearch = {
                     screen: "type",
                     labelInput: this.$t("labelSearchTypes"),
@@ -86,7 +74,7 @@
             reloadTable() {
                 this.$refs.TypesModal.close();
                 this.$refs.TypesTable.reload();
-            }
+            },
         },
         created() {
             this.setEntitySearch();

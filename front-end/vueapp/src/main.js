@@ -6,6 +6,7 @@ import store from "./store";
 import i18n from "./locales/i18n";
 import VueGtag from "vue-gtag";
 import tooltip from "@/directives/bootstrapTooltip";
+import "@/validators/validationRules";
 
 import LucideIcon from "@/components/global/LucideIcon.vue";
 import NotificationComponent from "@/components/global/NotificationComponent.vue";

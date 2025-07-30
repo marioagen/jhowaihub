@@ -48,10 +48,10 @@
                 </div>
 
                 <div class="dropdown nav-buttons">
-                    <button 
-                        class="btn btn-outline-primary table-btn" 
-                        type="button" 
-                        data-bs-toggle="dropdown" 
+                    <button
+                        class="btn btn-outline-primary table-btn"
+                        type="button"
+                        data-bs-toggle="dropdown"
                         aria-expanded="false"
                     >
                         <LucideIcon icon="Globe" />

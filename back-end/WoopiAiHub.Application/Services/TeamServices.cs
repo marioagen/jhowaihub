@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PdfSharp;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -128,7 +129,7 @@ namespace WoopiAiHub.Application.Services
             var createResult = _teamRepository.CreateUniqueTeam(team);
             if (!createResult)
             {
-                throw new ArgumentException("Duplicated Team Name");
+                throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name");
             }
             return createResult;
         }
@@ -162,7 +163,7 @@ namespace WoopiAiHub.Application.Services
             var updateResult = _teamRepository.Update(team);
             if (!updateResult)
             {
-                throw new ArgumentException("Duplicated Team");
+                throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name");
             }
             return updateResult;
         }

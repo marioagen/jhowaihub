@@ -1,15 +1,7 @@
 <template>
-    <div
-        :id="id"
-        :aria-labelledby="`${id}-label`"
-        class="modal fade"
-        tabindex="-1"
-        aria-hidden="true"
-        ref="modalEl"
-    >
+    <div :id="id" :aria-labelledby="`${id}-label`" class="modal fade" tabindex="-1" aria-hidden="true" ref="modalEl">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-
                 <slot name="header">
                     <div class="modal-header">
                         <h5 class="modal-title" :id="`${id}-label`">
@@ -43,20 +35,14 @@
                             {{ $t(cancelText) }}
                         </button>
 
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            :disabled="isLoading"
-                            @click="$emit('save')"
-                        >
-                            <div style="min-width: 80px;" class="text-center">
+                        <button type="button" class="btn btn-primary" :disabled="isLoading" @click="$emit('save')">
+                            <div style="min-width: 80px" class="text-center">
                                 <span v-if="isLoading" class="spinner-grow spinner-grow-sm" role="status"></span>
                                 <span v-else>{{ $t(saveText) }}</span>
                             </div>
                         </button>
                     </div>
                 </slot>
-
             </div>
         </div>
     </div>
