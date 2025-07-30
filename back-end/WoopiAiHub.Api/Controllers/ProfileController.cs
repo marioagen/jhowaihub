@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using WoopiAiHub.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WoopiAiHub.Api.Controllers
 {
@@ -43,8 +43,8 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet]
         [Route("Paged")]
         [SwaggerOperation("Endpoint that receives the request to return all profiles paginated")]
-        [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
-        public ActionResult<PagedDataDto> FindAllPaged([FromQuery] PagedDataDto pagedDataDto)
+        [ProducesResponseType(typeof(ProfilePagedResultDto), StatusCodes.Status200OK)]
+        public ActionResult<ProfilePagedResultDto> FindAllPaged([FromQuery] PagedDataDto pagedDataDto)
         {
             var result = _profileServices.FindAllPaged(pagedDataDto);
             return Ok(result);

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using AutoMapper;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -28,7 +29,7 @@ namespace WoopiAiHub.Domain.Models
         [Column("Created", TypeName = "datetime")]
         public DateTime Created { get; private set; }
 
-        public virtual ICollection<Profile> Profiles { get; set; }
+        public virtual ICollection<Profile> Profiles { get; set; } = [];
         public virtual ICollection<Permission> Permissions { get; set; }
 
         public ICollection<Team> Teams { get; set; } = [];
@@ -48,13 +49,22 @@ namespace WoopiAiHub.Domain.Models
 
         public void AddTeam(Team team)
         {
-            if (team == null)
-                throw new ArgumentNullException(nameof(team));
+            ArgumentNullException.ThrowIfNull(nameof(team));
 
             if (this.Teams.Any(t => t.Id == team.Id))
                 return;
 
             Teams.Add(team);
+        }
+
+        public void AddProfile(Profile profile)
+        {
+            ArgumentNullException.ThrowIfNull(nameof(profile));
+
+            if (this.Profiles.Any(t => t.Id == profile.Id))
+                return;
+
+            Profiles.Add(profile);
         }
 
         public void Reactivate(string name,
@@ -76,6 +86,15 @@ namespace WoopiAiHub.Domain.Models
         public void Deactivate()
         {
             IsActive = false;
+        }
+
+        public void SetPassword(byte[] passwordHash, byte[] salt)
+        {
+            ArgumentNullException.ThrowIfNull(nameof(passwordHash));
+            ArgumentNullException.ThrowIfNull(nameof(salt));
+
+            PasswordHash = passwordHash;
+            Salt = salt;
         }
     }
 }

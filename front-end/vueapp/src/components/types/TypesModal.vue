@@ -1,18 +1,9 @@
 <template>
-    <ModalComponent
-        id="typeModal"
-        :isLoading="isLoading"
-        @save="save"
-        ref="TypeModal"
-    >
+    <ModalComponent id="typeModal" :isLoading="isLoading" @save="save" ref="TypeModal">
         <template #header>
             <div class="modal-header">
-                <h5 class="modal-title"> {{ $t(titleText) }} </h5>
-                <button 
-                    class="btn-close" 
-                    data-bs-dismiss="modal" 
-                    @click="close" 
-                />
+                <h5 class="modal-title">{{ $t(titleText) }}</h5>
+                <button class="btn-close" data-bs-dismiss="modal" @click="close" />
             </div>
         </template>
 
@@ -25,16 +16,10 @@
 
         <template #footer>
             <div class="modal-footer">
-                <button 
-                    class="btn btn-secondary btn-sm" 
-                    @click="close"
-                >
+                <button class="btn btn-secondary btn-sm" @click="close">
                     {{ $t("labelCancel") }}
                 </button>
-                <button 
-                    class="btn btn-primary btn-sm" 
-                    @click="save"
-                >
+                <button class="btn btn-primary btn-sm" @click="save">
                     {{ $t(saveText) }}
                 </button>
             </div>
@@ -43,14 +28,14 @@
 </template>
 
 <script>
-    import ModalComponent from '@/components/global/ModalComponent.vue';
-    import TypesService from '@/services/types/TypesService';
-    
+    import ModalComponent from "@/components/global/ModalComponent.vue";
+    import TypesService from "@/services/types/TypesService";
+
     export default {
         components: {
-            ModalComponent
+            ModalComponent,
         },
-        emits: ['reload'],
+        emits: ["reload"],
         props: {
             isEdit: {
                 type: Boolean,
@@ -75,7 +60,7 @@
         },
         methods: {
             open(type = null) {
-                if(type === null) {
+                if (type === null) {
                     this.resetData();
                 } else {
                     this.typeData = type;
@@ -89,7 +74,7 @@
                 this.typeData = { id: "", name: "" };
             },
             save() {
-                if(this.isEdit) {
+                if (this.isEdit) {
                     return this.editType();
                 }
                 return this.createType();
@@ -99,26 +84,26 @@
                 TypesService.addType(this.typeData.name)
                     .then((result) => {
                         if (result.success) {
-                            this.$emit('reload');
+                            this.$emit("reload");
                             return this.$notify({
-                                title: 'Tipos',
+                                title: "Tipos",
                                 message: this.$t("labelDocumentTypeSuccess"),
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
-                        } 
-                        const messageKey = result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
+                        }
+                        const messageKey =
+                            result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
                         this.$notify({
-                            title: 'Tipos',
+                            title: "Tipos",
                             message: this.$t(messageKey),
-                            variant: 'danger',
-                            icon: 'CircleX',
+                            variant: "danger",
+                            icon: "CircleX",
                         });
                     })
                     .finally(() => {
                         this.isLoading = false;
                     });
-
             },
             editType() {
                 this.isLoading = true;
@@ -127,25 +112,26 @@
                         if (result.success) {
                             this.$emit("reload");
                             return this.$notify({
-                                title: 'Tipos',
+                                title: "Tipos",
                                 message: this.$t("labelDocumentTypeEditSuccess"),
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
                         }
 
-                        const messageKey = result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
+                        const messageKey =
+                            result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
                         this.$notify({
-                            title: 'Tipos',
+                            title: "Tipos",
                             message: this.$t(messageKey),
-                            variant: 'danger',
-                            icon: 'CircleX',
+                            variant: "danger",
+                            icon: "CircleX",
                         });
                     })
                     .finally(() => {
                         this.isLoading = false;
                     });
             },
-        }
-    }
+        },
+    };
 </script>

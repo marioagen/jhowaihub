@@ -11,8 +11,7 @@
                         {{ $t("labelUserManagementDescription") }}
                     </p>
 
-                    <TabsComponent :tabs="tabsList"
-                                   color="custom">
+                    <TabsComponent :tabs="tabsList" color="custom">
                         <template #users>
                             <UsersComponent />
                         </template>
@@ -42,13 +41,13 @@
             TabsComponent,
             TeamsComponent,
             UsersComponent,
-            ProfilesComponent
+            ProfilesComponent,
         },
         data: () => ({
             tabsList: [
-                { name: 'users', label: 'labelUsers', icon: 'UsersRound' },
-                { name: 'teams', label: 'labelTeams', icon: 'Building' },
-                { name: 'profiles', label: 'labelProfilePermissions', icon: 'Shield' }
+                { name: "users", label: "labelUsers", icon: "UsersRound" },
+                { name: "teams", label: "labelTeams", icon: "Building" },
+                { name: "profiles", label: "labelProfilePermissions", icon: "Shield" },
             ],
         }),
     };

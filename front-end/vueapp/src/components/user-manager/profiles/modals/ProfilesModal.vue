@@ -1,42 +1,40 @@
 <template>
-    <ModalComponent id="profilesModal"
-                    :isLoading="isLoading"
-                    @save="save"
-                    ref="ProfilesModal">
+    <ModalComponent id="profilesModal" :isLoading="isLoading" @save="save" ref="ProfilesModal">
         <template #header>
             <div class="modal-header">
                 <h6 class="modal-title">
                     {{ $t(titleText) }}
                     <small class="text-muted d-block text-sm">{{ $t(subTitleText) }}</small>
                 </h6>
-                <button class="btn-close"
-                        data-bs-dismiss="modal"
-                        @click="close" />
+                <button class="btn-close" data-bs-dismiss="modal" @click="close" />
             </div>
         </template>
 
         <template #body>
             <div class="modal-body">
-                <label>{{$t("labelName")}}</label>
-                <input v-model="profileData.name" class="form-control"
-                       @blur="nameError = profileData.name ? '' : $t('labelRequiredField')"
-                       @input="nameError = ''" />
+                <label>{{ $t("labelName") }}</label>
+                <input
+                    v-model="profileData.name"
+                    class="form-control"
+                    @blur="nameError = profileData.name ? '' : $t('labelRequiredField')"
+                    @input="nameError = ''"
+                />
                 <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
                 <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <label class="form-label mb-0">{{ $t("labelPermissions") }}</label>
-                        <span class="text-muted">
-                            {{ selectedPermissions.length }} {{ $t("labelSelectedWithO") }}
-                        </span>
+                        <span class="text-muted">{{ selectedPermissions.length }} {{ $t("labelSelectedWithO") }}</span>
                     </div>
 
                     <div class="mb-3">
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
-                            <input type="text"
-                                   class="form-control form-control-sm"
-                                   :placeholder="$t('labelSearchPermissions')"
-                                   v-model="searchTerm" />
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                :placeholder="$t('labelSearchPermissions')"
+                                v-model="searchTerm"
+                            />
                         </div>
                     </div>
                     <div class="mb-3">
@@ -58,13 +56,17 @@
                         </div>
                         <div v-if="!loading" v-for="permission in filteredPermissions" :key="permission.id" class="p-1">
                             <div class="form-check d-flex align-items-center">
-                                <input class="form-check-input me-3"
-                                       type="checkbox"
-                                       :id="`permission-${permission.id}`"
-                                       :value="permission.id"
-                                       v-model="selectedPermissions" />
-                                <label class="form-check-label d-flex align-items-center w-100"
-                                       :for="`permission-${permission.id}`">
+                                <input
+                                    class="form-check-input me-3"
+                                    type="checkbox"
+                                    :id="`permission-${permission.id}`"
+                                    :value="permission.id"
+                                    v-model="selectedPermissions"
+                                />
+                                <label
+                                    class="form-check-label d-flex align-items-center w-100"
+                                    :for="`permission-${permission.id}`"
+                                >
                                     <div>
                                         <div class="fw-semibold">{{ permission.name }}</div>
                                     </div>
@@ -79,12 +81,10 @@
 
         <template #footer>
             <div class="modal-footer">
-                <button class="btn btn-secondary btn-sm"
-                        @click="close">
+                <button class="btn btn-secondary btn-sm" @click="close">
                     {{ $t("labelCancel") }}
                 </button>
-                <button class="btn btn-primary btn-sm"
-                        @click="save">
+                <button class="btn btn-primary btn-sm" @click="save">
                     {{ $t(saveText) }}
                 </button>
             </div>
@@ -93,15 +93,15 @@
 </template>
 
 <script>
-    import ModalComponent from '@/components/global/ModalComponent.vue';
-    import PermissionsService from '@/services/permissions/PermissionsService';
-    import ProfilesService from '@/services/profiles/ProfilesService';
+    import ModalComponent from "@/components/global/ModalComponent.vue";
+    import PermissionsService from "@/services/permissions/PermissionsService";
+    import ProfilesService from "@/services/profiles/ProfilesService";
 
     export default {
         components: {
-            ModalComponent
+            ModalComponent,
         },
-        emits: ['reload'],
+        emits: ["reload"],
         props: {
             isEdit: {
                 type: Boolean,
@@ -136,9 +136,8 @@
                 if (!this.searchTerm) {
                     return this.permissions;
                 }
-                return this.permissions.filter(
-                    (permission) =>
-                        permission.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+                return this.permissions.filter((permission) =>
+                    permission.name.toLowerCase().includes(this.searchTerm.toLowerCase())
                 );
             },
         },
@@ -148,8 +147,7 @@
                 if (!this.profileData.name || this.profileData.name.length < 2) {
                     this.nameError = this.$t("labelRequiredField");
                     valid = false;
-                }
-                else if (this.selectedPermissions.length == 0) {
+                } else if (this.selectedPermissions.length == 0) {
                     this.clearMyInterval();
                     this.permissionError = this.$t("labelRequiredField");
                     valid = false;
@@ -170,7 +168,7 @@
                 this.$refs.ProfilesModal.close();
             },
             resetData() {
-                this.profileData = { id: "", name: "",  permissions: [] };
+                this.profileData = { id: "", name: "", permissions: [] };
             },
             save() {
                 if (this.isEdit) {
@@ -192,24 +190,23 @@
                             this.resetData();
                             this.$emit("reload");
                             return this.$notify({
-                                title: 'Profiles',
+                                title: "Profiles",
                                 message: this.$t("labelProfileAddSuccess"),
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: 'Profiles',
+                                title: "Profiles",
                                 message: this.$t("labelProfileAddError"),
-                                variant: 'danger',
-                                icon: 'CircleX',
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                     })
                     .finally(() => {
                         this.isLoading = false;
                     });
-
             },
             editProfile() {
                 this.isLoading = true;
@@ -225,18 +222,17 @@
                             this.close();
                             this.$emit("reload");
                             return this.$notify({
-                                title: 'Profiles',
+                                title: "Profiles",
                                 message: this.$t("labelProfileEditSuccess"),
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
-                        }
-                        else {
+                        } else {
                             this.$notify({
-                                title: 'Profiles',
+                                title: "Profiles",
                                 message: this.$t("labelProfileEditError"),
-                                variant: 'danger',
-                                icon: 'CircleX',
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                     })
@@ -261,12 +257,11 @@
                     .then((response) => {
                         this.permissions = response.permissions;
                     })
-                    .finally(() => {
-                    });
+                    .finally(() => {});
             },
         },
         created() {
             this.getPermissions();
         },
-    }
+    };
 </script>

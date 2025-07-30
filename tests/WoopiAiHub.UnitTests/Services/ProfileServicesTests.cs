@@ -1,22 +1,32 @@
 ﻿using Moq;
+using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
 {
+    [Collection(nameof(ProfileCollection))]
     public class ProfileServicesTests
     {
+        private readonly AutoMocker _mocker;
+        private readonly ProfileFixture _profileFixture;
+        private readonly ProfileServices _profileServices;
         private readonly Mock<IProfileRepository> _profileRepoMock;
         private readonly Mock<IPermissionRepository> _permissionRepoMock;
         private readonly ProfileServices _service;
 
-        public ProfileServicesTests()
+        public ProfileServicesTests(ProfileFixture profileFixture)
         {
+            _profileFixture = profileFixture;
+            _mocker = new AutoMocker();
+            _profileServices = _mocker.CreateInstance<ProfileServices>();
             _profileRepoMock = new Mock<IProfileRepository>();
             _permissionRepoMock = new Mock<IPermissionRepository>();
             _service = new ProfileServices(_profileRepoMock.Object, _permissionRepoMock.Object);
@@ -51,6 +61,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var result = _service.FindAllPaged(pagedData);
 
+            // Assert
             Assert.NotNull(result);
             Assert.True(result.Content.Any());
         }

@@ -1,10 +1,6 @@
 <template>
     <span
-        :class="[
-            'badge-outline',
-            'variant-secondary',
-            { clickable, [`hover-${variant}`]: clickable }
-        ]"
+        :class="['badge-outline', 'variant-secondary', { clickable, [`hover-${variant}`]: clickable }]"
         :tabindex="clickable ? 0 : undefined"
         @click="handleClick"
         @keydown.enter="handleClick"
@@ -16,28 +12,28 @@
 
 <script>
     export default {
-        name: 'BadgeOutlined',
+        name: "BadgeOutlined",
         props: {
             text: {
                 type: String,
-                required: true
+                required: true,
             },
             variant: {
                 type: String,
-                default: 'primary'
+                default: "primary",
             },
             clickable: {
                 type: Boolean,
-                default: true
-            }
+                default: true,
+            },
         },
         methods: {
             handleClick(event) {
                 if (this.clickable) {
-                    this.$emit('setClick', event);
+                    this.$emit("setClick", event);
                 }
-            }
-        }
+            },
+        },
     };
 </script>
 
@@ -51,7 +47,9 @@
         border: 1px solid currentColor;
         display: inline-block;
         white-space: nowrap;
-        transition: color 0.2s, border-color 0.2s;
+        transition:
+            color 0.2s,
+            border-color 0.2s;
         cursor: default;
     }
 

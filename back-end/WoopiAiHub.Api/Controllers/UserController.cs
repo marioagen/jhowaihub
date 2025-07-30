@@ -84,5 +84,19 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Checks if an email is already in use.
+        /// </summary>
+        /// <param name="userEmailDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("IsEmailInUse")]
+        [SwaggerOperation("Endpoint that receives the request to check if an email is already in use")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> IsEmailInUse([FromBody] UserEmailDto userEmailDto)
+        {
+            var result = await _userServices.IsEmailInUseAsync(userEmailDto);
+            return Ok(result);
+        }
     }
 }

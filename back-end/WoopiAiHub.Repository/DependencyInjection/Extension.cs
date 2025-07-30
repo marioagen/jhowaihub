@@ -30,6 +30,7 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IPermissionRepository, PermissionRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = configuration.GetConnectionString("Redis");
