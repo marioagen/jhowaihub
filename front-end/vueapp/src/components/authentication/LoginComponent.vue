@@ -311,6 +311,9 @@
                         this.$store.commit("updateUserProfile", { amount: dataUser });
                         window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                         this.redirectToDocument();
+                    })
+                    .finally(() => {
+                        this.isLoadingSSO = false;
                     });
             },
             redirectToDocument() {
