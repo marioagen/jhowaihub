@@ -4,6 +4,7 @@
 
 body {
     font-family: var(--font-family-base);
+    font-size: .875rem !important;
 }
 
 .sidebar-wrapper {

@@ -3,14 +3,14 @@ import LoginIndex from "@/components/pages/login";
 import LogoutIndex from "@/components/pages/logout";
 import DocumentUpload from "@/components/pages/document/upload";
 import DocumentList from "@/components/pages/document/list";
-import TypeManager from "@/components/pages/manager/type";
+//import TypeManager from "@/components/pages/manager/type";
 import QuestionManager from "@/components/pages/manager/question";
 import QuizFormNew from "@/components/pages/quiz/form-new";
 import QuizFormEdit from "@/components/pages/quiz/form-edit";
 import QuizManager from "@/components/pages/manager/quiz";
 import NormalizeIndex from "@/components/pages/normalize/loading";
 import AnalyzerIndex from "@/components/pages/analyzer";
-import UserIndex from "@/components/pages/user/index";
+//import UserIndex from "@/components/pages/user/index";
 
 import TypesPage from "@/pages/types.vue";
 import UserManagePage from "@/pages/user-manager.vue";
@@ -114,7 +114,7 @@ const routes = [
 ];
 
 const router = createRouter({
-    history: createWebHashHistory(process.env.BASE_URL),
+    history: createWebHashHistory(),
     routes,
 });
 
