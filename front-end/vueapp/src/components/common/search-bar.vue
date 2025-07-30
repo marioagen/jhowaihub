@@ -16,7 +16,7 @@
             </div>
         </div>
         <template v-if="entity.screen !== 'user' && entity.screen !== 'team'">
-            <div class="col-auto content-center" v-if="entity.screen != 'document'">    
+            <div class="col-auto content-center" v-if="entity.screen != 'document'">
                 <div class="mt-5 mb-2">
                     <a
                         class="btn btn-primary"

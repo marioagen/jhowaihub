@@ -56,7 +56,7 @@ async function uploadChunk(
     formData.append("name", additionalData.name);
     formData.append("description", additionalData.description);
     formData.append("emailCreator", additionalData.emailCreator);
-    additionalData.teamsIds.forEach(id => formData.append("teamsIds", id));
+    additionalData.teamsIds.forEach((id) => formData.append("teamsIds", id));
     const fullURL = url + "/api/Document/UploadByChunks";
 
     try {

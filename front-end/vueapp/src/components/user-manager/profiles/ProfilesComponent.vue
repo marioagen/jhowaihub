@@ -16,10 +16,7 @@
         </div>
         <profiles-table ref="ProfilesTable" />
     </div>
-    <ProfilesModal :isEdit="false"
-                   :type="modalType"
-                   @reload="reloadTable"
-                   ref="ProfilesModal" />
+    <ProfilesModal :isEdit="false" :type="modalType" @reload="reloadTable" ref="ProfilesModal" />
 </template>
 
 <script>
@@ -65,7 +62,7 @@
         components: {
             ProfilesTable,
             SearchComponent,
-            ProfilesModal
+            ProfilesModal,
         },
         methods: {
             setMenuActions: function () {
@@ -114,7 +111,7 @@
             reloadTable() {
                 this.$refs.ProfilesModal.close();
                 this.$refs.ProfilesTable.reload();
-            }
+            },
         },
         created() {
             this.setMenuActions();

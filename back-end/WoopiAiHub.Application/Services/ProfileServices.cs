@@ -51,8 +51,8 @@ namespace WoopiAiHub.Application.Services
             var totalList = _profileRepository.FindAllPaged(pagedDataDto);
 
                 totalList = pagedDataDto.IsAscending ?
-                    totalList.OrderBy(team => team.Name) :
-                    totalList.OrderByDescending(team => team.Name);
+                    totalList.OrderBy(profile => profile.Name) :
+                    totalList.OrderByDescending(profile => profile.Name);
 
                 var result = Pagination(totalList, pagedDataDto);
                 return result;

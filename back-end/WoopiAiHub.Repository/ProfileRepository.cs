@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
+using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
 {
     public class ProfileRepository : IProfileRepository
     {
+        private readonly ApplicationDbContext _context;
 
-        private readonly Context.ApplicationDbContext _context;
-
-        public ProfileRepository(Context.ApplicationDbContext context)
+        public ProfileRepository(ApplicationDbContext context)
         {
             _context = context;
         }
