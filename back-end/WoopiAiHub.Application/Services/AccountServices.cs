@@ -15,6 +15,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Text.Json;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -27,6 +28,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly ITenantServices _tenantServices;
         private readonly IUserRepository _userRepository;
+        private readonly IPermissionRepository _permissionRepository;
 
         public AccountServices(IGraphApi graphApi,
                                IMarketPlaceApi marketPlaceApi,
@@ -34,7 +36,8 @@ namespace WoopiAiHub.Application.Services
                                ILogger<AccountServices> logger,
                                IKeyGeneratorApi keyGeneratorApi,
                                ITenantServices tenantServices,
-                               IUserRepository userRepository
+                               IUserRepository userRepository,
+                               IPermissionRepository permissionRepository
                                )
         {
             _graphApi = graphApi;
@@ -44,6 +47,7 @@ namespace WoopiAiHub.Application.Services
             _keyGeneratorApi = keyGeneratorApi;
             _tenantServices = tenantServices;
             _userRepository = userRepository;
+            _permissionRepository = permissionRepository;
         }
 
         /// <summary>
@@ -88,8 +92,9 @@ namespace WoopiAiHub.Application.Services
                     Data = null,
                 };
             }
-            
-            // Get Users Permissions -> Must wait another PR
+
+            var permissions = await _permissionRepository.GetUserPermissionsAsync(user.Email);
+            var tokenJWT = await GenerateUserToken(user.Email, permissions);
             return new AccessDataAuthDto
             {
                 Success = true,
@@ -98,7 +103,7 @@ namespace WoopiAiHub.Application.Services
                 {
                     Name = user.Name,
                     Email = user.Email,
-                    Token = GenerateToken(user.Email),
+                    Token = tokenJWT,
                     Tenant = userAccess.Tenant,
                     IsAdmin = true,
                     Permissions = null,
@@ -139,6 +144,8 @@ namespace WoopiAiHub.Application.Services
                     };
                 }
 
+                var permissions = await _permissionRepository.GetUserPermissionsAsync(authenticateDto.Login);
+                var tokenJWT = await GenerateUserToken(emailUserAzureRequest.Content.Mail ?? emailUserAzureRequest.Content.UserPrincipalName, permissions);
                 return new AccessDataAuthDto
                 {
                     Success = true,
@@ -147,7 +154,7 @@ namespace WoopiAiHub.Application.Services
                     {
                         Name = "Askmann",
                         Email = "askmann@mail.com",
-                        Token = GenerateToken(emailUserAzureRequest.Content.Mail ?? emailUserAzureRequest.Content.UserPrincipalName),
+                        Token = tokenJWT,
                         Tenant = userAccess.Tenant,
                         IsAdmin = true,
                         Permissions = null,
@@ -199,6 +206,35 @@ namespace WoopiAiHub.Application.Services
                 _config["Jwt:Audience"],
                 claims,
                 expires: DateTime.Now.AddMinutes(5),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<string> GenerateUserToken(string userEmail, List<string> permissions)
+        {
+            var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var userProfile = await _userRepository.GetUserProfilesAsync(userEmail);
+            bool isAdmin = userProfile.Contains("admin");
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userEmail),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("IsAdmin", isAdmin.ToString())
+            };
+
+            var permissionsJson = JsonSerializer.Serialize(permissions);
+            claims.Add(new Claim("permissions", permissionsJson));
+
+            var token = new JwtSecurityToken(
+                _config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
+                claims,
+                expires: DateTime.UtcNow.AddMinutes(60),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
