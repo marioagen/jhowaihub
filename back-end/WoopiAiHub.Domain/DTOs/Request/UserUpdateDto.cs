@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.DTOs.Request
 {
-    public class UserUpdateDto
+    public record class UserUpdateDto
     {
         public Guid Id { get; set; } = Guid.Empty;
 
@@ -8,7 +8,9 @@
 
         public string Email { get;  set; } = string.Empty;
 
-        public ICollection<int>? TeamIds { get; set; }
+        public string Password { get; set; } = string.Empty;
 
+        public ICollection<int>? TeamIds { get; set; }
+        public ICollection<int>? ProfileIds { get; set; }
     }
 }

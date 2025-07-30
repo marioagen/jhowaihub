@@ -9,29 +9,28 @@
                     </h6>
                     <button type="button" class="btn-close" @click="close"></button>
                 </div>
-                <div class="modal-body">
-                    <form @submit="handleSubmit">
+                <Form @submit="handleSubmit">
+                    <div class="modal-body">
                         <div class="mb-3">
-                            <label for="name" class="form-label">{{ $t("labelName") }}</label>
-                            <input
+                            <label for="name" class="form-label fw-semibold mb-0">{{ $t("labelName") }}</label>
+                            <Field
                                 name="name"
                                 type="text"
                                 class="form-control form-control-sm"
                                 :placeholder="$t('labelTypeTeamName')"
                                 v-model="form.name"
-                                @blur="nameError = form.name ? '' : $t('labelRequiredField')"
-                                @input="nameError = ''"
+                                :rules="'required|min:3|max:100'"
                             />
-                            <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
+                            <ErrorMessage name="name" class="invalid-feedback d-block" />
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary btn-sm" @click="close">
-                                {{ $t("labelCancel") }}
-                            </button>
-                            <button type="submit" class="btn btn-primary btn-sm">{{ $t("labelCreate") }}</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" @click="close">
+                            {{ $t("labelCancel") }}
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-sm">{{ $t("labelCreate") }}</button>
+                    </div>
+                </Form>
             </div>
         </div>
     </div>
@@ -40,7 +39,7 @@
 
 <script>
     import api from "@/services/api";
-    import ErrorCode from "@/constants/Errorcode";
+    import { Form, Field, ErrorMessage } from "vee-validate";
     import ToastAlert from "@/components/common/toast-alert";
 
     export default {
@@ -56,8 +55,6 @@
                 form: {
                     name: "",
                 },
-                nameError: "",
-                emailError: "",
                 loading: false,
                 validatingEmail: false,
                 toastShow: false,
@@ -68,26 +65,19 @@
         },
         components: {
             ToastAlert,
+            Form,
+            Field,
+            ErrorMessage,
         },
         emits: ["close", "teamCreated"],
         methods: {
-            validateForm() {
-                let valid = true;
-                if (!this.form.name || this.form.name.length < 2) {
-                   this.nameError = this.$t("labelRequiredField");
-                   valid = false;
-                }
-                return valid;
-            },
             handleSubmit(e) {
-                e.preventDefault();
-                if (!this.validateForm()) return;
                 this.loading = true;
                 let team = {
                     id: 0,
                     name: this.form.name.trim(),
-                    users: []
-                }
+                    users: [],
+                };
                 api.post("Team", team)
                     .then((response) => {
                         this.loading = false;
@@ -108,8 +98,6 @@
                     name: "",
                     userId: 1,
                 };
-                this.errors = {};
-                this.nameError = "";
             },
             openModal() {
                 this.$refs.modal.style.display = "block";

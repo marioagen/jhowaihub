@@ -35,12 +35,8 @@
         </div>
 
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
-            <button 
-                class="btn toggle-button" 
-                type="button" 
-                aria-label="Toggle sidebar"
-            >
-                <LucideIcon v-if="isCollapsed" icon="ChevronRight"  />
+            <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
+                <LucideIcon v-if="isCollapsed" icon="ChevronRight" />
                 <LucideIcon v-else icon="ChevronLeft" />
             </button>
         </div>

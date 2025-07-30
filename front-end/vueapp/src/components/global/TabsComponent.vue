@@ -1,12 +1,7 @@
 <template>
     <div>
         <ul class="nav nav-pills nav-fill mt-3" role="tablist">
-            <li
-                v-for="(tab, index) in tabs"
-                :key="index"
-                class="nav-item"
-                role="presentation"
-            >
+            <li v-for="(tab, index) in tabs" :key="index" class="nav-item" role="presentation">
                 <a
                     class="nav-link rounded-pill btn-custom"
                     :class="{ active: activeTab === tab.name }"
@@ -18,12 +13,7 @@
                     :aria-controls="tab.name"
                     type="button"
                 >
-                    <LucideIcon
-                        v-if="tab.icon"
-                        :icon="tab.icon"
-                        size="16"
-                        class="icon-pill"
-                    />
+                    <LucideIcon v-if="tab.icon" :icon="tab.icon" size="16" class="icon-pill" />
                     {{ $t(tab.label) }}
                 </a>
             </li>
@@ -72,27 +62,27 @@
 </script>
 
 <style scoped>
-.nav-pills {
-    background-color: var(--muted);
-    border-radius: 50rem !important;
-}
-.nav-pills .nav-link.btn-custom {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.775rem;
-    font-weight: 500;
-    color: #323338;
-}
-.nav-pills .nav-link.btn-custom.active {
-    background-color: var(--color-card-content) !important;
-    color: #323338;
-}
-.icon-pill {
-    vertical-align: text-bottom;
-    margin-right: 5px;
-}
-.tab-pane {
-    padding: 0;
-    background-color: transparent;
-    border-radius: 0;
-}
+    .nav-pills {
+        background-color: var(--muted);
+        border-radius: 50rem !important;
+    }
+    .nav-pills .nav-link.btn-custom {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.775rem;
+        font-weight: 500;
+        color: #323338;
+    }
+    .nav-pills .nav-link.btn-custom.active {
+        background-color: var(--color-card-content) !important;
+        color: #323338;
+    }
+    .icon-pill {
+        vertical-align: text-bottom;
+        margin-right: 5px;
+    }
+    .tab-pane {
+        padding: 0;
+        background-color: transparent;
+        border-radius: 0;
+    }
 </style>
