@@ -48,7 +48,7 @@ namespace WoopiAiHub.Repository
                 .ToList();
         }
 
-        public async Task<List<string>> GetUserPermissionsAsync(string email)
+        public async Task<Dictionary<string, List<string>>> GetUserPermissionsAsync(string email)
         {
             var user = await _context.Users
                 .Include(u => u.Permissions)

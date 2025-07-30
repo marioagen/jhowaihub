@@ -144,6 +144,12 @@ namespace WoopiAiHub.Application.Services
                     };
                 }
 
+                var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
+                if (user == null)
+                {
+                    
+                }
+
                 var permissions = await _permissionRepository.GetUserPermissionsAsync(authenticateDto.Login);
                 var tokenJWT = await GenerateUserToken(emailUserAzureRequest.Content.Mail ?? emailUserAzureRequest.Content.UserPrincipalName, permissions);
                 return new AccessDataAuthDto
@@ -211,7 +217,7 @@ namespace WoopiAiHub.Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private async Task<string> GenerateUserToken(string userEmail, List<string> permissions)
+        private async Task<string> GenerateUserToken(string userEmail, Dictionary<string, List<string>> permissions)
         {
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
