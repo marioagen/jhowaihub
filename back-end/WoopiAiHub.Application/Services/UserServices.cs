@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
@@ -17,16 +18,22 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _config;
         private readonly ITeamRepository _teamRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IPasswordHasher _passwordHasher;
 
         public UserServices(IUserRepository userRepository,
                             IMarketPlaceApi marketPlaceApi,
                             IConfiguration config,
-                            ITeamRepository teamRepository)
+                            ITeamRepository teamRepository,
+                            IProfileRepository profileRepository,
+                            IPasswordHasher passwordHasher)
         {
             _userRepository = userRepository;
             _teamRepository = teamRepository;
             _marketPlaceApi = marketPlaceApi;
             _config = config;
+            _profileRepository = profileRepository;
+            _passwordHasher = passwordHasher;
         }
 
         /// <summary>
@@ -36,7 +43,9 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Create(UserCreateDto userCreateDto, HeadersDto headersDto)
         {
-            if (string.IsNullOrEmpty(userCreateDto.Name) || string.IsNullOrEmpty(userCreateDto.Email))
+            if (string.IsNullOrEmpty(userCreateDto.Name) || 
+                string.IsNullOrEmpty(userCreateDto.Email) ||
+                string.IsNullOrEmpty(userCreateDto.Password))
             {
                 throw new ArgumentException("Data cannot be empty");
             }
@@ -56,6 +65,10 @@ namespace WoopiAiHub.Application.Services
             {
                 existingUser.Reactivate(userCreateDto.Name,
                                         userCreateDto.Email);
+
+                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, existingUser.Salt);
+                existingUser.SetPassword(hashedPassword, existingUser.Salt);
+
                 _userRepository.Update(existingUser);
 
                 return true;
@@ -68,7 +81,11 @@ namespace WoopiAiHub.Application.Services
                       userCreateDto.Email,
                       true,
                       DateTime.Now
-                  );
+                );
+
+                var salt = _passwordHasher.GenerateSalt();
+                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, salt);
+                user.SetPassword(hashedPassword, salt);
 
                 if (userCreateDto.TeamIds.Count > 0)
                 {
@@ -78,8 +95,18 @@ namespace WoopiAiHub.Application.Services
                     {
                         user.AddTeam(team);
                     }
-
                 }
+
+                if (userCreateDto.ProfileIds.Count > 0)
+                {
+                    var profiles = _profileRepository.FindByIds(userCreateDto.ProfileIds);
+
+                    foreach (var profile in profiles)
+                    {
+                        user.AddProfile(profile);
+                    }
+                }
+
                 return await _userRepository.CreateAsync(user);
             }
         }
@@ -135,15 +162,20 @@ namespace WoopiAiHub.Application.Services
                 user.Update(userUpdateDto.Name,
                             userUpdateDto.Email);
 
-                if (userUpdateDto.TeamIds != null)
+                if (!string.IsNullOrEmpty(userUpdateDto.Password))
                 {
-                    user.Teams.Clear();
-                    var teams =  _teamRepository.FindByIds(userUpdateDto.TeamIds);
-                    foreach (var team in teams)
+                    var saltBytes = user.Salt;
+                    if (saltBytes == null || saltBytes.Length == 0)
                     {
-                        user.AddTeam(team);
+                        saltBytes = _passwordHasher.GenerateSalt();
                     }
+                    var hashedPassword = _passwordHasher.Hash(userUpdateDto.Password, saltBytes);
+                    user.SetPassword(hashedPassword, saltBytes);
                 }
+
+                AddTeams(userUpdateDto, user);
+
+                AddProfiles(userUpdateDto, user);
 
                 var updateResult = _userRepository.Update(user);
                 if (!updateResult)
@@ -187,7 +219,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="totalList"></param>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
-        private static UserPagedResultDto Pagination(IQueryable<UserDtoPaged> totalList,
+        private static UserPagedResultDto Pagination(IQueryable<UserPagedDto> totalList,
                                                      PagedDataDto pagedDataDto)
         {
             int pageCount, currentPage = 0;
@@ -227,5 +259,56 @@ namespace WoopiAiHub.Application.Services
             };
         }
 
+        /// <summary>
+        /// Checks if an email is already in use by another user.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="excludeUserId"></param>
+        /// <returns></returns>
+        public async Task<bool> IsEmailInUseAsync(UserEmailDto userEmailDto)
+        {
+            if (string.IsNullOrEmpty(userEmailDto.Email))
+            {
+                throw new ArgumentException("Null or empty email");
+            }
+
+            return await _userRepository.EmailExistsAsync(userEmailDto.Email, userEmailDto.UserId);
+        }
+
+        /// <summary>
+        /// Adds profiles to the user based on the provided UserUpdateDto.
+        /// </summary>
+        /// <param name="userUpdateDto"></param>
+        /// <param name="user"></param>
+        private void AddProfiles(UserUpdateDto userUpdateDto, User user)
+        {
+            if (userUpdateDto.ProfileIds != null)
+            {
+                user.Profiles.Clear();
+                var profiles = _profileRepository.FindByIds(userUpdateDto.ProfileIds);
+                foreach (var profile in profiles)
+                {
+                    user.AddProfile(profile);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds teams to the user based on the provided UserUpdateDto.
+        /// </summary>
+        /// <param name="userUpdateDto"></param>
+        /// <param name="user"></param>
+        private void AddTeams(UserUpdateDto userUpdateDto, User user)
+        {
+            if (userUpdateDto.TeamIds != null)
+            {
+                user.Teams.Clear();
+                var teams = _teamRepository.FindByIds(userUpdateDto.TeamIds);
+                foreach (var team in teams)
+                {
+                    user.AddTeam(team);
+                }
+            }
+        }
     }
 }

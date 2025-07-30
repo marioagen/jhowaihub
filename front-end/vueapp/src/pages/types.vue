@@ -9,35 +9,23 @@
                             <small class="text-muted">{{ $t("labelTypesMessage") }}</small>
                         </p>
                     </div>
-                    <button 
-                        class="btn btn-primary btn-sm" 
-                        @click="openModalType"
-                    >
+                    <button class="btn btn-primary btn-sm" @click="openModalType">
                         <LucideIcon icon="Plus" size="17" />
                         {{ $t("labelNewType") }}
                     </button>
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <SearchComponent 
-                            :entity="entitySearch" 
-                            :resetInput="resetInputSearch" 
-                            @search="filterList" 
-                        />
+                        <SearchComponent :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
                     </div>
                 </div>
 
-                <TypesTable ref="TypesTable" @toast="handleToast" />
+                <TypesTable ref="TypesTable" />
             </div>
 
-            <TypesModal
-                :isEdit="false"
-                :type="modalType"
-                @reload="$refs.TypesTable.getTypes()"
-                ref="TypesModal"
-            />
+            <TypesModal :isEdit="false" :type="modalType" @reload="reloadTable" ref="TypesModal" />
         </div>
-    </main>    
+    </main>
 </template>
 
 <script>
@@ -46,7 +34,7 @@
     import TypesModal from "@/components/types/TypesModal.vue";
 
     export default {
-        name: "TypeManager",
+        name: "TypePage",
         emits: ["showAlertToast"],
         data() {
             return {
@@ -55,7 +43,7 @@
                 resetInputSearch: false,
                 modalType: {
                     name: "",
-                }
+                },
             };
         },
         components: {
@@ -69,7 +57,7 @@
             },
         },
         methods: {
-            setEntitySearch () {
+            setEntitySearch() {
                 this.entitySearch = {
                     screen: "type",
                     labelInput: this.$t("labelSearchTypes"),
@@ -82,6 +70,10 @@
             },
             openModalType() {
                 this.$refs.TypesModal.open();
+            },
+            reloadTable() {
+                this.$refs.TypesModal.close();
+                this.$refs.TypesTable.reload();
             },
         },
         created() {

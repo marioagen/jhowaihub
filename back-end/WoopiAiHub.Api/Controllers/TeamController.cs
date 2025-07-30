@@ -51,6 +51,28 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
+        /// Retrieves a paged list of teams that the current user belongs to.
+        /// </summary>
+        /// <remarks>This method uses the email address provided in the <paramref name="headersDto"/> to
+        /// identify the current user and retrieve the teams they are associated with. The results are returned in a
+        /// paginated format based on the parameters specified in <paramref name="pagedDataDto"/>.</remarks>
+        /// <param name="pagedDataDto">The pagination and filtering parameters for the request.</param>
+        /// <param name="headersDto">The headers containing user-specific information, such as the email of the user making the request.</param>
+        /// <returns>A <see cref="PagedDataDto"/> containing the paged list of teams that the user belongs to.</returns>
+        [HttpGet]
+        [Route("PagedByUser")]
+        [SwaggerOperation("Returns paged list of teams that the current user belongs to")]
+        [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
+        public ActionResult<PagedDataDto> FindAllPagedByUser([FromQuery] PagedDataDto pagedDataDto,
+                                                             [FromHeader] HeadersDto headersDto)
+        {
+            var result = _teamServices.FindAllPaged(pagedDataDto, 
+                                                    headersDto.EmailCreator);
+
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Endpoint that receives the request to create a team.
         /// </summary>
         /// <param name="teamCreateDto"></param>

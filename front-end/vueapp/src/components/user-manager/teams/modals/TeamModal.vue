@@ -10,104 +10,57 @@
                     </h6>
                     <button type="button" class="btn-close" @click="close"></button>
                 </div>
-                <div class="modal-body">
-                    <form ref="formRef">
+                <Form @submit="saveTeam" ref="formRef">
+                    <div class="modal-body">
                         <div class="mb-3">
-                            <label for="teamName" class="form-label">{{ $t("labelTeamName") }}</label>
-                            <input
+                            <label for="teamName" class="form-label fw-semibold mb-0">{{ $t("labelTeamName") }}</label>
+                            <Field
                                 type="text"
                                 class="form-control form-control-sm"
                                 id="teamName"
                                 ref="teamNameInput"
                                 autocomplete="off"
                                 name="teamName"
-                                :rules="'required|min:2|max:50'"
                                 v-model="teamData.name"
                                 :placeholder="$t('labelTypeTeamName')"
-                                @blur="nameError = teamData.name ? '' : $t('labelRequiredField')"
-                                @input="nameError = ''"
+                                :rules="'required|min:3|max:100'"
                             />
-                            <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label class="form-label mb-0">{{ $t("labelTeamMembers") }}</label>
-                                <span class="text-muted">
-                                    {{ selectedUsers.length }} {{ $t("labelSelectedWithO") }}
-                                </span>
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
-                                    <input
-                                        type="text"
-                                        class="form-control form-control-sm"
-                                        :placeholder="$t('labelSearchUsers')"
-                                        v-model="searchTerm"
-                                    />
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <button type="button" class="btn btn-outline-primary btn-sm me-2" @click="selectAll">
-                                    <i class="bi bi-check-all"></i>
-                                    {{ $t("labelSelectAll") }}
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" @click="clearSelection">
-                                    <i class="bi bi-x-circle"></i>
-                                    {{ $t("labelClearSelection") }}
-                                </button>
-                            </div>
-
-                            <div class="border rounded p-1 user-list">
-                                <div v-if="loading" class="text-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">{{ $t("labelLoading") }}</span>
-                                    </div>
-                                </div>
-                                <div v-if="!loading" v-for="user in filteredUsers" :key="user.id" class="p-1">
-                                    <div class="form-check d-flex align-items-center">
-                                        <input
-                                            class="form-check-input me-3"
-                                            type="checkbox"
-                                            :id="`user-${user.id}`"
-                                            :value="user.id"
-                                            v-model="selectedUsers"
-                                        />
-                                        <label
-                                            class="form-check-label d-flex align-items-center w-100"
-                                            :for="`user-${user.id}`"
-                                        >
-                                            <div
-                                                class="rounded-circle d-flex align-items-center justify-content-center btn-primary fw-bold me-3 initials"
-                                            >
-                                                {{ getInitials(user.name) }}
-                                            </div>
-                                            <div>
-                                                <div class="fw-semibold">{{ user.name }}</div>
-                                                <div class="text-muted small">{{ user.email }}</div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+                            <ErrorMessage name="teamName" class="invalid-feedback d-block" />
                         </div>
 
-                        <div class="mb-3">
-                            <button type="button" class="btn btn-sm btn-outline-primary w-100" @click="addNewUser">
-                                + {{ $t("labelNewUser") }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" @click="close">
-                        {{ $t("labelCancel") }}
-                    </button>
-                    <button type="button" class="btn btn-primary btn-sm" @click="saveTeam">
-                        {{ $t("labelCreate") }}
-                    </button>
-                </div>
+                        <SelectionListComponent
+                            :id="'users'"
+                            :labelPanel="'labelTeamMembers'"
+                            :labelSelectedQuantity="'labelSelectedTeams'"
+                            :labelSearch="'labelSearchUsers'"
+                            :items="filteredUsers"
+                            :loading="loading"
+                            :type="'user-list'"
+                            v-model:selectedItems="selectedUsers"
+                        >
+                            <template #footer>
+                                <div class="border-top mt-2 pt-2">
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-secondary fw-semibold"
+                                        @click="addNewUser"
+                                    >
+                                        <LucideIcon :icon="'UserPlus'" :size="16" />
+                                        {{ $t("labelNewUser") }}
+                                    </button>
+                                </div>
+                            </template>
+                        </SelectionListComponent>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" @click="close">
+                            {{ $t("labelCancel") }}
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            {{ $t("labelCreate") }}
+                        </button>
+                    </div>
+                </Form>
             </div>
         </div>
     </div>
@@ -127,12 +80,19 @@
     import ModalTeamUser from "@/components/user-manager/teams/modals/UserModal.vue";
     import ToastAlert from "@/components/common/toast-alert";
     import ErrorCode from "@/constants/Errorcode";
+    import { Form, Field, ErrorMessage } from "vee-validate";
+    import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
+    import LucideIcon from "@/components/global/LucideIcon.vue";
 
     export default {
         name: "ModalTeam",
         components: {
             ModalTeamUser,
             ToastAlert,
+            Form,
+            Field,
+            ErrorMessage,
+            SelectionListComponent,
         },
         props: {
             teamEditing: {
@@ -141,6 +101,7 @@
                 default: {},
             },
         },
+
         data() {
             return {
                 teamData: {
@@ -157,7 +118,6 @@
                 toastColor: "",
                 toastMessage: "",
                 myInterval: null,
-                nameError: "",
             };
         },
         emits: ["close", "teamCreated"],
@@ -177,14 +137,6 @@
             this.loadUsers();
         },
         methods: {
-            validateForm() {
-                let valid = true;
-                if (!this.teamData.name || this.teamData.name.length < 2) {
-                    this.nameError = this.$t("labelRequiredField");
-                    valid = false;
-                }
-                return valid;
-            },
             loadUsers() {
                 var paramsReq = {
                     search: "",
@@ -216,35 +168,31 @@
                 this.showModalTeamUser = true;
             },
             saveTeam(e) {
-                e.preventDefault();
-                if (!this.validateForm()) return;
                 const team = {
                     id: this.teamData.id,
                     name: this.teamData.name,
                     userIds: this.selectedUsers,
                 };
                 const request = team.id === 0 ? api.post("Team", team) : api.put("Team", team);
-
                 request
                     .then(() => {
                         this.$emit("teamCreated", team);
                         this.resetForm();
+                        this.close();
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
 
                         if (errorCode && errorCode !== ErrorCode.DefaultError) {
                             if (errorCode === ErrorCode.Duplicated) {
-                                this.nameError = this.$t("labelErrorTeamAlreadyExists");
+                                this.$refs.formRef.setFieldError("teamName", this.$t("labelErrorTeamAlreadyExists"));
+                                this.alertToast(this.$t("labelTeamError"), "toast-warning");
                             } else {
-                                this.alertToast(this.$t("labelUserError"), "toast-warning");
+                                this.alertToast(this.$t("labelTeamError"), "toast-warning");
                             }
                         } else {
-                            this.alertToast(this.$t("labelUserError"), "toast-warning");
+                            this.alertToast(this.$t("labelTeamError"), "toast-warning");
                         }
-                    })
-                    .finally(() => {
-                        this.close();
                     });
             },
             resetForm() {
@@ -302,17 +250,6 @@
     .custom-header {
         padding: 15px 15px 0;
         border-bottom-width: 0px !important;
-    }
-
-    .initials {
-        width: 30px;
-        height: 30px;
-    }
-
-    .user-list {
-        max-height: 200px;
-        min-height: 200px;
-        overflow-y: auto;
     }
 
     .show {

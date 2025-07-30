@@ -8,6 +8,8 @@ using WoopiAiHub.UnitTests.Fixture;
 using WoopiAiHub.Domain.DTOs;
 using Moq.AutoMock;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.Enum;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -130,7 +132,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(false);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateUniqueTeam(teamCreateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.CreateUniqueTeam(teamCreateDto));
             Assert.Equal("Duplicated Team Name", ex.Message);
         }
 
@@ -220,8 +222,9 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock.Setup(r => r.Update(team)).Returns(false);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _service.Update(teamUpdateDto));
-            Assert.Equal("Duplicated Team", ex.Message);
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.Update(teamUpdateDto));
+            Assert.Equal("Duplicated Team Name", ex.Message);
+            Assert.Equal(ErrorCode.Duplicated, ex.ErrorCode);
         }
 
         [Fact(DisplayName = "DeleteByIds should return true when IDs are valid")]
@@ -286,14 +289,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var pagedData = new PagedDataDto { Page = 2, PageSize = 2, IsAscending = false };
-            var teamDtos = new List<TeamDto>
+            var teams = new List<TeamDto>
             {
                 _fixture.CreateValidTeamDto(),
                 _fixture.CreateValidTeamDto(),
                 _fixture.CreateValidTeamDto()
             }.AsQueryable();
 
-            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teamDtos);
+            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teams);
 
             // Act
             var result = _service.FindAllPaged(pagedData);
@@ -345,14 +348,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var pagedData = new PagedDataDto { Page = 1, PageSize = 0, IsAscending = true };
-            var teamDtos = new List<TeamDto>
+            var teams = new List<TeamDto>
             {
                 _fixture.CreateValidTeamDto(),
                 _fixture.CreateValidTeamDto(),
                 _fixture.CreateValidTeamDto()
             }.AsQueryable();
 
-            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teamDtos);
+            _teamRepositoryMock.Setup(r => r.FindAllPaged(pagedData)).Returns(teams);
 
             // Act
             var result = _service.FindAllPaged(pagedData);
@@ -364,5 +367,80 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(3, result.RowCount);
             Assert.Equal(3, result.Content.Count());
         }
+
+        [Fact(DisplayName = "FindByIdsAndUser should return teams when all teams are found")]
+        [Trait("FindByIdsAndUser", "Valid case")]
+        public void FindByIdsAndUser_ShouldReturnTeams_WhenAllTeamsAreFound()
+        {
+            // Arrange
+            var email = "user@example.com";
+            var teams = new List<Team>
+            {
+                _fixture.CreateValidTeam(),
+                _fixture.CreateValidTeam(),
+                _fixture.CreateValidTeam()
+            }.ToList();
+
+            var ids = teams.Select(t => t.Id).ToList();
+
+            _teamRepositoryMock.Setup(r => r.FindByIdsAndUser(ids, email))
+                               .Returns(teams);
+
+            // Act
+            var result = _service.FindByIdsAndUser(ids, email);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(teams.Count, result.Count);
+            Assert.All(result, team => Assert.Contains(team.Id, ids));
+        }
+
+        [Fact(DisplayName = "FindByIdsAndUser should throw when no teams are found")]
+        [Trait("FindByIdsAndUser", "Validation")]
+        public void FindByIdsAndUser_ShouldThrow_WhenNoTeamsAreFound()
+        {
+            // Arrange
+            var email = "user@example.com";
+            var teams = new List<Team>
+            {
+                _fixture.CreateValidTeam(),
+                _fixture.CreateValidTeam(),
+            }.ToList();
+
+            var ids = teams.Select(t => t.Id).ToList();
+
+            _teamRepositoryMock.Setup(r => r.FindByIdsAndUser(ids, email))
+                               .Returns(new List<Team>());
+
+            // Act & Assert
+            var ex = Assert.Throws<ArgumentException>(() => _service.FindByIdsAndUser(ids, email));
+            Assert.Equal("No teams were found", ex.Message);
+        }
+
+        [Fact(DisplayName = "FindByIdsAndUser should throw when some teams are missing")]
+        [Trait("FindByIdsAndUser", "Validation")]
+        public void FindByIdsAndUser_ShouldThrow_WhenSomeTeamsAreMissing()
+        {
+            // Arrange
+            var email = "user@example.com";
+            var requestedIds = new List<int> { 1, 2, 3 };
+
+            var foundTeams = new List<Team>
+            {
+                new Team("Team 1", 1, DateTime.Now),
+               new Team("Team 2", 2, DateTime.Now),
+            };
+
+            _teamRepositoryMock
+                .Setup(r => r.FindByIdsAndUser(requestedIds, email))
+                .Returns(foundTeams);
+
+            // Act & Assert
+            var ex = Assert.Throws<ArgumentException>(() =>
+                _service.FindByIdsAndUser(requestedIds, email));
+
+            Assert.Equal("Some teams were not found", ex.Message);
+        }
+
     }
 }

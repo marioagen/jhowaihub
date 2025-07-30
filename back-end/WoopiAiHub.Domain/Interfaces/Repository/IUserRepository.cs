@@ -12,7 +12,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<User> FindByEmailAsync(string email);
         bool DeactivateRange(List<Guid> ids);
         bool Update(User user);
-        IQueryable<UserDtoPaged> FindAllPaged(PagedDataDto pagedDataDto);
-
+        IQueryable<UserPagedDto> FindAllPaged(PagedDataDto pagedDataDto);
+        Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null);
     }
 }

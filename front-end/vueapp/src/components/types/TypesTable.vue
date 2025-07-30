@@ -1,9 +1,5 @@
 <template>
-    <button 
-        v-if="showMultiDelete" 
-        class="btn btn-outline-danger btn-sm mb-2 ms-2" 
-        @click="openConfirmationMultiple"
-    >
+    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
         <LucideIcon icon="Trash2" size="15" />
         {{ $t("labelDelete") }}
     </button>
@@ -22,27 +18,17 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <button 
-                    class="btn btn-outline-success btn-sm table-btn" 
-                    @click="openEditModal(data.row)"
-                >
+                <button class="btn btn-outline-success btn-sm table-btn" @click="openEditModal(data.row)">
                     <LucideIcon icon="SquarePen" />
                 </button>
-                <button 
-                    class="btn btn-outline-danger btn-sm ms-2 table-btn" 
-                    @click="openConfirmation(data.row)"
-                >
+                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="openConfirmation(data.row)">
                     <LucideIcon icon="Trash2" />
                 </button>
             </template>
         </TableComponent>
     </div>
 
-    <TypesModal
-        :isEdit="true"
-        @reload="getTypes({ search: '', page: this.queryPage, type: null })"
-        ref="TypesModal"
-    />
+    <TypesModal :isEdit="true" @reload="reload" ref="TypesModal" />
 
     <ConfirmModal
         id="deleteConfirm"
@@ -97,9 +83,6 @@
             colType: 2,
             modalTypeShow: false,
             modalAlertShow: false,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
             searchInput: "",
             isDeleting: false,
         }),
@@ -147,13 +130,6 @@
             openEditModal(type) {
                 this.$refs.TypesModal.open(type);
             },
-            emitToast(message, color) {
-                this.$emit("toast", { message, color });
-            },
-            finishEdit() {
-                this.closeModal();
-                this.getTypes({ search: "", page: 1, type: null });
-            },
             openConfirmation(type) {
                 this.selectedType = [type.id];
                 this.$refs.DeleteDialog.open();
@@ -170,15 +146,19 @@
                         if (success) {
                             this.$refs.DeleteDialog.close();
                             this.getTypes({ search: "", page: 1, type: null });
-                            this.emitToast(
-                                this.$t("labelDocumentTypeRemoveSuccess"), 
-                                "toast-success"
-                            );
+                            this.$notify({
+                                title: "Tipos",
+                                message: this.$t("labelDocumentTypeRemoveSuccess"),
+                                variant: "success",
+                                icon: "CircleCheckBig",
+                            });
                         } else {
-                            this.emitToast(
-                                this.$t("labelDocumentTypeRemoveError"), 
-                                "toast-warning"
-                            );
+                            this.$notify({
+                                title: "Tipos",
+                                message: this.$t("labelDocumentTypeRemoveError"),
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
                         }
                     })
                     .finally(() => {
@@ -191,46 +171,12 @@
                 this.searchInput = input;
                 this.getTypes({ search: input, page: this.queryPage, type: null });
             },
-            openModalType: function () {
-                this.modalTypeShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModalType: function () {
-                this.modalTypeShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            confirmationDialog(team) {
-                this.selectedTeam = team;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.modalAlertShow = false;
-                this.modalTypeShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
             changePage(page) {
                 this.getTypes({ search: "", page: page, type: null });
             },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
+            reload() {
+                this.$refs.TypesModal.close();
+                this.getTypes({ search: "", page: this.queryPage, type: null });
             },
         },
         created() {

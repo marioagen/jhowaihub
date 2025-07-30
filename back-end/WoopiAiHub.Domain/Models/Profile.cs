@@ -17,6 +17,22 @@ namespace WoopiAiHub.Domain.Models
             this.Name = name;
         }
 
+        public void AddPermission(Permission permission)
+        {
+            if (permission == null)
+                throw new ArgumentNullException(nameof(permission));
+
+            if (this.Permissions.Any(t => t.Id == permission.Id))
+                return;
+
+            Permissions.Add(permission);
+        }
+
+        public void Update(string name)
+        {
+            Name = name;
+        }
+
         private Profile(int id, DateTime created) : base(id, created) { }
     }
 }

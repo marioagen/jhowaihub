@@ -31,14 +31,6 @@
                     </a>
                 </div>
             </div>
-
-            <div class="col-auto content-center" v-else>
-                <div class="mt-5 mb-2">
-                    <a class="btn btn-primary" :title="$t('labelNewDocument')" @click="action">
-                        {{ $t("labelNewDocument") }}
-                    </a>
-                </div>
-            </div>
         </template>
     </div>
 </template>

@@ -11,6 +11,7 @@ import NormalizeIndex from "@/components/pages/normalize/loading";
 import AnalyzerIndex from "@/components/pages/analyzer";
 
 import TypesPage from "@/pages/types.vue";
+import QuestionPage from "@/pages/questions.vue";
 import UserManagePage from "@/pages/user-manager.vue";
 import LoginIndex from "@/pages/login.vue";
 
@@ -62,9 +63,9 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/manage-question",
+        path: "/questions",
         name: "Question",
-        component: QuestionManager,
+        component: QuestionPage,
         meta: { layout: "default" },
         beforeEnter: authenticate,
     },
