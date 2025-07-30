@@ -262,7 +262,10 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> IsEmailInUseAsync(UserEmailDto userEmailDto)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(nameof(userEmailDto.Email));
+            if (string.IsNullOrEmpty(userEmailDto.Email))
+            {
+                throw new ArgumentException("Null or empty email");
+            }
 
             return await _userRepository.EmailExistsAsync(userEmailDto.Email, userEmailDto.UserId);
         }
