@@ -275,6 +275,35 @@
         password_confirmed: "La confirmación de la contraseña no coincide.",
         email: "Correo electrónico inválido.",
     },
+    questions: {
+        title: "Preguntas",
+        subtitle: "Gestiona las preguntas del sistema",
+        notFound: "No hay preguntas registradas",
+        filters: {
+            input: "Buscar pregunta",
+        },
+        createBtn: "Crear pregunta",
+        createSuccess: "Pregunta creada con éxito",
+        createError: "Error al crear la pregunta",
+        editSuccess: "Pregunta editada con éxito",
+        editError: "Error al editar la pregunta",
+        removeTitle: "Estás a punto de eliminar una pregunta del sistema",
+        removeSuccess: "Pregunta eliminada con éxito",
+        removeError: "Error al eliminar la pregunta",
+        errorDuplicated: "Pregunta duplicada",
+        description: "Descripción",
+        owner: "Propietario",
+        createdData: "Fecha de creación",
+        actions: "Acciones",
+        modalCreate: {
+            title: "Crear pregunta",
+            save: "Crear pregunta",
+        },
+        modalEdit: {
+            title: "Editar pregunta",
+            save: "Guardar cambios",
+        },
+    },
 };
 
 export default spanish;
