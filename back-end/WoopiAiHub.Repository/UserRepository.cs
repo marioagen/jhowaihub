@@ -147,15 +147,24 @@ namespace WoopiAiHub.Repository
         public async Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null)
         {
             var query = _context.Users.AsQueryable();
-
             var normalizedEmail = email.Trim().ToLowerInvariant();
-
             if (excludeUserId.HasValue)
             {
                 query = query.Where(u => u.Id != excludeUserId.Value);
             }
-
             return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
+        }
+
+        public async Task<List<string>> GetUserProfilesAsync(string email)
+        {
+            var user = await _context.Users
+                .Include(u => u.Profiles)
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            return user.Profiles
+                .Select(p => p.Name.ToLower())
+                .Distinct()
+                .ToList();
         }
     }
 }
