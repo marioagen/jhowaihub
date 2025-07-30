@@ -68,7 +68,7 @@
                                     :for="`permission-${permission.id}`"
                                 >
                                     <div>
-                                        <div class="fw-semibold">{{ permission.name }}</div>
+                                        <div class="fw-semibold">{{ permission.description }}</div>
                                     </div>
                                 </label>
                             </div>
