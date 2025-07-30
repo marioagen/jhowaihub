@@ -243,10 +243,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("Description");
 
-                    b.Property<string>("Module")
+                    b.Property<string>("Group")
                         .IsRequired()
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("Module");
+                        .HasColumnName("Group");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -12,8 +12,8 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250730184931_AddDescriptionAndCategoryPermissions")]
-    partial class AddDescriptionAndCategoryPermissions
+    [Migration("20250730191411_AddDescriptionAndGroupPermissions")]
+    partial class AddDescriptionAndGroupPermissions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -246,10 +246,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("Description");
 
-                    b.Property<string>("Module")
+                    b.Property<string>("Group")
                         .IsRequired()
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("Module");
+                        .HasColumnName("Group");
 
                     b.Property<string>("Name")
                         .IsRequired()

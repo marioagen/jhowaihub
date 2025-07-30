@@ -5,7 +5,7 @@
 namespace WoopiAiHub.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class AddDescriptionAndCategoryPermissions : Migration
+    public partial class AddDescriptionAndGroupPermissions : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,7 +26,7 @@ namespace WoopiAiHub.Repository.Migrations
                 defaultValue: "");
 
             migrationBuilder.AddColumn<string>(
-                name: "Module",
+                name: "Group",
                 table: "Permissions",
                 type: "varchar(50)",
                 nullable: false,
@@ -41,7 +41,7 @@ namespace WoopiAiHub.Repository.Migrations
                 table: "Permissions");
 
             migrationBuilder.DropColumn(
-                name: "Module",
+                name: "Group",
                 table: "Permissions");
 
             migrationBuilder.AlterColumn<string>(
