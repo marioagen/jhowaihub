@@ -19,16 +19,16 @@ namespace WoopiAiHub.Repository.Migrations
                 oldType: "varchar(100)");
 
             migrationBuilder.AddColumn<string>(
-                name: "Category",
+                name: "Description",
                 table: "Permissions",
-                type: "varchar(50)",
+                type: "varchar(100)",
                 nullable: false,
                 defaultValue: "");
 
             migrationBuilder.AddColumn<string>(
-                name: "Description",
+                name: "Module",
                 table: "Permissions",
-                type: "varchar(100)",
+                type: "varchar(50)",
                 nullable: false,
                 defaultValue: "");
         }
@@ -37,11 +37,11 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Category",
+                name: "Description",
                 table: "Permissions");
 
             migrationBuilder.DropColumn(
-                name: "Description",
+                name: "Module",
                 table: "Permissions");
 
             migrationBuilder.AlterColumn<string>(

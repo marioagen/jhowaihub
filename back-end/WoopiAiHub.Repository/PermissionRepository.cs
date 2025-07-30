@@ -42,7 +42,7 @@ namespace WoopiAiHub.Repository
                     Id = q.Id,
                     Created = q.Created,
                     Name = q.Name,
-                    Category = q.Category,
+                    Module = q.Module,
                     Description = q.Description
                 })
                 .AsNoTracking()

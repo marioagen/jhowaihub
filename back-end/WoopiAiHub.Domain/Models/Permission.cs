@@ -10,21 +10,21 @@ namespace WoopiAiHub.Domain.Models
         [Column("Name", TypeName = "varchar(50)")]
         public string Name { get; private set; } = string.Empty;
 
-        [Column("Category", TypeName = "varchar(50)")]
-        public string Category { get; private set; }
+        [Column("Module", TypeName = "varchar(50)")]
+        public string Module { get; private set; }
 
         public virtual ICollection<User> Users { get; set; }
         public virtual ICollection<Profile> Profiles { get; set; }
 
         public Permission(string description,
                           string name,
-                          string category,
+                          string module,
                           int id,
                           DateTime created) : base(id, created)
         {
             this.Description = description;
             this.Name = name;
-            this.Category = category;
+            this.Module = module;
         }
 
         private Permission(int id, DateTime created) : base(id, created) { }

@@ -12,7 +12,7 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250730182224_AddDescriptionAndCategoryPermissions")]
+    [Migration("20250730184931_AddDescriptionAndCategoryPermissions")]
     partial class AddDescriptionAndCategoryPermissions
     {
         /// <inheritdoc />
@@ -237,11 +237,6 @@ namespace WoopiAiHub.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("Category");
-
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
@@ -250,6 +245,11 @@ namespace WoopiAiHub.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(100)")
                         .HasColumnName("Description");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Module");
 
                     b.Property<string>("Name")
                         .IsRequired()

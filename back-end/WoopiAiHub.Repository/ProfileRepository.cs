@@ -64,7 +64,7 @@ namespace WoopiAiHub.Repository
                         {
                             Id = u.Id,
                             Name = u.Name,
-                            Category = u.Category,
+                            Module = u.Module,
                             Description = u.Description,
                             Created = u.Created
                         })
@@ -135,7 +135,7 @@ namespace WoopiAiHub.Repository
                             Name = u.Name,
                             Created = u.Created,
                             Description = u.Description,
-                            Category = u.Category
+                            Module = u.Module
                         })
                         .ToList(),
                         Users = t.Users

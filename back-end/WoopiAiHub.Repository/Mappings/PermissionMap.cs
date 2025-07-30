@@ -18,7 +18,7 @@ namespace WoopiAiHub.Repository.Mappings
             builder.Property(u => u.Description)
                   .IsRequired();
 
-            builder.Property(u => u.Category)
+            builder.Property(u => u.Module)
                   .IsRequired();
 
             builder.Property(u => u.Created)
