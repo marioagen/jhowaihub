@@ -41,8 +41,11 @@ namespace WoopiAiHub.Repository
                     Id = q.Id,
                     Created = q.Created,
                     Name = q.Name,
-
-                }).ToList();
+                    Group = q.Group,
+                    Description = q.Description
+                })
+                .AsNoTracking()
+                .ToList();
         }
 
         public async Task<List<string>> GetUserPermissionsAsync(string email)

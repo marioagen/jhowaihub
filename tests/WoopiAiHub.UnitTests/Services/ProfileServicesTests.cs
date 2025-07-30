@@ -71,7 +71,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task CreateUniqueProfile_ReturnsTrue_WhenSuccess()
         {
             var dto = new ProfileCreateDto { Name = "Novo", PermissionsIds = new List<int> { 1 } };
-            var permission = new Permission("Perm", 1, DateTime.Now);
+            var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
 
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.CreateUniqueProfile(It.IsAny<Profile>())).Returns(true);
@@ -87,7 +87,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             var dto = new ProfileUpdateDto { Id = 1, Name = "Editado", PermissionsIds = new List<int> { 1 } };
             var profile = new Profile("Antigo", 1, DateTime.Now) { Permissions = new List<Permission>() };
-            var permission = new Permission("Perm", 1, DateTime.Now);
+            var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
 
             _profileRepoMock.Setup(r => r.FindByIdReturnModel(dto.Id)).Returns(profile);
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
@@ -142,7 +142,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task CreateUniqueProfile_Throws_WhenDuplicated()
         {
             var dto = new ProfileCreateDto { Name = "Duplicado", PermissionsIds = new List<int>() };
-            var permission = new Permission("Perm", 1, DateTime.Now);
+            var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.CreateUniqueProfile(It.IsAny<Profile>())).Returns(false);
 
@@ -167,7 +167,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             var dto = new ProfileUpdateDto { Id = 1, Name = "Duplicado", PermissionsIds = new List<int>() };
             var profile = new Profile("Antigo", 1, DateTime.Now) { Permissions = new List<Permission>() };
-            var permission = new Permission("Perm", 1, DateTime.Now);
+            var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
 
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.FindByIdReturnModel(dto.Id)).Returns(profile);
