@@ -107,7 +107,7 @@ namespace WoopiAiHub.Application.Services
         {
             if (string.IsNullOrEmpty(teamCreateDto.Name))
             {
-                throw new ArgumentException("Team name cannot be empty");
+                throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Team name cannot be empty");
             }
 
             var team = new Team(teamCreateDto.Name, 0, DateTime.Now)

@@ -42,8 +42,11 @@ namespace WoopiAiHub.Repository
                     Id = q.Id,
                     Created = q.Created,
                     Name = q.Name,
-
-                }).ToList();
+                    Category = q.Category,
+                    Description = q.Description
+                })
+                .AsNoTracking()
+                .ToList();
         }
     }
 }
