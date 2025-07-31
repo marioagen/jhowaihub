@@ -164,8 +164,13 @@ namespace WoopiAiHub.Application.Services
 
                 if (!string.IsNullOrEmpty(userUpdateDto.Password))
                 {
-                    var hashedPassword = _passwordHasher.Hash(userUpdateDto.Password, user.Salt);
-                    user.SetPassword(hashedPassword, user.Salt);
+                    var saltBytes = user.Salt;
+                    if (saltBytes == null || saltBytes.Length == 0)
+                    {
+                        saltBytes = _passwordHasher.GenerateSalt();
+                    }
+                    var hashedPassword = _passwordHasher.Hash(userUpdateDto.Password, saltBytes);
+                    user.SetPassword(hashedPassword, saltBytes);
                 }
 
                 AddTeams(userUpdateDto, user);
