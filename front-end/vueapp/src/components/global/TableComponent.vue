@@ -185,5 +185,6 @@
         border-radius: 8px;
         background: white;
         padding: 20px 24px;
+        overflow-x: auto;
     }
 </style>
