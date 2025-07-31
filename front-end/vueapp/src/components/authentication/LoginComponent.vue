@@ -22,13 +22,11 @@
                 <div class="card mb-3" style="max-width: 25rem;">
                     <div class="text-center mt-3">
                         <h6 class="fw-bold">
-                            Fazer Login
-                            <!-- {{ $t("labelTypes") }} -->
+                            {{ $t("login.title") }}
                         </h6>
                         <p>
                             <small class="text-muted">
-                                Acesse sua conta para gerenciar documentos
-                                <!-- {{ $t("labelTypesMessage") }} -->
+                                {{ $t("login.subtitle") }}
                             </small>
                         </p>
                     </div>
@@ -59,7 +57,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="form-label">Senha</label>
+                            <label for="password" class="form-label">{{ $t("login.password") }}</label>
                             <Field
                                 name="password"
                                 rules="required|custom_password"
@@ -103,7 +101,7 @@
                                 class="btn btn-primary btn-sm w-100"
                             >
                                 <i class="fas fa-spinner fa-pulse"></i>
-                                Carregando...
+                                {{ $t("login.loading") }}
                             </a>
                             <button
                                 v-else
@@ -138,14 +136,13 @@
                                     width="30"
                                     height="15"
                                 />
-                                Login com Microsoft
+                                {{ $t("login.sso") }}
                             </button>
                             
                             <a class="btn btn-outline-primary w-100" v-else>
                                 <i class="fas fa-spinner fa-pulse"></i>
-                                Login com Microsoft
+                                {{ $t("login.loading") }}
                             </a>
-
                         </div>
                     </div>
                 </div>
