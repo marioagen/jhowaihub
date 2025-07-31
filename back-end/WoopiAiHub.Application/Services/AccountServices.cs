@@ -128,6 +128,15 @@ namespace WoopiAiHub.Application.Services
             }
 
             var emailUserAzureRequest = await _graphApi.FindEmailUserAzure(authenticateHeaderDto.Authorization);
+            if(emailUserAzureRequest == null)
+            {
+                return new AccessDataAuthDto
+                {
+                    Success = false,
+                    Message = "User not found in Azure.",
+                    Data = null,
+                };
+            }
 
             if (emailUserAzureRequest.Content is not null &&
                (emailUserAzureRequest.Content.UserPrincipalName.Equals(authenticateDto.Login) ||
@@ -147,7 +156,12 @@ namespace WoopiAiHub.Application.Services
                 var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
                 if (user == null)
                 {
-                    
+                    return new AccessDataAuthDto
+                    {
+                        Success = false,
+                        Message = "User not found.",
+                        Data = null,
+                    };
                 }
 
                 var permissions = await _permissionRepository.GetUserPermissionsAsync(authenticateDto.Login);
