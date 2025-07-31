@@ -20,6 +20,17 @@ export default {
                 }
             });
     },
+    getQuestionsList() {
+        return api.get("/Question/FindAll")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                }
+            });
+    },
     createQuestion(description) {
         return api.post(`/Question?description=${description}`)
             .then(() => {
