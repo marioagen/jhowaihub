@@ -53,6 +53,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Users.Where(u => u.Id == referenceUserId)
                                        .Include(t => t.Teams)
+                                       .Include(p => p.Profiles)
                                        .FirstOrDefaultAsync();
         }
 

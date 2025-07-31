@@ -209,6 +209,7 @@
     labelSelectAll: "Seleccionar Todos",
     labelClearSelection: "Limpiar selección",
     labelNewUser: "Nuevo usuario",
+    labelEditUser: "Editar usuario",
     labelTeamName: "Nombre del equipo",
     labelTypeTeamName: "Nombre del equipo",
     labelTypeUserName: "Introduce el nombre del usuario",
