@@ -58,41 +58,35 @@
 
                         <div class="mb-3">
                             <label for="password" class="form-label">{{ $t("login.password") }}</label>
-                            <Field
-                                name="password"
-                                rules="required|custom_password"
-                                v-slot="{ field, errorMessage }"
-                            >
-                                <div class="input-group">                                
-                                    <span class="input-group-text border-end-0 bg-white">
-                                        <LucideIcon icon="Lock" size="16" />
-                                    </span>
-                                    <input
-                                        v-bind="field"
-                                        id="password"
-                                        name="password"
-                                        placeholder="******"
-                                        class="form-control form-control-sm border-start-0 border-end-0"
-                                        :type="showPassword ? 'text' : 'password'"                            
-                                        :class="{ 'is-invalid': errorMessage }"
+                            <div class="input-group">
+                                <span class="input-group-text border-end-0 bg-white">
+                                    <LucideIcon icon="Lock" size="16" />
+                                </span>
+                                <input
+                                    v-bind="field"
+                                    id="password"
+                                    name="password"
+                                    placeholder="******"
+                                    v-model="credentials.password"
+                                    class="form-control form-control-sm border-start-0 border-end-0"
+                                    :type="showPassword ? 'text' : 'password'"
+                                    :class="{ 'is-invalid': errorMessage }"
+                                />
+                                <span class="input-group-text border-start-0 bg-white">
+                                    <LucideIcon
+                                        v-if="showPassword"
+                                        icon="Eye" 
+                                        size="16"
+                                        @click="togglePassword"
                                     />
-                                    <span class="input-group-text border-start-0 bg-white">
-                                        <LucideIcon
-                                            v-if="showPassword"
-                                            icon="Eye" 
-                                            size="16"
-                                            @click="togglePassword"
-                                        />
-                                        <LucideIcon 
-                                            v-else
-                                            icon="EyeClosed" 
-                                            size="16"
-                                            @click="togglePassword"
-                                        />
-                                    </span>
-                                </div>
-                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
-                            </Field>
+                                    <LucideIcon 
+                                        v-else
+                                        icon="EyeClosed" 
+                                        size="16"
+                                        @click="togglePassword"
+                                    />
+                                </span>
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -194,23 +188,14 @@
                 }
 
                 this.isLoading = true;
-                console.log(this.credentials);
-                console.log(this.values.email);
-                console.log(this.values.password);
-                this.$notify({
-                    title: 'Login',
-                    message: 'Request to Login',
-                    variant: 'info',
-                    icon: 'MessageCircle',
-                });
-                this.isLoading = false;
-                // AuthService.Login(this.credentials)
-                //     .then((response) => {
-                //         console.log(response)
-                //     })
-                //     .finally(() => {
-                //         this.isLoading = false;
-                //     })
+                this.credentials.email = this.values.email;               
+                AuthService.Login(this.credentials)
+                    .then((response) => {
+                        console.log(response)
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    })
             },
             loginSSO() {
                 this.isLoadingSSO = true;
@@ -225,6 +210,12 @@
                                 icon: 'CircleX',
                             });
                         }
+                        this.$notify({
+                            title: 'Login',
+                            message: 'login.validateClient',
+                            variant: 'info',
+                            icon: 'MessageCircle',
+                        });
                         this.microsoftLogin(response);
                     });
             },
@@ -269,6 +260,12 @@
                         };
                         this.$store.commit("updateUserProfile", { amount: dataUser });
                         this.authenticateUser(response.account.name, response.account.username, response.accessToken);
+                        this.$notify({
+                            title: 'Login',
+                            message: 'login.authSSO',
+                            variant: 'info',
+                            icon: 'MessageCircle',
+                        });
                     })
                     .catch((error) => {
                         this.$notify({
