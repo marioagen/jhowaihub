@@ -247,6 +247,8 @@
         subtitle: "Accede a tu cuenta para gestionar documentos",
         loading: "Cargando...",
         sso: "Iniciar sesión con Microsoft",
+        authSSO: "Autenticado con Microsoft",
+        validateClient: "Cliente validado",
     },
     "validation": {
         "required": "Campo obligatorio.",

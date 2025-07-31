@@ -243,6 +243,8 @@
         subtitle: "Access your account to manage documents",
         loading: "Loading...",
         sso: "Login with Microsoft",
+        authSSO: "Authenticated with Microsoft",
+        validateClient: "Client validated",
     },
     "validation": {
       "required": "This field is required.",
