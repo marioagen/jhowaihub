@@ -238,6 +238,12 @@
     labelSaveSubTitleProfile: "Crie um novo perfil no sistema",
     labelEditType: "Editar tipo",
     labelSaveType: "Criar tipo",
+    login: {
+        title: "Fazer Login",
+        subtitle: "Acesse sua conta para gerenciar documentos",
+        loading: "Carregando...",
+        sso: "Login com Microsoft",
+    },
     "validation": {
         "required": "Campo obrigatório.",
         "email": "Informe um email válido.",

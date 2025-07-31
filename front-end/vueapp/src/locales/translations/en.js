@@ -238,6 +238,12 @@
     labelSaveSubTitleProfile: "Create a new profile in the system",
     labelEditType: "Edit",
     labelSaveType: "Create",
+    login: {
+        title: "Login",
+        subtitle: "Access your account to manage documents",
+        loading: "Loading...",
+        sso: "Login with Microsoft",
+    },
     "validation": {
       "required": "This field is required.",
       "email": "Please enter a valid email address.",
