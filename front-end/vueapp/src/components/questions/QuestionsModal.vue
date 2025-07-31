@@ -95,7 +95,8 @@
             },
             createQuestion() {
                 this.isLoading = true;
-                QuestionsService.createQuestion(this.questionData.name)
+                console.log(this.questionData)
+                QuestionsService.createQuestion(this.questionData.description)
                     .then((result) => {
                         if (result.success) {
                             this.$emit('reload');
