@@ -2,7 +2,14 @@
     <nav v-if="totalPages > 1">
         <ul class="pagination justify-content-center">
             <li class="page-item" :class="{ disabled: current === 1 }">
-                <a class="page-link" href="#" @click.prevent="changePage(current - 1)">« {{ $t("labelPrevious") }}</a>
+                <a 
+                    class="page-link" 
+                    href="#" 
+                    @click.prevent="changePage(current - 1)"
+                >
+                    <LucideIcon icon="ChevronsLeft" />
+                    {{ $t("pagination.previous") }}
+                </a>
             </li>
 
             <li v-for="page in pages" :key="page" :class="{ active: page === current }" class="page-item">
@@ -12,7 +19,14 @@
             </li>
 
             <li class="page-item" :class="{ disabled: current === totalPages }">
-                <a class="page-link" href="#" @click.prevent="changePage(current + 1)">{{ $t("labelNext") }} »</a>
+                <a 
+                    class="page-link" 
+                    href="#" 
+                    @click.prevent="changePage(current + 1)"
+                >
+                    {{ $t("pagination.next") }}
+                    <LucideIcon icon="ChevronsRight" />
+                </a>
             </li>
         </ul>
     </nav>
