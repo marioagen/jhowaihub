@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Data.SqlTypes;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -49,17 +50,21 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new ArgumentException("Data cannot be empty");
             }
-            var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
-            var requestAssignLicensesByHub = new RequestAssignLicensesByHub
-            {
-                UserEmail = userCreateDto.Email,
-                Tenant = headersDto.Tenant,
-            };
-            var userEnabledReference = await _marketPlaceApi.AssignLicensesByHub(KeyAccess, requestAssignLicensesByHub);
+            var userEnabledReference = await AssignMkt(userCreateDto.Email, Guid.Empty, headersDto);
+
             if (userEnabledReference == Guid.Empty)
                 return false;
 
-            return await CreateOrReactivate(userCreateDto, userEnabledReference);
+            var existingUser = await _userRepository.FindByReferenceAsync(userEnabledReference); //subir pro principal
+
+            if (existingUser != null)
+            {
+                return ReactivateUser(existingUser, userCreateDto);
+            }
+            else 
+            { 
+                return await CreateUser(userCreateDto, userEnabledReference);
+            }
         }
 
         // <summary>
@@ -94,15 +99,13 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Update(UserUpdateDto userUpdateDto, HeadersDto headersDto)
         {
-            var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
-            var requestAssignLicensesByHub = new RequestAssignLicensesByHub
+           var mktGuid = await AssignMkt(userUpdateDto.Email, userUpdateDto.Id, headersDto);
+            if (mktGuid != Guid.Empty)
             {
-                UserEmail = userUpdateDto.Email,
-                Tenant = headersDto.Tenant,
-                IdUser = userUpdateDto.Id
-            };
+                return await UpdateUser(userUpdateDto);
+            }
 
-            return await VerifyLicensesMkt(KeyAccess, userUpdateDto, requestAssignLicensesByHub);
+            return false;
         }
 
         /// <summary>
@@ -199,7 +202,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="user"></param>
         private void AddProfiles<T>(T dto, User user)
         {
-            var profileIdsProp = typeof(T).GetProperty("TeamIds");
+            var profileIdsProp = typeof(T).GetProperty("ProfileIds");
             var profileIds = profileIdsProp?.GetValue(dto) as ICollection<int>;
             if (profileIds != null)
             {
@@ -232,53 +235,88 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
-        private async Task<bool> CreateOrReactivate(UserCreateDto userCreateDto, Guid userEnabledReference)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="dto"></param>
+        /// <param name="user"></param>
+        /// <param name="salt"></param>
+        private void SetSaltPass<T>(T dto,
+                                    User user,
+                                    byte[] salt)
         {
-            var existingUser = await _userRepository.FindByReferenceAsync(userEnabledReference);
+            var passwordProp = typeof(T).GetProperty("Password");
+            var password = passwordProp?.GetValue(dto) as string;
 
-            if (existingUser != null)
+            if (salt == null || salt.Length == 0)
             {
-                existingUser.Reactivate(userCreateDto.Name,
-                                        userCreateDto.Email);
-
-                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, existingUser.Salt);
-                existingUser.SetPassword(hashedPassword, existingUser.Salt);
-
-                _userRepository.Update(existingUser);
-
-                return true;
+                salt = _passwordHasher.GenerateSalt();
             }
-            else
+            var hashedPassword = _passwordHasher.Hash(password, salt);
+            user.SetPassword(hashedPassword, salt);
+        }
+        
+        /// <summary>
+        ///  Creates a new user based on the provided UserCreateDto and userEnabledReference.
+        /// </summary>
+        /// <param name="userCreateDto"></param>
+        /// <param name="userEnabledReference"></param>
+        /// <returns></returns>
+        private async Task<bool> CreateUser(UserCreateDto userCreateDto,
+                                            Guid userEnabledReference)
+        {
+            User user = new User(
+                    userEnabledReference,
+                    userCreateDto.Name,
+                    userCreateDto.Email,
+                    true,
+                    DateTime.Now
+              );
+
+            SetSaltPass(userCreateDto, user, null);
+
+            if (userCreateDto.TeamIds.Count > 0)
             {
-                var user = CreateUser(userEnabledReference,
-                                      userCreateDto.Name,
-                                      userCreateDto.Email);
-
-                var salt = _passwordHasher.GenerateSalt();
-                var hashedPassword = _passwordHasher.Hash(userCreateDto.Password, salt);
-                user.SetPassword(hashedPassword, salt);
-
-                if (userCreateDto.TeamIds.Count > 0)
-                {
-                    AddTeams(userCreateDto, user);
-                }
-
-                if (userCreateDto.ProfileIds.Count > 0)
-                {
-                    AddProfiles(userCreateDto, user);
-                }
-
-                return await _userRepository.CreateAsync(user);
+                AddTeams(userCreateDto, user);
             }
+
+            if (userCreateDto.ProfileIds.Count > 0)
+            {
+                AddProfiles(userCreateDto, user);
+            }
+
+            return await _userRepository.CreateAsync(user);
         }
 
-        private async Task<bool> VerifyLicensesMkt(string keyAccess,
-                                                   UserUpdateDto userUpdateDto,
-                                                   RequestAssignLicensesByHub requestAssignLicensesByHub)
+        /// <summary>
+        /// Reactivate an existing user based on the provided UserCreateDto.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="userCreateDto"></param>
+        /// <returns></returns>
+        private bool ReactivateUser(User user,
+                                    UserCreateDto userCreateDto)
         {
-            var updateMkt = await _marketPlaceApi.AssignLicensesByHub(keyAccess, requestAssignLicensesByHub);
-            if (updateMkt != Guid.Empty)
-            {
+            user.Reactivate(userCreateDto.Name,
+                            userCreateDto.Email);
+
+            SetSaltPass(userCreateDto, user, user.Salt);
+
+
+            _userRepository.Update(user);
+
+            return true;
+        }
+
+        /// <summary>
+        ///  Updates an existing user based on the provided UserUpdateDto.
+        /// </summary>
+        /// <param name="userUpdateDto"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        private async Task<bool> UpdateUser(UserUpdateDto userUpdateDto)
+        {
                 var user = await _userRepository.FindByReferenceAsync(userUpdateDto.Id);
                 if (user == null)
                     return false;
@@ -288,13 +326,7 @@ namespace WoopiAiHub.Application.Services
 
                 if (!string.IsNullOrEmpty(userUpdateDto.Password))
                 {
-                    var saltBytes = user.Salt;
-                    if (saltBytes == null || saltBytes.Length == 0)
-                    {
-                        saltBytes = _passwordHasher.GenerateSalt();
-                    }
-                    var hashedPassword = _passwordHasher.Hash(userUpdateDto.Password, saltBytes);
-                    user.SetPassword(hashedPassword, saltBytes);
+                    SetSaltPass(userUpdateDto, user, user.Salt);
                 }
 
                 AddTeams(userUpdateDto, user);
@@ -307,23 +339,29 @@ namespace WoopiAiHub.Application.Services
                     throw new ArgumentException("Duplicated User");
                 }
                 return updateResult;
-            }
-            return false;
         }
 
-        private User CreateUser(Guid userEnabledReference,
-                                string name,
-                                string email)
+        /// <summary>
+        /// Assign a user to the marketplace by email and id.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="id"></param>
+        /// <param name="headersDto"></param>
+        /// <returns></returns>
+        private async Task<Guid> AssignMkt(string email,
+                                           Guid id,
+                                           HeadersDto headersDto)
         {
-            User user = new User(
-                    userEnabledReference,
-                    name,
-                    email,
-                    true,
-                    DateTime.Now
-              );
+            var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
+            var requestAssignLicensesByHub = new RequestAssignLicensesByHub
+            {
+                UserEmail = email,
+                Tenant = headersDto.Tenant,
+                IdUser =  id,
+            };
+            var userEnabledReference = await _marketPlaceApi.AssignLicensesByHub(KeyAccess, requestAssignLicensesByHub);
 
-            return user;
+            return userEnabledReference;
         }
     }
 }
