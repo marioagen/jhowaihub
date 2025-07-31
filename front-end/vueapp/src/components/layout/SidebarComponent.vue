@@ -134,15 +134,15 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/manage-quiz"
+                    to="/quizzes"
                 >
                     <img
                         src="./../../assets/img/questionnaires-icon.svg"
-                        :title="$t('labelQuestionnaires')"
+                        :title="$t('labelQuizzes')"
                         width="20"
                         class="icon-sidebar"
                     />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelQuestionnaires") }}</span>
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelQuizzes") }}</span>
                 </router-link>
             </li>
         </ul>
