@@ -33,7 +33,7 @@
         },
         computed: {
             badgeClasses() {
-                return ["badge", `bsg-${this.variant}`, { "rounded-pill": this.pill }];
+                return ["badge", `bg-${this.variant}`, { "rounded-pill": this.pill }];
             },
         },
         methods: {
