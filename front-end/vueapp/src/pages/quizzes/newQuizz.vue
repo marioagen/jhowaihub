@@ -1,7 +1,5 @@
 <template>
-    <QuizzesForm 
-        :edit="false"
-    />
+    <QuizzesForm />
 </template>
 
 <script>
