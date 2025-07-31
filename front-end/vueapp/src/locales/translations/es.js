@@ -275,6 +275,10 @@
         password_confirmed: "La confirmación de la contraseña no coincide.",
         email: "Correo electrónico inválido.",
     },
+    pagination: {
+        next: "Siguiente",
+        previous: "Anterior",
+    },
     questions: {
         title: "Preguntas",
         subtitle: "Gestiona las preguntas del sistema",

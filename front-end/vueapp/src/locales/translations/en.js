@@ -271,6 +271,10 @@
         password_confirmed: "The password confirmation does not match.",
         email: "Invalid email",
     },
+    pagination: {
+        next: "Next",
+        previous: "Previous",
+    },
     questions: {
         title: "Questions",
         subtitle: "Manage system questions",
