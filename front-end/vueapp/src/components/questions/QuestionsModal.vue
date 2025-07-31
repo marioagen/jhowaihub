@@ -95,7 +95,6 @@
             },
             createQuestion() {
                 this.isLoading = true;
-                console.log(this.questionData)
                 QuestionsService.createQuestion(this.questionData.description)
                     .then((result) => {
                         if (result.success) {
