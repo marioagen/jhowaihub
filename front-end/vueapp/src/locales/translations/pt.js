@@ -269,6 +269,10 @@
         password_confirmed: "A confirmação da senha não confere.",
         email: "Email inválido",
     },
+    pagination: {
+        next: "Próximo",
+        previous: "Anterior",
+    },
     questions: {
         title: "Perguntas",
         subtitle: "Gerencie perguntas do sistema",
