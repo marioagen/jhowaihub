@@ -169,7 +169,7 @@
 </template>
 
 <script>
-    import * as moment from "moment/moment";
+    import date from "@/helpers/date";
     import api from "@/services/api";
     import ModalAlert from "@/components/common/modal-alert";
 
@@ -429,11 +429,7 @@
                 this.isExpandedSort = false;
             },
             dateFormat: function (str) {
-                if (this.$store.state.userProfile.language === "en") {
-                    return moment(str).format("YYYY/MM/DD (H:mm:ss)");
-                } else {
-                    return moment(str).format("DD/MM/YYYY (H:mm:ss)");
-                }
+                return date.formatDate(str);
             },
         },
         computed: {},
