@@ -1,8 +1,6 @@
 ﻿import { createRouter, createWebHashHistory } from "vue-router";
 import LoginIndex from "@/components/pages/login";
 import LogoutIndex from "@/components/pages/logout";
-import DocumentUpload from "@/components/pages/document/upload";
-import DocumentList from "@/components/pages/document/list";
 import NormalizeIndex from "@/components/pages/normalize/loading";
 import AnalyzerIndex from "@/components/pages/analyzer";
 
@@ -12,6 +10,8 @@ import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import QuestionsPage from "@/pages/questions.vue";
 import UserManagePage from "@/pages/user-manager.vue";
+import DocumentsPage from "@/pages/documents/index.vue";
+import DocumentsUpload from "@/pages/documents/uploads.vue";
 
 function authenticate(to, from, next) {
     var usuario = JSON.parse(window.localStorage.getItem("project"));
@@ -38,16 +38,16 @@ const routes = [
         component: LogoutIndex,
     },
     {
-        path: "/document-upload",
-        name: "DocumentUpload",
-        component: DocumentUpload,
+        path: "/documents",
+        name: "Documents",
+        component: DocumentsPage,
         meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: "/document-list",
-        name: "DocumentList",
-        component: DocumentList,
+        path: "/documents/upload",
+        name: "DocumentsUpload",
+        component: DocumentsUpload,
         meta: { layout: "default" },
         beforeEnter: authenticate,
     },
@@ -115,5 +115,4 @@ const router = createRouter({
     history: createWebHashHistory(),
     routes,
 });
-
 export default router;
