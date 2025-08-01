@@ -58,7 +58,7 @@
 </template>
 
 <script>
-    import dates from "@/helpers/Dates";
+    import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ProfilesModal from "@/components/user-manager/profiles/modals/ProfilesModal.vue";
     import ProfilesService from "@/services/profiles/ProfilesService";
@@ -145,8 +145,8 @@
                 this.colType = col;
                 this.getProfiles({ search: "", page: this.queryPage, type: null });
             },
-            formatDate(date) {
-                return dates.formatDate(date);
+            formatDate(str) {
+                return date.formatDate(str);
             },
             filterList(input) {
                 this.searchInput = input;

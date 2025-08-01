@@ -63,6 +63,9 @@ defineRule("confirmed", (value, [target], ctx) => {
 });
 
 defineRule("custom_password", (value) => {
+    if (!value || !value.length) {
+        return true;
+    }
     if (!/[a-z]/.test(value)) {
         return i18n.global.t("validation.password_lowercase") || "A senha deve conter uma letra maiúscula.";
     }
