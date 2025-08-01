@@ -59,7 +59,7 @@
 </template>
 
 <script>
-    import dates from "@/helpers/Dates";
+    import dates from "@/helpers/date";
     import QuizzesService from "@/services/quizzes/QuizzesService";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
