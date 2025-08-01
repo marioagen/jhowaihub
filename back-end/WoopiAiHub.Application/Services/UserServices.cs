@@ -241,8 +241,8 @@ namespace WoopiAiHub.Application.Services
         /// <param name="user"></param>
         /// <param name="salt"></param>
         private void SetSaltAndPassword(string password,
-                                     User user,
-                                     byte[] salt)
+                                        User user,
+                                        byte[] salt)
         {
 
             if (salt == null || salt.Length == 0)
