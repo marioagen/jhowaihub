@@ -10,7 +10,6 @@
                         width="160"
                         height="80"
                     />
-
                     <img
                         v-else
                         src="../../assets/img/woopiai-hub-logo.png"
