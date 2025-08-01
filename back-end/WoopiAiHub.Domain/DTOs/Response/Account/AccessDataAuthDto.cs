@@ -2,8 +2,9 @@
 {
     public class AccessDataAuthDto
     {
-        public bool Success { get; set; }
-        public string Message { get; set; }
-        public LoginDataDto? Data { get; set; }
+        public string Token { get; set; } = string.Empty;
+        public string Tenant { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
     }
 }

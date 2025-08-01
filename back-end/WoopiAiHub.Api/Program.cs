@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.AspNetCore.HttpOverrides;
 using WoopiAiHub.Api.Exceptions;
 using System.Text.Json.Serialization;
+using WoopiAiHub.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,15 +59,22 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<SwaggerCustomHeader>();
 });
 
-builder.Services.AddCors(p => p.AddPolicy("manager", builder =>
-{
-    builder.WithOrigins(config.GetSection("CORS").GetChildren().Select(c => c.Value).ToArray())
-                           .SetIsOriginAllowedToAllowWildcardSubdomains()
-                           .AllowAnyHeader()
-                           .AllowAnyMethod();
+var allowedOrigins = config.GetSection("CORS")
+                           .Get<string[]>()
+                           .Where(o => !string.IsNullOrWhiteSpace(o))
+                           .ToArray();
 
+builder.Services.AddCors(p => p.AddPolicy("manager", policy =>
+{
+    policy
+        .WithOrigins(allowedOrigins)       // origens exatas obrigatórias quando AllowCredentials é usado
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();              // necessário para cookies HttpOnly serem enviados
 }));
+
 builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

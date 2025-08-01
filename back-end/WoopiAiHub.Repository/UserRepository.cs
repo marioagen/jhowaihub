@@ -157,14 +157,13 @@ namespace WoopiAiHub.Repository
 
         public async Task<List<string>> GetUserProfilesAsync(string email)
         {
-            var user = await _context.Users
-                .Include(u => u.Profiles)
-                .FirstOrDefaultAsync(u => u.Email == email);
-
-            return user.Profiles
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Email == email)
+                .SelectMany(u => u.Profiles)
                 .Select(p => p.Name.ToLower())
                 .Distinct()
-                .ToList();
+                .ToListAsync();
         }
     }
 }

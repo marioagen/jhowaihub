@@ -1,21 +1,20 @@
-﻿using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.DTOs.Request.Account;
-using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.DTOs.Refit;
-using WoopiAiHub.Domain.DTOs.Response.Account;
-using WoopiAiHub.Domain.Interfaces.Refit;
-using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Application.Utils;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Text.Json;
+using WoopiAiHub.Domain.DTOs.Refit;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Request.Account;
+using WoopiAiHub.Domain.DTOs.Response.Account;
+using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Infrastructure.Multitenancy;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -25,29 +24,36 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _config;
         private readonly ILogger<AccountServices> _logger;
-        private readonly IKeyGeneratorApi _keyGeneratorApi;
-        private readonly ITenantServices _tenantServices;
         private readonly IUserRepository _userRepository;
         private readonly IPermissionRepository _permissionRepository;
+        private readonly ITenantContextService _tenantContextService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IRefreshTokenServices _refreshTokenServices;
+
 
         public AccountServices(IGraphApi graphApi,
                                IMarketPlaceApi marketPlaceApi,
                                IConfiguration config,
                                ILogger<AccountServices> logger,
-                               IKeyGeneratorApi keyGeneratorApi,
-                               ITenantServices tenantServices,
                                IUserRepository userRepository,
-                               IPermissionRepository permissionRepository
+                               IPermissionRepository permissionRepository,
+                               ITenantContextService tenantContextService,
+                               IHttpContextAccessor httpContextAccessor,
+                               IPasswordHasher passwordHasher,
+                               IRefreshTokenServices refreshTokenServices
                                )
         {
             _graphApi = graphApi;
             _marketPlaceApi = marketPlaceApi;
             _config = config;
             _logger = logger;
-            _keyGeneratorApi = keyGeneratorApi;
-            _tenantServices = tenantServices;
             _userRepository = userRepository;
             _permissionRepository = permissionRepository;
+            _tenantContextService = tenantContextService;
+            _httpContextAccessor = httpContextAccessor;
+            _passwordHasher = passwordHasher;
+            _refreshTokenServices = refreshTokenServices;
         }
 
         /// <summary>
@@ -60,55 +66,42 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<AccessDataAuthDto> Login(LoginDto loginDto)
         {
-            var userAccess = await GetMarketplaceAccesses(loginDto.Email);
-            if (userAccess == null && !userAccess.HasAccess)
+            var userAccess = await CheckMarketplaceAccess(loginDto.Email);
+            if (userAccess != null && userAccess.HasAccess)
             {
+                await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
+                await _tenantContextService.TrySetTenantConnectionAsync(_httpContextAccessor.HttpContext,
+                                                                        userAccess.Tenant);
+                var user = await _userRepository.FindByEmailAsync(loginDto.Email);
+                if (user == null)
+                    throw new ArgumentException("User not found.");
+
+                bool isPasswordValid = _passwordHasher.Verify(loginDto.Password, user.PasswordHash, user.Salt);
+                if (!isPasswordValid)
+                {
+                    throw new ArgumentException("Invalid password.");
+                }
+
+                var permissions = await _permissionRepository.GetUserPermissionsAsync(user.Email);
+                var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
+                _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokenJWT.RefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Path = "/",
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
+                });
                 return new AccessDataAuthDto
                 {
-                    Success = false,
-                    Message = "Not authorized.",
-                    Data = null,
-                };
-            }
-
-            var user = await _userRepository.FindByEmailAsync(loginDto.Email);
-            if (user == null)
-            {
-                return new AccessDataAuthDto
-                {
-                    Success = false,
-                    Message = "User not found.",
-                    Data = null,
-                };
-            }
-
-            bool isPasswordValid = Encryption.VerifyHash(loginDto.Password, user.PasswordHash);
-            if (!isPasswordValid)
-            {
-                return new AccessDataAuthDto
-                {
-                    Success = false,
-                    Message = "Password doesn't match.",
-                    Data = null,
-                };
-            }
-
-            var permissions = await _permissionRepository.GetUserPermissionsAsync(user.Email);
-            var tokenJWT = await GenerateUserToken(user.Email, permissions);
-            return new AccessDataAuthDto
-            {
-                Success = true,
-                Message = "User logged",
-                Data = new LoginDataDto
-                {
-                    Name = user.Name,
-                    Email = user.Email,
-                    Token = tokenJWT,
                     Tenant = userAccess.Tenant,
-                    IsAdmin = true,
-                    Permissions = null,
-                },
-            };
+                    Token = tokenJWT.AccessToken,
+                    Email = user.Email,
+                    Name = user.Name
+                };
+            }
+
+            throw new ArgumentException("Not authorized.");
         }
 
         /// <summary>
@@ -121,65 +114,37 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<AccessDataAuthDto> LoginSSO(AuthenticateDto authenticateDto, AuthenticateHeaderDto authenticateHeaderDto)
         {
-            if (string.IsNullOrWhiteSpace(authenticateHeaderDto.Authorization))
-            {
-                _logger.LogError($"Token not provided.");
-                throw new ArgumentException("Token not provided.");
-            }
-
             var emailUserAzureRequest = await _graphApi.FindEmailUserAzure(authenticateHeaderDto.Authorization);
-            if(emailUserAzureRequest == null)
-            {
-                return new AccessDataAuthDto
-                {
-                    Success = false,
-                    Message = "User not found in Azure.",
-                    Data = null,
-                };
-            }
 
             if (emailUserAzureRequest.Content is not null &&
                (emailUserAzureRequest.Content.UserPrincipalName.Equals(authenticateDto.Login) ||
                 emailUserAzureRequest.Content.Mail.Equals(authenticateDto.Login)))
             {
-                var userAccess = await GetMarketplaceAccesses(authenticateDto.Login);
-                if (userAccess == null && !userAccess.HasAccess)
+                var userAccess = await CheckMarketplaceAccess(authenticateDto.Login);
+                if (userAccess != null && userAccess.HasAccess)
                 {
+                    await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
+                    await _tenantContextService.TrySetTenantConnectionAsync(_httpContextAccessor.HttpContext, userAccess.Tenant);
+                    var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
+                    if (user == null)
+                        throw new ArgumentException("User not found.");
+
+                    var permissions = await _permissionRepository.GetUserPermissionsAsync(authenticateDto.Login);
+                    var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
+                    _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokenJWT.RefreshToken, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        Path = "/",
+                        Expires = DateTimeOffset.UtcNow.AddDays(7)
+                    });
                     return new AccessDataAuthDto
                     {
-                        Success = false,
-                        Message = "Not authorized.",
-                        Data = null,
-                    };
-                }
-
-                var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
-                if (user == null)
-                {
-                    return new AccessDataAuthDto
-                    {
-                        Success = false,
-                        Message = "User not found.",
-                        Data = null,
-                    };
-                }
-
-                var permissions = await _permissionRepository.GetUserPermissionsAsync(authenticateDto.Login);
-                var tokenJWT = await GenerateUserToken(emailUserAzureRequest.Content.Mail ?? emailUserAzureRequest.Content.UserPrincipalName, permissions);
-                return new AccessDataAuthDto
-                {
-                    Success = true,
-                    Message = "User logged",
-                    Data = new LoginDataDto
-                    {
-                        Name = "Askmann",
-                        Email = "askmann@mail.com",
-                        Token = tokenJWT,
                         Tenant = userAccess.Tenant,
-                        IsAdmin = true,
-                        Permissions = null,
-                    },
-                };
+                        Token = tokenJWT.AccessToken
+                    };
+                }
             }
 
             _logger.LogError(emailUserAzureRequest.Error is null ?
@@ -203,6 +168,68 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Key is invalid or not provided.");
             }
             return GenerateToken(key);
+        }
+
+        /// <summary>
+        /// Returns an client id from appsettings
+        /// </summary>
+        /// <returns></returns>
+        public string FindClientId()
+        {
+            var clientId = _config["Azure:ClientId"];
+
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new ArgumentException("Client id is not configured.");
+            }
+
+            return clientId;
+        }
+
+        public async Task<string?> RefreshTokenAsync(string refreshToken)
+        {
+            var userEmail = await _refreshTokenServices.FindUserByRefreshTokenAsync(refreshToken);
+            if (string.IsNullOrEmpty(userEmail))
+                return null;
+
+            var userAccess = await CheckMarketplaceAccess(userEmail);
+            if (userAccess != null && userAccess.HasAccess)
+            {
+                await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
+                await _tenantContextService.TrySetTenantConnectionAsync(_httpContextAccessor.HttpContext, userAccess.Tenant);
+                var permissions = await _permissionRepository.GetUserPermissionsAsync(userEmail);
+
+                var tokens = await GenerateTokensAsync(userEmail, permissions);
+
+                await _refreshTokenServices.RevokeAsync(refreshToken);
+                await _refreshTokenServices.SaveAsync(userEmail, tokens.RefreshToken);
+
+                if (_httpContextAccessor.HttpContext == null)
+                    throw new InvalidOperationException("HttpContext is not available.");
+
+                _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokens.RefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Path = "/",
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
+                });
+
+                return tokens.AccessToken;
+            }
+
+            throw new ArgumentException("Not authorized.");
+        }
+
+        /// <summary>
+        /// Returns an client id from appsettings
+        /// </summary>
+        /// <returns></returns>
+        private async Task<ResponseCheckAccessDto> CheckMarketplaceAccess(string login)
+        {
+            var keyAccess = _config.GetSection("KeyAccess").Get<string>()!;
+            return await _marketPlaceApi.CheckAccess(keyAccess, login);
         }
 
         /// <summary>
@@ -231,59 +258,69 @@ namespace WoopiAiHub.Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private async Task<string> GenerateUserToken(string userEmail, Dictionary<string, List<string>> permissions)
+        private async Task<(string AccessToken, string RefreshToken)> GenerateTokensAsync(string userEmail,
+                                                                                         Dictionary<string, List<string>> permissions)
         {
+
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var userProfile = await _userRepository.GetUserProfilesAsync(userEmail);
-            bool isAdmin = userProfile.Contains("admin");
+            bool isAdmin = userProfile.Contains("admin"); // idealmente encapsular essa lógica
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, userEmail),
+                new Claim(JwtRegisteredClaimNames.Sub, userEmail),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("IsAdmin", isAdmin.ToString())
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
             };
 
-            var permissionsJson = JsonSerializer.Serialize(permissions);
-            claims.Add(new Claim("permissions", permissionsJson));
-
-            var token = new JwtSecurityToken(
-                _config["Jwt:Issuer"],
-                _config["Jwt:Audience"],
-                claims,
-                expires: DateTime.UtcNow.AddMinutes(60),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        /// <summary>
-        /// Returns an client id from appsettings
-        /// </summary>
-        /// <returns></returns>
-        public string FindClientId()
-        {
-            var clientId = _config["Azure:ClientId"];
-
-            if (string.IsNullOrEmpty(clientId))
+            if (isAdmin)
             {
-                throw new ArgumentException("Client id is not configured.");
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
             }
 
-            return clientId;
+            foreach (var kv in permissions)
+            {
+                var resource = kv.Key;
+                var actions = string.Join(',', kv.Value);
+                claims.Add(new Claim($"perm:{resource}", actions));
+            }
+
+            // 3. Criar token JWT (Access Token)
+            var now = DateTime.UtcNow;
+            var jwtToken = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                notBefore: now,
+                expires: now.AddMinutes(5),
+                signingCredentials: credentials
+            );
+
+            var accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken);
+            var refreshToken = GenerateRefreshToken();
+            await _refreshTokenServices.SaveAsync(userEmail, refreshToken);
+
+            return (AccessToken: accessToken, RefreshToken: refreshToken);
         }
 
-        /// <summary>
-        /// Returns an client id from appsettings
-        /// </summary>
-        /// <returns></returns>
-        private async Task<ResponseCheckAccessDto> GetMarketplaceAccesses(string login)
+        private string GenerateRefreshToken()
         {
-            var keyAccess = _config.GetSection("KeyAccess").Get<string>()!;
-            return await _marketPlaceApi.CheckAccess(keyAccess, login);
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Base64UrlEncode(randomNumber);
         }
+
+        private static string Base64UrlEncode(byte[] input)
+        {
+            return Convert.ToBase64String(input)
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .Replace("=", "");
+        }
+
     }
 }

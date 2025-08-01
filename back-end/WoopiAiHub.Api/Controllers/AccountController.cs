@@ -115,5 +115,19 @@ namespace WoopiAiHub.Api.Controllers
                 return Unauthorized();
             }
         }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+                return BadRequest("Refresh token missing.");
+
+            var accessToken = await _accountServices.RefreshTokenAsync(refreshToken);
+
+            if (string.IsNullOrEmpty(accessToken))
+                return Unauthorized("Invalid refresh token.");
+
+            return Ok(new { token = accessToken });
+        }
     }
 }

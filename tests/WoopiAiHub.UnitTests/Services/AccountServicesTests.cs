@@ -59,7 +59,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var accountServices = _mocker.CreateInstance<AccountServices>();
             // Act
-            var result = await accountServices.Authenticate(authenticateDto, authenticateHeaderDto);
+            var result = await accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
 
             // Assert
             iGraphApi.Verify(r => r.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
@@ -83,7 +83,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act
 
             // Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => accountServices.Authenticate(authenticateDto, authenticateHeaderDto));
+            await Assert.ThrowsAsync<ArgumentException>(() => accountServices.LoginSSO(authenticateDto, authenticateHeaderDto));
             iGraphApi.Verify(r => r.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
         }
 
@@ -97,7 +97,7 @@ namespace WoopiAiHub.UnitTests.Services
             var authenticateDto = AccountFixture.FindValidAuthenticateDto();
 
             // Act/Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _accountServices.Authenticate(authenticateDto, authenticateHeaderDto));
+            await Assert.ThrowsAsync<ArgumentException>(() => _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto));
         }
 
         [Fact(DisplayName = "Test Authenticate by internalKey")]

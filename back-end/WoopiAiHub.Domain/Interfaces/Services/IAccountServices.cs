@@ -11,5 +11,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<AccessDataAuthDto> LoginSSO(AuthenticateDto authenticateDto, AuthenticateHeaderDto authenticateHeaderDto);
         string AuthenticateApi(string key);
         string FindClientId();
+        Task<string?> RefreshTokenAsync(string refreshToken);
     }
 }
