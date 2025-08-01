@@ -267,7 +267,7 @@
 </template>
 
 <script>
-    import * as moment from "moment/moment";
+    import date from "@/helpers/date";
     import NavBar from "@/components/common/nav-bar";
     import Breadcrumb from "@/components/common/breadcrumb";
     import SearchBar from "@/components/common/search-bar";
@@ -432,11 +432,7 @@
                 this.$router.push({ name: "QuizNew", query: { title: quiz } });
             },
             dateFormat: function (str) {
-                if (this.$store.state.userProfile.language === "en") {
-                    return moment(str).format("YYYY/MM/DD");
-                } else {
-                    return moment(str).format("DD/MM/YYYY");
-                }
+                return date.formatDate(str);
             },
             upperFormat: function (str) {
                 return str.toUpperCase();

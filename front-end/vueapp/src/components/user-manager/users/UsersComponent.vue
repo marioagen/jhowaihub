@@ -48,6 +48,8 @@
     import UsersTable from "@/components/user-manager/users/UsersTable.vue";
     import SearchBar from "@/components/common/search-bar";
     import SearchComponent from "@/components/global/SearchComponent.vue";
+    import editIcon from "@/assets/img/edit-outlined.svg";
+    import deleteIcon from "@/assets/img/delete-outlined.svg";
 
     export default {
         name: "UsersManager",
@@ -94,11 +96,11 @@
             setMenuActions: function () {
                 this.menuActions = {
                     options: [
-                        { label: this.$t("labelEdit"), value: "edit", icon: require("@/assets/img/edit-outlined.svg") },
+                        { label: this.$t("labelEdit"), value: "edit", icon: editIcon },
                         {
                             label: this.$t("labelDelete"),
                             value: "delete",
-                            icon: require("@/assets/img/delete-outlined.svg"),
+                            icon: deleteIcon,
                             color: "text-danger",
                         },
                     ],
