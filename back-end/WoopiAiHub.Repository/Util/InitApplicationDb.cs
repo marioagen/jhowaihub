@@ -18,6 +18,7 @@ namespace WoopiAiHub.Repository.Util
                     context.Database.CanConnect() is true &&
                     context.Database.GetPendingMigrations().Any())
                 {
+                    string currentConnectionString = context.Database.GetDbConnection().ConnectionString;
                     context.Database.Migrate();
                 }
             }

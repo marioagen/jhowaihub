@@ -12,7 +12,6 @@ namespace WoopiAiHub.Repository
 {
     public class PermissionRepository : IPermissionRepository
     {
-
         private readonly Context.ApplicationDbContext _context;
         public PermissionRepository(Context.ApplicationDbContext context)
         {
@@ -47,6 +46,22 @@ namespace WoopiAiHub.Repository
                 })
                 .AsNoTracking()
                 .ToList();
+        }
+
+        public async Task<Dictionary<string, List<string>>> GetUserPermissionsAsync(string email)
+        {
+            var user = await _context.Users
+                .Include(u => u.Permissions)
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            var groupedPermissions = user.Permissions
+                .GroupBy(p => p.Group)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(p => p.Name).Distinct().ToList()
+                );
+
+            return groupedPermissions;
         }
     }
 }

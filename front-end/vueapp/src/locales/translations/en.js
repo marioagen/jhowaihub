@@ -240,6 +240,23 @@
     labelSaveSubTitleProfile: "Create a new profile in the system",
     labelEditType: "Edit",
     labelSaveType: "Create",
+    login: {
+        title: "Login",
+        subtitle: "Access your account to manage documents",
+        loading: "Loading...",
+        sso: "Login with Microsoft",
+        authSSO: "Authenticated with Microsoft",
+        validateClient: "Client validated",
+    },
+    "validation": {
+      "required": "This field is required.",
+      "email": "Please enter a valid email address.",
+      "min": "Minimum of {length} characters.",
+      "max": "Maximum of {length} characters.",
+      "password_min": "Password must be at least 6 characters.",
+      "password_uppercase": "Password must contain at least one uppercase letter.",
+      "password_number": "Password must contain at least one number."
+    },
     labelBackToListDocuments: "Back to documents",
     pageTitleDocumentsForm: "New Document",
     pageSubtitleDocumentsForm: "Upload new documents for analysis",

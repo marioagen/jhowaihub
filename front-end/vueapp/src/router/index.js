@@ -1,5 +1,5 @@
 ﻿import { createRouter, createWebHashHistory } from "vue-router";
-import LoginIndex from "@/components/pages/login";
+// import LoginIndex from "@/components/pages/login";
 import LogoutIndex from "@/components/pages/logout";
 import DocumentUpload from "@/components/pages/document/upload";
 import DocumentList from "@/components/pages/document/list";
@@ -12,6 +12,7 @@ import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import QuestionsPage from "@/pages/questions.vue";
 import UserManagePage from "@/pages/user-manager.vue";
+import LoginIndex from "@/pages/login.vue";
 
 function authenticate(to, from, next) {
     var usuario = JSON.parse(window.localStorage.getItem("project"));

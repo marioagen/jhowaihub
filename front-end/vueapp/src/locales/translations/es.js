@@ -244,6 +244,23 @@
     labelSaveSubTitleProfile: "Crear un nuevo perfil en el sistema",
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
+    login: {
+        title: "Iniciar sesión",
+        subtitle: "Accede a tu cuenta para gestionar documentos",
+        loading: "Cargando...",
+        sso: "Iniciar sesión con Microsoft",
+        authSSO: "Autenticado con Microsoft",
+        validateClient: "Cliente validado",
+    },
+    "validation": {
+        "required": "Campo obligatorio.",
+        "email": "Por favor, introduce un correo electrónico válido.",
+        "min": "Mínimo de {length} caracteres.",
+        "max": "Máximo de {length} caracteres.",
+        "password_min": "La contraseña debe tener al menos 6 caracteres.",
+        "password_uppercase": "La contraseña debe contener al menos una letra mayúscula.",
+        "password_number": "La contraseña debe contener al menos un número."
+    },
     labelBackToListDocuments: "Volver a los documentos",
     pageTitleDocumentsForm: "Nuevo documento",
     pageSubtitleDocumentsForm: "Cargar nuevos documentos para su análisis",

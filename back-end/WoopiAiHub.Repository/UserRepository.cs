@@ -44,6 +44,16 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Find users by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<User> FindByEmailAsync(String email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        /// <summary>
         /// Asynchronously retrieves a user by their unique reference identifier.
         /// </summary>
         /// <param name="referenceUserId">The unique identifier of the user to retrieve. This value must not be empty.</param>
@@ -138,15 +148,23 @@ namespace WoopiAiHub.Repository
         public async Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null)
         {
             var query = _context.Users.AsQueryable();
-
             var normalizedEmail = email.Trim().ToLowerInvariant();
-
             if (excludeUserId.HasValue)
             {
                 query = query.Where(u => u.Id != excludeUserId.Value);
             }
-
             return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
+        }
+
+        public async Task<List<string>> GetUserProfilesAsync(string email)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Email == email)
+                .SelectMany(u => u.Profiles)
+                .Select(p => p.Name.ToLower())
+                .Distinct()
+                .ToListAsync();
         }
     }
 }

@@ -20,11 +20,9 @@ api.defaults.paramsSerializer = {
         return qs.stringify(params, { arrayFormat: "indices", allowDots: true });
     },
 };
-
+api.defaults.withCredentials = true;
 api.defaults.headers.post["Content-Type"] = "application/json;charset=utf-8";
-api.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
 api.defaults.headers.get["Content-Type"] = "application/json;charset=utf-8";
-api.defaults.headers.get["Access-Control-Allow-Origin"] = "*";
 
 api.defaults.headers.common["X-Time-Zone"] = window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -48,56 +46,46 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-    (response) => {
-        return response;
-    },
-    async (error) => {
-        const originalRequest = error.config;
-        if (originalRequest.url !== "/Account/Authenticate" && error.response) {
-            if (error.response != null && error.response.status === 401 && !originalRequest._retry) {
-                originalRequest._retry = true;
-                try {
-                    var formData = new FormData();
-                    formData.append("login", store.state.userProfile.login);
-                    const rs = await api
-                        .post("/Account/Authenticate", formData, {
-                            headers: { Authorization: `Bearer ${store.state.userProfile.tokenAzure}` },
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            router.push({ name: "Logout" });
-                        });
-                    if (rs && rs.data) {
-                        var selectedTenant = store.state.userProfile.tenant;
-                        var newDataUser = {
-                            language: store.state.userProfile.language,
-                            image: store.state.userProfile.image,
-                            name: store.state.userProfile.name,
-                            login: store.state.userProfile.login,
-                            tokenAzure: store.state.userProfile.tokenAzure,
-                            tokenApi: rs.data.token,
-                            tenant: selectedTenant,
-                            keyMongoAccess: store.state.userProfile.keyMongoAccess,
-                        };
-                        store.commit("updateUserProfile", { amount: newDataUser });
-                        error.config.headers["Authorization"] = `Bearer ${rs.data.token}`;
-                        return new Promise((resolve, reject) => {
-                            api.request(originalRequest)
-                                .then((response) => {
-                                    resolve(response);
-                                })
-                                .catch((e) => {
-                                    reject(e);
-                                });
-                        });
-                    }
-                } catch (_error) {
-                    return Promise.reject(_error);
-                }
-            }
+  response => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (originalRequest.url !== "/Account/Login-sso" &&  originalRequest.url != "/Account/Login" && originalRequest != "/Account/refresh-token" && error.response) {
+      if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          // Chama o endpoint de refresh token, sem corpo, com cookie HttpOnly
+          const rs = await api.post("/Account/refresh-token", null);
+
+          if (rs && rs.data && rs.data.token) {
+            // Atualiza o token no Vuex store
+            store.commit("updateUserProfile", {
+              amount: {
+                ...store.state.userProfile,
+                tokenApi: rs.data.token
+              }
+            });
+
+            // Atualiza o header Authorization da requisição original
+            originalRequest.headers["Authorization"] = `Bearer ${rs.data.token}`;
+
+            // Reenvia a requisição original com token renovado
+            return api.request(originalRequest);
+          } else {
+            router.push({ name: "Logout" });
+            return Promise.reject(error);
+          }
+        } catch (refreshError) {
+          console.log(refreshError);
+          router.push({ name: "Logout" });
+          return Promise.reject(refreshError);
         }
-        return Promise.reject(error);
+      }
     }
+
+    return Promise.reject(error);
+  }
 );
+
 
 export default api;

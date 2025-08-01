@@ -13,5 +13,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         public Task<List<Permission>> FindByIdsAsync(List<int> ids);
         public ICollection<PermissionDto> FindAll();
+        public Task<Dictionary<string, List<string>>> GetUserPermissionsAsync(string email);
     }
 }
