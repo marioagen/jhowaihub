@@ -21,14 +21,6 @@
                 </span>
             </div>
         </div>
-
-        <template>
-            <div class="mb-2 col-auto content-center">
-                <a v-if="searchInput.length >= 3" class="btn btn-primary" :title="entity.labelButton" @click="action">
-                    {{ upperFormat(entity.labelButton) }}
-                </a>
-            </div>
-        </template>
     </div>
 </template>
 
@@ -70,9 +62,6 @@
             },
             action() {
                 this.$emit("action", this.searchInput);
-            },
-            upperFormat(str) {
-                return str.toUpperCase();
             },
             cleanBtn() {
                 this.searchInput = "";
