@@ -1,8 +1,8 @@
 import api from "@/services/api";
 
 export default {
-    getQuestions(params) {
-        return api.get("/Question/Paged", { params: params })
+    getQuizzes(params) {
+        return api.get("/Questionnaire/Paged", { params: params })
             .then(({ data }) => {
                 return {
                     content: data.content,
@@ -20,8 +20,8 @@ export default {
                 }
             });
     },
-    getQuestionsList() {
-        return api.get("/Question/FindAll")
+    getQuizzById(id) {
+        return api.get(`/Questionnaire/${id}`)
             .then(({ data }) => {
                 return data;
             })
@@ -31,42 +31,31 @@ export default {
                 }
             });
     },
-    createQuestion(description) {
-        return api.post(`/Question?description=${description}`)
+    createQuizz(params) {
+        return api.post("/Questionnaire", params)
             .then(() => {
                 return true;
             })
             .catch(function (e) {
-                let errorMessage = "";
-                if (e.response.status == 409) {
-                    errorMessage = "labelQuestionAlreadyExists";
-                } else {
-                    errorMessage = "labelQuestionError";
-                }
-
+                const message = e?.response?.data?.message || "Erro desconhecido";
                 return {
-                    error: errorMessage,
-                }
+                    error: message,
+                };
             });
     },
-    editQuestion(params) {
-        return api.put("/Question", params)
+    editQuizz(params) {
+        return api.put("/Questionnaire", params)
             .then(() => {
                 return true;
             })
             .catch((e) => {
-                let errorMessage = "";
-                if (e.response.status == 409) {
-                    errorMessage = "labelQuestionAlreadyExists";
-                } else {
-                    errorMessage = e;
-                }
+                const message = e?.response?.data?.message || "Erro desconhecido";
                 return {
-                    error: errorMessage,
-                }
+                    error: message,
+                };
             });
     },
-    deleteQuestionById(ids) {
+    deleteQuizzById(ids) {
         return api.delete("/Question/DeleteByIds", { data: ids })
             .then(() => {
                 return true;

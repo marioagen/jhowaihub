@@ -3,15 +3,14 @@
 import LogoutIndex from "@/components/pages/logout";
 import DocumentUpload from "@/components/pages/document/upload";
 import DocumentList from "@/components/pages/document/list";
-import QuestionManager from "@/components/pages/manager/question";
-import QuizFormNew from "@/components/pages/quiz/form-new";
-import QuizFormEdit from "@/components/pages/quiz/form-edit";
-import QuizManager from "@/components/pages/manager/quiz";
 import NormalizeIndex from "@/components/pages/normalize/loading";
 import AnalyzerIndex from "@/components/pages/analyzer";
 
 import TypesPage from "@/pages/types.vue";
-import QuestionPage from "@/pages/questions.vue";
+import QuizzesPage from "@/pages/quizzes/index.vue";
+import NewQuizz from "@/pages/quizzes/newQuizz.vue";
+import EditQuizz from "@/pages/quizzes/editQuizz.vue";
+import QuestionsPage from "@/pages/questions.vue";
 import UserManagePage from "@/pages/user-manager.vue";
 import LoginIndex from "@/pages/login.vue";
 
@@ -65,28 +64,28 @@ const routes = [
     {
         path: "/questions",
         name: "Question",
-        component: QuestionPage,
+        component: QuestionsPage,
         meta: { layout: "default" },
         beforeEnter: authenticate,
     },
     {
-        path: "/quiz-new",
-        name: "QuizNew",
-        component: QuizFormNew,
-        meta: { layout: "default" },
-        beforeEnter: authenticate,
-    },
-    {
-        path: "/quiz-edit/:id",
-        name: "QuizEdit",
-        component: QuizFormEdit,
-        meta: { layout: "default" },
-        beforeEnter: authenticate,
-    },
-    {
-        path: "/manage-quiz",
+        path: "/quizzes",
         name: "Quiz",
-        component: QuizManager,
+        component: QuizzesPage,
+        meta: { layout: "default" },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/quizzes/new",
+        name: "NewQuizz",
+        component: NewQuizz,
+        meta: { layout: "default" },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/quizzes/edit/:id",
+        name: "EditQuizz",
+        component: EditQuizz,
         meta: { layout: "default" },
         beforeEnter: authenticate,
     },

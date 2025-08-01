@@ -9,8 +9,8 @@
     </button>
     <div>
         <TableComponent
-            modalName="questions.title"
-            emptyMessage="questions.notFound"
+            modalName="quizz.tableTitle"
+            emptyMessage="quizz.notFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -18,18 +18,25 @@
             @selectedRows="selectedRows"
             @change-page="changePage"
         >
+            <template #cell-questions="{ data }">
+                <BadgeComponent 
+                    :text="questionsNumber(data.row.questions)"
+                    :clickable="false"
+                    variant="primary"
+                />
+            </template>
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
                 <button 
-                    class="btn btn-outline-success btn-sm table-btn" 
-                    @click="openEditModal(data.row)"
+                    class="btn btn-outline-success btn-sm table-btn"
+                    @click="redirectToEdit(data.row)"
                 >
                     <LucideIcon icon="SquarePen" />
                 </button>
                 <button 
-                    class="btn btn-outline-danger btn-sm ms-2 table-btn" 
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn"
                     @click="openConfirmation(data.row)"
                 >
                     <LucideIcon icon="Trash2" />
@@ -37,12 +44,6 @@
             </template>
         </TableComponent>
     </div>
-
-    <QuestionsModal
-        :isEdit="true"
-        @reload="reload"
-        ref="QuestionsModal"
-    />
 
     <ConfirmModal
         id="deleteConfirm"
@@ -53,33 +54,35 @@
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
-        @confirm="deleteQuestion"
+        @confirm="deleteQuizz"
     />
 </template>
 
 <script>
     import dates from "@/helpers/date";
-    import QuestionsService from "@/services/questions/QuestionsService";
+    import QuizzesService from "@/services/quizzes/QuizzesService";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
-    import QuestionsModal from "@/components/questions/QuestionsModal.vue";
+    import BadgeComponent from "@/components/global/BadgeComponent.vue";
 
     export default {
-        name: "QuestionsTable",
+        name: "QuizzesTable",
         components: {
             TableComponent,
             ConfirmModal,
-            QuestionsModal,
+            BadgeComponent
         },
         data: () => ({
             table: {
                 isLoading: true,
                 columns: [
                     { key: "id", label: "Id" },
-                    { key: "description", label: "questions.description" },
-                    { key: "created", label: "questions.createdData" },
-                    { key: "emailCreator", label: "questions.owner" },
-                    { key: "actions", label: "questions.actions" },
+                    { key: "title", label: "quizzes.name" },
+                    { key: "typeDocName", label: "quizzes.type" },
+                    { key: "questions", label: "quizzes.questions" },
+                    { key: "created", label: "quizzes.createdDate" },
+                    { key: "emailCreator", label: "quizzes.owner" },
+                    { key: "actions", label: "quizzes.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -90,21 +93,16 @@
                 },
                 selectedRows: [],
             },
-            selectedQuestion: {},
+            selectedQuizz: {},
             queryPage: 1,
             selectedOption: 10,
             isAscending: false,
             colType: 2,
-            modalTypeShow: false,
-            modalAlertShow: false,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
             searchInput: "",
             isDeleting: false,
         }),
         methods: {
-            getQuestions(obj) {
+            getQuizzes(obj) {
                 this.table.isLoading = true;
                 this.searchInput = obj.search;
                 var paramsReq = {
@@ -115,10 +113,10 @@
                     colType: this.colType,
                 };
 
-                QuestionsService.getQuestions(paramsReq)
-                    .then((resposne) => {
-                        this.table.data = resposne.content;
-                        this.table.pagination = resposne.pagination;
+                QuizzesService.getQuizzes(paramsReq)
+                    .then((response) => {
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;
@@ -128,6 +126,9 @@
             formatDate(date) {
                 return dates.formatDate(date);
             },
+            questionsNumber(questions) {
+                return questions.length;
+            },
             orderList: function (col) {
                 if (this.isAscending) {
                     this.isAscending = false;
@@ -135,40 +136,45 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getQuestions({ search: "", page: this.queryPage, type: null });
+                this.getQuizzes({ search: "", page: this.queryPage, type: null });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
-            openEditModal(question) {
-                this.$refs.QuestionsModal.open(question);
+            redirectToEdit(quizz) {
+                this.$router.push({
+                    name: 'EditQuizz',
+                    params: {
+                        id: quizz.id,
+                    },
+                });
             },
-            openConfirmation(question) {
-                this.selectedQuestion = [question.id];
+            openConfirmation(quizz) {
+                this.selectedQuizz = [quizz.id];
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
                 const ids = this.table.selectedRows.map((item) => item.id);
-                this.selectedQuestion = ids;
+                this.selectedQuizz = ids;
                 this.$refs.DeleteDialog.open();
             },
-            deleteQuestion() {
+            deleteQuizz() {
                 this.isDeleting = true;
-                QuestionsService.deleteQuestionById(this.selectedQuestion)
+                QuizzesService.deleteQuizzById(this.selectedQuizz)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getQuestions({ search: "", page: 1, type: null });
+                            this.getQuizzes({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: 'Perguntas',
-                                message: this.$t("labelQuestionRemoveSuccess"),
+                                title: 'quizzes.removeTitle',
+                                message: this.$t("quizzes.removeSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
-                                title: 'Perguntas',
-                                message: this.$t("labelQuestionRemoveError"),
+                                title: 'quizzes.removeTitle',
+                                message: this.$t("quizzes.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
@@ -182,16 +188,16 @@
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getQuestions({ search: input, page: this.queryPage, type: null });
+                this.getQuizzes({ search: input, page: this.queryPage, type: null });
             },
             reload() {
-                this.$refs.QuestionsModal.close();
-                this.getQuestions({ search: "", page: this.queryPage, type: null });
+                this.$refs.QuizzesModal.close();
+                this.getQuizzes({ search: "", page: this.queryPage, type: null });
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getQuestions({ search: "", page: this.queryPage, type: null });
+            this.getQuizzes({ search: "", page: this.queryPage, type: null });
         },
         computed: {
             showMultiDelete() {

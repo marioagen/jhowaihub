@@ -21,6 +21,17 @@ export default {
                 console.log(e);
             });
     },
+    getTypesList() {
+        return api.get("/TypeDoc/FindAll")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                }
+            });
+    },
     editType(params) {
         return api
             .put("/TypeDoc", params)
