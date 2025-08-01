@@ -10,7 +10,7 @@
                                 {{ $t("labelBack") }}
                             </button>
                         </div>
-                        <div class="col">
+                        <div class="col-8">
                             <div>
                                 <h5 class="mb-0 fw-bold">{{ $t(formTitle) }}</h5>
                                 <p><small class="text-muted">{{ $t(formSubtitle) }}</small></p>
