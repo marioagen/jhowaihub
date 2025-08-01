@@ -2,7 +2,7 @@
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
         <!-- Logo -->
         <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
-            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'DocumentList' }">
+            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Documents' }">
                 <img
                     v-if="!showLogoDarkMode && isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
@@ -47,7 +47,7 @@
                 <router-link
                     :class="[
                         'd-flex align-items-center',
-                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
+                        menuActive == 'Documents' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
@@ -67,7 +67,7 @@
                 <router-link
                     :class="[
                         'd-flex align-items-center',
-                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
+                        menuActive == 'Documents' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"

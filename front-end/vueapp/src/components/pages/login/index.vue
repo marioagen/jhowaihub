@@ -132,7 +132,7 @@
                         };
                         this.$store.commit("updateUserProfile", { amount: dataUser });
                         window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
-                        this.$router.push({ name: "DocumentList" });
+                        this.$router.push({ name: "Documents" });
                     })
                     .catch((e) => {
                         console.log(e);
@@ -156,7 +156,7 @@
         },
         created() {
             if (useRouter().currentRoute.value.name === "Login") {
-                this.$router.push({ name: "DocumentList" });
+                this.$router.push({ name: "Documents" });
             }
             this.checkTheme();
         },

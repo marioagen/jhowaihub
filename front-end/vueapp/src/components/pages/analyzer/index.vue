@@ -62,7 +62,7 @@
         data() {
             return {
                 crumbsData: [],
-                sidebarData: "DocumentList",
+                sidebarData: "Documents",
                 idAnalyzer: this.$route.params.id,
                 backPage: this.$route.query.page,
                 hashDocument: "",
@@ -105,8 +105,8 @@
             },
             setCrumbsData: function () {
                 this.crumbsData = [
-                    { crumb: this.$t("labelDocuments"), link: { to: "DocumentList" } },
-                    { crumb: this.$t("labelListing"), link: { to: "DocumentList", queryPage: this.$route.query.page } },
+                    { crumb: this.$t("labelDocuments"), link: { to: "Documents" } },
+                    { crumb: this.$t("labelListing"), link: { to: "Documents", queryPage: this.$route.query.page } },
                     { crumb: this.$t("labelConsult"), link: { to: "Analyzer", queryPage: this.$route.query.page } },
                 ];
             },

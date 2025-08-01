@@ -143,7 +143,7 @@
             redirectToDocument() {
                 let self = this;
                 setTimeout(function () {
-                    self.$router.push({ name: "DocumentList", query: { page: self.backPage } });
+                    self.$router.push({ name: "Documents", query: { page: self.backPage } });
                 }, 6000);
             },
             showModal() {
