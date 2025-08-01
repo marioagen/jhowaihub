@@ -205,6 +205,7 @@
     labelSelectAll: "Selecionar Todos",
     labelClearSelection: "Limpar Seleção",
     labelNewUser: "Novo usuário",
+    labelEditUser: "Editar usuário",
     labelTeamName: "Nome do time",
     labelTypeTeamName: "Digite o nome do time",
     labelTypeUserName: "Digite o nome do usuário",
