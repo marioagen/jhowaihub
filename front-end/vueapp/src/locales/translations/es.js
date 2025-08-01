@@ -210,6 +210,7 @@
     labelSelectAll: "Seleccionar Todos",
     labelClearSelection: "Limpiar selección",
     labelNewUser: "Nuevo usuario",
+    labelEditUser: "Editar usuario",
     labelTeamName: "Nombre del equipo",
     labelTypeTeamName: "Nombre del equipo",
     labelTypeUserName: "Introduce el nombre del usuario",
@@ -275,6 +276,10 @@
         password_special: "La contraseña debe contener al menos un carácter especial.",
         password_confirmed: "La confirmación de la contraseña no coincide.",
         email: "Correo electrónico inválido.",
+    },
+    pagination: {
+        next: "Siguiente",
+        previous: "Anterior",
     },
     questions: {
         title: "Preguntas",

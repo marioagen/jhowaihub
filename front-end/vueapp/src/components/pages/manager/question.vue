@@ -256,7 +256,7 @@
 </template>
 
 <script>
-    import * as moment from "moment/moment";
+    import date from "@/helpers/date";
     import NavBar from "@/components/common/nav-bar";
     import Breadcrumb from "@/components/common/breadcrumb";
     import SearchBar from "@/components/common/search-bar";
@@ -485,11 +485,7 @@
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             dateFormat: function (str) {
-                if (this.$store.state.userProfile.language === "en") {
-                    return moment(str).format("YYYY/MM/DD");
-                } else {
-                    return moment(str).format("DD/MM/YYYY");
-                }
+                return date.formatDate(str);
             },
             upperFormat: function (str) {
                 return str.toUpperCase();

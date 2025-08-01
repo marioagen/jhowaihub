@@ -206,6 +206,7 @@
     labelSelectAll: "Selecionar Todos",
     labelClearSelection: "Limpar Seleção",
     labelNewUser: "Novo usuário",
+    labelEditUser: "Editar usuário",
     labelTeamName: "Nome do time",
     labelTypeTeamName: "Digite o nome do time",
     labelTypeUserName: "Digite o nome do usuário",
@@ -268,6 +269,10 @@
         password_special: "A senha deve conter pelo menos um caractere especial.",
         password_confirmed: "A confirmação da senha não confere.",
         email: "Email inválido",
+    },
+    pagination: {
+        next: "Próximo",
+        previous: "Anterior",
     },
     questions: {
         title: "Perguntas",

@@ -44,7 +44,7 @@
 </template>
 
 <script>
-    import dates from "@/helpers/Dates";
+    import date from "@/helpers/date";
     import TypesService from "@/services/types/TypesService";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
@@ -112,8 +112,8 @@
                         this.searchInput = "";
                     });
             },
-            formatDate(date) {
-                return dates.formatDate(date);
+            formatDate(str) {
+                return date.formatDate(str);
             },
             orderList: function (col) {
                 if (this.isAscending) {
