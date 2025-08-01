@@ -138,11 +138,11 @@
                 >
                     <img
                         src="./../../assets/img/questionnaires-icon.svg"
-                        :title="$t('labelQuizzes')"
+                        :title="$t('quizzes.title')"
                         width="20"
                         class="icon-sidebar"
                     />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelQuizzes") }}</span>
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t("quizzes.title") }}</span>
                 </router-link>
             </li>
         </ul>
