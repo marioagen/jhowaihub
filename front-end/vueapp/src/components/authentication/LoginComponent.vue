@@ -36,7 +36,7 @@
                             <label for="email" class="form-label">Email</label>
                             <Field
                                 name="email"
-                                rules="required|custom_email"
+                                rules="required|email"
                                 v-slot="{ field, errorMessage }"
                             >
                                 <div class="input-group">
@@ -177,7 +177,6 @@
         methods: {
             async login() {
                const result = await this.validate();
-                console.log(result);
                 if (!result.valid) {
                     return this.$notify({
                         title: 'Login',
@@ -188,10 +187,23 @@
                 }
 
                 this.isLoading = true;
-                this.credentials.email = this.values.email;               
+                this.credentials.email = this.values.email;  
+                console.log(this.values.email);             
                 AuthService.Login(this.credentials)
                     .then((response) => {
-                        console.log(response)
+                      let dataUser = {
+                            language: this.$store.state.userProfile.language,
+                            image: "",
+                            name: response.name,
+                            login: response.email,
+                            tokenAzure: "",
+                            tokenApi: response.tokenApi,
+                            tenant: response.tenant,
+                            keyMongoAccess: "",
+                        };
+                        this.$store.commit("updateUserProfile", { amount: dataUser });
+                        window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
+                        this.redirectToDocument();
                     })
                     .finally(() => {
                         this.isLoading = false;
@@ -291,17 +303,17 @@
                                 icon: 'CircleX',
                             });
                         }
-
                         let dataUser = {
                             language: this.$store.state.userProfile.language,
                             image: "",
                             name: userName,
                             login: userEmail,
                             tokenAzure: userAzure,
-                            tokenApi: response.token,
+                            tokenApi: response.tokenApi,
                             tenant: response.tenant,
                             keyMongoAccess: "",
                         };
+                        console.log(dataUser);
                         this.$store.commit("updateUserProfile", { amount: dataUser });
                         window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                         this.redirectToDocument();

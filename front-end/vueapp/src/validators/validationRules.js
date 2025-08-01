@@ -7,24 +7,18 @@ defineRule('required', value => {
     return i18n.global.t('validation.required') || 'Campo obrigatório.'
 })
 
-defineRule('custom_email', value => {
-    console.log(value)
-    if (!value || value.trim() === '') {
-        return i18n.global.t('validation.required')
+defineRule("email", (value) => {
+    if (!value || !value.length) {
+        return true;
     }
-
-    const hasAt = value.includes('@')
-    const endsWithCom = value.toLowerCase().endsWith('.com')
-
-    if (!hasAt || !endsWithCom) {
-        return i18n.global.t('validation.email_simple')
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+        return i18n.global.t("validation.email") || "Email inválido";
     }
-
-    return true
-})
+    return true;
+});
 
 defineRule('custom_password', value => {
-    console.log(value)
     if (!value || value.trim() === '') {
         return i18n.global.t('validation.required') || 'A senha é obrigatória.'
     }

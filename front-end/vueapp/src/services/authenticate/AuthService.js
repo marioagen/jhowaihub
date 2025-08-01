@@ -3,17 +3,18 @@ import api from "@/services/api";
 export default {
     Login(credentials) {
         return api.post('/Account/Login', credentials, {
-                headers: { 'Authorization': "" }
-            })
+            headers: { 'Authorization': "" }
+        })
             .then(({ data }) => {
                 console.log(data);
                 return {
                     id: "",
-                    name: "",
-                    login: "",
+                    name: data.name,
+                    login: data.email,
                     isAdmin: "",
                     tokenAzure: "",
-                    tokenApi: "",
+                    tokenApi: data.token,
+                    tenant: data.tenant,
                 };
             })
             .catch(() => {
@@ -27,15 +28,9 @@ export default {
             headers: { Authorization: `Bearer ${userAzure}` },
         })
             .then(({ data }) => {
-                if(!data.success) {
-                    return {
-                        error: data.message,
-                    }
-                }
-                
                 return {
-                    tokenApi: data.data.token,
-                    tenant: data.data.tenant,
+                    tokenApi: data.token,
+                    tenant: data.tenant,
                 };
             })
             .catch(() => {
