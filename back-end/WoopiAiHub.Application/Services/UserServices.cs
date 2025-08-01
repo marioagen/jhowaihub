@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data.SqlTypes;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -50,12 +52,12 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new ArgumentException("Data cannot be empty");
             }
-            var userEnabledReference = await AssignMkt(userCreateDto.Email, Guid.Empty, headersDto);
+            var userEnabledReference = await CreateMkt(userCreateDto.Email, Guid.Empty, headersDto);
 
             if (userEnabledReference == Guid.Empty)
                 return false;
 
-            var existingUser = await _userRepository.FindByReferenceAsync(userEnabledReference); //subir pro principal
+            var existingUser = await _userRepository.FindByReferenceAsync(userEnabledReference);
 
             if (existingUser != null)
             {
@@ -99,8 +101,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Update(UserUpdateDto userUpdateDto, HeadersDto headersDto)
         {
-           var mktGuid = await AssignMkt(userUpdateDto.Email, userUpdateDto.Id, headersDto);
-            if (mktGuid != Guid.Empty)
+           var marketplaceIdentifier = await CreateMkt(userUpdateDto.Email, userUpdateDto.Id, headersDto);
+            if (marketplaceIdentifier != Guid.Empty)
             {
                 return await UpdateUser(userUpdateDto);
             }
@@ -196,14 +198,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Adds profiles to the user based on the provided UserUpdateDto.
+        /// Adds profiles to the user based on the provided profileIds.
         /// </summary>
-        /// <param name="userUpdateDto"></param>
+        /// <param name="profileIds"></param>
         /// <param name="user"></param>
-        private void AddProfiles<T>(T dto, User user)
+        private void AddProfiles(ICollection<int>? profileIds, User user)
         {
-            var profileIdsProp = typeof(T).GetProperty("ProfileIds");
-            var profileIds = profileIdsProp?.GetValue(dto) as ICollection<int>;
             if (profileIds != null)
             {
                 user.Profiles.Clear();
@@ -216,14 +216,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Adds teams to the user based on the provided UserUpdateDto.
+        /// Adds teams to the user based on the provided teamIds.
         /// </summary>
-        /// <param name="userUpdateDto"></param>
+        /// <param name="teamIds"></param>
         /// <param name="user"></param>
-        private void AddTeams<T>(T dto, User user)
+        private void AddTeams(ICollection<int>? teamIds, User user)
         {
-            var teamIdsProp = typeof(T).GetProperty("TeamIds");
-            var teamIds = teamIdsProp?.GetValue(dto) as ICollection<int>;
             if (teamIds != null)
             {
                 user.Teams.Clear();
@@ -236,18 +234,16 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// 
+        /// Sets the password and salt for a user based on the provided DTO and user object.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="dto"></param>
         /// <param name="user"></param>
         /// <param name="salt"></param>
-        private void SetSaltPass<T>(T dto,
-                                    User user,
-                                    byte[] salt)
+        private void SetSaltPass(string password,
+                                 User user,
+                                 byte[] salt)
         {
-            var passwordProp = typeof(T).GetProperty("Password");
-            var password = passwordProp?.GetValue(dto) as string;
 
             if (salt == null || salt.Length == 0)
             {
@@ -274,16 +270,16 @@ namespace WoopiAiHub.Application.Services
                     DateTime.Now
               );
 
-            SetSaltPass(userCreateDto, user, null);
+            SetSaltPass(userCreateDto.Password, user, null);
 
             if (userCreateDto.TeamIds.Count > 0)
             {
-                AddTeams(userCreateDto, user);
+                AddTeams(userCreateDto.TeamIds, user);
             }
 
             if (userCreateDto.ProfileIds.Count > 0)
             {
-                AddProfiles(userCreateDto, user);
+                AddProfiles(userCreateDto.ProfileIds, user);
             }
 
             return await _userRepository.CreateAsync(user);
@@ -301,8 +297,7 @@ namespace WoopiAiHub.Application.Services
             user.Reactivate(userCreateDto.Name,
                             userCreateDto.Email);
 
-            SetSaltPass(userCreateDto, user, user.Salt);
-
+            SetSaltPass(userCreateDto.Password, user, user.Salt);
 
             _userRepository.Update(user);
 
@@ -326,29 +321,29 @@ namespace WoopiAiHub.Application.Services
 
                 if (!string.IsNullOrEmpty(userUpdateDto.Password))
                 {
-                    SetSaltPass(userUpdateDto, user, user.Salt);
+                    SetSaltPass(userUpdateDto.Password, user, user.Salt);
                 }
 
-                AddTeams(userUpdateDto, user);
+                AddTeams(userUpdateDto.TeamIds, user);
 
-                AddProfiles(userUpdateDto, user);
+                AddProfiles(userUpdateDto.ProfileIds, user);
 
                 var updateResult = _userRepository.Update(user);
                 if (!updateResult)
                 {
-                    throw new ArgumentException("Duplicated User");
+                    throw new AppException(ErrorCode.Duplicated, "Duplicated user");
                 }
                 return updateResult;
         }
 
         /// <summary>
-        /// Assign a user to the marketplace by email and id.
+        /// Create a user to the marketplace by email and id.
         /// </summary>
         /// <param name="email"></param>
         /// <param name="id"></param>
         /// <param name="headersDto"></param>
         /// <returns></returns>
-        private async Task<Guid> AssignMkt(string email,
+        private async Task<Guid> CreateMkt(string email,
                                            Guid id,
                                            HeadersDto headersDto)
         {
