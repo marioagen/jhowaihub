@@ -52,7 +52,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new ArgumentException("Data cannot be empty");
             }
-            var userEnabledReference = await CreateMkt(userCreateDto.Email, Guid.Empty, headersDto);
+            var userEnabledReference = await CreateUserMarketplace(userCreateDto.Email, Guid.Empty, headersDto);
 
             if (userEnabledReference == Guid.Empty)
                 return false;
@@ -101,7 +101,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Update(UserUpdateDto userUpdateDto, HeadersDto headersDto)
         {
-           var marketplaceIdentifier = await CreateMkt(userUpdateDto.Email, userUpdateDto.Id, headersDto);
+           var marketplaceIdentifier = await CreateUserMarketplace(userUpdateDto.Email, userUpdateDto.Id, headersDto);
             if (marketplaceIdentifier != Guid.Empty)
             {
                 return await UpdateUser(userUpdateDto);
@@ -240,9 +240,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="dto"></param>
         /// <param name="user"></param>
         /// <param name="salt"></param>
-        private void SetSaltPass(string password,
-                                 User user,
-                                 byte[] salt)
+        private void SetSaltAndPassword(string password,
+                                     User user,
+                                     byte[] salt)
         {
 
             if (salt == null || salt.Length == 0)
@@ -270,7 +270,7 @@ namespace WoopiAiHub.Application.Services
                     DateTime.Now
               );
 
-            SetSaltPass(userCreateDto.Password, user, null);
+            SetSaltAndPassword(userCreateDto.Password, user, null);
 
             if (userCreateDto.TeamIds.Count > 0)
             {
@@ -297,7 +297,7 @@ namespace WoopiAiHub.Application.Services
             user.Reactivate(userCreateDto.Name,
                             userCreateDto.Email);
 
-            SetSaltPass(userCreateDto.Password, user, user.Salt);
+            SetSaltAndPassword(userCreateDto.Password, user, user.Salt);
 
             _userRepository.Update(user);
 
@@ -321,7 +321,7 @@ namespace WoopiAiHub.Application.Services
 
                 if (!string.IsNullOrEmpty(userUpdateDto.Password))
                 {
-                    SetSaltPass(userUpdateDto.Password, user, user.Salt);
+                    SetSaltAndPassword(userUpdateDto.Password, user, user.Salt);
                 }
 
                 AddTeams(userUpdateDto.TeamIds, user);
@@ -343,9 +343,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <param name="headersDto"></param>
         /// <returns></returns>
-        private async Task<Guid> CreateMkt(string email,
-                                           Guid id,
-                                           HeadersDto headersDto)
+        private async Task<Guid> CreateUserMarketplace(string email,
+                                                       Guid id,
+                                                       HeadersDto headersDto)
         {
             var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
             var requestAssignLicensesByHub = new RequestAssignLicensesByHub
