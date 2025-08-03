@@ -242,6 +242,7 @@
     labelSaveType: "Create",
     login: {
         title: "Login",
+        password: "Password",
         subtitle: "Access your account to manage documents",
         loading: "Loading...",
         sso: "Login with Microsoft",

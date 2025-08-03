@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -30,7 +31,10 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x["JWT:Key"]).Returns(Guid.NewGuid().ToString());
             configMock.Setup(x => x["KeyAccess"]).Returns("mockKey");
             configMock.Setup(x => x["Azure:ClientId"]).Returns("clientMock");
-
+            configMock.Setup(x => x.GetSection("KeyAccess").Value).Returns("mockedKey");
+            configMock.Setup(x => x["JWT:Key"]).Returns(Guid.NewGuid().ToString());
+            configMock.Setup(x => x["Jwt:Issuer"]).Returns("http://localhost");
+            configMock.Setup(x => x["Jwt:Audience"]).Returns("http://localhost");
             _mocker.Use(configMock);
 
             _accountServices = _mocker.CreateInstance<AccountServices>();
@@ -86,15 +90,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(profiles);
 
             var configMock = new Mock<IConfiguration>();
-            configMock.Setup(x => x.GetSection("KeyAccess").Value).Returns("mockedKey");
-            configMock.Setup(x => x["JWT:Key"]).Returns(Guid.NewGuid().ToString());
-            configMock.Setup(x => x["Jwt:Issuer"]).Returns("http://localhost");
-            configMock.Setup(x => x["Jwt:Audience"]).Returns("http://localhost");
+
             _mocker.Use(configMock.Object);
 
-            var accountServices = _mocker.CreateInstance<AccountServices>();
             // Act
-            var result = await accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
+            var result = await _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
 
             // Assert
             iGraphApi.Verify(r => r.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
@@ -155,16 +155,8 @@ namespace WoopiAiHub.UnitTests.Services
             _mockPasswordHasher.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()))
                 .Returns(true);
 
-            var configMock = new Mock<IConfiguration>();
-            configMock.Setup(x => x.GetSection("KeyAccess").Value).Returns("mockedKey");
-            configMock.Setup(x => x["JWT:Key"]).Returns(Guid.NewGuid().ToString());
-            configMock.Setup(x => x["Jwt:Issuer"]).Returns("http://localhost");
-            configMock.Setup(x => x["Jwt:Audience"]).Returns("http://localhost");
-            _mocker.Use(configMock.Object);
-
-            var accountServices = _mocker.CreateInstance<AccountServices>();
             // Act
-            var result = await accountServices.Login(loginDto);
+            var result = await _accountServices.Login(loginDto);
 
             // Assert
             iMarketPlaceApi.Verify(a => a.CheckAccess(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
@@ -185,10 +177,8 @@ namespace WoopiAiHub.UnitTests.Services
             iGraphApi.Setup(a => a.FindEmailUserAzure(It.IsAny<string>())).Returns(Task.FromResult(graphApiResponse));
             var accountServices = _mocker.CreateInstance<AccountServices>();
 
-            // Act
-
-            // Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => accountServices.LoginSSO(authenticateDto, authenticateHeaderDto));
+            // Act & Assert
+            await Assert.ThrowsAsync<AppException>(() => accountServices.LoginSSO(authenticateDto, authenticateHeaderDto));
             iGraphApi.Verify(r => r.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
         }
 
@@ -223,8 +213,8 @@ namespace WoopiAiHub.UnitTests.Services
                .Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
                .ReturnsAsync((User?)null);
 
-            // Act/Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto));
+            // Act & Assert
+            await Assert.ThrowsAsync<AppException>(() => _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto));
         }
 
         [Fact(DisplayName = "Test Authenticate by internalKey")]
@@ -271,7 +261,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Throws<ArgumentException>(() => accountServices.FindClientId());
         }
 
-        [Fact]
+        [Fact(DisplayName = "Test FindKeyAccess by valid key")]
+        [Trait("Authenticate", "Success")]
         public async Task RefreshTokenAsync_WhenValidRefreshToken_ShouldReturnAccessToken()
         {
             // Arrange
@@ -343,17 +334,8 @@ namespace WoopiAiHub.UnitTests.Services
                     It.IsAny<CookieOptions>()))
                 .Verifiable();
 
-            var configMock = new Mock<IConfiguration>();
-            configMock.Setup(x => x.GetSection("KeyAccess").Value).Returns("mockedKey");
-            configMock.Setup(x => x["JWT:Key"]).Returns(Guid.NewGuid().ToString());
-            configMock.Setup(x => x["Jwt:Issuer"]).Returns("http://localhost");
-            configMock.Setup(x => x["Jwt:Audience"]).Returns("http://localhost");
-            _mocker.Use(configMock.Object);
-
-            var accountServices = _mocker.CreateInstance<AccountServices>();
-
             // Act
-            var result = await accountServices.RefreshTokenAsync(refreshToken);
+            var result = await _accountServices.RefreshTokenAsync(refreshToken);
 
             // Assert
             Assert.NotNull(result);

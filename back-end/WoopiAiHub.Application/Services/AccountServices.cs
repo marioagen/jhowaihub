@@ -69,8 +69,11 @@ namespace WoopiAiHub.Application.Services
             var userAccess = await CheckMarketplaceAccess(loginDto.Email);
             if (userAccess != null && userAccess.HasAccess)
             {
+                var httpContext = _httpContextAccessor.HttpContext ??
+                                 throw new InvalidOperationException("HttpContext is not available.");
+
                 await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
-                await _tenantContextService.TrySetTenantConnectionAsync(_httpContextAccessor.HttpContext,
+                await _tenantContextService.TrySetTenantConnectionAsync(httpContext,
                                                                         userAccess.Tenant);
                 var user = await _userRepository.FindByEmailAsync(loginDto.Email);
                 if (user == null)
@@ -123,8 +126,12 @@ namespace WoopiAiHub.Application.Services
                 var userAccess = await CheckMarketplaceAccess(authenticateDto.Login);
                 if (userAccess != null && userAccess.HasAccess)
                 {
+                    var httpContext = _httpContextAccessor.HttpContext ??
+                                throw new InvalidOperationException("HttpContext is not available.");
+
                     await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
-                    await _tenantContextService.TrySetTenantConnectionAsync(_httpContextAccessor.HttpContext, userAccess.Tenant);
+                    await _tenantContextService.TrySetTenantConnectionAsync(httpContext, 
+                                                                            userAccess.Tenant);
                     var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
 
                     if (user == null)
@@ -209,8 +216,12 @@ namespace WoopiAiHub.Application.Services
             var userAccess = await CheckMarketplaceAccess(userEmail);
             if (userAccess != null && userAccess.HasAccess)
             {
+                var httpContext = _httpContextAccessor.HttpContext ??
+                                  throw new InvalidOperationException("HttpContext is not available.");
+
                 await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
-                await _tenantContextService.TrySetTenantConnectionAsync(_httpContextAccessor.HttpContext, userAccess.Tenant);
+                await _tenantContextService.TrySetTenantConnectionAsync(httpContext, 
+                                                                        userAccess.Tenant);
                 var permissions = await _permissionRepository.FindUserPermissionsAsync(userEmail);
 
                 var tokens = await GenerateTokensAsync(userEmail, permissions);

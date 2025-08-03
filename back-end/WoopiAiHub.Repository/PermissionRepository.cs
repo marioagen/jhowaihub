@@ -44,29 +44,29 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Asynchronously retrieves the permissions for a user, grouped by permission group.
+        /// Search the database for user permissions
         /// </summary>
-        /// <remarks>This method queries the database to retrieve the user's permissions and groups them
-        /// by their associated  permission group. The returned dictionary will contain only distinct permission names
-        /// within each group.</remarks>
-        /// <param name="email">The email address of the user whose permissions are to be retrieved.  This parameter cannot be <see
-        /// langword="null"/> or empty.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result is a dictionary where the keys  are
-        /// permission group names and the values are lists of distinct permission names within each group.</returns>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public async Task<Dictionary<string, List<string>>> FindUserPermissionsAsync(string email)
         {
-            var user = await _context.Users
-                .Include(u => u.Permissions)
-                .FirstOrDefaultAsync(u => u.Email == email);
+            var result = await _context.Users
+                              .AsNoTracking()
+                              .Where(u => u.Email == email)
+                              .SelectMany(u => u.Profiles)
+                              .SelectMany(p => p.Permissions)
+                              .Where(p => !string.IsNullOrWhiteSpace(p.Group) &&
+                                          !string.IsNullOrWhiteSpace(p.Name))
+                              .GroupBy(p => p.Group!.Trim())
+                              .ToDictionaryAsync(
+                                  g => g.Key!,
+                                  g => g.Select(p => p.Name!.Trim())
+                                        .Where(n => n.Length > 0)
+                                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                                        .ToList(),
+                                  StringComparer.OrdinalIgnoreCase);
 
-            var groupedPermissions = user.Permissions
-                .GroupBy(p => p.Group)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(p => p.Name).Distinct().ToList()
-                );
-
-            return groupedPermissions;
+            return result;
         }
     }
 }

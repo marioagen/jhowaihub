@@ -246,6 +246,7 @@
     labelSaveType: "Crear tipo",
     login: {
         title: "Iniciar sesión",
+        password: "Contraseña",
         subtitle: "Accede a tu cuenta para gestionar documentos",
         loading: "Cargando...",
         sso: "Iniciar sesión con Microsoft",

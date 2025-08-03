@@ -242,6 +242,7 @@
     labelSaveType: "Criar tipo",
     login: {
         title: "Fazer Login",
+        password: "Senha",
         subtitle: "Acesse sua conta para gerenciar documentos",
         loading: "Carregando...",
         sso: "Login com Microsoft",

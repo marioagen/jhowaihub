@@ -5,7 +5,7 @@ import AuthService from "@/services/authenticate/AuthService";
 export default {
     name: "Logout",
     beforeRouteEnter: function (to, from, next) {
-        AuthService.logout()
+        AuthService.Logout()
             .catch(() => {
                 this.$notify({
                     title: 'Error',
