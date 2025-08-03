@@ -49,7 +49,8 @@ api.interceptors.response.use(
   response => response,
   async (error) => {
     const originalRequest = error.config;
-    if (originalRequest.url !== "/Account/Login-sso" &&  originalRequest.url != "/Account/Login" && originalRequest != "/Account/refresh-token" && error.response) {
+    console.log(originalRequest);
+    if (originalRequest.url !== "/Account/Login-sso" &&  originalRequest.url != "/Account/Login" && originalRequest.url != "/Account/refresh-token" && error.response) {
       if (error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 

@@ -251,6 +251,10 @@
         sso: "Iniciar sesión con Microsoft",
         authSSO: "Autenticado con Microsoft",
         validateClient: "Cliente validado",
+        userNotFound: "Usuario no encontrado.",
+        userWithoutAccess: "Usuario sin permiso de acceso.",
+        userIncorrectPassword: "La contraseña ingresada es incorrecta.",
+        userTokenMicrosoftInvalid: "No pudimos validar tu autenticación. Inicia sesión de nuevo."
     },
     "validation": {
         "required": "Campo obligatorio.",
@@ -371,7 +375,7 @@
     },
     transferListTitle: "Lista para seleccionar",
     transferListPlaceholder: "Buscar en la lista",
-
+    unexpectedError: "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema."
 };
 
 export default spanish;

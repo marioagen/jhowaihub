@@ -6,7 +6,6 @@ export default {
             headers: { 'Authorization': "" }
         })
             .then(({ data }) => {
-                console.log(data);
                 return {
                     id: "",
                     name: data.name,
@@ -17,10 +16,8 @@ export default {
                     tenant: data.tenant,
                 };
             })
-            .catch(() => {
-                return {
-                    erro: "Error",
-                }
+            .catch((error) => {
+                throw error;
             });
     },
     LoginSSO(form, userAzure) {
@@ -33,10 +30,8 @@ export default {
                     tenant: data.tenant,
                 };
             })
-            .catch(() => {
-                return {
-                    error: "Error"
-                }
+            .catch((error) => {
+                throw error;
             });
     },
     GetClientId() {
@@ -44,10 +39,14 @@ export default {
             .then(({ data }) => {
                 return data;
             })
-            .catch(() => {
-                return {
-                    error: "Error"
-                }
+            .catch((error) => {
+                throw error;
             });
     },
+    Logout() {
+        return api.post("/account/logout")
+            .catch(err => {
+                throw err;
+            })
+    }
 };
