@@ -13,7 +13,6 @@ namespace WoopiAiHub.Infrastructure.Multitenancy
     {
         private readonly IConfiguration _configuration;
         private readonly ITenantCacheServices _tenantCacheService;
-        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _initLocks = new();
 
         public TenantContextService(IConfiguration configuration,
                                     ITenantCacheServices tenantCacheService)
@@ -27,30 +26,21 @@ namespace WoopiAiHub.Infrastructure.Multitenancy
             if (string.IsNullOrWhiteSpace(tenantIdentifier))
                 throw new ArgumentException("Tenant identifier cannot be null or empty.", nameof(tenantIdentifier));
 
-            // resolve tenant metadata (incluindo DatabaseName)
-            var tenant = await _tenantCacheService.FindTenantAsync(tenantIdentifier, ColTypeModule.WoopiAiHub);
+            var tenant = await _tenantCacheService.FindTenantAsync(tenantIdentifier,
+                                                                   ColTypeModule.WoopiAiHub);
             if (tenant == null)
                 throw new InvalidOperationException($"Tenant '{tenantIdentifier}' not found.");
 
             var tenantDbName = tenant.DatabaseName;
 
-            var sem = _initLocks.GetOrAdd(tenantIdentifier, _ => new SemaphoreSlim(1, 1));
-            await sem.WaitAsync();
-            try
-            {
-                var connectionString = BuildConnectionString(tenantDbName);
+            var connectionString = BuildConnectionString(tenantDbName);
 
-                var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                    .UseSqlServer(connectionString)
-                    .Options;
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer(connectionString)
+                .Options;
 
-                using var ctx = new ApplicationDbContext(options);
-                await Task.Run(() => InitApplicationDb.RunApplicationMigration(ctx));
-            }
-            finally
-            {
-                sem.Release();
-            }
+            using var ctx = new ApplicationDbContext(options);
+            await Task.Run(() => InitApplicationDb.RunApplicationMigration(ctx));
         }
 
         public async Task<bool> TrySetTenantConnectionAsync(HttpContext context, string tenantIdentifier)

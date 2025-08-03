@@ -67,10 +67,10 @@ var allowedOrigins = config.GetSection("CORS")
 builder.Services.AddCors(p => p.AddPolicy("manager", policy =>
 {
     policy
-        .WithOrigins(allowedOrigins)       // origens exatas obrigatórias quando AllowCredentials é usado
+        .WithOrigins(allowedOrigins)      
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowCredentials();              // necessário para cookies HttpOnly serem enviados
+        .AllowCredentials();
 }));
 
 builder.Services.AddApplication();

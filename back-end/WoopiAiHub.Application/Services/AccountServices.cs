@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Account;
@@ -41,8 +42,7 @@ namespace WoopiAiHub.Application.Services
                                ITenantContextService tenantContextService,
                                IHttpContextAccessor httpContextAccessor,
                                IPasswordHasher passwordHasher,
-                               IRefreshTokenServices refreshTokenServices
-                               )
+                               IRefreshTokenServices refreshTokenServices)
         {
             _graphApi = graphApi;
             _marketPlaceApi = marketPlaceApi;
@@ -74,24 +74,22 @@ namespace WoopiAiHub.Application.Services
                                                                         userAccess.Tenant);
                 var user = await _userRepository.FindByEmailAsync(loginDto.Email);
                 if (user == null)
-                    throw new ArgumentException("User not found.");
+                    throw new AppException(null,
+                                           "User not found.",
+                                           Domain.Utils.ErrorLabels.Login.UserNotFound);
 
                 bool isPasswordValid = _passwordHasher.Verify(loginDto.Password, user.PasswordHash, user.Salt);
                 if (!isPasswordValid)
                 {
-                    throw new ArgumentException("Invalid password.");
+                    throw new AppException(null,
+                                           "Incorrect password.",
+                                           Domain.Utils.ErrorLabels.Login.UserIncorrectPassword);
                 }
 
                 var permissions = await _permissionRepository.GetUserPermissionsAsync(user.Email);
                 var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
-                _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokenJWT.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Path = "/",
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
+                this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
+
                 return new AccessDataAuthDto
                 {
                     Tenant = userAccess.Tenant,
@@ -101,7 +99,9 @@ namespace WoopiAiHub.Application.Services
                 };
             }
 
-            throw new ArgumentException("Not authorized.");
+            throw new AppException(null,
+                                   "User without access.",
+                                   Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
         }
 
         /// <summary>
@@ -126,32 +126,35 @@ namespace WoopiAiHub.Application.Services
                     await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
                     await _tenantContextService.TrySetTenantConnectionAsync(_httpContextAccessor.HttpContext, userAccess.Tenant);
                     var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
+
                     if (user == null)
-                        throw new ArgumentException("User not found.");
+                        throw new AppException(null,
+                                               "User not found.",
+                                               Domain.Utils.ErrorLabels.Login.UserNotFound);
 
                     var permissions = await _permissionRepository.GetUserPermissionsAsync(authenticateDto.Login);
                     var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
-                    _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokenJWT.RefreshToken, new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.None,
-                        Path = "/",
-                        Expires = DateTimeOffset.UtcNow.AddDays(7)
-                    });
+                    this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
+
                     return new AccessDataAuthDto
                     {
                         Tenant = userAccess.Tenant,
                         Token = tokenJWT.AccessToken
                     };
                 }
+
+                throw new AppException(null,
+                                       "User without access.",
+                                       Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
             }
 
             _logger.LogError(emailUserAzureRequest.Error is null ?
                            $"The user does not have permission." :
                            $"An error occurred in the request to the GraphApi. Error: {emailUserAzureRequest.Error?.Content}");
 
-            throw new ArgumentException("The user does not have permission");
+            throw new AppException(null,
+                                   "User without access.",
+                                   Domain.Utils.ErrorLabels.Login.UserTokenMicrosoftInvalid);
         }
 
         /// <summary>
@@ -186,6 +189,17 @@ namespace WoopiAiHub.Application.Services
             return clientId;
         }
 
+        /// <summary>
+        /// Refreshes the access token using the provided refresh token.
+        /// </summary>
+        /// <remarks>This method validates the provided refresh token, checks the user's marketplace
+        /// access, and generates new tokens if the user is authorized. The new refresh token is stored in a secure
+        /// HTTP-only cookie, and the old refresh token is revoked.</remarks>
+        /// <param name="refreshToken">The refresh token used to generate a new access token. This value cannot be null or empty.</param>
+        /// <returns>A new access token as a string, or <see langword="null"/> if the provided refresh token is invalid or does
+        /// not correspond to a user.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the HTTP context is not available during the operation.</exception>
+        /// <exception cref="ArgumentException">Thrown if the user is not authorized to access the marketplace.</exception>
         public async Task<string?> RefreshTokenAsync(string refreshToken)
         {
             var userEmail = await _refreshTokenServices.FindUserByRefreshTokenAsync(refreshToken);
@@ -207,19 +221,36 @@ namespace WoopiAiHub.Application.Services
                 if (_httpContextAccessor.HttpContext == null)
                     throw new InvalidOperationException("HttpContext is not available.");
 
-                _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", tokens.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
-                    Path = "/",
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
+                this.SetRefreshTokenCookie(tokens.RefreshToken);
 
                 return tokens.AccessToken;
             }
 
             throw new ArgumentException("Not authorized.");
+        }
+
+        /// <summary>
+        /// Revokes the specified refresh token and removes it from the client's cookies.
+        /// </summary>
+        /// <remarks>This method revokes the provided refresh token by delegating the operation to the
+        /// underlying  refresh token service. If the HTTP context is available, it also clears the "refreshToken" 
+        /// cookie from the client's browser by setting it to an expired state.</remarks>
+        /// <param name="refreshToken">The refresh token to be revoked. Cannot be null or empty.</param>
+        /// <returns><see langword="true"/> if the token was successfully revoked and the cookie was cleared;  otherwise, <see
+        /// langword="false"/> if the HTTP context is unavailable.</returns>
+        public async Task<bool> RevokeTokenAsync(string refreshToken)
+        {
+            await _refreshTokenServices.RevokeAsync(refreshToken);
+
+            var context = _httpContextAccessor.HttpContext;
+            if (context != null)
+            {
+                this.RemoveRefreshTokenCookie();
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -258,8 +289,22 @@ namespace WoopiAiHub.Application.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        /// <summary>
+        /// Asynchronously generates a new access token and refresh token for the specified user.
+        /// </summary>
+        /// <remarks>The access token includes claims for the user's email, a unique identifier, and
+        /// issued-at timestamp.  If the user has an "admin" profile, an additional claim for the "Admin" role is
+        /// included.  Permissions are encoded as claims in the format "perm:{resource}" with the associated actions as
+        /// the value. The refresh token is stored using the refresh token service for later validation.</remarks>
+        /// <param name="userEmail">The email address of the user for whom the tokens are being generated. Cannot be null or empty.</param>
+        /// <param name="permissions">A dictionary representing the user's permissions, where the key is the resource name and the value is a list
+        /// of actions the user is allowed to perform on that resource.</param>
+        /// <returns>A tuple containing the generated access token and refresh token. The access token is a JWT string with a
+        /// short expiration time,  and the refresh token is a string used to obtain a new access token after
+        /// expiration.</returns>
+        /// <exception cref="ArgumentException">Thrown if the JWT key is not configured in the application settings.</exception>
         private async Task<(string AccessToken, string RefreshToken)> GenerateTokensAsync(string userEmail,
-                                                                                         Dictionary<string, List<string>> permissions)
+                                                                                          Dictionary<string, List<string>> permissions)
         {
 
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
@@ -267,7 +312,7 @@ namespace WoopiAiHub.Application.Services
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var userProfile = await _userRepository.GetUserProfilesAsync(userEmail);
-            bool isAdmin = userProfile.Contains("admin"); // idealmente encapsular essa lógica
+            bool isAdmin = userProfile.Contains("admin");
 
             var claims = new List<Claim>
             {
@@ -277,9 +322,7 @@ namespace WoopiAiHub.Application.Services
             };
 
             if (isAdmin)
-            {
                 claims.Add(new Claim(ClaimTypes.Role, "Admin"));
-            }
 
             foreach (var kv in permissions)
             {
@@ -288,14 +331,12 @@ namespace WoopiAiHub.Application.Services
                 claims.Add(new Claim($"perm:{resource}", actions));
             }
 
-            // 3. Criar token JWT (Access Token)
-            var now = DateTime.UtcNow;
             var jwtToken = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                notBefore: now,
-                expires: now.AddMinutes(5),
+                notBefore: DateTime.Now,
+                expires: DateTime.Now.AddMinutes(5),
                 signingCredentials: credentials
             );
 
@@ -306,6 +347,10 @@ namespace WoopiAiHub.Application.Services
             return (AccessToken: accessToken, RefreshToken: refreshToken);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         private string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
@@ -314,7 +359,12 @@ namespace WoopiAiHub.Application.Services
             return Base64UrlEncode(randomNumber);
         }
 
-        private static string Base64UrlEncode(byte[] input)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private string Base64UrlEncode(byte[] input)
         {
             return Convert.ToBase64String(input)
                 .Replace("+", "-")
@@ -322,5 +372,33 @@ namespace WoopiAiHub.Application.Services
                 .Replace("=", "");
         }
 
+        private bool SetRefreshTokenCookie(string refreshToken)
+        {
+            if (_httpContextAccessor.HttpContext == null)
+                return false;
+            _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+            return true;
+        }
+
+        private bool RemoveRefreshTokenCookie()
+        {
+            if (_httpContextAccessor.HttpContext == null)
+                return false;
+            _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", "", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1)
+            });
+            return true;
+        }
     }
 }
