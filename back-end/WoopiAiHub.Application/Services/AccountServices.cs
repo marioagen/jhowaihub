@@ -86,7 +86,7 @@ namespace WoopiAiHub.Application.Services
                                            Domain.Utils.ErrorLabels.Login.UserIncorrectPassword);
                 }
 
-                var permissions = await _permissionRepository.GetUserPermissionsAsync(user.Email);
+                var permissions = await _permissionRepository.FindUserPermissionsAsync(user.Email);
                 var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
                 this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
 
@@ -132,7 +132,7 @@ namespace WoopiAiHub.Application.Services
                                                "User not found.",
                                                Domain.Utils.ErrorLabels.Login.UserNotFound);
 
-                    var permissions = await _permissionRepository.GetUserPermissionsAsync(authenticateDto.Login);
+                    var permissions = await _permissionRepository.FindUserPermissionsAsync(authenticateDto.Login);
                     var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
                     this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
 
@@ -211,7 +211,7 @@ namespace WoopiAiHub.Application.Services
             {
                 await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
                 await _tenantContextService.TrySetTenantConnectionAsync(_httpContextAccessor.HttpContext, userAccess.Tenant);
-                var permissions = await _permissionRepository.GetUserPermissionsAsync(userEmail);
+                var permissions = await _permissionRepository.FindUserPermissionsAsync(userEmail);
 
                 var tokens = await GenerateTokensAsync(userEmail, permissions);
 
@@ -226,7 +226,7 @@ namespace WoopiAiHub.Application.Services
                 return tokens.AccessToken;
             }
 
-            throw new ArgumentException("Not authorized.");
+            throw new ArgumentException("User does not have authorization");
         }
 
         /// <summary>
@@ -246,7 +246,6 @@ namespace WoopiAiHub.Application.Services
             if (context != null)
             {
                 this.RemoveRefreshTokenCookie();
-
                 return true;
             }
 
@@ -311,7 +310,7 @@ namespace WoopiAiHub.Application.Services
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var userProfile = await _userRepository.GetUserProfilesAsync(userEmail);
+            var userProfile = await _userRepository.FindUserProfilesByEmailAsync(userEmail);
             bool isAdmin = userProfile.Contains("admin");
 
             var claims = new List<Claim>
@@ -372,6 +371,20 @@ namespace WoopiAiHub.Application.Services
                 .Replace("=", "");
         }
 
+        /// <summary>
+        /// Sets a secure HTTP-only cookie containing the specified refresh token.
+        /// </summary>
+        /// <remarks>The cookie is configured with the following properties: <list type="bullet">
+        /// <item><description><see cref="CookieOptions.HttpOnly"/> is set to <see langword="true"/> to prevent
+        /// client-side access.</description></item> <item><description><see cref="CookieOptions.Secure"/> is set to
+        /// <see langword="true"/> to ensure the cookie is transmitted over HTTPS only.</description></item>
+        /// <item><description><see cref="CookieOptions.SameSite"/> is set to <see cref="SameSiteMode.None"/> to allow
+        /// cross-site requests.</description></item> <item><description>The cookie's <see cref="CookieOptions.Path"/>
+        /// is set to the root ("/").</description></item> <item><description>The cookie expires 7 days from the time it
+        /// is set.</description></item> </list></remarks>
+        /// <param name="refreshToken">The refresh token to store in the cookie.</param>
+        /// <returns><see langword="true"/> if the cookie was successfully set; otherwise, <see langword="false"/> if the current
+        /// HTTP context is unavailable.</returns>
         private bool SetRefreshTokenCookie(string refreshToken)
         {
             if (_httpContextAccessor.HttpContext == null)
@@ -387,6 +400,14 @@ namespace WoopiAiHub.Application.Services
             return true;
         }
 
+        /// <summary>
+        /// Removes the "refreshToken" cookie from the HTTP response by setting it with an expired timestamp.
+        /// </summary>
+        /// <remarks>This method ensures that the "refreshToken" cookie is effectively invalidated by
+        /// appending it with an expiration date in the past. The method requires a valid HTTP context to perform the
+        /// operation.</remarks>
+        /// <returns><see langword="true"/> if the cookie was successfully removed; otherwise, <see langword="false"/> if the
+        /// HTTP context is unavailable.</returns>
         private bool RemoveRefreshTokenCookie()
         {
             if (_httpContextAccessor.HttpContext == null)

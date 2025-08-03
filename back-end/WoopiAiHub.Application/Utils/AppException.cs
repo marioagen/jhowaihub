@@ -5,7 +5,7 @@ namespace WoopiAiHub.Application.Utils
     public class AppException : Exception
     {
         public ErrorCode? ErrorCode { get; private set; }
-        public string? LabelError { get; set; }
+        public string? LabelError { get; private set; }
 
         public AppException(ErrorCode? errorCode, 
                             string message,

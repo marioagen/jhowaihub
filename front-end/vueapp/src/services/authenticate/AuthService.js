@@ -45,8 +45,8 @@ export default {
     },
     Logout() {
         return api.post("/account/logout")
-            .catch(err => {
-                throw err;
+            .catch(error => {
+                throw error;
             })
     }
 };

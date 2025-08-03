@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -48,7 +43,17 @@ namespace WoopiAiHub.Repository
                 .ToList();
         }
 
-        public async Task<Dictionary<string, List<string>>> GetUserPermissionsAsync(string email)
+        /// <summary>
+        /// Asynchronously retrieves the permissions for a user, grouped by permission group.
+        /// </summary>
+        /// <remarks>This method queries the database to retrieve the user's permissions and groups them
+        /// by their associated  permission group. The returned dictionary will contain only distinct permission names
+        /// within each group.</remarks>
+        /// <param name="email">The email address of the user whose permissions are to be retrieved.  This parameter cannot be <see
+        /// langword="null"/> or empty.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is a dictionary where the keys  are
+        /// permission group names and the values are lists of distinct permission names within each group.</returns>
+        public async Task<Dictionary<string, List<string>>> FindUserPermissionsAsync(string email)
         {
             var user = await _context.Users
                 .Include(u => u.Permissions)

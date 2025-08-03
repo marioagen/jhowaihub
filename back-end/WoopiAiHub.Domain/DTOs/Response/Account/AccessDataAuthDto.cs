@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.DTOs.Response.Account
 {
-    public class AccessDataAuthDto
+    public record class AccessDataAuthDto
     {
         public string Token { get; set; } = string.Empty;
         public string Tenant { get; set; } = string.Empty;

@@ -55,11 +55,9 @@ api.interceptors.response.use(
         originalRequest._retry = true;
 
         try {
-          // Chama o endpoint de refresh token, sem corpo, com cookie HttpOnly
           const rs = await api.post("/Account/refresh-token", null);
 
           if (rs && rs.data && rs.data.token) {
-            // Atualiza o token no Vuex store
             store.commit("updateUserProfile", {
               amount: {
                 ...store.state.userProfile,
@@ -67,10 +65,8 @@ api.interceptors.response.use(
               }
             });
 
-            // Atualiza o header Authorization da requisição original
-            originalRequest.headers["Authorization"] = `Bearer ${rs.data.token}`;
+              originalRequest.headers["Authorization"] = `Bearer ${rs.data.token}`;
 
-            // Reenvia a requisição original com token renovado
             return api.request(originalRequest);
           } else {
             router.push({ name: "Logout" });

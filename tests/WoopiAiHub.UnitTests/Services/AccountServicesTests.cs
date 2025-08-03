@@ -76,13 +76,13 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
             _mockPermissionRepository
-                .Setup(x => x.GetUserPermissionsAsync(It.IsAny<string>()))
+                .Setup(x => x.FindUserPermissionsAsync(It.IsAny<string>()))
                 .ReturnsAsync(permissionDic);
             _mockUserRepository
                 .Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(user);
             _mockUserRepository
-                .Setup(x => x.GetUserProfilesAsync(It.IsAny<string>()))
+                .Setup(x => x.FindUserProfilesByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(profiles);
 
             var configMock = new Mock<IConfiguration>();
@@ -143,13 +143,13 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
             _mockPermissionRepository
-                .Setup(x => x.GetUserPermissionsAsync(It.IsAny<string>()))
+                .Setup(x => x.FindUserPermissionsAsync(It.IsAny<string>()))
                 .ReturnsAsync(permissionDic);
             _mockUserRepository
                 .Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(user);
             _mockUserRepository
-                .Setup(x => x.GetUserProfilesAsync(It.IsAny<string>()))
+                .Setup(x => x.FindUserProfilesByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(profiles);
 
             _mockPasswordHasher.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()))
@@ -317,7 +317,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.FromResult(true));
 
             _mockPermissionRepository
-                .Setup(x => x.GetUserPermissionsAsync(userEmail))
+                .Setup(x => x.FindUserPermissionsAsync(userEmail))
                 .ReturnsAsync(permissionDic);
 
             _mockRefreshTokenServices
@@ -333,7 +333,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             _mockUserRepository
-                .Setup(x => x.GetUserProfilesAsync(userEmail))
+                .Setup(x => x.FindUserProfilesByEmailAsync(userEmail))
                 .ReturnsAsync(profiles);
 
             _mockResponseCookies
@@ -360,7 +360,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mockRefreshTokenServices.Verify(x => x.FindUserByRefreshTokenAsync(refreshToken), Times.Once);
             _mockTenantContextService.Verify(x => x.InitializeTenantAsync(It.IsAny<string>()), Times.Once);
             _mockTenantContextService.Verify(x => x.TrySetTenantConnectionAsync(_mockHttpContext.Object, It.IsAny<string>()), Times.Once);
-            _mockPermissionRepository.Verify(x => x.GetUserPermissionsAsync(userEmail), Times.Once);
+            _mockPermissionRepository.Verify(x => x.FindUserPermissionsAsync(userEmail), Times.Once);
             _mockRefreshTokenServices.Verify(x => x.RevokeAsync(refreshToken), Times.Once);
             _mockRefreshTokenServices.Verify(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()), Times.AtLeast(2));
         }

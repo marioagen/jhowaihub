@@ -156,15 +156,21 @@ namespace WoopiAiHub.Repository
             return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
         }
 
-        public async Task<List<string>> GetUserProfilesAsync(string email)
+        /// <summary>
+        /// Asynchronously retrieves a list of distinct user profile names associated with the specified email address.
+        /// </summary>
+        /// <param name="email">The email address used to filter user profiles. Cannot be null or empty.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of distinct  profile
+        /// names in lowercase associated with the specified email. Returns an empty list if no profiles are found.</returns>
+        public async Task<List<string>> FindUserProfilesByEmailAsync(string email)
         {
             return await _context.Users
-                .AsNoTracking()
-                .Where(u => u.Email == email)
-                .SelectMany(u => u.Profiles)
-                .Select(p => p.Name.ToLower())
-                .Distinct()
-                .ToListAsync();
+                                 .AsNoTracking()
+                                 .Where(u => u.Email == email)
+                                 .SelectMany(u => u.Profiles)
+                                 .Select(p => p.Name.ToLower())
+                                 .Distinct()
+                                 .ToListAsync();
         }
     }
 }

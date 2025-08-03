@@ -84,9 +84,13 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Refreshes the access token using the refresh token stored in the request cookies.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>This method retrieves the refresh token from the request cookies and attempts to
+        /// generate a new access token. If the refresh token is missing or invalid, the appropriate HTTP status code
+        /// and error message are returned.</remarks>
+        /// <returns>An <see cref="IActionResult"/> containing the new access token if the operation is successful, or an error
+        /// response if the refresh token is missing or invalid.</returns>
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
