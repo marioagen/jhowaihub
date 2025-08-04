@@ -1,12 +1,16 @@
 <template>
-    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
+    <button 
+        v-if="showMultiDelete" 
+        class="btn btn-outline-danger btn-sm mb-2 ms-2" 
+        @click="openConfirmationMultiple"
+    >
         <LucideIcon icon="Trash2" size="15" />
         {{ $t("labelDelete") }}
     </button>
     <div>
         <TableComponent
-            modalName="labelTypes"
-            emptyMessage="labelNoDocumentTypeWasFound"
+            modalName="questions.title"
+            emptyMessage="questions.notFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -18,54 +22,64 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <button class="btn btn-outline-success btn-sm table-btn" @click="openEditModal(data.row)">
+                <button 
+                    class="btn btn-outline-success btn-sm table-btn" 
+                    @click="openEditModal(data.row)"
+                >
                     <LucideIcon icon="SquarePen" />
                 </button>
-                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="openConfirmation(data.row)">
+                <button 
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn" 
+                    @click="openConfirmation(data.row)"
+                >
                     <LucideIcon icon="Trash2" />
                 </button>
             </template>
         </TableComponent>
     </div>
 
-    <TypesModal :isEdit="true" @reload="reload" ref="TypesModal" />
+    <QuestionsModal
+        :isEdit="true"
+        @reload="reload"
+        ref="QuestionsModal"
+    />
 
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteType"
+        title="questions.removeTitle"
         message="labelThisActionCannotBeUndone"
         cancelText="labelCancel"
         confirmText="labelConfirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
-        @confirm="deleteType"
+        @confirm="deleteQuestion"
     />
 </template>
 
 <script>
-    import date from "@/helpers/date";
-    import TypesService from "@/services/types/TypesService";
+    import dates from "@/helpers/date";
+    import QuestionsService from "@/services/questions/QuestionsService";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
-    import TypesModal from "@/components/types/TypesModal.vue";
+    import QuestionsModal from "@/components/questions/QuestionsModal.vue";
 
     export default {
-        name: "TypesTable",
+        name: "QuestionsTable",
         components: {
             TableComponent,
             ConfirmModal,
-            TypesModal,
+            QuestionsModal,
         },
         data: () => ({
             table: {
                 isLoading: true,
                 columns: [
                     { key: "id", label: "Id" },
-                    { key: "name", label: "labelName" },
-                    { key: "created", label: "labelInclusionDate" },
-                    { key: "emailCreator", label: "labelOwner" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "description", label: "questions.description" },
+                    { key: "created", label: "questions.createdData" },
+                    { key: "emailCreator", label: "questions.owner" },
+                    { key: "actions", label: "questions.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -76,21 +90,24 @@
                 },
                 selectedRows: [],
             },
-            selectedType: {},
+            selectedQuestion: {},
             queryPage: 1,
             selectedOption: 10,
             isAscending: false,
             colType: 2,
             modalTypeShow: false,
             modalAlertShow: false,
+            toastShow: false,
+            toastColor: "",
+            toastMessage: "",
             searchInput: "",
             isDeleting: false,
         }),
         methods: {
-            getTypes(obj) {
+            getQuestions(obj) {
                 this.table.isLoading = true;
-                this.searching = false;
-                let params = {
+                this.searchInput = obj.search;
+                var paramsReq = {
                     search: this.searchInput.trim() ? this.searchInput.trim() : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
@@ -98,22 +115,18 @@
                     colType: this.colType,
                 };
 
-                TypesService.getTypes(params)
-                    .then((response) => {
-                        const content = response?.content || [];
-                        const pagination = response?.pagination || {};
-
-                        this.table.data = content;
-                        this.table.pagination = pagination;
+                QuestionsService.getQuestions(paramsReq)
+                    .then((resposne) => {
+                        this.table.data = resposne.content;
+                        this.table.pagination = resposne.pagination;
                     })
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
-                        this.searchInput = "";
                     });
             },
-            formatDate(str) {
-                return date.formatDate(str);
+            formatDate(date) {
+                return dates.formatDate(date);
             },
             orderList: function (col) {
                 if (this.isAscending) {
@@ -122,42 +135,42 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getTypes({ search: "", page: this.queryPage, type: null });
+                this.getQuestions({ search: "", page: this.queryPage, type: null });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
-            openEditModal(type) {
-                this.$refs.TypesModal.open(type);
+            openEditModal(question) {
+                this.$refs.QuestionsModal.open(question);
             },
-            openConfirmation(type) {
-                this.selectedType = [type.id];
+            openConfirmation(question) {
+                this.selectedQuestion = [question.id];
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
                 const ids = this.table.selectedRows.map((item) => item.id);
-                this.selectedType = ids;
+                this.selectedQuestion = ids;
                 this.$refs.DeleteDialog.open();
             },
-            deleteType() {
+            deleteQuestion() {
                 this.isDeleting = true;
-                TypesService.deleteTypeById(this.selectedType)
+                QuestionsService.deleteQuestionById(this.selectedQuestion)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getTypes({ search: "", page: 1, type: null });
+                            this.getQuestions({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: "Tipos",
-                                message: this.$t("labelDocumentTypeRemoveSuccess"),
-                                variant: "success",
-                                icon: "CircleCheckBig",
+                                title: 'Perguntas',
+                                message: this.$t("labelQuestionRemoveSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
-                                title: "Tipos",
-                                message: this.$t("labelDocumentTypeRemoveError"),
-                                variant: "danger",
-                                icon: "CircleX",
+                                title: 'Perguntas',
+                                message: this.$t("labelQuestionRemoveError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
                             });
                         }
                     })
@@ -165,23 +178,20 @@
                         this.listIds = [];
                         this.table.selectedRows = [];
                         this.isDeleting = false;
-                    });
+                    })
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getTypes({ search: input, page: this.queryPage, type: null });
-            },
-            changePage(page) {
-                this.getTypes({ search: "", page: page, type: null });
+                this.getQuestions({ search: input, page: this.queryPage, type: null });
             },
             reload() {
-                this.$refs.TypesModal.close();
-                this.getTypes({ search: "", page: this.queryPage, type: null });
+                this.$refs.QuestionsModal.close();
+                this.getQuestions({ search: "", page: this.queryPage, type: null });
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getTypes({ search: "", page: this.queryPage, type: null });
+            this.getQuestions({ search: "", page: this.queryPage, type: null });
         },
         computed: {
             showMultiDelete() {

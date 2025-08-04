@@ -15,6 +15,12 @@ namespace WoopiAiHub.Repository.Mappings
             builder.Property(u => u.Name)
                    .IsRequired();
 
+            builder.Property(u => u.Description)
+                  .IsRequired();
+
+            builder.Property(u => u.Group)
+                  .IsRequired();
+
             builder.Property(u => u.Created)
                    .IsRequired();
         }

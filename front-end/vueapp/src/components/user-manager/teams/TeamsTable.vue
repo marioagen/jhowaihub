@@ -61,7 +61,7 @@
 </template>
 
 <script>
-    import dates from "@/helpers/Dates";
+    import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ModalTeam from "@/components/user-manager/teams/modals/TeamModal.vue";
     import TeamsService from "@/services/teams/TeamsService";
@@ -137,8 +137,8 @@
                 this.colType = col;
                 this.getTeams({ search: "", page: this.queryPage, type: null });
             },
-            formatDate(date) {
-                return dates.formatDate(date);
+            formatDate(str) {
+                return date.formatDate(str);
             },
             editTeam(team) {
                 this.selectedTeam = team;

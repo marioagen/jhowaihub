@@ -5,7 +5,7 @@
                 <div class="overlay" :class="{ active: showModalUserTeam }"></div>
                 <div class="modal-header custom-header">
                     <h6 class="modal-title" id="novoTimeModalLabel">
-                        {{ $t("labelNewUser") }}
+                        {{ userData.id ? $t("labelEditUser") : $t("labelNewUser") }}
                         <small class="text-muted d-block text-sm">{{ $t("labelNewUserMessage") }}</small>
                     </h6>
                     <button type="button" class="btn-close" @click="close"></button>
@@ -167,7 +167,7 @@
                     password: "",
                 },
                 selectedTeams: this.userEditing.teams ? this.userEditing.teams.map((u) => u.id) : [],
-                selectedProfiles: this.userEditing.teams ? this.userEditing.teams.map((u) => u.id) : [],
+                selectedProfiles: this.userEditing.profiles ? this.userEditing.profiles.map((u) => u.id) : [],
                 searchTeams: "",
                 searchProfiles: "",
                 teams: [],
@@ -192,7 +192,7 @@
             },
             passwordRules() {
                 return {
-                    required: !this.userEditing.id,
+                    required: this.userEditing.id ? false : true,
                     custom_password: true,
                     min: 6,
                     max: 50,
@@ -200,7 +200,7 @@
             },
             confirmedPasswordRules() {
                 return {
-                    required: !this.userEditing.id,
+                    required: this.userEditing.id ? false : true,
                     confirmed: "userPassword",
                     min: 6,
                     max: 50,

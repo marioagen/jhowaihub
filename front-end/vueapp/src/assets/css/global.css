@@ -4,6 +4,7 @@
 
 body {
     font-family: var(--font-family-base);
+    font-size: .875rem !important;
 }
 
 .sidebar-wrapper {
@@ -356,7 +357,7 @@ main > .container-fluid > .custom-padding > .row > .table-responsive > table > t
     border-color: var(--color-bg-table-tr-first) !important;
 }
 
-main > .container-fluid > .custom-padding > .row > .table-responsive > table > tbody > {
+main > .container-fluid > .custom-padding > .row > .table-responsive > table > tbody {
     background-color: var(--color-table-striped) !important;
 }
 

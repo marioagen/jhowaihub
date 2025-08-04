@@ -1,12 +1,16 @@
 <template>
-    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
+    <button 
+        v-if="showMultiDelete" 
+        class="btn btn-outline-danger btn-sm mb-2 ms-2" 
+        @click="openConfirmationMultiple"
+    >
         <LucideIcon icon="Trash2" size="15" />
         {{ $t("labelDelete") }}
     </button>
     <div>
         <TableComponent
-            modalName="labelTypes"
-            emptyMessage="labelNoDocumentTypeWasFound"
+            modalName="quizz.tableTitle"
+            emptyMessage="quizz.notFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -14,58 +18,71 @@
             @selectedRows="selectedRows"
             @change-page="changePage"
         >
+            <template #cell-questions="{ data }">
+                <BadgeComponent 
+                    :text="questionsNumber(data.row.questions)"
+                    :clickable="false"
+                    variant="primary"
+                />
+            </template>
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <button class="btn btn-outline-success btn-sm table-btn" @click="openEditModal(data.row)">
+                <button 
+                    class="btn btn-outline-success btn-sm table-btn"
+                    @click="redirectToEdit(data.row)"
+                >
                     <LucideIcon icon="SquarePen" />
                 </button>
-                <button class="btn btn-outline-danger btn-sm ms-2 table-btn" @click="openConfirmation(data.row)">
+                <button 
+                    class="btn btn-outline-danger btn-sm ms-2 table-btn"
+                    @click="openConfirmation(data.row)"
+                >
                     <LucideIcon icon="Trash2" />
                 </button>
             </template>
         </TableComponent>
     </div>
 
-    <TypesModal :isEdit="true" @reload="reload" ref="TypesModal" />
-
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteType"
+        title="questions.removeTitle"
         message="labelThisActionCannotBeUndone"
         cancelText="labelCancel"
         confirmText="labelConfirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
-        @confirm="deleteType"
+        @confirm="deleteQuizz"
     />
 </template>
 
 <script>
-    import date from "@/helpers/date";
-    import TypesService from "@/services/types/TypesService";
+    import dates from "@/helpers/date";
+    import QuizzesService from "@/services/quizzes/QuizzesService";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
-    import TypesModal from "@/components/types/TypesModal.vue";
+    import BadgeComponent from "@/components/global/BadgeComponent.vue";
 
     export default {
-        name: "TypesTable",
+        name: "QuizzesTable",
         components: {
             TableComponent,
             ConfirmModal,
-            TypesModal,
+            BadgeComponent
         },
         data: () => ({
             table: {
                 isLoading: true,
                 columns: [
                     { key: "id", label: "Id" },
-                    { key: "name", label: "labelName" },
-                    { key: "created", label: "labelInclusionDate" },
-                    { key: "emailCreator", label: "labelOwner" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "title", label: "quizzes.name" },
+                    { key: "typeDocName", label: "quizzes.type" },
+                    { key: "questions", label: "quizzes.questions" },
+                    { key: "created", label: "quizzes.createdDate" },
+                    { key: "emailCreator", label: "quizzes.owner" },
+                    { key: "actions", label: "quizzes.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -76,21 +93,19 @@
                 },
                 selectedRows: [],
             },
-            selectedType: {},
+            selectedQuizz: {},
             queryPage: 1,
             selectedOption: 10,
             isAscending: false,
             colType: 2,
-            modalTypeShow: false,
-            modalAlertShow: false,
             searchInput: "",
             isDeleting: false,
         }),
         methods: {
-            getTypes(obj) {
+            getQuizzes(obj) {
                 this.table.isLoading = true;
-                this.searching = false;
-                let params = {
+                this.searchInput = obj.search;
+                var paramsReq = {
                     search: this.searchInput.trim() ? this.searchInput.trim() : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
@@ -98,22 +113,21 @@
                     colType: this.colType,
                 };
 
-                TypesService.getTypes(params)
+                QuizzesService.getQuizzes(paramsReq)
                     .then((response) => {
-                        const content = response?.content || [];
-                        const pagination = response?.pagination || {};
-
-                        this.table.data = content;
-                        this.table.pagination = pagination;
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
-                        this.searchInput = "";
                     });
             },
-            formatDate(str) {
-                return date.formatDate(str);
+            formatDate(date) {
+                return dates.formatDate(date);
+            },
+            questionsNumber(questions) {
+                return questions.length;
             },
             orderList: function (col) {
                 if (this.isAscending) {
@@ -122,42 +136,47 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getTypes({ search: "", page: this.queryPage, type: null });
+                this.getQuizzes({ search: "", page: this.queryPage, type: null });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
-            openEditModal(type) {
-                this.$refs.TypesModal.open(type);
+            redirectToEdit(quizz) {
+                this.$router.push({
+                    name: 'EditQuizz',
+                    params: {
+                        id: quizz.id,
+                    },
+                });
             },
-            openConfirmation(type) {
-                this.selectedType = [type.id];
+            openConfirmation(quizz) {
+                this.selectedQuizz = [quizz.id];
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
                 const ids = this.table.selectedRows.map((item) => item.id);
-                this.selectedType = ids;
+                this.selectedQuizz = ids;
                 this.$refs.DeleteDialog.open();
             },
-            deleteType() {
+            deleteQuizz() {
                 this.isDeleting = true;
-                TypesService.deleteTypeById(this.selectedType)
+                QuizzesService.deleteQuizzById(this.selectedQuizz)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getTypes({ search: "", page: 1, type: null });
+                            this.getQuizzes({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: "Tipos",
-                                message: this.$t("labelDocumentTypeRemoveSuccess"),
-                                variant: "success",
-                                icon: "CircleCheckBig",
+                                title: 'quizzes.removeTitle',
+                                message: this.$t("quizzes.removeSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
-                                title: "Tipos",
-                                message: this.$t("labelDocumentTypeRemoveError"),
-                                variant: "danger",
-                                icon: "CircleX",
+                                title: 'quizzes.removeTitle',
+                                message: this.$t("quizzes.removeError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
                             });
                         }
                     })
@@ -165,23 +184,20 @@
                         this.listIds = [];
                         this.table.selectedRows = [];
                         this.isDeleting = false;
-                    });
+                    })
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getTypes({ search: input, page: this.queryPage, type: null });
-            },
-            changePage(page) {
-                this.getTypes({ search: "", page: page, type: null });
+                this.getQuizzes({ search: input, page: this.queryPage, type: null });
             },
             reload() {
-                this.$refs.TypesModal.close();
-                this.getTypes({ search: "", page: this.queryPage, type: null });
+                this.$refs.QuizzesModal.close();
+                this.getQuizzes({ search: "", page: this.queryPage, type: null });
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getTypes({ search: "", page: this.queryPage, type: null });
+            this.getQuizzes({ search: "", page: this.queryPage, type: null });
         },
         computed: {
             showMultiDelete() {
