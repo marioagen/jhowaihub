@@ -316,7 +316,6 @@ namespace WoopiAiHub.Application.Services
         private async Task<(string AccessToken, string RefreshToken)> GenerateTokensAsync(string userEmail,
                                                                                           Dictionary<string, List<string>> permissions)
         {
-
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
