@@ -11,6 +11,9 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly AutoMocker _mocker;
         public readonly RefreshTokenServices _refreshTokenServices;
+        private const string _email = "user@example.com";
+        private const string _refreshToken = "token123";
+        private const string _expectedKey = $"refresh_token:{_refreshToken}";
 
         public RefreshTokenServicesTests()
         {
@@ -24,16 +27,13 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var cacheMock = _mocker.GetMock<IDistributedCache>();
-            var email = "user@example.com";
-            var refreshToken = "token123";
-            var expectedKey = $"refresh_token:{refreshToken}";
 
             DistributedCacheEntryOptions? capturedOptions = null;
             byte[]? capturedValue = null;
 
             cacheMock
                 .Setup(c => c.SetAsync(
-                    It.Is<string>(k => k == expectedKey),
+                    It.Is<string>(k => k == _expectedKey),
                     It.IsAny<byte[]>(),
                     It.IsAny<DistributedCacheEntryOptions>(),
                     It.IsAny<CancellationToken>()))
@@ -45,11 +45,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _refreshTokenServices.SaveAsync(email, refreshToken);
+            await _refreshTokenServices.SaveAsync(_email, _refreshToken);
 
             // Assert
             cacheMock.Verify(c => c.SetAsync(
-                It.Is<string>(k => k == expectedKey),
+                It.Is<string>(k => k == _expectedKey),
                 It.IsAny<byte[]>(),
                 It.IsAny<DistributedCacheEntryOptions>(),
                 It.IsAny<CancellationToken>()),
@@ -61,7 +61,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             Assert.NotNull(capturedValue);
             var decoded = Encoding.UTF8.GetString(capturedValue!);
-            Assert.Equal(email, decoded);
+            Assert.Equal(_email, decoded);
         }
 
         [Fact(DisplayName = "FindUserByRefreshTokenAsync returns stored email")]
@@ -70,22 +70,19 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var cacheMock = _mocker.GetMock<IDistributedCache>();
-            var refreshToken = "tokenABC";
-            var expectedKey = $"refresh_token:{refreshToken}";
-            var expectedEmail = "foo@bar.com";
-            var encoded = Encoding.UTF8.GetBytes(expectedEmail);
+            var encoded = Encoding.UTF8.GetBytes(_email);
 
             cacheMock
                 .Setup(c => c.GetAsync(
-                    It.Is<string>(k => k == expectedKey),
+                    It.Is<string>(k => k == _expectedKey),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(encoded);
 
             // Act
-            var result = await _refreshTokenServices.FindUserByRefreshTokenAsync(refreshToken);
+            var result = await _refreshTokenServices.FindUserByRefreshTokenAsync(_refreshToken);
 
             // Assert
-            Assert.Equal(expectedEmail, result);
+            Assert.Equal(_email, result);
         }
 
         [Fact(DisplayName = "FindUserByRefreshTokenAsync returns null when missing")]
@@ -94,17 +91,15 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var cacheMock = _mocker.GetMock<IDistributedCache>();
-            var refreshToken = "nonexistent";
-            var expectedKey = $"refresh_token:{refreshToken}";
 
             cacheMock
                 .Setup(c => c.GetAsync(
-                    It.Is<string>(k => k == expectedKey),
+                    It.Is<string>(k => k == _expectedKey),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync((byte[]?)null);
 
             // Act
-            var result = await _refreshTokenServices.FindUserByRefreshTokenAsync(refreshToken);
+            var result = await _refreshTokenServices.FindUserByRefreshTokenAsync(_refreshToken);
 
             // Assert
             Assert.Null(result);
@@ -116,21 +111,19 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var cacheMock = _mocker.GetMock<IDistributedCache>();
-            var refreshToken = "toRevoke";
-            var expectedKey = $"refresh_token:{refreshToken}";
 
             cacheMock
                 .Setup(c => c.RemoveAsync(
-                    It.Is<string>(k => k == expectedKey),
+                    It.Is<string>(k => k == _expectedKey),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _refreshTokenServices.RevokeAsync(refreshToken);
+            await _refreshTokenServices.RevokeAsync(_refreshToken);
 
             // Assert
             cacheMock.Verify(c => c.RemoveAsync(
-                It.Is<string>(k => k == expectedKey),
+                It.Is<string>(k => k == _expectedKey),
                 It.IsAny<CancellationToken>()),
                 Times.Once);
         }
