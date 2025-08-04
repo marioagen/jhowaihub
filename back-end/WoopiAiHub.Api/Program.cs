@@ -59,19 +59,20 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<SwaggerCustomHeader>();
 });
 
-var allowedOrigins = config.GetSection("CORS")
-                           .Get<string[]>()
-                           .Where(o => !string.IsNullOrWhiteSpace(o))
-                           .ToArray();
-
-builder.Services.AddCors(p => p.AddPolicy("manager", policy =>
+var allowedOrigin = config["CORS"]?.Trim();
+if (!string.IsNullOrWhiteSpace(allowedOrigin))
 {
-    policy
-        .WithOrigins(allowedOrigins)      
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials();
-}));
+    builder.Services.AddCors(p => p.AddPolicy("manager", policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigin) 
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); 
+    }));
+}
+else
+    throw new InvalidOperationException("CORS origin não está configurado. Verifique a chave 'CORS' no appsettings ou variável de ambiente.");
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
