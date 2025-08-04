@@ -31,7 +31,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IRefreshTokenServices _refreshTokenServices;
-
+        private const string _messageHttpContextNotAvailable = "HttpContext is not available.";
 
         public AccountServices(IGraphApi graphApi,
                                IMarketPlaceApi marketPlaceApi,
@@ -70,7 +70,7 @@ namespace WoopiAiHub.Application.Services
             if (userAccess != null && userAccess.HasAccess)
             {
                 var httpContext = _httpContextAccessor.HttpContext ??
-                                 throw new InvalidOperationException("HttpContext is not available.");
+                                 throw new InvalidOperationException(_messageHttpContextNotAvailable);
 
                 await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
                 await _tenantContextService.TrySetTenantConnectionAsync(httpContext,
@@ -127,7 +127,7 @@ namespace WoopiAiHub.Application.Services
                 if (userAccess != null && userAccess.HasAccess)
                 {
                     var httpContext = _httpContextAccessor.HttpContext ??
-                                throw new InvalidOperationException("HttpContext is not available.");
+                                throw new InvalidOperationException(_messageHttpContextNotAvailable);
 
                     await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
                     await _tenantContextService.TrySetTenantConnectionAsync(httpContext, 
@@ -217,7 +217,7 @@ namespace WoopiAiHub.Application.Services
             if (userAccess != null && userAccess.HasAccess)
             {
                 var httpContext = _httpContextAccessor.HttpContext ??
-                                  throw new InvalidOperationException("HttpContext is not available.");
+                                  throw new InvalidOperationException(_messageHttpContextNotAvailable);
 
                 await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
                 await _tenantContextService.TrySetTenantConnectionAsync(httpContext, 
@@ -230,7 +230,7 @@ namespace WoopiAiHub.Application.Services
                 await _refreshTokenServices.SaveAsync(userEmail, tokens.RefreshToken);
 
                 if (_httpContextAccessor.HttpContext == null)
-                    throw new InvalidOperationException("HttpContext is not available.");
+                    throw new InvalidOperationException(_messageHttpContextNotAvailable);
 
                 this.SetRefreshTokenCookie(tokens.RefreshToken);
 
