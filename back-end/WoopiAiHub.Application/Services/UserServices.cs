@@ -331,7 +331,7 @@ namespace WoopiAiHub.Application.Services
                 var updateResult = _userRepository.Update(user);
                 if (!updateResult)
                 {
-                    throw new AppException(ErrorCode.Duplicated, "Duplicated user");
+                    throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
                 }
                 return updateResult;
         }

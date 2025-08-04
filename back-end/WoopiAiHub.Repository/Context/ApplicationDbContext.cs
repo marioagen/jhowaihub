@@ -14,7 +14,12 @@ namespace WoopiAiHub.Repository.Context
             DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            _httpContextAccessor = httpContextAccessor;
+            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        }
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+            _httpContextAccessor = null!;
         }
 
         public DbSet<Document> Documents { get; set; }

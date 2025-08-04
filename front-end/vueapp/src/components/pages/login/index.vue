@@ -96,7 +96,6 @@
             login(e) {
                 e.preventDefault();
                 this.loading = true;
-                let clientIdResponse = "";
                 api.get("/Account/clientId")
                     .then((response) => {
                         this.microsoftLogin(response.data);

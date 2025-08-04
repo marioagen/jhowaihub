@@ -43,6 +43,7 @@ namespace WoopiAiHub.Api.Exceptions
                     problemDetails.Status = StatusCodes.Status400BadRequest;
                     problemDetails.Detail = appException.Message;
                     problemDetails.ErrorCode = appException.ErrorCode;
+                    problemDetails.LabelError = appException.LabelError;    
                     break;
 
                 case KeyNotFoundException:

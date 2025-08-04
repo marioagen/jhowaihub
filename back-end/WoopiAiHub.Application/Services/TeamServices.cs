@@ -129,7 +129,7 @@ namespace WoopiAiHub.Application.Services
             var createResult = _teamRepository.CreateUniqueTeam(team);
             if (!createResult)
             {
-                throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name");
+                throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
             }
             return createResult;
         }
@@ -163,7 +163,7 @@ namespace WoopiAiHub.Application.Services
             var updateResult = _teamRepository.Update(team);
             if (!updateResult)
             {
-                throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name");
+                throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
             }
             return updateResult;
         }
