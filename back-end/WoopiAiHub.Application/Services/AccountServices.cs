@@ -358,7 +358,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// 
+        /// Generates the refresh token to renew the API token
         /// </summary>
         /// <returns></returns>
         private string GenerateRefreshToken()
@@ -370,7 +370,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// 
+        /// Performs conversion to base 64
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
