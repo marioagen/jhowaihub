@@ -94,6 +94,7 @@
 <script>
 import { Field, useForm } from "vee-validate";
 import { useRouter } from "vue-router";
+import { getJWTPermissions } from "@/utils/permissions";
 import AuthService from "@/services/authenticate/AuthService";
 
 export default {
@@ -146,6 +147,9 @@ export default {
                         tenant: response.tenant,
                         keyMongoAccess: "",
                     };
+
+                    let permissions = this.getPermissions(response.tokenApi);
+                    this.$store.commit("updatePermissions", permissions);
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
@@ -263,6 +267,8 @@ export default {
                         keyMongoAccess: "",
                     };
 
+                    let permissions = this.getPermissions(response.tokenApi);
+                    this.$store.commit("updatePermissions", permissions);
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
@@ -285,6 +291,9 @@ export default {
         },
         redirectToDocument() {
             this.$router.push({ name: "DocumentList" });
+        },
+        getPermissions(token) {
+            return getJWTPermissions(token);
         },
         checkTheme() {
             const element = document.querySelector("html");
