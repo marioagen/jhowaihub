@@ -1,5 +1,4 @@
 ﻿import { createRouter, createWebHashHistory } from "vue-router";
-import LogoutIndex from "@/components/pages/logout";
 import DocumentUpload from "@/components/pages/document/upload";
 import DocumentList from "@/components/pages/document/list";
 import NormalizeIndex from "@/components/pages/normalize/loading";
@@ -12,6 +11,7 @@ import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import QuestionsPage from "@/pages/questions.vue";
 import UserManagePage from "@/pages/user-manager.vue";
 import LoginIndex from "@/pages/login.vue";
+import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
 
 import { hasPermission } from "@/utils/permissions";
@@ -45,7 +45,7 @@ const routes = [
     {
         path: "/logout",
         name: "Logout",
-        component: LogoutIndex,
+        component: LogoutPage,
         meta: {
             public: true
         }
