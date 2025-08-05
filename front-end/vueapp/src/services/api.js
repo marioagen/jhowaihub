@@ -7,8 +7,8 @@ import { pageview } from "vue-gtag";
 const api = axios.create();
 
 // Show env config
-console.log(ENV_CONFIG.VUE_APP_NAME);
-console.log(ENV_CONFIG.VUE_APP_BASE_URL_API);
+// console.log(ENV_CONFIG.VUE_APP_NAME);
+// console.log(ENV_CONFIG.VUE_APP_BASE_URL_API);
 
 let baseUrlApi = ENV_CONFIG.VUE_APP_BASE_URL_API;
 baseUrlApi = baseUrlApi.replace(/\/$/, "") + "/api";
@@ -49,7 +49,6 @@ api.interceptors.response.use(
   response => response,
   async (error) => {
     const originalRequest = error.config;
-    console.log(originalRequest);
     if (originalRequest.url !== "/Account/Login-sso" &&  originalRequest.url != "/Account/Login" && originalRequest.url != "/Account/refresh-token" && error.response) {
       if (error.response.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
