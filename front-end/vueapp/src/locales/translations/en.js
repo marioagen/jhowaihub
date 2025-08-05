@@ -242,11 +242,16 @@
     labelSaveType: "Create",
     login: {
         title: "Login",
+        password: "Password",
         subtitle: "Access your account to manage documents",
         loading: "Loading...",
         sso: "Login with Microsoft",
         authSSO: "Authenticated with Microsoft",
         validateClient: "Client validated",
+        userNotFound: "User not found.",
+        userWithoutAccess: "User without access permission.",
+        userIncorrectPassword: "The password entered is incorrect.",
+        userTokenMicrosoftInvalid: "We were unable to validate your authentication. Please log in again."
     },
     "validation": {
       "required": "This field is required.",
@@ -367,7 +372,7 @@
     },
     transferListTitle: "Selection list",
     transferListPlaceholder: "Search in list",
-
+    unexpectedError: "An unexpected error occurred. Please contact the system administrator."
 };
 
 export default english;

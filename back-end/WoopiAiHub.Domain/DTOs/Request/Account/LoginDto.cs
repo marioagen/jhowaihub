@@ -1,8 +1,8 @@
 namespace WoopiAiHub.Domain.DTOs.Request.Account
 {
-    public class LoginDto
+    public record class LoginDto
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }

@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -48,20 +43,30 @@ namespace WoopiAiHub.Repository
                 .ToList();
         }
 
-        public async Task<Dictionary<string, List<string>>> GetUserPermissionsAsync(string email)
+        /// <summary>
+        /// Search the database for user permissions
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<Dictionary<string, List<string>>> FindUserPermissionsAsync(string email)
         {
-            var user = await _context.Users
-                .Include(u => u.Permissions)
-                .FirstOrDefaultAsync(u => u.Email == email);
+            var result = await _context.Users
+                              .AsNoTracking()
+                              .Where(u => u.Email == email)
+                              .SelectMany(u => u.Profiles)
+                              .SelectMany(p => p.Permissions)
+                              .Where(p => !string.IsNullOrWhiteSpace(p.Group) &&
+                                          !string.IsNullOrWhiteSpace(p.Name))
+                              .GroupBy(p => p.Group!.Trim())
+                              .ToDictionaryAsync(
+                                  g => g.Key!,
+                                  g => g.Select(p => p.Name!.Trim())
+                                        .Where(n => n.Length > 0)
+                                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                                        .ToList(),
+                                  StringComparer.OrdinalIgnoreCase);
 
-            var groupedPermissions = user.Permissions
-                .GroupBy(p => p.Group)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(p => p.Name).Distinct().ToList()
-                );
-
-            return groupedPermissions;
+            return result;
         }
     }
 }

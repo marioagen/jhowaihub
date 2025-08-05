@@ -242,11 +242,16 @@
     labelSaveType: "Criar tipo",
     login: {
         title: "Fazer Login",
+        password: "Senha",
         subtitle: "Acesse sua conta para gerenciar documentos",
         loading: "Carregando...",
         sso: "Login com Microsoft",
         authSSO: "Autenticado na Microsoft",
         validateClient: "Cliente validado",
+        userNotFound: "Usuário não encontrado.",
+        userWithoutAccess: "Usuário sem permissão de acesso.",
+        userIncorrectPassword: "A senha informada está incorreta.",
+        userTokenMicrosoftInvalid: "Não foi possível validar sua autenticação. Por favor, faça login novamente."
     },
     "validation": {
         "required": "Campo obrigatório.",
@@ -364,6 +369,7 @@
     },
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
+    unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador."
 };
 
 export default portuguese;
