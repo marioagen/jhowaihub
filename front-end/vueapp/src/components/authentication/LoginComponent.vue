@@ -308,7 +308,9 @@ export default {
         },
     },
     created() {
-        if (useRouter().currentRoute.value.name === "Login") {
+        let login = this.$store.state.userProfile.login;
+        let tenant = this.$store.state.userProfile.tenant;
+        if(login !== "" || tenant !== "") {
             this.$router.push({ name: "DocumentList" });
         }
         this.checkTheme();
