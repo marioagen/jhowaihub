@@ -6,7 +6,7 @@ export default new Vuex.Store({
     state: {
         tenantInitialized: false,
         userProfile: {
-            language: "pt", // Default language = pt
+            language: "pt",
             image: "",
             name: "",
             login: "",
@@ -15,13 +15,14 @@ export default new Vuex.Store({
             tenant: "",
             keyMongoAccess: "",
         },
-    },
-    getters: {
-        //
+        permissions: [],
     },
     mutations: {
         updateUserProfile(state, payload) {
             state.userProfile = payload.amount;
+        },
+        updatePermissions(state, payload) {
+            state.permissions = payload;
         },
         updateUserProfileLanguage(state, payload) {
             state.userProfile.language = payload.amount;
@@ -38,9 +39,6 @@ export default new Vuex.Store({
         setTenantInitialized(state, value) {
             state.tenantInitialized = value;
         },
-    },
-    actions: {
-        //
     },
     plugins: [
         createPersistedState({
