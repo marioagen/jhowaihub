@@ -3,7 +3,7 @@
         <div class="container" style="padding: 0">
             <div class="row">
                 <div class="col-auto col-fix">
-                    <form @submit="redirectToHome" style="text-align: center">
+                    <form @submit="returnToPreviousPage" style="text-align: center">
                         <img
                             src="../assets/img/woopiai-hub-logo.png"
                             style="padding-bottom: 10px"
@@ -20,18 +20,16 @@
                             v-else
                         />
 
-                        <h5>{{ $t("unauthorized.title") }}</h5>
-
+                        <h5 class="fw-bold">{{ $t("unauthorized.title") }}</h5>
+                        <button
+                            class="btn btn-outline-primary"
+                            @click="redirectTo"
+                        >
+                            <LucideIcon icon="Redo2" />
+                            {{ $t("labelBack") }}
+                        </button>
                     </form>
                 </div>
-                <button 
-                    type="submit" 
-                    class="btn btn-outline-primary"
-                    @click="redirectTo"
-                >
-                    <LucideIcon icon="Redo2" />
-                    Return to home
-                </button>
             </div>
         </div>
     </main>
@@ -41,13 +39,9 @@
     export default {
         name: "UnauthorizedPage",
         methods: {
-            redirectToHome() {
-                console.log("retorn to login")
-                // this.$router.push({ name: "Login" });
+            returnToPreviousPage() {
+                this. $router.back();
             },
-            redirectTo() {
-                this.$router.push({ name: "/" });
-            }
         },
     };
 </script>
