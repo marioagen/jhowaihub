@@ -284,6 +284,10 @@
     labelProfiles: "Profiles",
     labelSelectedProfiles: "Selected profiles",
     labelSearchProfiles: "Search profiles",
+    unauthorized: {
+        title: "You do not have permission",
+        returnToHome: "Return",
+    },
     validation: {
         required: "This field is required.",
         max: "Maximum {limit} characters",

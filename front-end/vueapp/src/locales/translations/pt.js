@@ -281,6 +281,10 @@
     labelProfiles: "Perfis",
     labelSelectedProfiles: "Perfis selecionados",
     labelSearchProfiles: "Buscar perfis",
+    unauthorized: {
+        title: "Você não tem permissão",
+        returnToHome: "Retornar",
+    },
     validation: {
         required: "Campo obrigatório",
         max: "Máximo de {limit} caracteres",

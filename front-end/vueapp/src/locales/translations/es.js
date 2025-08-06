@@ -288,6 +288,10 @@
     labelProfiles: "Perfiles",
     labelSelectedProfiles: "Perfiles seleccionados",
     labelSearchProfiles: "Buscar perfiles",
+    unauthorized: {
+        title: "No tienes permiso",
+        returnToHome: "Volver",
+    },
     validation: {
         required: "El campo es obligatorio.",
         max: "El número máximo de caracteres es {limit}.",

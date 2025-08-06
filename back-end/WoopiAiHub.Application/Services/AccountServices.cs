@@ -16,6 +16,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Infrastructure.Multitenancy;
+using Newtonsoft.Json;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -322,23 +323,16 @@ namespace WoopiAiHub.Application.Services
 
             var userProfile = await _userRepository.FindUserProfilesByEmailAsync(userEmail);
             bool isAdmin = userProfile.Contains("admin");
-
+            var permissionsList = BuildPermissionsList(permissions, isAdmin);
+            var permissionsJson = JsonConvert.SerializeObject(permissionsList);
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userEmail),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new Claim("isAdmin", isAdmin.ToString().ToLower()),
+                new Claim("permissions", permissionsJson)
             };
-
-            if (isAdmin)
-                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
-
-            foreach (var kv in permissions)
-            {
-                var resource = kv.Key;
-                var actions = string.Join(',', kv.Value);
-                claims.Add(new Claim($"perm:{resource}", actions));
-            }
 
             var jwtToken = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
@@ -354,6 +348,27 @@ namespace WoopiAiHub.Application.Services
             await _refreshTokenServices.SaveAsync(userEmail, refreshToken);
 
             return (AccessToken: accessToken, RefreshToken: refreshToken);
+        }
+
+        /// <summary>
+        /// Get the permission list
+        /// </summary>
+        /// <returns></returns>
+        private List<Dictionary<string, string>> BuildPermissionsList(Dictionary<string, List<string>> permissions, bool isAdmin)
+        {
+            var permissionsList = new List<Dictionary<string, string>>();
+            if (isAdmin)
+                return permissionsList;
+
+            foreach (var kv in permissions)
+            {
+                var resource = kv.Key;
+                foreach (var action in kv.Value)
+                {
+                    permissionsList.Add(new Dictionary<string, string> { { resource, action } });
+                }
+            }
+            return permissionsList;
         }
 
         /// <summary>

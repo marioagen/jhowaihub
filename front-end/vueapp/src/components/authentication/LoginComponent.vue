@@ -94,6 +94,7 @@
 <script>
 import { Field, useForm } from "vee-validate";
 import { useRouter } from "vue-router";
+import { getJWTPermissions } from "@/utils/permissions";
 import AuthService from "@/services/authenticate/AuthService";
 
 export default {
@@ -136,6 +137,9 @@ export default {
             this.credentials.email = this.values.email;
             AuthService.Login(this.credentials)
                 .then((response) => {
+                    let tokenData = this.getPermissions(response.tokenApi);
+                    this.$store.commit("updatePermissions", tokenData.permissions);
+
                     let dataUser = {
                         language: this.$store.state.userProfile.language,
                         image: "",
@@ -145,7 +149,9 @@ export default {
                         tokenApi: response.tokenApi,
                         tenant: response.tenant,
                         keyMongoAccess: "",
+                        isAdmin: tokenData.isAdmin
                     };
+
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
@@ -252,6 +258,9 @@ export default {
 
             AuthService.LoginSSO(formData, userAzure)
                 .then((response) => {
+                    let tokenData = this.getPermissions(response.tokenApi);
+                    this.$store.commit("updatePermissions", tokenData.permissions);
+
                     let dataUser = {
                         language: this.$store.state.userProfile.language,
                         image: "",
@@ -261,8 +270,9 @@ export default {
                         tokenApi: response.tokenApi,
                         tenant: response.tenant,
                         keyMongoAccess: "",
+                        isAdmin: tokenData.isAdmin
                     };
-
+                    
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
@@ -286,6 +296,9 @@ export default {
         redirectToDocument() {
             this.$router.push({ name: "DocumentList" });
         },
+        getPermissions(token) {
+            return getJWTPermissions(token);
+        },
         checkTheme() {
             const element = document.querySelector("html");
             if (element.classList.value == "css-theme-dark") {
@@ -299,7 +312,9 @@ export default {
         },
     },
     created() {
-        if (useRouter().currentRoute.value.name === "Login") {
+        let login = this.$store.state.userProfile.login;
+        let tenant = this.$store.state.userProfile.tenant;
+        if(login !== "" || tenant !== "") {
             this.$router.push({ name: "DocumentList" });
         }
         this.checkTheme();

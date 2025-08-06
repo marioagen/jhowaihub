@@ -218,7 +218,6 @@
                         console.log("Erro ao inicializar o tenant:", error);
                     });
             },
-
             InitializeTenant(tenant) {
                 let self = this;
 
@@ -230,24 +229,39 @@
                     }
                 });
             },
-            setLanguage: function (lang) {
+            getUserTenants(userEmail, savedTenant) {
+                api.get("/Tenant/FindAllByUserEmail/" + userEmail)
+                .then((result) => {
+                    if (JSON.stringify(result.data) !== JSON.stringify(this.tenantsFromState)) {
+                        this.tenantsFromState = result.data;
+                    }
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+
+                this.selectedTenant = savedTenant;
+                if (!this.tenantInitialized) {
+                    this.InitializeTenant(this.selectedTenant);
+                    this.$store.commit("setTenantInitialized", true);
+                }
+            },
+            setLanguage(lang) {
                 this.$i18n.locale = lang;
                 this.$store.commit("updateUserProfileLanguage", { amount: lang });
             },
-            getProfileImage: function () {
-                let self = this;
-                axios
-                    .get("https://graph.microsoft.com/v1.0/me/photos/48x48/$value", {
+            getProfileImage() {
+                axios.get("https://graph.microsoft.com/v1.0/me/photos/48x48/$value", {
                         headers: {
-                            Authorization: `Bearer ${self.$store.state.userProfile.tokenAzure}`,
+                            Authorization: `Bearer ${this.$store.state.userProfile.tokenAzure}`,
                         },
                         responseType: "blob",
                     })
-                    .then(function (response) {
-                        self.profileImage = window.URL.createObjectURL(
+                    .then((response) => {
+                        this.profileImage = window.URL.createObjectURL(
                             new Blob([response.data], { type: "image/jpeg" })
                         );
-                        self.$store.commit("updateUserProfileImage", {
+                        this.$store.commit("updateUserProfileImage", {
                             amount: self.profileImage,
                         });
                     })
@@ -255,11 +269,11 @@
                         console.log(error);
                     });
             },
-            setBreakWord: function (str) {
+            setBreakWord(str) {
                 var strSplit = str.split(" ");
                 return strSplit[0] + " " + strSplit[strSplit.length - 1];
             },
-            toggleTheme: function () {
+            toggleTheme() {
                 if (localStorage.getItem("theme") === "css-theme-dark") {
                     this.setTheme("css-theme-light");
                     this.showLogoDarkMode = false;
@@ -268,7 +282,7 @@
                     this.showLogoDarkMode = true;
                 }
             },
-            setTheme: function (themeName) {
+            setTheme(themeName) {
                 localStorage.setItem("theme", themeName);
                 document.documentElement.className = themeName;
             },
@@ -293,39 +307,23 @@
             },
         },
         created() {
-            this.getProfileImage();
-            let self = this;
             const userEmail = this.$store.state.userProfile.login;
-            const savedTenant = self.$store.state.userProfile.tenant;
-            if (userEmail === "") {
-                router.push({ name: "Logout" });
+            const savedTenant = this.$store.state.userProfile.tenant;
+            if (userEmail === "" || savedTenant === "") {
+                router.push({ name: "Login" });
             }
-            api.get("/Tenant/FindAllByUserEmail/" + userEmail)
-                .then(function (result) {
-                    if (JSON.stringify(result.data) !== JSON.stringify(self.tenantsFromState)) {
-                        self.tenantsFromState = result.data;
-                    }
-                })
-                .catch(function (e) {
-                    console.log(e);
-                })
-            self.selectedTenant = savedTenant;
-            if (!self.tenantInitialized) {
-                self.InitializeTenant(self.selectedTenant);
-                self.$store.commit("setTenantInitialized", true);
-            }
+
+            this.getProfileImage();
+            this.getUserTenants(userEmail, savedTenant);
         },
         mounted() {
-            let self = this;
-            (function () {
-                if (localStorage.getItem("theme") === "css-theme-dark") {
-                    self.setTheme("css-theme-dark");
-                    self.showLogoDarkMode = true;
-                } else {
-                    self.setTheme("css-theme-light");
-                    self.showLogoDarkMode = false;
-                }
-            })();
+            if (localStorage.getItem("theme") === "css-theme-dark") {
+                this.setTheme("css-theme-dark");
+                this.showLogoDarkMode = true;
+            } else {
+                this.setTheme("css-theme-light");
+                this.showLogoDarkMode = false;
+            }
         },
     };
 </script>
