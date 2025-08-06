@@ -5,15 +5,9 @@ import store from "@/store";
 import { pageview } from "vue-gtag";
 
 const api = axios.create();
-
-// Show env config
-// console.log(ENV_CONFIG.VUE_APP_NAME);
-// console.log(ENV_CONFIG.VUE_APP_BASE_URL_API);
-
 let baseUrlApi = ENV_CONFIG.VUE_APP_BASE_URL_API;
 baseUrlApi = baseUrlApi.replace(/\/$/, "") + "/api";
-api.defaults.baseURL = baseUrlApi; // App on development environment
-//api.defaults.baseURL = "/api"; // App on test environment
+api.defaults.baseURL = baseUrlApi;
 
 api.defaults.paramsSerializer = {
     serialize: (params) => {
@@ -35,7 +29,6 @@ api.interceptors.request.use(
         if (config.headers.Authorization === undefined) {
             config.headers["Authorization"] = `Bearer ${store.state.userProfile.tokenApi}`;
         }
-        //Google Analytics
         pageview(config.url);
         return config;
     },
