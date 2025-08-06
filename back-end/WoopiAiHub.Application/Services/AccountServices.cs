@@ -350,6 +350,10 @@ namespace WoopiAiHub.Application.Services
             return (AccessToken: accessToken, RefreshToken: refreshToken);
         }
 
+        /// <summary>
+        /// Get the permission list
+        /// </summary>
+        /// <returns></returns>
         private List<Dictionary<string, string>> BuildPermissionsList(Dictionary<string, List<string>> permissions, bool isAdmin)
         {
             var permissionsList = new List<Dictionary<string, string>>();
