@@ -6,7 +6,7 @@ export const hasPermission = (module, action) => {
 
     const permissions = store.state.permissions;
     if (permissions.length === 0) return false;
-    
+
     var isAllowed = permissions.some(p => {
         const [key] = Object.keys(p);
         const value = p[key];
@@ -26,8 +26,7 @@ export const getJWTPermissions = (token) => {
     try {
         const payload = jwtDecode(token);
         const permissions = payload.permission === "" ? [] : JSON.parse(payload.permissions)
-        const isAdmin = !!payload.isAdmin;
-        console.log(permissions)
+        const isAdmin = payload.isAdmin === "true";
         return { 
             permissions: permissions, 
             isAdmin: isAdmin, 
