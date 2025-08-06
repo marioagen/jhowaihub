@@ -354,7 +354,7 @@ namespace WoopiAiHub.Application.Services
         /// Get the permission list
         /// </summary>
         /// <returns></returns>
-        private List<Dictionary<string, string>> BuildPermissionsList(Dictionary<string, List<string>> permissions, bool isAdmin)
+        private static List<Dictionary<string, string>> BuildPermissionsList(Dictionary<string, List<string>> permissions, bool isAdmin)
         {
             var permissionsList = new List<Dictionary<string, string>>();
             if (isAdmin)
