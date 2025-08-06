@@ -301,7 +301,7 @@
 </template>
 
 <script>
-    import * as moment from "moment/moment";
+    import date from "@/helpers/date";
     import NavBar from "@/components/common/nav-bar";
     import Breadcrumb from "@/components/common/breadcrumb";
     import SearchBar from "@/components/common/search-bar";
@@ -482,12 +482,10 @@
                         if (obj.type === "search") this.searching = true;
                     })
                     .catch((e) => {
-                        console.log(e);
                         this.loading = false;
                         if (obj.type === "search") this.searching = true;
                     })
                     .finally(() => {
-                        console.log("Finished request.");
                     });
             },
             prepareState(obj) {
@@ -555,21 +553,13 @@
                         self.getList({ search: "", page: 1, type: null });
                     })
                     .catch(function (e) {
-                        // Handle error
-                        console.log(e);
                     })
                     .finally(function () {
-                        // Always executed
-                        console.log("Finished request.");
                     });
                 this.listIds = [];
             },
             dateFormat: function (str) {
-                if (this.$store.state.userProfile.language === "en") {
-                    return moment(str).format("YYYY/MM/DD");
-                } else {
-                    return moment(str).format("DD/MM/YYYY");
-                }
+                return date.formatDate(str);
             },
             upperFormat: function (str) {
                 return str.toUpperCase();

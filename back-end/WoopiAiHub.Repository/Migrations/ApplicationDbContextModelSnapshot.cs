@@ -238,9 +238,19 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("varchar(100)")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("Group")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Group");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("Name");
 
                     b.HasKey("Id");

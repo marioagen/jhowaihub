@@ -44,6 +44,16 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Find users by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<User> FindByEmailAsync(String email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        /// <summary>
         /// Asynchronously retrieves a user by their unique reference identifier.
         /// </summary>
         /// <param name="referenceUserId">The unique identifier of the user to retrieve. This value must not be empty.</param>
@@ -53,6 +63,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Users.Where(u => u.Id == referenceUserId)
                                        .Include(t => t.Teams)
+                                       .Include(p => p.Profiles)
                                        .FirstOrDefaultAsync();
         }
 
@@ -137,15 +148,29 @@ namespace WoopiAiHub.Repository
         public async Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null)
         {
             var query = _context.Users.AsQueryable();
-
             var normalizedEmail = email.Trim().ToLowerInvariant();
-
             if (excludeUserId.HasValue)
             {
                 query = query.Where(u => u.Id != excludeUserId.Value);
             }
-
             return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a list of distinct user profile names associated with the specified email address.
+        /// </summary>
+        /// <param name="email">The email address used to filter user profiles. Cannot be null or empty.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of distinct  profile
+        /// names in lowercase associated with the specified email. Returns an empty list if no profiles are found.</returns>
+        public async Task<List<string>> FindUserProfilesByEmailAsync(string email)
+        {
+            return await _context.Users
+                                 .AsNoTracking()
+                                 .Where(u => u.Email == email)
+                                 .SelectMany(u => u.Profiles)
+                                 .Select(p => p.Name.ToLower())
+                                 .Distinct()
+                                 .ToListAsync();
         }
     }
 }

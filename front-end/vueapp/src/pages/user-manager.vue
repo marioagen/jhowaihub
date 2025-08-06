@@ -52,3 +52,9 @@
         }),
     };
 </script>
+<style>
+    .scroll-area {
+        display: list-item;
+        overflow-y: auto;
+    }
+</style>

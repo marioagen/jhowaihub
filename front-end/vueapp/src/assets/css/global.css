@@ -4,6 +4,7 @@
 
 body {
     font-family: var(--font-family-base);
+    font-size: .875rem !important;
 }
 
 .sidebar-wrapper {
@@ -356,7 +357,7 @@ main > .container-fluid > .custom-padding > .row > .table-responsive > table > t
     border-color: var(--color-bg-table-tr-first) !important;
 }
 
-main > .container-fluid > .custom-padding > .row > .table-responsive > table > tbody > {
+main > .container-fluid > .custom-padding > .row > .table-responsive > table > tbody {
     background-color: var(--color-table-striped) !important;
 }
 
@@ -872,6 +873,14 @@ dropzone .dz-preview .dz-details {
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
     font-weight: normal;
+}
+
+.validation-message {
+    color: #dc3545;
+    font-size: 0.70rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+    display: block;
 }
 
 .fw-semibold {
