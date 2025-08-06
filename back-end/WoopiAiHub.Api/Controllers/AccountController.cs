@@ -2,13 +2,12 @@
 using WoopiAiHub.Domain.Interfaces.Services;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs.Request;
-using Microsoft.AspNetCore.Cors;
+using WoopiAiHub.Domain.DTOs.Request.Account;
 
 namespace WoopiAiHub.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [EnableCors("all")]
     public class AccountController : Controller
     {
         private readonly IAccountServices _accountServices;
@@ -25,30 +24,33 @@ namespace WoopiAiHub.Api.Controllers
         /// Authenticates the user and returns the token if he has user permission
         /// </summary>
         /// <param name="authenticateDto"></param>
-        /// <param name="authenticateHeaderDto"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("authenticate")]
+        [Route("login")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [SwaggerOperation("Authenticates the user and returns the token if he has user permission")]
-        public async Task<IActionResult> Authenticate([FromHeader] AuthenticateHeaderDto authenticateHeaderDto,
-                                                      [FromBody] AuthenticateDto authenticateDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            try
-            {
-                var authData = await _accountServices.Authenticate(authenticateDto,
-                                                                   authenticateHeaderDto);
+            var authData = await _accountServices.Login(loginDto);
+            return Ok(authData);
+        }
 
-                return Ok(authData);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,
-                    "An exception occurred in {Controller} in the {Method} method. Login: {LoginSanitized}",
-                    nameof(AccountController), nameof(Authenticate), authenticateDto.Login?.Replace('\n', '_').Replace('\r', '_'));
-                return Unauthorized();
-            }
+        /// <summary>
+        /// Authenticates the user and returns the token if he has user permission
+        /// </summary>
+        /// <param name="authenticateDto"></param>
+        /// <param name="authenticateHeaderDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("login-sso")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [SwaggerOperation("Authenticates the user and returns the token if he has user permission")]
+        public async Task<IActionResult> LoginSSO([FromHeader] AuthenticateHeaderDto authenticateHeaderDto, [FromBody] AuthenticateDto authenticateDto)
+        {
+            var authData = await _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
+            return Ok(authData);
         }
 
         /// <summary>
@@ -62,17 +64,9 @@ namespace WoopiAiHub.Api.Controllers
         [SwaggerOperation("Returns an access token if the internal key passed is valid")]
         public IActionResult AuthenticateApi(string key)
         {
-            try
-            {
-                var tokenApi = _accountServices.AuthenticateApi(key);
+            var tokenApi = _accountServices.AuthenticateApi(key);
 
-                return Ok(tokenApi);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AccountController)} in the {nameof(AuthenticateApi)} method.");
-                return Unauthorized();
-            }
+            return Ok(tokenApi);
         }
 
         /// <summary>
@@ -84,17 +78,52 @@ namespace WoopiAiHub.Api.Controllers
         [SwaggerOperation("Returns a client id")]
         public IActionResult FindClientId()
         {
-            try
-            {
-                var clientId = _accountServices.FindClientId();
+            var clientId = _accountServices.FindClientId();
 
-                return Ok(clientId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AccountController)} in the {nameof(FindClientId)} method.");
-                return Unauthorized();
-            }
+            return Ok(clientId);
+        }
+
+        /// <summary>
+        /// Refreshes the access token using the refresh token stored in the request cookies.
+        /// </summary>
+        /// <remarks>This method retrieves the refresh token from the request cookies and attempts to
+        /// generate a new access token. If the refresh token is missing or invalid, the appropriate HTTP status code
+        /// and error message are returned.</remarks>
+        /// <returns>An <see cref="IActionResult"/> containing the new access token if the operation is successful, or an error
+        /// response if the refresh token is missing or invalid.</returns>
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+                return BadRequest("Refresh token missing.");
+
+            var accessToken = await _accountServices.RefreshTokenAsync(refreshToken);
+
+            if (string.IsNullOrEmpty(accessToken))
+                return Unauthorized("Invalid refresh token.");
+
+            return Ok(new { token = accessToken });
+        }
+
+        /// <summary>
+        /// Logs out the current user by revoking their refresh token.
+        /// </summary>
+        /// <remarks>This method checks for the presence of a refresh token in the request cookies and
+        /// revokes it  using the account services. If the refresh token is missing, a <see cref="BadRequestResult"/> 
+        /// is returned. Otherwise, the result of the revocation is returned in an <see
+        /// cref="OkObjectResult"/>.</remarks>
+        /// <returns>An <see cref="IActionResult"/> indicating the outcome of the logout operation. Returns  <see
+        /// cref="BadRequestResult"/> if the refresh token is missing, or <see cref="OkObjectResult"/>  with the
+        /// revocation result if successful.</returns>
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
+                return BadRequest("Refresh token missing.");
+
+            var result = await _accountServices.RevokeTokenAsync(refreshToken);
+
+            return Ok(result);
         }
     }
 }
