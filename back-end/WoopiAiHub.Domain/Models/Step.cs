@@ -8,7 +8,7 @@ namespace WoopiAiHub.Domain.Models
         public int WorkflowId { get; private set; }
 
         [Column("Name", TypeName = "varchar(255)")]
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
 
         [Column("Order", TypeName = "int")]
         public int Order { get; private set; }
@@ -19,10 +19,10 @@ namespace WoopiAiHub.Domain.Models
         [Column("StatusId", TypeName = "int")]
         public int StatusId { get; private set; }
 
-        public virtual Workflow Workflow { get; set; }
-        public virtual Profile Profile { get; set; }
-        public virtual Status Status { get; set; }
-        public virtual ICollection<Card> Cards { get; set; }
+        public virtual Workflow? Workflow { get; set; }
+        public virtual Profile? Profile { get; set; }
+        public virtual Status? Status { get; set; }
+        public virtual ICollection<Card> Cards { get; set; } = [];
 
         public Step(int id, DateTime created, int workflowId, string name, int order, int profileId, int statusId)
             : base(id, created)

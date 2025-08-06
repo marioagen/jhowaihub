@@ -5,10 +5,10 @@ namespace WoopiAiHub.Domain.Models
     public class Status : BaseEntity
     {
         [Column("Name", TypeName = "varchar(50)")]
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
 
-        public virtual ICollection<Step> Steps { get; set; }
-        public virtual ICollection<Card> Cards { get; set; }
+        public virtual ICollection<Step> Steps { get; set; } = [];
+        public virtual ICollection<Card> Cards { get; set; } = [];
 
         public Status(string name, int id, DateTime created) : base(id, created)
         {

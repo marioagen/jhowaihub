@@ -11,14 +11,14 @@ namespace WoopiAiHub.Domain.Models
         public int DocumentId { get; private set; }
 
         [Column("Name", TypeName = "varchar(255)")]
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
 
         [Column("StatusId", TypeName = "int")]
         public int StatusId { get; private set; }
 
-        public virtual Step Step { get; set; }
-        public virtual Document Document { get; set; }
-        public virtual Status Status { get; set; }
+        public virtual Step? Step { get; set; }
+        public virtual Document? Document { get; set; }
+        public virtual Status? Status { get; set; }
 
         public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId)
             : base(id, created)

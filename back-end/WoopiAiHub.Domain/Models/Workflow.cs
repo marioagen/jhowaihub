@@ -11,7 +11,7 @@ namespace WoopiAiHub.Domain.Models
         public string Name { get; private set; }
 
         public virtual ICollection<Step> Steps { get; set; }
-        public virtual Team Team { get; set; }
+        public virtual Team? Team { get; set; }
 
         public Workflow(int id, DateTime created, int teamId, string name)
             : base(id, created)
@@ -25,7 +25,6 @@ namespace WoopiAiHub.Domain.Models
         /// Use to EF context
         /// </summary>
         private Workflow(int id, DateTime created) : base(id, created) { }
-
 
         public void AddStep(Step step)
         {
