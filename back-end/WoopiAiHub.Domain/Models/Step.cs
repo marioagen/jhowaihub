@@ -1,0 +1,50 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace WoopiAiHub.Domain.Models
+{
+    public class Step : BaseEntity
+    {
+        [Column("WorkflowId", TypeName = "int")]
+        public int WorkflowId { get; private set; }
+
+        [Column("Name", TypeName = "varchar(255)")]
+        public string Name { get; private set; }
+
+        [Column("Order", TypeName = "int")]
+        public int Order { get; private set; }
+
+        [Column("ProfileId", TypeName = "int")]
+        public int ProfileId { get; private set; }
+
+        [Column("StatusId", TypeName = "int")]
+        public int StatusId { get; private set; }
+
+        public virtual Workflow Workflow { get; private set; }
+        public virtual Profile Profile { get; private set; }
+        public virtual StepStatus Status { get; private set; }
+        public virtual ICollection<Card> Cards { get; private set; }
+
+        public Step(int id, DateTime created, int workflowId, string name, int order, int profileId, int statusId)
+            : base(id, created)
+        {
+            WorkflowId = workflowId;
+            Name = name;
+            Order = order;
+            ProfileId = profileId;
+            StatusId = statusId;
+            Cards = new List<Card>();
+        }
+
+        private Step(int id, DateTime created) : base(id, created) { }
+
+        public void AddCard(Card card)
+        {
+            if (card == null)
+                throw new ArgumentNullException(nameof(card));
+
+            if (Cards.Any(c => c.Id == card.Id))
+                return;
+            Cards.Add(card);
+        }
+    }
+}

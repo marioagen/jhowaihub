@@ -10,6 +10,8 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<User> Users { get; set; }
         public virtual ICollection<Document> Documents { get; set; }
 
+        public virtual ICollection<Workflow> Workflows { get; set; }
+
         public Team(string name,
                     int id,
                     DateTime created) : base(id, created)

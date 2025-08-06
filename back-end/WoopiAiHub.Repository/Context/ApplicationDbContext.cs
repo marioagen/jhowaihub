@@ -33,6 +33,10 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<Team> Teams { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<Profile> Profiles { get; set; }
+        public DbSet<Workflow> Workflows { get; set; }
+        public DbSet<Step> Steps { get; set; }
+        public DbSet<Card> Cards { get; set; }
+        public DbSet<StepStatus> StepStatuses { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -58,6 +62,10 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<Team>(new TeamMap().Configure);
             modelBuilder.Entity<Permission>(new PermissionMap().Configure);
             modelBuilder.Entity<Profile>(new ProfileMap().Configure);
+            modelBuilder.Entity<Workflow>(new WorkflowMap().Configure);
+            modelBuilder.Entity<Step>(new StepMap().Configure);
+            modelBuilder.Entity<Card>(new CardMap().Configure);
+            modelBuilder.Entity<StepStatus>(new StepStatusMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }
