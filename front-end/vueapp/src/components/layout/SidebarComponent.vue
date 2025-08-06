@@ -174,11 +174,11 @@
                 title: "Component SideBarTest",
                 showLogoDarkMode: this.theme,
                 permissions: {
-                    questions: hasPermission("Questions:View"),
-                    documents: hasPermission("Documents:View"),
-                    types: hasPermission("Types:View"),
-                    quizzes: hasPermission("Quizzes:View"),
-                    users: hasPermission("Users:View"),
+                    questions: hasPermission("Questions", "View"),
+                    documents: hasPermission("Documents","View"),
+                    types: hasPermission("Types", "View"),
+                    quizzes: hasPermission("Quizzes", "View"),
+                    users: hasPermission("Users", "View"),
                 }
             };
         },
