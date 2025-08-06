@@ -8,7 +8,7 @@ namespace WoopiAiHub.Repository.Mappings
     {
         public void Configure(EntityTypeBuilder<Status> builder)
         {
-            builder.ToTable("StepStatus");
+            builder.ToTable("Status");
 
             builder.HasKey(ss => ss.Id);
 
@@ -20,6 +20,16 @@ namespace WoopiAiHub.Repository.Mappings
             builder.Property(ss => ss.Created)
                 .HasColumnType("datetime")
                 .IsRequired();
+
+            builder.HasMany(c => c.Cards)
+                .WithOne(c => c.Status)
+                .HasForeignKey(c => c.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.Steps)
+                .WithOne(c => c.Status)
+                .HasForeignKey(c => c.StatusId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(ss => ss.Name).IsUnique();
             builder.HasIndex(ss => ss.Created);

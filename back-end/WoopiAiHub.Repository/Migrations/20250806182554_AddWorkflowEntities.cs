@@ -12,7 +12,7 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "StepStatus",
+                name: "Status",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -22,7 +22,7 @@ namespace WoopiAiHub.Repository.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StepStatus", x => x.Id);
+                    table.PrimaryKey("PK_Status", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -69,9 +69,9 @@ namespace WoopiAiHub.Repository.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Steps_StepStatus_StatusId",
+                        name: "FK_Steps_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "StepStatus",
+                        principalTable: "Status",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -104,9 +104,9 @@ namespace WoopiAiHub.Repository.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Cards_StepStatus_StatusId",
+                        name: "FK_Cards_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "StepStatus",
+                        principalTable: "Status",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -143,6 +143,17 @@ namespace WoopiAiHub.Repository.Migrations
                 column: "StepId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Status_Created",
+                table: "Status",
+                column: "Created");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Status_Name",
+                table: "Status",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Steps_Created",
                 table: "Steps",
                 column: "Created");
@@ -169,17 +180,6 @@ namespace WoopiAiHub.Repository.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_StepStatus_Created",
-                table: "StepStatus",
-                column: "Created");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StepStatus_Name",
-                table: "StepStatus",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Workflows_Created",
                 table: "Workflows",
                 column: "Created");
@@ -190,15 +190,15 @@ namespace WoopiAiHub.Repository.Migrations
                 column: "TeamId");
 
             migrationBuilder.InsertData(
-                table: "StepStatus",
-                columns: new[] { "Id", "Name", "Created" },
+                table: "Status",
+                columns: ["Id", "Name", "Created"],
                 values: new object[,]
                 {
-                                { 1, "AwaitingAnalysis", DateTime.UtcNow },
-                                { 2, "Analyzed", DateTime.UtcNow },
-                                { 3, "WaitingForApproval", DateTime.UtcNow },
-                                { 4, "Approved", DateTime.UtcNow },
-                                { 5, "Done", DateTime.UtcNow }
+                    { 1, "AwaitingAnalysis", DateTime.UtcNow },
+                    { 2, "Analyzed", DateTime.UtcNow },
+                    { 3, "WaitingForApproval", DateTime.UtcNow },
+                    { 4, "Approved", DateTime.UtcNow },
+                    { 5, "Done", DateTime.UtcNow }
                 });
         }
 
@@ -206,9 +206,9 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
-                table: "StepStatus",
+                table: "Status",
                 keyColumn: "Id",
-                keyValues: new object[] { 1, 2, 3, 4, 5 });
+                keyValues: [1, 2, 3, 4, 5]);
 
             migrationBuilder.DropTable(
                 name: "Cards");
@@ -217,7 +217,7 @@ namespace WoopiAiHub.Repository.Migrations
                 name: "Steps");
 
             migrationBuilder.DropTable(
-                name: "StepStatus");
+                name: "Status");
 
             migrationBuilder.DropTable(
                 name: "Workflows");

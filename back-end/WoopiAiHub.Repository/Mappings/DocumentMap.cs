@@ -44,6 +44,10 @@ namespace WoopiAiHub.Repository.Mappings
                     .WithOne(s => s.Document)
                     .HasForeignKey<DocumentNormalized>(c => c.IdDocument);
 
+            builder.HasMany(u => u.Cards)
+                   .WithOne(s => s.Document)
+                   .HasForeignKey(c => c.DocumentId);
+
             builder.HasMany(p => p.Teams)
                    .WithMany(pr => pr.Documents)
                    .UsingEntity<Dictionary<string, object>>(

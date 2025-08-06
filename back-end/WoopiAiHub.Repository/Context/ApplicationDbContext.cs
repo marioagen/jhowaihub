@@ -36,7 +36,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<Workflow> Workflows { get; set; }
         public DbSet<Step> Steps { get; set; }
         public DbSet<Card> Cards { get; set; }
-        public DbSet<Status> StepStatuses { get; set; }
+        public DbSet<Status> Status { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

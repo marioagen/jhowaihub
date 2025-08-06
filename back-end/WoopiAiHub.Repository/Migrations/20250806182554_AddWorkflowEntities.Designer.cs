@@ -12,7 +12,7 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250806145528_AddWorkflowEntities")]
+    [Migration("20250806182554_AddWorkflowEntities")]
     partial class AddWorkflowEntities
     {
         /// <inheritdoc />
@@ -435,7 +435,7 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("StepStatus", (string)null);
+                    b.ToTable("Status", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>
@@ -689,13 +689,13 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Document", "Document")
-                        .WithMany()
+                        .WithMany("Cards")
                         .HasForeignKey("DocumentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WoopiAiHub.Domain.Models.Status", "Status")
-                        .WithMany()
+                        .WithMany("Cards")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -768,13 +768,13 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Profile", "Profile")
-                        .WithMany()
+                        .WithMany("Steps")
                         .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WoopiAiHub.Domain.Models.Status", "Status")
-                        .WithMany()
+                        .WithMany("Steps")
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -805,9 +805,16 @@ namespace WoopiAiHub.Repository.Migrations
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Document", b =>
                 {
+                    b.Navigation("Cards");
+
                     b.Navigation("DocumentHistories");
 
                     b.Navigation("DocumentNormalized");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Profile", b =>
+                {
+                    b.Navigation("Steps");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Question", b =>
@@ -818,6 +825,13 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Questionnaire", b =>
                 {
                     b.Navigation("QuestionQuestionnaire");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Status", b =>
+                {
+                    b.Navigation("Cards");
+
+                    b.Navigation("Steps");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>

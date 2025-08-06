@@ -26,6 +26,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<DocumentHistory> DocumentHistories { get; set; }
         public virtual DocumentNormalized? DocumentNormalized { get; set; }
         public virtual ICollection<Team> Teams { get; set; }
+        public virtual ICollection<Card> Cards { get; set; }
 
         public Document(string name,
                        string description,
