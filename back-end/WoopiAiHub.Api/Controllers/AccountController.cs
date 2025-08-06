@@ -2,11 +2,13 @@
 using WoopiAiHub.Domain.Interfaces.Services;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs.Request;
+using Microsoft.AspNetCore.Cors;
 
 namespace WoopiAiHub.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("all")]
     public class AccountController : Controller
     {
         private readonly IAccountServices _accountServices;

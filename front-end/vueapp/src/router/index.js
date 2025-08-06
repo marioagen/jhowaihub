@@ -12,6 +12,7 @@ import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import QuestionsPage from "@/pages/questions.vue";
 import UserManagePage from "@/pages/user-manager.vue";
+import WorkflowDocumentsPage from "@/pages/workflow-documents.vue";
 
 function authenticate(to, from, next) {
     var usuario = JSON.parse(window.localStorage.getItem("project"));
@@ -106,6 +107,13 @@ const routes = [
         path: "/manage-user",
         name: "UserManage",
         component: UserManagePage,
+        meta: { layout: "default" },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow-documents",
+        name: "WorkflowDocuments",
+        component: WorkflowDocumentsPage,
         meta: { layout: "default" },
         beforeEnter: authenticate,
     },

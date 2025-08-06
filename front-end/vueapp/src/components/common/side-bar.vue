@@ -3,34 +3,26 @@
         <!-- Logo -->
         <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
             <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'DocumentList' }">
-                <img
-                    v-if="!showLogoDarkMode && isCollapsed"
-                    src="./../../assets/img/woopiai-hub-small-logo.png"
-                    :title="$t('labelGoHome')"
-                    width="30"
-                    height="30"
-                />
-                <img
-                    v-else-if="!showLogoDarkMode"
-                    src="./../../assets/img/woopiai-hub-logo.png"
-                    :title="$t('labelGoHome')"
-                    width="120"
-                    height="40"
-                />
-                <img
-                    v-else-if="isCollapsed"
-                    src="./../../assets/img/woopiai-hub-small-logo.png"
-                    :title="$t('labelGoHome')"
-                    width="30"
-                    height="30"
-                />
-                <img
-                    v-else
-                    src="./../../assets/img/woopiai-hub-logo.png"
-                    :title="$t('labelGoHome')"
-                    width="186"
-                    height="40"
-                />
+                <img v-if="!showLogoDarkMode && isCollapsed"
+                     src="./../../assets/img/woopiai-hub-small-logo.png"
+                     :title="$t('labelGoHome')"
+                     width="30"
+                     height="30" />
+                <img v-else-if="!showLogoDarkMode"
+                     src="./../../assets/img/woopiai-hub-logo.png"
+                     :title="$t('labelGoHome')"
+                     width="120"
+                     height="40" />
+                <img v-else-if="isCollapsed"
+                     src="./../../assets/img/woopiai-hub-small-logo.png"
+                     :title="$t('labelGoHome')"
+                     width="30"
+                     height="30" />
+                <img v-else
+                     src="./../../assets/img/woopiai-hub-logo.png"
+                     :title="$t('labelGoHome')"
+                     width="186"
+                     height="40" />
             </router-link>
         </div>
 
@@ -44,61 +36,65 @@
 
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li class="mb-1">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/manage-user"
-                >
-                    <img
-                        src="./../../assets/img/manage-users.svg"
-                        :title="$t('labelManageUsers')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/manage-user">
+                    <img src="./../../assets/img/manage-users.svg"
+                         :title="$t('labelManageUsers')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelManageUsers") }}</span>
                 </router-link>
             </li>
 
             <li class="mb-1">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/document-list"
-                >
-                    <img
-                        src="./../../assets/img/docs-analyze.svg"
-                        :title="$t('labelDocuments')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/document-list">
+                    <img src="./../../assets/img/docs-analyze.svg"
+                         :title="$t('labelDocuments')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelDocuments") }}</span>
                 </router-link>
             </li>
 
             <li class="mb-1">
-                <router-link
-                    :class="[
+                <router-link :class="[
+                       'd-flex align-items-center',
+                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
+                        isCollapsed ? 'justify-content-center' : '',
+                        'custom-menu-item',
+                    ]"
+                             to="/workflow-docs">
+                    <img src="./../../assets/img/workflow.svg"
+                         :title="$t('labelWorkflow')"
+                         width="20"
+                         class="icon-sidebar" />
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelDocuments") }}</span>
+                </router-link>
+            </li>
+
+            <li class="mb-1">
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/types"
-                >
-                    <img
-                        src="./../../assets/img/type-icon.svg"
-                        :title="$t('labelTypes')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/types">
+                    <img src="./../../assets/img/type-icon.svg"
+                         :title="$t('labelTypes')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">
                         {{ $t("labelTypes") }}
                     </span>
@@ -106,41 +102,33 @@
             </li>
 
             <li>
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/manage-question"
-                >
-                    <img
-                        src="../../assets/img/question-icon.svg"
-                        :title="$t('labelQuestions')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/manage-question">
+                    <img src="../../assets/img/question-icon.svg"
+                         :title="$t('labelQuestions')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelQuestions") }}</span>
                 </router-link>
             </li>
 
             <li>
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/manage-quiz"
-                >
-                    <img
-                        src="./../../assets/img/questionnaires-icon.svg"
-                        :title="$t('labelQuestionnaires')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/manage-quiz">
+                    <img src="./../../assets/img/questionnaires-icon.svg"
+                         :title="$t('labelQuestionnaires')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelQuestionnaires") }}</span>
                 </router-link>
             </li>
@@ -180,7 +168,7 @@
         watch: {},
         methods: {},
         computed: {},
-        created() {},
+        created() { },
         updated() {
             let self = this;
             (function () {
@@ -191,8 +179,8 @@
                 }
             })();
         },
-        mounted() {},
-        unmounted() {},
+        mounted() { },
+        unmounted() { },
     };
 </script>
 
@@ -224,9 +212,7 @@
     .btn-toggle-nav a {
         margin-left: 0 !important;
         color: #676879;
-        transition:
-            background-color 0.2s ease,
-            color 0.2s ease;
+        transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     .btn-toggle-nav {
@@ -246,10 +232,10 @@
         line-height: 1.5;
     }
 
-    .custom-menu-item:hover {
-        background-color: #f0f2f5;
-        text-decoration: none;
-    }
+        .custom-menu-item:hover {
+            background-color: #f0f2f5;
+            text-decoration: none;
+        }
 
     .collapse-toggle-container {
         display: flex;
@@ -293,9 +279,9 @@
         padding: 0;
     }
 
-    .offcanvas-header .btn-close {
-        padding: 0.5rem 1rem;
-    }
+        .offcanvas-header .btn-close {
+            padding: 0.5rem 1rem;
+        }
 
     .btn-toggle {
         display: inline-flex;
@@ -307,31 +293,31 @@
         border: 0;
     }
 
-    .btn-toggle:hover,
-    .btn-toggle:focus {
-        color: rgba(0, 0, 0, 0.85);
-        background-color: #d2f4ea;
-    }
+        .btn-toggle:hover,
+        .btn-toggle:focus {
+            color: rgba(0, 0, 0, 0.85);
+            background-color: #d2f4ea;
+        }
 
-    .btn-toggle:active {
-        background-color: transparent;
-    }
+        .btn-toggle:active {
+            background-color: transparent;
+        }
 
-    .btn-toggle::before {
-        width: 1.25em;
-        line-height: 0;
-        content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%280,0,0,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
-        transition: transform 0.35s ease;
-        transform-origin: 0.5em 50%;
-    }
+        .btn-toggle::before {
+            width: 1.25em;
+            line-height: 0;
+            content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%280,0,0,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
+            transition: transform 0.35s ease;
+            transform-origin: 0.5em 50%;
+        }
 
-    .btn-toggle[aria-expanded="true"] {
-        color: rgba(0, 0, 0, 0.85);
-    }
+        .btn-toggle[aria-expanded="true"] {
+            color: rgba(0, 0, 0, 0.85);
+        }
 
-    .btn-toggle[aria-expanded="true"]::before {
-        transform: rotate(90deg);
-    }
+            .btn-toggle[aria-expanded="true"]::before {
+                transform: rotate(90deg);
+            }
 
     .btn-toggle-nav a {
         display: inline-flex;
@@ -341,10 +327,10 @@
         text-decoration: none;
     }
 
-    .btn-toggle-nav a:hover,
-    .btn-toggle-nav a:focus {
-        background-color: #d2f4ea;
-    }
+        .btn-toggle-nav a:hover,
+        .btn-toggle-nav a:focus {
+            background-color: #d2f4ea;
+        }
 
     .btn-toggle-nav > li > .active {
         background-color: #d2f4ea;
