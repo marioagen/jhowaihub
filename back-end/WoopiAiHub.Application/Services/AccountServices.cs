@@ -323,24 +323,7 @@ namespace WoopiAiHub.Application.Services
 
             var userProfile = await _userRepository.FindUserProfilesByEmailAsync(userEmail);
             bool isAdmin = userProfile.Contains("admin");
-            List<Dictionary<string, string>> permissionsList;
-            if (isAdmin)
-            {
-                permissionsList = new List<Dictionary<string, string>>();
-            }
-            else
-            {
-                permissionsList = new List<Dictionary<string, string>>();
-                foreach (var kv in permissions)
-                {
-                    var resource = kv.Key;
-                    foreach (var action in kv.Value)
-                    {
-                        permissionsList.Add(new Dictionary<string, string> { { resource, action } });
-                    }
-                }
-            }
-
+            var permissionsList = BuildPermissionsList(permissions, isAdmin);
             var permissionsJson = JsonConvert.SerializeObject(permissionsList);
             var claims = new List<Claim>
             {
@@ -365,6 +348,23 @@ namespace WoopiAiHub.Application.Services
             await _refreshTokenServices.SaveAsync(userEmail, refreshToken);
 
             return (AccessToken: accessToken, RefreshToken: refreshToken);
+        }
+
+        private List<Dictionary<string, string>> BuildPermissionsList(Dictionary<string, List<string>> permissions, bool isAdmin)
+        {
+            var permissionsList = new List<Dictionary<string, string>>();
+            if (isAdmin)
+                return permissionsList;
+
+            foreach (var kv in permissions)
+            {
+                var resource = kv.Key;
+                foreach (var action in kv.Value)
+                {
+                    permissionsList.Add(new Dictionary<string, string> { { resource, action } });
+                }
+            }
+            return permissionsList;
         }
 
         /// <summary>
