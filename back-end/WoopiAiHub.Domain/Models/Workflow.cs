@@ -10,8 +10,8 @@ namespace WoopiAiHub.Domain.Models
         [Column("Name", TypeName = "varchar(255)")]
         public string Name { get; private set; }
 
-        public virtual ICollection<Step> Steps { get; private set; }
-        public virtual Team Team { get; private set; }
+        public virtual ICollection<Step> Steps { get; set; }
+        public virtual Team Team { get; set; }
 
         public Workflow(int id, DateTime created, int teamId, string name)
             : base(id, created)

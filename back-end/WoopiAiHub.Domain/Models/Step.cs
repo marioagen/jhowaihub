@@ -19,10 +19,10 @@ namespace WoopiAiHub.Domain.Models
         [Column("StatusId", TypeName = "int")]
         public int StatusId { get; private set; }
 
-        public virtual Workflow Workflow { get; private set; }
-        public virtual Profile Profile { get; private set; }
-        public virtual Status Status { get; private set; }
-        public virtual ICollection<Card> Cards { get; private set; }
+        public virtual Workflow Workflow { get; set; }
+        public virtual Profile Profile { get; set; }
+        public virtual Status Status { get; set; }
+        public virtual ICollection<Card> Cards { get; set; }
 
         public Step(int id, DateTime created, int workflowId, string name, int order, int profileId, int statusId)
             : base(id, created)

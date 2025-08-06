@@ -16,9 +16,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("StatusId", TypeName = "int")]
         public int StatusId { get; private set; }
 
-        public virtual Step Step { get; private set; }
-        public virtual Document Document { get; private set; }
-        public virtual Status Status { get; private set; }
+        public virtual Step Step { get; set; }
+        public virtual Document Document { get; set; }
+        public virtual Status Status { get; set; }
 
         public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId)
             : base(id, created)
