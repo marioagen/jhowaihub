@@ -137,6 +137,9 @@ export default {
             this.credentials.email = this.values.email;
             AuthService.Login(this.credentials)
                 .then((response) => {
+                    let tokenData = this.getPermissions(response.tokenApi);
+                    this.$store.commit("updatePermissions", tokenData.permissions);
+
                     let dataUser = {
                         language: this.$store.state.userProfile.language,
                         image: "",
@@ -146,10 +149,9 @@ export default {
                         tokenApi: response.tokenApi,
                         tenant: response.tenant,
                         keyMongoAccess: "",
+                        isAdmin: tokenData.isAdmin
                     };
 
-                    let permissions = this.getPermissions(response.tokenApi);
-                    this.$store.commit("updatePermissions", permissions);
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
@@ -256,6 +258,9 @@ export default {
 
             AuthService.LoginSSO(formData, userAzure)
                 .then((response) => {
+                    let tokenData = this.getPermissions(response.tokenApi);
+                    this.$store.commit("updatePermissions", tokenData.permissions);
+
                     let dataUser = {
                         language: this.$store.state.userProfile.language,
                         image: "",
@@ -265,10 +270,9 @@ export default {
                         tokenApi: response.tokenApi,
                         tenant: response.tenant,
                         keyMongoAccess: "",
+                        isAdmin: tokenData.isAdmin
                     };
-
-                    let permissions = this.getPermissions(response.tokenApi);
-                    this.$store.commit("updatePermissions", permissions);
+                    
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
