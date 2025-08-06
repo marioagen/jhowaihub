@@ -16,6 +16,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Infrastructure.Multitenancy;
+using Newtonsoft.Json;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -322,23 +323,33 @@ namespace WoopiAiHub.Application.Services
 
             var userProfile = await _userRepository.FindUserProfilesByEmailAsync(userEmail);
             bool isAdmin = userProfile.Contains("admin");
+            List<Dictionary<string, string>> permissionsList;
+            if (isAdmin)
+            {
+                permissionsList = new List<Dictionary<string, string>>();
+            }
+            else
+            {
+                permissionsList = new List<Dictionary<string, string>>();
+                foreach (var kv in permissions)
+                {
+                    var resource = kv.Key;
+                    foreach (var action in kv.Value)
+                    {
+                        permissionsList.Add(new Dictionary<string, string> { { resource, action } });
+                    }
+                }
+            }
 
+            var permissionsJson = JsonConvert.SerializeObject(permissionsList);
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userEmail),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+                new Claim("isAdmin", isAdmin.ToString().ToLower()),
+                new Claim("permissions", permissionsJson)
             };
-
-            if (isAdmin)
-                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
-
-            foreach (var kv in permissions)
-            {
-                var resource = kv.Key;
-                var actions = string.Join(',', kv.Value);
-                claims.Add(new Claim($"perm:{resource}", actions));
-            }
 
             var jwtToken = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
