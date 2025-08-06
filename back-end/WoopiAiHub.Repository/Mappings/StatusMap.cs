@@ -4,9 +4,9 @@ using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Repository.Mappings
 {
-    public class StepStatusMap : IEntityTypeConfiguration<StepStatus>
+    public class StatusMap : IEntityTypeConfiguration<Status>
     {
-        public void Configure(EntityTypeBuilder<StepStatus> builder)
+        public void Configure(EntityTypeBuilder<Status> builder)
         {
             builder.ToTable("StepStatus");
 

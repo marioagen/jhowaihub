@@ -2,16 +2,16 @@
 
 namespace WoopiAiHub.Domain.Models
 {
-    public class StepStatus : BaseEntity
+    public class Status : BaseEntity
     {
         [Column("Name", TypeName = "varchar(50)")]
         public string Name { get; private set; }
 
-        public StepStatus(string name, int id, DateTime created) : base(id, created)
+        public Status(string name, int id, DateTime created) : base(id, created)
         {
             Name = name;
         }
 
-        private StepStatus(int id, DateTime created) : base(id, created) { }
+        private Status(int id, DateTime created) : base(id, created) { }
     }
 }

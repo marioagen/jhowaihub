@@ -21,7 +21,7 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual Workflow Workflow { get; private set; }
         public virtual Profile Profile { get; private set; }
-        public virtual StepStatus Status { get; private set; }
+        public virtual Status Status { get; private set; }
         public virtual ICollection<Card> Cards { get; private set; }
 
         public Step(int id, DateTime created, int workflowId, string name, int order, int profileId, int statusId)

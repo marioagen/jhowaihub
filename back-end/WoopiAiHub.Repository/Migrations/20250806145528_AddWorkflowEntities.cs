@@ -194,11 +194,11 @@ namespace WoopiAiHub.Repository.Migrations
                 columns: new[] { "Id", "Name", "Created" },
                 values: new object[,]
                 {
-                    { 1, "AwaitingAnalysis", DateTime.UtcNow },
-                    { 2, "Analyzed", DateTime.UtcNow },
-                    { 3, "WaitingForApproval", DateTime.UtcNow },
-                    { 4, "Approved", DateTime.UtcNow },
-                    { 5, "Done", DateTime.UtcNow }
+                                { 1, "AwaitingAnalysis", DateTime.UtcNow },
+                                { 2, "Analyzed", DateTime.UtcNow },
+                                { 3, "WaitingForApproval", DateTime.UtcNow },
+                                { 4, "Approved", DateTime.UtcNow },
+                                { 5, "Done", DateTime.UtcNow }
                 });
         }
 

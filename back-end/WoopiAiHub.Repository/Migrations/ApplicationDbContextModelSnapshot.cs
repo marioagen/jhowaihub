@@ -406,6 +406,35 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Questionnaires", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Status", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("StepStatus", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>
                 {
                     b.Property<int>("Id")
@@ -455,35 +484,6 @@ namespace WoopiAiHub.Repository.Migrations
                         .IsUnique();
 
                     b.ToTable("Steps", (string)null);
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Created");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("Name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Created");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("StepStatus", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
@@ -691,7 +691,7 @@ namespace WoopiAiHub.Repository.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WoopiAiHub.Domain.Models.StepStatus", "Status")
+                    b.HasOne("WoopiAiHub.Domain.Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -770,7 +770,7 @@ namespace WoopiAiHub.Repository.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WoopiAiHub.Domain.Models.StepStatus", "Status")
+                    b.HasOne("WoopiAiHub.Domain.Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict)
