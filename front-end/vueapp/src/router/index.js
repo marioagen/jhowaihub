@@ -26,7 +26,7 @@ function authenticate(to, from, next) {
         return next({ path: "/" });
     }
 
-    if (!hasPermission(to)) {
+    if (!hasPermission(to.meta.module, to.meta.action)) {
         return next({ path: "/unauthorized" });
     }
 
@@ -63,7 +63,9 @@ const routes = [
         name: "DocumentUpload",
         component: DocumentUpload,
         meta: { 
-            layout: "default" 
+            layout: "default",
+            module: "Documents",
+            action: "View",
         },
     },
     {
@@ -72,9 +74,10 @@ const routes = [
         component: DocumentList,
         meta: { 
             layout: "default",
-            permission: ["documents_view"],
+            module: "Documents",
+            action: "View",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/types",
@@ -82,9 +85,10 @@ const routes = [
         component: TypesPage,
         meta: {
             layout: "default",
-            permission: ["types_view"],
+            module: "Types",
+            action: "View",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/questions",
@@ -92,57 +96,76 @@ const routes = [
         component: QuestionsPage,
         meta: { 
             layout: "default",
-            permission: ["questions_view"],
+            module: "Questions",
+            action: "View",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/quizzes",
         name: "Quiz",
         component: QuizzesPage,
         meta: { 
-            layout: "default" 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
         },
+        beforeEnter: authenticate,
     },
     {
         path: "/quizzes/new",
         name: "NewQuizz",
         component: NewQuizz,
         meta: { 
-            layout: "default" 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
         },
+        beforeEnter: authenticate,
     },
     {
         path: "/quizzes/edit/:id",
         name: "EditQuizz",
         component: EditQuizz,
         meta: { 
-            layout: "default" 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
         },
+        beforeEnter: authenticate,
     },
     {
         path: "/normalize/:id",
         name: "Normalize",
         component: NormalizeIndex,
         meta: { 
-            layout: "default" 
+            layout: "default",
+            module: "Documents",
+            action: "View",
         },
+        beforeEnter: authenticate,
     },
     {
         path: "/analyzer/:id",
         name: "Analyzer",
         component: AnalyzerIndex,
         meta: { 
-            layout: "default" 
+            layout: "default",
+            module: "Documents",
+            action: "View",
         },
+        beforeEnter: authenticate,
     },
     {
         path: "/manage-user",
         name: "UserManage",
         component: UserManagePage,
         meta: { 
-            layout: "default" 
+            layout: "default",
+            module: "Users",
+            action: "View",
         },
+        beforeEnter: authenticate,
     },
 ];
 
