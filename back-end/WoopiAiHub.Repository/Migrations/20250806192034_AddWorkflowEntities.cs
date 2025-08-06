@@ -187,7 +187,8 @@ namespace WoopiAiHub.Repository.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Workflows_TeamId",
                 table: "Workflows",
-                column: "TeamId");
+                column: "TeamId",
+                unique: true);
 
             migrationBuilder.InsertData(
                 table: "Status",
@@ -206,9 +207,9 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
-                table: "Status",
-                keyColumn: "Id",
-                keyValues: [1, 2, 3, 4, 5]);
+                 table: "Status",
+                 keyColumn: "Id",
+                 keyValues: [1, 2, 3, 4, 5]);
 
             migrationBuilder.DropTable(
                 name: "Cards");

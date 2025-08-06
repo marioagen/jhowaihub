@@ -603,7 +603,8 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("Created");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("TeamId")
+                        .IsUnique();
 
                     b.ToTable("Workflows", (string)null);
                 });
@@ -792,8 +793,8 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Team", "Team")
-                        .WithMany("Workflows")
-                        .HasForeignKey("TeamId")
+                        .WithOne("Workflow")
+                        .HasForeignKey("WoopiAiHub.Domain.Models.Workflow", "TeamId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -838,7 +839,8 @@ namespace WoopiAiHub.Repository.Migrations
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
-                    b.Navigation("Workflows");
+                    b.Navigation("Workflow")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.TypeDoc", b =>
