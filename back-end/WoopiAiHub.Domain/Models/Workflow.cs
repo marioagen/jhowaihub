@@ -28,7 +28,7 @@ namespace WoopiAiHub.Domain.Models
 
         public void AddStep(Step step)
         {
-            ArgumentNullException.ThrowIfNull(step, nameof(step));
+            ArgumentNullException.ThrowIfNull(step);
 
             if (Steps.Any(s => s.Id == step.Id))
                 return;
