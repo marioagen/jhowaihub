@@ -54,12 +54,7 @@
                     ]"
                     to="/manage-user"
                 >
-                    <img
-                        src="./../../assets/img/manage-users.svg"
-                        :title="$t('labelManageUsers')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                    <LucideIcon icon="Users" strokeWidth="2.2" color="#ff6900" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelManageUsers") }}</span>
                 </router-link>
             </li>
@@ -74,13 +69,23 @@
                     ]"
                     to="/document-list"
                 >
-                    <img
-                        src="./../../assets/img/docs-analyze.svg"
-                        :title="$t('labelDocuments')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                    <LucideIcon icon="FileText" strokeWidth="2" color="#2f80ed" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelDocuments") }}</span>
+                </router-link>
+            </li>
+
+            <li class="mb-1" v-if="permissions.workflow">
+                <router-link
+                    :class="[
+                        'd-flex align-items-center',
+                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
+                        isCollapsed ? 'justify-content-center' : '',
+                        'custom-menu-item',
+                    ]"
+                    to="/workflow/edit"
+                >
+                    <LucideIcon icon="Workflow" strokeWidth="2" color="#00bba7" />
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelWorkflow") }}</span>
                 </router-link>
             </li>
 
@@ -94,12 +99,7 @@
                     ]"
                     to="/types"
                 >
-                    <img
-                        src="./../../assets/img/type-icon.svg"
-                        :title="$t('labelTypes')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                    <LucideIcon icon="BookmarkCheck" strokeWidth="2" color="	#f2c94c" />
                     <span v-show="!isCollapsed" class="ms-2">
                         {{ $t("labelTypes") }}
                     </span>
@@ -116,12 +116,7 @@
                     ]"
                     to="/questions"
                 >
-                    <img
-                        src="../../assets/img/question-icon.svg"
-                        :title="$t('labelQuestions')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                    <LucideIcon icon="MessageSquare" strokeWidth="2" color="#3fd67b" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelQuestions") }}</span>
                 </router-link>
             </li>
@@ -136,12 +131,7 @@
                     ]"
                     to="/quizzes"
                 >
-                    <img
-                        src="./../../assets/img/questionnaires-icon.svg"
-                        :title="$t('quizzes.title')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                    <LucideIcon icon="ClipboardList" strokeWidth="2" color="#a259ff" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("quizzes.title") }}</span>
                 </router-link>
             </li>
@@ -179,6 +169,7 @@
                     documents: hasPermission("Documents","View"),
                     types: hasPermission("Types", "View"),
                     quizzes: hasPermission("Quizzes", "View"),
+                    workflow: hasPermission("Workflow", "View"),
                 }
             };
         },
