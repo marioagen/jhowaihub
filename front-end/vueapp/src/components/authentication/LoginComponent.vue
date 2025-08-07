@@ -32,8 +32,7 @@
                                         class="form-control form-control-sm border-start-0"
                                         :class="{ 'is-invalid': errorMessage }" placeholder="user@mail.com" />
                                 </div>
-                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage
-                                    }}</span>
+                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
                             </Field>
                         </div>
 
