@@ -302,8 +302,6 @@
 
 <script>
     import date from "@/helpers/date";
-    import NavBar from "@/components/common/nav-bar";
-    import Breadcrumb from "@/components/common/breadcrumb";
     import SearchBar from "@/components/common/search-bar";
     import ModalAlert from "@/components/common/modal-alert";
     import api from "@/services/api";
@@ -349,8 +347,6 @@
             };
         },
         components: {
-            NavBar,
-            Breadcrumb,
             SearchBar,
             ModalAlert,
             Pagination,
