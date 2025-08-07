@@ -27,11 +27,9 @@ export default {
     name: "UnauthorizedPage",
     methods: {
         returnToPreviousPage() {
-            // Verifica se há histórico suficiente para voltar
             if (window.history.state && window.history.length > 1) {
                 this.$router.back();
             } else {
-                // Se não houver, redireciona para a tela de listagem
                 this.$router.push({ name: 'DocumentList' });
             }
         }
