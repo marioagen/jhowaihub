@@ -44,7 +44,7 @@
         <div class="sidebar-horizontal-separator"></div>
 
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li class="mb-1" v-if="permissions.users">
+            <li class="mb-1" v-if="permissions.management">
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -174,11 +174,11 @@
                 title: "Component SideBarTest",
                 showLogoDarkMode: this.theme,
                 permissions: {
+                    management: hasPermission("Management", "View"),
                     questions: hasPermission("Questions", "View"),
                     documents: hasPermission("Documents","View"),
                     types: hasPermission("Types", "View"),
                     quizzes: hasPermission("Quizzes", "View"),
-                    users: hasPermission("Users", "View"),
                 }
             };
         },
