@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import fs from 'node:fs';
 import pathNode from 'node:path';
+const isDev = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
   build: {
@@ -19,14 +20,29 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
-  server: {
-    https: {
-      key: fs.readFileSync(pathNode.resolve(process.cwd(), 'localhost-key.pem')),
-      cert: fs.readFileSync(pathNode.resolve(process.cwd(), 'localhost.pem')),
-    },
-    host: 'localhost',
-    port: 3000
-  },
+  server: (() => {
+    if (!isDev) return undefined;
+
+    const keyPath = path.resolve(process.cwd(), 'localhost-key.pem');
+    const certPath = path.resolve(process.cwd(), 'localhost.pem');
+
+    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+      return {
+        https: {
+          key: fs.readFileSync(keyPath),
+          cert: fs.readFileSync(certPath),
+        },
+        host: 'localhost',
+        port: 3000
+      };
+    }
+
+    console.warn('Certificados HTTPS não encontrados. Usando HTTP em modo desenvolvimento.');
+    return {
+      host: 'localhost',
+      port: 3000
+    };
+  })(),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
