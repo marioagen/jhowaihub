@@ -64,7 +64,7 @@
                 </router-link>
             </li>
 
-            <li class="mb-1" v-if="permissions.documents">
+            <li class="mb-1">
                 <router-link
                     :class="[
                         'd-flex align-items-center',

@@ -77,7 +77,6 @@ const routes = [
             module: "Documents",
             action: "View",
         },
-        beforeEnter: authenticate,
     },
     {
         path: "/types",
@@ -162,7 +161,7 @@ const routes = [
         component: UserManagePage,
         meta: { 
             layout: "default",
-            module: "Users",
+            module: "Management",
             action: "View",
         },
         beforeEnter: authenticate,

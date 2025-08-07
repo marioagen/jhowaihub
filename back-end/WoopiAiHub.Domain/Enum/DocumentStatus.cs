@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.Enum
 {
-    public enum Status
+    public enum DocumentStatus
     {
         NotAnalyzed = 0,
         Analyzed = 1

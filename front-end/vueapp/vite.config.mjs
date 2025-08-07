@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
+import fs from 'node:fs';
+import pathNode from 'node:path';
 
 export default defineConfig({
   build: {
@@ -17,6 +19,14 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  server: {
+    https: {
+      key: fs.readFileSync(pathNode.resolve(process.cwd(), 'localhost-key.pem')),
+      cert: fs.readFileSync(pathNode.resolve(process.cwd(), 'localhost.pem')),
+    },
+    host: 'localhost',
+    port: 3000
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -27,11 +37,6 @@ export default defineConfig({
   },
   define: {
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false'
-  },
-  server: {
-    port: 3000,
-    open: true,
-    historyApiFallback: true,
   },
   logLevel: 'info'
 })
