@@ -37,7 +37,7 @@ export default defineConfig({
       };
     }
 
-    console.warn('⚠️ Certificados HTTPS não encontrados. Usando HTTP em modo desenvolvimento.');
+    console.warn('Certificados HTTPS não encontrados. Usando HTTP em modo desenvolvimento.');
     return {
       host: 'localhost',
       port: 3000
