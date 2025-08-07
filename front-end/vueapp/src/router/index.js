@@ -13,6 +13,7 @@ import UserManagePage from "@/pages/user-manager.vue";
 import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
+import WorkflowEditPage from "@/pages/workflow/editWorkflow.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -166,6 +167,15 @@ const routes = [
             action: "View",
         },
         beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow/edit",
+        name: "WorkflowEdit",
+        component: WorkflowEditPage,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
     },
 ];
 
