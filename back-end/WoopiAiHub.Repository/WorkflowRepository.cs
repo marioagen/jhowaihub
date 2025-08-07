@@ -25,33 +25,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Workflows
                 .Where(w => w.TeamId == teamId)
-                .Select(w => new WorkflowDto
-                {
-                    Id = w.Id,
-                    Name = w.Name,
-                    TeamId = w.TeamId,
-                    Steps = w.Steps.Select(s => new StepDto
-                    {
-                        Id = s.Id,
-                        Name = s.Name,
-                        Order = s.Order,
-                        Profile = new ProfileDto
-                        {
-                            Id = s.Profile!.Id,
-                            Name = s.Profile.Name
-                        },
-                        Status = new StatusDto
-                        {
-                            Id = s.Status!.Id,
-                            Name = s.Status.Name
-                        },
-                        Cards = s.Cards.Select(c => new CardDto
-                        {
-                            Id = c.Id,
-                            Name = c.Name,
-                        }).ToList(),
-                    }).ToList()
-                })
+                .Select(GetWorkflowProjection())
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
         }

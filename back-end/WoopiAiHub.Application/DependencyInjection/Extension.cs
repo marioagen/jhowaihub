@@ -32,6 +32,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IRefreshTokenServices, RefreshTokenServices>();
             services.AddScoped<IStatusServices, StatusServices>();
             services.AddScoped<IWorkflowServices, WorkflowServices>();
+            services.AddScoped<ICardServices, CardServices>();
             services.AddLogging();
             services.AddMemoryCache();
 

@@ -26,7 +26,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindById(id);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", Workflow.NotFound);
+                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
             }
             return workflow;
         }
@@ -42,7 +42,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindByTeamId(teamId);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", Workflow.NotFound);
+                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
             }
             return workflow;
         }
