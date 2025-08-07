@@ -282,7 +282,7 @@
     labelSelectedProfiles: "Perfis selecionados",
     labelSearchProfiles: "Buscar perfis",
     unauthorized: {
-        title: "Você não tem permissão",
+        title: "Você não tem permissão para acessar esta tela.",
         returnToHome: "Retornar",
     },
     validation: {
