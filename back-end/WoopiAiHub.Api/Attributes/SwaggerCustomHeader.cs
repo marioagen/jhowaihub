@@ -14,13 +14,13 @@ namespace WoopiAiHub.Api.Attributes
                 operation.Parameters = new List<OpenApiParameter>();
             }
 
-            operation.Parameters.Add(new OpenApiParameter
-            {
-                Name = HeaderNames.XTenant,
-                In = ParameterLocation.Header,
-                Description = "Tenant Name",
-                Required = true,
-            });
+            //operation.Parameters.Add(new OpenApiParameter
+            //{
+            //    Name = HeaderNames.XTenant,
+            //    In = ParameterLocation.Header,
+            //    Description = "Tenant Name",
+            //    Required = true,
+            //});
         }
 
     }
