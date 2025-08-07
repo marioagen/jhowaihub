@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,17 +9,25 @@ namespace WoopiAiHub.Repository.Migrations
     /// <inheritdoc />
     public partial class AddWorkflowEntities : Migration
     {
+        private const string StatusTableName = "Status";
+        private const string WorkflowsTableName = "Workflows";
+        private const string StepsTableName = "Steps";
+        private const string CardsTableName = "Cards";
+        private const string AnnotationSqlServer = "SqlServer:Identity";
+        private const string DatetimeType = "datetime";
+        private const string CreatedColumnName = "Created";
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Status",
+                name: StatusTableName,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation(AnnotationSqlServer, "1, 1"),
                     Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Created = table.Column<DateTime>(type: "datetime", nullable: false)
+                    Created = table.Column<DateTime>(type: DatetimeType, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -26,14 +35,14 @@ namespace WoopiAiHub.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Workflows",
+                name: WorkflowsTableName,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation(AnnotationSqlServer, "1, 1"),
                     TeamId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
-                    Created = table.Column<DateTime>(type: "datetime", nullable: false)
+                    Created = table.Column<DateTime>(type: DatetimeType, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,17 +56,17 @@ namespace WoopiAiHub.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Steps",
+                name: StepsTableName,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation(AnnotationSqlServer, "1, 1"),
                     WorkflowId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     Order = table.Column<int>(type: "int", nullable: false),
                     ProfileId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
-                    Created = table.Column<DateTime>(type: "datetime", nullable: false)
+                    Created = table.Column<DateTime>(type: DatetimeType, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -71,28 +80,28 @@ namespace WoopiAiHub.Repository.Migrations
                     table.ForeignKey(
                         name: "FK_Steps_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: StatusTableName,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Steps_Workflows_WorkflowId",
                         column: x => x.WorkflowId,
-                        principalTable: "Workflows",
+                        principalTable: WorkflowsTableName,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Cards",
+                name: CardsTableName,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                        .Annotation(AnnotationSqlServer, "1, 1"),
                     StepId = table.Column<int>(type: "int", nullable: false),
                     DocumentId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
-                    Created = table.Column<DateTime>(type: "datetime", nullable: false)
+                    Created = table.Column<DateTime>(type: DatetimeType, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -106,93 +115,93 @@ namespace WoopiAiHub.Repository.Migrations
                     table.ForeignKey(
                         name: "FK_Cards_Status_StatusId",
                         column: x => x.StatusId,
-                        principalTable: "Status",
+                        principalTable: StatusTableName,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Cards_Steps_StepId",
                         column: x => x.StepId,
-                        principalTable: "Steps",
+                        principalTable: StepsTableName,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cards_Created",
-                table: "Cards",
-                column: "Created");
+                table: CardsTableName,
+                column: CreatedColumnName);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cards_DocumentId",
-                table: "Cards",
+                table: CardsTableName,
                 column: "DocumentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cards_Name",
-                table: "Cards",
+                table: CardsTableName,
                 column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cards_StatusId",
-                table: "Cards",
+                table: CardsTableName,
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cards_StepId",
-                table: "Cards",
+                table: CardsTableName,
                 column: "StepId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Status_Created",
-                table: "Status",
-                column: "Created");
+                table: StatusTableName,
+                column: CreatedColumnName);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Status_Name",
-                table: "Status",
+                table: StatusTableName,
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Steps_Created",
-                table: "Steps",
-                column: "Created");
+                table: StepsTableName,
+                column: CreatedColumnName);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Steps_Name",
-                table: "Steps",
+                table: StepsTableName,
                 column: "Name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Steps_ProfileId",
-                table: "Steps",
+                table: StepsTableName,
                 column: "ProfileId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Steps_StatusId",
-                table: "Steps",
+                table: StepsTableName,
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Steps_WorkflowId_Order",
-                table: "Steps",
-                columns: new[] { "WorkflowId", "Order" },
+                table: StepsTableName,
+                columns: ["WorkflowId", "Order"],
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Workflows_Created",
-                table: "Workflows",
-                column: "Created");
+                table: WorkflowsTableName,
+                column: CreatedColumnName);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Workflows_TeamId",
-                table: "Workflows",
+                table: WorkflowsTableName,
                 column: "TeamId",
                 unique: true);
 
             migrationBuilder.InsertData(
-                table: "Status",
-                columns: ["Id", "Name", "Created"],
+                table: StatusTableName,
+                columns: ["Id", "Name", CreatedColumnName],
                 values: new object[,]
                 {
                     { 1, "AwaitingAnalysis", DateTime.UtcNow },
@@ -207,21 +216,21 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
-                 table: "Status",
+                 table: StatusTableName,
                  keyColumn: "Id",
                  keyValues: [1, 2, 3, 4, 5]);
 
             migrationBuilder.DropTable(
-                name: "Cards");
+                name: CardsTableName);
 
             migrationBuilder.DropTable(
-                name: "Steps");
+                name: StepsTableName);
 
             migrationBuilder.DropTable(
-                name: "Status");
+                name: StatusTableName);
 
             migrationBuilder.DropTable(
-                name: "Workflows");
+                name: WorkflowsTableName);
         }
     }
 }

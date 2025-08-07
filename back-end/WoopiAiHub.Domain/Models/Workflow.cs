@@ -8,9 +8,9 @@ namespace WoopiAiHub.Domain.Models
         public int TeamId { get; private set; }
 
         [Column("Name", TypeName = "varchar(255)")]
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
 
-        public virtual ICollection<Step> Steps { get; set; }
+        public virtual ICollection<Step> Steps { get; set; } = [];
         public virtual Team? Team { get; set; }
 
         public Workflow(int id, DateTime created, int teamId, string name)
@@ -28,8 +28,7 @@ namespace WoopiAiHub.Domain.Models
 
         public void AddStep(Step step)
         {
-            if (step == null)
-                throw new ArgumentNullException(nameof(step));
+            ArgumentNullException.ThrowIfNull(step, nameof(step));
 
             if (Steps.Any(s => s.Id == step.Id))
                 return;

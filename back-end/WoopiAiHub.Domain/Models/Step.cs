@@ -39,8 +39,7 @@ namespace WoopiAiHub.Domain.Models
 
         public void AddCard(Card card)
         {
-            if (card == null)
-                throw new ArgumentNullException(nameof(card));
+            ArgumentNullException.ThrowIfNull(card, nameof(card));
 
             if (Cards.Any(c => c.Id == card.Id))
                 return;
