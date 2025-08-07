@@ -9,6 +9,7 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual ICollection<User> Users { get; set; }
         public virtual ICollection<Permission> Permissions { get; set; }
+        public virtual ICollection<Step> Steps { get; set; }
 
         public Profile(string name,
                        int id,
