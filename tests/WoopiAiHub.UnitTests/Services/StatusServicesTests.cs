@@ -19,23 +19,23 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Test FindAll and returns status list")]
         [Trait("FindAll", "Success")]
-        public async Task FindAll_ShouldReturnAllStatuses()
+        public async Task FindAll_ShouldReturnAllStatus()
         {
             // Arrange
-            var expectedStatuses = new List<StatusDto>
+            var expectedStatus = new List<StatusDto>
             {
                 new StatusDto { Id = 1, Name = "Status1" },
                 new StatusDto { Id = 2, Name = "Status2" }
             };
 
             _statusRepositoryMock.Setup(repo => repo.FindAll())
-                .ReturnsAsync(expectedStatuses);
+                .ReturnsAsync(expectedStatus);
 
             // Act
             var result = await _statusService.FindAll();
 
             // Assert
-            Assert.Equal(expectedStatuses, result);
+            Assert.Equal(expectedStatus, result);
             _statusRepositoryMock.Verify(repo => repo.FindAll(), Times.Once);
         }
 
@@ -44,10 +44,10 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindAll_ShouldReturnEmptyList_WhenNoStatusesExist()
         {
             // Arrange
-            var expectedStatuses = new List<StatusDto>();
+            var expectedStatus = new List<StatusDto>();
 
             _statusRepositoryMock.Setup(repo => repo.FindAll())
-                .ReturnsAsync(expectedStatuses);
+                .ReturnsAsync(expectedStatus);
 
             // Act
             var result = await _statusService.FindAll();

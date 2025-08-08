@@ -10,6 +10,7 @@ namespace WoopiAiHub.Application.Services
     public class WorkflowServices : IWorkflowServices
     {
         private readonly IWorkflowRepository _workflowRepository;
+
         public WorkflowServices(IWorkflowRepository workflowRepository)
         {
             _workflowRepository = workflowRepository;

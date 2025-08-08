@@ -13,6 +13,7 @@ namespace WoopiAiHub.Api.Controllers
     public class CardController : ControllerBase
     {
         private readonly ICardServices _cardServices;
+
         public CardController(ICardServices cardServices)
         {
             _cardServices = cardServices;

@@ -4,6 +4,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using Xunit;
 
@@ -34,6 +35,7 @@ namespace WoopiAiHub.UnitTests.Services
             var result = await _workflowService.FindById(workflowId);
 
             // Assert
+            _workflowRepositoryMock.Verify(repo => repo.FindById(workflowId), Times.Once);
             Assert.Equal(expectedWorkflow, result);
         }
 
@@ -46,8 +48,11 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(repo => repo.FindById(workflowId))
                 .ReturnsAsync((WorkflowDto?)null);
 
-            // Act & Assert
+            // Act
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowService.FindById(workflowId));
+
+            // Assert
+            _workflowRepositoryMock.Verify(repo => repo.FindById(workflowId), Times.Once);
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Workflow not found", exception.Message);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
@@ -67,6 +72,7 @@ namespace WoopiAiHub.UnitTests.Services
             var result = await _workflowService.FindByTeamId(teamId);
 
             // Assert
+            _workflowRepositoryMock.Verify(repo => repo.FindByTeamId(teamId), Times.Once);
             Assert.Equal(expectedWorkflow, result);
         }
 
@@ -79,8 +85,11 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(repo => repo.FindByTeamId(teamId))
                 .ReturnsAsync((WorkflowDto?)null);
 
-            // Act & Assert
+            // Act
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowService.FindByTeamId(teamId));
+
+            // Assert
+            _workflowRepositoryMock.Verify(repo => repo.FindByTeamId(teamId), Times.Once);
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Workflow not found", exception.Message);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);

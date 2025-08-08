@@ -25,12 +25,13 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Returns all statuses.
+        /// Returns all status.
         /// </summary>
         /// <returns></returns>
         public async Task<ICollection<StatusDto>> FindAll()
         {
             return await _context.Status
+                                 .AsNoTracking()
                                  .Select(status => new StatusDto
                                  {
                                     Id = status.Id,

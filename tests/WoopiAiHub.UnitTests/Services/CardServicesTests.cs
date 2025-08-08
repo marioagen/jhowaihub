@@ -78,7 +78,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(StatusLabel.NotFound, exception.LabelError);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Tests update Step and Status and returns true")]
+        [Trait("UpdateStepAndStatus", "Success")]
         public async Task UpdateStepAndStatus_ValidInputs_UpdatesCardAndReturnsTrue()
         {
             // Arrange
