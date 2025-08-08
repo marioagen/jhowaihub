@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class WorkflowDto
+    public record class WorkflowDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

@@ -10,7 +10,6 @@ namespace WoopiAiHub.Domain.Models
         [Column("Color", TypeName = "varchar(7)")]
         public string Color { get; private set; } = string.Empty;
 
-
         public virtual ICollection<Step> Steps { get; set; } = [];
         public virtual ICollection<Card> Cards { get; set; } = [];
 
