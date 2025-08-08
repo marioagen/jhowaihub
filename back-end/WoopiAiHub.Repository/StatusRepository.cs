@@ -35,7 +35,8 @@ namespace WoopiAiHub.Repository
                                  .Select(status => new StatusDto
                                  {
                                     Id = status.Id,
-                                    Name = status.Name
+                                    Name = status.Name,
+                                    Color = status.Color,
                                  })
                                  .ToListAsync();
         }

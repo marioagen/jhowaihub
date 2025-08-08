@@ -24,8 +24,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var expectedStatus = new List<StatusDto>
             {
-                new StatusDto { Id = 1, Name = "Status1" },
-                new StatusDto { Id = 2, Name = "Status2" }
+                new StatusDto { Id = 1, Name = "Status1", Color = "#000000" },
+                new StatusDto { Id = 2, Name = "Status2", Color = "#000000" }
             };
 
             _statusRepositoryMock.Setup(repo => repo.FindAll())

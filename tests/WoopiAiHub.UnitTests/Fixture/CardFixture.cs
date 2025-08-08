@@ -27,7 +27,7 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static Status FindValidStatus()
         {
-            return new Status("Status", 1, DateTime.Now);
+            return new Status("Status", "#FFFFFF", 1, DateTime.Now);
         }
     }
 
