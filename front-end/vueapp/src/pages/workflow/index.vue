@@ -78,7 +78,7 @@
 </template>
 
 <script>
-    import WorkflowCards from "@/components/workflow-docs/WorkFlowCards.vue";
+    import WorkflowCards from "@/components/workflow/WorkFlowCards.vue";
     export default {
         name: "WorkflowDocuments",
         data() {
