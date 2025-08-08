@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WoopiAiHub.Domain.Interfaces.Services;
 using Swashbuckle.AspNetCore.Annotations;
+using WoopiAiHub.Api.Attributes;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Account;
+using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
 {
@@ -30,6 +31,7 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [SwaggerOperation("Authenticates the user and returns the token if he has user permission")]
+        [OptionalTenantHeader]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var authData = await _accountServices.Login(loginDto);
@@ -47,6 +49,7 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [SwaggerOperation("Authenticates the user and returns the token if he has user permission")]
+        [OptionalTenantHeader]
         public async Task<IActionResult> LoginSSO([FromHeader] AuthenticateHeaderDto authenticateHeaderDto, [FromBody] AuthenticateDto authenticateDto)
         {
             var authData = await _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
