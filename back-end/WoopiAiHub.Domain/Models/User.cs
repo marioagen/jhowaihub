@@ -30,8 +30,7 @@ namespace WoopiAiHub.Domain.Models
         public DateTime Created { get; private set; }
 
         public virtual ICollection<Profile> Profiles { get; set; } = [];
-        public virtual ICollection<Permission> Permissions { get; set; }
-
+        public virtual ICollection<Permission> Permissions { get; set; } = [];
         public ICollection<Team> Teams { get; set; } = [];
 
         public User(Guid id,

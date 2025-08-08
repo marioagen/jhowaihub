@@ -12,6 +12,11 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.HasKey(t => t.Id);
 
+            builder.HasOne(t => t.Workflow)
+               .WithOne(w => w.Team) 
+               .HasForeignKey<Workflow>(w => w.TeamId)
+               .OnDelete(DeleteBehavior.Restrict);
+
             builder.Property(t => t.Name)
                    .HasColumnName("Name")
                    .HasColumnType("varchar(100)")

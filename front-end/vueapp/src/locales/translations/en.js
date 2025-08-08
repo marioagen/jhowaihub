@@ -287,6 +287,10 @@
     labelProfiles: "Profiles",
     labelSelectedProfiles: "Selected profiles",
     labelSearchProfiles: "Search profiles",
+    unauthorized: {
+        title: "You do not have permission to access this screen.",
+        returnToHome: "Return",
+    },
     labelWatchingWorkflow: "Viewing workflow:",
     labelWorkflowDocs: "Documents Workflow",
     labelWorkflowBoard: "Document Processing Board",

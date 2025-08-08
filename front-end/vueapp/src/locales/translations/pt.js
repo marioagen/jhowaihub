@@ -284,6 +284,10 @@
     labelProfiles: "Perfis",
     labelSelectedProfiles: "Perfis selecionados",
     labelSearchProfiles: "Buscar perfis",
+    unauthorized: {
+        title: "Você não tem permissão para acessar esta tela.",
+        returnToHome: "Retornar",
+    },
     labelWatchingWorkflow: "Visualizando workflow:",
     labelWorkflowDocs: "Workflow de documentos",
     labelWorkflowBoard: "Board de Processamento de Documentos",

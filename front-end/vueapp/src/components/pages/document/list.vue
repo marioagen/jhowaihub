@@ -478,12 +478,10 @@
                         if (obj.type === "search") this.searching = true;
                     })
                     .catch((e) => {
-                        console.log(e);
                         this.loading = false;
                         if (obj.type === "search") this.searching = true;
                     })
                     .finally(() => {
-                        console.log("Finished request.");
                     });
             },
             prepareState(obj) {
@@ -551,12 +549,8 @@
                         self.getList({ search: "", page: 1, type: null });
                     })
                     .catch(function (e) {
-                        // Handle error
-                        console.log(e);
                     })
                     .finally(function () {
-                        // Always executed
-                        console.log("Finished request.");
                     });
                 this.listIds = [];
             },

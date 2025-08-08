@@ -44,9 +44,12 @@ export default {
             });
     },
     Logout() {
-        return api.post("/account/logout")
-            .catch(error => {
-                throw error;
+        return api.post("/Account/logout")
+            .then((response) => {
+                return response.data;
+            })
+            .catch(() => {
+                return false;
             })
     }
 };

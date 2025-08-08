@@ -107,6 +107,52 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("UserTeams", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int")
+                        .HasColumnName("DocumentId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("Name");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int")
+                        .HasColumnName("StatusId");
+
+                    b.Property<int>("StepId")
+                        .HasColumnType("int")
+                        .HasColumnName("StepId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created");
+
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("StatusId");
+
+                    b.HasIndex("StepId");
+
+                    b.ToTable("Cards", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Document", b =>
                 {
                     b.Property<int>("Id")
@@ -360,6 +406,91 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Questionnaires", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Status", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("varchar(7)")
+                        .HasColumnName("Color");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Status", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("Name");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int")
+                        .HasColumnName("Order");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProfileId");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int")
+                        .HasColumnName("StatusId");
+
+                    b.Property<int>("WorkflowId")
+                        .HasColumnType("int")
+                        .HasColumnName("WorkflowId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("ProfileId");
+
+                    b.HasIndex("StatusId");
+
+                    b.HasIndex("WorkflowId", "Order")
+                        .IsUnique();
+
+                    b.ToTable("Steps", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
                     b.Property<int>("Id")
@@ -450,6 +581,39 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("Name");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int")
+                        .HasColumnName("TeamId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Created");
+
+                    b.HasIndex("TeamId")
+                        .IsUnique();
+
+                    b.ToTable("Workflows", (string)null);
+                });
+
             modelBuilder.Entity("DocumentTeams", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Document", null)
@@ -525,6 +689,33 @@ namespace WoopiAiHub.Repository.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Document", "Document")
+                        .WithMany("Cards")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Status", "Status")
+                        .WithMany("Cards")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Step", "Step")
+                        .WithMany("Cards")
+                        .HasForeignKey("StepId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+
+                    b.Navigation("Status");
+
+                    b.Navigation("Step");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentHistory", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Document", "Document")
@@ -577,11 +768,56 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("TypeDoc");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Profile", "Profile")
+                        .WithMany("Steps")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Status", "Status")
+                        .WithMany("Steps")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Workflow", "Workflow")
+                        .WithMany("Steps")
+                        .HasForeignKey("WorkflowId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Profile");
+
+                    b.Navigation("Status");
+
+                    b.Navigation("Workflow");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Team", "Team")
+                        .WithOne("Workflow")
+                        .HasForeignKey("WoopiAiHub.Domain.Models.Workflow", "TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Document", b =>
                 {
+                    b.Navigation("Cards");
+
                     b.Navigation("DocumentHistories");
 
                     b.Navigation("DocumentNormalized");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Profile", b =>
+                {
+                    b.Navigation("Steps");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Question", b =>
@@ -594,9 +830,31 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("QuestionQuestionnaire");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Status", b =>
+                {
+                    b.Navigation("Cards");
+
+                    b.Navigation("Steps");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>
+                {
+                    b.Navigation("Cards");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
+                {
+                    b.Navigation("Workflow");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.TypeDoc", b =>
                 {
                     b.Navigation("Questionnaires");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>
+                {
+                    b.Navigation("Steps");
                 });
 #pragma warning restore 612, 618
         }

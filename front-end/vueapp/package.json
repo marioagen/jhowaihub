@@ -19,13 +19,14 @@
         "dropzone": "^6.0.0-beta.2",
         "jquery": "^3.7.0",
         "js-cookie": "^3.0.5",
+        "jwt-decode": "^4.0.0",
         "lucide-vue-next": "^0.525.0",
         "mitt": "^3.0.1",
         "qs": "^6.11.1",
         "vee-validate": "^4.15.1",
         "vue": "^3.2.26",
         "vue-gtag": "^2.1.0",
-        "vue-i18n": "^9.10.1",
+        "vue-i18n": "^11.1.11",
         "vue-router": "^4.0.3",
         "vue3-simple-dropzone": "^1.1.0",
         "vuex": "^4.1.0",
@@ -40,7 +41,8 @@
         "eslint-plugin-vue": "^8.0.3",
         "prettier": "^3.6.2",
         "terser": "^5.43.1",
-        "vite": "^7.0.6"
+        "vite": "^7.0.6",
+        "vite-plugin-mkcert": "^1.17.8"
     },
     "eslintConfig": {
         "root": true,

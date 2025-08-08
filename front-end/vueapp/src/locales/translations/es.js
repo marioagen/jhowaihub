@@ -291,6 +291,10 @@
     labelProfiles: "Perfiles",
     labelSelectedProfiles: "Perfiles seleccionados",
     labelSearchProfiles: "Buscar perfiles",
+    unauthorized: {
+        title: "No tiene permiso para acceder a esta pantalla.",
+        returnToHome: "Volver",
+    },
     labelWatchingWorkflow: "Visualización del workflow:",
     labelWorkflowDocs: "Workflow de documentos",
     labelWorkflowBoard: "Tablero de procesamiento de documentos",

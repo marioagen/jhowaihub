@@ -1,6 +1,4 @@
 ﻿import { createRouter, createWebHashHistory } from "vue-router";
-// import LoginIndex from "@/components/pages/login";
-import LogoutIndex from "@/components/pages/logout";
 import DocumentUpload from "@/components/pages/document/upload";
 import DocumentList from "@/components/pages/document/list";
 import NormalizeIndex from "@/components/pages/normalize/loading";
@@ -13,18 +11,27 @@ import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import QuestionsPage from "@/pages/questions.vue";
 import UserManagePage from "@/pages/user-manager.vue";
 import LoginIndex from "@/pages/login.vue";
+import LogoutPage from "@/pages/logout";
+import UnauthorizedPage from "@/pages/unauthorized.vue";
 import WorkflowPage from "@/pages/workflow/index.vue";
 
+import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
-    var usuario = JSON.parse(window.localStorage.getItem("project"));
-    if (usuario != null) {
-        if (usuario.isLogged === true) {
-            next();
-        }
-    } else
-        next({
-            path: "/",
-        });
+    const userStr = window.localStorage.getItem("project");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) {
+        return next({ path: "/" });
+    }
+
+    if (user.isLogged !== true) {
+        return next({ path: "/" });
+    }
+
+    if (!hasPermission(to.meta.module, to.meta.action)) {
+        return next({ path: "/unauthorized" });
+    }
+
+    return next();
 }
 
 const routes = [
@@ -32,26 +39,45 @@ const routes = [
         path: "/",
         name: "Login",
         component: LoginIndex,
-        meta: { layout: "auth" },
+        meta: { 
+            layout: "auth",
+        },
     },
     {
         path: "/logout",
         name: "Logout",
-        component: LogoutIndex,
+        component: LogoutPage,
+        meta: {
+            public: true
+        }
+    },
+    {
+        path: "/unauthorized",
+        name: "Unauthorized",
+        component: UnauthorizedPage,
+        meta: { 
+            layout: "auth",
+        },
     },
     {
         path: "/document-upload",
         name: "DocumentUpload",
         component: DocumentUpload,
-        meta: { layout: "default" },
-        beforeEnter: authenticate,
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
     },
     {
         path: "/document-list",
         name: "DocumentList",
         component: DocumentList,
-        meta: { layout: "default" },
-        beforeEnter: authenticate,
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
     },
     {
         path: "/types",
@@ -59,6 +85,8 @@ const routes = [
         component: TypesPage,
         meta: {
             layout: "default",
+            module: "Types",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -66,49 +94,77 @@ const routes = [
         path: "/questions",
         name: "Question",
         component: QuestionsPage,
-        meta: { layout: "default" },
+        meta: { 
+            layout: "default",
+            module: "Questions",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
         path: "/quizzes",
         name: "Quiz",
         component: QuizzesPage,
-        meta: { layout: "default" },
+        meta: { 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
         path: "/quizzes/new",
         name: "NewQuizz",
         component: NewQuizz,
-        meta: { layout: "default" },
+        meta: { 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
         path: "/quizzes/edit/:id",
         name: "EditQuizz",
         component: EditQuizz,
-        meta: { layout: "default" },
+        meta: { 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
         path: "/normalize/:id",
         name: "Normalize",
         component: NormalizeIndex,
-        meta: { layout: "default" },
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
         path: "/analyzer/:id",
         name: "Analyzer",
         component: AnalyzerIndex,
-        meta: { layout: "default" },
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
         path: "/manage-user",
         name: "UserManage",
         component: UserManagePage,
-        meta: { layout: "default" },
+        meta: { 
+            layout: "default",
+            module: "Management",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
