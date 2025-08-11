@@ -48,10 +48,10 @@ export default {
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    width: 32px;
-    height: 24px;
     font-weight: 500;
     font-size: 13px;
+    padding: 0 0.5rem;
+    min-height: 24px;
 }
 
 .badge-primary {
