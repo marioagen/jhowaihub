@@ -135,7 +135,7 @@
             },
             hasOrdering: {
                 type: Boolean,
-                default: true,
+                default: false,
             },
             pagination: {
                 type: Object,
