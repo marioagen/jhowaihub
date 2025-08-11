@@ -39,7 +39,6 @@
                 queryPage: this.$route.query.page ? this.$route.query.page : 1,
                 pagination: { currentPage: 0, pageCount: 0, rowCount: 0, listPage: 0 },
                 listIds: [],
-                profileEditing: {},
                 entitySearch: {},
             };
         },
