@@ -12,6 +12,7 @@
                     <th
                         v-for="(column, index) in columns"
                         :key="index"
+                        :class="{ 'text-end': column.key === 'actions' }"
                     >
                         <div
                             v-if="column.key !== 'actions'"
@@ -74,7 +75,11 @@
                             @change="selectRow(row)"
                         />
                     </td>
-                    <td v-for="column in columns" :key="column.key">
+                    <td 
+                        v-for="column in columns" 
+                        :key="column.key"
+                        :class="{ 'text-end': column.key === 'actions' }"
+                    >
                         <slot :name="`cell-${column.key}`" :data="{ row, column }">
                             {{ row[column.key] }}
                         </slot>
