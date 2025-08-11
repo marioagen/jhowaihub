@@ -18,6 +18,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="col-auto ms-auto">
                     <button class="btn btn-outline-primary btn-sm table-btn me-2">
                         {{ $t("labelCancel") }}

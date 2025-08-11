@@ -4,9 +4,20 @@
             <div class="row align-items-center">
                 <div class="col-auto">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
-                        <p><small class="text-muted">{{ $t("workflow.subtitle") }}</small></p>
-                    </div>
+                         <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
+                         <p><small class="text-muted">{{ $t("workflow.subtitle") }}</small></p>
+                     </div>
+                </div>
+
+                <div class="col-auto ms-auto">
+                    <button 
+                        class="btn btn-primary btn-sm" 
+                        :disabled="canSave"
+                        @click="save"
+                    >
+                        <LucideIcon icon="Save" size="15" />
+                        {{ $t("quizzes.formSave") }}
+                    </button>
                 </div>
             </div>
             
@@ -19,37 +30,50 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <label>{{ $t("quizzes.formName") }}</label>
+                            <label>{{ $t("workflow.name") }}</label>
                             <input 
                                 class="form-control form-control-sm"
-                                :placeholder="$t('quizzes.formNamePlaceholder')"
+                                :placeholder="$t('workflow.name')"
                                 v-model="workflowData.name"
                             />
                         </div>
                         <div class="col">
-                            <label>{{ $t("quizzes.type") }}</label>
-                            <select
-                                id="typeDocId"
-                                class="form-select form-select-sm"
-                                v-model="workflowData.profile"
-                            >
-                                <option value="">{{ $t("quizzes.formSelect") }}</option>
-                                <!-- <option 
-                                    v-for="(item, index) in docTypesList" 
-                                    :key="index"
-                                    :value="item.id" 
+                            <label>{{ $t("workflow.responsableTeam") }}</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-end-0 bg-white">
+                                    <LucideIcon icon="Users" size="16" />
+                                </span>
+                                <select
+                                    id="typeDocId"
+                                    class="form-select form-select-sm border-start-0"
+                                    v-model="workflowData.team"
                                 >
-                                    {{ item.id }} - {{ item.name }}
-                                </option> -->
-                            </select>
+                                    <option value="">{{ $t("workflow.responsableTeam") }}</option>
+                                    <option 
+                                        v-for="(item, index) in docTypesList" 
+                                        :key="index"
+                                        :value="item.id" 
+                                    >
+                                        {{ item.id }} - {{ item.name }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="row mt-4">
-                <div>
-                    <h6 class="mb-4">{{ $t("workflow.steps") }}</h6>
+                <div class="row d-flex justify-content-between align-items-center">
+                    <div class="col-auto">
+                        <h6 class="mb-4">{{ $t("workflow.steps") }}</h6>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary btn-sm" @click="addStep">
+                            <LucideIcon icon="Plus" size="15" />
+                            {{ $t("workflow.createNewStep") }}
+                        </button>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
@@ -58,6 +82,7 @@
                             :key="index"
                             :step="step"
                             :index="index + 1"
+                            :is-last="index === stepsList.length - 1" 
                             @update-step="updateStep(index, $event)"
                             @remove-step="removeStep(index)"
                             class="workflow-step-card"
@@ -67,8 +92,8 @@
                             <div class="icon-circle mb-2">
                                 <LucideIcon icon="Plus" size="16" />
                             </div>
-                            <h6 class="fw-semibold mb-1">Adicionar Etapa</h6>
-                            <p class="text-muted small mb-0">Clique para criar uma nova etapa</p>
+                            <h6 class="fw-semibold mb-1">{{ $t("workflow.addBtn") }}</h6>
+                            <p class="text-muted small mb-0">{{ $t("workflow.addBtnDescription") }}</p>
                         </div>
                     </div>
                 </div>
@@ -79,7 +104,6 @@
 
 <script>
     import WorkflowStepComponent from "@/components/workflow/WorkflowStepComponent.vue";
-
     export default {
         name: "QuizFormNew",
         props: {
@@ -96,7 +120,7 @@
                 },
                 workflowData: {
                     name: "",
-                    profile: "",
+                    team: "",
                 },
             };
         },
@@ -105,7 +129,15 @@
                 this.setCrumbsData();
             },
         },
+        computed: {
+            canSave() {
+                return !this.stepsList.length > 0;
+            }
+        },
         methods: {
+            getProfiles() {
+
+            },
             updateStep(index, updatedStep) {
                 this.stepsList[index] = { ...this.stepsList[index], ...updatedStep };
             },
@@ -118,8 +150,17 @@
             removeStep(index) {
                 this.stepsList.splice(index, 1);
             },
+            save() {
+                let params = {
+                    name: this.workflowData.name,
+                    team: this.workflowData.team,
+                    steps: this.stepsList
+                };
+                console.log(params)
+            },
         },
         created() {
+            this.getProfiles();
         },
     };
 </script>
