@@ -1,6 +1,7 @@
 <template>
     <span
-        :class="badgeClasses"
+        class="badge-number"
+        :class="`badge-${variant}`"
         @click="handleClick"
         :style="clickable ? 'cursor: pointer;' : ''"
         role="button"
@@ -11,50 +12,70 @@
 </template>
 
 <script>
-    export default {
-        name: "BadgeComponent",
-        props: {
-            text: {
-                type: String,
-                required: true,
-            },
-            variant: {
-                type: String,
-                default: "primary",
-            },
-            pill: {
-                type: Boolean,
-                default: true,
-            },
-            clickable: {
-                type: Boolean,
-                default: true,
-            },
+export default {
+    name: "BadgeComponent",
+    props: {
+        text: { 
+            type: String, 
+            required: true 
         },
-        computed: {
-            badgeClasses() {
-                return ["badge", `bg-${this.variant}`, { "rounded-pill": this.pill }];
-            },
+        variant: { 
+            type: String, 
+            default: "primary" 
         },
-        methods: {
-            handleClick(event) {
-                if (this.clickable) {
-                    this.$emit("setClick", event);
-                }
-            },
+        pill: { 
+            type: Boolean, 
+            default: true 
         },
-    };
+        clickable: { 
+            type: Boolean, 
+            default: true 
+        },
+    },
+    methods: {
+        handleClick(event) {
+            if (this.clickable) {
+                this.$emit("setClick", event);
+            }
+        },
+    },
+};
 </script>
 
 <style>
-    .badge {
-        background-color: transparent;
-        font-size: 0.75em;
-        font-weight: 500;
-        padding: 0.25em 0.5em;
-        border-radius: 0.375rem;
-        border: 1px solid currentColor;
-        display: inline-block;
-        white-space: nowrap;
-    }
+.badge-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    width: 32px;
+    height: 24px;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.badge-primary {
+    background-color: #e0f0ff;
+    color: #4e85d7;
+}
+.badge-danger {
+    background-color: #ffe0e0;
+    color: #d74e4e;
+}
+.badge-success {
+    background-color: #e0ffe9;
+    color: #4ed77a;
+}
+.badge-warning {
+    background-color: #fff7e0;
+    color: #d7a54e;
+}
+.badge-info {
+    background-color: #e0faff;
+    color: #4ed7d7;
+}
+.badge-secondary {
+    background-color: #ececec;
+    color: #6c757d;
+}
 </style>
