@@ -72,7 +72,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <button v-if="!isLoadingSSO" type="submit" class="btn btn-outline-primary w-100"
+                            <button v-if="!isLoadingSSO" type="submit" class="btn btn-outline-primary btn-sm w-100"
                                 @click="loginSSO">
                                 <img src="../../assets/img/microsoft-log.svg" width="30" height="15" />
                                 {{ $t("login.sso") }}
