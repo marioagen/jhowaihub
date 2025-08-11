@@ -29,8 +29,13 @@
                 </div>
 
                 <div class="dropdown nav-buttons">
-                    <button class="btn btn-outline-primary table-btn" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
+                    <button
+                        class="btn btn-outline-primary table-btn btn-sm"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        style="display: flex; align-items: center; justify-content: center;"
+                    >
                         <LucideIcon icon="Globe" />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-button text-small shadow">
@@ -95,6 +100,7 @@
         </div>
     </nav>
 </template>
+
 <script>
 import axios from "axios";
 import api from "@/services/api";
