@@ -30,7 +30,7 @@ namespace WoopiAiHub.Domain.Models
         {
             ArgumentNullException.ThrowIfNull(step);
 
-            if (Steps.Any(s => s.Id == step.Id))
+            if (Steps.Any(s => s.Id != 0 && s.Id == step.Id))
                 return;
             Steps.Add(step);
         }

@@ -19,7 +19,7 @@ namespace WoopiAiHub.Api.Controllers
             _statusServices = statusServices;
         }
 
-        [HttpGet]
+        [HttpGet("FindAll")]
         [SwaggerOperation("Endpoint that receives the request to return all status")]
         [ProducesResponseType(typeof(ICollection<StatusDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindAll()

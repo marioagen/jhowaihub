@@ -25,9 +25,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public ProfileDto FindById(int id)
+        public async Task<ProfileDto> FindById(int id)
         {
-            var team = _profileRepository.FindById(id);
+            var team = await _profileRepository.FindById(id);
             if (team == null)
             {
                 throw new ArgumentException("Profile not found");
@@ -136,6 +136,15 @@ namespace WoopiAiHub.Application.Services
         public bool DeleteByIds(List<int> ids)
         {
             return _profileRepository.DeleteByIds(ids);
+        }
+
+        /// <summary>
+        /// Retrieves all profiles.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ICollection<ProfileDto>> FindAll()
+        {
+            return await _profileRepository.FindAll();
         }
 
         /// <summary>
