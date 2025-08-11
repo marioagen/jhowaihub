@@ -1,7 +1,9 @@
 <template>
     <div class="card shadow-sm rounded-3 overflow-hidden">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center px-3 py-2" style="background-color: #e8f1ff;">
+        <div
+            class="d-flex justify-content-between align-items-center px-3 py-2"
+            :style="{ backgroundColor: isLast ? '#E8FFE8' : '#e8f1ff' }"
+        >
             <div class="d-flex align-items-center">
                 <div
                     class="d-flex justify-content-center align-items-center rounded-circle text-white me-2"
@@ -9,9 +11,24 @@
                 >
                     {{ index }}
                 </div>
-                <span class="fw-semibold text-dark small">
-                    {{ localStep.profile || 'Etapa sem perfil' }}
+                <span
+                    v-if="!editingTitle"
+                    class="fw-semibold text-dark small"
+                    @click="startEditingTitle"
+                    style="cursor: pointer;"
+                >
+                    {{ localStep.title || 'Etapa sem título' }}
                 </span>
+                <input
+                    v-else
+                    type="text"
+                    v-model="localStep.title"
+                    class="form-control form-control-sm"
+                    @blur="stopEditingTitle"
+                    @keyup.enter="stopEditingTitle"
+                    style="max-width: 200px;"
+                    autofocus
+                />
             </div>
             <button 
                 type="button" 
@@ -22,26 +39,42 @@
             </button>
         </div>
 
-        <!-- Body -->
         <div class="card-body">
             <div class="mb-3">
-                <label class="form-label text-muted small">STATUS</label>
-                <select class="form-select" v-model="localStep.status">
-                    <option value="analizado">Analisado</option>
-                    <option value="pendente">Pendente</option>
-                    <option value="rejeitado">Rejeitado</option>
-                </select>
+                <label class="form-label text-muted small">{{ $t("workflow.status") }}</label>
+                <select
+                        class="form-select form-select-sm border-start-0"
+                        v-model="localStep.status"
+                    >
+                        <option value="">{{ $t("workflow.status") }}</option>
+                        <option 
+                            v-for="(item, index) in statusList" 
+                            :key="index"
+                            :value="item.id" 
+                        >
+                            {{ item.id }} - {{ item.name }}
+                        </option>
+                    </select>
             </div>
 
             <div class="mb-2">
-                <label class="form-label text-muted small">PERFIL RESPONSÁVEL</label>
+                <label class="form-label text-muted small">{{ $t("workflow.profiles") }}</label>
                 <div class="input-group">
                     <span class="input-group-text border-end-0 bg-white">
                         <LucideIcon icon="Users" size="16" />
                     </span>
-                    <select class="form-select border-start-0" v-model="localStep.profile">
-                        <option value="senior">Analista Sênior</option>
-                        <option value="junior">Analista Júnior</option>
+                    <select
+                        class="form-select form-select-sm border-start-0"
+                        v-model="localStep.profile"
+                    >
+                        <option value="">{{ $t("workflow.responsableTeam") }}</option>
+                        <option 
+                            v-for="(item, index) in profilesList" 
+                            :key="index"
+                            :value="item.id" 
+                        >
+                            {{ item.id }} - {{ item.name }}
+                        </option>
                     </select>
                 </div>
             </div>
@@ -60,14 +93,25 @@
             index: {
                 type: Number,
                 required: true
+            },
+            isLast: {
+                type: Boolean,
+                default: false
+            },
+            profilesList: {
+                type: Array,
+                required: true,
             }
         },
         data() {
             return {
+                editingTitle: false,
                 localStep: {
                     status: this.step.status || '',
-                    profile: this.step.profile || ''
-                }
+                    profile: this.step.profile || '',
+                    title: this.step.title || ''
+                },
+                statusList: [],
             };
         },
         watch: {
@@ -81,6 +125,12 @@
         methods: {
             remove() {
                 this.$emit('remove-step');
+            },
+            startEditingTitle() {
+                this.editingTitle = true;
+            },
+            stopEditingTitle() {
+                this.editingTitle = false;
             }
         }
     };
