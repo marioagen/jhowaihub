@@ -9,12 +9,44 @@
                     <th v-if="hasSelection">
                         <input type="checkbox" class="form-check-input" :checked="allSelected" @change="selectAllRow" />
                     </th>
-                    <th 
-                        v-for="(column, index) in columns" 
+                    <th
+                        v-for="(column, index) in columns"
                         :key="index"
                         :class="{ 'text-end': column.key === 'actions' }"
                     >
-                        {{ $t(column.label) }}
+                        <div
+                            v-if="column.key !== 'actions'"
+                            class="d-flex align-items-center gap-1"
+                        >
+                            <span>{{ $t(column.label) }}</span>
+                            <div v-if="hasOrdering">
+                                <button
+                                    class="btn btn-link btn-sm table-btn p-0"
+                                    style="line-height: 1"
+                                    @click="setOrder(column.key)"
+                                >
+                                    <LucideIcon 
+                                        v-if="showOrderDescByColumn(column.key)"
+                                        icon="MoveUp"
+                                        size="15" 
+                                    />
+                                    <LucideIcon 
+                                        v-else-if="showOrderAscByColumn(column.key)"
+                                        icon="MoveDown"
+                                        size="15" 
+                                    />
+                                    <LucideIcon 
+                                        v-else    
+                                        icon="ArrowDownUp"
+                                        size="15" 
+                                    />
+                                </button>
+                            </div>
+                        </div>
+
+                        <span v-else>
+                            {{ $t(column.label) }}
+                        </span>
                     </th>
                 </tr>
             </thead>
@@ -106,6 +138,10 @@
                 type: Boolean,
                 default: true,
             },
+            hasOrdering: {
+                type: Boolean,
+                default: false,
+            },
             pagination: {
                 type: Object,
                 required: false,
@@ -123,6 +159,7 @@
         data() {
             return {
                 selectedRows: [],
+                order: {},
             };
         },
         methods: {
@@ -151,6 +188,48 @@
             },
             changePage(page) {
                 this.$emit("change-page", page);
+            },
+            setOrder(columnKey) {
+                if(this.hasntOrderBeenSet(columnKey)) {
+                    this.order[columnKey] = {
+                      asc: false,
+                      desc: false
+                    };
+                }
+
+                if(!this.hasMultipleOrderingHeader) {
+                    this.removeSecondOrderings(columnKey);
+                }
+
+                if(this.order[columnKey].asc === false && this.order[columnKey].desc === false) {
+                    this.order[columnKey].asc = true;
+                } else if (this.order[columnKey].asc) {
+                    this.order[columnKey].asc = false;
+                    this.order[columnKey].desc = true;
+                } else {
+                    this.order[columnKey].desc = false;
+                    this.order[columnKey].asc = false;
+                }
+
+                this.$emit("orderColumn", this.order);
+            },
+            hasntOrderBeenSet(columnKey) {
+                return this.order[columnKey] === undefined;
+            },
+            showOrderAscByColumn(columnKey) {
+                return this.hasntOrderBeenSet(columnKey) ? false : this.order[columnKey].asc;
+            },
+            showOrderDescByColumn(columnKey) {
+                return this.hasntOrderBeenSet(columnKey) ? false : this.order[columnKey].desc;
+            },
+            removeSecondOrderings(columnKey) {
+                let cleanOrderings =  Object.keys(this.order)
+                    .filter(key => key === columnKey)
+                    .reduce((obj, key) => {
+                        obj[key] = this.order[key];
+                        return obj;
+                    }, {});
+                this.order = cleanOrderings;
             },
         },
         computed: {
