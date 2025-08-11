@@ -376,7 +376,20 @@
     },
     transferListTitle: "Selection list",
     transferListPlaceholder: "Search in list",
-    unexpectedError: "An unexpected error occurred. Please contact the system administrator."
+    unexpectedError: "An unexpected error occurred. Please contact the system administrator.",
+    workflow: {
+        title: "Workflow Editor",
+        subtitle: "Manage and configure document processing workflows",
+        manage: "Manage workflow:",
+        steps: "Workflow Steps",
+        addBtn: "Add Step",
+        addBtnDescription: "Click to create a new step",
+        createNewStep: "New step",
+        responsableTeam: "Responsible team",
+        name: "Workflow name",
+        profiles: "Responsible profile",
+        status: "Status"
+    },
 };
 
 export default english;

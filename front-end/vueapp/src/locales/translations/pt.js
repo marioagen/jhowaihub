@@ -373,7 +373,20 @@
     },
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
-    unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador."
+    unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
+    workflow: {
+        title: "Editor de Workflow",
+        subtitle: "Gerencie e configure workflows de processamento de documentos",
+        manage: "Gerenciar workflow:",
+        steps: "Etapas do Workflow",
+        addBtn: "Adicionar Etapa",
+        addBtnDescription: "Clique para criar uma nova etapa",
+        createNewStep: "Nova etapa",
+        responsableTeam: "Time responsável",
+        name: "Nome do workflow",
+        profiles: "Perfil responsável",
+        status: "Status"
+    },
 };
 
 export default portuguese;

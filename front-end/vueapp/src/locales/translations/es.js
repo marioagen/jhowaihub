@@ -380,7 +380,20 @@
     },
     transferListTitle: "Lista para seleccionar",
     transferListPlaceholder: "Buscar en la lista",
-    unexpectedError: "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema."
+    unexpectedError: "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",
+    workflow: {
+        title: "Editor de Workflow",
+        subtitle: "Administra y configura flujos de trabajo para el procesamiento de documentos",
+        manage: "Gestionar workflow:",
+        steps: "Etapas del Workflow",
+        addBtn: "Agregar Etapa",
+        addBtnDescription: "Haz clic para crear una nueva etapa",
+        createNewStep: "Nueva etapa",
+        responsableTeam: "Equipo responsable",
+        name: "Nombre del workflow",
+        profiles: "Perfil responsable",
+        status: "Estado"
+    },
 };
 
 export default spanish;
