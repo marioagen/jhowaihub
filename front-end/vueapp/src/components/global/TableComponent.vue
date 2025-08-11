@@ -9,7 +9,11 @@
                     <th v-if="hasSelection">
                         <input type="checkbox" class="form-check-input" :checked="allSelected" @change="selectAllRow" />
                     </th>
-                    <th v-for="(column, index) in columns" :key="index">
+                    <th 
+                        v-for="(column, index) in columns" 
+                        :key="index"
+                        :class="{ 'text-end': column.key === 'actions' }"
+                    >
                         {{ $t(column.label) }}
                     </th>
                 </tr>
@@ -39,7 +43,11 @@
                             @change="selectRow(row)"
                         />
                     </td>
-                    <td v-for="column in columns" :key="column.key">
+                    <td 
+                        v-for="column in columns" 
+                        :key="column.key"
+                        :class="{ 'text-end': column.key === 'actions' }"
+                    >
                         <slot :name="`cell-${column.key}`" :data="{ row, column }">
                             {{ row[column.key] }}
                         </slot>
