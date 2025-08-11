@@ -4,6 +4,8 @@
     {
         DefaultError = 0,
         Duplicated = 1,
-        RequiredField = 2
+        RequiredField = 2,
+        NotFound = 3,
+        Conflict = 4,
     }
 }

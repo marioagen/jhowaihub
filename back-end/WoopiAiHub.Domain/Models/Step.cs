@@ -37,6 +37,14 @@ namespace WoopiAiHub.Domain.Models
 
         private Step(int id, DateTime created) : base(id, created) { }
 
+        public void Update(string name, int order, int profileId, int statusId)
+        {
+            Name = name;
+            Order = order;
+            ProfileId = profileId;
+            StatusId = statusId;
+        }
+
         public void AddCard(Card card)
         {
             ArgumentNullException.ThrowIfNull(card);

@@ -289,7 +289,7 @@
     labelSelectedProfiles: "Perfiles seleccionados",
     labelSearchProfiles: "Buscar perfiles",
     unauthorized: {
-        title: "No tienes permiso",
+        title: "No tiene permiso para acceder a esta pantalla.",
         returnToHome: "Volver",
     },
     validation: {

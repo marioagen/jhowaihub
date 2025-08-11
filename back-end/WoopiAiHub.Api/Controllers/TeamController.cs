@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Api.Controllers
 {
@@ -112,6 +113,21 @@ namespace WoopiAiHub.Api.Controllers
         {
             var deleted = _teamServices.DeleteByIds(ids);
             return Ok(deleted);
+        }
+
+        /// <summary>
+        /// Returns all teams associated with a specific user's email.
+        /// </summary>
+        /// <param name="headersDto"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("FindAll")]
+        [SwaggerOperation("Endpoint that receives the request to return all teams by user's email")]
+        [ProducesResponseType(typeof(ICollection<TeamDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindAll([FromHeader] HeadersDto headersDto)
+        {
+            var result = await _teamServices.FindByUser(headersDto.EmailCreator);
+            return Ok(result);
         }
     }
 }

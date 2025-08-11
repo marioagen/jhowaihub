@@ -285,7 +285,7 @@
     labelSelectedProfiles: "Selected profiles",
     labelSearchProfiles: "Search profiles",
     unauthorized: {
-        title: "You do not have permission",
+        title: "You do not have permission to access this screen.",
         returnToHome: "Return",
     },
     validation: {

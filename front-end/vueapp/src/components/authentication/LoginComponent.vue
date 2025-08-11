@@ -32,8 +32,7 @@
                                         class="form-control form-control-sm border-start-0"
                                         :class="{ 'is-invalid': errorMessage }" placeholder="user@mail.com" />
                                 </div>
-                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage
-                                }}</span>
+                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
                             </Field>
                         </div>
 
@@ -139,12 +138,11 @@ export default {
                 .then((response) => {
                     let tokenData = this.getPermissions(response.tokenApi);
                     this.$store.commit("updatePermissions", tokenData.permissions);
-
                     let dataUser = {
                         language: this.$store.state.userProfile.language,
                         image: "",
                         name: response.name,
-                        login: response.email,
+                        login: response.login,
                         tokenAzure: "",
                         tokenApi: response.tokenApi,
                         tenant: response.tenant,
@@ -191,7 +189,8 @@ export default {
                         variant: 'danger',
                         icon: 'CircleX',
                     });
-                });
+                    this.isLoadingSSO = false;
+                })
         },
         microsoftLogin(clientIdResponse) {
             const msalConfig = {
@@ -272,7 +271,7 @@ export default {
                         keyMongoAccess: "",
                         isAdmin: tokenData.isAdmin
                     };
-                    
+
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
@@ -314,7 +313,7 @@ export default {
     created() {
         let login = this.$store.state.userProfile.login;
         let tenant = this.$store.state.userProfile.tenant;
-        if(login !== "" || tenant !== "") {
+        if (login !== "" || tenant !== "") {
             this.$router.push({ name: "DocumentList" });
         }
         this.checkTheme();

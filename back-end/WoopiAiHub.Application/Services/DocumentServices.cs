@@ -589,7 +589,7 @@ namespace WoopiAiHub.Application.Services
                 requestCreateDocumentDto.Name,
                 requestCreateDocumentDto.Description,
                 referenceFile,
-                (int)Domain.Enum.Status.NotAnalyzed,
+                (int)Domain.Enum.DocumentStatus.NotAnalyzed,
                 true,
                 requestCreateDocumentDto.EmailCreator,
                 0,

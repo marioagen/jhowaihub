@@ -415,6 +415,11 @@ namespace WoopiAiHub.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("varchar(7)")
+                        .HasColumnName("Color");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
@@ -839,8 +844,7 @@ namespace WoopiAiHub.Repository.Migrations
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
-                    b.Navigation("Workflow")
-                        .IsRequired();
+                    b.Navigation("Workflow");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.TypeDoc", b =>
