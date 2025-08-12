@@ -20,13 +20,46 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static WorkflowCreateDto FindValidWorkflowCreateDtoNoSteps()
+        {
+            var faker = new Faker<WorkflowCreateDto>("pt_BR")
+                .CustomInstantiator(f => new WorkflowCreateDto
+                {
+                    TeamId = f.Random.Int(1, 1000),
+                    Name = f.Lorem.Sentence(3)
+                });
+            return faker;
+        }
+
+        public static WorkflowCreateDto FindValidWorkflowCreateDtoStepWithNoName()
+        {
+            var faker = new Faker<WorkflowCreateDto>("pt_BR")
+                .CustomInstantiator(f => new WorkflowCreateDto
+                {
+                    TeamId = f.Random.Int(1, 1000),
+                    Name = f.Lorem.Sentence(3),
+                    Steps = new List<StepCreateDto>()
+                    {
+                        new StepCreateDto
+                        {
+                            Name = string.Empty,
+                            Order = f.Random.Int(1, 10),
+                            ProfileId = f.Random.Int(1, 100),
+                            StatusId = f.Random.Int(1, 5)
+                        }
+                    }
+                });
+            return faker;
+        }
+
         public static WorkflowUpdateDto FindValidWorkflowUpdateDto()
         {
             var faker = new Faker<WorkflowUpdateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowUpdateDto
                 {
                     Id = f.Random.Int(1, 1000),
-                    Name = f.Lorem.Sentence(3)
+                    Name = f.Lorem.Sentence(3),
+                    Steps = new List<StepUpdateDto>() { FindValidStepUpdateDto() }
                 });
             return faker;
         }
@@ -96,7 +129,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var f = new Faker("pt_BR");
             return new StepUpdateDto
             {
-                Id = f.Random.Int(1, 1000),
+                Id = f.Random.Int(0, 2),
                 Name = f.Lorem.Sentence(2),
                 Order = f.Random.Int(1, 10),
                 ProfileId = f.Random.Int(1, 100),

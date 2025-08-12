@@ -1,17 +1,15 @@
 ﻿using Moq;
-using System;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
-using static Google.Cloud.Vision.V1.ProductSearchResults.Types;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -23,6 +21,8 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IProfileRepository> _profileRepositoryMock;
         private readonly Mock<IStatusRepository> _statusRepositoryMock;
         private readonly Mock<ITeamRepository> _teamRepositoryMock;
+        private readonly IValidateWorkflow _validateWorkflow;
+        private readonly IValidateStep _validateStep;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly WorkflowServices _workflowService;
 
@@ -34,14 +34,19 @@ namespace WoopiAiHub.UnitTests.Services
             _profileRepositoryMock = new Mock<IProfileRepository>();
             _statusRepositoryMock = new Mock<IStatusRepository>();
             _teamRepositoryMock = new Mock<ITeamRepository>();
+            
+            _validateWorkflow = new ValidateWorkflow(_workflowRepositoryMock.Object, _teamRepositoryMock.Object);
+            _validateStep = new ValidateStep(_cardRepositoryMock.Object);
+
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _workflowService = new WorkflowServices(_workflowRepositoryMock.Object,
                                                     _profileRepositoryMock.Object,
                                                     _statusRepositoryMock.Object,
-                                                    _teamRepositoryMock.Object,
                                                     _stepRepositoryMock.Object,
                                                     _unitOfWorkMock.Object,
-                                                    _cardRepositoryMock.Object);
+                                                    _validateStep,
+                                                    _validateWorkflow);
+
         }
 
         [Fact(DisplayName = "Test FindById and returns a workflow")]
@@ -118,12 +123,48 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
         }
 
-        [Fact(DisplayName = "Create should throw ArgumentNullException when Dto is null")]
+        [Fact(DisplayName = "Create should throw AppException when workflow has no step")]
         [Trait("Create", "Fail")]
-        public async Task Create_ShouldThrowArgumentNullException_WhenDtoIsNull()
+        public async Task Create_ShouldThrowAppException_WhenWorkflowHasNoStep()
+        {        
+            // Arrange
+            var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDtoNoSteps();
+            var teamDto = WorkflowFixture.FindValidTeamDto();
+
+            _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>())).ReturnsAsync((WorkflowDto?)null);
+            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
+
+            // Act
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Create(workflowCreateDto));
+
+            // Assert 
+            Assert.Equal(ErrorCode.RequiredField, ex.ErrorCode);
+            Assert.Equal("Workflow must have at least one step", ex.Message);
+            Assert.Equal(StepLabel.Required, ex.LabelError);
+            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>()), Times.Once);
+            _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "Create should throw AppException when workflow step has empty name")]
+        [Trait("Create", "Fail")]
+        public async Task Create_ShouldThrowAppException_WhenStepHasEmptyName()
         {
-            // Act & Assert
-            await Assert.ThrowsAsync<NullReferenceException>(() => _workflowService.Create(null!));
+            // Arrange
+            var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDtoStepWithNoName();
+            var teamDto = WorkflowFixture.FindValidTeamDto();
+
+            _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>())).ReturnsAsync((WorkflowDto?)null);
+            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
+
+            // Act
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Create(workflowCreateDto));
+
+            // Assert 
+            Assert.Equal(ErrorCode.RequiredField, ex.ErrorCode);
+            Assert.Equal("Step name cannot be empty", ex.Message);
+            Assert.Equal(StepLabel.NameRequired, ex.LabelError);
+            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>()), Times.Once);
+            _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Never);
         }
 
         [Fact(DisplayName = "Create should throw AppException when workflow already exists for team")]

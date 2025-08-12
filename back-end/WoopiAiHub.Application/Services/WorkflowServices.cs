@@ -17,26 +17,26 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
-        private readonly ITeamRepository _teamRepository;
-        private readonly ICardRepository _cardRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IValidateWorkflow _validateWorkflow;
+        private readonly IValidateStep _validateStep;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
                                 IProfileRepository profileRepository,
                                 IStatusRepository statusRepository,
-                                ITeamRepository teamRepository,
                                 IStepRepository stepRepository,
                                 IUnitOfWork unitOfWork,
-                                ICardRepository cardRepository)
+                                IValidateStep validateStep,
+                                IValidateWorkflow validateWorkflow)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
-            _teamRepository = teamRepository;
             _stepRepository = stepRepository;
             _unitOfWork = unitOfWork;
-            _cardRepository = cardRepository;
+            _validateStep = validateStep;
+            _validateWorkflow = validateWorkflow;
         }
 
         /// <summary>
@@ -47,17 +47,9 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> Create(WorkflowCreateDto workflowCreateDto)
         {
-            var workflowDto = await _workflowRepository.FindByTeamId(workflowCreateDto.TeamId);
-            if (workflowDto != null)
-            {
-                throw new AppException(ErrorCode.Conflict, "Workflow already exists for this team", WorkflowLabel.AlreadyExists);
-            }
+            await _validateWorkflow.ValidateCreateWorkflow(workflowCreateDto);
 
-            var team = _teamRepository.FindById(workflowCreateDto.TeamId);
-            if (team == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Team not found", TeamLabel.NotFound);
-            }
+            _validateStep.ValidateCreateStep(workflowCreateDto.Steps);
 
             var workflow = new Workflow(0, DateTime.UtcNow, workflowCreateDto.TeamId, workflowCreateDto.Name);
 
@@ -86,16 +78,9 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
-                if (workflow == null)
-                {
-                    throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
-                }
+                var workflow = await _validateWorkflow.ValidateUpdateWorkflow(workflowUpdateDto);
 
-                if (workflow.TeamId != workflowUpdateDto.TeamId)
-                {
-                    throw new AppException(ErrorCode.Conflict, "Workflow team ID does not match", WorkflowLabel.TeamIdMismatch);
-                }
+                _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
 
                 await DeleteSteps(workflowUpdateDto, workflow);
 
@@ -176,9 +161,10 @@ namespace WoopiAiHub.Application.Services
                     throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
                 }
 
-                List<int> stepsToRemove = await VerifyAndReturnSteps(workflow, workflow.Steps.Select(s => s.Id).ToHashSet());
-                _stepRepository.DeleteByIds(stepsToRemove);
+                var stepIds = workflow.Steps.Select(s => s.Id).ToList();
+                await _validateStep.ValidateDeleteStep(stepIds);
 
+                _stepRepository.DeleteByIds(stepIds);
                 await _workflowRepository.DeleteById(id);
                 
                 _unitOfWork.Commit();
@@ -239,27 +225,10 @@ namespace WoopiAiHub.Application.Services
         private async Task DeleteSteps(WorkflowUpdateDto workflowUpdateDto, Workflow workflow)
         {
             var updatedStepIds = workflowUpdateDto.Steps.Select(s => s.Id).ToHashSet();
-            List<int> stepsToRemove = await VerifyAndReturnSteps(workflow, updatedStepIds);
-            _stepRepository.DeleteByIds(stepsToRemove);
-        }
-
-        /// <summary>
-        /// Verifies which steps need to be removed and checks if they are in use by any cards.
-        /// </summary>
-        /// <param name="workflow"></param>
-        /// <param name="updatedStepIds"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        private async Task<List<int>> VerifyAndReturnSteps(Workflow workflow, HashSet<int> updatedStepIds)
-        {
             var stepsToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id)).Select(s => s.Id).ToList();
-            var existingStepsInUse = await _cardRepository.ExistsStepsInUse(stepsToRemove);
-            if (existingStepsInUse)
-            {
-                throw new AppException(ErrorCode.Conflict, "Cannot delete steps that are in use by cards", StepLabel.StepsInUse);
-            }
 
-            return stepsToRemove;
+            await _validateStep.ValidateDeleteStep(stepsToRemove);
+            _stepRepository.DeleteByIds(stepsToRemove);
         }
 
         /// <summary>
