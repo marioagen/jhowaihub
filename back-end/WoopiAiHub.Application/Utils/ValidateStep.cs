@@ -80,13 +80,17 @@ namespace WoopiAiHub.Application.Utils
         /// <exception cref="AppException"></exception>
         private static void ValidateOrder(List<Step> steps)
         {
-            var orders = new HashSet<int>();
-            foreach (var step in steps)
+            var duplicate = steps
+                    .GroupBy(s => s.Order)
+                    .FirstOrDefault(g => g.Count() > 1);
+
+            if (duplicate != null)
             {
-                if (!orders.Add(step.Order))
-                {
-                    throw new AppException(ErrorCode.Conflict, $"Step order '{step.Order}' is already used in this workflow", StepLabel.OrderInvalid);
-                }
+                throw new AppException(
+                    ErrorCode.Conflict,
+                    $"Step order '{duplicate.Key}' is already used in this workflow",
+                    StepLabel.OrderInvalid
+                );
             }
         }
 
