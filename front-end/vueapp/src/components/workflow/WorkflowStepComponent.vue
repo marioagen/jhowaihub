@@ -17,12 +17,12 @@
                     @click="startEditingTitle"
                     style="cursor: pointer;"
                 >
-                    {{ localStep.title || 'Etapa sem título' }}
+                    {{ localStep.name || 'Etapa sem título' }}
                 </span>
                 <input
                     v-else
                     type="text"
-                    v-model="localStep.title"
+                    v-model="localStep.name"
                     class="form-control form-control-sm"
                     @blur="stopEditingTitle"
                     @keyup.enter="stopEditingTitle"
@@ -44,7 +44,7 @@
                 <label class="form-label text-muted small">{{ $t("workflow.status") }}</label>
                 <select
                         class="form-select form-select-sm border-start-0"
-                        v-model="localStep.status"
+                        v-model="localStep.statusId"
                     >
                         <option value="">{{ $t("workflow.status") }}</option>
                         <option 
@@ -65,7 +65,7 @@
                     </span>
                     <select
                         class="form-select form-select-sm border-start-0"
-                        v-model="localStep.profile"
+                        v-model="localStep.profileId"
                     >
                         <option value="">{{ $t("workflow.responsableTeam") }}</option>
                         <option 
@@ -73,7 +73,7 @@
                             :key="index"
                             :value="item.id" 
                         >
-                            {{ item.id }} - {{ item.name }}
+                            {{ item.id }} - {{ item.text }}
                         </option>
                     </select>
                 </div>
@@ -101,17 +101,21 @@
             profilesList: {
                 type: Array,
                 required: true,
-            }
+            },
+            statusList: {
+                type: Array,
+                required: true,
+            },
         },
         data() {
             return {
                 editingTitle: false,
                 localStep: {
-                    status: this.step.status || '',
-                    profile: this.step.profile || '',
-                    title: this.step.title || ''
+                    statusId: this.step.status || '',
+                    profileId: this.step.profile || '',
+                    name: this.step.title || '',
+                    order: this.index
                 },
-                statusList: [],
             };
         },
         watch: {
@@ -132,7 +136,7 @@
             stopEditingTitle() {
                 this.editingTitle = false;
             }
-        }
+        },
     };
 </script>
 
