@@ -18,7 +18,7 @@ namespace WoopiAiHub.UnitTests.Helpers
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression) =>
             new TestAsyncEnumerable<TElement>(expression);
 
-        public object Execute(Expression expression) =>
+        public object? Execute(Expression expression) =>
             _inner.Execute(expression);
 
         public TResult Execute<TResult>(Expression expression) =>

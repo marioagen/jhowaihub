@@ -114,7 +114,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindById", "Fail")]
         public async Task FindById_Throws_WhenNotFound()
         {
-            _profileRepoMock.Setup(r => r.FindById(99)).ReturnsAsync((ProfileDto)null);
+            _profileRepoMock.Setup(r => r.FindById(99)).ReturnsAsync((ProfileDto?)null);
 
             await Assert.ThrowsAsync<ArgumentException>(() => _service.FindById(99));
         }

@@ -20,6 +20,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ITeamRepository _teamRepository;
         private readonly ICardRepository _cardRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
                                 IProfileRepository profileRepository,
@@ -88,7 +89,7 @@ namespace WoopiAiHub.Application.Services
                 var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
                 if (workflow == null)
                 {
-                    throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                    throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
                 }
 
                 if (workflow.TeamId != workflowUpdateDto.TeamId)
@@ -98,7 +99,7 @@ namespace WoopiAiHub.Application.Services
 
                 await DeleteSteps(workflowUpdateDto, workflow);
 
-                await UpdateSteps(workflowUpdateDto, workflow);
+                await UpdateSteps(workflowUpdateDto);
 
                 ICollection<Step> stepsAdd = workflowUpdateDto.Steps
                     .Where(s => s.Id == 0)
@@ -137,7 +138,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindById(id);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
             return workflow;
         }
@@ -153,7 +154,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindByTeamId(teamId);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
             return workflow;
         }
@@ -172,7 +173,7 @@ namespace WoopiAiHub.Application.Services
                 var workflow = await _workflowRepository.FindByIdReturnModel(id);
                 if (workflow == null)
                 {
-                    throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                    throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
                 }
 
                 List<int> stepsToRemove = await VerifyAndReturnSteps(workflow, workflow.Steps.Select(s => s.Id).ToHashSet());
@@ -265,9 +266,8 @@ namespace WoopiAiHub.Application.Services
         /// Updates existing steps in a workflow based on the provided DTO.
         /// </summary>
         /// <param name="workflowUpdateDto"></param>
-        /// <param name="workflow"></param>
         /// <returns></returns>
-        private async Task UpdateSteps(WorkflowUpdateDto workflowUpdateDto, Workflow workflow)
+        private async Task UpdateSteps(WorkflowUpdateDto workflowUpdateDto)
         {
             var stepsToUpdate = workflowUpdateDto.Steps.Where(s => s.Id > 0).ToList();
 
