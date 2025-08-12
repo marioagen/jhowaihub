@@ -181,17 +181,14 @@ export default {
                 },
                 responseType: "blob",
             })
-                .then((response) => {
-                    this.profileImage = window.URL.createObjectURL(
-                        new Blob([response.data], { type: "image/jpeg" })
-                    );
-                    this.$store.commit("updateUserProfileImage", {
-                        amount: self.profileImage,
-                    });
-                })
-                .catch((error) => {
-                    console.log(error);
+            .then((response) => {
+                this.profileImage = window.URL.createObjectURL(
+                    new Blob([response.data], { type: "image/jpeg" })
+                );
+                this.$store.commit("updateUserProfileImage", {
+                    amount: self.profileImage,
                 });
+            });
         },
         setBreakWord(str) {
             const strSplit = str.trim().split(" ");

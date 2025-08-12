@@ -1,6 +1,10 @@
 <template>
     <main>
-        <div class="container-fluid scroll-area mx-4 mt-4">
+        <FullscreenLoadingComponent v-if="isLoading" />
+        <div 
+            v-else 
+            class="container-fluid scroll-area mx-4 mt-4"
+        >
             <div class="row align-items-center">
                 <div class="col-auto">
                     <div>
@@ -50,11 +54,11 @@
                                 >
                                     <option value="">{{ $t("workflow.responsableTeam") }}</option>
                                     <option 
-                                        v-for="(item, index) in docTypesList" 
+                                        v-for="(item, index) in teamsList"
                                         :key="index"
                                         :value="item.id" 
                                     >
-                                        {{ item.id }} - {{ item.name }}
+                                        {{ item.id }} - {{ item.text }}
                                     </option>
                                 </select>
                             </div>
@@ -83,6 +87,8 @@
                             :step="step"
                             :index="index + 1"
                             :is-last="index === stepsList.length - 1" 
+                            :profilesList="profilesList"
+                            :statusList="statusList"
                             @update-step="updateStep(index, $event)"
                             @remove-step="removeStep(index)"
                             class="workflow-step-card"
@@ -104,15 +110,22 @@
 
 <script>
     import WorkflowStepComponent from "@/components/workflow/WorkflowStepComponent.vue";
+    import TeamsService from "@/services/teams/TeamsService";
+    import StatusService from "@/services/status/StatusService";
+    import ProfilesService from "@/services/profiles/ProfilesService";
+    import WorkflowService from "@/services/workflow/WorkflowService";
+    import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingComponent.vue";
     export default {
-        name: "QuizFormNew",
-        props: {
-        },
+        name: "EditBoard",
         components: {
-            WorkflowStepComponent
+            FullscreenLoadingComponent,
+            WorkflowStepComponent,
         },
         data() {
             return {
+                profilesList: [],
+                statusList: [],
+                teamsList: [],
                 stepsList: [],
                 steps: {
                     status: "",
@@ -122,6 +135,7 @@
                     name: "",
                     team: "",
                 },
+                isLoading: false,
             };
         },
         watch: {
@@ -135,8 +149,38 @@
             }
         },
         methods: {
+            getTeams() {
+                TeamsService.getTeamList()
+                    .then((response) => {
+                        if(response.error !== undefined) return;
+                        for (let i = 0; i < response.length; i++) {
+                            var item = {
+                                id: response[i].id,
+                                text: response[i].name,
+                            };
+                            this.teamsList.push(item);
+                        }
+                    });
+            },
+            getStatus() {
+                StatusService.getStatus()
+                    .then((response) => {
+                        if(response.error !== undefined) return;
+                        this.statusList = response;
+                    });
+            },
             getProfiles() {
-
+                ProfilesService.getProfilesList()
+                    .then((response) => {
+                        if(response.error !== undefined) return;
+                        for (let i = 0; i < response.length; i++) {
+                            var item = {
+                                id: response[i].id,
+                                text: response[i].name,
+                            };
+                            this.profilesList.push(item);
+                        }
+                    });
             },
             updateStep(index, updatedStep) {
                 this.stepsList[index] = { ...this.stepsList[index], ...updatedStep };
@@ -151,17 +195,41 @@
                 this.stepsList.splice(index, 1);
             },
             save() {
+                this.isLoading = true;
                 let params = {
                     name: this.workflowData.name,
-                    team: this.workflowData.team,
+                    teamId: this.workflowData.team,
                     steps: this.stepsList
                 };
                 console.log(params)
+                WorkflowService.createWorkflow(params)
+                    .then((response) => {
+                        if(response) {
+                            //redict somewhere
+                            return this.$notify({
+                                title: 'Workflow',
+                                message: 'workflow.createSuccess',
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
+                        }
+                        this.$notify({
+                            title: 'Workflow',
+                            message: 'workflow.createError',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
             },
         },
         created() {
+            this.getTeams();
+            this.getStatus();
             this.getProfiles();
-        },
+        },  
     };
 </script>
 
