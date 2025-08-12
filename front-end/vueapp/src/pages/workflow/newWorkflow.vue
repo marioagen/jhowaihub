@@ -1,8 +1,5 @@
 <template>
-    <WorkflowBoards 
-        :isEdit="true"
-        :id="$route.params.id"
-    />
+    <WorkflowBoards />
 </template>
 
 <script>
@@ -11,6 +8,6 @@
         name: "EditWorkflow",
         components: {
             WorkflowBoards,
-        },
+        }
     }
 </script>

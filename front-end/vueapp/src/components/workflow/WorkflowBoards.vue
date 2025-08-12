@@ -6,11 +6,21 @@
             class="container-fluid scroll-area mx-4 mt-4"
         >
             <div class="row align-items-center">
-                <div class="col-auto">
-                    <div>
-                         <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
-                         <p><small class="text-muted">{{ $t("workflow.subtitle") }}</small></p>
-                     </div>
+                <div class="col-auto">                    
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="redirectToIndex">
+                                <LucideIcon icon="ArrowLeft" />
+                                {{ $t("labelBack") }}
+                            </button>
+                        </div>
+                        <div class="col-8">
+                            <div>
+                                <h5 class="mb-0 fw-bold">{{ $t(formTitle) }}</h5>
+                                <p><small class="text-muted">{{ $t(formSubtitle) }}</small></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col-auto ms-auto">
@@ -50,7 +60,7 @@
                                 <select
                                     id="typeDocId"
                                     class="form-select form-select-sm border-start-0"
-                                    v-model="workflowData.team"
+                                    v-model="workflowData.teamId"
                                 >
                                     <option value="">{{ $t("workflow.responsableTeam") }}</option>
                                     <option 
@@ -115,11 +125,24 @@
     import ProfilesService from "@/services/profiles/ProfilesService";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingComponent.vue";
+    
     export default {
-        name: "EditBoard",
+        name: "WorkflowBoards",
         components: {
             FullscreenLoadingComponent,
             WorkflowStepComponent,
+        },
+        props: {
+            isEdit: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            id: {
+                type: Number,
+                required: false,
+                default: null,
+            },
         },
         data() {
             return {
@@ -133,7 +156,7 @@
                 },
                 workflowData: {
                     name: "",
-                    team: "",
+                    teamId: "",
                 },
                 isLoading: false,
             };
@@ -146,7 +169,13 @@
         computed: {
             canSave() {
                 return !this.stepsList.length > 0;
-            }
+            },
+            formTitle() {
+                return this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title";
+            },
+            formSubtitle() {
+                return this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle";
+            },
         },
         methods: {
             getTeams() {
@@ -182,6 +211,20 @@
                         }
                     });
             },
+            setEdit() {
+                if(!this.isEdit) return;
+                this.isLoading = true;
+                WorkflowService.getWorkflowById(this.id)
+                    .then((response) => {
+                        this.workflowData.id = response.id;
+                        this.workflowData.name = response.name;
+                        this.workflowData.teamId = response.teamId;
+                        this.stepsList = response.steps;
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
+            },
             updateStep(index, updatedStep) {
                 this.stepsList[index] = { ...this.stepsList[index], ...updatedStep };
             },
@@ -196,16 +239,22 @@
             },
             save() {
                 this.isLoading = true;
+                if(this.isEdit) {
+                    return this.editWorkflow();
+                }
+                return this.createWorkflow();
+            },
+            createWorkflow() {
                 let params = {
                     name: this.workflowData.name,
-                    teamId: this.workflowData.team,
+                    teamId: this.workflowData.teamId,
                     steps: this.stepsList
                 };
-                console.log(params)
+
                 WorkflowService.createWorkflow(params)
                     .then((response) => {
                         if(response) {
-                            //redict somewhere
+                            this.redirectToIndex();
                             return this.$notify({
                                 title: 'Workflow',
                                 message: 'workflow.createSuccess',
@@ -224,11 +273,45 @@
                         this.isLoading = false;
                     });
             },
+            editWorkflow() {
+                let params = {
+                    id: this.workflowData.id,
+                    name: this.workflowData.name,
+                    teamId: this.workflowData.teamId,
+                    steps: this.stepsList
+                };
+
+                WorkflowService.editWorkflow(params)
+                    .then((response) => {
+                        if(response) {
+                            this.redirectToIndex();
+                            return this.$notify({
+                                title: 'Workflow',
+                                message: 'workflow.editSuccess',
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
+                        }
+                        this.$notify({
+                            title: 'Workflow',
+                            message: 'workflow.editError',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
+            },
+            redirectToIndex() {
+                return this.$router.push({ name: "Workflow" });
+            },
         },
         created() {
             this.getTeams();
             this.getStatus();
             this.getProfiles();
+            this.setEdit();
         },  
     };
 </script>
