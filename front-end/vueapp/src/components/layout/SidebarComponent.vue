@@ -82,10 +82,10 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/workflow/edit"
+                    to="/workflow"
                 >
                     <LucideIcon icon="Workflow" strokeWidth="2" color="#00bba7" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelWorkflow") }}</span>
+                    <span v-show="!isCollapsed" class="ms-2">Workflow</span>
                 </router-link>
             </li>
 
