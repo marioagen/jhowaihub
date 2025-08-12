@@ -19,6 +19,17 @@ export default {
                 console.log(e);
             });
     },
+    getProfilesList() {
+        return api.get("/Profile/FindAll")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
     deleteProfileById(ids) {
         return api
             .delete("/Profile", { data: ids })
