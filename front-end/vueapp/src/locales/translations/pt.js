@@ -385,7 +385,13 @@
         responsableTeam: "Time responsável",
         name: "Nome do workflow",
         profiles: "Perfil responsável",
-        status: "Status"
+        status: "Status",
+        createSuccess: "Workflow criado com sucesso",
+        createError: "Erro ao criar workflow",
+        editSuccess: "Workflow editado com sucesso",
+        editError: "Erro ao editar workflow",
+        removeSuccess: "Workflow removido com sucesso",
+        removeError: "Erro ao remover workflow",
     },
 };
 

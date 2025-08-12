@@ -388,7 +388,13 @@
         responsableTeam: "Responsible team",
         name: "Workflow name",
         profiles: "Responsible profile",
-        status: "Status"
+        status: "Status",
+        createSuccess: "Workflow created successfully",
+        createError: "Error creating workflow",
+        editSuccess: "Workflow edited successfully",
+        editError: "Error editing workflow",
+        removeSuccess: "Workflow removed successfully",
+        removeError: "Error removing workflow",
     },
 };
 

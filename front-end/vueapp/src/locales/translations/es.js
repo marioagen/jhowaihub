@@ -392,7 +392,13 @@
         responsableTeam: "Equipo responsable",
         name: "Nombre del workflow",
         profiles: "Perfil responsable",
-        status: "Estado"
+        status: "Estado",
+        createSuccess: "Flujo de trabajo creado con éxito",
+        createError: "Error al crear el flujo de trabajo",
+        editSuccess: "Flujo de trabajo editado con éxito",
+        editError: "Error al editar el flujo de trabajo",
+        removeSuccess: "Flujo de trabajo eliminado con éxito",
+        removeError: "Error al eliminar el flujo de trabajo",
     },
 };
 
