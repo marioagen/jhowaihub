@@ -85,15 +85,37 @@ namespace WoopiAiHub.Repository
                     Status = new StatusDto
                     {
                         Id = s.Status!.Id,
-                        Name = s.Status.Name
+                        Name = s.Status.Name,
+                        Color = s.Status.Color,
                     },
                     Cards = s.Cards.Select(c => new CardDto
                     {
                         Id = c.Id,
                         Name = c.Name,
+                        Created = c.Created,
+                        Description = c.Document.Description,
+                        Owner = c.Document.EmailCreator,
                     }).ToList(),
                 }).ToList()
             };
+        }
+
+        public ICollection<WorkflowDto> FindAllByUser(string userEmail)
+        {
+            return _context.Workflows
+                           .Where(w => w.Team.Users.Any(u => u.Email == userEmail))
+                           .Select(t => new WorkflowDto
+                           {
+                               Id = t.Id,
+                               Name = t.Name,
+                               Created = t.Created,
+                               Team = new TeamDto
+                               {
+                                   Id = t.Team.Id,
+                                   Name = t.Team.Name,
+                               },
+                           })
+                           .ToList();
         }
     }
 }

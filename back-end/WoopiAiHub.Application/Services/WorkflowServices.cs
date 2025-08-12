@@ -47,5 +47,16 @@ namespace WoopiAiHub.Application.Services
             }
             return workflow;
         }
+
+        /// <summary>
+        /// Find all workflows associated with a user, based on their email.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ICollection<WorkflowDto> FindAllByUser(string email)
+        {
+            var workflow = _workflowRepository.FindAllByUser(email);
+            return workflow;
+        }
     }
 }

@@ -168,7 +168,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/index",
+        path: "/workflow",
         name: "WorkflowPage",
         component: WorkflowPage,
         meta: { layout: "default" },

@@ -1,62 +1,22 @@
 <template>
     <div class="container mt-2">
         <div class="row">
-            <div class="col-3 kanban-col">
+            <div class="col-3 kanban-col" v-for="step in kanbanData.steps" :key="step.id">
                 <div class="card flex-grow-1">
-                    <div class="card-header first-steps">
-                        data.title
+                    <div class="card-header" :class="findOrder(step.order)">
+                        {{step.name}}
                     </div>
-                    <div class="card-body">
-                        <CardComponent :dataCard="dataList"
-                                       color="primary"
-                                       label="labelAnalyze">
+                    <div class="card-body" v-for="card in step.cards" :key="card.id">
+                        <CardComponent :dataCard="card"
+                                       :dataStep="step"
+                                       :isFirstStep="firstStep"
+                                       label="labelAnalyze"
+                                       @reload="reloadList">
                         </CardComponent>
                     </div>
                 </div>
             </div>
-
-            <div class="col-3 kanban-col">
-                <div class="card flex-grow-1">
-                    <div class="card-header first-steps">
-                        data.title
-                    </div>
-                    <div class="card-body">
-                            <CardComponent :dataCard="dataList"
-                                           color="warning"
-                                           label="labelAdvance">
-                            </CardComponent>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-3 kanban-col">
-                <div class="card flex-grow-1">
-                    <div class="card-header first-steps">
-                        data.title
-                    </div>
-                        <div class="card-body">
-                            <CardComponent :dataCard="dataList"
-                                           color="danger"
-                                           label="labelAdvance">
-                            </CardComponent>
-                        </div>
-                </div>
-            </div>
-
-            <div class="col-3 kanban-col">
-                <div class="card flex-grow-1">
-                    <div class="card-header last-step">
-                        data.title
-                    </div>
-                    <div class="card-body">
-                        <CardComponent :dataCard="dataList"
-                                       color="success"
-                                       label="labelAdvance">
-                        </CardComponent>
-                    </div>
-                </div>
-            </div>
-        </div>
+       </div>
     </div>
 </template>
 <script>
@@ -66,9 +26,38 @@
         components: {
             CardComponent
         },
+        props: {
+            kanbanData: {
+                type: Array,
+                required: false,
+                default: () => []
+            },
+            
+        },
         data: () => ({
+
+            firstStep: false,
+            customClass: ""
         }),
         methods: {
+            findOrder(stepOrder) {
+                const minOrder = Math.min(...this.kanbanData.steps.map(s => s.order));
+                const maxOrder = Math.max(...this.kanbanData.steps.map(s => s.order));
+
+                if (stepOrder === minOrder) {
+                    this.firstStep = true;
+                    return `first-steps`;
+                }
+                else if (stepOrder !== maxOrder) {
+                   return `first-steps`;
+               }
+                else if (stepOrder === maxOrder) {
+                   return `last-step`;
+               }
+            },
+            reloadList() {
+                this.$emit('reload');
+            }
         },
             
     };

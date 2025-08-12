@@ -83,7 +83,7 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                             to="/workflow-documents">
+                             to="/workflow">
                     <img src="./../../assets/img/workflow.svg"
                          :title="$t('labelDocuments')"
                          width="20"

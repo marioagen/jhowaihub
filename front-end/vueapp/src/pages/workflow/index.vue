@@ -22,35 +22,31 @@
                                         type="button"
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false">
-                                    <div class="fw-bold font-size-sm">Time Financeiro</div>
-                                    <div class="text-muted font-size-xs">Processamento de Notas Fiscais</div>
+                                    <div class="fw-bold font-size-sm">{{selectedOption.teamName}}</div>
+                                    <div class="text-muted font-size-xs">{{selectedOption.name}}</div>
                                 </button>
 
                                 <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="#" @click="selectTeam('RH', 'Folha de Pagamento')">
-                                            <div class="fw-bold">Time RH</div>
-                                            <div class="text-muted small">Folha de Pagamento</div>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" @click="selectTeam('TI', 'Infraestrutura')">
-                                            <div class="fw-bold">Time TI</div>
-                                            <div class="text-muted small">Infraestrutura</div>
+                                    <li v-for="item in workflowList" :key="item.id">
+                                        <a class="dropdown-item" @click="selectOption(item)">
+                                            <div class="fw-bold">{{item.team.name}}</div>
+                                            <div class="text-muted small">{{item.name}}</div>
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                             <div class="badge bg-secondary badge-custom">
                                 <LucideIcon icon="Workflow" size="14" class="me-2" stroke="#0d6efd" />
-                                <span>data.workflow</span>
+                                <span>{{selectedOption.name}}</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="card mb-3 h-100">
                     <div class="card-body d-flex flex-column p-2 flex-md-row card-container">
-                        <WorkflowCards>
+                        <WorkflowCards
+                         :kanbanData="kanbanCards"
+                          @reload="reloadKanban">
                         </WorkflowCards>
                     </div>
                 </div>
@@ -59,15 +55,15 @@
                         <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
                             <div>
                                 <span class="me-1">Workflow:</span>
-                                <b>data.workflow</b>
+                                <b>{{selectedOption.name}}</b>
                             </div>
                             <div>
                                 <span class="me-1">{{$t("labelTeam")}}:</span>
-                                <b>data.team</b>
+                                <b>{{selectedOption.teamName}}</b>
                             </div>
                             <div>
                                 <span class="me-1">{{$t("labelTotalDocuments")}}</span>
-                                <b>data.docs</b>
+                                <b>{{numDocs}}</b>
                             </div>
                         </div>
                     </div>
@@ -78,6 +74,7 @@
 </template>
 
 <script>
+    import WorkflowService from "@/services/workflow/WorkflowService.js";
     import WorkflowCards from "@/components/workflow/WorkFlowCards.vue";
     export default {
         name: "WorkflowDocuments",
@@ -88,7 +85,14 @@
                 resetInputSearch: false,
                 modalQuestion: {
                     name: "",
-                }
+                },
+                workflowList: [],
+                selectedOption: {
+                    name: "",
+                    teamName:"",
+                },
+                kanbanCards: [],
+                numDocs: 0
             };
         },
         components:
@@ -100,7 +104,59 @@
                 this.setEntitySearch();
             },
         },
-        methods: {}
+        methods: {
+            getWorkflows() {
+                WorkflowService.getWorkflows()
+                    .then((response) => {
+                        console.log(response);
+                        this.workflowList = response;
+                    })
+                    .finally(() => {
+                        this.selectOption(this.workflowList[0]);
+                        this.filteredworkflows();
+                    });
+            },
+            getWorkflowbyTeam(id) {
+                WorkflowService.getWorkbyTeamId(id)
+                    .then((response) => {
+                        console.log(response);
+                        this.kanbanCards = response;
+                        this.countDocuments(this.kanbanCards);
+                    })
+                    .finally(() => {
+                    });
+            },
+            filteredworkflows() {
+                return this.workflowList.filter(
+                    (workflow) => workflow.id !== this.selectedOption.id
+                );
+            },
+            selectOption(workflow) {
+                this.selectedOption = {
+                    name: workflow.name,
+                    teamName: workflow.team.name,
+                }
+                this.getWorkflowbyTeam(workflow.team.id);
+            },
+            reloadKanban() {
+                this.getWorkflowbyTeam(this.selectedOption.team.id);
+            },
+            countDocuments() {
+                this.kanbanCards.forEach(k => {
+                    if (k.steps) {
+                        k.steps.forEach(step => {
+                            if (step.cards) {
+                                total += step.cards.length;
+                            }
+                        });
+                    }
+                });
+                this.numDocs = totalCards
+            }
+        },
+        created() {
+            this.getWorkflows();
+        },
     };
 </script>
 
