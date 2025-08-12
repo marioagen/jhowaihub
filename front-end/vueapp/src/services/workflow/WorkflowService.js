@@ -3,10 +3,9 @@ import api from "@/services/api";
 export default {
     getWorkflowList() {
     },
-    getWorkflowById() {
-        return api.get("/Workflow")
+    getWorkflowById(workflowId) {
+        return api.get(`/Workflow/Team/${workflowId}`)
             .then(({ data }) => {
-                console.log(data)
                 return data;
             })
             .catch((error) => {
@@ -40,8 +39,8 @@ export default {
 
     },
     deleteWorkflowById(workflowId) {
-        return api.delete("/Workflow", workflowId)
-            .then(( data ) => {
+        return api.delete(`/Workflow/${workflowId}`)
+            .then(({ data } ) => {
                 console.log(data);
                 return data;
             })
