@@ -395,6 +395,14 @@
         editError: "Error editing workflow",
         removeSuccess: "Workflow removed successfully",
         removeError: "Error removing workflow",
+        formCreate: {
+            title: "New Workflow",
+            subtitle: "Configure the steps of the document analysis process",
+        },
+        formEdit: {
+            title: "Workflow Editing",
+            subtitle: "Modify the steps and settings of the workflow",
+        },
     },
 };
 

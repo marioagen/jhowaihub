@@ -375,7 +375,7 @@
     transferListPlaceholder: "Busque na lista",
     unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
     workflow: {
-        title: "Editor de Workflow",
+        title: "Workflow",
         subtitle: "Gerencie e configure workflows de processamento de documentos",
         manage: "Gerenciar workflow:",
         steps: "Etapas do Workflow",
@@ -386,12 +386,21 @@
         name: "Nome do workflow",
         profiles: "Perfil responsável",
         status: "Status",
+        createBtn: "Novo Workflow",
         createSuccess: "Workflow criado com sucesso",
         createError: "Erro ao criar workflow",
         editSuccess: "Workflow editado com sucesso",
         editError: "Erro ao editar workflow",
         removeSuccess: "Workflow removido com sucesso",
         removeError: "Erro ao remover workflow",
+        formCreate: {
+            title: "Novo Workflow",
+            subtitle: "Configure as etapas do processo de análise de documentos",
+        },
+        formEdit: {
+            title: "Edição de Workflow",
+            subtitle: "Modifique as etapas e configurações do workflow",
+        },
     },
 };
 

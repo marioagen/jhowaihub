@@ -399,6 +399,14 @@
         editError: "Error al editar el flujo de trabajo",
         removeSuccess: "Flujo de trabajo eliminado con éxito",
         removeError: "Error al eliminar el flujo de trabajo",
+        formCreate: {
+            title: "Nuevo Flujo de Trabajo",
+            subtitle: "Configure los pasos del proceso de análisis de documentos",
+        },
+        formEdit: {
+            title: "Edición de Flujo de Trabajo",
+            subtitle: "Modifique los pasos y configuraciones del flujo de trabajo",
+        },
     },
 };
 
