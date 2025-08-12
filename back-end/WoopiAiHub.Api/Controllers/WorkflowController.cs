@@ -61,5 +61,19 @@ namespace WoopiAiHub.Api.Controllers
             var workflow = await _workflowServices.FindByTeamId(id);
             return Ok(workflow);
         }
+
+        /// <summary>
+        /// Details a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete("{id}")]
+        [SwaggerOperation("Endpoint that receives the request to delete a workflow by its ID")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteById(int id)
+        {
+            var result = await _workflowServices.DeleteById(id);
+            return Ok(result);
+        }
     }
 }

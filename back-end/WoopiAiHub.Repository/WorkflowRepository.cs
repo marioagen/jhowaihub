@@ -67,6 +67,18 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Deletes a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteById(int id)
+        {
+            return await _context.Workflows
+                .Where(w => w.Id == id)
+                .ExecuteDeleteAsync() > 0;
+        }
+
+        /// <summary>
         /// Retrieves a workflow by its ID and includes related entities.
         /// </summary>
         /// <param name="id"></param>

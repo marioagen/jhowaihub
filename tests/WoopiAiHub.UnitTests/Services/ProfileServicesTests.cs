@@ -34,12 +34,12 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Test Find by id and returns profile when exists")]
         [Trait("FindById", "Success")]
-        public void FindById_ReturnsProfile_WhenExists()
+        public async Task FindById_ReturnsProfile_WhenExists()
         {
             var profileDto = new ProfileDto { Id = 1, Name = "Test" };
-            _profileRepoMock.Setup(r => r.FindById(1)).Returns(profileDto);
+            _profileRepoMock.Setup(r => r.FindById(1)).ReturnsAsync(profileDto);
 
-            var result = _service.FindById(1);
+            var result = await _service.FindById(1);
 
             Assert.Equal(1, result.Id);
             Assert.Equal("Test", result.Name);
@@ -50,7 +50,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindAll", "Success")]
         public void FindAllPaged_ReturnsPagedResult()
         {
-            var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true };
+            var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true, Search = "A" };
             var profiles = new List<ProfileDto>
             {
                 new ProfileDto { Id = 1, Name = "A" },
@@ -112,11 +112,11 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Test FindById and throw exception when not id is not found")]
         [Trait("FindById", "Fail")]
-        public void FindById_Throws_WhenNotFound()
+        public async Task FindById_Throws_WhenNotFound()
         {
-            _profileRepoMock.Setup(r => r.FindById(99)).Returns((ProfileDto)null);
+            _profileRepoMock.Setup(r => r.FindById(99)).ReturnsAsync((ProfileDto)null);
 
-            Assert.Throws<ArgumentException>(() => _service.FindById(99));
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.FindById(99));
         }
 
         [Fact(DisplayName = "Test FindAllPaged and throw exception when page is invalid")]
@@ -174,6 +174,26 @@ namespace WoopiAiHub.UnitTests.Services
             _profileRepoMock.Setup(r => r.Update(profile)).Returns(false);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.Update(dto));
+        }
+
+        [Fact(DisplayName = "Test FindAll and return all profiles")]
+        [Trait("FindAll", "Sucess")]
+        public async Task FindAll_ShouldReturnAllProfiles()
+        {
+            // Arrange
+            var profiles = new List<ProfileDto>
+            {
+                new ProfileDto { Id = 1, Name = "Profile1" },
+                new ProfileDto { Id = 2, Name = "Profile2" }
+            };
+            _profileRepoMock.Setup(repo => repo.FindAll()).ReturnsAsync(profiles);
+
+            // Act
+            var result = await _service.FindAll();
+
+            // Assert
+            Assert.Equal(profiles, result);
+            _profileRepoMock.Verify(repo => repo.FindAll(), Times.Once);
         }
     }
 }

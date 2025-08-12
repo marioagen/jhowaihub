@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
+using static Google.Cloud.Vision.V1.ProductSearchResults.Types;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -68,7 +69,7 @@ namespace WoopiAiHub.Application.Services
                 s.ProfileId,
                 s.StatusId)).ToList();
 
-            AddSteps(steps, workflow);
+            await AddSteps(steps, workflow);
 
             return await _workflowRepository.Create(workflow);
         }
@@ -111,7 +112,7 @@ namespace WoopiAiHub.Application.Services
                         s.StatusId))
                     .ToList();
 
-                AddSteps(stepsAdd, workflow);
+                await AddSteps(stepsAdd, workflow);
 
                 await _workflowRepository.Update(workflow);
 
@@ -158,17 +159,49 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Deletes a workflow by its ID, including all associated steps.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<bool> DeleteById(int id)
+        {
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var workflow = await _workflowRepository.FindByIdReturnModel(id);
+                if (workflow == null)
+                {
+                    throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                }
+
+                List<int> stepsToRemove = await VerifyAndReturnSteps(workflow, workflow.Steps.Select(s => s.Id).ToHashSet());
+                _stepRepository.DeleteByIds(stepsToRemove);
+
+                await _workflowRepository.DeleteById(id);
+                
+                _unitOfWork.Commit();
+                return true;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Adds steps to a workflow, ensuring that each step has a valid profile and status.
         /// </summary>
         /// <param name="steps"></param>
         /// <param name="workflow"></param>
         /// <exception cref="AppException"></exception>
-        private void AddSteps(ICollection<Step> steps, Workflow workflow)
+        private async Task AddSteps(ICollection<Step> steps, Workflow workflow)
         {
             workflow.Steps.Clear();
             foreach (var step in steps)
             {
-                ValidateProfileAndStatus(step);
+                await ValidateProfileAndStatus(step);
 
                 workflow.AddStep(step);
             }
@@ -180,14 +213,14 @@ namespace WoopiAiHub.Application.Services
         /// <param name="step"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private bool ValidateProfileAndStatus(Step step)
+        private async Task<bool> ValidateProfileAndStatus(Step step)
         {
-            var profile = _profileRepository.FindById(step.ProfileId);
+            var profile = await _profileRepository.FindById(step.ProfileId);
             if (profile == null)
             {
                 throw new AppException(ErrorCode.NotFound, "Profile not found", ProfileLabel.NotFound);
             }
-            var status = _statusRepository.FindById(step.StatusId);
+            var status = await _statusRepository.FindById(step.StatusId);
             if (status == null)
             {
                 throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
@@ -205,13 +238,27 @@ namespace WoopiAiHub.Application.Services
         private async Task DeleteSteps(WorkflowUpdateDto workflowUpdateDto, Workflow workflow)
         {
             var updatedStepIds = workflowUpdateDto.Steps.Select(s => s.Id).ToHashSet();
+            List<int> stepsToRemove = await VerifyAndReturnSteps(workflow, updatedStepIds);
+            _stepRepository.DeleteByIds(stepsToRemove);
+        }
+
+        /// <summary>
+        /// Verifies which steps need to be removed and checks if they are in use by any cards.
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <param name="updatedStepIds"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private async Task<List<int>> VerifyAndReturnSteps(Workflow workflow, HashSet<int> updatedStepIds)
+        {
             var stepsToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id)).Select(s => s.Id).ToList();
             var existingStepsInUse = await _cardRepository.ExistsStepsInUse(stepsToRemove);
             if (existingStepsInUse)
             {
                 throw new AppException(ErrorCode.Conflict, "Cannot delete steps that are in use by cards", StepLabel.StepsInUse);
             }
-            _stepRepository.DeleteByIds(stepsToRemove);
+
+            return stepsToRemove;
         }
 
         /// <summary>
@@ -231,7 +278,7 @@ namespace WoopiAiHub.Application.Services
                 {
                     existingStep.Update(step.Name, step.Order, step.ProfileId, step.StatusId);
 
-                    ValidateProfileAndStatus(existingStep);
+                    await ValidateProfileAndStatus(existingStep);
                     await _stepRepository.Update(existingStep);
                 }
             }
