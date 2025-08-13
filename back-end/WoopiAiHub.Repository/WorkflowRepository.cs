@@ -17,6 +17,28 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Creates a new workflow.
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <returns></returns>
+        public async Task<bool> Create(Workflow workflow)
+        {
+            _context.Workflows.Add(workflow);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
+        /// Updates an existing workflow.
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <returns></returns>
+        public async Task<bool> Update(Workflow workflow)
+        {
+            _context.Workflows.Update(workflow);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
         /// Retrieves a workflow associated with a specific team ID.
         /// </summary>
         /// <param name="teamId"></param>
@@ -42,6 +64,18 @@ namespace WoopiAiHub.Repository
                 .Select(GetWorkflowProjection())
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Deletes a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteById(int id)
+        {
+            return await _context.Workflows
+                .Where(w => w.Id == id)
+                .ExecuteDeleteAsync() > 0;
         }
 
         /// <summary>
