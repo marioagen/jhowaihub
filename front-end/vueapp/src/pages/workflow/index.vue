@@ -64,7 +64,7 @@
                             </div>
                             <div>
                                 <span class="me-1">{{$t("labelTotalDocuments")}}</span>
-                                <b>{{numDocs}}</b>
+                                <b>{{kanbanCards.numDocuments}}</b>
                             </div>
                         </div>
                     </div>
@@ -107,10 +107,9 @@
             },
         },
         methods: {
-            getWorkflows() {
-                WorkflowService.getWorkflows()
+            getWorkflowList() {
+                WorkflowService.getWorkflowList()
                     .then((response) => {
-                        console.log(response);
                         this.workflowList = response;
                     })
                     .finally(() => {
@@ -121,8 +120,8 @@
             getWorkflowbyTeam(id) {
                 WorkflowService.getWorkbyTeamId(id)
                     .then((response) => {
-                        console.log(response);
                         this.kanbanCards = response;
+                        console.log(this.kanbanCards);
                     })
                     .finally(() => {
                     });
@@ -136,7 +135,7 @@
                 this.selectedOption = {
                     name: workflow.name,
                     teamName: workflow.team.name,
-                    teamId: workflow.team.id
+                    teamId: workflow.team.id,
                 }
                 this.getWorkflowbyTeam(workflow.team.id);
             },
@@ -145,7 +144,7 @@
             },
         },
         created() {
-            this.getWorkflows();
+            this.getWorkflowList();
         },
     };
 </script>

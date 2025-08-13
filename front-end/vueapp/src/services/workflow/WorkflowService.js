@@ -1,7 +1,7 @@
 import api from "@/services/api";
 
 export default {
-    getWorkflows() {
+    getWorkflowList() {
         return api
             .get("/Workflow")
             .then(({ data }) => {

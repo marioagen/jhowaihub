@@ -26,5 +26,13 @@ namespace WoopiAiHub.Repository
                            .Include(s => s.Cards)
                            .FirstOrDefaultAsync(s => s.Id == id);
         }
+
+        public Task<Step?> FindByOrderAndWorkflowId(int order,
+                                                    int workflowId)
+        {
+            return _context.Steps
+                           .FirstOrDefaultAsync(s => s.Order == order &&
+                                                     s.WorkflowId == workflowId);
+        }
     }
 }

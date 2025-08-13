@@ -16,7 +16,7 @@
                     <small>{{dataCard.owner}}</small>
                 </div>
                 <div class="mb-2">
-                    <button class="btn btn-sm btn-primary" style="float:right" @click="advanceStep">
+                    <button class="btn btn-sm btn-primary" style="float:right" @click="advanceStep" v-if="!isLastStep">
                         <span>{{ verifyFirst }}</span>
                         <LucideIcon icon="ChevronRight" size="16" class="me-1" />
                     </button>
@@ -46,6 +46,11 @@
                 type: Boolean,
                 required: true,
                 default: false,
+            },
+            isLastStep: {
+                type: Boolean,
+                required: true,
+                default: false,
             }
         },
 
@@ -58,7 +63,6 @@
                 };
             },
             advanceStep() {
-                console.log(this.isFirstStep);
                 if (this.isFirstStep) {
                     this.getDocumentNormalized();
                 }
@@ -83,23 +87,23 @@
                         });
             },
             updateStatus() {
-                var statusId = this.dataStep.status.id + 1;
-                var stepId = this.dataStep.id + 1;
-                var params = {
-                    CardId: this.dataCard.id,
-                    StepId: stepId,
-                    StatusId: statusId
+                if (!this.isLastStep) {
+                    var params = {
+                        CardId: this.dataCard.id,
+                        NextStepOrder: this.dataStep.order + 1,
+                        WorkflowId: this.dataStep.workflowId,
+                    }
+                    CardsServices.updateStepAndStatus(params)
+                        .then((response) => {
+                            if (response.error !== undefined) {
+                                console.log(response.error);
+                            }
+                        })
+                        .finally(() => {
+                            console.log("Finished request.");
+                            this.$emit('reload');
+                        });
                 }
-                CardsServices.updateStepAndStatus(params)
-                    .then((response) => {
-                        if (response.error !== undefined) {
-                            console.log(response.error);
-                        }
-                    })
-                    .finally(() => {
-                        console.log("Finished request.");
-                        this.$emit('reload');
-                    });
             }
         },
         computed: {

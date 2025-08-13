@@ -10,6 +10,7 @@
                         <CardComponent :dataCard="card"
                                        :dataStep="step"
                                        :isFirstStep="firstStep"
+                                       :isLastStep="lastStep"
                                        label="labelAnalyze"
                                        @reload="reloadList">
                         </CardComponent>
@@ -37,7 +38,8 @@
         data: () => ({
 
             firstStep: false,
-            customClass: ""
+            lastStep: false,
+            customClass: "",
         }),
         methods: {
             findOrder(stepOrder) {
@@ -46,15 +48,18 @@
 
                 if (stepOrder === minOrder) {
                     this.firstStep = true;
+                    this.lastStep = false;
                     return `first-steps`;
                 }
                 else if (stepOrder !== maxOrder) {
                     this.firstStep = false;
+                    this.lastStep = false;
                     return `first-steps`;
                     
                }
                 else if (stepOrder === maxOrder) {
                     this.firstStep = false;
+                    this.lastStep = true;
                     return `last-step`;
                }
             },

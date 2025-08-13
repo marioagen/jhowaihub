@@ -97,6 +97,7 @@ namespace WoopiAiHub.Repository
                         Owner = c.Document.EmailCreator,
                         DocumentId = c.Document.Id
                     }).ToList(),
+                    WorkflowId = s.WorkflowId
                 }).ToList()
             };
         }

@@ -5,5 +5,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     public interface IStepRepository
     {
         Task<Step?> FindById(int id);
+        Task<Step?> FindByOrderAndWorkflowId(int order,
+                                             int workflowId);
     }
 }

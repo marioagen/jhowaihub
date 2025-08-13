@@ -1,8 +1,6 @@
 ﻿using Moq;
-using System.Runtime.CompilerServices;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -17,7 +15,6 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly Mock<ICardRepository> _cardRepositoryMock;
         private readonly Mock<IStepRepository> _stepRepositoryMock;
-        private readonly Mock<IStatusRepository> _statusRepositoryMock;
         private readonly CardServices _cardService;
         private readonly CardFixture _cardFixture;
 
@@ -26,8 +23,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardFixture = cardFixture;
             _cardRepositoryMock = new Mock<ICardRepository>();
             _stepRepositoryMock = new Mock<IStepRepository>();
-            _statusRepositoryMock = new Mock<IStatusRepository>();
-            _cardService = new CardServices(_cardRepositoryMock.Object, _stepRepositoryMock.Object, _statusRepositoryMock.Object);
+            _cardService = new CardServices(_cardRepositoryMock.Object, _stepRepositoryMock.Object);
         }
 
         [Fact(DisplayName = "Tests update Step and Status and throws an AppException when Card not found")]
@@ -52,30 +48,13 @@ namespace WoopiAiHub.UnitTests.Services
             var updateDto = CardFixture.FindValidUpdateCardStepStatusDto();
             var card = CardFixture.FindValidCard();
             _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync(card);
-            _stepRepositoryMock.Setup(repo => repo.FindById(updateDto.StepId)).ReturnsAsync((Step?)null);
+            _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
+                                                                            updateDto.WorkflowId)).ReturnsAsync((Step?)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _cardService.UpdateStepAndStatus(updateDto));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(StepLabel.NotFound, exception.LabelError);
-        }
-
-        [Fact(DisplayName = "Tests update Step and Status and throws an AppException")]
-        [Trait("UpdateStepAndStatus", "Fail")]
-        public async Task UpdateStepAndStatus_StatusNotFound_ThrowsAppException()
-        {
-            // Arrange
-            var updateDto = CardFixture.FindValidUpdateCardStepStatusDto();
-            var card = CardFixture.FindValidCard();
-            var step = CardFixture.FindValidStep();
-            _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync(card);
-            _stepRepositoryMock.Setup(repo => repo.FindById(updateDto.StepId)).ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindById(updateDto.StatusId)).ReturnsAsync((Status?)null);
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardService.UpdateStepAndStatus(updateDto));
-            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
-            Assert.Equal(StatusLabel.NotFound, exception.LabelError);
         }
 
         [Fact(DisplayName = "Tests update Step and Status and returns true")]
@@ -88,8 +67,9 @@ namespace WoopiAiHub.UnitTests.Services
             var step = CardFixture.FindValidStep();
             var status = CardFixture.FindValidStatus();
             _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync(card);
-            _stepRepositoryMock.Setup(repo => repo.FindById(updateDto.StepId)).ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindById(updateDto.StatusId)).ReturnsAsync(status);
+            _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
+                                                                            updateDto.WorkflowId)).ReturnsAsync(step);
+
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
 
             // Act
