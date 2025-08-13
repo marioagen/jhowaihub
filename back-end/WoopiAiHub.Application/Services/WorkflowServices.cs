@@ -7,7 +7,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using static Google.Cloud.Vision.V1.ProductSearchResults.Types;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -53,16 +52,9 @@ namespace WoopiAiHub.Application.Services
 
             var workflow = new Workflow(0, DateTime.UtcNow, workflowCreateDto.TeamId, workflowCreateDto.Name);
 
-            ICollection<Step> steps = workflowCreateDto.Steps.Select(s => new Step(
-                0,
-                DateTime.UtcNow,
-                workflow.TeamId,
-                s.Name,
-                s.Order,
-                s.ProfileId,
-                s.StatusId)).ToList();
+            ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, workflow.TeamId);
 
-            await AddSteps(steps, workflow);
+            workflow.AddSteps(steps);
 
             return await _workflowRepository.Create(workflow);
         }
@@ -86,19 +78,10 @@ namespace WoopiAiHub.Application.Services
 
                 await UpdateSteps(workflowUpdateDto);
 
-                ICollection<Step> stepsAdd = workflowUpdateDto.Steps
-                    .Where(s => s.Id == 0)
-                    .Select(s => new Step(
-                        0,
-                        DateTime.UtcNow,
-                        workflow.TeamId,
-                        s.Name,
-                        s.Order,
-                        s.ProfileId,
-                        s.StatusId))
-                    .ToList();
+                ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.Where(s => s.Id == 0).ToList(), 
+                                                                          workflow.TeamId);
 
-                await AddSteps(stepsAdd, workflow);
+                workflow.AddSteps(stepsAdd);
 
                 await _workflowRepository.Update(workflow);
 
@@ -178,23 +161,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Adds steps to a workflow, ensuring that each step has a valid profile and status.
-        /// </summary>
-        /// <param name="steps"></param>
-        /// <param name="workflow"></param>
-        /// <exception cref="AppException"></exception>
-        private async Task AddSteps(ICollection<Step> steps, Workflow workflow)
-        {
-            workflow.Steps.Clear();
-            foreach (var step in steps)
-            {
-                await ValidateProfileAndStatus(step);
-
-                workflow.AddStep(step);
-            }
-        }
-
-        /// <summary>
         /// Validates that the profile and status associated with a step exist.
         /// </summary>
         /// <param name="step"></param>
@@ -251,6 +217,32 @@ namespace WoopiAiHub.Application.Services
                     await _stepRepository.Update(existingStep);
                 }
             }
+        }
+
+        /// <summary>
+        /// Creates a collection of Step entities from the provided DTOs and associates them with the given teamId.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stepsDto"></param>
+        /// <param name="teamId"></param>
+        /// <returns></returns>
+        private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int teamId) where T : IStepDto
+        {
+            var steps = stepsDto.Select(s => new Step(
+                0,
+                DateTime.UtcNow,
+                teamId,
+                s.Name,
+                s.Order,
+                s.ProfileId,
+                s.StatusId)).ToList();
+
+            foreach(var step in steps)
+            {
+                await ValidateProfileAndStatus(step);
+            }
+
+            return steps;
         }
     }
 }

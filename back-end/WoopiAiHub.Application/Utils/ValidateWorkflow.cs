@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using WoopiAiHub.Domain.DTOs.Request;
+﻿using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -54,7 +53,6 @@ namespace WoopiAiHub.Application.Utils
         /// <exception cref="AppException"></exception>
         public async Task<Workflow> ValidateUpdateWorkflow(WorkflowUpdateDto workflowUpdateDto)
         {
-
             if (string.IsNullOrEmpty(workflowUpdateDto.Name))
             {
                 throw new AppException(ErrorCode.RequiredField, "Workflow name cannot be empty", WorkflowLabel.NameRequired);

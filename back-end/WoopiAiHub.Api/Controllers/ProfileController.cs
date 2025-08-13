@@ -98,7 +98,6 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("FindAll")]
         [SwaggerOperation("Endpoint that receives the request to return all profiles")]
         [ProducesResponseType(typeof(ICollection<ProfileDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindAll()

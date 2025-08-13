@@ -52,7 +52,6 @@ namespace WoopiAiHub.Application.Utils
 
             var steps = stepsUpdateDto.Select(s => new Step(s.Id, DateTime.UtcNow, workflow.Id, s.Name, s.Order, s.ProfileId, s.StatusId)).ToList();
 
-
             ValidateNames(steps);
 
             ValidateOrder(steps);

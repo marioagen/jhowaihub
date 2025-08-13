@@ -7,7 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     {
         void ValidateCreateStep(ICollection<StepCreateDto> stepsCreateDto);
         void ValidateUpdateStep(Workflow workflow, ICollection<StepUpdateDto> stepsUpdateDto);
-
         Task ValidateDeleteStep(ICollection<int> stepIds);
     }
 }

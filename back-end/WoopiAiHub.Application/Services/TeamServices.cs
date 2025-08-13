@@ -102,11 +102,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<ICollection<TeamDto>> FindByUser(string emailUser)
         {
-            var query = _teamRepository.FindAllByUser(emailUser);
-
-            var teams = await query.ToListAsync();
-
-            return teams;
+            return await _teamRepository.FindAllByUser(emailUser).ToListAsync();
         }
 
         /// <summary>

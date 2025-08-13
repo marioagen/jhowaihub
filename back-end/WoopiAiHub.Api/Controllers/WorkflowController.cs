@@ -44,7 +44,7 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> Update([FromBody] WorkflowUpdateDto workflowUpdateDto)
         {
-             var result = await _workflowServices.Update(workflowUpdateDto);
+            var result = await _workflowServices.Update(workflowUpdateDto);
             return Ok(result);
         }
 

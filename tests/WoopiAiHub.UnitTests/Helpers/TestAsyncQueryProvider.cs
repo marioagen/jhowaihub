@@ -3,6 +3,11 @@ using System.Linq.Expressions;
 
 namespace WoopiAiHub.UnitTests.Helpers
 {
+    /// <summary>
+    /// A custom IAsyncQueryProvider implementation used for mocking asynchronous LINQ queries
+    /// in unit tests. This allows methods like ToListAsync(), FirstOrDefaultAsync(), etc. to 
+    /// work with in-memory IQueryable sources without relying on a real database.
+    /// </summary
     public class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
     {
         private readonly IQueryProvider _inner;
@@ -29,20 +34,5 @@ namespace WoopiAiHub.UnitTests.Helpers
 
         public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken) =>
             Execute<TResult>(expression);
-    }
-
-    public class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
-    {
-        public TestAsyncEnumerable(IEnumerable<T> enumerable)
-            : base(enumerable) { }
-
-        public TestAsyncEnumerable(Expression expression)
-            : base(expression) { }
-
-        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default) =>
-            new TestAsyncEnumerator<T>(this.AsEnumerable().GetEnumerator());
-
-        IQueryProvider IQueryable.Provider =>
-            new TestAsyncQueryProvider<T>(this);
     }
 }
