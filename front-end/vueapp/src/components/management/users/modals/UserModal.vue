@@ -130,7 +130,7 @@
 
 <script>
     import api from "@/services/api";
-    import ModalUserTeam from "@/components/user-manager/users/modals/TeamModal.vue";
+    import ModalUserTeam from "@/components/management/users/modals/TeamModal.vue";
     import ToastAlert from "@/components/common/toast-alert";
     import ErrorCode from "@/constants/Errorcode";
     import { Form, Field, ErrorMessage } from "vee-validate";

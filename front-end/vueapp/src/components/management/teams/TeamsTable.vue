@@ -1,8 +1,8 @@
 <template>
     <div>
         <TableComponent
-            modalName="labelProfile"
-            emptyMessage="labelNoProfilesWereFound"
+            modalName="labelTeams"
+            emptyMessage="labelNoTeamWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -10,12 +10,9 @@
             :hasSelection="false"
             @change-page="changePage"
         >
-            <template #cell-users="{ data }">
+            <template #cell-members="{ data }">
                 <LucideIcon icon="UsersRound" size="15" />
                 {{ data.row.users.length }}
-            </template>
-            <template #cell-permissions="{ data }">
-                {{ data.row.permissions.length }} {{ $t("labelShowingToTotal") }} {{ this.permissionsCount }}
             </template>
             <template #cell-actions="{ data }">
                 <div class="dropdown column-align">
@@ -24,7 +21,7 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="editTeam(data.row)">
                                 <LucideIcon icon="SquarePen" />
                                 {{ $t("labelEdit") }}
                             </a>
@@ -43,33 +40,38 @@
             </template>
         </TableComponent>
     </div>
-    <ProfilesModal :isEdit="true" @reload="reload" ref="ProfilesModal" />
+    <modal-team
+        v-if="modalTeamShow"
+        :teamEditing="selectedTeam"
+        @teamCreated="handleTeamCreated"
+        @close="closeModalTeam"
+    />
+
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteProfile"
+        title="labelYouAreAboutToDeleteTeam"
         message="labelThisActionCannotBeUndone"
         cancelText="labelCancel"
         confirmText="labelConfirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
-        @confirm="deleteProfile"
+        @confirm="deleteTeam"
     />
 </template>
 
 <script>
     import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ProfilesModal from "@/components/user-manager/profiles/modals/ProfilesModal.vue";
-    import ProfilesService from "@/services/profiles/ProfilesService";
-    import PermissionsService from "@/services/permissions/PermissionsService";
+    import ModalTeam from "@/components/management/teams/modals/TeamModal.vue";
+    import TeamsService from "@/services/teams/TeamsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
 
     export default {
-        name: "ProfilesTable",
+        name: "TeamsTable",
         components: {
             TableComponent,
-            ProfilesModal,
+            ModalTeam,
             ConfirmModal,
         },
         data: () => ({
@@ -77,9 +79,8 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "Id" },
-                    { key: "name", label: "labelProfile" },
-                    { key: "users", label: "labelUsers" },
-                    { key: "permissions", label: "labelPermissions" },
+                    { key: "name", label: "labelTeamName" },
+                    { key: "members", label: "labelMembers" },
                     { key: "actions", label: "labelAction" },
                 ],
                 data: [],
@@ -91,18 +92,17 @@
                 },
             },
             isDeleting: false,
-            selectedProfile: {},
+            selectedTeam: {},
             queryPage: 1,
             searchInput: "",
             selectedOption: 10,
             isAscending: false,
             colType: 2,
-            modalProfileShow: false,
+            modalTeamShow: false,
             modalAlertShow: false,
-            permissionsCount: 0,
         }),
         methods: {
-            getProfiles(obj) {
+            getTeams(obj) {
                 this.table.isLoading = true;
                 this.searching = false;
                 this.dataDocument = [];
@@ -115,7 +115,7 @@
                     colType: this.colType,
                 };
 
-                ProfilesService.getProfiles(paramsReq)
+                TeamsService.getTeams(paramsReq)
                     .then((response) => {
                         const content = response?.content || [];
                         const pagination = response?.pagination || {};
@@ -128,14 +128,6 @@
                         this.table.isLoading = false;
                     });
             },
-            getPermissions(obj) {
-                PermissionsService.getPermissions()
-                    .then((response) => {
-                        const permissions = response.permissions;
-                        this.permissionsCount = permissions.length;
-                    })
-                    .finally(() => {});
-            },
             orderList: function (col) {
                 if (this.isAscending) {
                     this.isAscending = false;
@@ -143,66 +135,57 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
+                this.getTeams({ search: "", page: this.queryPage, type: null });
             },
             formatDate(str) {
                 return date.formatDate(str);
             },
-            filterList(input) {
-                this.searchInput = input;
-                this.getProfiles({ search: input, page: this.queryPage, type: null });
+            editTeam(team) {
+                this.selectedTeam = team;
+                this.openModalTeam();
             },
-            handleTeamCreated: function () {
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
-                this.closeModalTeam();
-            },
-            openEditModal(profile) {
-                this.$refs.ProfilesModal.open(profile);
-            },
-            openConfirmation(profile) {
-                this.selectedProfile = [profile.id];
+            openConfirmation(team) {
+                this.selectedTeam = team;
                 this.$refs.DeleteDialog.open();
             },
-            changePage(page) {
-                this.getProfiles({ search: "", page: page, type: null });
-            },
-            deleteProfile() {
+            deleteTeam() {
                 this.isDeleting = true;
-                ProfilesService.deleteProfileById(this.selectedProfile)
-                    .then((success) => {
-                        if (success) {
+                let teamId = this.selectedTeam.id;
+                TeamsService.deleteTeamById(teamId)
+                    .then((status) => {
+                        if (status) {
                             this.$refs.DeleteDialog.close();
-                            this.getProfiles({ search: "", page: 1, type: null });
-                            this.$notify({
-                                title: "Profiles",
-                                message: this.$t("labelProfileRemoveSuccess"),
-                                variant: "success",
-                                icon: "CircleCheckBig",
-                            });
-                        } else {
-                            this.$notify({
-                                title: "Profiles",
-                                message: this.$t("labelProfileRemoveError"),
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
+                            this.getTeams({ search: "", page: 1, type: null });
                         }
                     })
                     .finally(() => {
-                        this.listIds = [];
-                        this.table.selectedRows = [];
                         this.isDeleting = false;
+                        this.listIds = [];
                     });
             },
-            reload() {
-                this.$refs.ProfilesModal.close();
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
+            filterList(input) {
+                this.searchInput = input;
+                this.getTeams({ search: input, page: this.queryPage, type: null });
+            },
+            handleTeamCreated: function () {
+                this.getTeams({ search: "", page: this.queryPage, type: null });
+                this.closeModalTeam();
+            },
+            openModalTeam: function () {
+                this.modalTeamShow = true;
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            },
+            closeModalTeam: function () {
+                this.modalTeamShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            changePage(page) {
+                this.getTeams({ search: "", page: page, type: null });
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getProfiles({ search: "", page: this.queryPage, type: null });
-            this.getPermissions();
+            this.getTeams({ search: "", page: this.queryPage, type: null });
         },
     };
 </script>

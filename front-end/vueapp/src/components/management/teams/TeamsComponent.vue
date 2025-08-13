@@ -1,74 +1,55 @@
 <template>
-    <div class="scroll-area mt-3 mb-3">
+    <div class="mt-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h6 class="mb-0 fw-bold">{{ $t("labelUsers") }}</h6>
+                <h6 class="mb-0 fw-bold">{{ $t("labelTeams") }}</h6>
                 <p>
-                    <small class="text-muted">{{ $t("labelUsersMessage") }}</small>
+                    <small class="text-muted">{{ $t("labelTeamsMessage") }}</small>
                 </p>
             </div>
-            <button class="btn btn-primary btn-sm" @click="openModalUser">+ {{ $t("labelNewUser") }}</button>
+            <button class="btn btn-primary btn-sm" @click="openModalTeam">+ {{ $t("labelNewTeam") }}</button>
         </div>
         <div class="card mb-3">
             <div class="card-body">
-                <SearchComponent
-                    :entity="entitySearch"
-                    :resetInput="resetInputSearch"
-                    @search="filterList"
-                    @clean="filterList"
-                    ref="SearchComponent"
-                />
+                <SearchComponent :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
             </div>
         </div>
-        <UsersTable @setFilter="setFilter" ref="UserTable" />
+        <teams-table ref="TeamsTable" />
     </div>
-    <modal-alert
-        v-if="modalAlertShow"
-        :type="'Confirm'"
-        :entity="modalEntity"
-        :alertTitle="$t('labelYouAreAboutToDeleteTeam')"
-        :alertMessage="$t('labelThisActionCannotBeUndone')"
-        :okLabel="$t('labelConfirm')"
-        :cancelLabel="$t('labelCancel')"
-        @open="deleteItem"
-        @close="closeModal"
-    />
-    <modal-user
-        v-if="modalUserShow"
-        @userCreated="handleUserCreated"
-        @close="closeModalUser"
-        :userEditing="userEditing"
+    <modal-team
+        v-if="modalTeamShow"
+        @teamCreated="handleTeamCreated"
+        @close="closeModalTeam"
+        :teamEditing="teamEditing"
     />
 </template>
 
 <script>
-    import ModalAlert from "@/components/common/modal-alert";
-    import ModalUser from "@/components/user-manager/users/modals/UserModal.vue";
+    import ModalTeam from "@/components/management/teams/modals/TeamModal.vue";
     import paginationDivider from "@/utils/paginationDivider";
-    import UsersTable from "@/components/user-manager/users/UsersTable.vue";
-    import SearchBar from "@/components/common/search-bar";
+    import TeamsTable from "@/components/management/teams/TeamsTable.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import editIcon from "@/assets/img/edit-outlined.svg";
-    import deleteIcon from "@/assets/img/delete-outlined.svg";
+    import deleteIcon from "@/assets/img/delete-outlined.svg";    
 
     export default {
-        name: "UsersManager",
+        name: "TeamsManager",
         data() {
             return {
                 menuActions: {},
                 loading: false,
                 searching: false,
                 modalAlertShow: false,
-                modalUserShow: false,
+                modalTeamShow: false,
                 modalEntity: {},
                 search: "",
-                entitySearch: {},
                 queryPage: this.$route.query.page ? this.$route.query.page : 1,
                 pagination: { currentPage: 0, pageCount: 0, rowCount: 0, listPage: 0 },
                 teams: [],
                 divider: new paginationDivider(),
                 listIds: [],
-                userEditing: {},
+                teamEditing: {},
+                entitySearch: {},
             };
         },
         watch: {
@@ -81,15 +62,13 @@
             },
             "$store.state.userProfile.keyMongoAccess"(newValue) {
                 if (newValue) {
-                    this.$refs.UserTable.getUsers({ search: "", page: this.queryPage, type: null });
+                    this.$refs.TeamsTable.getTeams({ search: "", page: this.queryPage, type: null });
                 }
             },
         },
         components: {
-            ModalAlert,
-            ModalUser,
-            UsersTable,
-            SearchBar,
+            ModalTeam,
+            TeamsTable,
             SearchComponent,
         },
         methods: {
@@ -108,13 +87,12 @@
             },
             handleMenuAction: function (option, item) {
                 if (option.value === "edit") {
-                    this.userEditing = {
+                    this.teamEditing = {
                         id: item.id,
                         name: item.name,
-                        email: item.email,
-                        teams: item.teams,
+                        users: item.users,
                     };
-                    this.openModalUser();
+                    this.openModalTeam();
                 } else if (option.value === "delete") {
                     this.listIds = [item.id];
                     this.confirmationDialog(item);
@@ -129,31 +107,27 @@
                 this.modalAlertShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
-            handleUserCreated: function () {
-                this.$refs.UserTable.getUsers({ search: "", page: this.queryPage, type: null });
-                this.closeModalUser();
+            handleTeamCreated() {
+                this.$refs.TeamsTable.getTeams({ search: "", page: this.queryPage, type: null });
+                this.closeModalTeam();
             },
-            openModalUser: function () {
-                this.modalUserShow = true;
+            openModalTeam: function () {
+                this.modalTeamShow = true;
                 document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
-            closeModalUser: function () {
-                this.modalUserShow = false;
+            closeModalTeam: function () {
+                this.modalTeamShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             filterList(obj) {
-                this.$refs.UserTable.filterList(obj.search);
+                this.$refs.TeamsTable.filterList(obj.search);
             },
             setEntitySearch: function () {
                 this.entitySearch = {
-                    screen: "user",
-                    labelInput: this.$t("labelSearchUsers"),
-                    placeholderInput: this.$t("labelTypeUserName"),
+                    screen: "team",
+                    labelInput: this.$t("labelSearchTeams"),
+                    placeholderInput: this.$t("labelTypeTeamName"),
                 };
-            },
-            setFilter(searchValue) {
-                this.$refs.SearchComponent.searchInput = searchValue;
-                this.$refs.UserTable.getUsers({ search: searchValue, page: this.queryPage, type: null });
             },
         },
         created() {
