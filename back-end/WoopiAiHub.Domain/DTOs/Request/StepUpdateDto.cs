@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.DTOs.Request
 {
-    public record struct StepUpdateDto
+    public record struct StepUpdateDto : IStepDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

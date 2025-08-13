@@ -34,5 +34,13 @@ namespace WoopiAiHub.Domain.Models
                 return;
             Steps.Add(step);
         }
+
+        public void AddSteps(ICollection<Step> steps)
+        {
+            foreach (var step in steps)
+            {
+                AddStep(step);
+            }
+        }        
     }
 }

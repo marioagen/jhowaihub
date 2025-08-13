@@ -9,5 +9,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> Update(WorkflowUpdateDto workflowUpdateDto);
         Task<WorkflowDto> FindByTeamId(int teamId);
         Task<WorkflowDto> FindById(int id);
+        Task<bool> DeleteById(int id);
     }
 }

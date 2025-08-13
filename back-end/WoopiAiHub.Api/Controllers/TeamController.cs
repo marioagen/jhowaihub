@@ -121,7 +121,6 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="headersDto"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("FindAll")]
         [SwaggerOperation("Endpoint that receives the request to return all teams by user's email")]
         [ProducesResponseType(typeof(ICollection<TeamDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindAll([FromHeader] HeadersDto headersDto)

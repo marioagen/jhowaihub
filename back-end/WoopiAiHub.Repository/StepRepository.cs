@@ -50,15 +50,14 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Reteves a collection of steps by its IDs
+        /// Retrieves all steps associated with a specific workflow ID.
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
         public ICollection<Step> FindByIds(IEnumerable<int> ids)
         {
-            return _context.Steps.Where(t => ids.Contains(t.Id)).ToList();
+            return _context.Steps.AsNoTracking().Where(t => ids.Contains(t.Id)).ToList();
         }
-
 
         /// <summary>
         /// Delete steps by their IDs.

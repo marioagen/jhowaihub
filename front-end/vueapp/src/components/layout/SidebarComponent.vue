@@ -52,7 +52,7 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/manage-user"
+                    to="/management"
                 >
                     <LucideIcon icon="Users" strokeWidth="2.2" color="#ff6900" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelManageUsers") }}</span>

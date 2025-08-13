@@ -16,25 +16,26 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
-        private readonly ITeamRepository _teamRepository;
-        private readonly ICardRepository _cardRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IValidateWorkflow _validateWorkflow;
+        private readonly IValidateStep _validateStep;
+        private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
                                 IProfileRepository profileRepository,
                                 IStatusRepository statusRepository,
-                                ITeamRepository teamRepository,
                                 IStepRepository stepRepository,
                                 IUnitOfWork unitOfWork,
-                                ICardRepository cardRepository)
+                                IValidateStep validateStep,
+                                IValidateWorkflow validateWorkflow)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
-            _teamRepository = teamRepository;
             _stepRepository = stepRepository;
             _unitOfWork = unitOfWork;
-            _cardRepository = cardRepository;
+            _validateStep = validateStep;
+            _validateWorkflow = validateWorkflow;
         }
 
         /// <summary>
@@ -45,30 +46,15 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> Create(WorkflowCreateDto workflowCreateDto)
         {
-            var workflowDto = await _workflowRepository.FindByTeamId(workflowCreateDto.TeamId);
-            if (workflowDto != null)
-            {
-                throw new AppException(ErrorCode.Conflict, "Workflow already exists for this team", WorkflowLabel.AlreadyExists);
-            }
+            await _validateWorkflow.ValidateCreateWorkflow(workflowCreateDto);
 
-            var team = _teamRepository.FindById(workflowCreateDto.TeamId);
-            if (team == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Team not found", TeamLabel.NotFound);
-            }
+            _validateStep.ValidateCreateStep(workflowCreateDto.Steps);
 
             var workflow = new Workflow(0, DateTime.UtcNow, workflowCreateDto.TeamId, workflowCreateDto.Name);
 
-            ICollection<Step> steps = workflowCreateDto.Steps.Select(s => new Step(
-                0,
-                DateTime.UtcNow,
-                workflow.TeamId,
-                s.Name,
-                s.Order,
-                s.ProfileId,
-                s.StatusId)).ToList();
+            ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, workflow.TeamId);
 
-            AddSteps(steps, workflow);
+            workflow.AddSteps(steps);
 
             return await _workflowRepository.Create(workflow);
         }
@@ -84,34 +70,18 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
-                if (workflow == null)
-                {
-                    throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
-                }
+                var workflow = await _validateWorkflow.ValidateUpdateWorkflow(workflowUpdateDto);
 
-                if (workflow.TeamId != workflowUpdateDto.TeamId)
-                {
-                    throw new AppException(ErrorCode.Conflict, "Workflow team ID does not match", WorkflowLabel.TeamIdMismatch);
-                }
+                _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
 
                 await DeleteSteps(workflowUpdateDto, workflow);
 
-                await UpdateSteps(workflowUpdateDto, workflow);
+                await UpdateSteps(workflowUpdateDto);
 
-                ICollection<Step> stepsAdd = workflowUpdateDto.Steps
-                    .Where(s => s.Id == 0)
-                    .Select(s => new Step(
-                        0,
-                        DateTime.UtcNow,
-                        workflow.TeamId,
-                        s.Name,
-                        s.Order,
-                        s.ProfileId,
-                        s.StatusId))
-                    .ToList();
+                ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.Where(s => s.Id == 0).ToList(), 
+                                                                          workflow.TeamId);
 
-                AddSteps(stepsAdd, workflow);
+                workflow.AddSteps(stepsAdd);
 
                 await _workflowRepository.Update(workflow);
 
@@ -136,7 +106,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindById(id);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
             return workflow;
         }
@@ -152,25 +122,41 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindByTeamId(teamId);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
             return workflow;
         }
 
         /// <summary>
-        /// Adds steps to a workflow, ensuring that each step has a valid profile and status.
+        /// Deletes a workflow by its ID, including all associated steps.
         /// </summary>
-        /// <param name="steps"></param>
-        /// <param name="workflow"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private void AddSteps(ICollection<Step> steps, Workflow workflow)
+        public async Task<bool> DeleteById(int id)
         {
-            workflow.Steps.Clear();
-            foreach (var step in steps)
+            _unitOfWork.BeginTransaction();
+            try
             {
-                ValidateProfileAndStatus(step);
+                var workflow = await _workflowRepository.FindByIdReturnModel(id);
+                if (workflow == null)
+                {
+                    throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+                }
 
-                workflow.AddStep(step);
+                var stepIds = workflow.Steps.Select(s => s.Id).ToList();
+                await _validateStep.ValidateDeleteStep(stepIds);
+
+                _stepRepository.DeleteByIds(stepIds);
+                await _workflowRepository.DeleteById(id);
+                
+                _unitOfWork.Commit();
+                return true;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
             }
         }
 
@@ -180,14 +166,14 @@ namespace WoopiAiHub.Application.Services
         /// <param name="step"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private bool ValidateProfileAndStatus(Step step)
+        private async Task<bool> ValidateProfileAndStatus(Step step)
         {
-            var profile = _profileRepository.FindById(step.ProfileId);
+            var profile = await _profileRepository.FindById(step.ProfileId);
             if (profile == null)
             {
                 throw new AppException(ErrorCode.NotFound, "Profile not found", ProfileLabel.NotFound);
             }
-            var status = _statusRepository.FindById(step.StatusId);
+            var status = await _statusRepository.FindById(step.StatusId);
             if (status == null)
             {
                 throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
@@ -206,11 +192,8 @@ namespace WoopiAiHub.Application.Services
         {
             var updatedStepIds = workflowUpdateDto.Steps.Select(s => s.Id).ToHashSet();
             var stepsToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id)).Select(s => s.Id).ToList();
-            var existingStepsInUse = await _cardRepository.ExistsStepsInUse(stepsToRemove);
-            if (existingStepsInUse)
-            {
-                throw new AppException(ErrorCode.Conflict, "Cannot delete steps that are in use by cards", StepLabel.StepsInUse);
-            }
+
+            await _validateStep.ValidateDeleteStep(stepsToRemove);
             _stepRepository.DeleteByIds(stepsToRemove);
         }
 
@@ -218,9 +201,8 @@ namespace WoopiAiHub.Application.Services
         /// Updates existing steps in a workflow based on the provided DTO.
         /// </summary>
         /// <param name="workflowUpdateDto"></param>
-        /// <param name="workflow"></param>
         /// <returns></returns>
-        private async Task UpdateSteps(WorkflowUpdateDto workflowUpdateDto, Workflow workflow)
+        private async Task UpdateSteps(WorkflowUpdateDto workflowUpdateDto)
         {
             var stepsToUpdate = workflowUpdateDto.Steps.Where(s => s.Id > 0).ToList();
 
@@ -231,10 +213,36 @@ namespace WoopiAiHub.Application.Services
                 {
                     existingStep.Update(step.Name, step.Order, step.ProfileId, step.StatusId);
 
-                    ValidateProfileAndStatus(existingStep);
+                    await ValidateProfileAndStatus(existingStep);
                     await _stepRepository.Update(existingStep);
                 }
             }
+        }
+
+        /// <summary>
+        /// Creates a collection of Step entities from the provided DTOs and associates them with the given teamId.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="stepsDto"></param>
+        /// <param name="teamId"></param>
+        /// <returns></returns>
+        private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int teamId) where T : IStepDto
+        {
+            var steps = stepsDto.Select(s => new Step(
+                0,
+                DateTime.UtcNow,
+                teamId,
+                s.Name,
+                s.Order,
+                s.ProfileId,
+                s.StatusId)).ToList();
+
+            foreach(var step in steps)
+            {
+                await ValidateProfileAndStatus(step);
+            }
+
+            return steps;
         }
     }
 }

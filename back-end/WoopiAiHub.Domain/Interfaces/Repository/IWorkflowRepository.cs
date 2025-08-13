@@ -10,5 +10,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<WorkflowDto?> FindByTeamId(int teamId);
         Task<WorkflowDto?> FindById(int id);
         Task<Workflow?> FindByIdReturnModel(int id);
+        Task<bool> DeleteById(int id);
     }
 }
