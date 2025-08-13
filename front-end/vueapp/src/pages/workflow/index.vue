@@ -121,7 +121,6 @@
                 WorkflowService.getWorkbyTeamId(id)
                     .then((response) => {
                         this.kanbanCards = response;
-                        console.log(this.kanbanCards);
                     })
                     .finally(() => {
                     });

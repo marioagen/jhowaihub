@@ -22,6 +22,11 @@ namespace WoopiAiHub.Api.Controllers
             _workflowServices = workflowServices;
         }
 
+        /// <summary>
+        /// Endpoint that receives a team id and returns a valid workflow
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         [SwaggerOperation("Endpoint that receive an team id and return a valid workflow")]
         [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
@@ -31,6 +36,11 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(workflow);
         }
 
+        /// <summary>
+        /// Endpoint that returns all valids workflows by user email
+        /// </summary>
+        /// <param name="workflowHeaderDto"></param>
+        /// <returns></returns>
         [HttpGet]
         [SwaggerOperation("Endpoint that receives the request to return all teams paginated")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
