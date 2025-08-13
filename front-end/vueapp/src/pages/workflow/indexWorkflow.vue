@@ -87,9 +87,8 @@
             },
             deleteWorkflow() {
                 this.isDeleting = true;
-                WorkflowService.deleteWorkflow(4)
+                WorkflowService.deleteWorkflowById(4)
                     .then((status) => {
-                        console.log(status)
                         if(status) {
                             return this.$notify({
                                 title: 'Workflow',
