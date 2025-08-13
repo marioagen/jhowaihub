@@ -10,10 +10,9 @@
                             color: var(--dropdown-text-color);
                             padding-right: 20px;
                             text-align: left;
-                        ">
-                        <div class="circle-icon">
-                            {{ initials }}
-                        </div>
+                        "
+                    >
+                        <AvatarComponent :name="initials" size="30" />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-sidebar text-small shadow" aria-labelledby="tenantDropdown"
                         id="tenantDropdownMenu" style="white-space: normal; overflow-wrap: break-word">
@@ -29,8 +28,13 @@
                 </div>
 
                 <div class="dropdown nav-buttons">
-                    <button class="btn btn-outline-primary table-btn" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
+                    <button
+                        class="btn btn-outline-primary table-btn btn-sm"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        style="display: flex; align-items: center; justify-content: center;"
+                    >
                         <LucideIcon icon="Globe" />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-button text-small shadow">
@@ -95,10 +99,12 @@
         </div>
     </nav>
 </template>
+
 <script>
 import axios from "axios";
 import api from "@/services/api";
 import router from "@/router";
+import AvatarComponent from "@/components/global/AvatarComponent.vue";
 
 export default {
     name: "NavBarComponent",
@@ -108,6 +114,9 @@ export default {
             type: String,
             default: "",
         },
+    },
+    components: {
+        AvatarComponent,
     },
     data() {
         return {

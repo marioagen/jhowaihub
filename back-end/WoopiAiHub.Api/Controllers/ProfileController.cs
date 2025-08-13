@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
@@ -90,6 +91,19 @@ namespace WoopiAiHub.Api.Controllers
         {
             var deleted = _profileServices.DeleteByIds(ids);
             return Ok(deleted);
+        }
+
+        /// <summary>
+        /// Returns all profiles.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [SwaggerOperation("Endpoint that receives the request to return all profiles")]
+        [ProducesResponseType(typeof(ICollection<ProfileDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindAll()
+        {
+            var result = await _profileServices.FindAll();
+            return Ok(result);
         }
     }
 }

@@ -77,12 +77,11 @@
 
 <script>
     import api from "@/services/api";
-    import ModalTeamUser from "@/components/user-manager/teams/modals/UserModal.vue";
+    import ModalTeamUser from "@/components/management/teams/modals/UserModal.vue";
     import ToastAlert from "@/components/common/toast-alert";
     import ErrorCode from "@/constants/Errorcode";
     import { Form, Field, ErrorMessage } from "vee-validate";
     import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
-    import LucideIcon from "@/components/global/LucideIcon.vue";
 
     export default {
         name: "ModalTeam",

@@ -9,7 +9,7 @@ import QuizzesPage from "@/pages/quizzes/index.vue";
 import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import QuestionsPage from "@/pages/questions.vue";
-import UserManagePage from "@/pages/user-manager.vue";
+import ManagementPage from "@/pages/management.vue";
 import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
@@ -157,9 +157,9 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/manage-user",
-        name: "UserManage",
-        component: UserManagePage,
+        path: "/management",
+        name: "Management",
+        component: ManagementPage,
         meta: { 
             layout: "default",
             module: "Management",

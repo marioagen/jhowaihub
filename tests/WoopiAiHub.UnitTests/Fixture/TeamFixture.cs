@@ -3,6 +3,7 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using Xunit;
+using Microsoft.EntityFrameworkCore;
 
 namespace WoopiAiHub.UnitTests.Fixture
 {
@@ -58,6 +59,14 @@ namespace WoopiAiHub.UnitTests.Fixture
                 }
             }
             };
+        }
+    }
+
+    public static class TeamFixtureExtensions
+    {
+        public static async Task<ICollection<TeamDto>> TolistAsync(this IQueryable<TeamDto> query)
+        {
+            return await query.ToListAsync();
         }
     }
 

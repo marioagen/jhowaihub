@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using PdfSharp;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -7,7 +6,6 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -95,6 +93,16 @@ namespace WoopiAiHub.Application.Services
                 : query.OrderByDescending(t => t.Name);
 
             return Pagination(query, pagedDataDto);
+        }
+
+        /// <summary>
+        /// Retrieves a collection of teams associated with the specified user's email.
+        /// </summary>
+        /// <param name="emailUser"></param>
+        /// <returns></returns>
+        public async Task<ICollection<TeamDto>> FindByUser(string emailUser)
+        {
+            return await _teamRepository.FindAllByUser(emailUser).ToListAsync();
         }
 
         /// <summary>
@@ -220,6 +228,5 @@ namespace WoopiAiHub.Application.Services
                 RowCount = totalListCount,
             };
         }
-
     }
 }

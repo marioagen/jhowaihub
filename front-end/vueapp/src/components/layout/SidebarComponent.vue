@@ -51,11 +51,14 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                             to="/manage-user">
-                    <img src="./../../assets/img/manage-users.svg"
-                         :title="$t('labelManageUsers')"
-                         width="20"
-                         class="icon-sidebar" />
+                    to="/management"
+                >
+                    <img
+                        src="./../../assets/img/manage-users.svg"
+                        :title="$t('labelManageUsers')"
+                        width="20"
+                        class="icon-sidebar"
+                    />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelManageUsers") }}</span>
                 </router-link>
             </li>
