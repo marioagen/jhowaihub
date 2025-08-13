@@ -20,8 +20,8 @@
 </template>
 
 <script>
-    import ProfilesModal from "@/components/user-manager/profiles/modals/ProfilesModal.vue";
-    import ProfilesTable from "@/components/user-manager/profiles/ProfilesTable.vue";
+    import ProfilesModal from "@/components/management/profiles/modals/ProfilesModal.vue";
+    import ProfilesTable from "@/components/management/profiles/ProfilesTable.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import editIcon from "@/assets/img/edit-outlined.svg";
     import deleteIcon from "@/assets/img/delete-outlined.svg";

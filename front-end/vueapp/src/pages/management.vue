@@ -32,9 +32,9 @@
 
 <script>
     import TabsComponent from "@/components/global/TabsComponent.vue";
-    import TeamsComponent from "@/components/user-manager/teams/TeamsComponent.vue";
-    import UsersComponent from "@/components/user-manager/users/UsersComponent.vue";
-    import ProfilesComponent from "@/components/user-manager/profiles/ProfilesComponent.vue";
+    import TeamsComponent from "@/components/management/teams/TeamsComponent.vue";
+    import UsersComponent from "@/components/management/users/UsersComponent.vue";
+    import ProfilesComponent from "@/components/management/profiles/ProfilesComponent.vue";
     export default {
         name: "UserIndex",
         components: {

@@ -52,7 +52,7 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/manage-user"
+                    to="/management"
                 >
                     <img
                         src="./../../assets/img/manage-users.svg"
