@@ -359,15 +359,16 @@ namespace WoopiAiHub.UnitTests.Services
             var updateDto = WorkflowFixture.FindValidWorkflowUpdateDto();
             var workflow = WorkflowFixture.FindValidWorkflow();
             updateDto.TeamId = workflow.TeamId;
+            var step = WorkflowFixture.FindValidStep();
+            updateDto.Steps.Clear();
             var stepUpdateDto = WorkflowFixture.FindValidStepUpdateDto();
             var stepUpdateDto2 = WorkflowFixture.FindValidStepUpdateDto();
-            var step = WorkflowFixture.FindValidStep();
             stepUpdateDto.Id = 0;
             updateDto.Steps.Add(stepUpdateDto);
             stepUpdateDto2.Id = 10;            
             updateDto.Steps.Add(stepUpdateDto2);
 
-            // Simulate existing steps in workflow and updateDto
+
             workflow.Steps.Clear();
             foreach (var stepDto in updateDto.Steps)
             {
