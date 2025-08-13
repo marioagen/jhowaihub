@@ -1,6 +1,6 @@
 ﻿import { createRouter, createWebHashHistory } from "vue-router";
-import DocumentUpload from "@/components/pages/document/upload";
-import DocumentList from "@/components/pages/document/list";
+import DocumentsUpload from "@/pages/documents/uploads.vue";
+import DocumentsPage from "@/pages/documents/index.vue";
 import NormalizeIndex from "@/components/pages/normalize/loading";
 import AnalyzerIndex from "@/components/pages/analyzer";
 
@@ -62,15 +62,21 @@ const routes = [
         path: "/documents",
         name: "Documents",
         component: DocumentsPage,
-        meta: { layout: "default" },
-        beforeEnter: authenticate,
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
     },
     {
         path: "/documents/upload",
         name: "DocumentsUpload",
         component: DocumentsUpload,
-        meta: { layout: "default" },
-        beforeEnter: authenticate,
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
     },
     {
         path: "/types",
