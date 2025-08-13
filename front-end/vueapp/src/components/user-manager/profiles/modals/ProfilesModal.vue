@@ -15,7 +15,7 @@
                 <label>{{ $t("labelName") }}</label>
                 <input
                     v-model="profileData.name"
-                    class="form-control"
+                    class="form-control form-control-sm"
                     @blur="nameError = profileData.name ? '' : $t('labelRequiredField')"
                     @input="nameError = ''"
                 />

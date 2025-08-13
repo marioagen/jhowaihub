@@ -29,6 +29,10 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IUserServices, UserServices>();
             services.AddScoped<IProfileServices, ProfileServices>();
             services.AddScoped<IPasswordHasher, Argon2PasswordHasher>();
+            services.AddScoped<IRefreshTokenServices, RefreshTokenServices>();
+            services.AddScoped<IStatusServices, StatusServices>();
+            services.AddScoped<IWorkflowServices, WorkflowServices>();
+            services.AddScoped<ICardServices, CardServices>();
             services.AddLogging();
             services.AddMemoryCache();
 

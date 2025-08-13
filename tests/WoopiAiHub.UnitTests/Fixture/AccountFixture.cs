@@ -4,6 +4,9 @@ using Xunit;
 using Refit;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.Models;
+using Azure.Storage.Blobs.Models;
+using WoopiAiHub.Domain.DTOs.Request.Account;
 
 namespace WoopiAiHub.UnitTests.Fixtures
 {
@@ -32,6 +35,29 @@ namespace WoopiAiHub.UnitTests.Fixtures
                 new RefitSettings()
             ));
             return response;
+        }
+
+        public static User FindValidUser()
+        {
+            return new Faker<User>("pt_BR")
+            .CustomInstantiator(f => new User
+            (
+                Guid.NewGuid(),
+                f.Person.FullName,
+                f.Person.Email,
+                true,
+                DateTime.Now
+            ));
+        }
+
+        public static LoginDto FindValidLoginDto()
+        {
+            return new Faker<LoginDto>("pt_BR")
+            .CustomInstantiator(f => new LoginDto
+            {
+                Email = f.Person.Email,
+                Password = f.Internet.Password(8, true)
+            });
         }
 
         public static AuthenticateHeaderDto FindValidAuthenticateHeaderDto()
