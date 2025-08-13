@@ -5,6 +5,7 @@ namespace WoopiAiHub.Application.Utils
 {
     public class AppProblemDetails : ProblemDetails
     {
-        public ErrorCode ErrorCode { get; set; } = ErrorCode.DefaultError;
+        public ErrorCode? ErrorCode { get; set; } 
+        public string? LabelError { get; set; }
     }
 }

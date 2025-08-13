@@ -875,6 +875,14 @@ dropzone .dz-preview .dz-details {
     font-weight: normal;
 }
 
+.validation-message {
+    color: #dc3545;
+    font-size: 0.70rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+    display: block;
+}
+
 .fw-semibold {
     font-weight: 500 !important;
 }

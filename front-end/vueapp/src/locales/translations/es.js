@@ -244,6 +244,28 @@
     labelSaveSubTitleProfile: "Crear un nuevo perfil en el sistema",
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
+    login: {
+        title: "Iniciar sesión",
+        password: "Contraseña",
+        subtitle: "Accede a tu cuenta para gestionar documentos",
+        loading: "Cargando...",
+        sso: "Iniciar sesión con Microsoft",
+        authSSO: "Autenticado con Microsoft",
+        validateClient: "Cliente validado",
+        userNotFound: "Usuario no encontrado.",
+        userWithoutAccess: "Usuario sin permiso de acceso.",
+        userIncorrectPassword: "La contraseña ingresada es incorrecta.",
+        userTokenMicrosoftInvalid: "No pudimos validar tu autenticación. Inicia sesión de nuevo."
+    },
+    "validation": {
+        "required": "Campo obligatorio.",
+        "email": "Por favor, introduce un correo electrónico válido.",
+        "min": "Mínimo de {length} caracteres.",
+        "max": "Máximo de {length} caracteres.",
+        "password_min": "La contraseña debe tener al menos 6 caracteres.",
+        "password_uppercase": "La contraseña debe contener al menos una letra mayúscula.",
+        "password_number": "La contraseña debe contener al menos un número."
+    },
     labelBackToListDocuments: "Volver a los documentos",
     pageTitleDocumentsForm: "Nuevo documento",
     pageSubtitleDocumentsForm: "Cargar nuevos documentos para su análisis",
@@ -266,6 +288,10 @@
     labelProfiles: "Perfiles",
     labelSelectedProfiles: "Perfiles seleccionados",
     labelSearchProfiles: "Buscar perfiles",
+    unauthorized: {
+        title: "No tiene permiso para acceder a esta pantalla.",
+        returnToHome: "Volver",
+    },
     validation: {
         required: "El campo es obligatorio.",
         max: "El número máximo de caracteres es {limit}.",
@@ -354,7 +380,7 @@
     },
     transferListTitle: "Lista para seleccionar",
     transferListPlaceholder: "Buscar en la lista",
-
+    unexpectedError: "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema."
 };
 
 export default spanish;

@@ -240,6 +240,28 @@
     labelSaveSubTitleProfile: "Create a new profile in the system",
     labelEditType: "Edit",
     labelSaveType: "Create",
+    login: {
+        title: "Login",
+        password: "Password",
+        subtitle: "Access your account to manage documents",
+        loading: "Loading...",
+        sso: "Login with Microsoft",
+        authSSO: "Authenticated with Microsoft",
+        validateClient: "Client validated",
+        userNotFound: "User not found.",
+        userWithoutAccess: "User without access permission.",
+        userIncorrectPassword: "The password entered is incorrect.",
+        userTokenMicrosoftInvalid: "We were unable to validate your authentication. Please log in again."
+    },
+    "validation": {
+      "required": "This field is required.",
+      "email": "Please enter a valid email address.",
+      "min": "Minimum of {length} characters.",
+      "max": "Maximum of {length} characters.",
+      "password_min": "Password must be at least 6 characters.",
+      "password_uppercase": "Password must contain at least one uppercase letter.",
+      "password_number": "Password must contain at least one number."
+    },
     labelBackToListDocuments: "Back to documents",
     pageTitleDocumentsForm: "New Document",
     pageSubtitleDocumentsForm: "Upload new documents for analysis",
@@ -262,6 +284,10 @@
     labelProfiles: "Profiles",
     labelSelectedProfiles: "Selected profiles",
     labelSearchProfiles: "Search profiles",
+    unauthorized: {
+        title: "You do not have permission to access this screen.",
+        returnToHome: "Return",
+    },
     validation: {
         required: "This field is required.",
         max: "Maximum {limit} characters",
@@ -350,7 +376,7 @@
     },
     transferListTitle: "Selection list",
     transferListPlaceholder: "Search in list",
-
+    unexpectedError: "An unexpected error occurred. Please contact the system administrator."
 };
 
 export default english;
