@@ -10,7 +10,7 @@ export default {
             })
             .catch((error) => {
                 return {
-                    error: error,
+                    error: error.response.data.detail,
                 }
             });
     },

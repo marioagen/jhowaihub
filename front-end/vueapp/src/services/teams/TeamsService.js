@@ -19,7 +19,7 @@ export default {
             });
     },
     getTeamList() {
-        return api.get("/Team/FindAll")
+        return api.get("/Team")
             .then(({ data }) => {
                 return data;
             })

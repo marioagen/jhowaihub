@@ -20,7 +20,7 @@ export default {
             });
     },
     getProfilesList() {
-        return api.get("/Profile/FindAll")
+        return api.get("/Profile")
             .then(({ data }) => {
                 return data;
             })
