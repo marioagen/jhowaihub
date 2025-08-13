@@ -1,7 +1,7 @@
 <template>
     <div class="container mt-2">
-        <div class="row">
-            <div class="col-3 kanban-col" v-for="step in kanbanData.steps" :key="step.id">
+        <div class="d-flex flex-nowrap">
+            <div class="col-3 kanban-col me-3" v-for="step in kanbanData.steps" :key="step.id">
                 <div class="card flex-grow-1">
                     <div class="card-header" :class="findOrder(step.order)">
                         {{step.name}}
@@ -49,10 +49,13 @@
                     return `first-steps`;
                 }
                 else if (stepOrder !== maxOrder) {
-                   return `first-steps`;
+                    this.firstStep = false;
+                    return `first-steps`;
+                    
                }
                 else if (stepOrder === maxOrder) {
-                   return `last-step`;
+                    this.firstStep = false;
+                    return `last-step`;
                }
             },
             reloadList() {

@@ -58,14 +58,20 @@
                 };
             },
             advanceStep() {
+                console.log(this.isFirstStep);
                 if (this.isFirstStep) {
                     this.getDocumentNormalized();
                 }
+                else {
+                    this.updateStatus();
+                }
             },
-             getDocumentNormalized() {
-                if (this.contentDocumentNormalized == "") {
-                    this.loadingDocumentNormalized = true;
-                    DocumentsServices.getNormalizedDocument(this.idAnalyzer)
+            getDocumentNormalized() {
+                let paramsReq = {
+                    Id: parseInt(this.dataCard.documentId),
+                    Embeddings_model_name: "",
+                };
+                DocumentsServices.normalizeDocument(paramsReq)
                         .then((response) => {
                             if (response.error !== undefined) {
                                 console.log(response.error);
@@ -75,11 +81,16 @@
                         .finally(() => {
                             console.log("Finished request.");
                         });
-                }
             },
             updateStatus() {
                 var statusId = this.dataStep.status.id + 1;
-                CardsServices.updateCardStatus(this.dataCard.id, this.dataStep.id, statusId)
+                var stepId = this.dataStep.id + 1;
+                var params = {
+                    CardId: this.dataCard.id,
+                    StepId: stepId,
+                    StatusId: statusId
+                }
+                CardsServices.updateStepAndStatus(params)
                     .then((response) => {
                         if (response.error !== undefined) {
                             console.log(response.error);

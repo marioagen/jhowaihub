@@ -43,11 +43,12 @@
                     </div>
                 </div>
                 <div class="card mb-3 h-100">
-                    <div class="card-body d-flex flex-column p-2 flex-md-row card-container">
-                        <WorkflowCards
-                         :kanbanData="kanbanCards"
-                          @reload="reloadKanban">
-                        </WorkflowCards>
+                    <div class="card-body d-flex flex-column p-2 card-container">
+                        <div class="kanban-wrapper">
+                            <WorkflowCards :kanbanData="kanbanCards"
+                                           @reload="reloadKanban">
+                            </WorkflowCards>
+                        </div>
                     </div>
                 </div>
                 <div class="card mb-3">
@@ -89,7 +90,8 @@
                 workflowList: [],
                 selectedOption: {
                     name: "",
-                    teamName:"",
+                    teamName: "",
+                    teamId: 0,
                 },
                 kanbanCards: [],
                 numDocs: 0
@@ -121,7 +123,6 @@
                     .then((response) => {
                         console.log(response);
                         this.kanbanCards = response;
-                        this.countDocuments(this.kanbanCards);
                     })
                     .finally(() => {
                     });
@@ -135,24 +136,13 @@
                 this.selectedOption = {
                     name: workflow.name,
                     teamName: workflow.team.name,
+                    teamId: workflow.team.id
                 }
                 this.getWorkflowbyTeam(workflow.team.id);
             },
             reloadKanban() {
-                this.getWorkflowbyTeam(this.selectedOption.team.id);
+                this.getWorkflowbyTeam(this.selectedOption.teamId);
             },
-            countDocuments() {
-                this.kanbanCards.forEach(k => {
-                    if (k.steps) {
-                        k.steps.forEach(step => {
-                            if (step.cards) {
-                                total += step.cards.length;
-                            }
-                        });
-                    }
-                });
-                this.numDocs = totalCards
-            }
         },
         created() {
             this.getWorkflows();
@@ -181,6 +171,11 @@
 
     .card-container {
         max-height: 70vh;
+    }
+
+    .kanban-wrapper {
+        overflow-x: auto;
+        white-space: nowrap; /* impede quebra de linha */
     }
 
 </style>

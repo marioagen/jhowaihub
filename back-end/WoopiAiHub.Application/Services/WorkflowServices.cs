@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Application.Utils;
+﻿using Humanizer;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -41,6 +42,10 @@ namespace WoopiAiHub.Application.Services
         public async Task<WorkflowDto> FindByTeamId(int teamId)
         {
             var workflow = await _workflowRepository.FindByTeamId(teamId);
+            int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
+
+            workflow.NumDocuments = totalCards;
+
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
