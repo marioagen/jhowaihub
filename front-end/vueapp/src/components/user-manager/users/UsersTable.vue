@@ -12,13 +12,9 @@
         >
             <template #cell-name="{ data }">
                 <div v-if="!loading" class="p-1">
-                    <div class="d-flex">
+                     <div class="d-flex">
                         <label class="form-check-label d-flex align-items-center w-100">
-                            <div
-                                class="rounded-circle d-flex align-items-center justify-content-center btn-primary fw-bold me-3 initials"
-                            >
-                                {{ getInitials(data.row.name) }}
-                            </div>
+                            <AvatarComponent :name="data.row.name" />
                             <div>
                                 <div class="fw-semibold">{{ data.row.name }}</div>
                                 <div class="text-muted small">{{ data.row.email }}</div>
@@ -100,6 +96,7 @@
     />
 </template>
 <script>
+    import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import UserService from "@/services/users/UserService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import TableComponent from "@/components/global/TableComponent.vue";
@@ -111,6 +108,7 @@
         name: "UsersTable",
         components: {
             BadgeOutlinedComponent,
+            AvatarComponent,
             BadgeComponent,
             TableComponent,
             ConfirmModal,
@@ -195,17 +193,6 @@
             filterList(input) {
                 this.searchInput = input;
                 this.getUsers({ search: input, page: this.queryPage, type: null });
-            },
-            getInitials(name) {
-                if (!name) return "";
-                const parts = name.trim().split(" ");
-                if (parts.length === 1) {
-                    const n = parts[0];
-                    return (n[0] || "").toUpperCase() + (n[n.length - 1] || "").toUpperCase();
-                }
-                const first = parts[0][0] || "";
-                const last = parts[parts.length - 1].slice(-1) || "";
-                return (first + last).toUpperCase();
             },
             handleUserCreated: function () {
                 this.getUsers({ search: "", page: this.queryPage, type: null });

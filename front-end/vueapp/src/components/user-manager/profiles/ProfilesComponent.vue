@@ -21,7 +21,6 @@
 
 <script>
     import ProfilesModal from "@/components/user-manager/profiles/modals/ProfilesModal.vue";
-    import paginationDivider from "@/utils/paginationDivider";
     import ProfilesTable from "@/components/user-manager/profiles/ProfilesTable.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import editIcon from "@/assets/img/edit-outlined.svg";
@@ -35,15 +34,11 @@
                 loading: false,
                 searching: false,
                 modalAlertShow: false,
-                modalTeamShow: false,
                 modalEntity: {},
                 search: "",
                 queryPage: this.$route.query.page ? this.$route.query.page : 1,
                 pagination: { currentPage: 0, pageCount: 0, rowCount: 0, listPage: 0 },
-                teams: [],
-                divider: new paginationDivider(),
                 listIds: [],
-                teamEditing: {},
                 entitySearch: {},
             };
         },
@@ -57,7 +52,7 @@
             },
             "$store.state.userProfile.keyMongoAccess"(newValue) {
                 if (newValue) {
-                    this.$refs.TeamsTable.getTeams({ search: "", page: this.queryPage, type: null });
+                    this.$refs.ProfilesTable.getProfiles({ search: "", page: this.queryPage, type: null });
                 }
             },
         },
@@ -80,28 +75,11 @@
                     ],
                 };
             },
-            handleMenuAction: function (option, item) {
-                if (option.value === "edit") {
-                    this.teamEditing = {
-                        id: item.id,
-                        name: item.name,
-                        users: item.users,
-                    };
-                    this.openModalTeam();
-                } else if (option.value === "delete") {
-                    this.listIds = [item.id];
-                    this.confirmationDialog(item);
-                }
-            },
-            handleTeamCreated() {
-                this.$refs.TeamsTable.getTeams({ search: "", page: this.queryPage, type: null });
-                this.closeModalTeam();
-            },
             openModalProfile() {
                 this.$refs.ProfilesModal.open();
             },
             filterList(obj) {
-                this.$refs.TeamsTable.filterList(obj.search);
+                this.$refs.ProfilesTable.filterList(obj.search);
             },
             setEntitySearch: function () {
                 this.entitySearch = {

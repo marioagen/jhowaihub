@@ -33,5 +33,11 @@ namespace WoopiAiHub.Domain.Models
         /// Use to EF context
         /// </summary>
         private Card(int id, DateTime created) : base(id, created) { }
+
+        public void UpdateStepAndSatus(int stepId, int statusId)
+        {
+            StepId = stepId;
+            StatusId = statusId;
+        }
     }
 }
