@@ -13,7 +13,7 @@ namespace WoopiAiHub.Domain.Profiles
                 i.Name,
                 i.Description,
                 Guid.NewGuid().ToString("N"),
-                Enum.DocumentStatus.NotAnalyzed,
+                Status.NotAnalyzed,
                 true,
                 i.EmailCreator,
                 0,

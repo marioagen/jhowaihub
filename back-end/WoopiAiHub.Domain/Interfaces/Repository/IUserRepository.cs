@@ -9,11 +9,9 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> CreateAsync(User user);
         Task<User> FindByReferenceAsync(Guid referenceUserId);
         Task<List<User>> FindByIdsAsync(List<Guid> ids);
-        Task<User> FindByEmailAsync(string email);
         bool DeactivateRange(List<Guid> ids);
         bool Update(User user);
         IQueryable<UserPagedDto> FindAllPaged(PagedDataDto pagedDataDto);
         Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null);
-        Task<List<string>> FindUserProfilesByEmailAsync(string email);
     }
 }

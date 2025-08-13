@@ -10,7 +10,6 @@ using System.Text;
 using Microsoft.AspNetCore.HttpOverrides;
 using WoopiAiHub.Api.Exceptions;
 using System.Text.Json.Serialization;
-using WoopiAiHub.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,23 +58,15 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<SwaggerCustomHeader>();
 });
 
-var allowedOrigin = config["CORS"]?.Trim();
-if (!string.IsNullOrWhiteSpace(allowedOrigin))
+builder.Services.AddCors(p => p.AddPolicy("manager", builder =>
 {
-    builder.Services.AddCors(p => p.AddPolicy("manager", policy =>
-    {
-        policy
-            .WithOrigins(allowedOrigin) 
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials(); 
-    }));
-}
-else
-    throw new InvalidOperationException("CORS origin não está configurado. Verifique a chave 'CORS' no appsettings ou variável de ambiente.");
+    builder.WithOrigins(config.GetSection("CORS").GetChildren().Select(c => c.Value).ToArray())
+                           .SetIsOriginAllowedToAllowWildcardSubdomains()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
 
+}));
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

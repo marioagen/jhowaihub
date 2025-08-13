@@ -11,7 +11,6 @@ COPY ["WoopiAiHub.Api/WoopiAiHub.Api.csproj", "WoopiAiHub.Api/"]
 COPY ["WoopiAiHub.Repository/WoopiAiHub.Repository.csproj", "WoopiAiHub.Repository/"]
 COPY ["WoopiAiHub.Domain/WoopiAiHub.Domain.csproj", "WoopiAiHub.Domain/"]
 COPY ["WoopiAiHub.Application/WoopiAiHub.Application.csproj", "WoopiAiHub.Application/"]
-COPY ["WoopiAiHub.Infrastructure/WoopiAiHub.Infrastructure.csproj", "WoopiAiHub.Infrastructure/"]
 RUN dotnet restore "WoopiAiHub.Api/WoopiAiHub.Api.csproj"
 COPY . .
 WORKDIR "/back-end/WoopiAiHub.Api"

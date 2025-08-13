@@ -14,11 +14,6 @@ const i18n = createI18n({
         en: english,
         es: spanish,
     },
-    // Configurações CSP-friendly
-    warnHtmlMessage: false,
-    escapeParameter: true,
-    // Desabilita compilação dinâmica
-    globalInjection: false,
 });
 
 export default i18n;

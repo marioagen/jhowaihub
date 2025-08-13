@@ -44,7 +44,7 @@
         <div class="sidebar-horizontal-separator"></div>
 
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li class="mb-1" v-if="permissions.management">
+            <li class="mb-1">
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -84,7 +84,7 @@
                 </router-link>
             </li>
 
-            <li class="mb-1" v-if="permissions.types">
+            <li class="mb-1">
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -106,7 +106,7 @@
                 </router-link>
             </li>
 
-            <li v-if="permissions.questions">
+            <li>
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -126,7 +126,7 @@
                 </router-link>
             </li>
 
-            <li v-if="permissions.quizzes">
+            <li>
                 <router-link
                     :class="[
                         'd-flex align-items-center',
@@ -150,7 +150,6 @@
 </template>
 
 <script>
-    import { hasPermission } from '@/utils/permissions';
     export default {
         name: "SideBar",
         props: {
@@ -168,18 +167,15 @@
                 type: Boolean,
                 default: false,
             },
+            menuActive: {
+                type: String,
+                default: "",
+            },
         },
         data() {
             return {
                 title: "Component SideBarTest",
                 showLogoDarkMode: this.theme,
-                permissions: {
-                    management: hasPermission("Management", "View"),
-                    questions: hasPermission("Questions", "View"),
-                    documents: hasPermission("Documents","View"),
-                    types: hasPermission("Types", "View"),
-                    quizzes: hasPermission("Quizzes", "View"),
-                }
             };
         },
         updated() {

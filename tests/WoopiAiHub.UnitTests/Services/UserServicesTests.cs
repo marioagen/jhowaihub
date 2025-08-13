@@ -2,12 +2,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.AutoMock;
-using Refit;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WoopiAiHub.Application.Services;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -350,8 +348,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(false);
 
             // Act & Assert
-            var ex = await Assert.ThrowsAsync<AppException>(() => _userServices.Update(userUpdateDto, headersDto));
-            Assert.Equal("Duplicated user", ex.Message);
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _userServices.Update(userUpdateDto, headersDto));
+            Assert.Equal("Duplicated User", ex.Message);
         }
 
         [Theory(DisplayName = "Create should throw when required fields are missing")]

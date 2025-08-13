@@ -29,7 +29,7 @@ namespace WoopiAiHub.Repository.Middleware
                 var tenant = await tenantCacheService.FindTenantAsync(tenantName,
                                                                       ColTypeModule.WoopiAiHub);
 
-                if (tenant != null && !string.IsNullOrEmpty(tenant.DatabaseName))
+                if (tenant != null)
                 {
                     var template = configuration.GetConnectionString("TemplateConnection");
                     var connectionString = template?.Replace("___NEWDB___", tenant.DatabaseName);

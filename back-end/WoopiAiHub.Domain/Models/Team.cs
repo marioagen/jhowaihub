@@ -7,9 +7,8 @@ namespace WoopiAiHub.Domain.Models
         [Column("Name", TypeName = "varchar(100)")]
         public string Name { get; private set; } = string.Empty;
 
-        public virtual ICollection<User> Users { get; set; } = [];
-        public virtual ICollection<Document> Documents { get; set; } = [];
-        public virtual Workflow? Workflow { get; set; }
+        public virtual ICollection<User> Users { get; set; }
+        public virtual ICollection<Document> Documents { get; set; }
 
         public Team(string name,
                     int id,

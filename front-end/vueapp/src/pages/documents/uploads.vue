@@ -676,7 +676,7 @@
     }
 
     .custom-dropzone {
-        background-image: url("@/assets/img/icon-dropzone.svg");
+        background-image: url("~@/assets/img/icon-dropzone.svg");
         background-repeat: no-repeat;
         background-position: center;
         color: var(--color-body-content) !important;

@@ -14,12 +14,7 @@ namespace WoopiAiHub.Repository.Context
             DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-        }
-
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-            _httpContextAccessor = null!;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public DbSet<Document> Documents { get; set; }
@@ -33,10 +28,6 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<Team> Teams { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<Profile> Profiles { get; set; }
-        public DbSet<Workflow> Workflows { get; set; }
-        public DbSet<Step> Steps { get; set; }
-        public DbSet<Card> Cards { get; set; }
-        public DbSet<Status> Status { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -62,10 +53,6 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<Team>(new TeamMap().Configure);
             modelBuilder.Entity<Permission>(new PermissionMap().Configure);
             modelBuilder.Entity<Profile>(new ProfileMap().Configure);
-            modelBuilder.Entity<Workflow>(new WorkflowMap().Configure);
-            modelBuilder.Entity<Step>(new StepMap().Configure);
-            modelBuilder.Entity<Card>(new CardMap().Configure);
-            modelBuilder.Entity<Status>(new StatusMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }

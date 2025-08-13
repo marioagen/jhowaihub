@@ -10,7 +10,7 @@
         <template #body>
             <div class="modal-body">
                 <label>Name</label>
-                <input v-model="typeData.name" class="form-control form-control-sm" />
+                <input v-model="typeData.name" class="form-control" />
             </div>
         </template>
 

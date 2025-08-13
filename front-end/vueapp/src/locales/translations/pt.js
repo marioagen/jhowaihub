@@ -240,28 +240,6 @@
     labelSaveSubTitleProfile: "Crie um novo perfil no sistema",
     labelEditType: "Editar tipo",
     labelSaveType: "Criar tipo",
-    login: {
-        title: "Fazer Login",
-        password: "Senha",
-        subtitle: "Acesse sua conta para gerenciar documentos",
-        loading: "Carregando...",
-        sso: "Login com Microsoft",
-        authSSO: "Autenticado na Microsoft",
-        validateClient: "Cliente validado",
-        userNotFound: "Usuário não encontrado.",
-        userWithoutAccess: "Usuário sem permissão de acesso.",
-        userIncorrectPassword: "A senha informada está incorreta.",
-        userTokenMicrosoftInvalid: "Não foi possível validar sua autenticação. Por favor, faça login novamente."
-    },
-    "validation": {
-        "required": "Campo obrigatório.",
-        "email": "Informe um email válido.",
-        "min": "Mínimo de {length} caracteres.",
-        "max": "Máximo de {length} caracteres.",
-        "password_min": "A senha deve ter no mínimo 6 caracteres.",
-        "password_uppercase": "A senha deve conter uma letra maiúscula.",
-        "password_number": "A senha deve conter um número."
-    },
     labelBackToListDocuments: "Voltar para documentos",
     pageTitleDocumentsForm: "Novo Documento",
     pageSubtitleDocumentsForm: "Faça upload de novos documentos para análise",
@@ -281,10 +259,6 @@
     labelProfiles: "Perfis",
     labelSelectedProfiles: "Perfis selecionados",
     labelSearchProfiles: "Buscar perfis",
-    unauthorized: {
-        title: "Você não tem permissão para acessar esta tela.",
-        returnToHome: "Retornar",
-    },
     validation: {
         required: "Campo obrigatório",
         max: "Máximo de {limit} caracteres",
@@ -373,7 +347,6 @@
     },
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
-    unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador."
 };
 
 export default portuguese;

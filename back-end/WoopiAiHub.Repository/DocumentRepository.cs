@@ -130,11 +130,11 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool ChangeStatus(int id)
         {
-            var documents = _context.Documents.Where(a => a.Id.Equals(id) && a.Status.Equals(Domain.Enum.DocumentStatus.NotAnalyzed));
+            var documents = _context.Documents.Where(a => a.Id.Equals(id) && a.Status.Equals(Status.NotAnalyzed));
             if (documents.Any())
             {
                 documents.ExecuteUpdate(b => b
-                .SetProperty(u => u.Status, Domain.Enum.DocumentStatus.Analyzed));
+                .SetProperty(u => u.Status, Status.Analyzed));
                 _context.SaveChanges();
                 return true;
             }

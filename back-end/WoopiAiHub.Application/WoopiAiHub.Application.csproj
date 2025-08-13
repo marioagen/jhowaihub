@@ -27,7 +27,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\WoopiAiHub.Domain\WoopiAiHub.Domain.csproj" />
-		<ProjectReference Include="..\WoopiAiHub.Infrastructure\WoopiAiHub.Infrastructure.csproj" />
 		<ProjectReference Include="..\WoopiAiHub.Repository\WoopiAiHub.Repository.csproj" />
 	</ItemGroup>
 

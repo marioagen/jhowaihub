@@ -9,4 +9,3 @@ packages/
 *.map
 *.user
 .config/
-*.pem

@@ -15,7 +15,7 @@ namespace WoopiAiHub.Domain.Models
         public string ReferenceFile { get; private set; } = string.Empty;
 
         [Column("Status", TypeName = "int")]
-        public Enum.DocumentStatus Status { get; private set; }
+        public Status Status { get; private set; }
 
         [Column("Enable", TypeName = "bit")]
         public bool Enable { get; private set; }
@@ -26,12 +26,11 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<DocumentHistory> DocumentHistories { get; set; }
         public virtual DocumentNormalized? DocumentNormalized { get; set; }
         public virtual ICollection<Team> Teams { get; set; }
-        public virtual ICollection<Card> Cards { get; set; }
 
         public Document(string name,
                        string description,
                        string referenceFile,
-                       Enum.DocumentStatus status,
+                       Status status,
                        bool enable,
                        string emailCreator,
                        int id,
