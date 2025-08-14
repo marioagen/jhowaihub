@@ -364,10 +364,11 @@ namespace WoopiAiHub.UnitTests.Services
             var stepUpdateDto = WorkflowFixture.FindValidStepUpdateDto();
             var stepUpdateDto2 = WorkflowFixture.FindValidStepUpdateDto();
             stepUpdateDto.Id = 0;
+            stepUpdateDto2.Order = 1;
             updateDto.Steps.Add(stepUpdateDto);
-            stepUpdateDto2.Id = 10;            
+            stepUpdateDto.Id = 10;
+            stepUpdateDto2.Order = 2;            
             updateDto.Steps.Add(stepUpdateDto2);
-
 
             workflow.Steps.Clear();
             foreach (var stepDto in updateDto.Steps)
