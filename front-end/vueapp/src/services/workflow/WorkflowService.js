@@ -1,9 +1,9 @@
 import api from "@/services/api";
 
 export default {
-    getWorkflowList() {
+    getWorkflowList(email) {
         return api
-            .get("/Workflow")
+            .get(`/Workflow/Users/${email}`)
             .then(({ data }) => {
                 return data;
             })
@@ -11,8 +11,8 @@ export default {
                 console.log(e);
             });
     },
-    getWorkbyTeamId(id) {
-        return api.get(`/Workflow/${id}`)
+    getWorkbyTeamId(teamId) {
+        return api.get(`/Workflow/Teams/${teamId}`)
             .then(({ data }) => {
                 return data;
             })

@@ -295,10 +295,12 @@
         title: "No tiene permiso para acceder a esta pantalla.",
         returnToHome: "Volver",
     },
-    labelWatchingWorkflow: "Visualización del workflow:",
-    labelWorkflowDocs: "Workflow de documentos",
-    labelWorkflowBoard: "Tablero de procesamiento de documentos",
-    labelWorkflowSubTitle: "Visualice el flujo de documentos a través de los pasos de procesamiento",
+    workflow: {
+        labelWatchingWorkflow: "Visualización del workflow:",
+        labelWorkflowDocs: "Workflow de documentos",
+        labelWorkflowBoard: "Tablero de procesamiento de documentos",
+        labelWorkflowSubTitle: "Visualice el flujo de documentos a través de los pasos de procesamiento",
+    },
     validation: {
         required: "El campo es obligatorio.",
         max: "El número máximo de caracteres es {limit}.",

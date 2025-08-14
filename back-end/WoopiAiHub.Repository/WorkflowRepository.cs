@@ -136,9 +136,15 @@ namespace WoopiAiHub.Repository
             };
         }
 
+        /// <summary>
+        /// Finds all workflows associated with a specific user by their email address.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
         public ICollection<WorkflowDto> FindAllByUser(string userEmail)
         {
             return _context.Workflows
+                           .AsNoTracking()
                            .Where(w => w.Team.Users.Any(u => u.Email == userEmail))
                            .Select(t => new WorkflowDto
                            {

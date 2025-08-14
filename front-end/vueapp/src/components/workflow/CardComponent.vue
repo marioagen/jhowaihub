@@ -28,7 +28,7 @@
 
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
-    import CardsServices from "../../services/cards/CardsServices";
+    import CardsServices from "@/services/cards/CardsServices";
     export default {
         name: "CardComponent",
         props: {
@@ -53,7 +53,6 @@
                 default: false,
             }
         },
-
         methods: {
             badgeStyle(color) {
                 return {
@@ -83,7 +82,6 @@
                             this.updateStatus()
                         })
                         .finally(() => {
-                            console.log("Finished request.");
                         });
             },
             updateStatus() {
@@ -100,7 +98,6 @@
                             }
                         })
                         .finally(() => {
-                            console.log("Finished request.");
                             this.$emit('reload');
                         });
                 }

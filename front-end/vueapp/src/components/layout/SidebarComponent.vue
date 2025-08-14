@@ -91,7 +91,7 @@
                          :title="$t('labelDocuments')"
                          width="20"
                          class="icon-sidebar" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelWorkflowDocs") }}</span>
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t("workflow.labelWorkflowDocs") }}</span>
                 </router-link>
             </li>
 

@@ -4,9 +4,9 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("labelWorkflowBoard") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("workflow.labelWorkflowBoard") }}</h5>
                         <p>
-                            <small class="text-muted">{{$t("labelWorkflowSubTitle")}}</small>
+                            <small class="text-muted">{{$t("workflow.labelWorkflowSubTitle")}}</small>
                         </p>
                     </div>
                 </div>
@@ -15,7 +15,7 @@
                         <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
                             <div>
                                 <LucideIcon icon="Clock" size="14" class="me-2" />
-                                <span>{{$t("labelWatchingWorkflow")}}</span>
+                                <span>{{$t("workflow.labelWatchingWorkflow")}}</span>
                             </div>
                             <div class="dropdown">
                                 <button class="btn btn-light border text-start"
@@ -78,7 +78,7 @@
     import WorkflowService from "@/services/workflow/WorkflowService.js";
     import WorkflowCards from "@/components/workflow/WorkFlowCards.vue";
     export default {
-        name: "WorkflowDocuments",
+        name: "WorkflowPage",
         data() {
             return {
                 crumbsData: [],
@@ -108,7 +108,8 @@
         },
         methods: {
             getWorkflowList() {
-                WorkflowService.getWorkflowList()
+                var email = this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email)
                     .then((response) => {
                         this.workflowList = response;
                     })

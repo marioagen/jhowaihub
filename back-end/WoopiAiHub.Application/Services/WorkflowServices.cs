@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using WoopiAiHub.Application.Utils;
+﻿using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -126,6 +125,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
+
             int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
             workflow.NumDocuments = totalCards;
 

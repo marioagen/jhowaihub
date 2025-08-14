@@ -288,10 +288,12 @@
         title: "Você não tem permissão para acessar esta tela.",
         returnToHome: "Retornar",
     },
-    labelWatchingWorkflow: "Visualizando workflow:",
-    labelWorkflowDocs: "Workflow de documentos",
-    labelWorkflowBoard: "Board de Processamento de Documentos",
-    labelWorkflowSubTitle: "Visualize o fluxo de documentos através das etapas de processamento",
+    workflow: {
+        labelWatchingWorkflow: "Visualizando workflow:",
+        labelWorkflowDocs: "Workflow de documentos",
+        labelWorkflowBoard: "Board de Processamento de Documentos",
+        labelWorkflowSubTitle: "Visualize o fluxo de documentos através das etapas de processamento",
+    },
     validation: {
         required: "Campo obrigatório",
         max: "Máximo de {limit} caracteres",

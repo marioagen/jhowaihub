@@ -291,10 +291,12 @@
         title: "You do not have permission to access this screen.",
         returnToHome: "Return",
     },
-    labelWatchingWorkflow: "Viewing workflow:",
-    labelWorkflowDocs: "Documents Workflow",
-    labelWorkflowBoard: "Document Processing Board",
-    labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
+    workflow: {
+        labelWatchingWorkflow: "Viewing workflow:",
+        labelWorkflowDocs: "Documents Workflow",
+        labelWorkflowBoard: "Document Processing Board",
+        labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
+    },
     validation: {
         required: "This field is required.",
         max: "Maximum {limit} characters",

@@ -21,7 +21,7 @@
     </div>
 </template>
 <script>
-    import CardComponent from "@/components/global/CardComponent.vue";
+    import CardComponent from "@/components/workflow/CardComponent.vue";
     export default {
         name: "WorkflowCards",
         components: {
@@ -33,7 +33,6 @@
                 required: false,
                 default: () => []
             },
-            
         },
         data: () => ({
 
@@ -55,7 +54,6 @@
                     this.firstStep = false;
                     this.lastStep = false;
                     return `first-steps`;
-                    
                }
                 else if (stepOrder === maxOrder) {
                     this.firstStep = false;

@@ -55,12 +55,12 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("{id}")]
+        [HttpGet("Teams/{teamId}")]
         [SwaggerOperation("Endpoint that receive an team id and return a valid workflow")]
         [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindByTeamId(int id)
+        public async Task<IActionResult> FindByTeamId(int teamId)
         {
-            var workflow = await _workflowServices.FindByTeamId(id);
+            var workflow = await _workflowServices.FindByTeamId(teamId);
             return Ok(workflow);
         }
         /// <summary>
@@ -80,14 +80,14 @@ namespace WoopiAiHub.Api.Controllers
         /// <summary>
         /// Endpoint that returns all valids workflows by user email
         /// </summary>
-        /// <param name="workflowHeaderDto"></param>
+        /// <param name="email"></param>
         /// <returns></returns>
-        [HttpGet]
-        [SwaggerOperation("Endpoint that receives the request to return all teams paginated")]
+        [HttpGet("Users/{email}")]
+        [SwaggerOperation("Endpoint that returns all valids workflows by user email")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
-        public ActionResult<UserPagedResultDto> FindAllByUser([FromHeader] HeadersDto workflowHeaderDto)
+        public ActionResult<UserPagedResultDto> FindAllByUser(string email)
         {
-            var result = _workflowServices.FindAllByUser(workflowHeaderDto.EmailCreator);
+            var result = _workflowServices.FindAllByUser(email);
             return Ok(result);
         }
     }
