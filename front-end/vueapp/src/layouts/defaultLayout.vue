@@ -11,6 +11,7 @@
 
             <div :class="['content-wrapper', { collapsed: isSidebarCollapsed }]">
                 <NavbarComponent :isSidebarCollapsed="isSidebarCollapsed" />
+                <div class="horizontal-separator-fixed"></div>
                 <router-view :key="$route.fullPath" />
                 <toast-notification :showToast="toastShow" @close="closeToast" />
             </div>
@@ -18,7 +19,7 @@
             <div class="vertical-menu-separator" :style="{ left: isSidebarCollapsed ? '60px' : '240px' }"></div>
         </div>
 
-        <div class="horizontal-separator-fixed"></div>
+        
     </div>
 </template>
 
