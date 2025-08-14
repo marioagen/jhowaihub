@@ -33,7 +33,7 @@
                 />
             </router-link>
         </div>
-
+        <div class="horizontal-separator-fixed"></div>
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
             <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
                 <LucideIcon v-if="isCollapsed" icon="ChevronRight" />

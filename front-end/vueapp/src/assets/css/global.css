@@ -55,7 +55,6 @@ body {
     width: 100%;
     height: 1px;
     background-color: #d0d4d9;
-    z-index: 1000;
 }
 
 .modal-backdrop.show {
