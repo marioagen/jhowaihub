@@ -4,14 +4,14 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("labelDocuments") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("documents.title") }}</h5>
                         <p>
-                            <small class="text-muted">{{ $t("labelDocumentsMessage") }}</small>
+                            <small class="text-muted">{{ $t("documents.subtitle") }}</small>
                         </p>
                     </div>
                     <button class="btn btn-primary btn-sm" @click="redirectToNewUpload">
                         <LucideIcon icon="Plus" size="17" />
-                        {{ $t("labelNewDocument") }}
+                        {{ $t("documents.createBtn") }}
                     </button>
                 </div>
 
@@ -43,254 +43,8 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="row" v-if="loading">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <tbody>
-                                <tr class="tr-head-1">
-                                    <td style="text-align: center">
-                                        <i class="fas fa-sync-alt fa-spin text-secondary"></i>
-                                        &nbsp;{{ $t("labelLoading") }}..
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <button
-                        type="button"
-                        class="btn delete-custom d-flex align-items-center"
-                        @click="confirmationDialog(item)"
-                        v-if="this.listIds.length > 0"
-                    >
-                        <i class="fas fa-trash text-danger" style="font-size: 0.9em; margin-right: 8px"></i>
-                        {{ $t("labelDelete") }}
-                    </button>
-                </div>
-                <div class="row" v-if="dataDocument.length === 0 && !loading && (searching || !searching)">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <tbody>
-                                <tr class="tr-head-1">
-                                    <td style="text-align: center">
-                                        <i class="fas fa-exclamation-circle text-secondary"></i>
-                                        &nbsp;{{ $t("labelNoDocumentsWereFound") }}.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="row scroll-area" v-if="!loading && dataDocument.length > 0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered-vertical table-striped">
-                            <tbody>
-                                <tr class="tr-head-1">
-                                    <td class="content-left-middle">
-                                        <div class="form-check">
-                                            <input
-                                                class="form-check-input"
-                                                type="checkbox"
-                                                value=""
-                                                @click="checkAll($event)"
-                                            />
-                                        </div>
-                                    </td>
-                                    <td class="content-left-middle">{{ $t("labelDocumentName") }}</td>
-                                    <td class="content-left-middle">
-                                        {{ $t("labelDescription") }}
-                                        <i
-                                            id="1"
-                                            class="fas fa-sort"
-                                            @click="orderList(1)"
-                                            style="cursor: pointer"
-                                            :title="$t('labelOrder')"
-                                        ></i>
-                                    </td>
-                                    <td class="content-left-middle">
-                                        {{ $t("labelInclusionDate") }}
-                                        <i
-                                            id="2"
-                                            class="fas fa-sort"
-                                            @click="orderList(2)"
-                                            style="cursor: pointer"
-                                            :title="$t('labelOrder')"
-                                        ></i>
-                                    </td>
-                                    <td class="content-left-middle">
-                                        {{ $t("labelStatus") }}
-                                        <i
-                                            id="3"
-                                            class="fas fa-sort"
-                                            @click="orderList(3)"
-                                            style="cursor: pointer"
-                                            :title="$t('labelOrder')"
-                                        ></i>
-                                    </td>
-                                    <td class="content-left-middle">
-                                        {{ $t("labelTeams") }}
-                                    </td>
-                                    <td class="content-right-middle">{{ $t("labelAction") }}</td>
-                                </tr>
-                                <tr v-for="(item, index) in dataDocument" :key="index">
-                                    <td class="content-right-middle" style="width: 40px">
-                                        <a>
-                                            <div class="form-check">
-                                                <input
-                                                    class="form-check-input checkbox"
-                                                    type="checkbox"
-                                                    value=""
-                                                    :id="item.id"
-                                                    @click="countChecks(item.id)"
-                                                />
-                                            </div>
-                                        </a>
-                                    </td>
-                                    <td class="content-left-middle" style="max-width: 350px">
-                                        <truncate-text :item="item" :text="item.name" />
-                                    </td>
-                                    <td class="content-left-middle" style="max-width: 200px">
-                                        <truncate-text :item="resetName(item)" :text="item.description" />
-                                    </td>
-                                    <td class="content-left-middle" style="width: 160px">
-                                        {{ dateFormat(item.created) }}
-                                    </td>
-                                    <td class="content-left-middle" style="width: 150px">
-                                        <span class="badge rounded-pill bg-custom-primary" v-if="item.status == 0">
-                                            {{ $t("labelNotAnalyzed") }}
-                                        </span>
-                                        <span class="badge rounded-pill bg-custom-success" v-if="item.status == 1">
-                                            {{ $t("labelAnalyzed") }}
-                                        </span>
-                                    </td>
-                                    <td class="content-left-middle">
-                                        <div v-if="item.teams && item.teams.length" class="team-list">
-                                            <span v-for="(team, i) in item.teams" :key="i" class="team-badge">
-                                                {{ team.name }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="content-right-middle" style="width: 100px">
-                                        <button
-                                            class="btn btn-primary btn-sm"
-                                            :title="$t('labelAnalyze')"
-                                            @click="embeddingData(item.id)"
-                                            v-if="item.status == 0"
-                                        >
-                                            {{ upperFormat($t("labelAnalyze")) }}
-                                        </button>
-                                        <router-link
-                                            class="btn btn-success btn-sm"
-                                            :to="{
-                                                name: 'Analyzer',
-                                                params: { id: item.id },
-                                                query: { page: pagination.currentPage },
-                                            }"
-                                            :title="$t('labelConsult')"
-                                            v-if="item.status == 1"
-                                        >
-                                            {{ upperFormat($t("labelConsult")) }}
-                                        </router-link>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-1" v-if="!loading && dataDocument.length > 0">
-                <div class="col">
-                    <div class="d-inline-block lines">
-                        <p class="d-inline">{{ $t("labelLines") }}</p>
-                    </div>
-                    <div class="d-inline-block" style="margin-left: 1%">
-                        <select
-                            class="form-select form-select-sm d-inline"
-                            v-model="selectedOption"
-                            @change="getList({ search: '', page: 1, type: null })"
-                        >
-                            <option selected>10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="0">{{ $t("labelAll") }}</option>
-                        </select>
-                    </div>
-                    <Pagination :paginationData="pagination" :dataList="dataDocument"></Pagination>
-                </div>
-                <div class="col-auto">
-                    <nav>
-                        <ul class="pagination justify-content-center">
-                            <!-- Chevrons left -->
-                            <li class="page-item" v-if="pagination.currentPage != 1">
-                                <a
-                                    class="page-link"
-                                    @click="getList({ search: '', page: pagination.currentPage - 1, type: null })"
-                                >
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                            <li class="page-item disabled" v-else>
-                                <a class="page-link" tabindex="-1" aria-disabled="true">
-                                    <i class="fas fa-chevron-left"></i>
-                                </a>
-                            </li>
-                            <!-- Pages -->
-                            <li
-                                :class="pagination.currentPage === i ? `page-item active` : `page-item`"
-                                v-for="i in pagination.listPage"
-                            >
-                                <a
-                                    class="page-link"
-                                    @click="getList({ search: '', page: i, type: null })"
-                                    v-if="pagination.currentPage != i"
-                                >
-                                    {{ i }}
-                                </a>
-                                <a class="page-link" v-else>{{ i }}</a>
-                            </li>
-                            <!-- Chevrons right -->
-                            <li class="page-item" v-if="pagination.currentPage <= pagination.pageCount - 1">
-                                <a
-                                    class="page-link"
-                                    @click="getList({ search: '', page: pagination.currentPage + 1, type: null })"
-                                >
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                            <li class="page-item disabled" v-else>
-                                <a class="page-link">
-                                    <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-            <!-- Component ModalAlert -->
-            <modal-alert
-                v-if="modalAlertShow"
-                :type="'Confirm'"
-                :entity="modalEntity"
-                :alertTitle="$t('labelYouAreAboutToDeleteDocument')"
-                :alertMessage="$t('labelThisActionCannotBeUndone')"
-                :okLabel="$t('labelConfirm')"
-                :cancelLabel="$t('labelCancel')"
-                @open="deleteItem"
-                @close="closeModal"
-            />
-            <modal-alert
-                v-if="modalWarningShow"
-                :type="'Warning'"
-                :entity="modalEntity"
-                :alertTitle="$t('labelCaution')"
-                :alertMessage="$t('labelNotReloadThePage')"
-                :okLabel="$t('labelConfirm')"
-                @open="confirmWarning"
-                @close="closeModalWarning"
-            />
             <NormalizeIndex
                 :docData="docDataEmbedding"
                 :isReprocessing="isReprocessing"
@@ -302,16 +56,10 @@
 
 <script>
     import date from "@/helpers/date";
-    import NavBar from "@/components/common/nav-bar";
-    import Breadcrumb from "@/components/common/breadcrumb";
-    import SearchBar from "@/components/common/search-bar";
-    import ModalAlert from "@/components/common/modal-alert";
     import api from "@/services/api";
     import paginationDivider from "@/utils/paginationDivider";
     import GlobalEventService from "@/services/globalEventService.js";
-    import Pagination from "@/components/common/pagination";
     import NormalizeIndex from "@/components/pages/normalize/loading";
-    import TruncateText from "@/components/common/truncate-text.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
 
     export default {
@@ -349,13 +97,7 @@
             };
         },
         components: {
-            NavBar,
-            Breadcrumb,
-            SearchBar,
-            ModalAlert,
-            Pagination,
             NormalizeIndex,
-            TruncateText,
             SearchComponent,
         },
         watch: {
@@ -521,26 +263,6 @@
                     teamIds,
                 };
             },
-            confirmationDialog: function (item) {
-                this.modalEntity = item;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            warningDialog: function () {
-                this.modalWarningShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal: function () {
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            closeModalWarning: function () {
-                this.modalWarningShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            confirmWarning: function () {
-                this.closeModalWarning();
-            },
             deleteItem: function () {
                 let self = this;
                 var paramsReq = {
@@ -560,9 +282,6 @@
             },
             dateFormat: function (str) {
                 return date.formatDate(str);
-            },
-            upperFormat: function (str) {
-                return str.toUpperCase();
             },
             orderList: function (col) {
                 if (this.isAscending) {
@@ -620,7 +339,6 @@
             GlobalEventService.off("all-uploads-complete", this.reloadList);
             GlobalEventService.off("refresh-once", this.reloadList);
         },
-        unmounted() {},
     };
 </script>
 
