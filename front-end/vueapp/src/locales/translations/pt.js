@@ -300,6 +300,13 @@
         next: "Próximo",
         previous: "Anterior",
     },
+    documents: {
+        title: "Documentos",
+        subtitle: "Gerencie documentos e extraia informações",
+        notFound: "Documentos não encontrados",
+        removeTitle: "Você está prestes a deletar uma documento do sistema",
+        createBtn: "Novo documento",
+    },
     questions: {
         title: "Perguntas",
         subtitle: "Gerencie perguntas do sistema",
