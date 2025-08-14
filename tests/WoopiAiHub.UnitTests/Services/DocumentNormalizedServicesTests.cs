@@ -15,7 +15,6 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly DocumentFixture _fixture;
         private readonly DocumentNormalizedServices _documentNormalizedServices;
 
-
         public DocumentNormalizedTests(DocumentFixture documentFixture)
         {
             _mocker = new AutoMocker();

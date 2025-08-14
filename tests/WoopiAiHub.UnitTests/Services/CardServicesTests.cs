@@ -1,8 +1,7 @@
 ﻿using Moq;
-using System.Runtime.CompilerServices;
+using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -15,19 +14,19 @@ namespace WoopiAiHub.UnitTests.Services
     [Collection(nameof(CardCollection))]
     public class CardServicesTests
     {
+        private readonly AutoMocker _mocker;
         private readonly Mock<ICardRepository> _cardRepositoryMock;
         private readonly Mock<IStepRepository> _stepRepositoryMock;
         private readonly Mock<IStatusRepository> _statusRepositoryMock;
-        private readonly CardServices _cardService;
-        private readonly CardFixture _cardFixture;
+        private readonly CardServices _cardServices;
 
-        public CardServicesTests(CardFixture cardFixture)
+        public CardServicesTests()
         {
-            _cardFixture = cardFixture;
-            _cardRepositoryMock = new Mock<ICardRepository>();
-            _stepRepositoryMock = new Mock<IStepRepository>();
-            _statusRepositoryMock = new Mock<IStatusRepository>();
-            _cardService = new CardServices(_cardRepositoryMock.Object, _stepRepositoryMock.Object, _statusRepositoryMock.Object);
+            _mocker = new AutoMocker();
+            _cardRepositoryMock = _mocker.GetMock<ICardRepository>();
+            _stepRepositoryMock = _mocker.GetMock<IStepRepository>();
+            _statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
+            _cardServices = _mocker.CreateInstance<CardServices>();
         }
 
         [Fact(DisplayName = "Tests update Step and Status and throws an AppException when Card not found")]
@@ -39,7 +38,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync((Card?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardService.UpdateStepAndStatus(updateDto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(CardLabel.NotFound, exception.LabelError);
         }
@@ -55,7 +54,7 @@ namespace WoopiAiHub.UnitTests.Services
             _stepRepositoryMock.Setup(repo => repo.FindById(updateDto.StepId)).ReturnsAsync((Step?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardService.UpdateStepAndStatus(updateDto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(StepLabel.NotFound, exception.LabelError);
         }
@@ -73,7 +72,7 @@ namespace WoopiAiHub.UnitTests.Services
             _statusRepositoryMock.Setup(repo => repo.FindById(updateDto.StatusId)).ReturnsAsync((Status?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardService.UpdateStepAndStatus(updateDto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(StatusLabel.NotFound, exception.LabelError);
         }
@@ -93,7 +92,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
 
             // Act
-            var result = await _cardService.UpdateStepAndStatus(updateDto);
+            var result = await _cardServices.UpdateStepAndStatus(updateDto);
 
             // Assert
             Assert.True(result);
