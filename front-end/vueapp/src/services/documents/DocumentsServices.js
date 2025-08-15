@@ -1,6 +1,25 @@
 import api from "@/services/api";
 
 export default {
+    getDocuments(params) {
+        return api.get("/Document", { params: params })
+            .then(({ data }) => {
+                return {
+                    content: data.content,
+                    pagination: {
+                        currentPage: data.currentPage,
+                        pageCount: data.pageCount,
+                        rowCount: data.rowCount,
+                        listPage: data.rowCount,
+                    }
+                }
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                }
+            });
+    },
     getDocumentAnalyze(docId) {
         return api
             .get(`/Document/Analyze/${docId}`)
