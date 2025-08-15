@@ -11,7 +11,7 @@ export default {
                 console.log(e);
             });
     },
-    getWorkflowkbyTeamId(teamId) {
+    getWorkflowbyTeamId(teamId) {
         return api.get(`/Workflow/Teams/${teamId}`)
             .then(({ data }) => {
                 return data;
