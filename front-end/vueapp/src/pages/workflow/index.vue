@@ -119,7 +119,7 @@
                     });
             },
             getWorkflowbyTeam(id) {
-                WorkflowService.getWorkbyTeamId(id)
+                WorkflowService.getWorflowkbyTeamId(id)
                     .then((response) => {
                         this.kanbanCards = response;
                     })
