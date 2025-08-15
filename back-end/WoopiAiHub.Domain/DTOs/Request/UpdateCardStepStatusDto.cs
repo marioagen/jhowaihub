@@ -3,7 +3,7 @@
     public record struct UpdateCardStepStatusDto
     {
         public int CardId { get; set; }
-        public int StepId { get; set; }
-        public int StatusId { get; set; }
+        public int NextStepOrder { get; set; }
+        public int WorkflowId { get; set; }
     }
 }

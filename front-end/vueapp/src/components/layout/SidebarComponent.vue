@@ -33,7 +33,7 @@
                 />
             </router-link>
         </div>
-
+        <div class="horizontal-separator-fixed"></div>
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
             <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
                 <LucideIcon v-if="isCollapsed" icon="ChevronRight" />
@@ -45,8 +45,7 @@
 
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li class="mb-1" v-if="permissions.management">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
@@ -60,8 +59,7 @@
             </li>
 
             <li class="mb-1">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
@@ -90,8 +88,23 @@
             </li>
 
             <li class="mb-1" v-if="permissions.types">
-                <router-link
-                    :class="[
+                <router-link :class="[
+                        'd-flex align-items-center',
+                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
+                        isCollapsed ? 'justify-content-center' : '',
+                        'custom-menu-item',
+                    ]"
+                             to="/workflow">
+                    <img src="./../../assets/img/workflow.svg"
+                         :title="$t('labelDocuments')"
+                         width="20"
+                         class="icon-sidebar" />
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t("workflow.labelWorkflowDocs") }}</span>
+                </router-link>
+            </li>
+
+            <li class="mb-1">
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
@@ -107,8 +120,7 @@
             </li>
 
             <li v-if="permissions.questions">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
@@ -122,8 +134,7 @@
             </li>
 
             <li v-if="permissions.quizzes">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',

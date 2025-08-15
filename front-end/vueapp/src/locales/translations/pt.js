@@ -1,6 +1,7 @@
 ﻿const portuguese = {
     welcomeMsg: "Bem-vindo",
     labelAction: "Ação",
+    labelAdvance: "Avançar",
     labelAlmost: "Você está quase lá!",
     labelAnalyze: "Analisar",
     labelAnalyzed: "Analisado",
@@ -186,6 +187,7 @@
     labelUsersMessage: "Gerencie os usuários do sistema",
     labelUser: "Usuário",
     labelTeams: "Times",
+    labelTeam: "Time",
     labelTypes: "Tipos",
     labelTeamsMessage: "Gerencie os times e suas equipes",
     labelProfilesMessage: "Gerencie os perfis e permissões do sistema",
@@ -199,6 +201,7 @@
     labelYouAreAboutToDeleteTeam: "Você está prestes a deletar um Time do sistema",
     labelYouAreAboutToDeleteProfile: "Você está prestes a deletar um perfil do sistema",
     labelNewTeamMessage: "Crie um novo time no sistema",
+    labelTotalDocuments: "Total de documentos",
     labelTeamMembers: "Membros do time",
     labelSelectedWithO: "Selecionados",
     labelSearchUsers: "Buscar usuários...",
@@ -284,6 +287,12 @@
     unauthorized: {
         title: "Você não tem permissão para acessar esta tela.",
         returnToHome: "Retornar",
+    },
+    workflow: {
+        labelWatchingWorkflow: "Visualizando workflow:",
+        labelWorkflowDocs: "Workflow de documentos",
+        labelWorkflowBoard: "Board de Processamento de Documentos",
+        labelWorkflowSubTitle: "Visualize o fluxo de documentos através das etapas de processamento",
     },
     validation: {
         required: "Campo obrigatório",

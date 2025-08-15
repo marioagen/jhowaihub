@@ -1,7 +1,27 @@
 import api from "@/services/api";
 
 export default {
-    getWorkflowList() {
+    getWorkflowList(email) {
+        return api.get(`/Workflow/Users/${email}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error.response.data.detail,
+                }
+            });
+    },
+    getWorkflowByTeamId(teamId) {
+        return api.get(`/Workflow/Teams/${teamId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                }
+            });
     },
     getWorkflowById(workflowId) {
         return api.get(`/Workflow/Team/${workflowId}`)
@@ -49,5 +69,5 @@ export default {
                     error: error,
                 }
             });
-    },
+    },    
 }

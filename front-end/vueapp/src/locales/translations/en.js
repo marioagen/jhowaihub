@@ -1,6 +1,7 @@
 ﻿const english = {
     welcomeMsg: "Welcome",
     labelAction: "Action",
+    labelAdvance: "Advance",
     labelAnalyze: "Analyze",
     labelAnalyzed: "Analyzed",
     labelAlmost: "You're almost there!",
@@ -190,6 +191,7 @@
     labelPermissions: "Permissions",
     labelUser: "User",
     labelTeams: "Teams",
+    labelTeam: "Team",
     labelTypes: "Types",
     labelTeamsMessage: "Manage teams and their members",
     labelProfilesMessage: "Manage profiles and permissions from system",
@@ -199,6 +201,7 @@
     labelYouAreAboutToDeleteTeam: "You are about to delete a Team from the system",
     labelYouAreAboutToDeleteProfile: "You are about to delete a profile from the system",
     labelNewTeamMessage: "Create a new team in the system",
+    labelTotalDocuments: "Total documents",
     labelTeamMembers: "Team members",
     labelSelectedWithO: "Selected",
     labelSearchUsers: "Search users...",
@@ -287,6 +290,12 @@
     unauthorized: {
         title: "You do not have permission to access this screen.",
         returnToHome: "Return",
+    },
+    workflow: {
+        labelWatchingWorkflow: "Viewing workflow:",
+        labelWorkflowDocs: "Documents Workflow",
+        labelWorkflowBoard: "Document Processing Board",
+        labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
     },
     validation: {
         required: "This field is required.",

@@ -120,10 +120,15 @@ namespace WoopiAiHub.Application.Services
         public async Task<WorkflowDto> FindByTeamId(int teamId)
         {
             var workflow = await _workflowRepository.FindByTeamId(teamId);
+
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
+
+            int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
+            workflow.NumDocuments = totalCards;
+
             return workflow;
         }
 
@@ -243,6 +248,17 @@ namespace WoopiAiHub.Application.Services
             }
 
             return steps;
+        }
+
+        /// <summary>
+        /// Find all workflows associated with a user, based on their email.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ICollection<WorkflowDto> FindAllByUser(string email)
+        {
+            var workflow = _workflowRepository.FindAllByUser(email);
+            return workflow;
         }
     }
 }

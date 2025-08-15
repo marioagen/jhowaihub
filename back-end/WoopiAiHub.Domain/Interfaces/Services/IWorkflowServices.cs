@@ -10,5 +10,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<WorkflowDto> FindByTeamId(int teamId);
         Task<WorkflowDto> FindById(int id);
         Task<bool> DeleteById(int id);
+        ICollection<WorkflowDto> FindAllByUser(string email);
     }
 }

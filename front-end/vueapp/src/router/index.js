@@ -13,9 +13,10 @@ import ManagementPage from "@/pages/management.vue";
 import QuizzesPage from "@/pages/quizzes/index.vue";
 import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
-import WorkflowPage from "@/pages/workflow/indexWorkflow.vue";
+import WorkflowPageT from "@/pages/workflow/indexWorkflow.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
+import WorkflowPage from "@/pages/workflow/index.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {

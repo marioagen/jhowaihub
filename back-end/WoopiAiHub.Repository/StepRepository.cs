@@ -77,5 +77,19 @@ namespace WoopiAiHub.Repository
 
             return false;
         }
+
+        /// <summary>
+        /// Finds a step by its order and workflow ID.
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="workflowId"></param>
+        /// <returns></returns>
+        public Task<Step?> FindByOrderAndWorkflowId(int order,
+                                                    int workflowId)
+        {
+            return _context.Steps
+                           .FirstOrDefaultAsync(s => s.Order == order &&
+                                                     s.WorkflowId == workflowId);
+        }
     }
 }
