@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -15,6 +16,7 @@ namespace WoopiAiHub.UnitTests.Services
 {
     public class WorkflowServicesTests
     {
+        private readonly AutoMocker _mocker;
         private readonly Mock<IWorkflowRepository> _workflowRepositoryMock;
         private readonly Mock<IStepRepository> _stepRepositoryMock;
         private readonly Mock<ICardRepository> _cardRepositoryMock;
@@ -24,29 +26,27 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-        private readonly WorkflowServices _workflowService;
+        private readonly WorkflowServices _workflowServices;
 
         public WorkflowServicesTests()
         {
-            _workflowRepositoryMock = new Mock<IWorkflowRepository>();
-            _stepRepositoryMock = new Mock<IStepRepository>();
-            _cardRepositoryMock = new Mock<ICardRepository>();
-            _profileRepositoryMock = new Mock<IProfileRepository>();
-            _statusRepositoryMock = new Mock<IStatusRepository>();
-            _teamRepositoryMock = new Mock<ITeamRepository>();
-            
+            _mocker = new AutoMocker();
+
+            _workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            _stepRepositoryMock = _mocker.GetMock<IStepRepository>();
+            _cardRepositoryMock = _mocker.GetMock<ICardRepository>();
+            _profileRepositoryMock = _mocker.GetMock<IProfileRepository>();
+            _statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
+            _teamRepositoryMock = _mocker.GetMock<ITeamRepository>();
+            _unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+
             _validateWorkflow = new ValidateWorkflow(_workflowRepositoryMock.Object, _teamRepositoryMock.Object);
             _validateStep = new ValidateStep(_cardRepositoryMock.Object);
 
-            _unitOfWorkMock = new Mock<IUnitOfWork>();
-            _workflowService = new WorkflowServices(_workflowRepositoryMock.Object,
-                                                    _profileRepositoryMock.Object,
-                                                    _statusRepositoryMock.Object,
-                                                    _stepRepositoryMock.Object,
-                                                    _unitOfWorkMock.Object,
-                                                    _validateStep,
-                                                    _validateWorkflow);
+            _mocker.Use<IValidateWorkflow>(_validateWorkflow);
+            _mocker.Use<IValidateStep>(_validateStep);
 
+            _workflowServices = _mocker.CreateInstance<WorkflowServices>();
         }
 
         [Fact(DisplayName = "Test FindById and returns a workflow")]
@@ -60,7 +60,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(expectedWorkflow);
 
             // Act
-            var result = await _workflowService.FindById(workflowId);
+            var result = await _workflowServices.FindById(workflowId);
 
             // Assert
             _workflowRepositoryMock.Verify(repo => repo.FindById(workflowId), Times.Once);
@@ -77,7 +77,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync((WorkflowDto?)null);
 
             // Act
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowService.FindById(workflowId));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindById(workflowId));
 
             // Assert
             _workflowRepositoryMock.Verify(repo => repo.FindById(workflowId), Times.Once);
@@ -97,7 +97,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(expectedWorkflow);
 
             // Act
-            var result = await _workflowService.FindByTeamId(teamId);
+            var result = await _workflowServices.FindByTeamId(teamId);
 
             // Assert
             _workflowRepositoryMock.Verify(repo => repo.FindByTeamId(teamId), Times.Once);
@@ -114,7 +114,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync((WorkflowDto?)null);
 
             // Act
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowService.FindByTeamId(teamId));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindByTeamId(teamId));
 
             // Assert
             _workflowRepositoryMock.Verify(repo => repo.FindByTeamId(teamId), Times.Once);
@@ -135,7 +135,7 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Create(workflowCreateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
 
             // Assert 
             Assert.Equal(ErrorCode.RequiredField, ex.ErrorCode);
@@ -157,7 +157,7 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Create(workflowCreateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
 
             // Assert 
             Assert.Equal(ErrorCode.RequiredField, ex.ErrorCode);
@@ -178,7 +178,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>())).ReturnsAsync(workflowDto);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Create(workflowCreateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
 
             // Assert
             Assert.Equal(ErrorCode.Conflict, ex.ErrorCode);
@@ -199,7 +199,7 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns((TeamDto?)null);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Create(workflowCreateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
 
             // Assert
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
@@ -224,7 +224,7 @@ namespace WoopiAiHub.UnitTests.Services
             _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync((ProfileDto?)null);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Create(workflowCreateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
 
             // Assert
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
@@ -251,7 +251,7 @@ namespace WoopiAiHub.UnitTests.Services
             _statusRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync((Status?)null);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Create(workflowCreateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
 
             // Assert
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
@@ -281,7 +281,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>())).ReturnsAsync(true);
 
             // Act
-            var result = await _workflowService.Create(workflowCreateDto);
+            var result = await _workflowServices.Create(workflowCreateDto);
 
             // Assert
             Assert.True(result);
@@ -300,7 +300,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync((Workflow?)null);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Update(updateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Update(updateDto));
 
             // Assert
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
@@ -319,7 +319,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync(workflow);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Update(updateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Update(updateDto));
 
             // Assert
             Assert.Equal(ErrorCode.Conflict, ex.ErrorCode);
@@ -341,7 +341,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(r => r.ExistsStepsInUse(It.IsAny<ICollection<int>>())).ReturnsAsync(true);
 
             // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowService.Update(updateDto));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Update(updateDto));
 
             // Assert
             Assert.Equal(ErrorCode.Conflict, ex.ErrorCode);
@@ -364,10 +364,11 @@ namespace WoopiAiHub.UnitTests.Services
             var stepUpdateDto = WorkflowFixture.FindValidStepUpdateDto();
             var stepUpdateDto2 = WorkflowFixture.FindValidStepUpdateDto();
             stepUpdateDto.Id = 0;
+            stepUpdateDto2.Order = 1;
             updateDto.Steps.Add(stepUpdateDto);
-            stepUpdateDto2.Id = 10;            
+            stepUpdateDto.Id = 10;
+            stepUpdateDto2.Order = 2;            
             updateDto.Steps.Add(stepUpdateDto2);
-
 
             workflow.Steps.Clear();
             foreach (var stepDto in updateDto.Steps)
@@ -396,7 +397,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>())).ReturnsAsync(true);
 
             // Act
-            var result = await _workflowService.Update(updateDto);
+            var result = await _workflowServices.Update(updateDto);
 
             // Assert
             Assert.True(result);
@@ -417,7 +418,7 @@ namespace WoopiAiHub.UnitTests.Services
             _stepRepositoryMock.Setup(repo => repo.DeleteByIds(It.IsAny<List<int>>())).Returns(true);
 
             // Act
-            var result = await _workflowService.DeleteById(1);
+            var result = await _workflowServices.DeleteById(1);
 
             // Assert
             Assert.True(result);
@@ -434,7 +435,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync((Workflow?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowService.DeleteById(1));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.DeleteById(1));
 
             _workflowRepositoryMock.Verify(repo => repo.FindByIdReturnModel(It.IsAny<int>()), Times.Once);
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
@@ -457,7 +458,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(expectedWorkflows);
 
             // Act
-            var result = _workflowService.FindAllByUser(email);
+            var result = _workflowServices.FindAllByUser(email);
 
             // Assert
             _workflowRepositoryMock.Verify(repo => repo.FindAllByUser(email), Times.Once);
@@ -475,7 +476,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(expectedWorkflows);
 
             // Act
-            var result = _workflowService.FindAllByUser(email);
+            var result = _workflowServices.FindAllByUser(email);
 
             // Assert
             _workflowRepositoryMock.Verify(repo => repo.FindAllByUser(email), Times.Once);
