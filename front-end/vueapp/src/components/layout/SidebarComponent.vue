@@ -33,7 +33,9 @@
                 />
             </router-link>
         </div>
+        
         <div class="horizontal-separator-fixed"></div>
+
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
             <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
                 <LucideIcon v-if="isCollapsed" icon="ChevronRight" />
@@ -146,6 +148,31 @@
                 </router-link>
             </li>
         </ul>
+
+        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li
+                v-for="item in menuItems"
+                :key="item.labelKey"
+                class="mb-1"
+                :class="{ 'is-active': isRouteActive(item) }"
+            >
+                <router-link
+                    :class="[
+                        'd-flex align-items-center custom-menu-item link-dark rounded',
+                        isRouteActive(item) ? 'active' : '',
+                        isCollapsed ? 'justify-content-center' : ''
+                    ]"
+                    :to="item.to"
+                >
+                    <LucideIcon
+                        size="20"
+                        :icon="item.icon.name"
+                        :color="item.icon.color"
+                    />
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t(item.labelKey) }}</span>
+                </router-link>
+            </li>
+        </ul>
     </aside>
 </template>
 
@@ -179,8 +206,49 @@
                     documents: hasPermission("Documents","View"),
                     types: hasPermission("Types", "View"),
                     quizzes: hasPermission("Quizzes", "View"),
-                }
+                },
+                menuItems: [
+                    {
+                        permission: 'Management',
+                        activeKey: 'DocumentList',
+                        to: '/management',
+                        icon: { name: 'Users', color: '#000000' },
+                        labelKey: 'labelManageUsers'
+                    },
+                    {
+                        activeKey: 'DocumentList',
+                        to: '/document-list',
+                        icon: { name: 'FileText', color: '#000000' },
+                        labelKey: 'labelDocuments'
+                    },
+                    {
+                        permission: 'Types',
+                        activeKey: 'Type',
+                        to: '/types',
+                        icon: { name: 'Layers', color: '#000000' },
+                        labelKey: 'labelTypes'
+                    },
+                    {
+                        permission: 'Questions',
+                        activeKey: 'Questions',
+                        to: '/questions',
+                        icon: { name: 'HelpCircle', color: '#000000' },
+                        labelKey: 'labelQuestions'
+                    },
+                    {
+                        permission: 'Quizzes',
+                        activeKey: 'Quizzes',
+                        to: '/quizzes',
+                        icon: { name: 'ClipboardList', color: '#000000' },
+                        labelKey: 'quizzes.title'
+                    }
+                ]
             };
+        },
+        methods: {
+            isRouteActive(item) {
+                return this.$route.path.startsWith(item.to);
+            }
         },
         updated() {
             let self = this;
@@ -370,5 +438,14 @@
 
     .title {
         color: black;
+    }
+
+    .custom-menu-item.active {
+        background-color: var(--bs-primary-bg-subtle);
+        font-weight: 600;
+    }
+
+    .custom-menu-item:not(.active) {
+        opacity: 0.8;
     }
 </style>
