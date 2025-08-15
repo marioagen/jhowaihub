@@ -10,8 +10,8 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new UpdateCardStepStatusDto
             {
                 CardId = 1,
-                StepId = 1,
-                StatusId = 1
+                NextStepOrder = 1,
+                WorkflowId = 1
             };
         }
 

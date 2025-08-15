@@ -442,5 +442,46 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Workflow not found", exception.Message);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
         }
+
+        [Fact(DisplayName = "Test FindAllByUser returns workflows for valid user")]
+        [Trait("FindAllByUser", "Success")]
+        public void FindAllByUser_ValidUser_ReturnsWorkflows()
+        {
+            // Arrange
+            var email = "user@email.com";
+            var expectedWorkflows = new List<WorkflowDto>
+            {
+                new WorkflowDto { Id = 1, Name = "Workflow 1" },
+                new WorkflowDto { Id = 2, Name = "Workflow 2" }
+            };
+            _workflowRepositoryMock.Setup(repo => repo.FindAllByUser(email))
+                .Returns(expectedWorkflows);
+
+            // Act
+            var result = _workflowServices.FindAllByUser(email);
+
+            // Assert
+            _workflowRepositoryMock.Verify(repo => repo.FindAllByUser(email), Times.Once);
+            Assert.Equal(expectedWorkflows, result);
+        }
+
+        [Fact(DisplayName = "Test FindAllByUser returns empty when user has no workflows")]
+        [Trait("FindAllByUser", "Fail")]
+        public void FindAllByUser_UserHasNoWorkflows_ReturnsEmptyList()
+        {
+            // Arrange
+            var email = "empty@email.com";
+            var expectedWorkflows = new List<WorkflowDto>();
+            _workflowRepositoryMock.Setup(repo => repo.FindAllByUser(email))
+                .Returns(expectedWorkflows);
+
+            // Act
+            var result = _workflowServices.FindAllByUser(email);
+
+            // Assert
+            _workflowRepositoryMock.Verify(repo => repo.FindAllByUser(email), Times.Once);
+            Assert.Empty(result);
+        }
+
     }
 }
