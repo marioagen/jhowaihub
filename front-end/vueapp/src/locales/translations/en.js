@@ -303,6 +303,27 @@
         next: "Next",
         previous: "Previous",
     },
+    documents: {
+        title: "Documents",
+        subtitle: "Manage documents and extract information",
+        notFound: "No documents found",
+        removeTitle: "You are about to delete a document from the system",
+        createBtn: "New document",
+        name: "Name",
+        description: "Description",
+        createdDate: "Upload date",
+        status: "Status",
+        owner: "Owner",
+        teams: "Team",
+        statusList: {
+            analyzed: "Analyzed",
+            notAnalyzed: "Waiting for analysis",
+        },
+        actions: {
+            analyze: "Analyze",
+            consult: "Consult",
+        },
+    },
     questions: {
         title: "Questions",
         subtitle: "Manage system questions",

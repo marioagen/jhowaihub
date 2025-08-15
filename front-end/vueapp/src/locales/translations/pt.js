@@ -306,6 +306,20 @@
         notFound: "Documentos não encontrados",
         removeTitle: "Você está prestes a deletar uma documento do sistema",
         createBtn: "Novo documento",
+        name: "Nome",
+        description: "Descrição",
+        createdDate: "Data de upload",
+        status: "Status",
+        owner: "Proprietário",
+        teams: "Time",
+        statusList: {
+            analyzed: "Analisado",
+            notAnalyzed: "Esperando análise",
+        },
+        actions: {
+            analyze: "Analisar",
+            consult: "Consultar",
+        },
     },
     questions: {
         title: "Perguntas",
