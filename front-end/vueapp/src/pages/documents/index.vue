@@ -45,6 +45,10 @@
                 </div>
             </div>
 
+            <DocumentsTable 
+                ref="DocumentsTable"
+            />
+
             <NormalizeIndex
                 :docData="docDataEmbedding"
                 :isReprocessing="isReprocessing"
@@ -61,6 +65,7 @@
     import GlobalEventService from "@/services/globalEventService.js";
     import NormalizeIndex from "@/components/pages/normalize/loading";
     import SearchComponent from "@/components/global/SearchComponent.vue";
+    import DocumentsTable from "@/components/documents/DocumentsTable.vue";
 
     export default {
         name: "DocumentsPage",
@@ -99,6 +104,7 @@
         components: {
             NormalizeIndex,
             SearchComponent,
+            DocumentsTable,
         },
         watch: {
             searchInput(val) {
@@ -334,7 +340,6 @@
                 this.selectedTeamId = null;
             }
         },
-        mounted() {},
         beforeUnmount() {
             GlobalEventService.off("all-uploads-complete", this.reloadList);
             GlobalEventService.off("refresh-once", this.reloadList);
