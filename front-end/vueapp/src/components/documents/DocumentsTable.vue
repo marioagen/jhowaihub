@@ -18,7 +18,41 @@
             @selectedRows="selectedRows"
             @change-page="changePage"
         >
+            <template #cell-created="{ data }">
+                
+            </template>
+            <template #cell-status="{ data }">
+                <BadgeComponent
+                    v-if="data.row.status === 0" 
+                    text="documents.statusList.notAnalyzed"
+                />
+                <BadgeComponent
+                    v-else 
+                    text="documents.statusList.analyzed"
+                    variant="success"
+                />
+            </template>
+            <template #cell-teams="{ data }">
+                <BadgeOutlinedComponent
+                    v-for="(team, index) in data.row.teams"
+                    :key="index"
+                    :text="team.name"
+                    :clickable="false"
+                />
+            </template>
             <template #cell-actions="{ data }">
+                <button
+                    v-if="data.row.status === 0"
+                    class="btn btn-outline-primary btn-sm table-btn"
+                >
+                    {{ $t("documents.actions.analyze") }}
+                </button>
+                <button
+                    v-else
+                    class="btn btn-outline-success btn-sm table-btn"
+                >
+                    {{ $t("documents.actions.consult") }}
+                </button>
             </template>
         </TableComponent>
     </div>
@@ -39,10 +73,15 @@
 <script>
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import DocumentsServices from "@/services/documents/DocumentsServices";
+    import BadgeComponent from "@/components/global/BadgeComponent";
+    import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent"
 
     export default {
         name: "DocumentsTable",
         components: {
+            BadgeOutlinedComponent,
+            BadgeComponent,
             TableComponent,
             ConfirmModal,
         },
@@ -52,9 +91,10 @@
                 columns: [
                     { key: "id", label: "Id" },
                     { key: "name", label: "documents.name" },
-                    { key: "description", label: "documents.name" },
-                    { key: "reference_file", label: "documents.name" },
-                    { key: "status", label: "documents.name" },
+                    { key: "description", label: "documents.description" },
+                    { key: "created", label: "documents.createdDate" },
+                    { key: "status", label: "documents.status" },
+                    { key: "teams", label: "documents.teams" },
                     { key: "emailCreator", label: "documents.owner" },
                     { key: "actions", label: "questions.actions" },
                 ],
@@ -82,6 +122,34 @@
         }),
         methods: {
             getDocuments(obj) {
+                this.table.isLoading = true;
+
+                const teamIds = this.resolveTeamIds();
+                if (teamIds.length === 0) return;
+
+                const params = {
+                    search: this.searchInput.trim() || "",
+                    pageSize: this.selectedOption,
+                    page: obj.page,
+                    isAscending: this.isAscending,
+                    colType: this.colType,
+                    teamIds,
+                };
+                DocumentsServices.getDocuments(params)
+                    .then((response) => {
+                        console.log(response)
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
+                    })
+                    .finally(() => {
+                        this.table.isLoading = false;
+                    });
+            },
+            resolveTeamIds() {
+                if (this.selectedTeamId === 0) {
+                    return this.teamList.length > 0 ? this.teamList.map((team) => team.id) : [];
+                }
+                return [this.selectedTeamId];
             },
             orderList: function (col) {
                 if (this.isAscending) {
