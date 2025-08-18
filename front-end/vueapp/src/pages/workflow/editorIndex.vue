@@ -138,7 +138,6 @@
                         }
                         this.workflowList = response;
                         if(this.workflowList.length > 0) {
-                            console.log(this.workflowList)
                             this.selectOption(this.workflowList[0]);
                             this.filteredworkflows();
                         }

@@ -90,13 +90,11 @@
                 this.$emit('reload');
             },
             setCard() {
-                console.log(this.kanbanData)
                 this.stepsList = this.kanbanData.steps;
             },
         },
         created() {
             this.setCard();
-            console.log("Workflor Board");
         }
     };
 </script>
