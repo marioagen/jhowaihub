@@ -4,16 +4,21 @@
             <div class="col-3 kanban-col me-3" v-for="step in kanbanData.steps" :key="step.id">
                 <div class="card flex-grow-1">
                     <div class="card-header" :class="findOrder(step.order)">
-                        {{step.name}}
+                        {{ step.name }}
                     </div>
-                    <div class="card-body" v-for="card in step.cards" :key="card.id">
-                        <CardComponent :dataCard="card"
-                                       :dataStep="step"
-                                       :isFirstStep="firstStep"
-                                       :isLastStep="lastStep"
-                                       label="labelAnalyze"
-                                       @reload="reloadList">
-                        </CardComponent>
+                    <div 
+                        class="card-body" 
+                        v-for="card in step.cards" 
+                        :key="card.id"
+                    >
+                        <CardComponent 
+                            :dataCard="card"
+                            :dataStep="step"
+                            :isFirstStep="firstStep"
+                            :isLastStep="lastStep"
+                            label="labelAnalyze"
+                            @reload="reloadList"
+                        />
                     </div>
                 </div>
             </div>
@@ -35,7 +40,6 @@
             },
         },
         data: () => ({
-
             firstStep: false,
             lastStep: false,
             customClass: "",
