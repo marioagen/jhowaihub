@@ -389,6 +389,8 @@
         addBtnDescription: "Clique para criar uma nova etapa",
         createNewStep: "Nova etapa",
         responsableTeam: "Time responsável",
+        stepTitle: "Etapa do workflow",
+        stepSubtitle: "Configure as regras e responsáveis",
         name: "Nome do workflow",
         profiles: "Perfil responsável",
         status: "Status",
