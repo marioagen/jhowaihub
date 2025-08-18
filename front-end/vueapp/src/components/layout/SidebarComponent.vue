@@ -94,12 +94,13 @@
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                             to="/workflow">
+                    to="/workflow/editor"
+                >
                     <img src="./../../assets/img/workflow.svg"
                          :title="$t('labelDocuments')"
                          width="20"
                          class="icon-sidebar" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("workflow.labelWorkflowDocs") }}</span>
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t("workflow.editTitle") }}</span>
                 </router-link>
             </li>
 
