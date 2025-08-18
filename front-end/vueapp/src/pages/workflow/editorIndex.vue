@@ -21,22 +21,22 @@
 
                             <div class="dropdown">
                                 <button 
-                                class="btn btn-light border text-start"
-                                type="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
+                                    class="btn btn-light border text-start"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
                                 >
-                                <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
-                                <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
+                                    <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
+                                    <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
                                 </button>
 
                                 <ul class="dropdown-menu">
-                                <li v-for="item in workflowList" :key="item.id">
-                                    <a class="dropdown-item" @click="selectOption(item)">
-                                    <div class="fw-bold">{{ item.team.name }}</div>
-                                    <div class="text-muted small">{{ item.name }}</div>
-                                    </a>
-                                </li>
+                                    <li v-for="item in workflowList" :key="item.id">
+                                        <a class="dropdown-item" @click="selectOption(item)">
+                                            <div class="fw-bold">{{ item.team.name }}</div>
+                                            <div class="text-muted small">{{ item.name }}</div>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
 
@@ -47,29 +47,40 @@
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
-                        <button 
-                            class="btn btn-outline-primary btn-sm" 
-                            @click="redirectToForm"
-                        >
-                            <LucideIcon icon="PenLine" size="14" class="me-2" />
-                            {{ $t("workflow.createBtn") }}
-                        </button>
-                        <button 
-                            class="btn btn-primary btn-sm" 
-                            @click="editWorkflow"
-                        >
-                            <LucideIcon icon="PenLine" size="14" class="me-2" />
-                            {{ $t("workflow.editBtn") }}
-                        </button>
-                        <button 
-                            class="btn btn-outline-danger btn-sm"
-                            @click="deleteWorkflow"
-                        >
-                            <LucideIcon icon="Trash2" size="14" class="me-2" />
-                            {{ $t("workflow.deleteBtn") }}
-                        </button>
+                            <button 
+                                class="btn btn-outline-primary btn-sm" 
+                                @click="redirectToForm"
+                            >
+                                <LucideIcon icon="Plus" size="14" class="me-2" />
+                                {{ $t("workflow.createBtn") }}
+                            </button>
+                            <button 
+                                class="btn btn-primary btn-sm" 
+                                @click="editWorkflow"
+                            >
+                                <LucideIcon icon="PenLine" size="14" class="me-2" />
+                                {{ $t("workflow.editBtn") }}
+                            </button>
+                            <button 
+                                class="btn btn-outline-danger btn-sm"
+                                @click="deleteWorkflow"
+                            >
+                                <LucideIcon icon="Trash2" size="14" class="me-2" />
+                                {{ $t("workflow.deleteBtn") }}
+                            </button>
                         </div>
 
+                    </div>
+                </div>
+
+                <div v-if="isLoaded" class="card mb-3 h-100">
+                    <div class="card-body d-flex flex-column p-2 card-container">
+                        <div class="kanban-wrapper">
+                            <WorkflowCards 
+                                :kanbanData="board"
+                                @reload="reloadKanban"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -84,11 +95,13 @@
 <script>
     import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingComponent.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
 
     export default {
         name: "QuizzesPage",
         data() {
             return {
+                isLoaded: false,
                 crumbsData: [],
                 entitySearch: {},
                 resetInputSearch: false,
@@ -97,11 +110,13 @@
                 selectedOption: {
                     teamName: "TeamName",
                     name: "Nome"
-                }
+                },
+                board: [],
             };
         },
         components: {
             FullscreenLoadingComponent,
+            WorkflowCards,
         },
         watch: {
             "$store.state.userProfile.language": function () {
@@ -139,9 +154,13 @@
                 this.getWorkflowbyTeam(workflow.team.id);
             },
             getWorkflowbyTeam(id) {
+                this.isLoaded = false;
                 WorkflowService.getWorkflowByTeamId(id)
                     .then((response) => {
-                        this.kanbanCards = response;
+                        this.board = response;
+                    })
+                    .finally(() => {
+                        this.isLoaded = true;
                     });
             },
             filteredworkflows() {
