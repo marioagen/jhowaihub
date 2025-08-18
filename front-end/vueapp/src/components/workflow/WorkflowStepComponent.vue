@@ -19,16 +19,20 @@
                 >
                     {{ localStep.name || 'Etapa sem título' }}
                 </span>
-                <input
-                    v-else
-                    type="text"
-                    v-model="localStep.name"
-                    class="form-control form-control-sm"
-                    @blur="stopEditingTitle"
-                    @keyup.enter="stopEditingTitle"
-                    style="max-width: 200px;"
-                    autofocus
-                />
+                <Field v-else :name="`steps[${index - 1}].name`" rules="required" v-slot="slotProps">
+                    <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        v-bind="slotProps.field"
+                        @blur="stopEditingTitle"
+                        @keyup.enter="stopEditingTitle"
+                        style="max-width: 200px;"
+                        autofocus
+                    />
+                    <span class="validation-message text-danger" v-if="slotProps.errors?.length">
+                        {{ slotProps.errors[0] }}
+                    </span>
+                </Field>
             </div>
             <button 
                 type="button" 
@@ -42,19 +46,24 @@
         <div class="card-body">
             <div class="mb-3">
                 <label class="form-label text-muted small">{{ $t("workflow.status") }}</label>
-                <select
+                <Field :name="`steps[${index - 1}].statusId`" rules="required" v-slot="slotProps">
+                    <select
                         class="form-select form-select-sm border-start-0"
-                        v-model="localStep.statusId"
+                        v-bind="slotProps.field"
                     >
                         <option value="">{{ $t("workflow.status") }}</option>
-                        <option 
-                            v-for="(item, index) in statusList" 
-                            :key="index"
-                            :value="item.id" 
+                        <option
+                            v-for="(item, i) in statusList"
+                            :key="i"
+                            :value="item.id"
                         >
                             {{ item.id }} - {{ item.name }}
                         </option>
                     </select>
+                    <span class="validation-message text-danger" v-if="slotProps.errors?.length">
+                        {{ slotProps.errors[0] }}
+                    </span>
+                </Field>
             </div>
 
             <div class="mb-2">
@@ -63,19 +72,24 @@
                     <span class="input-group-text border-end-0 bg-white">
                         <LucideIcon icon="Users" size="16" />
                     </span>
-                    <select
-                        class="form-select form-select-sm border-start-0"
-                        v-model="localStep.profileId"
-                    >
-                        <option value="">{{ $t("workflow.responsableTeam") }}</option>
-                        <option 
-                            v-for="(item, index) in profilesList" 
-                            :key="index"
-                            :value="item.id" 
+                    <Field :name="`steps[${index - 1}].profileId`" rules="required" v-slot="slotProps">
+                        <select
+                            class="form-select form-select-sm border-start-0"
+                            v-bind="slotProps.field"
                         >
-                            {{ item.id }} - {{ item.text }}
-                        </option>
-                    </select>
+                            <option value="">{{ $t("workflow.responsableTeam") }}</option>
+                            <option
+                                v-for="(item, i) in profilesList"
+                                :key="i"
+                                :value="item.id"
+                            >
+                                {{ item.id }} - {{ item.text }}
+                            </option>
+                        </select>
+                        <span class="validation-message text-danger" v-if="slotProps.errors?.length">
+                            {{ slotProps.errors[0] }}
+                        </span>
+                    </Field>
                 </div>
             </div>
         </div>
@@ -83,8 +97,12 @@
 </template>
 
 <script>
+    import { Field, useForm } from "vee-validate";
     export default {
         name: "WorkflowStepComponent",
+        components: { 
+            Field,
+        },
         props: {
             step: {
                 type: Object,
@@ -135,6 +153,22 @@
             },
             stopEditingTitle() {
                 this.editingTitle = false;
+            },
+            validateStep() {
+                const { name, statusId, profileId } = this.localStep;
+                const valid = !!name && !!statusId && !!profileId;
+
+                if (!valid) {
+                    this.$notify({
+                        title: 'Workflow',
+                        message: 'Campos da etapa estão inválidos',
+                        variant: 'danger',
+                        icon: 'CircleX'
+                    });
+                }
+
+                this.$emit('update-step', this.localStep);
+                return valid;
             }
         },
     };
