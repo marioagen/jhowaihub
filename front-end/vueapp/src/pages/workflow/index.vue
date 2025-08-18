@@ -46,7 +46,7 @@
                     </div>
                 </div>
 
-                <div v-if="isWorkflowSelected">
+                <div v-if="isWorkflowSelected && isLoaded">
                     <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
@@ -102,7 +102,8 @@
                     teamId: 0,
                 },
                 kanbanCards: [],
-                numDocs: 0
+                numDocs: 0,
+                isLoaded: false,
             };
         },
         components: {
@@ -115,10 +116,10 @@
         },
         methods: {
             getWorkflowList() {
+                this.isLoaded = false;
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
-                        console.log(response)
                         if(response.error !== undefined) {
                             this.$notify({
                                 title: 'Error',
@@ -138,6 +139,9 @@
                 WorkflowService.getWorkflowByTeamId(id)
                     .then((response) => {
                         this.kanbanCards = response;
+                    })
+                    .finally(() => {
+                        this.isLoaded = true;
                     });
             },
             filteredworkflows() {
@@ -146,6 +150,7 @@
                 );
             },
             selectOption(workflow) {
+                this.isLoaded = false;
                 this.selectedOption = {
                     name: workflow.name,
                     teamName: workflow.team.name,
