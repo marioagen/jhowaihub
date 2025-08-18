@@ -82,7 +82,7 @@
                     ]"
                     to="/workflow"
                 >
-                    <LucideIcon icon="Workflow" strokeWidth="2" color="#00bba7" />
+                    <LucideIcon icon="Workflow" strokeWidth="2" color="#615FFF" />
                     <span v-show="!isCollapsed" class="ms-2">Workflow</span>
                 </router-link>
             </li>
@@ -96,10 +96,7 @@
                     ]"
                     to="/workflow/editor"
                 >
-                    <img src="./../../assets/img/workflow.svg"
-                         :title="$t('labelDocuments')"
-                         width="20"
-                         class="icon-sidebar" />
+                    <LucideIcon icon="Workflow" strokeWidth="2" color="#00bba7" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("workflow.editTitle") }}</span>
                 </router-link>
             </li>
