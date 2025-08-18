@@ -1,19 +1,44 @@
 <template>
     <div class="container mt-2">
         <div class="d-flex flex-nowrap">
-            <div class="col-3 kanban-col me-3" v-for="step in kanbanData.steps" :key="step.id">
+            <div class="col-3 kanban-col me-3" 
+                v-for="step in stepsList"
+                :key="step.id"
+            >
                 <div class="card flex-grow-1">
                     <div class="card-header" :class="findOrder(step.order)">
-                        {{step.name}}
+                        {{ step.name }}
                     </div>
-                    <div class="card-body" v-for="card in step.cards" :key="card.id">
-                        <CardComponent :dataCard="card"
-                                       :dataStep="step"
-                                       :isFirstStep="firstStep"
-                                       :isLastStep="lastStep"
-                                       label="labelAnalyze"
-                                       @reload="reloadList">
-                        </CardComponent>
+                    <div v-if="step.cards.length === 0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-center mb-3">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center">
+                                    <LucideIcon icon="Workflow" />
+                                </div>
+                            </div>
+
+                            <h6 class="card-title">
+                                {{ $t("workflow.stepTitle") }}
+                            </h6>
+                            <p class="card-text text-muted small xsm-text">
+                                {{ $t("workflow.stepSubtitle") }}
+                            </p>
+                        </div>
+                    </div>
+                    <div
+                        v-else 
+                        class="card-body" 
+                        v-for="card in step.cards"
+                        :key="card.id"
+                    >
+                        <CardComponent 
+                            :dataCard="card"
+                            :dataStep="step"
+                            :isFirstStep="firstStep"
+                            :isLastStep="lastStep"
+                            label="labelAnalyze"
+                            @reload="reloadList"
+                        />
                     </div>
                 </div>
             </div>
@@ -35,10 +60,10 @@
             },
         },
         data: () => ({
-
             firstStep: false,
             lastStep: false,
             customClass: "",
+            stepsList: [],
         }),
         methods: {
             findOrder(stepOrder) {
@@ -63,11 +88,17 @@
             },
             reloadList() {
                 this.$emit('reload');
-            }
+            },
+            setCard() {
+                this.stepsList = this.kanbanData.steps;
+            },
         },
-            
+        created() {
+            this.setCard();
+        }
     };
 </script>
+
 <style scoped>
     .first-steps {
         background-color: #dbe9fc;
@@ -109,4 +140,7 @@
         }
     }
 
+    .xsm-text {
+        font-size: 0.55rem;
+    }
 </style>

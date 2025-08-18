@@ -1,10 +1,10 @@
 <template>
         <div class="card">
             <div class="card-body">
-                <p>{{dataCard.name}}</p>
+                <p>{{ dataCard.name }}</p>
                 <div class="mb-2">
                     <LucideIcon icon="FileText" size="12" class="me-1" />
-                    <small>{{dataCard.description}}</small>
+                    <small>{{ dataCard.description }}</small>
                 </div>
                 <div class="mb-2">
                     <LucideIcon icon="Calendar" size="12" class="me-1" />
