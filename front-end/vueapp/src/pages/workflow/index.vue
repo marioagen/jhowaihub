@@ -4,67 +4,75 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("workflow.labelWorkflowBoard") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
                         <p>
-                            <small class="text-muted">{{$t("workflow.labelWorkflowSubTitle")}}</small>
+                            <small class="text-muted">{{$t("workflow.subtitle")}}</small>
                         </p>
                     </div>
                 </div>
+                
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
                             <div>
                                 <LucideIcon icon="Clock" size="14" class="me-2" />
-                                <span>{{$t("workflow.labelWatchingWorkflow")}}</span>
+                                <span>{{$t("workflow.boardView")}}</span>
                             </div>
                             <div class="dropdown">
-                                <button class="btn btn-light border text-start"
-                                        type="button"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    <div class="fw-bold font-size-sm">{{selectedOption.teamName}}</div>
-                                    <div class="text-muted font-size-xs">{{selectedOption.name}}</div>
+                                <button 
+                                    class="btn btn-light border text-start"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
+                                    <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
                                 </button>
 
                                 <ul class="dropdown-menu">
                                     <li v-for="item in workflowList" :key="item.id">
                                         <a class="dropdown-item" @click="selectOption(item)">
-                                            <div class="fw-bold">{{item.team.name}}</div>
-                                            <div class="text-muted small">{{item.name}}</div>
+                                            <div class="fw-bold">{{ item.team.name }}</div>
+                                            <div class="text-muted small">{{ item.name }}</div>
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                             <div class="badge bg-secondary badge-custom">
                                 <LucideIcon icon="Workflow" size="14" class="me-2" stroke="#0d6efd" />
-                                <span>{{selectedOption.name}}</span>
+                                <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card mb-3 h-100">
-                    <div class="card-body d-flex flex-column p-2 card-container">
-                        <div class="kanban-wrapper">
-                            <WorkflowCards :kanbanData="kanbanCards"
-                                           @reload="reloadKanban">
-                            </WorkflowCards>
+
+                <div v-if="isWorkflowSelected">
+                    <div class="card mb-3 h-100">
+                        <div class="card-body d-flex flex-column p-2 card-container">
+                            <div class="kanban-wrapper">
+                                <WorkflowCards 
+                                    :kanbanData="kanbanCards"
+                                    @reload="reloadKanban"
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
-                            <div>
-                                <span class="me-1">Workflow:</span>
-                                <b>{{selectedOption.name}}</b>
-                            </div>
-                            <div>
-                                <span class="me-1">{{$t("labelTeam")}}:</span>
-                                <b>{{selectedOption.teamName}}</b>
-                            </div>
-                            <div>
-                                <span class="me-1">{{$t("labelTotalDocuments")}}</span>
-                                <b>{{kanbanCards.numDocuments}}</b>
+    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
+                                <div>
+                                    <span class="me-1">Workflow:</span>
+                                    <b>{{ selectedOption.name }}</b>
+                                </div>
+                                <div>
+                                    <span class="me-1">{{$t("labelTeam")}}:</span>
+                                    <b>{{ selectedOption.teamName }}</b>
+                                </div>
+                                <div>
+                                    <span class="me-1">{{$t("labelTotalDocuments")}}</span>
+                                    <b>{{ kanbanCards.numDocuments }}</b>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -89,16 +97,15 @@
                 },
                 workflowList: [],
                 selectedOption: {
-                    name: "",
-                    teamName: "",
+                    name: "Select a workflow",
+                    teamName: "Select a team",
                     teamId: 0,
                 },
                 kanbanCards: [],
                 numDocs: 0
             };
         },
-        components:
-        {
+        components: {
             WorkflowCards
         },
         watch: {
@@ -111,19 +118,26 @@
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
+                        console.log(response)
+                        if(response.error !== undefined) {
+                            this.$notify({
+                                title: 'Error',
+                                message: 'Dados salvos com erro com sucesso!',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
                         this.workflowList = response;
-                    })
-                    .finally(() => {
-                        this.selectOption(this.workflowList[0]);
-                        this.filteredworkflows();
+                        if(this.workflowList.length > 0) {
+                            this.selectOption(this.workflowList[0]);
+                            this.filteredworkflows();
+                        }
                     });
             },
             getWorkflowbyTeam(id) {
-                WorkflowService.getWorkflowbyTeamId(id)
+                WorkflowService.getWorkflowByTeamId(id)
                     .then((response) => {
                         this.kanbanCards = response;
-                    })
-                    .finally(() => {
                     });
             },
             filteredworkflows() {
@@ -141,6 +155,11 @@
             },
             reloadKanban() {
                 this.getWorkflowbyTeam(this.selectedOption.teamId);
+            },
+        },
+        computed: {
+            isWorkflowSelected() {
+                return this.workflowList.length > 0;
             },
         },
         created() {
@@ -174,7 +193,7 @@
 
     .kanban-wrapper {
         overflow-x: auto;
-        white-space: nowrap; /* impede quebra de linha */
+        white-space: nowrap;
     }
 
 </style>
