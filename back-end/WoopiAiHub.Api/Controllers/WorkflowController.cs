@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
 
@@ -49,21 +51,20 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Find a workflow by its team ID.
+        /// Endpoint that receives a team id and returns a valid workflow
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("Team/{id}")]
+        [HttpGet("Teams/{teamId}")]
         [SwaggerOperation("Endpoint that receive an team id and return a valid workflow")]
         [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindByTeamId(int id)
+        public async Task<IActionResult> FindByTeamId(int teamId)
         {
-            var workflow = await _workflowServices.FindByTeamId(id);
+            var workflow = await _workflowServices.FindByTeamId(teamId);
             return Ok(workflow);
         }
-
         /// <summary>
-        /// Details a workflow by its ID.
+        /// Delete a workflow by its ID.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -73,6 +74,20 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> DeleteById(int id)
         {
             var result = await _workflowServices.DeleteById(id);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Endpoint that returns all valids workflows by user email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [HttpGet("Users/{email}")]
+        [SwaggerOperation("Endpoint that returns all valids workflows by user email")]
+        [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
+        public ActionResult<UserPagedResultDto> FindAllByUser(string email)
+        {
+            var result = _workflowServices.FindAllByUser(email);
             return Ok(result);
         }
     }

@@ -119,15 +119,45 @@ namespace WoopiAiHub.Repository
                     Status = new StatusDto
                     {
                         Id = s.Status!.Id,
-                        Name = s.Status.Name
+                        Name = s.Status.Name,
+                        Color = s.Status.Color,
                     },
                     Cards = s.Cards.Select(c => new CardDto
                     {
                         Id = c.Id,
                         Name = c.Name,
+                        Created = c.Created,
+                        Description = c.Document.Description,
+                        Owner = c.Document.EmailCreator,
+                        DocumentId = c.Document.Id
                     }).ToList(),
+                    WorkflowId = s.WorkflowId
                 }).ToList()
             };
+        }
+
+        /// <summary>
+        /// Finds all workflows associated with a specific user by their email address.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public ICollection<WorkflowDto> FindAllByUser(string userEmail)
+        {
+            return _context.Workflows
+                           .AsNoTracking()
+                           .Where(w => w.Team.Users.Any(u => u.Email == userEmail))
+                           .Select(t => new WorkflowDto
+                           {
+                               Id = t.Id,
+                               Name = t.Name,
+                               Created = t.Created,
+                               Team = new TeamDto
+                               {
+                                   Id = t.Team.Id,
+                                   Name = t.Team.Name,
+                               },
+                           })
+                           .ToList();
         }
     }
 }

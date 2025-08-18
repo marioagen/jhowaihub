@@ -47,8 +47,7 @@
 
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li class="mb-1" v-if="permissions.management">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
@@ -67,41 +66,49 @@
             </li>
 
             <li class="mb-1">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/document-list"
-                >
-                    <img
-                        src="./../../assets/img/docs-analyze.svg"
-                        :title="$t('labelDocuments')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/document-list">
+                    <img src="./../../assets/img/docs-analyze.svg"
+                         :title="$t('labelDocuments')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelDocuments") }}</span>
                 </router-link>
             </li>
 
             <li class="mb-1" v-if="permissions.types">
-                <router-link
-                    :class="[
+                <router-link :class="[
+                        'd-flex align-items-center',
+                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
+                        isCollapsed ? 'justify-content-center' : '',
+                        'custom-menu-item',
+                    ]"
+                             to="/workflow">
+                    <img src="./../../assets/img/workflow.svg"
+                         :title="$t('labelDocuments')"
+                         width="20"
+                         class="icon-sidebar" />
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t("workflow.labelWorkflowDocs") }}</span>
+                </router-link>
+            </li>
+
+            <li class="mb-1">
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/types"
-                >
-                    <img
-                        src="./../../assets/img/type-icon.svg"
-                        :title="$t('labelTypes')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/types">
+                    <img src="./../../assets/img/type-icon.svg"
+                         :title="$t('labelTypes')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">
                         {{ $t("labelTypes") }}
                     </span>
@@ -109,41 +116,33 @@
             </li>
 
             <li v-if="permissions.questions">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/questions"
-                >
-                    <img
-                        src="../../assets/img/question-icon.svg"
-                        :title="$t('labelQuestions')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/questions">
+                    <img src="../../assets/img/question-icon.svg"
+                         :title="$t('labelQuestions')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("labelQuestions") }}</span>
                 </router-link>
             </li>
 
             <li v-if="permissions.quizzes">
-                <router-link
-                    :class="[
+                <router-link :class="[
                         'd-flex align-items-center',
                         menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
                         isCollapsed ? 'justify-content-center' : '',
                         'custom-menu-item',
                     ]"
-                    to="/quizzes"
-                >
-                    <img
-                        src="./../../assets/img/questionnaires-icon.svg"
-                        :title="$t('quizzes.title')"
-                        width="20"
-                        class="icon-sidebar"
-                    />
+                             to="/quizzes">
+                    <img src="./../../assets/img/questionnaires-icon.svg"
+                         :title="$t('quizzes.title')"
+                         width="20"
+                         class="icon-sidebar" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t("quizzes.title") }}</span>
                 </router-link>
             </li>

@@ -9,5 +9,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<Step?> FindById(int id);
         ICollection<Step> FindByIds(IEnumerable<int> ids);
         bool DeleteByIds(ICollection<int> ids);
+        Task<Step?> FindByOrderAndWorkflowId(int order,
+                                             int workflowId);
     }
 }

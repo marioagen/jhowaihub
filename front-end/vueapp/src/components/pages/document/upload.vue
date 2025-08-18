@@ -244,8 +244,6 @@
 </template>
 
 <script>
-    import NavBar from "@/components/common/nav-bar";
-    import Breadcrumb from "@/components/common/breadcrumb";
     import ModalAlert from "@/components/common/modal-alert";
     import ToastAlert from "@/components/common/toast-alert";
     import api from "@/services/api";
@@ -308,8 +306,6 @@
         },
 
         components: {
-            NavBar,
-            Breadcrumb,
             ModalAlert,
             ToastAlert,
         },
