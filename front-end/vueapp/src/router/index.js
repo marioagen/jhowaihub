@@ -13,10 +13,10 @@ import ManagementPage from "@/pages/management.vue";
 import QuizzesPage from "@/pages/quizzes/index.vue";
 import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
-import WorkflowPageT from "@/pages/workflow/indexWorkflow.vue";
+import WorkflowPage from "@/pages/workflow/index.vue";
+import WorkflowEditor from "@/pages/workflow/editorIndex.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
-import WorkflowPage from "@/pages/workflow/index.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -174,6 +174,15 @@ const routes = [
         path: "/workflow",
         name: "Workflow",
         component: WorkflowPage,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow/editor",
+        name: "WorkflowEditor",
+        component: WorkflowEditor,
         meta: { 
             layout: "default",
         },
