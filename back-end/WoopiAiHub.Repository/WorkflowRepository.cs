@@ -17,6 +17,28 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Creates a new workflow.
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <returns></returns>
+        public async Task<bool> Create(Workflow workflow)
+        {
+            _context.Workflows.Add(workflow);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
+        /// Updates an existing workflow.
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <returns></returns>
+        public async Task<bool> Update(Workflow workflow)
+        {
+            _context.Workflows.Update(workflow);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
         /// Retrieves a workflow associated with a specific team ID.
         /// </summary>
         /// <param name="teamId"></param>
@@ -42,6 +64,18 @@ namespace WoopiAiHub.Repository
                 .Select(GetWorkflowProjection())
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Deletes a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteById(int id)
+        {
+            return await _context.Workflows
+                .Where(w => w.Id == id)
+                .ExecuteDeleteAsync() > 0;
         }
 
         /// <summary>
@@ -85,15 +119,45 @@ namespace WoopiAiHub.Repository
                     Status = new StatusDto
                     {
                         Id = s.Status!.Id,
-                        Name = s.Status.Name
+                        Name = s.Status.Name,
+                        Color = s.Status.Color,
                     },
                     Cards = s.Cards.Select(c => new CardDto
                     {
                         Id = c.Id,
                         Name = c.Name,
+                        Created = c.Created,
+                        Description = c.Document.Description,
+                        Owner = c.Document.EmailCreator,
+                        DocumentId = c.Document.Id
                     }).ToList(),
+                    WorkflowId = s.WorkflowId
                 }).ToList()
             };
+        }
+
+        /// <summary>
+        /// Finds all workflows associated with a specific user by their email address.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public ICollection<WorkflowDto> FindAllByUser(string userEmail)
+        {
+            return _context.Workflows
+                           .AsNoTracking()
+                           .Where(w => w.Team.Users.Any(u => u.Email == userEmail))
+                           .Select(t => new WorkflowDto
+                           {
+                               Id = t.Id,
+                               Name = t.Name,
+                               Created = t.Created,
+                               Team = new TeamDto
+                               {
+                                   Id = t.Team.Id,
+                                   Name = t.Team.Name,
+                               },
+                           })
+                           .ToList();
         }
     }
 }

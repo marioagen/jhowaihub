@@ -16,30 +16,26 @@ namespace WoopiAiHub.UnitTests.Services
     public class ProfileServicesTests
     {
         private readonly AutoMocker _mocker;
-        private readonly ProfileFixture _profileFixture;
-        private readonly ProfileServices _profileServices;
         private readonly Mock<IProfileRepository> _profileRepoMock;
         private readonly Mock<IPermissionRepository> _permissionRepoMock;
-        private readonly ProfileServices _service;
+        private readonly ProfileServices _profileServices;
 
-        public ProfileServicesTests(ProfileFixture profileFixture)
+        public ProfileServicesTests()
         {
-            _profileFixture = profileFixture;
             _mocker = new AutoMocker();
             _profileServices = _mocker.CreateInstance<ProfileServices>();
-            _profileRepoMock = new Mock<IProfileRepository>();
-            _permissionRepoMock = new Mock<IPermissionRepository>();
-            _service = new ProfileServices(_profileRepoMock.Object, _permissionRepoMock.Object);
+            _profileRepoMock = _mocker.GetMock<IProfileRepository>();
+            _permissionRepoMock = _mocker.GetMock<IPermissionRepository>();
         }
 
         [Fact(DisplayName = "Test Find by id and returns profile when exists")]
         [Trait("FindById", "Success")]
-        public void FindById_ReturnsProfile_WhenExists()
+        public async Task FindById_ReturnsProfile_WhenExists()
         {
             var profileDto = new ProfileDto { Id = 1, Name = "Test" };
-            _profileRepoMock.Setup(r => r.FindById(1)).Returns(profileDto);
+            _profileRepoMock.Setup(r => r.FindById(1)).ReturnsAsync(profileDto);
 
-            var result = _service.FindById(1);
+            var result = await _profileServices.FindById(1);
 
             Assert.Equal(1, result.Id);
             Assert.Equal("Test", result.Name);
@@ -50,7 +46,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindAll", "Success")]
         public void FindAllPaged_ReturnsPagedResult()
         {
-            var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true };
+            var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true, Search = "A" };
             var profiles = new List<ProfileDto>
             {
                 new ProfileDto { Id = 1, Name = "A" },
@@ -59,7 +55,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _profileRepoMock.Setup(r => r.FindAllPaged(pagedData)).Returns(profiles);
 
-            var result = _service.FindAllPaged(pagedData);
+            var result = _profileServices.FindAllPaged(pagedData);
 
             // Assert
             Assert.NotNull(result);
@@ -76,7 +72,7 @@ namespace WoopiAiHub.UnitTests.Services
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.CreateUniqueProfile(It.IsAny<Profile>())).Returns(true);
 
-            var result = await _service.CreateUniqueProfile(dto);
+            var result = await _profileServices.CreateUniqueProfile(dto);
 
             Assert.True(result);
         }
@@ -93,7 +89,7 @@ namespace WoopiAiHub.UnitTests.Services
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.Update(profile)).Returns(true);
 
-            var result = await _service.Update(dto);
+            var result = await _profileServices.Update(dto);
 
             Assert.True(result);
         }
@@ -105,18 +101,18 @@ namespace WoopiAiHub.UnitTests.Services
             var ids = new List<int> { 1, 2 };
             _profileRepoMock.Setup(r => r.DeleteByIds(ids)).Returns(true);
 
-            var result = _service.DeleteByIds(ids);
+            var result = _profileServices.DeleteByIds(ids);
 
             Assert.True(result);
         }
 
         [Fact(DisplayName = "Test FindById and throw exception when not id is not found")]
         [Trait("FindById", "Fail")]
-        public void FindById_Throws_WhenNotFound()
+        public async Task FindById_Throws_WhenNotFound()
         {
-            _profileRepoMock.Setup(r => r.FindById(99)).Returns((ProfileDto)null);
+            _profileRepoMock.Setup(r => r.FindById(99)).ReturnsAsync((ProfileDto?)null);
 
-            Assert.Throws<ArgumentException>(() => _service.FindById(99));
+            await Assert.ThrowsAsync<ArgumentException>(() => _profileServices.FindById(99));
         }
 
         [Fact(DisplayName = "Test FindAllPaged and throw exception when page is invalid")]
@@ -125,7 +121,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             var pagedData = new PagedDataDto { Page = 0, PageSize = 10 };
 
-            Assert.Throws<ArgumentException>(() => _service.FindAllPaged(pagedData));
+            Assert.Throws<ArgumentException>(() => _profileServices.FindAllPaged(pagedData));
         }
 
         [Fact(DisplayName = "Test CreateUniqueProfile and throw exception when name is empty")]
@@ -134,7 +130,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             var dto = new ProfileCreateDto { Name = "", PermissionsIds = new List<int>() };
 
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateUniqueProfile(dto));
+            await Assert.ThrowsAsync<ArgumentException>(() => _profileServices.CreateUniqueProfile(dto));
         }
 
         [Fact(DisplayName = "Test CreateUniqueProfile and throw exception when name is duplicated")]
@@ -146,7 +142,7 @@ namespace WoopiAiHub.UnitTests.Services
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.CreateUniqueProfile(It.IsAny<Profile>())).Returns(false);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CreateUniqueProfile(dto));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _profileServices.CreateUniqueProfile(dto));
         }
 
         [Fact(DisplayName = "Test Update and return false when profile is not found")]
@@ -156,7 +152,7 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = new ProfileUpdateDto { Id = 99, Name = "X", PermissionsIds = new List<int>() };
             _profileRepoMock.Setup(r => r.FindByIdReturnModel(dto.Id)).Returns((Profile)null);
 
-            var result = await _service.Update(dto);
+            var result = await _profileServices.Update(dto);
 
             Assert.False(result);
         }
@@ -173,7 +169,27 @@ namespace WoopiAiHub.UnitTests.Services
             _profileRepoMock.Setup(r => r.FindByIdReturnModel(dto.Id)).Returns(profile);
             _profileRepoMock.Setup(r => r.Update(profile)).Returns(false);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.Update(dto));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _profileServices.Update(dto));
+        }
+
+        [Fact(DisplayName = "Test FindAll and return all profiles")]
+        [Trait("FindAll", "Sucess")]
+        public async Task FindAll_ShouldReturnAllProfiles()
+        {
+            // Arrange
+            var profiles = new List<ProfileDto>
+            {
+                new ProfileDto { Id = 1, Name = "Profile1" },
+                new ProfileDto { Id = 2, Name = "Profile2" }
+            };
+            _profileRepoMock.Setup(repo => repo.FindAll()).ReturnsAsync(profiles);
+
+            // Act
+            var result = await _profileServices.FindAll();
+
+            // Assert
+            Assert.Equal(profiles, result);
+            _profileRepoMock.Verify(repo => repo.FindAll(), Times.Once);
         }
     }
 }

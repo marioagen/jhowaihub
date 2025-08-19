@@ -6,5 +6,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<Card?> FindById(int id);
         bool Update(Card card);
+        Task<bool> ExistsStepsInUse(ICollection<int> ids);
     }
 }

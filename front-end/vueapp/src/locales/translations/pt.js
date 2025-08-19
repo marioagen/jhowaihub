@@ -1,6 +1,7 @@
 ﻿const portuguese = {
     welcomeMsg: "Bem-vindo",
     labelAction: "Ação",
+    labelAdvance: "Avançar",
     labelAlmost: "Você está quase lá!",
     labelAnalyze: "Analisar",
     labelAnalyzed: "Analisado",
@@ -186,6 +187,7 @@
     labelUsersMessage: "Gerencie os usuários do sistema",
     labelUser: "Usuário",
     labelTeams: "Times",
+    labelTeam: "Time",
     labelTypes: "Tipos",
     labelTeamsMessage: "Gerencie os times e suas equipes",
     labelProfilesMessage: "Gerencie os perfis e permissões do sistema",
@@ -199,6 +201,7 @@
     labelYouAreAboutToDeleteTeam: "Você está prestes a deletar um Time do sistema",
     labelYouAreAboutToDeleteProfile: "Você está prestes a deletar um perfil do sistema",
     labelNewTeamMessage: "Crie um novo time no sistema",
+    labelTotalDocuments: "Total de documentos",
     labelTeamMembers: "Membros do time",
     labelSelectedWithO: "Selecionados",
     labelSearchUsers: "Buscar usuários...",
@@ -284,7 +287,7 @@
     unauthorized: {
         title: "Você não tem permissão para acessar esta tela.",
         returnToHome: "Retornar",
-    },
+    },   
     validation: {
         required: "Campo obrigatório",
         max: "Máximo de {limit} caracteres",
@@ -394,7 +397,43 @@
     },
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
-    unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador."
+    unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
+    workflow: {
+        title: "Board de Processamento de Documentos",
+        editTitle: "Editor de Workflow",
+        subtitle: "Visualize o fluxo de documentos através das etapas de processamento",
+        subtitleEditor: "Gerencie e configure workflows de processamento de documentos",
+        manage: "Gerenciar workflow:",
+        boardView: "Visualizando workflow:",
+        steps: "Etapas do Workflow",
+        addBtn: "Adicionar Etapa",
+        addBtnDescription: "Clique para criar uma nova etapa",
+        createNewStep: "Nova etapa",
+        responsableTeam: "Time responsável",
+        stepTitle: "Etapa do workflow",
+        stepSubtitle: "Configure as regras e responsáveis",
+        name: "Nome do workflow",
+        profiles: "Perfil responsável",
+        status: "Status",
+        selectWorkflow: "Selecione um workflow",
+        createBtn: "Novo Workflow",
+        editBtn: "Editar",
+        deleteBtn: "Excluir",
+        createSuccess: "Workflow criado com sucesso",
+        createError: "Erro ao criar workflow",
+        editSuccess: "Workflow editado com sucesso",
+        editError: "Erro ao editar workflow",
+        removeSuccess: "Workflow removido com sucesso",
+        removeError: "Erro ao remover workflow",
+        formCreate: {
+            title: "Novo Workflow",
+            subtitle: "Configure as etapas do processo de análise de documentos",
+        },
+        formEdit: {
+            title: "Edição de Workflow",
+            subtitle: "Modifique as etapas e configurações do workflow",
+        },
+    },
 };
 
 export default portuguese;

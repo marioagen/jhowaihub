@@ -1,15 +1,16 @@
-using Xunit;
 using Moq;
+using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
-using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixture;
-using WoopiAiHub.Domain.DTOs;
-using Moq.AutoMock;
-using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.UnitTests.Helpers;
+using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -442,5 +443,48 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Some teams were not found", ex.Message);
         }
 
+        [Fact(DisplayName = "Tests FindByUser and returns a list os teams")]
+        [Trait("FindByUser", "Success")]
+        public async Task FindByUser_ShouldReturnTeamsForUser()
+        {
+            // Arrange
+            var emailUser = "user@example.com";
+            var teams = new List<TeamDto>
+            {
+                _fixture.CreateValidTeamDto(),
+                _fixture.CreateValidTeamDto(),
+            }.AsQueryable();
+
+            var asyncTeams = new TestAsyncEnumerable<TeamDto>(teams);
+
+            _teamRepositoryMock.Setup(repo => repo.FindAllByUser(It.IsAny<string>())).Returns(asyncTeams);
+
+            // Act
+            var result = await _service.FindByUser(emailUser);
+
+            // Assert
+            Assert.Equal(teams.ToList(), result);
+            _teamRepositoryMock.Verify(repo => repo.FindAllByUser(It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "Tests FindByUser and returns an empty list os teams")]
+        [Trait("FindByUser", "Success")]
+        public async Task FindByUser_ShouldReturnEmptyList_WhenNoTeamsExistForUser()
+        {
+            // Arrange
+            var emailUser = "user@example.com";
+            var teams = new List<TeamDto>().AsQueryable();
+
+            var asyncTeams = new TestAsyncEnumerable<TeamDto>(teams);
+
+            _teamRepositoryMock.Setup(repo => repo.FindAllByUser(It.IsAny<string>())).Returns(asyncTeams);
+
+            // Act
+            var result = await _service.FindByUser(emailUser);
+
+            // Assert
+            Assert.Empty(result);
+            _teamRepositoryMock.Verify(repo => repo.FindAllByUser(It.IsAny<string>()), Times.Once);
+        }
     }
 }

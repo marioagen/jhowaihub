@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Domain.Interfaces.Repository;
+﻿using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 
@@ -10,6 +11,16 @@ namespace WoopiAiHub.Repository
         public CardRepository(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        /// <summary>
+        /// checks if a collection of card IDs exists in the database.
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public async Task<bool> ExistsStepsInUse(ICollection<int> ids)
+        {
+           return await _context.Cards.Where(a => ids.Contains(a.StepId)).AnyAsync();
         }
 
         /// <summary>

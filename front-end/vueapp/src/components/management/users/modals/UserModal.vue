@@ -272,14 +272,11 @@
                 api.get("/Profile/Paged", { params: paramsReq })
                     .then((response) => {
                         this.profiles = response.data.content;
-                        this.loading = false;
                     })
                     .catch((e) => {
                         console.log(e);
-                        this.loading = false;
                     })
                     .finally(() => {
-                        console.log("Finished request.");
                         this.loading = false;
                     });
             },
@@ -323,9 +320,6 @@
                     })
                     .catch((e) => {
                         self.alertToast(self.$t("labelUserError"), "toast-warning");
-                    })
-                    .finally(function () {
-                        console.log("Finished request.");
                     });
             },
             resetForm() {

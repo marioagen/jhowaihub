@@ -13,7 +13,8 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface IProfileServices
     {
-        ProfileDto FindById(int id);
+        Task<ProfileDto> FindById(int id);
+        Task<ICollection<ProfileDto>> FindAll();
         ProfilePagedResultDto FindAllPaged(PagedDataDto pagedDataDto);
         Task<bool> CreateUniqueProfile(ProfileCreateDto profileCreateDto);
         Task<bool> Update(ProfileUpdateDto profileUpdateDto);

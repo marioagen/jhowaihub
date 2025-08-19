@@ -36,13 +36,17 @@ namespace WoopiAiHub.Repository
         /// Find all profiles
         /// </summary>
         /// <returns></returns>
-        public ICollection<Domain.Models.Profile> FindAll()
+        public async Task<ICollection<ProfileDto>> FindAll()
         {
-            return _context.Profiles
-                .Include(t => t.Permissions)
-                .Include(t => t.Users)
+            return await _context.Profiles
                 .AsNoTracking()
-                .ToList();
+                .Select(t => new ProfileDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Created = t.Created
+                })                
+                .ToListAsync();
         }
 
         /// <summary>
@@ -50,9 +54,9 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ProfileDto? FindById(int id)
-        {
-            return _context.Profiles
+        public async Task<ProfileDto?> FindById(int id)
+        { 
+            return await _context.Profiles
                 .Include(t => t.Permissions)
                 .Select(t => new ProfileDto
                 {
@@ -78,7 +82,7 @@ namespace WoopiAiHub.Repository
                         }).ToList()
                 })
                 .AsNoTracking()
-                .FirstOrDefault(t => t.Id == id);
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         /// <summary>
@@ -157,7 +161,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public List<Domain.Models.Profile> FindByIds(IEnumerable<int> ids)
+        public ICollection<Domain.Models.Profile> FindByIds(IEnumerable<int> ids)
         {
             return _context.Profiles.Where(t => ids.Contains(t.Id)).ToList();
         }

@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -10,11 +11,13 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly Mock<IStatusRepository> _statusRepositoryMock;
         private readonly StatusServices _statusService;
+        private readonly AutoMocker _mocker;
 
         public StatusServicesTests()
         {
-            _statusRepositoryMock = new Mock<IStatusRepository>();
-            _statusService = new StatusServices(_statusRepositoryMock.Object);
+            _mocker = new AutoMocker();
+            _statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
+            _statusService = _mocker.CreateInstance<StatusServices>();
         }
 
         [Fact(DisplayName = "Test FindAll and returns status list")]

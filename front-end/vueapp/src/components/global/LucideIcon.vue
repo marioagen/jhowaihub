@@ -1,5 +1,11 @@
 <template>
-    <component :is="iconComponent" v-bind="$attrs" :size="size" :stroke-width="strokeWidth" />
+    <component 
+        :is="iconComponent" 
+        :size="size" 
+        :stroke-width="strokeWidth" 
+        :color="color"
+        v-bind="$attrs" 
+    />
 </template>
 
 <script>
@@ -14,6 +20,11 @@
                 type: [Number, String],
                 required: false,
                 default: 20,
+            },
+            color: {
+                type: String,
+                required: false,
+                default: "currentColor",
             },
             strokeWidth: {
                 type: [Number, String],

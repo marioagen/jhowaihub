@@ -48,8 +48,6 @@
 </template>
 
 <script>
-    import NavBar from "@/components/common/nav-bar";
-    import Breadcrumb from "@/components/common/breadcrumb";
     import PromptView from "@/components/pages/analyzer/prompt-view";
     import DocView from "@/components/pages/analyzer/doc-view";
     import HistoryView from "@/components/pages/analyzer/history-view";
@@ -84,8 +82,6 @@
             };
         },
         components: {
-            NavBar,
-            Breadcrumb,
             PromptView,
             DocView,
             HistoryView,
