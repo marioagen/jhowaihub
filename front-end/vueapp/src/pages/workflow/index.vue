@@ -84,7 +84,7 @@
 
 <script>
     import WorkflowService from "@/services/workflow/WorkflowService.js";
-    import WorkflowCards from "@/components/workflow/WorkFlowCards.vue";
+    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
     export default {
         name: "WorkflowPage",
         data() {
