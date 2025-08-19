@@ -176,7 +176,7 @@
         },
         methods: {
             isRouteActive(item) {
-                return this.$route.path.startsWith(item.to);
+                return this.$route.path === item.to;
             }
         },
         updated() {
