@@ -314,9 +314,19 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var requestCreateDocumentDto = _fixture.FindValidRequestCreateDocumentDto();
-            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
+            var team = _fixture.FindValidTeam();
+            var workflow = _fixture.FindValidWorkflow();
+            var step = _fixture.FindValidStep();
+            workflow.Steps.Add(step);
+            team.Workflow = workflow;
+            List<Team> teams = new List<Team> { team };
+
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             fileRepositoryApi.Setup(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>())).ReturnsAsync(fileUploadSummaryDto);
+
+            var teamServicesMock = _mocker.GetMock<ITeamServices>();
+            teamServicesMock.Setup(a => a.FindByIdsAndUser(It.IsAny<List<int>>(), It.IsAny<string>())).Returns(teams);
 
             // Act / Assert
             await _documentServices.ProcessChunks(requestCreateDocumentDto, "tenant");

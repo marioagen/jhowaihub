@@ -278,6 +278,47 @@ namespace WoopiAiHub.UnitTests.Fixture
 
             return documentQuestionnaireDto;
         }
+
+        public Team FindValidTeam()
+        {
+            Team team = new Faker<Team>("pt_BR")
+            .CustomInstantiator(f => new Team(
+                f.Company.CompanyName(), 
+                f.IndexFaker, 
+                f.Date.Past()
+                )
+            );
+            return team;
+        }
+
+        public Workflow FindValidWorkflow()
+        {
+            Workflow workflow = new Faker<Workflow>("pt_BR")
+            .CustomInstantiator(f => new Workflow(
+                    f.IndexFaker,
+                    f.Date.Past(),
+                    f.IndexFaker,
+                    f.Lorem.Word()                 
+                )
+            );
+            return workflow;
+        }
+
+        public Step FindValidStep()
+        {
+            Step step = new Faker<Step>("pt_BR")
+            .CustomInstantiator(f => new Step(
+                    f.IndexFaker,
+                    f.Date.Past(),
+                    f.IndexFaker,
+                    f.Lorem.Word(),
+                    f.Random.Int(1,1),
+                    f.IndexFaker,
+                    f.IndexFaker
+                )
+            );
+            return step;
+        }
     }
 
     [CollectionDefinition(nameof(DocumentCollection))]
