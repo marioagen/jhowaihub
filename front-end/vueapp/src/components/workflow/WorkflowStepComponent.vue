@@ -59,7 +59,7 @@
                         <select 
                             class="form-select form-select-sm" 
                             v-bind="field"
-                            @input="$emit('update-step', { ...step, status: field.value })"
+                            @change="$emit('update-step', { ...step, status: $event.target.value })"
                         >
                             <option value="">Select status</option>
                             <option v-for="s in statusList" :key="s.id" :value="s.id">{{ s.name }}</option>
@@ -86,7 +86,7 @@
                             <select
                                 class="form-select form-select-sm border-start-0 flex-grow-1"
                                 v-bind="field"
-                                @input="$emit('update-step', { ...step, profile: field.value })"
+                                @change="$emit('update-step', { ...step, profile: $event.target.value })"
                             >
                                 <option value="">{{ $t("workflow.responsableTeam") }}</option>
                                 <option v-for="p in profilesList" :key="p.id" :value="p.id">
@@ -134,21 +134,7 @@
         data() {
             return {
                 editingTitle: false,
-                localStep: {
-                    statusId: this.step.status || '',
-                    profileId: this.step.profile || '',
-                    name: this.step.title || '',
-                    order: this.index
-                },
             };
-        },
-        watch: {
-            localStep: {
-                deep: true,
-                handler(newVal) {
-                    this.$emit('update-step', newVal);
-                }
-            }
         },
         methods: {
             remove() {

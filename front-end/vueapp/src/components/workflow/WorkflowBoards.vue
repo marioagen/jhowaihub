@@ -24,8 +24,8 @@
                 <div class="col-auto ms-auto">
                     <button 
                         class="btn btn-primary btn-sm" 
-                        :disabled="canSave"
-                        type="save"
+                        :disabled="cantSave"
+                        type="button"
                         @click="save"
                     >
                         <LucideIcon icon="Save" size="15" />
@@ -100,7 +100,7 @@
                     <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
                         <WorkflowStepComponent
                             v-for="(step, index) in stepsList"
-                            :key="index"
+                            :key="step.id || index"
                             :step="step"
                             :index="index + 1"
                             :is-last="index === stepsList.length - 1" 
@@ -109,7 +109,7 @@
                             @update-step="updateStep(index, $event)"
                             @remove-step="removeStep(index)"
                             class="workflow-step-card"
-                            :ref="el => workflowStepRefs[index] = el"
+                            ref="stepRefs"
                         />
                         
                         <div class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0" @click="addStep">
@@ -182,8 +182,8 @@
             };
         },
         computed: {
-            canSave() {
-                return false;
+            cantSave() {
+                return this.stepsList.length === 0;
             },
             formTitle() {
                 return this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title";
@@ -244,6 +244,8 @@
             },
             addStep() {
                 this.stepsList.push({
+                    id: crypto.randomUUID?.() || Date.now() + Math.random(),
+                    name: '',
                     status: '',
                     profile: '',
                 });
@@ -251,51 +253,42 @@
             removeStep(index) {
                 this.stepsList.splice(index, 1);
             },
-            // async save() {
-            //     const result = await this.validate();
-            //     console.log(result)
-            //     if (!result.valid) {
-            //         return this.$notify({
-            //             title: 'Workflow',
-            //             message: 'Campos inválidos',
-            //             variant: 'warning',
-            //             icon: 'CircleAlert',
-            //         });
-            //     }
-
-            //     this.isLoading = true;
-            //     if(this.isEdit) {
-            //         return this.editWorkflow();
-            //     }
-            //     return this.createWorkflow();
-            // },
             async save() {
-                    const nameValid = await this.$refs.nameField?.validate?.();
-                    const teamValid = await this.$refs.teamField?.validate?.();
+                if (!this.stepsList || this.stepsList.length === 0) {
+                    return this.$notify({
+                        title: 'Workflow',
+                        message: 'Add at least one step before saving.',
+                        variant: 'warning',
+                        icon: 'CircleAlert',
+                    });
+                }
 
-                    let stepsValid = true;
-                    for (const stepRef of this.workflowStepRefs) {
-                        if (stepRef && stepRef.validateStep) {
-                            const valid = await stepRef.validateStep();
-                            if (!valid) stepsValid = false;
-                        }
-                    }
+                const nameValid = await this.$refs.nameField?.validate?.();
+                const teamValid = await this.$refs.teamField?.validate?.();
 
-                    if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
-                        this.isLoading = false;
-                        return this.$notify({
-                            title: 'Workflow',
-                            message: 'Campos inválidos',
-                            variant: 'warning',
-                            icon: 'CircleAlert',
-                        });
+                let stepsValid = true;
+                const stepRefs = this.$refs.stepRefs || [];
+                for (const stepRef of stepRefs) {
+                    if (stepRef?.validateStep) {
+                        const valid = await stepRef.validateStep();
+                        if (!valid) stepsValid = false;
                     }
-                    
-                    this.isLoading = true;
-                    if(this.isEdit) {
-                        return this.editWorkflow();
-                    }
-                    return this.createWorkflow();
+                }
+
+                if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
+                    return this.$notify({
+                        title: 'Workflow',
+                        message: 'Campos inválidos',
+                        variant: 'warning',
+                        icon: 'CircleAlert',
+                    });
+                }
+                
+                this.isLoading = true;
+                if(this.isEdit) {
+                    return this.editWorkflow();
+                }
+                return this.createWorkflow();
             },
             createWorkflow() {
                 let params = {
