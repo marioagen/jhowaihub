@@ -22,7 +22,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="col-auto ms-auto">
                     <button 
                         class="btn btn-primary btn-sm" 
@@ -33,8 +32,7 @@
                         {{ $t("quizzes.formSave") }}
                     </button>
                 </div>
-            </div>
-            
+            </div>            
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
                     <div class="row">
@@ -45,11 +43,14 @@
                     <div class="row">
                         <div class="col">
                             <label>{{ $t("workflow.name") }}</label>
-                            <input 
-                                class="form-control form-control-sm"
-                                :placeholder="$t('workflow.name')"
-                                v-model="workflowData.name"
-                            />
+                            <Field name="name" rules="required" v-slot="{ field, errorMessage }">
+                                <input 
+                                    class="form-control form-control-sm"
+                                    :placeholder="$t('workflow.name')"
+                                    v-bind="field"
+                                />
+                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
+                            </Field>
                         </div>
                         <div class="col">
                             <label>{{ $t("workflow.responsableTeam") }}</label>
@@ -57,26 +58,32 @@
                                 <span class="input-group-text border-end-0 bg-white">
                                     <LucideIcon icon="Users" size="16" />
                                 </span>
-                                <select
-                                    id="typeDocId"
-                                    class="form-select form-select-sm border-start-0"
-                                    v-model="workflowData.teamId"
-                                >
-                                    <option value="">{{ $t("workflow.responsableTeam") }}</option>
-                                    <option 
-                                        v-for="(item, index) in teamsList"
-                                        :key="index"
-                                        :value="item.id" 
+
+                                <Field name="teamId" rules="required" v-slot="slotProps">
+                                    <select
+                                        id="typeDocId"
+                                        class="form-select form-select-sm border-start-0"
+                                        v-bind="slotProps.field"
                                     >
-                                        {{ item.id }} - {{ item.text }}
-                                    </option>
-                                </select>
+                                        <option value="">{{ $t("workflow.responsableTeam") }}</option>
+                                        <option 
+                                            v-for="(item, index) in teamsList"
+                                            :key="index"
+                                            :value="item.id" 
+                                        >
+                                            {{ item.id }} - {{ item.text }}
+                                        </option>
+                                    </select>
+
+                                    <span class="validation-message text-danger" v-if="slotProps.errors?.length">
+                                        {{ slotProps.errors[0] }}
+                                    </span>
+                                </Field>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="row mt-4">
                 <div class="row d-flex justify-content-between align-items-center">
                     <div class="col-auto">
@@ -102,6 +109,8 @@
                             @update-step="updateStep(index, $event)"
                             @remove-step="removeStep(index)"
                             class="workflow-step-card"
+                            ref="WorkflowStepComponent"
+                            
                         />
                         
                         <div class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0" @click="addStep">
@@ -119,6 +128,7 @@
 </template>
 
 <script>
+    import { Field, useForm } from "vee-validate";
     import WorkflowStepComponent from "@/components/workflow/WorkflowStepComponent.vue";
     import TeamsService from "@/services/teams/TeamsService";
     import StatusService from "@/services/status/StatusService";
@@ -131,6 +141,7 @@
         components: {
             FullscreenLoadingComponent,
             WorkflowStepComponent,
+            Field,
         },
         props: {
             isEdit: {
@@ -143,6 +154,13 @@
                 required: false,
                 default: null,
             },
+        },
+        setup() {
+            const { validate, values } = useForm();
+            return {
+                validate,
+                values
+            }
         },
         data() {
             return {
@@ -246,7 +264,38 @@
             removeStep(index) {
                 this.stepsList.splice(index, 1);
             },
-            save() {
+            async validateSteps() {
+                await this.$nextTick();
+                const refs = this.$refs.stepRefs || [];
+                for (let ref of refs) {
+                    if (!ref.validateStep()) {
+                        return false;
+                    }
+                }
+                return true;
+            },
+            async save() {
+                const result = await this.validate();
+                if (!result.valid) {
+                    return this.$notify({
+                        title: 'Workflow',
+                        message: 'Campo inválidos',
+                        variant: 'warning',
+                        icon: 'CircleAlert',
+                    });
+                }
+
+                for (let ref of this.stepRefs) {
+                    if (ref && !(await ref.validateStep())) {
+                        return this.$notify({
+                            title: 'Workflow',
+                            message: 'Existem etapas inválidas',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    }
+                }
+
                 this.isLoading = true;
                 if(this.isEdit) {
                     return this.editWorkflow();
@@ -255,11 +304,11 @@
             },
             createWorkflow() {
                 let params = {
-                    name: this.workflowData.name,
-                    teamId: this.workflowData.teamId,
+                    name: this.values.name,
+                    teamId: this.values.teamId,
                     steps: this.stepsList
                 };
-
+                
                 WorkflowService.createWorkflow(params)
                     .then((response) => {
                         if(response) {
