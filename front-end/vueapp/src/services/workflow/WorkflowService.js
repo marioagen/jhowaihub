@@ -8,7 +8,7 @@ export default {
             })
             .catch((error) => {
                 return {
-                    error: error?.response?.data?.detail,
+                    error: error,
                 }
             });
     },
@@ -30,7 +30,7 @@ export default {
             })
             .catch((error) => {
                 return {
-                    error: error?.response?.data?.detail,
+                    error: error,
                 }
             });
     },
