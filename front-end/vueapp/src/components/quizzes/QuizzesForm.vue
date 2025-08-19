@@ -18,6 +18,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="save">
                         <LucideIcon icon="Save" size="15" />

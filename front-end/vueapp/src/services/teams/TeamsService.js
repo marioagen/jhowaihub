@@ -1,11 +1,8 @@
 import api from "@/services/api";
-import PaginationDivider from "@/utils/paginationDivider";
-const divider = new PaginationDivider();
 
 export default {
     getTeams(params) {
-        return api
-            .get("/Team/Paged/", { params: params })
+        return api.get("/Team/Paged/", { params: params })
             .then(({ data }) => {
                 return {
                     content: data.content,
@@ -19,6 +16,17 @@ export default {
             })
             .catch(function (e) {
                 console.log(e);
+            });
+    },
+    getTeamList() {
+        return api.get("/Team")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
             });
     },
     deleteTeamById(teamId) {

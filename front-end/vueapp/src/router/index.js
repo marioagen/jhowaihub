@@ -4,16 +4,19 @@ import DocumentList from "@/components/pages/document/list";
 import NormalizeIndex from "@/components/pages/normalize/loading";
 import AnalyzerIndex from "@/components/pages/analyzer";
 
-import TypesPage from "@/pages/types.vue";
-import QuizzesPage from "@/pages/quizzes/index.vue";
-import NewQuizz from "@/pages/quizzes/newQuizz.vue";
-import EditQuizz from "@/pages/quizzes/editQuizz.vue";
-import QuestionsPage from "@/pages/questions.vue";
-import ManagementPage from "@/pages/management.vue";
 import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
+import TypesPage from "@/pages/types.vue";
+import QuestionsPage from "@/pages/questions.vue";
+import ManagementPage from "@/pages/management.vue";
+import QuizzesPage from "@/pages/quizzes/index.vue";
+import NewQuizz from "@/pages/quizzes/newQuizz.vue";
+import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import WorkflowPage from "@/pages/workflow/index.vue";
+import WorkflowEditor from "@/pages/workflow/editorIndex.vue";
+import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
+import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -169,10 +172,39 @@ const routes = [
     },
     {
         path: "/workflow",
-        name: "WorkflowPage",
+        name: "Workflow",
         component: WorkflowPage,
-        meta: { layout: "default" },
-        beforeEnter: authenticate,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow/editor",
+        name: "WorkflowEditor",
+        component: WorkflowEditor,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow/new",
+        name: "NewWorkflow",
+        component: NewWorkflow,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow/edit/:id",
+        name: "EditWorkflow",
+        component: EditWorkflow,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
     },
 ];
 
