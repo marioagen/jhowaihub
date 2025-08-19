@@ -315,9 +315,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var requestCreateDocumentDto = _fixture.FindValidRequestCreateDocumentDto();
             var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
-            var team = _fixture.FindValidTeam();
-            var workflow = _fixture.FindValidWorkflow();
-            var step = _fixture.FindValidStep();
+            var team = DocumentFixture.FindValidTeam();
+            var workflow = DocumentFixture.FindValidWorkflow();
+            var step = DocumentFixture.FindValidStep();
             workflow.Steps.Add(step);
             team.Workflow = workflow;
             List<Team> teams = new List<Team> { team };

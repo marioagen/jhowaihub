@@ -279,7 +279,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return documentQuestionnaireDto;
         }
 
-        public Team FindValidTeam()
+        public static Team FindValidTeam()
         {
             Team team = new Faker<Team>("pt_BR")
             .CustomInstantiator(f => new Team(
@@ -291,7 +291,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return team;
         }
 
-        public Workflow FindValidWorkflow()
+        public static Workflow FindValidWorkflow()
         {
             Workflow workflow = new Faker<Workflow>("pt_BR")
             .CustomInstantiator(f => new Workflow(
@@ -304,7 +304,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return workflow;
         }
 
-        public Step FindValidStep()
+        public static Step FindValidStep()
         {
             Step step = new Faker<Step>("pt_BR")
             .CustomInstantiator(f => new Step(

@@ -902,32 +902,23 @@ namespace WoopiAiHub.Application.Services
         /// <param name="requestCreateDocumentDto"></param>
         /// <param name="teams"></param>
         /// <returns></returns>
-        private static ICollection<Card> CreateCards(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Team> teams)
+        private static List<Card> CreateCards(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Team> teams)
         {
-            var cards = new List<Card>();
 
-            foreach (var team in teams)
-            {
-                if (team.Workflow != null)
-                {
-                    var step = team.Workflow.Steps.OrderBy(o => o.Order).FirstOrDefault();
-                    if (step != null)
-                    {
-                        var card = new Card
-                            (
-                                0,
-                                DateTime.UtcNow,
-                                step.Id,
-                                0,
-                                requestCreateDocumentDto.Filename,
-                                step.StatusId
-                            );
-                        cards.Add(card);
-                    }
-                }
-            }
-
-            return cards;
+            return teams
+                .Where(t => t.Workflow != null)
+                .Select(t => t.Workflow!.Steps.OrderBy(o => o.Order).FirstOrDefault())
+                .Where(step => step != null)
+                .Select(step => new Card
+                    (
+                        0,
+                        DateTime.UtcNow,
+                        step!.Id,
+                        0,
+                        requestCreateDocumentDto.Filename,
+                        step.StatusId
+                    ))
+                .ToList();
         }
 
         /// <summary>
