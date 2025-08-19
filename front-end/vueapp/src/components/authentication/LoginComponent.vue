@@ -92,7 +92,6 @@
 
 <script>
 import { Field, useForm } from "vee-validate";
-import { useRouter } from "vue-router";
 import { getJWTPermissions } from "@/utils/permissions";
 import AuthService from "@/services/authenticate/AuthService";
 

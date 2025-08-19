@@ -130,7 +130,7 @@
 
 <script>
     import api from "@/services/api";
-    import ModalUserTeam from "@/components/user-manager/users/modals/TeamModal.vue";
+    import ModalUserTeam from "@/components/management/users/modals/TeamModal.vue";
     import ToastAlert from "@/components/common/toast-alert";
     import ErrorCode from "@/constants/Errorcode";
     import { Form, Field, ErrorMessage } from "vee-validate";
@@ -272,14 +272,11 @@
                 api.get("/Profile/Paged", { params: paramsReq })
                     .then((response) => {
                         this.profiles = response.data.content;
-                        this.loading = false;
                     })
                     .catch((e) => {
                         console.log(e);
-                        this.loading = false;
                     })
                     .finally(() => {
-                        console.log("Finished request.");
                         this.loading = false;
                     });
             },
@@ -323,9 +320,6 @@
                     })
                     .catch((e) => {
                         self.alertToast(self.$t("labelUserError"), "toast-warning");
-                    })
-                    .finally(function () {
-                        console.log("Finished request.");
                     });
             },
             resetForm() {

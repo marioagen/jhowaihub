@@ -39,11 +39,11 @@ namespace WoopiAiHub.UnitTests.Services
         {
             _fixture = new UserFixture();
             _mocker = new AutoMocker();
-            _userRepositoryMock = new Mock<IUserRepository>();
-            _marketPlaceApiMock = new Mock<IMarketPlaceApi>();
-            _teamRepositoryMock = new Mock<ITeamRepository>();
-            _profileRepositoryMock = new Mock<IProfileRepository>();
-            _passwordHasherMock = new Mock<IPasswordHasher>();
+            _userRepositoryMock = _mocker.GetMock<IUserRepository>();
+            _marketPlaceApiMock = _mocker.GetMock<IMarketPlaceApi>();
+            _teamRepositoryMock = _mocker.GetMock<ITeamRepository>();
+            _profileRepositoryMock = _mocker.GetMock<IProfileRepository>();
+            _passwordHasherMock = _mocker.GetMock<IPasswordHasher>();
 
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(config => config[It.Is<string>(s => s == "keyAccess")]).Returns("mockKeyAccess");
@@ -51,14 +51,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _mocker.Use(configMock);
 
-            _userServices = new UserServices(
-                _userRepositoryMock.Object,
-                _marketPlaceApiMock.Object,
-                 configMock.Object,
-                _teamRepositoryMock.Object,
-                _profileRepositoryMock.Object,
-                _passwordHasherMock.Object
-            );
+            _userServices = _mocker.CreateInstance<UserServices>();
         }
 
         [Fact(DisplayName = "CreateUser")]

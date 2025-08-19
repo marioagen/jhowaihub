@@ -32,6 +32,11 @@ namespace WoopiAiHub.Repository
             return false;
         }
 
+        /// <summary>
+        /// Retrieve all teams associated with a specific user email, including their active users.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
         public IQueryable<TeamDto> FindAllByUser(string userEmail)
         {
             return _context.Teams

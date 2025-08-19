@@ -100,7 +100,7 @@
     import UserService from "@/services/users/UserService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalUser from "@/components/user-manager/users/modals/UserModal.vue";
+    import ModalUser from "@/components/management/users/modals/UserModal.vue";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent.vue";
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
 

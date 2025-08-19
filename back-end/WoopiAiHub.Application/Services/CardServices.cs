@@ -10,15 +10,12 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly ICardRepository _cardRepository;
         private readonly IStepRepository _stepRepository;
-        private readonly IStatusRepository _statusRepository;
 
         public CardServices(ICardRepository cardRepository,
-                            IStepRepository stepRepository,
-                            IStatusRepository statusRepository)
+                            IStepRepository stepRepository)
         {
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
-            _statusRepository = statusRepository;
         }
 
         /// <summary>
@@ -34,18 +31,14 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             }
-            var step = await _stepRepository.FindById(updateCardStepStatusDto.StepId);
+            var step = await _stepRepository.FindByOrderAndWorkflowId(updateCardStepStatusDto.NextStepOrder,
+                                                                      updateCardStepStatusDto.WorkflowId);
             if (step == null)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
             }
-            var status = await _statusRepository.FindById(updateCardStepStatusDto.StatusId);
-            if (status == null)
-            {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
-            }
 
-            card.UpdateStepAndSatus(step.Id, status.Id);
+            card.UpdateStepAndSatus(step.Id, step.StatusId);
 
             return _cardRepository.Update(card);
         }
