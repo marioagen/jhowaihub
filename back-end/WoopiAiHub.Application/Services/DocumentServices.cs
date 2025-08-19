@@ -1,7 +1,6 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -444,6 +443,10 @@ namespace WoopiAiHub.Application.Services
 
             var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
                                                        requestCreateDocumentDto.EmailCreator);
+
+            ICollection<Card> cards = CreateCards(requestCreateDocumentDto, teams);
+
+            documentForDataBase.Cards = cards;
             documentForDataBase.Teams = teams;
             _documentRepository.Create(documentForDataBase);
         }
@@ -891,6 +894,40 @@ namespace WoopiAiHub.Application.Services
                 PageCount = pageCount,
                 RowCount = totalListCount
             };
+        }
+
+        /// <summary>
+        /// Create card by a collections of teams
+        /// </summary>
+        /// <param name="requestCreateDocumentDto"></param>
+        /// <param name="teams"></param>
+        /// <returns></returns>
+        private static ICollection<Card> CreateCards(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Team> teams)
+        {
+            var cards = new List<Card>();
+
+            foreach (var team in teams)
+            {
+                if (team.Workflow != null)
+                {
+                    var step = team.Workflow.Steps.OrderBy(o => o.Order).FirstOrDefault();
+                    if (step != null)
+                    {
+                        var card = new Card
+                            (
+                                0,
+                                DateTime.UtcNow,
+                                step.Id,
+                                0,
+                                requestCreateDocumentDto.Filename,
+                                step.StatusId
+                            );
+                        cards.Add(card);
+                    }
+                }
+            }
+
+            return cards;
         }
 
         /// <summary>
