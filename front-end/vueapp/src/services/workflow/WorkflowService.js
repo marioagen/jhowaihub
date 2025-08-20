@@ -8,7 +8,7 @@ export default {
             })
             .catch((error) => {
                 return {
-                    error: error.response.data.detail,
+                    error: error,
                 }
             });
     },
@@ -24,13 +24,13 @@ export default {
             });
     },
     getWorkflowById(workflowId) {
-        return api.get(`/Workflow/Team/${workflowId}`)
+        return api.get(`/Workflow/${workflowId}`)
             .then(({ data }) => {
                 return data;
             })
             .catch((error) => {
                 return {
-                    error: error.response.data.detail,
+                    error: error,
                 }
             });
     },
@@ -41,14 +41,13 @@ export default {
             })
             .catch((error) => {
                 return {
-                    error: error,
+                    error: error.message,
                 }
             });
     },
     editWorkflow(params) {
         return api.put("/Workflow", params)
-            .then((data) => {
-                console.log(data)
+            .then(({ data }) => {
                 return data;
             })
             .catch((error) => {

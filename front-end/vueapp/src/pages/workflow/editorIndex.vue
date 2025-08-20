@@ -4,9 +4,9 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("workflow.editTitle") }}</h5>
                         <p>
-                            <small class="text-muted">{{ $t("workflow.subtitle") }}</small>
+                            <small class="text-muted">{{ $t("workflow.subtitleEditor") }}</small>
                         </p>
                     </div>
                 </div>
@@ -78,6 +78,7 @@
                         <div class="kanban-wrapper">
                             <WorkflowCards 
                                 :kanbanData="board"
+                                :isEditor="true"
                                 @reload="reloadKanban"
                             />
                         </div>
