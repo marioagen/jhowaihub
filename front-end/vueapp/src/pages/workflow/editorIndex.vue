@@ -78,6 +78,7 @@
                         <div class="kanban-wrapper">
                             <WorkflowCards 
                                 :kanbanData="board"
+                                :isEditor="true"
                                 @reload="reloadKanban"
                             />
                         </div>

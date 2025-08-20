@@ -9,7 +9,7 @@
                     <div class="card-header" :class="findOrder(step.order)">
                         {{ step.name }}
                     </div>
-                    <div v-if="step.cards.length === 0">
+                    <div v-if="step.cards.length === 0 && isEditor">
                         <div class="card-body">
                             <div class="d-flex justify-content-center mb-3">
                                 <div class="rounded-circle bg-light d-flex align-items-center justify-content-center">
@@ -58,6 +58,11 @@
                 required: false,
                 default: () => []
             },
+            isEditor: {
+                type: Boolean,
+                required: false,
+                default: false,
+            }
         },
         data: () => ({
             firstStep: false,
