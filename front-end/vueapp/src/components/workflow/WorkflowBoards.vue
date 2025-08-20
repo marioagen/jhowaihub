@@ -298,6 +298,10 @@
                     });
                 }
                 
+                this.stepsList.forEach((step, index) => {
+                    step.order = index + 1;
+                });
+
                 this.isLoading = true;
                 if(this.isEdit) {
                     return this.editWorkflow();

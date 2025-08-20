@@ -41,7 +41,7 @@ export default {
             })
             .catch((error) => {
                 return {
-                    error: error.message,
+                    error: error,
                 }
             });
     },
@@ -60,7 +60,6 @@ export default {
     deleteWorkflowById(workflowId) {
         return api.delete(`/Workflow/${workflowId}`)
             .then(({ data } ) => {
-                console.log(data);
                 return data;
             })
             .catch((error) => {
