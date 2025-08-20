@@ -444,7 +444,7 @@ namespace WoopiAiHub.Application.Services
             var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
                                                        requestCreateDocumentDto.EmailCreator);
 
-            ICollection<Card> cards = CreateCards(requestCreateDocumentDto, teams);
+            ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, teams);
 
             documentForDataBase.Cards = cards;
             documentForDataBase.Teams = teams;
@@ -902,7 +902,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="requestCreateDocumentDto"></param>
         /// <param name="teams"></param>
         /// <returns></returns>
-        private static List<Card> CreateCards(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Team> teams)
+        private static List<Card> CreateDocumentCard(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Team> teams)
         {
 
             return teams
