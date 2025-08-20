@@ -47,8 +47,7 @@ export default {
     },
     editWorkflow(params) {
         return api.put("/Workflow", params)
-            .then((data) => {
-                console.log(data)
+            .then(({ data }) => {
                 return data;
             })
             .catch((error) => {

@@ -344,7 +344,7 @@
 
                 WorkflowService.editWorkflow(params)
                     .then((response) => {
-                        if(response === undefined) {
+                        if(response.error === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
                                 title: 'Workflow',
