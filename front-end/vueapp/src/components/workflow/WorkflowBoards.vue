@@ -292,7 +292,7 @@
                 if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
                     return this.$notify({
                         title: 'Workflow',
-                        message: 'Campos inválidos',
+                        message: 'validation.hasInvalid',
                         variant: 'warning',
                         icon: 'CircleAlert',
                     });

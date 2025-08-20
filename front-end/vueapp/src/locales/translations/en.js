@@ -307,6 +307,7 @@
         password_special: "The password must contain at least one special character.",
         password_confirmed: "The password confirmation does not match.",
         email: "Invalid email",
+        hasInvalid: "Invalid fields"
     },
     pagination: {
         next: "Next",

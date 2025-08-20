@@ -311,6 +311,7 @@
         password_special: "La contraseña debe contener al menos un carácter especial.",
         password_confirmed: "La confirmación de la contraseña no coincide.",
         email: "Correo electrónico inválido.",
+        hasInvalid: "Campos inválidos"
     },
     pagination: {
         next: "Siguiente",
