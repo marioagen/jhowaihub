@@ -43,7 +43,13 @@
                     <div class="row">
                         <div class="col">
                             <label>{{ $t("workflow.name") }}</label>
-                            <Field name="name" rules="required" v-slot="{ field, errorMessage }" ref="nameField">
+                            <Field 
+                                name="name" 
+                                rules="required" 
+                                v-slot="{ field, errorMessage }"
+                                v-model="workflowData.name"
+                                ref="nameField"
+                            >
                                 <input 
                                     class="form-control form-control-sm"
                                     :placeholder="$t('workflow.name')"
@@ -59,7 +65,13 @@
                                     <LucideIcon icon="Users" size="16" />
                                 </span>
 
-                                <Field name="teamId" rules="required" v-slot="{ field, errors }" ref="teamField">
+                                <Field 
+                                    name="teamId" 
+                                    rules="required" 
+                                    v-slot="{ field, errors }" 
+                                    v-model="workflowData.teamId"
+                                    ref="teamField"
+                                >
                                     <select
                                         id="typeDocId"
                                         class="form-select form-select-sm border-start-0"
@@ -291,8 +303,8 @@
             },
             createWorkflow() {
                 let params = {
-                    name: this.values.name,
-                    teamId: this.values.teamId,
+                    name: this.workflowData.name,
+                    teamId: this.workflowData.teamId,
                     steps: this.stepsList
                 };
                 
