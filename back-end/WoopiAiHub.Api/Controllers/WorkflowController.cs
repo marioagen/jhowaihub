@@ -55,6 +55,20 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [HttpGet("{Id}")]
+        [SwaggerOperation("Endpoint that receive an workflow id and return a valid workflow")]
+        [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindById(int id)
+        {
+            var workflow = await _workflowServices.FindById(id);
+            return Ok(workflow);
+        }
+
+        /// <summary>
+        /// Endpoint that receives a team id and returns a valid workflow
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("Teams/{teamId}")]
         [SwaggerOperation("Endpoint that receive an team id and return a valid workflow")]
         [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
@@ -63,6 +77,7 @@ namespace WoopiAiHub.Api.Controllers
             var workflow = await _workflowServices.FindByTeamId(teamId);
             return Ok(workflow);
         }
+
         /// <summary>
         /// Delete a workflow by its ID.
         /// </summary>
