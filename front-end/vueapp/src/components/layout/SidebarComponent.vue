@@ -1,6 +1,5 @@
 <template>
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
-        <!-- Logo -->
         <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
             <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'DocumentList' }">
                 <img
@@ -32,7 +31,7 @@
                     height="40"
                 />
             </router-link>
-        </div>
+        </div>        
         <div class="horizontal-separator-fixed"></div>
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
             <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
@@ -40,108 +39,28 @@
                 <LucideIcon v-else icon="ChevronLeft" />
             </button>
         </div>
-
         <div class="sidebar-horizontal-separator"></div>
-
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li class="mb-1" v-if="permissions.management">
-                <router-link :class="[
-                        'd-flex align-items-center',
-                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item',
-                    ]"
-                    to="/management"
-                >
-                    <LucideIcon icon="Users" strokeWidth="2.2" color="#ff6900" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelManageUsers") }}</span>
-                </router-link>
-            </li>
-
-            <li class="mb-1">
-                <router-link :class="[
-                        'd-flex align-items-center',
-                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item',
-                    ]"
-                    to="/document-list"
-                >
-                    <LucideIcon icon="FileText" strokeWidth="2" color="#2f80ed" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelDocuments") }}</span>
-                </router-link>
-            </li>
-
-            <li class="mb-1" v-if="permissions.workflow">
+            <li
+                v-for="item in menuItems"
+                :key="item.labelKey"
+                class="mb-1"
+                :class="{ 'is-active': isRouteActive(item) }"
+            >
                 <router-link
                     :class="[
-                        'd-flex align-items-center',
-                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item',
+                        'd-flex align-items-center custom-menu-item link-dark rounded',
+                        isRouteActive(item) ? 'active' : '',
+                        isCollapsed ? 'justify-content-center' : ''
                     ]"
-                    to="/workflow"
+                    :to="item.to"
                 >
-                    <LucideIcon icon="Workflow" strokeWidth="2" color="#615FFF" />
-                    <span v-show="!isCollapsed" class="ms-2">Workflow</span>
-                </router-link>
-            </li>
-
-            <li class="mb-1" v-if="permissions.types">
-                <router-link :class="[
-                        'd-flex align-items-center',
-                        menuActive == 'DocumentList' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item',
-                    ]"
-                    to="/workflow/editor"
-                >
-                    <LucideIcon icon="Workflow" strokeWidth="2" color="#00bba7" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("workflow.editTitle") }}</span>
-                </router-link>
-            </li>
-
-            <li class="mb-1">
-                <router-link :class="[
-                        'd-flex align-items-center',
-                        menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item',
-                    ]"
-                    to="/types"
-                >
-                    <LucideIcon icon="BookmarkCheck" strokeWidth="2" color="	#f2c94c" />
-                    <span v-show="!isCollapsed" class="ms-2">
-                        {{ $t("labelTypes") }}
-                    </span>
-                </router-link>
-            </li>
-
-            <li v-if="permissions.questions">
-                <router-link :class="[
-                        'd-flex align-items-center',
-                        menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item',
-                    ]"
-                    to="/questions"
-                >
-                    <LucideIcon icon="MessageSquare" strokeWidth="2" color="#3fd67b" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("labelQuestions") }}</span>
-                </router-link>
-            </li>
-
-            <li v-if="permissions.quizzes">
-                <router-link :class="[
-                        'd-flex align-items-center',
-                        menuActive === 'Type' ? 'link-dark rounded active' : 'link-dark rounded',
-                        isCollapsed ? 'justify-content-center' : '',
-                        'custom-menu-item',
-                    ]"
-                    to="/quizzes"
-                >
-                    <LucideIcon icon="ClipboardList" strokeWidth="2" color="#a259ff" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t("quizzes.title") }}</span>
+                    <LucideIcon
+                        strokeWidth="2"
+                        :icon="item.icon.name"
+                        :color="item.icon.color"
+                    />
+                    <span v-show="!isCollapsed" class="ms-2">{{ $t(item.labelKey) }}</span>
                 </router-link>
             </li>
         </ul>
@@ -179,8 +98,81 @@
                     types: hasPermission("Types", "View"),
                     quizzes: hasPermission("Quizzes", "View"),
                     workflow: hasPermission("Workflow", "View"),
-                }
+                },
+                menuItems: [
+                    {
+                        permission: 'Management',
+                        activeKey: 'DocumentList',
+                        to: '/management',
+                        icon: { name: 'Users', color: '#ff6900' },
+                        labelKey: 'labelManageUsers'
+                    },
+                    {
+                        activeKey: 'DocumentList',
+                        to: '/document-list',
+                        icon: { 
+                            name: 'FileText', 
+                            color: '#2f80ed' 
+                        },
+                        labelKey: 'labelDocuments'
+                    },
+                    {
+                        permission: 'Workflow',
+                        activeKey: 'Workflow',
+                        to: '/workflow',
+                        icon: { 
+                            name: 'Workflow', 
+                            color: '#615FFF' 
+                        },
+                        labelKey: 'Workflow'
+                    },
+                    {
+                        permission: 'Workflow',
+                        activeKey: 'WorkflowEditor',
+                        to: '/workflow/editor',
+                        icon: { 
+                            name: 'Workflow', 
+                            color: '#00bba7' 
+                        },
+                        labelKey: 'workflow.editTitle'
+                    },
+                    {
+                        permission: 'Types',
+                        activeKey: 'Type',
+                        to: '/types',
+                        icon: { 
+                            name: 'BookmarkCheck', 
+                            color: '#f2c94c' 
+                        },
+                        labelKey: 'labelTypes'
+                    },
+                    {
+                        permission: 'Questions',
+                        activeKey: 'Questions',
+                        to: '/questions',
+                        icon: { 
+                            name: 'MessageSquare', 
+                            color: '#3fd67b' 
+                        },
+                        labelKey: 'labelQuestions'
+                    },
+                    {
+                        permission: 'Quizzes',
+                        activeKey: 'Quizzes',
+                        to: '/quizzes',
+                        icon: { 
+                            name: 'ClipboardList', 
+                            color: '#a259ff' 
+                        },
+                        labelKey: 'quizzes.title'
+                    }
+                ]
             };
+        },
+        methods: {
+            isRouteActive(item) {
+                return this.$route.path === item.to;
+            }
         },
         updated() {
             let self = this;
@@ -370,5 +362,14 @@
 
     .title {
         color: black;
+    }
+
+    .custom-menu-item.active {
+        background-color: var(--bs-primary-bg-subtle);
+        font-weight: 600;
+    }
+
+    .custom-menu-item:not(.active) {
+        opacity: 0.8;
     }
 </style>
