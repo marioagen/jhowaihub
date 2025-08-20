@@ -86,7 +86,6 @@
                 </div>
             </div>
         </div>
-
         <FullscreenLoadingComponent 
             v-if="isDeleting"
         />
@@ -126,6 +125,7 @@
         },
         methods: {
             getWorkflowList() {
+                this.workflowList = [];
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
@@ -141,6 +141,8 @@
                         if(this.workflowList.length > 0) {
                             this.selectOption(this.workflowList[0]);
                             this.filteredworkflows();
+                        } else {
+                            this.isLoaded = false;
                         }
                     });
             },
@@ -192,6 +194,7 @@
                 WorkflowService.deleteWorkflowById(this.selectedOption.id)
                     .then((status) => {
                         if(status) {
+                            this.getWorkflowList();
                             return this.$notify({
                                 title: 'Workflow',
                                 message: 'workflow.removeSuccess',
