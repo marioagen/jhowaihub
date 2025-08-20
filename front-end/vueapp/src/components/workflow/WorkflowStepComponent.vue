@@ -26,7 +26,7 @@
                                     v-bind="field"
                                     @blur="stopEditingTitle"
                                     @keyup.enter="stopEditingTitle"
-                                    @input="$emit('update-step', { ...step, name: field.value })"
+                                    @input="onTitleInput"
                                     autofocus
                                     placeholder="Title"
                                 />
@@ -134,6 +134,7 @@
         data() {
             return {
                 editingTitle: false,
+                titleDebounceTimer: null,
             };
         },
         methods: {
@@ -151,11 +152,17 @@
                 const statusValid = await this.$refs.statusField.validate?.();
                 const profileValid = await this.$refs.profileField.validate?.();
                 return titleValid?.valid && statusValid?.valid && profileValid?.valid;
-            }
+            },
+            onTitleInput(e) {
+                const val = e.target.value;
+                clearTimeout(this.titleDebounceTimer);
+                this.titleDebounceTimer = setTimeout(() => {
+                    this.$emit('update-step', { ...this.step, name: val });
+                }, 300);
+            },
         },
-        created() {
-            console.log(this.profilesList)
-            console.log(this.statusList)
+        beforeUnmount() {
+            clearTimeout(this.titleDebounceTimer);
         }
     };
 </script>

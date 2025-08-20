@@ -354,8 +354,6 @@
             },
         },
         created() {
-            console.log(this.stepsList)
-            console.log(this.stepsList.length)
             this.getTeams();
             this.getStatus();
             this.getProfiles();
