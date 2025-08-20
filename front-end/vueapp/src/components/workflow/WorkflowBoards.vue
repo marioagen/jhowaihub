@@ -244,7 +244,11 @@
                         this.workflowData.id = response.id;
                         this.workflowData.name = response.name;
                         this.workflowData.teamId = response.teamId;
-                        this.stepsList = response.steps;
+                        this.stepsList = response.steps.map(step => ({
+                            ...step,
+                            profileId: step.profile?.id || "",
+                            statusId: step.status?.id || ""
+                        }));
                     })
                     .finally(() => {
                         this.isLoading = false;

@@ -13,9 +13,10 @@
                         >
                             {{ index }}
                         </div>
-                        <Field 
-                            :name="`steps[${index - 1}].name`" 
-                            rules="required" 
+                        <Field
+                            :name="`steps[${index - 1}].name`"
+                            rules="required"
+                            v-model="titleComputed"
                             v-slot="{ field, errors }"
                             ref="titleField"
                         >
@@ -24,11 +25,10 @@
                                     type="text"
                                     class="input-title"
                                     v-bind="field"
-                                    @blur="stopEditingTitle"
-                                    @keyup.enter="stopEditingTitle"
-                                    @input="onTitleInput"
-                                    autofocus
+                                    @blur="(e) => { field.onBlur(e); flushTitle(e) }"
+                                    @keyup.enter="flushTitle($event)"
                                     placeholder="Title"
+                                    autofocus
                                 />
                                 <span v-if="errors[0]" class="validation-message text-danger mt-1">
                                     {{ errors[0] }}
@@ -49,20 +49,17 @@
         <div class="card-body">
            <div class="mb-3">
                 <label class="form-label text-muted small">{{ $t("workflow.status") }}</label>
-                <Field 
-                    :name="`steps[${index - 1}].status`" 
-                    rules="required" 
+                <Field
+                    :name="`steps[${index - 1}].statusId`"
+                    rules="required"
+                    v-model="statusIdComputed"
                     v-slot="{ field, errors }"
-                    ref="statusField"             
+                    ref="statusField"
                 >
                     <div class="d-flex flex-column">
-                        <select 
-                            class="form-select form-select-sm" 
-                            v-bind="field"
-                            @change="$emit('update-step', { ...step, status: $event.target.value })"
-                        >
+                        <select class="form-select form-select-sm" v-bind="field">
                             <option value="">Select status</option>
-                            <option v-for="s in statusList" :key="s.id" :value="s.id">{{ s.name }}</option>
+                            <option v-for="s in statusList" :key="s.id" :value="String(s.id)">{{ s.name }}</option>
                         </select>
                         <span v-if="errors[0]" class="text-danger small mt-1">{{ errors[0] }}</span>
                     </div>
@@ -71,25 +68,21 @@
 
             <div class="mb-2">
                 <label class="form-label text-muted small">{{ $t("workflow.profiles") }}</label>
-                <Field 
-                    :name="`steps[${index - 1}].profile`" 
-                    rules="required" 
+                <Field
+                    :name="`steps[${index - 1}].profileId`"
+                    rules="required"
+                    v-model="profileIdComputed"
                     v-slot="{ field, errors }"
-                    ref="profileField"                    
+                    ref="profileField"
                 >
                     <div class="d-flex flex-column">
                         <div class="input-group">
                             <span class="input-group-text border-end-0 bg-white">
                                 <LucideIcon icon="Users" size="16" />
                             </span>
-
-                            <select
-                                class="form-select form-select-sm border-start-0 flex-grow-1"
-                                v-bind="field"
-                                @change="$emit('update-step', { ...step, profile: $event.target.value })"
-                            >
+                            <select class="form-select form-select-sm border-start-0 flex-grow-1" v-bind="field">
                                 <option value="">{{ $t("workflow.responsableTeam") }}</option>
-                                <option v-for="p in profilesList" :key="p.id" :value="p.id">
+                                <option v-for="p in profilesList" :key="p.id" :value="String(p.id)">
                                     {{ p.text }}
                                 </option>
                             </select>
@@ -137,6 +130,35 @@
                 titleDebounceTimer: null,
             };
         },
+        computed: {
+            titleComputed: {
+                get() {
+                    return this.step?.name ?? "";
+                },
+                set(val) {
+                    clearTimeout(this.titleDebounceTimer);
+                    this.titleDebounceTimer = setTimeout(() => {
+                        this.$emit("update-step", { ...this.step, name: val });
+                    }, 300);
+                },
+            },
+            statusIdComputed: {
+                get() {
+                    return String(this.step?.statusId ?? "");
+                },
+                set(val) {
+                    this.$emit("update-step", { ...this.step, statusId: String(val) });
+                },
+            },
+            profileIdComputed: {
+                get() {
+                    return String(this.step?.profileId ?? "");
+                },
+                set(val) {
+                    this.$emit("update-step", { ...this.step, profileId: String(val) });
+                },
+            },
+        },
         methods: {
             remove() {
                 this.$emit('remove-step');
@@ -147,24 +169,29 @@
             stopEditingTitle() {
                 this.editingTitle = false;
             },
-            async validateStep() {
-                const titleValid = await this.$refs.titleField.validate?.();
-                const statusValid = await this.$refs.statusField.validate?.();
-                const profileValid = await this.$refs.profileField.validate?.();
-                return titleValid?.valid && statusValid?.valid && profileValid?.valid;
-            },
-            onTitleInput(e) {
-                const val = e.target.value;
+            flushTitle(e) {
                 clearTimeout(this.titleDebounceTimer);
-                this.titleDebounceTimer = setTimeout(() => {
-                    this.$emit('update-step', { ...this.step, name: val });
-                }, 300);
+                const val = e?.target?.value ?? "";
+                this.$emit("update-step", { ...this.step, name: val });
+                this.stopEditingTitle();
+            },
+            async validateStep() {
+                this.$refs.titleField?.setTouched?.(true);
+                this.$refs.statusField?.setTouched?.(true);
+                this.$refs.profileField?.setTouched?.(true);
+
+                const [titleValid, statusValid, profileValid] = await Promise.all([
+                    this.$refs.titleField?.validate?.(),
+                    this.$refs.statusField?.validate?.(),
+                    this.$refs.profileField?.validate?.(),
+                ]);
+                return titleValid?.valid && statusValid?.valid && profileValid?.valid;
             },
         },
         beforeUnmount() {
             clearTimeout(this.titleDebounceTimer);
         }
-    };
+    }
 </script>
 
 <style scoped>
