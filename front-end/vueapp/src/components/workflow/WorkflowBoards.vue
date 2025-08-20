@@ -299,7 +299,7 @@
                 
                 WorkflowService.createWorkflow(params)
                     .then((response) => {
-                        if(response) {
+                        if(response.error === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
                                 title: 'Workflow',
@@ -329,7 +329,7 @@
 
                 WorkflowService.editWorkflow(params)
                     .then((response) => {
-                        if(response) {
+                        if(response === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
                                 title: 'Workflow',

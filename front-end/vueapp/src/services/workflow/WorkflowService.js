@@ -41,7 +41,7 @@ export default {
             })
             .catch((error) => {
                 return {
-                    error: error,
+                    error: error.message,
                 }
             });
     },
