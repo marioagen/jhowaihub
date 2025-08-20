@@ -231,7 +231,6 @@
                 this.isLoading = true;
                 WorkflowService.getWorkflowById(this.id)
                     .then((response) => {
-                        console.log(response)
                         if(response.error !== undefined) {
                             this.$router.push({ name: "Workflow" });
                             return this.$notify({
