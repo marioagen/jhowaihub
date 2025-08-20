@@ -24,7 +24,7 @@ export default {
             });
     },
     getWorkflowById(workflowId) {
-        return api.get(`/Workflow/Team/${workflowId}`)
+        return api.get(`/Workflow/${workflowId}`)
             .then(({ data }) => {
                 return data;
             })

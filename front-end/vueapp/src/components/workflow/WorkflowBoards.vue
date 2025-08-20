@@ -217,7 +217,6 @@
             setEdit() {
                 if(!this.isEdit) return;
                 this.isLoading = true;
-                console.log(this.id)
                 WorkflowService.getWorkflowById(this.id)
                     .then((response) => {
                         console.log(response)
