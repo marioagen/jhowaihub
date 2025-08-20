@@ -1,6 +1,5 @@
 <template>
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
-        <!-- Logo -->
         <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
             <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'DocumentList' }">
                 <img
@@ -32,19 +31,15 @@
                     height="40"
                 />
             </router-link>
-        </div>
-        
+        </div>        
         <div class="horizontal-separator-fixed"></div>
-
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
             <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
                 <LucideIcon v-if="isCollapsed" icon="ChevronRight" />
                 <LucideIcon v-else icon="ChevronLeft" />
             </button>
         </div>
-
         <div class="sidebar-horizontal-separator"></div>
-
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li
                 v-for="item in menuItems"
