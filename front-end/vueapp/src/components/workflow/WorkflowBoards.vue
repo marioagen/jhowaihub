@@ -271,7 +271,7 @@
                 if (!this.stepsList || this.stepsList.length === 0) {
                     return this.$notify({
                         title: 'Workflow',
-                        message: 'Add at least one step before saving.',
+                        message: 'validation.oneStep',
                         variant: 'warning',
                         icon: 'CircleAlert',
                     });
