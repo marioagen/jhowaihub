@@ -9,7 +9,7 @@
                     <div class="card-header" :class="findOrder(step.order)">
                         {{ step.name }}
                     </div>
-                    <div v-if="step.cards.length === 0 && isEditor">
+                    <div v-if="isEditor">
                         <div class="card-body">
                             <div class="d-flex justify-content-center mb-3">
                                 <div class="rounded-circle bg-light d-flex align-items-center justify-content-center">
@@ -25,26 +25,28 @@
                             </p>
                         </div>
                     </div>
-                    <div
-                        v-else 
-                        class="card-body" 
-                        v-for="card in step.cards"
-                        :key="card.id"
-                    >
-                        <CardComponent 
-                            :dataCard="card"
-                            :dataStep="step"
-                            :isFirstStep="firstStep"
-                            :isLastStep="lastStep"
-                            label="labelAnalyze"
-                            @reload="reloadList"
-                        />
+                    <div v-else>
+                        <div
+                            v-for="card in step.cards"
+                            :key="card.id"
+                            class="card-body" 
+                        >
+                            <CardComponent 
+                                :dataCard="card"
+                                :dataStep="step"
+                                :isFirstStep="step.order === minOrder"
+                                :isLastStep="step.order === maxOrder"
+                                @reload="reloadList"
+                                label="labelAnalyze"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
        </div>
     </div>
 </template>
+
 <script>
     import CardComponent from "@/components/workflow/CardComponent.vue";
     export default {
@@ -70,26 +72,22 @@
             customClass: "",
             stepsList: [],
         }),
+        computed: {
+            minOrder() {
+                return Math.min(...this.kanbanData.steps.map(s => s.order));
+            },
+            maxOrder() {
+                return Math.max(...this.kanbanData.steps.map(s => s.order));
+            }
+        },
         methods: {
             findOrder(stepOrder) {
                 const minOrder = Math.min(...this.kanbanData.steps.map(s => s.order));
                 const maxOrder = Math.max(...this.kanbanData.steps.map(s => s.order));
 
-                if (stepOrder === minOrder) {
-                    this.firstStep = true;
-                    this.lastStep = false;
-                    return `first-steps`;
-                }
-                else if (stepOrder !== maxOrder) {
-                    this.firstStep = false;
-                    this.lastStep = false;
-                    return `first-steps`;
-               }
-                else if (stepOrder === maxOrder) {
-                    this.firstStep = false;
-                    this.lastStep = true;
-                    return `last-step`;
-               }
+                if (stepOrder === minOrder) return "first-steps";
+                if (stepOrder === maxOrder) return "last-step";
+                return "middle-step";
             },
             reloadList() {
                 this.$emit('reload');
