@@ -2,7 +2,6 @@
 using System.Text;
 using RabbitMQ.Client;
 using WoopiAiHub.Domain.Interfaces.Messaging;
-using WoopiAiHub.Infrastructure.Messaging.Managers;
 
 namespace WoopiAiHub.Infrastructure.Messaging.Publishers
 {
@@ -23,7 +22,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Publishers
         /// <returns></returns>
         public async Task PublishAsync(string destination, T message)
         {
-            using var channel = await (_manager as RabbitMqManager)!.CreateChannel();
+            using var channel = await _manager.CreateChannel<IChannel>();
 
             var messageJson = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(messageJson);

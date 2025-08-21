@@ -44,16 +44,16 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
         }
 
         /// <summary>
-        /// Internal method to create a channel
+        /// Method to create a channel
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        internal async Task<IChannel> CreateChannel()
+        public async Task<T> CreateChannel<T>()
         {
             if (_connection == null || !_connection.IsOpen)
                 throw new InvalidOperationException("RabbitMQ connection is not open.");
 
-            return await _connection.CreateChannelAsync();
+            return (T)await _connection.CreateChannelAsync();
         }
     }
 }

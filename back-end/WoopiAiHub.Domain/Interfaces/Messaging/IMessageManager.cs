@@ -3,5 +3,6 @@
     public interface IMessageManager
     {
         Task CreateQueuesAsync();
+        Task<T> CreateChannel<T>();
     }
 }
