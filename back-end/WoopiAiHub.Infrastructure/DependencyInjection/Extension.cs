@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using WoopiAiHub.Domain.Interfaces.Messenging;
-using WoopiAiHub.Infrastructure.Messanging.Configuration;
-using WoopiAiHub.Infrastructure.Messanging.Consumers;
-using WoopiAiHub.Infrastructure.Messanging.Managers;
-using WoopiAiHub.Infrastructure.Messanging.Publishers;
+using WoopiAiHub.Domain.Interfaces.Messaging;
+using WoopiAiHub.Infrastructure.Messaging.Configuration;
+using WoopiAiHub.Infrastructure.Messaging.Consumers;
+using WoopiAiHub.Infrastructure.Messaging.Managers;
+using WoopiAiHub.Infrastructure.Messaging.Publishers;
 using WoopiAiHub.Infrastructure.Multitenancy;
 
 namespace WoopiAiHub.Infrastructure.DependencyInjection

@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Infrastructure.Messanging.Configuration
+﻿namespace WoopiAiHub.Infrastructure.Messaging.Configuration
 {
     public class MessageQueues
     {

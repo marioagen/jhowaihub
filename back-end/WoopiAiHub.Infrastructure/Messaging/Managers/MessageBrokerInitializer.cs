@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
-using WoopiAiHub.Domain.Interfaces.Messenging;
+using WoopiAiHub.Domain.Interfaces.Messaging;
 
-namespace WoopiAiHub.Infrastructure.Messanging.Managers
+namespace WoopiAiHub.Infrastructure.Messaging.Managers
 {
     /// <summary>
     /// MessageBrokerInitializer is responsible for initializing the message broker. Since the dependency is injected, it starts together with the application.

@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System.Text;
 using RabbitMQ.Client;
-using WoopiAiHub.Domain.Interfaces.Messenging;
-using WoopiAiHub.Infrastructure.Messanging.Managers;
+using WoopiAiHub.Domain.Interfaces.Messaging;
+using WoopiAiHub.Infrastructure.Messaging.Managers;
 
-namespace WoopiAiHub.Infrastructure.Messanging.Publishers
+namespace WoopiAiHub.Infrastructure.Messaging.Publishers
 {
     public class RabbitMqPublisher<T> : IMessagePublisher<T>
     {

@@ -1,10 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
-using WoopiAiHub.Domain.Interfaces.Messenging;
-using WoopiAiHub.Infrastructure.Messanging.Configuration;
+using WoopiAiHub.Domain.Interfaces.Messaging;
+using WoopiAiHub.Infrastructure.Messaging.Configuration;
 
-namespace WoopiAiHub.Infrastructure.Messanging.Managers
+namespace WoopiAiHub.Infrastructure.Messaging.Managers
 {
     public class RabbitMqManager : IMessageManager
     {

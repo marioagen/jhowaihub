@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.Interfaces.Messenging
+﻿namespace WoopiAiHub.Domain.Interfaces.Messaging
 {
     public interface IMessageManager
     {

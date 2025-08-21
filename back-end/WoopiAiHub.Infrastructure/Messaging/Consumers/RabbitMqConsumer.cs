@@ -2,10 +2,10 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
-using WoopiAiHub.Domain.Interfaces.Messenging;
-using WoopiAiHub.Infrastructure.Messanging.Managers;
+using WoopiAiHub.Domain.Interfaces.Messaging;
+using WoopiAiHub.Infrastructure.Messaging.Managers;
 
-namespace WoopiAiHub.Infrastructure.Messanging.Consumers
+namespace WoopiAiHub.Infrastructure.Messaging.Consumers
 {
     public class RabbitMqConsumer<T> : IMessageConsumer<T>
     {
