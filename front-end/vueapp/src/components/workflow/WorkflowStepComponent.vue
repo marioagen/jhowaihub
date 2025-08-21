@@ -5,34 +5,38 @@
             :style="{ backgroundColor: isLast ? '#E8FFE8' : '#e8f1ff' }"
         >
             <div class="d-flex align-items-center">
-                <div
-                    class="d-flex justify-content-center align-items-center rounded-circle text-white me-2"
-                    style="width: 28px; height: 28px; background-color: #2F80ED;"
-                >
-                    {{ index }}
+                <div class="d-flex flex-column align-items-start">
+                    <div class="d-flex align-items-center mb-1">
+                        <div
+                            class="d-flex justify-content-center align-items-center rounded-circle text-white me-2"
+                            style="width: 28px; height: 28px; background-color: #2F80ED;"
+                        >
+                            {{ index }}
+                        </div>
+                        <Field
+                            :name="`steps[${index - 1}].name`"
+                            rules="required"
+                            v-model="titleComputed"
+                            v-slot="{ field, errors }"
+                            ref="titleField"
+                        >
+                            <div class="d-flex flex-column">
+                                <input
+                                    type="text"
+                                    class="input-title"
+                                    v-bind="field"
+                                    @blur="(e) => { field.onBlur(e); flushTitle(e) }"
+                                    @keyup.enter="flushTitle($event)"
+                                    placeholder="Title"
+                                    autofocus
+                                />
+                                <span v-if="errors[0]" class="validation-message text-danger mt-1">
+                                    {{ errors[0] }}
+                                </span>
+                            </div>
+                        </Field>
+                    </div>
                 </div>
-                <span
-                    v-if="!editingTitle"
-                    class="fw-semibold text-dark small"
-                    @click="startEditingTitle"
-                    style="cursor: pointer;"
-                >
-                    {{ localStep.name || 'Etapa sem título' }}
-                </span>
-                <Field v-else :name="`steps[${index - 1}].name`" rules="required" v-slot="slotProps">
-                    <input
-                        type="text"
-                        class="form-control form-control-sm"
-                        v-bind="slotProps.field"
-                        @blur="stopEditingTitle"
-                        @keyup.enter="stopEditingTitle"
-                        style="max-width: 200px;"
-                        autofocus
-                    />
-                    <span class="validation-message text-danger" v-if="slotProps.errors?.length">
-                        {{ slotProps.errors[0] }}
-                    </span>
-                </Field>
             </div>
             <button 
                 type="button" 
@@ -42,62 +46,57 @@
                 <LucideIcon icon="X"/>
             </button>
         </div>
-
         <div class="card-body">
-            <div class="mb-3">
+           <div class="mb-3">
                 <label class="form-label text-muted small">{{ $t("workflow.status") }}</label>
-                <Field :name="`steps[${index - 1}].statusId`" rules="required" v-slot="slotProps">
-                    <select
-                        class="form-select form-select-sm border-start-0"
-                        v-bind="slotProps.field"
-                    >
-                        <option value="">{{ $t("workflow.status") }}</option>
-                        <option
-                            v-for="(item, i) in statusList"
-                            :key="i"
-                            :value="item.id"
-                        >
-                            {{ item.id }} - {{ item.name }}
-                        </option>
-                    </select>
-                    <span class="validation-message text-danger" v-if="slotProps.errors?.length">
-                        {{ slotProps.errors[0] }}
-                    </span>
+                <Field
+                    :name="`steps[${index - 1}].statusId`"
+                    rules="required"
+                    v-model="statusIdComputed"
+                    v-slot="{ field, errors }"
+                    ref="statusField"
+                >
+                    <div class="d-flex flex-column">
+                        <select class="form-select form-select-sm" v-bind="field">
+                            <option value="">Select status</option>
+                            <option v-for="s in statusList" :key="s.id" :value="String(s.id)">{{ s.name }}</option>
+                        </select>
+                        <span v-if="errors[0]" class="text-danger small mt-1">{{ errors[0] }}</span>
+                    </div>
                 </Field>
             </div>
 
             <div class="mb-2">
                 <label class="form-label text-muted small">{{ $t("workflow.profiles") }}</label>
-                <div class="input-group">
-                    <span class="input-group-text border-end-0 bg-white">
-                        <LucideIcon icon="Users" size="16" />
-                    </span>
-                    <Field :name="`steps[${index - 1}].profileId`" rules="required" v-slot="slotProps">
-                        <select
-                            class="form-select form-select-sm border-start-0"
-                            v-bind="slotProps.field"
-                        >
-                            <option value="">{{ $t("workflow.responsableTeam") }}</option>
-                            <option
-                                v-for="(item, i) in profilesList"
-                                :key="i"
-                                :value="item.id"
-                            >
-                                {{ item.id }} - {{ item.text }}
-                            </option>
-                        </select>
-                        <span class="validation-message text-danger" v-if="slotProps.errors?.length">
-                            {{ slotProps.errors[0] }}
-                        </span>
-                    </Field>
-                </div>
+                <Field
+                    :name="`steps[${index - 1}].profileId`"
+                    rules="required"
+                    v-model="profileIdComputed"
+                    v-slot="{ field, errors }"
+                    ref="profileField"
+                >
+                    <div class="d-flex flex-column">
+                        <div class="input-group">
+                            <span class="input-group-text border-end-0 bg-white">
+                                <LucideIcon icon="Users" size="16" />
+                            </span>
+                            <select class="form-select form-select-sm border-start-0 flex-grow-1" v-bind="field">
+                                <option value="">{{ $t("workflow.responsableTeam") }}</option>
+                                <option v-for="p in profilesList" :key="p.id" :value="String(p.id)">
+                                    {{ p.text }}
+                                </option>
+                            </select>
+                        </div>
+                        <span v-if="errors[0]" class="text-danger small mt-1">{{ errors[0] }}</span>
+                    </div>
+                </Field>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-    import { Field, useForm } from "vee-validate";
+    import { Field } from "vee-validate";
     export default {
         name: "WorkflowStepComponent",
         components: { 
@@ -128,21 +127,37 @@
         data() {
             return {
                 editingTitle: false,
-                localStep: {
-                    statusId: this.step.status || '',
-                    profileId: this.step.profile || '',
-                    name: this.step.title || '',
-                    order: this.index
-                },
+                titleDebounceTimer: null,
             };
         },
-        watch: {
-            localStep: {
-                deep: true,
-                handler(newVal) {
-                    this.$emit('update-step', newVal);
-                }
-            }
+        computed: {
+            titleComputed: {
+                get() {
+                    return this.step?.name ?? "";
+                },
+                set(val) {
+                    clearTimeout(this.titleDebounceTimer);
+                    this.titleDebounceTimer = setTimeout(() => {
+                        this.$emit("update-step", { ...this.step, name: val });
+                    }, 300);
+                },
+            },
+            statusIdComputed: {
+                get() {
+                    return String(this.step?.statusId ?? "");
+                },
+                set(val) {
+                    this.$emit("update-step", { ...this.step, statusId: String(val) });
+                },
+            },
+            profileIdComputed: {
+                get() {
+                    return String(this.step?.profileId ?? "");
+                },
+                set(val) {
+                    this.$emit("update-step", { ...this.step, profileId: String(val) });
+                },
+            },
         },
         methods: {
             remove() {
@@ -154,24 +169,29 @@
             stopEditingTitle() {
                 this.editingTitle = false;
             },
-            validateStep() {
-                const { name, statusId, profileId } = this.localStep;
-                const valid = !!name && !!statusId && !!profileId;
+            flushTitle(e) {
+                clearTimeout(this.titleDebounceTimer);
+                const val = e?.target?.value ?? "";
+                this.$emit("update-step", { ...this.step, name: val });
+                this.stopEditingTitle();
+            },
+            async validateStep() {
+                this.$refs.titleField?.setTouched?.(true);
+                this.$refs.statusField?.setTouched?.(true);
+                this.$refs.profileField?.setTouched?.(true);
 
-                if (!valid) {
-                    this.$notify({
-                        title: 'Workflow',
-                        message: 'Campos da etapa estão inválidos',
-                        variant: 'danger',
-                        icon: 'CircleX'
-                    });
-                }
-
-                this.$emit('update-step', this.localStep);
-                return valid;
-            }
+                const [titleValid, statusValid, profileValid] = await Promise.all([
+                    this.$refs.titleField?.validate?.(),
+                    this.$refs.statusField?.validate?.(),
+                    this.$refs.profileField?.validate?.(),
+                ]);
+                return titleValid?.valid && statusValid?.valid && profileValid?.valid;
+            },
         },
-    };
+        beforeUnmount() {
+            clearTimeout(this.titleDebounceTimer);
+        }
+    }
 </script>
 
 <style scoped>
@@ -182,5 +202,20 @@
 .btn-close {
   background: none;
   border: none;
+}
+.input-title {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  width: auto;
+  min-width: 30px;
+}
+
+.input-title:focus {
+  outline: none;
+  box-shadow: none;
 }
 </style>
