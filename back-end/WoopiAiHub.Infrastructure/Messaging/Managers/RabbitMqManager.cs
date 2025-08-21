@@ -10,7 +10,6 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
         private readonly RabbitMqConfig _config;
         private readonly MessageQueues _queues;
         private IConnection? _connection;
-        private IChannel? _channel;
 
         public RabbitMqManager(IOptions<RabbitMqConfig> config,
                                IOptions<MessageQueues> queues)
@@ -34,11 +33,11 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
             };
 
             _connection = await factory.CreateConnectionAsync();
-            _channel = await _connection.CreateChannelAsync();
+            using var channel = await _connection.CreateChannelAsync();
 
             foreach (var queue in _queues.Queues())
             {
-                await _channel.QueueDeclareAsync(queue: queue, durable: true, exclusive: false, autoDelete: false, arguments: null);
+                await channel.QueueDeclareAsync(queue: queue, durable: true, exclusive: false, autoDelete: false, arguments: null);
             }
 
             await Task.CompletedTask;

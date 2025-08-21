@@ -43,7 +43,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
         /// <param name="process"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        private async Task HandleMessageAsync(IChannel channel, BasicDeliverEventArgs args, Func<T, Task> process)
+        private static async Task HandleMessageAsync(IChannel channel, BasicDeliverEventArgs args, Func<T, Task> process)
         {
             var body = args.Body.ToArray();
             var json = Encoding.UTF8.GetString(body);
