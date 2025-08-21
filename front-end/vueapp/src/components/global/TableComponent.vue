@@ -43,7 +43,6 @@
                                 </button>
                             </div>
                         </div>
-
                         <span v-else class="ms-4">
                             {{ $t(column.label) }}
                         </span>
