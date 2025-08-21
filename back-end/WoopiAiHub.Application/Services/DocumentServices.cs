@@ -194,7 +194,7 @@ namespace WoopiAiHub.Application.Services
                 var documentNormalizedForDb = this.CreateDocumentNormalizedForDb(documentAnalysisResponseDto.Id, normalizedContext, 0);
                 _documentNormalizedServices.Create(documentNormalizedForDb);
             }
-
+            _documentRepository.ChangeStatus(documentAnalysisResponseDto.Id, DocumentStatus.Analyzed);
             return true;
         }
 
@@ -369,8 +369,6 @@ namespace WoopiAiHub.Application.Services
                                              string emailCreator)
         {
             var result = _documentRepository.ChangeStatus(id, status);
-
-            await _documentNotifier.NotifyStatusChangedAsync(emailCreator, id, status);
 
             return result;
         }
