@@ -12,7 +12,7 @@
                     <th
                         v-for="(column, index) in columns"
                         :key="index"
-                        :class="{ 'text-end': column.key === 'actions' }"
+                        :class="{ 'text-center': column.key === 'actions' }"
                     >
                         <div
                             v-if="column.key !== 'actions'"
@@ -44,7 +44,7 @@
                             </div>
                         </div>
 
-                        <span v-else>
+                        <span v-else class="ms-4">
                             {{ $t(column.label) }}
                         </span>
                     </th>
