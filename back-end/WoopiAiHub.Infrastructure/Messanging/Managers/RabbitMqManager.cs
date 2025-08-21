@@ -1,0 +1,61 @@
+﻿using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
+using WoopiAiHub.Domain.Interfaces.Messenging;
+using WoopiAiHub.Infrastructure.Messanging.Configuration;
+
+namespace WoopiAiHub.Infrastructure.Messanging.Managers
+{
+    public class RabbitMqManager : IMessageManager
+    {
+        private readonly RabbitMqConfig _config;
+        private readonly MessageQueues _queues;
+        private IConnection? _connection;
+        private IChannel? _channel;
+
+        public RabbitMqManager(IOptions<RabbitMqConfig> config,
+                               IOptions<MessageQueues> queues)
+        {
+            _config = config.Value;
+            _queues = queues.Value;
+        }
+
+        /// <summary>
+        /// Initialize RabbitMQ connection and create queues 
+        /// </summary>
+        /// <returns></returns>
+        public async Task CreateQueuesAsync()
+        {
+            var factory = new ConnectionFactory
+            {
+                HostName = _config.HostName,
+                UserName = _config.UserName,
+                Password = _config.Password,
+                VirtualHost = _config.VirtualHost
+            };
+
+            _connection = await factory.CreateConnectionAsync();
+            _channel = await _connection.CreateChannelAsync();
+
+            foreach (var queue in _queues.Queues())
+            {
+                await _channel.QueueDeclareAsync(queue: queue, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            }
+
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Internal method to create a channel
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        internal async Task<IChannel> CreateChannel()
+        {
+            if (_connection == null || !_connection.IsOpen)
+                throw new InvalidOperationException("RabbitMQ connection is not open.");
+
+            return await _connection.CreateChannelAsync();
+        }
+    }
+}

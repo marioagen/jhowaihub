@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using Microsoft.AspNetCore.HttpOverrides;
 using WoopiAiHub.Api.Exceptions;
 using System.Text.Json.Serialization;
 using WoopiAiHub.Infrastructure.DependencyInjection;
@@ -75,7 +74,7 @@ else
     throw new InvalidOperationException("CORS origin não está configurado. Verifique a chave 'CORS' no appsettings ou variável de ambiente.");
 
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(config);
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
