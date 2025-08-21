@@ -5,9 +5,9 @@
         public string OcrQueue { get; set; } = string.Empty;
         public string EmbeddingQueue { get; set; } = string.Empty;
         public string AnswerQueue { get; set; } = string.Empty;
-        public string OcrQueueExtratorResponse { get; set; } = string.Empty;
-        public string EmbeddingQueueResponse { get; set; } = string.Empty;
-        public string AnswerQueueResponse { get; set; } = string.Empty;
+        public string OcrQueueAiHubResponse { get; set; } = string.Empty;
+        public string EmbeddingQueueAiHubResponse { get; set; } = string.Empty;
+        public string AnswerQueueAiHubResponse { get; set; } = string.Empty;
 
         public IEnumerable<string> Queues()
         {
@@ -16,9 +16,9 @@
               OcrQueue,
               EmbeddingQueue,
               AnswerQueue,
-              OcrQueueExtratorResponse,
-              EmbeddingQueueResponse,
-              AnswerQueueResponse,
+              OcrQueueAiHubResponse,
+              EmbeddingQueueAiHubResponse,
+              AnswerQueueAiHubResponse,
             ];
         }
     }
