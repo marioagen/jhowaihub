@@ -137,7 +137,7 @@ namespace WoopiAiHub.UnitTests.Services
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
 
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(true);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(),DocumentStatus.Analyzed)).Returns(true);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
             documentNormalizedServices.Setup(a => a.Create(It.IsAny<DocumentNormalized>())).Returns(true);
             ocrGoogle.Setup(a => a.ProcessResult(It.IsAny<byte[]>())).ReturnsAsync(listOcr);
@@ -152,7 +152,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed), Times.Once);
             functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             documentNormalizedServices.Verify(a => a.Create(It.IsAny<DocumentNormalized>()), Times.Once);
             embeddingsApi.Verify(a => a.AddDocuments(It.IsAny<string>(), It.IsAny<AddDocumentsRequestRefitDto>(), It.IsAny<string>()), Times.Once);
@@ -180,7 +180,7 @@ namespace WoopiAiHub.UnitTests.Services
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
 
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(true);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed)).Returns(true);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
             documentNormalizedServices.Setup(a => a.Update(It.IsAny<DocumentNormalized>())).Returns(true);
             documentNormalizedServices.Setup(a => a.FindById(It.IsAny<int>(), It.IsAny<string>())).Returns(documentNormalized);
@@ -197,7 +197,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed), Times.Once);
             functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             documentNormalizedServices.Verify(a => a.Update(It.IsAny<DocumentNormalized>()), Times.Once);
             documentNormalizedServices.Verify(a => a.FindById(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
@@ -235,7 +235,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.Use(configMock.Object);
 
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(true);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed)).Returns(true);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
             documentNormalizedServices.Setup(a => a.Update(It.IsAny<DocumentNormalized>())).Returns(true);
             documentNormalizedServices.Setup(a => a.FindById(It.IsAny<int>(), It.IsAny<string>())).Returns(documentNormalized);
@@ -253,7 +253,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed), Times.Once);
             functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             documentNormalizedServices.Verify(a => a.Update(It.IsAny<DocumentNormalized>()), Times.Once);
             documentNormalizedServices.Verify(a => a.FindById(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
@@ -418,36 +418,36 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "ChangeStatus")]
         [Trait("ChangeStatus", "Success")]
-        public void ChangeStatus_Success()
+        public async Task ChangeStatus_Success()
         {
             // Arrange
             var document = _fixture.FindValidDocument();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(true);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed)).Returns(true);
 
             // Act
-            var result = _documentServices.ChangeStatus(document.Id, document.EmailCreator);
+            var result = await _documentServices.ChangeStatus(document.Id, DocumentStatus.Analyzed, document.EmailCreator);
 
             // Assert
             Assert.True(result);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed), Times.Once);
         }
 
         [Fact(DisplayName = "ChangeStatus")]
         [Trait("ChangeStatus", "Fail")]
-        public void ChangeStatus_Fail()
+        public async Task ChangeStatus_Fail()
         {
             // Arrange
             var document = _fixture.FindValidDocument();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(false);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed)).Returns(false);
 
             // Act
-            var result = _documentServices.ChangeStatus(document.Id, document.EmailCreator);
+            var result = await _documentServices.ChangeStatus(document.Id,DocumentStatus.Analyzed, document.EmailCreator);
 
             // Assert
             Assert.False(result);
-            documentRepository.Verify(r => r.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(r => r.ChangeStatus(It.IsAny<int>(), DocumentStatus.Analyzed), Times.Once);
         }
 
         [Fact(DisplayName = "Delete")]
