@@ -24,7 +24,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
         /// <returns></returns>
         public async Task ConsumerAsync(string destination, Func<T, Task> process)
         {
-            var channel = await _manager.CreateChannel<IChannel>();
+            using var channel = await _manager.CreateChannel<IChannel>();
             var consumer = new AsyncEventingBasicConsumer(channel);
 
             consumer.ReceivedAsync += (sender, args) =>

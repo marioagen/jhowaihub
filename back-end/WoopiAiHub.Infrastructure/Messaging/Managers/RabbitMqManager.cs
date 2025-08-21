@@ -39,8 +39,6 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
             {
                 await channel.QueueDeclareAsync(queue: queue, durable: true, exclusive: false, autoDelete: false, arguments: null);
             }
-
-            await Task.CompletedTask;
         }
 
         /// <summary>
