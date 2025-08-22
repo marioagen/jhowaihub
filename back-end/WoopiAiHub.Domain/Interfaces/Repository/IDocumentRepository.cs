@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         bool Delete(List<int> ids);
         Document FindById(int id);
         bool ChangeStatus(int id,
-                          DocumentStatus status);
+                          DocumentStatus documentStatus);
         IQueryable<Document> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto, string email);
         int FindDocumentCount();
         IQueryable<string> FindHashById(List<int> ids);

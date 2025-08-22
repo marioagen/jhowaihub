@@ -25,7 +25,7 @@ namespace WoopiAiHub.Application.Messaging
                            IMessageConsumer<ProcessOcrResultDto> consumer,
                            IMessagePublisher<IEnumerable<DocumentEmbeddingsAddDto>> publisher,
                            ILogger<OcrConsumer> logger,
-                           IOptions<MessageQueues> queues) : base(scopeFactory, configuration)
+                           IOptions<MessageQueues> queues) : base(configuration)
         {
             _scopeFactory = scopeFactory;
             _queues = queues.Value;
@@ -59,7 +59,7 @@ namespace WoopiAiHub.Application.Messaging
                 catch (Exception ex)
                 {
                     var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
-                    await documentServices.ChangeStatusByReferenceFile(message.ReferenceFile,
+                    documentServices.ChangeStatusByReferenceFile(message.ReferenceFile,
                                                                        message.Email,
                                                                        DocumentStatus.Failure);
 

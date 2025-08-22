@@ -17,7 +17,6 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
-using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -54,7 +53,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly MessageQueues _messageQueues;
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
-
+        private const string ConfigKeyAccessName = "keyAccess";
+        private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
 
         public DocumentServices(IDocumentRepository documentRepository,
                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -109,7 +109,7 @@ namespace WoopiAiHub.Application.Services
         /// </returns>
         public async Task<bool> CheckerExceededPages(string emailCreator)
         {
-            return await _marketPlaceApi.CheckExceededPages(_config["keyAccess"], emailCreator);
+            return await _marketPlaceApi.CheckExceededPages(_config[ConfigKeyAccessName], emailCreator);
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace WoopiAiHub.Application.Services
                                                    HeadersDto headersDto)
         {
             if (string.IsNullOrEmpty(headersDto.KeyMongoAccess))
-                throw new ArgumentNullException("Could not find emmbeddings api key");
+                throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
 
             HttpContext context = _httpContextAccessor.HttpContext!;
             var tenant = context.Request.Headers[HeaderNames.XTenant].ToString();
@@ -411,7 +411,7 @@ namespace WoopiAiHub.Application.Services
                                                 HeadersDto headersDto)
         {
             if (string.IsNullOrEmpty(headersDto.KeyMongoAccess))
-                throw new ArgumentNullException("Could not find emmbeddings api key");
+                throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
 
             bool availableBalanceToQuestion = await ManagerConsumptionQuestions(headersDto.EmailCreator,
                                                                                 headersDto.Tenant,
@@ -447,7 +447,7 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<IEnumerable<DocumentEmbeddingsAddDto>> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
         {
-            var keyAccess = _config["keyAccess"];
+            var keyAccess = _config[ConfigKeyAccessName];
             if (string.IsNullOrEmpty(keyAccess))
             {
                 throw new InvalidOperationException("KeyAccess is not configured in the application settings.");
@@ -599,7 +599,7 @@ namespace WoopiAiHub.Application.Services
                                                              bool isKeyOrigin)
         {
             return await _marketPlaceApi.ManageConsumptionQuestions(
-                _config["keyAccess"],
+                _config[ConfigKeyAccessName],
                 new ConsumptionQuestionsDto()
                 {
                     Email = emailCreator,
@@ -789,7 +789,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <param name="status"></param>
         /// <returns></returns>
-        public async Task<bool> ChangeStatusByReferenceFile(string referenceFile,
+        public bool ChangeStatusByReferenceFile(string referenceFile,
                                                             string emailCreator,
                                                             DocumentStatus status)
         {
@@ -799,7 +799,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Error while finding document in database");
             }
 
-            return _documentRepository.ChangeStatus(id, status);
+            return  _documentRepository.ChangeStatus(id, status);
         }
 
         /// <summary>
@@ -862,7 +862,7 @@ namespace WoopiAiHub.Application.Services
                 var apiEmbbeddingsKeyAuth = documentAnalysisResponseDto.KeyMongoAcess;
 
                 if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                    throw new ArgumentNullException("Could not find emmbeddings api key");
+                    throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
 
                 await _embbedingsApi.AddDocuments(referenceFile,
                                                   documentRequestRefitDto,
@@ -921,7 +921,7 @@ namespace WoopiAiHub.Application.Services
                 normalizedContext.Append(pageText.ToString());
 
                 if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                    throw new ArgumentNullException("Could not find emmbeddings api key");
+                    throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
 
                 AddDocumentsRequestRefitDto addDocumentRequest = await CreateAddDocumentsRequestDtoAsync(pageText.ToString(),
                                                                                               documentAnalysisResponseDto.Tenant,
@@ -1051,7 +1051,7 @@ namespace WoopiAiHub.Application.Services
                                                         bool isKeyOrigin)
         {
             return await _marketPlaceApi.ManageConsumptionPages(
-                _config["keyAccess"],
+                _config[ConfigKeyAccessName],
                 new ConsumptionPagesDto()
                 {
                     Email = documentAnalysisResponseDto.EmailCreator,
@@ -1068,11 +1068,11 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private async Task<List<DocumentEmbeddingsAddDto>> ExtractDocumentEmbeddingsAddDto(ProcessOcrResultDto processOcrResultDto)
         {
-            var keyAccess = _config["keyAccess"]!;
+            var keyAccess = _config[ConfigKeyAccessName]!;
             var apiEmbbeddingsKeyAuth = await _keyGeneratorApi.GetKey(keyAccess, processOcrResultDto.Tenant);
 
             if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                throw new ArgumentNullException("Could not find emmbeddings api key");
+                throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
 
             List<DocumentEmbeddingsAddDto> listDocument = new List<DocumentEmbeddingsAddDto>();
 
@@ -1159,7 +1159,7 @@ namespace WoopiAiHub.Application.Services
                 Text = text,
                 Metadata = new { PageNumber = page.PageNumber },
                 Tenant = processOcrResultDto.Tenant,
-                EmbeddingModelName = tenant.EmbeddingModelName,
+                EmbeddingModelName = tenant!.EmbeddingModelName,
                 ChunkSize = tenant.ChunkSize,
                 Email = processOcrResultDto.Email
             };

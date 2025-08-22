@@ -22,7 +22,6 @@ namespace WoopiAiHub.UnitTests.Consumers
     {
         private readonly AutoMocker _mocker;
         private readonly ProcessOcrResultDto _processOcrResultDto;
-        private readonly MessagingFixture _fixture;
         private readonly IEnumerable<DocumentEmbeddingsAddDto> _documentEmbeddingsAddDto;
         private readonly Mock<IDocumentServices> _documentServices;
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
@@ -30,14 +29,13 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly Mock<IMessageConsumer<ProcessOcrResultDto>> _consumerMock;
         private readonly Mock<ILogger<OcrConsumer>> _loggerMock;
 
-        public OcrConsumerTests(MessagingFixture fixture)
+        public OcrConsumerTests()
         {
-            _fixture = fixture;
             _mocker = new AutoMocker();
 
-            _documentEmbeddingsAddDto = _fixture.FindValidDocumentEmbeddingsAddDto();
-            _processOcrResultDto = _fixture.FindValidProcessOcrResultDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
+            _documentEmbeddingsAddDto = MessagingFixture.FindValidDocumentEmbeddingsAddDto();
+            _processOcrResultDto = MessagingFixture.FindValidProcessOcrResultDto();
+            var tenant = MessagingFixture.FindValidTenantInfoDto();
 
             var messageQueues = Options.Create(new MessageQueues
             {
@@ -45,7 +43,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 EmbeddingQueue = "embeddingQueue"
             });
 
-            var inMemorySettings = new Dictionary<string, string>
+            var inMemorySettings = new Dictionary<string, string?>
             {
                 { "ConnectionStrings:TemplateConnection",
                   "Password=123;Persist Security Info=True;User ID=sa;Initial Catalog=___NEWDB___;Data Source=test;TrustServerCertificate=True;" }
@@ -57,7 +55,6 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker.Use<IConfiguration>(configuration);
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
             _documentServices = new Mock<IDocumentServices>();
-            //_documentServices.Setup(x => x.ProcessEmbeddingsExtractor(It.IsAny<ProcessOcrResponseDto>())).ReturnsAsync(_documentEmbeddingsAddDto);
 
             _tenantCacheServices = new Mock<ITenantCacheServices>();
             _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))

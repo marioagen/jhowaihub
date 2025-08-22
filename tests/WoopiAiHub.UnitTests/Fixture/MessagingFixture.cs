@@ -7,7 +7,7 @@ namespace WoopiAiHub.UnitTests.Fixture
 {
     public class MessagingFixture
     {
-        public ProcessOcrResultDto FindValidProcessOcrResultDto()
+        public static ProcessOcrResultDto FindValidProcessOcrResultDto()
         {
             var faker = new Faker<ProcessOcrResultDto>("pt_BR")
               .CustomInstantiator(f => new ProcessOcrResultDto
@@ -21,7 +21,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
-        public TenantInfoDto FindValidTenantInfoDto()
+        public static TenantInfoDto FindValidTenantInfoDto()
         {
             var faker = new Faker<TenantInfoDto>("pt_BR")
               .CustomInstantiator(f => new TenantInfoDto
@@ -43,7 +43,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
-        public IEnumerable<DocumentEmbeddingsAddDto> FindValidDocumentEmbeddingsAddDto()
+        public static IEnumerable<DocumentEmbeddingsAddDto> FindValidDocumentEmbeddingsAddDto()
         {
             var documentEmbeddingsAddDto = new Faker<DocumentEmbeddingsAddDto>("pt_BR")
             .RuleFor(a => a.Tenant, "test")

@@ -9,14 +9,10 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
 {
     public abstract class BaseConsumer : BackgroundService
     {
-        private readonly IServiceScopeFactory _scopeFactory;
         private readonly IConfiguration _configuration;
 
-        protected BaseConsumer(
-            IServiceScopeFactory scopeFactory,
-            IConfiguration configuration)
+        protected BaseConsumer(IConfiguration configuration)
         {
-            _scopeFactory = scopeFactory;
             _configuration = configuration;
         }
 

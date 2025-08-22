@@ -50,7 +50,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
         /// Create connection factory for rabbitMQ
         /// </summary>
         /// <returns></returns>
-        private IConnectionFactory CreateConnectionFactory()
+        private ConnectionFactory CreateConnectionFactory()
         {
             var factory = new ConnectionFactory
             {

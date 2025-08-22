@@ -44,7 +44,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<FindDocumentDto> FindDocumentById(int id,
                                                string tenant);
 
-        Task<bool> ChangeStatusByReferenceFile(string referenceFile,
+        bool ChangeStatusByReferenceFile(string referenceFile,
                                                string emailCreator,
                                                DocumentStatus status);
 
