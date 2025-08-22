@@ -14,6 +14,7 @@ using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -192,9 +193,7 @@ namespace WoopiAiHub.Application.Services
                 var documentNormalizedForDb = this.CreateDocumentNormalizedForDb(documentAnalysisResponseDto.Id, normalizedContext, 0);
                 _documentNormalizedServices.Create(documentNormalizedForDb);
             }
-
-            _documentRepository.ChangeStatus(documentAnalysisResponseDto.Id);
-
+            _documentRepository.ChangeStatus(documentAnalysisResponseDto.Id, DocumentStatus.Analyzed);
             return true;
         }
 
@@ -364,10 +363,13 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool ChangeStatus(int id,
-                                 string emailCreator)
+        public async Task<bool> ChangeStatus(int id,
+                                             DocumentStatus status,
+                                             string emailCreator)
         {
-            return _documentRepository.ChangeStatus(id);
+            var result = _documentRepository.ChangeStatus(id, status);
+
+            return result;
         }
 
         /// <summary>
