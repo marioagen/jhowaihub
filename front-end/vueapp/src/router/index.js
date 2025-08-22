@@ -146,7 +146,6 @@ const routes = [
             module: "Documents",
             action: "View",
         },
-        beforeEnter: authenticate,
     },
     {
         path: "/analyzer/:id",
@@ -157,7 +156,6 @@ const routes = [
             module: "Documents",
             action: "View",
         },
-        beforeEnter: authenticate,
     },
     {
         path: "/management",

@@ -17,8 +17,13 @@
                 </div>
                 <div class="mb-2">
                     <button class="btn btn-sm btn-primary" style="float:right" @click="advanceStep" v-if="!isLastStep">
-                        <span>{{ verifyFirst }}</span>
-                        <LucideIcon icon="ChevronRight" size="16" class="me-1" />
+                        <div v-if="isLoadingAnalysis">
+                            <span class="spinner-grow spinner-grow-sm" role="status"></span>
+                        </div>
+                        <div v-else>
+                            <span>{{ verifyFirst }}</span>
+                            <LucideIcon icon="ChevronRight" size="16" class="me-1" />
+                        </div>
                     </button>
                     <div class="badge" :style="badgeStyle(dataStep.status.color)">{{dataStep.status.name}}</div>
                 </div>
@@ -31,6 +36,9 @@
     import CardsServices from "@/services/cards/CardsServices";
     export default {
         name: "CardComponent",
+        data: () => ({
+            isLoadingAnalysis: false,
+        }),
         props: {
             dataCard: {
                 type: Object,
@@ -62,6 +70,7 @@
                 };
             },
             advanceStep() {
+                this.isLoadingAnalysis = true;
                 if (this.isFirstStep) {
                     this.getDocumentNormalized();
                 }
@@ -82,6 +91,7 @@
                             this.updateStatus()
                         })
                         .finally(() => {
+                            this.isLoadingAnalysis = false;
                         });
             },
             updateStatus() {
@@ -94,10 +104,16 @@
                     CardsServices.updateStepAndStatus(params)
                         .then((response) => {
                             if (response.error !== undefined) {
-                                console.log(response.error);
+                                return this.$notify({
+                                    title: 'Error',
+                                    message: response.error,
+                                    variant: 'danger',
+                                    icon: 'CircleX',
+                                });
                             }
                         })
                         .finally(() => {
+                            this.isLoadingAnalysis = false;
                             this.$emit('reload');
                         });
                 }

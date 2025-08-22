@@ -10,6 +10,7 @@ using System.Text;
 using WoopiAiHub.Api.Exceptions;
 using System.Text.Json.Serialization;
 using WoopiAiHub.Infrastructure.DependencyInjection;
+using WoopiAiHub.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,8 @@ builder.Services.AddInfrastructure(config);
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddSignalR();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -118,5 +121,7 @@ app.MapControllers();
 app.UseExceptionHandler();
 
 app.MapHealthChecks("/healthz");
+
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 app.Run();

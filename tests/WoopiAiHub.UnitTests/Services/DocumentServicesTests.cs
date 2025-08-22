@@ -445,7 +445,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "ChangeStatus")]
         [Trait("ChangeStatus", "Success")]
-        public void ChangeStatus_Success()
+        public async Task ChangeStatus_Success()
         {
             // Arrange
             var document = _fixture.FindValidDocument();
@@ -453,7 +453,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
 
             // Act
-            var result = _documentServices.ChangeStatus(document.Id, document.EmailCreator);
+            var result = await _documentServices.ChangeStatus(document.Id, DocumentStatus.Analyzed, document.EmailCreator);
 
             // Assert
             Assert.True(result);
@@ -462,7 +462,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "ChangeStatus")]
         [Trait("ChangeStatus", "Fail")]
-        public void ChangeStatus_Fail()
+        public async Task ChangeStatus_Fail()
         {
             // Arrange
             var document = _fixture.FindValidDocument();
@@ -470,7 +470,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(false);
 
             // Act
-            var result = _documentServices.ChangeStatus(document.Id, document.EmailCreator);
+            var result = await _documentServices.ChangeStatus(document.Id,DocumentStatus.Analyzed, document.EmailCreator);
 
             // Assert
             Assert.False(result);
