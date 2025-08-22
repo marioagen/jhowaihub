@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.DTOs.Response
+﻿namespace WoopiAiHub.Domain.DTOs.Messaging
 {
     public record class DocumentEmbeddingsAddDto
     {

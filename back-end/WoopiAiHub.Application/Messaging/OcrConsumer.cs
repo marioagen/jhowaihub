@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -33,15 +34,22 @@ namespace WoopiAiHub.Application.Messaging
             _logger = logger;
         }
 
+        /// <summary>
+        /// Execute the background service to consume messages from the OCR queue.
+        /// </summary>
+        /// <param name="stoppingToken"></param>
+        /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _consumer.ConsumerAsync(_queues.AnswerQueueAiHubResponse, async message =>
-            {
+            await _consumer.ConsumerAsync(_queues.OcrQueueAiHubResponse, async message =>
+            {                
                 using var scope = _scopeFactory.CreateScope();
-
                 try
                 {
-                    await ConfigureTenantContextAsync(message.Tenant, ColTypeModule.WoopiAiHub);
+                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant, ColTypeModule.WoopiAiHub);
+                    var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+                    httpAccessor.HttpContext ??= new DefaultHttpContext();
+                    httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
                     var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
                     var result = await documentServices.ProcessOcrResult(message);

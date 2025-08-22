@@ -27,23 +27,16 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
         /// <param name="module"></param>
         /// <param name="tenantSelector"></param>
         /// <returns></returns>
-        //protected async Task ConfigureTenantContextAsync(TMessage message,
-        //                                                 ColTypeModule module,
-        //                                                 TenantSelector<TMessage> tenantSelector)
-        protected async Task ConfigureTenantContextAsync(string temantName,
-                                                         ColTypeModule module)
+        protected async Task<string> GetConnectionStringAsync(IServiceScope scope,
+                                                              string temantName,
+                                                              ColTypeModule module)
         {
-            using var scope = _scopeFactory.CreateScope();
-
-            var tenantCacheService = scope.ServiceProvider.GetRequiredService<ITenantCacheServices>();
-            var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
-
+            var tenantCacheService = scope.ServiceProvider.GetRequiredService<ITenantCacheServices>();            
             var tenant = await tenantCacheService.FindTenantAsync(temantName, module);
-
-            httpAccessor.HttpContext ??= new DefaultHttpContext();
             var template = _configuration.GetConnectionString("TemplateConnection");
             var connectionString = template?.Replace("___NEWDB___", tenant!.DatabaseName);
-            httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
+            return connectionString!;
         }
     }
 

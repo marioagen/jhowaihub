@@ -1,8 +1,8 @@
 ﻿using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 
-namespace WoopiAiHub.Domain.DTOs.Response
+namespace WoopiAiHub.Domain.DTOs.Messaging
 {
-    public class ProcessOcrResultDto
+    public record class ProcessOcrResultDto
     {
         public string Tenant { get; set; } = string.Empty;
         public string ReferenceFile { get; set; } = string.Empty;

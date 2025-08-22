@@ -4,16 +4,19 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Refit;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Dto;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -22,6 +25,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
+using WoopiAiHub.Infrastructure.Messaging.Configuration;
 
 
 namespace WoopiAiHub.Application.Services
@@ -47,6 +51,9 @@ namespace WoopiAiHub.Application.Services
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly ITeamServices _teamServices;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
+        private readonly MessageQueues _messageQueues;
+        private readonly IMessagePublisher<ProcessOcrDto> _publisher;
+
 
         public DocumentServices(IDocumentRepository documentRepository,
                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -65,7 +72,9 @@ namespace WoopiAiHub.Application.Services
                                IQuestionnaireRepository questionnaireRepository,
                                ITenantCacheServices tenantCacheServices,
                                ITeamServices teamServices,
-                               IKeyGeneratorApi keyGeneratorApi)
+                               IKeyGeneratorApi keyGeneratorApi,
+                               IMessagePublisher<ProcessOcrDto> publisher,
+                               IOptions<MessageQueues> messageQueues)
         {
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
@@ -85,6 +94,8 @@ namespace WoopiAiHub.Application.Services
             _tenantCacheServices = tenantCacheServices;
             _teamServices = teamServices;
             _keyGeneratorApi = keyGeneratorApi;
+            _messageQueues = messageQueues.Value;
+            _publisher = publisher;
         }
 
         /// <summary>
@@ -221,8 +232,11 @@ namespace WoopiAiHub.Application.Services
 
             if (requestCreateDocumentDto.IsLast)
             {
-                await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
+                var referenceFile = await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
                 _cache.Remove(requestCreateDocumentDto.Name);
+                await PublishOcrDto(tenant,
+                                    referenceFile,
+                                    requestCreateDocumentDto.EmailCreator);
             }
         }
 
@@ -422,6 +436,13 @@ namespace WoopiAiHub.Application.Services
             throw new ApplicationException("No Credits to send a Question");
         }
 
+        /// <summary>
+        /// Processes the OCR result and extracts document embeddings.
+        /// </summary>
+        /// <param name="processOcrResultDto"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public async Task<IEnumerable<DocumentEmbeddingsAddDto>> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
         {
             var keyAccess = _config["keyAccess"];
@@ -462,13 +483,43 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// realize the publish in rabbitMq to ocr queue
+        /// </summary>
+        /// <param name="tenant"></param>
+        /// <param name="referenceFile"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task PublishOcrDto(string tenant,
+                                        string referenceFile,
+                                        string email)
+        {
+            var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenant,
+                                                                        ColTypeModule.WoopiAiHub);
+            if (string.IsNullOrEmpty(tenantInfo!.OcrModel))
+            {
+                throw new ArgumentException("Ocr not found");
+            }
+
+            var processOcrDto = new ProcessOcrDto
+            {
+                Tenant = tenant,
+                ReferenceFile = referenceFile,
+                Model = tenantInfo.OcrModel,
+                Email = email,
+                ResponseQueue = _messageQueues.OcrQueueAiHubResponse
+            };
+
+            await _publisher.PublishAsync(_messageQueues.OcrQueue, processOcrDto);
+        }
+
+        /// <summary>
         /// It uploads the document PDF file to the fileRepository and after uploading 
         /// it saves the document data in the database.
         /// </summary>
         /// <param name="requestCreateDocumentDto"></param>
         /// <returns></returns>
         /// 
-        private async Task FinalizeUploadAsync(RequestCreateDocumentDto requestCreateDocumentDto,
+        private async Task<string> FinalizeUploadAsync(RequestCreateDocumentDto requestCreateDocumentDto,
                                                Byte[] chunks,
                                                string tenant)
         {
@@ -492,6 +543,8 @@ namespace WoopiAiHub.Application.Services
             documentForDataBase.Cards = cards;
             documentForDataBase.Teams = teams;
             _documentRepository.Create(documentForDataBase);
+
+            return referenceFile;
         }
 
         /// <summary>
