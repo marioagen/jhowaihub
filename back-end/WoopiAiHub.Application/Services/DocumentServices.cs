@@ -109,7 +109,7 @@ namespace WoopiAiHub.Application.Services
         /// </returns>
         public async Task<bool> CheckerExceededPages(string emailCreator)
         {
-            return await _marketPlaceApi.CheckExceededPages(_config[ConfigKeyAccessName], emailCreator);
+            return await _marketPlaceApi.CheckExceededPages(_config[ConfigKeyAccessName]!, emailCreator);
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace WoopiAiHub.Application.Services
                                                    HeadersDto headersDto)
         {
             if (string.IsNullOrEmpty(headersDto.KeyMongoAccess))
-                throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
+                throw new ArgumentNullException(headersDto.KeyMongoAccess, KeyMongoAccessNotFoundMessage);
 
             HttpContext context = _httpContextAccessor.HttpContext!;
             var tenant = context.Request.Headers[HeaderNames.XTenant].ToString();
@@ -411,7 +411,7 @@ namespace WoopiAiHub.Application.Services
                                                 HeadersDto headersDto)
         {
             if (string.IsNullOrEmpty(headersDto.KeyMongoAccess))
-                throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
+                throw new ArgumentNullException(headersDto.KeyMongoAccess, KeyMongoAccessNotFoundMessage);
 
             bool availableBalanceToQuestion = await ManagerConsumptionQuestions(headersDto.EmailCreator,
                                                                                 headersDto.Tenant,
@@ -599,7 +599,7 @@ namespace WoopiAiHub.Application.Services
                                                              bool isKeyOrigin)
         {
             return await _marketPlaceApi.ManageConsumptionQuestions(
-                _config[ConfigKeyAccessName],
+                _config[ConfigKeyAccessName]!,
                 new ConsumptionQuestionsDto()
                 {
                     Email = emailCreator,
@@ -862,7 +862,7 @@ namespace WoopiAiHub.Application.Services
                 var apiEmbbeddingsKeyAuth = documentAnalysisResponseDto.KeyMongoAcess;
 
                 if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                    throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
+                    throw new ArgumentNullException(apiEmbbeddingsKeyAuth, KeyMongoAccessNotFoundMessage);
 
                 await _embbedingsApi.AddDocuments(referenceFile,
                                                   documentRequestRefitDto,
@@ -921,7 +921,7 @@ namespace WoopiAiHub.Application.Services
                 normalizedContext.Append(pageText.ToString());
 
                 if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                    throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
+                    throw new ArgumentNullException(apiEmbbeddingsKeyAuth, KeyMongoAccessNotFoundMessage);
 
                 AddDocumentsRequestRefitDto addDocumentRequest = await CreateAddDocumentsRequestDtoAsync(pageText.ToString(),
                                                                                               documentAnalysisResponseDto.Tenant,
@@ -1051,7 +1051,7 @@ namespace WoopiAiHub.Application.Services
                                                         bool isKeyOrigin)
         {
             return await _marketPlaceApi.ManageConsumptionPages(
-                _config[ConfigKeyAccessName],
+                _config[ConfigKeyAccessName]!,
                 new ConsumptionPagesDto()
                 {
                     Email = documentAnalysisResponseDto.EmailCreator,
@@ -1072,7 +1072,7 @@ namespace WoopiAiHub.Application.Services
             var apiEmbbeddingsKeyAuth = await _keyGeneratorApi.GetKey(keyAccess, processOcrResultDto.Tenant);
 
             if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                throw new ArgumentNullException(KeyMongoAccessNotFoundMessage);
+                throw new ArgumentNullException(apiEmbbeddingsKeyAuth, KeyMongoAccessNotFoundMessage);
 
             List<DocumentEmbeddingsAddDto> listDocument = new List<DocumentEmbeddingsAddDto>();
 
