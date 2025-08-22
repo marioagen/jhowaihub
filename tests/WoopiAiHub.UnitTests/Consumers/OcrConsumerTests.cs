@@ -72,7 +72,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker.Use(scopeFactoryMock.Object);
 
             var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-            httpContextAccessorMock.SetupProperty(x => x.HttpContext, null); // Permitir set do HttpContext
+            httpContextAccessorMock.SetupProperty(x => x.HttpContext, null);
 
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
                                .Returns(_documentServices.Object);
