@@ -21,6 +21,7 @@ using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
+using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 
 
 namespace WoopiAiHub.Application.Services
@@ -45,6 +46,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly ITeamServices _teamServices;
+        private readonly IKeyGeneratorApi _keyGeneratorApi;
 
         public DocumentServices(IDocumentRepository documentRepository,
                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -62,7 +64,8 @@ namespace WoopiAiHub.Application.Services
                                IHttpContextAccessor httpContextAccessor,
                                IQuestionnaireRepository questionnaireRepository,
                                ITenantCacheServices tenantCacheServices,
-                               ITeamServices teamServices)
+                               ITeamServices teamServices,
+                               IKeyGeneratorApi keyGeneratorApi)
         {
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
@@ -81,6 +84,7 @@ namespace WoopiAiHub.Application.Services
             _questionnaireRepository = questionnaireRepository;
             _tenantCacheServices = tenantCacheServices;
             _teamServices = teamServices;
+            _keyGeneratorApi = keyGeneratorApi;
         }
 
         /// <summary>
@@ -193,7 +197,7 @@ namespace WoopiAiHub.Application.Services
                 _documentNormalizedServices.Create(documentNormalizedForDb);
             }
 
-            _documentRepository.ChangeStatus(documentAnalysisResponseDto.Id);
+            _documentRepository.ChangeStatus(documentAnalysisResponseDto.Id, DocumentStatus.Analyzed);
 
             return true;
         }
@@ -367,7 +371,7 @@ namespace WoopiAiHub.Application.Services
         public bool ChangeStatus(int id,
                                  string emailCreator)
         {
-            return _documentRepository.ChangeStatus(id);
+            return _documentRepository.ChangeStatus(id, DocumentStatus.Analyzed);
         }
 
         /// <summary>
@@ -416,6 +420,45 @@ namespace WoopiAiHub.Application.Services
             }
 
             throw new ApplicationException("No Credits to send a Question");
+        }
+
+        public async Task<IEnumerable<DocumentEmbeddingsAddDto>> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
+        {
+            var keyAccess = _config["keyAccess"];
+            if (string.IsNullOrEmpty(keyAccess))
+            {
+                throw new InvalidOperationException("KeyAccess is not configured in the application settings.");
+            }
+
+            var documentoId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
+            if (documentoId == 0)
+            {
+                throw new ArgumentException("Error while finding document in database");
+            }
+
+            var documentEmbeddingsAddDtoList = await ExtractDocumentEmbeddingsAddDto(processOcrResultDto);
+
+            var normalizedContext = new StringBuilder();
+            foreach (var page in documentEmbeddingsAddDtoList)
+            {
+                normalizedContext.AppendLine(page.Text);
+            }
+
+            var normalizedDocument = _documentNormalizedServices.FindById(documentoId, processOcrResultDto.Email);
+            if (normalizedDocument is not null)
+            {
+                var documentNormalized = CreateDocumentNormalized(documentoId, normalizedContext.ToString(), normalizedDocument.Id);
+                _documentNormalizedServices.Update(documentNormalized);
+            }
+            else
+            {
+                var documentNormalized = CreateDocumentNormalized(documentoId, normalizedContext.ToString(), 0);
+                _documentNormalizedServices.Create(documentNormalized);
+            }
+
+            _documentRepository.ChangeStatus(documentoId, DocumentStatus.OCR);
+
+            return documentEmbeddingsAddDtoList;
         }
 
         /// <summary>
@@ -685,6 +728,26 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Change the current status of an document by reference file
+        /// </summary>
+        /// <param name="referenceFile"></param>
+        /// <param name="emailCreator"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public async Task<bool> ChangeStatusByReferenceFile(string referenceFile,
+                                                            string emailCreator,
+                                                            DocumentStatus status)
+        {
+            var id = _documentRepository.FindDocumentIdByReferenceFile(referenceFile);
+            if (id == 0)
+            {
+                throw new ArgumentException("Error while finding document in database");
+            }
+
+            return _documentRepository.ChangeStatus(id, status);
+        }
+
+        /// <summary>
         /// Request the Refit interface to upload a file to the FileRepositoryApi
         /// </summary>
         /// <param name="formFile"></param>
@@ -943,5 +1006,108 @@ namespace WoopiAiHub.Application.Services
                 });
         }
 
+        /// <summary>
+        /// Extract normalized context from AnalyzeResult 
+        /// </summary>
+        /// <param name="processOcrResultDto"></param>
+        /// <returns></returns>
+        private async Task<List<DocumentEmbeddingsAddDto>> ExtractDocumentEmbeddingsAddDto(ProcessOcrResultDto processOcrResultDto)
+        {
+            var keyAccess = _config["keyAccess"]!;
+            var apiEmbbeddingsKeyAuth = await _keyGeneratorApi.GetKey(keyAccess, processOcrResultDto.Tenant);
+
+            if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
+                throw new ArgumentNullException("Could not find emmbeddings api key");
+
+            List<DocumentEmbeddingsAddDto> listDocument = new List<DocumentEmbeddingsAddDto>();
+
+            var tablesByPage = processOcrResultDto.AnalyzeResult.Tables
+               .GroupBy(table => table.BoundingRegions.Count > 0 ? table.BoundingRegions[0].PageNumber : 0)
+               .ToDictionary(group => group.Key, group => group.ToList());
+
+            foreach (var page in processOcrResultDto.AnalyzeResult.Pages)
+            {
+                var pageText = new StringBuilder($"----------- Página {page.PageNumber} do PDF -----------\n\n");
+
+                var paragraphTexts = page.Lines.Select(line => line.Content).ToList();
+
+                var pageTables = tablesByPage.TryGetValue(page.PageNumber, out List<CustomDocumentTable>? value)
+                    ? value
+                    : [];
+
+                var tableTexts = pageTables.Select(table =>
+                {
+                    var tableContent = new StringBuilder($"\n--- Tabela ---\n");
+                    foreach (var row in table.Cells.GroupBy(c => c.RowIndex))
+                    {
+                        var line = string.Join(" | ", row.OrderBy(c => c.ColumnIndex).Select(c => c.Content));
+                        tableContent.AppendLine(line);
+                    }
+                    return tableContent.ToString();
+                }).ToList();
+
+                var remainingParagraphs = paragraphTexts
+                    .Where(paragraph => !tableTexts.Any(table => table.Contains(paragraph)))
+                    .ToList();
+
+                pageText.AppendLine(string.Join(Environment.NewLine, remainingParagraphs));
+                pageText.AppendLine(string.Join(Environment.NewLine, tableTexts));
+
+                var documentEmbeddingsAddDto = await CreateAddDocumentsEmbeddingsDtoAsync(processOcrResultDto,
+                                                                                          pageText.ToString(),
+                                                                                          page,
+                                                                                          ColTypeModule.WoopiAiHub,
+                                                                                          apiEmbbeddingsKeyAuth);
+                listDocument.Add(documentEmbeddingsAddDto);
+            }
+
+            return listDocument;
+        }
+
+        /// <summary>
+        /// Create a new DocumentNormalized for the database.
+        /// </summary>
+        /// <param name="idDocument"></param>
+        /// <param name="content"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private static DocumentNormalized CreateDocumentNormalized(int idDocument,
+                                                                   string content,
+                                                                   int id)
+        {
+            return new DocumentNormalized
+            (
+                idDocument,
+                content,
+                id,
+                DateTime.Now
+            );
+        }
+
+        /// <summary>
+        /// Creates an object of type AddDocumentsRequestDto
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        private async Task<DocumentEmbeddingsAddDto> CreateAddDocumentsEmbeddingsDtoAsync(ProcessOcrResultDto processOcrResultDto,
+                                                                                          string text,
+                                                                                          CustomDocumentPage page,
+                                                                                          ColTypeModule module,
+                                                                                          string keyMongoAccess)
+        {
+            var tenant = await _tenantCacheServices.FindTenantAsync(processOcrResultDto.Tenant,
+                                                                    module);
+            return new DocumentEmbeddingsAddDto
+            {
+                ReferenceFile = processOcrResultDto.ReferenceFile,
+                KeyMongoAccess = keyMongoAccess,
+                Text = text,
+                Metadata = new { PageNumber = page.PageNumber },
+                Tenant = processOcrResultDto.Tenant,
+                EmbeddingModelName = tenant.EmbeddingModelName,
+                ChunkSize = tenant.ChunkSize,
+                Email = processOcrResultDto.Email
+            };
+        }
     }
 }

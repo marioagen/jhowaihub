@@ -3,7 +3,6 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
 using WoopiAiHub.Domain.Interfaces.Messaging;
-using WoopiAiHub.Infrastructure.Messaging.Managers;
 
 namespace WoopiAiHub.Infrastructure.Messaging.Consumers
 {

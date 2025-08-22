@@ -2,6 +2,7 @@
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
 
 
 namespace WoopiAiHub.Domain.Interfaces.Services
@@ -40,5 +41,11 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         Task<FindDocumentDto> FindDocumentById(int id,
                                                string tenant);
+
+        Task<bool> ChangeStatusByReferenceFile(string referenceFile,
+                                               string emailCreator,
+                                               DocumentStatus status);
+
+        Task<IEnumerable<DocumentEmbeddingsAddDto>> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto);
     };
 }
