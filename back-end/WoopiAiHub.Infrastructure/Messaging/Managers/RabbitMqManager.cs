@@ -9,13 +9,14 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
     {
         private readonly RabbitMqConfig _config;
         private readonly MessageQueues _queues;
-        private IConnection? _connection;
+        public IConnectionFactory ConnectionFactory { get; set; }
 
         public RabbitMqManager(IOptions<RabbitMqConfig> config,
                                IOptions<MessageQueues> queues)
         {
             _config = config.Value;
             _queues = queues.Value;
+            ConnectionFactory = CreateConnectionFactory();
         }
 
         /// <summary>
@@ -24,16 +25,8 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
         /// <returns></returns>
         public async Task CreateQueuesAsync()
         {
-            var factory = new ConnectionFactory
-            {
-                HostName = _config.HostName,
-                UserName = _config.UserName,
-                Password = _config.Password,
-                VirtualHost = _config.VirtualHost
-            };
-
-            _connection = await factory.CreateConnectionAsync();
-            using var channel = await _connection.CreateChannelAsync();
+            using var connection = await this.ConnectionFactory.CreateConnectionAsync();
+            using var channel = await connection.CreateChannelAsync();
 
             foreach (var queue in _queues.Queues())
             {
@@ -48,10 +41,26 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<T> CreateChannel<T>()
         {
-            if (_connection == null || !_connection.IsOpen)
-                throw new InvalidOperationException("RabbitMQ connection is not open.");
+            var connection = await this.ConnectionFactory.CreateConnectionAsync();
 
-            return (T)await _connection.CreateChannelAsync();
+            return (T) await connection.CreateChannelAsync();
+        }
+
+        /// <summary>
+        /// Create connection factory for rabbitMQ
+        /// </summary>
+        /// <returns></returns>
+        private ConnectionFactory CreateConnectionFactory()
+        {
+            var factory = new ConnectionFactory
+            {
+                HostName = _config.HostName,
+                UserName = _config.UserName,
+                Password = _config.Password,
+                VirtualHost = _config.VirtualHost
+            };
+
+            return factory;
         }
     }
 }

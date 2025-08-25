@@ -1,17 +1,17 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
+using Microsoft.AspNetCore.Http;
+using System.Net;
+using System.Text;
 using WoopiAiHub.Application.Dto;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
-using Microsoft.AspNetCore.Http;
-using System.Net;
-using System.Text;
-using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Fixture
@@ -318,6 +318,41 @@ namespace WoopiAiHub.UnitTests.Fixture
                 )
             );
             return step;
+        }
+
+        public static ProcessOcrResultDto FindValidProcessOcrResultDto()
+        {
+            var faker = new Faker<ProcessOcrResultDto>("pt_BR")
+                .CustomInstantiator(f => new ProcessOcrResultDto
+                {
+                    ReferenceFile = f.Random.String(),
+                    Tenant = f.Random.String(),
+                    Email = f.Random.String(),
+                    AnalyzeResult = FindValidAnalyzeResultCustomDto()
+                });
+            return faker;
+        }
+
+        public static AnalyzeResultCustomDto FindValidAnalyzeResultCustomDto()
+        {
+            var faker = new Faker<AnalyzeResultCustomDto>("pt_BR")
+                .CustomInstantiator(f => new AnalyzeResultCustomDto
+                {
+                    Pages = new List<CustomDocumentPage>
+                    {
+                        new CustomDocumentPage
+                        {
+                            PageNumber = 1,
+                            Lines = new List<CustomDocumentLine>
+                            {
+                                new CustomDocumentLine { Content = "Line 1" },
+                                new CustomDocumentLine { Content = "Line 2" }
+                            }
+                        }
+                    },
+                    Tables = new List<CustomDocumentTable>()
+                });
+            return faker;
         }
     }
 
