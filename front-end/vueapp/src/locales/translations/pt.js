@@ -299,6 +299,8 @@
         password_special: "A senha deve conter pelo menos um caractere especial.",
         password_confirmed: "A confirmação da senha não confere.",
         email: "Email inválido",
+        hasInvalid: "Campos inválidos",
+        oneStep: "Ao menos um step é necessário para salvar",
     },
     pagination: {
         next: "Próximo",

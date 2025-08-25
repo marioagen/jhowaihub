@@ -174,7 +174,7 @@
                                     </td>
                                     <td class="content-right-middle" style="width: 100px">
                                         <button
-                                            class="btn btn-primary btn-sm"
+                                            class="btn btn-primary btn-sm analyze-btn"
                                             :title="$t('labelAnalyze')"
                                             @click="embeddingData(item.id)"
                                             v-if="item.status == 0"
@@ -684,5 +684,9 @@
         .lines {
             display: none !important;
         }
+    }
+
+    .analyze-btn {
+        width: 94px;
     }
 </style>

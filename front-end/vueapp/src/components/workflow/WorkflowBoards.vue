@@ -1,15 +1,14 @@
 <template>
     <main>
         <FullscreenLoadingComponent v-if="isLoading" />
-        <div 
-            v-else 
+        <div
             class="container-fluid scroll-area mx-4 mt-4"
         >
             <div class="row align-items-center">
                 <div class="col-auto">                    
                     <div class="row">
                         <div class="col">
-                            <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="redirectToIndex">
+                            <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="redirectToIndex" type="button">
                                 <LucideIcon icon="ArrowLeft" />
                                 {{ $t("labelBack") }}
                             </button>
@@ -22,19 +21,18 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="col-auto ms-auto">
                     <button 
                         class="btn btn-primary btn-sm" 
-                        :disabled="canSave"
+                        :disabled="cantSave"
+                        type="button"
                         @click="save"
                     >
                         <LucideIcon icon="Save" size="15" />
                         {{ $t("quizzes.formSave") }}
                     </button>
                 </div>
-            </div>
-            
+            </div>            
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
                     <div class="row">
@@ -45,11 +43,20 @@
                     <div class="row">
                         <div class="col">
                             <label>{{ $t("workflow.name") }}</label>
-                            <input 
-                                class="form-control form-control-sm"
-                                :placeholder="$t('workflow.name')"
+                            <Field 
+                                name="name" 
+                                rules="required" 
+                                v-slot="{ field, errorMessage }"
                                 v-model="workflowData.name"
-                            />
+                                ref="nameField"
+                            >
+                                <input 
+                                    class="form-control form-control-sm"
+                                    :placeholder="$t('workflow.name')"
+                                    v-bind="field"
+                                />
+                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
+                            </Field>
                         </div>
                         <div class="col">
                             <label>{{ $t("workflow.responsableTeam") }}</label>
@@ -57,33 +64,45 @@
                                 <span class="input-group-text border-end-0 bg-white">
                                     <LucideIcon icon="Users" size="16" />
                                 </span>
-                                <select
-                                    id="typeDocId"
-                                    class="form-select form-select-sm border-start-0"
+
+                                <Field 
+                                    name="teamId" 
+                                    rules="required" 
+                                    v-slot="{ field, errors }" 
                                     v-model="workflowData.teamId"
+                                    ref="teamField"
                                 >
-                                    <option value="">{{ $t("workflow.responsableTeam") }}</option>
-                                    <option 
-                                        v-for="(item, index) in teamsList"
-                                        :key="index"
-                                        :value="item.id" 
+                                    <select
+                                        id="typeDocId"
+                                        class="form-select form-select-sm border-start-0"
+                                        v-bind="field"
                                     >
-                                        {{ item.id }} - {{ item.text }}
-                                    </option>
-                                </select>
+                                        <option value="">{{ $t("workflow.responsableTeam") }}</option>
+                                        <option 
+                                            v-for="(item, index) in teamsList"
+                                            :key="index"
+                                            :value="item.id" 
+                                        >
+                                            {{ item.id }} - {{ item.text }}
+                                        </option>
+                                    </select>
+
+                                    <span class="validation-message text-danger" v-if="errors?.length">
+                                        {{ errors[0] }}
+                                    </span>
+                                </Field>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="row mt-4">
                 <div class="row d-flex justify-content-between align-items-center">
                     <div class="col-auto">
                         <h6 class="mb-4">{{ $t("workflow.steps") }}</h6>
                     </div>
                     <div class="col-auto">
-                        <button class="btn btn-primary btn-sm" @click="addStep">
+                        <button class="btn btn-primary btn-sm" type="button" @click="addStep">
                             <LucideIcon icon="Plus" size="15" />
                             {{ $t("workflow.createNewStep") }}
                         </button>
@@ -93,7 +112,7 @@
                     <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
                         <WorkflowStepComponent
                             v-for="(step, index) in stepsList"
-                            :key="index"
+                            :key="step.id || index"
                             :step="step"
                             :index="index + 1"
                             :is-last="index === stepsList.length - 1" 
@@ -102,6 +121,7 @@
                             @update-step="updateStep(index, $event)"
                             @remove-step="removeStep(index)"
                             class="workflow-step-card"
+                            ref="stepRefs"
                         />
                         
                         <div class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0" @click="addStep">
@@ -119,6 +139,7 @@
 </template>
 
 <script>
+    import { Field, Form, useForm } from "vee-validate";
     import WorkflowStepComponent from "@/components/workflow/WorkflowStepComponent.vue";
     import TeamsService from "@/services/teams/TeamsService";
     import StatusService from "@/services/status/StatusService";
@@ -131,6 +152,8 @@
         components: {
             FullscreenLoadingComponent,
             WorkflowStepComponent,
+            Field,
+            Form
         },
         props: {
             isEdit: {
@@ -144,31 +167,35 @@
                 default: null,
             },
         },
+        watch: {
+            "$store.state.userProfile.language": function () {
+                this.setCrumbsData();
+            },
+        },
+        setup() {
+            const { validate, values } = useForm();
+            return {
+                validate,
+                values
+            }
+        },
         data() {
             return {
                 profilesList: [],
                 statusList: [],
                 teamsList: [],
                 stepsList: [],
-                steps: {
-                    status: "",
-                    profile: "",
-                },
                 workflowData: {
                     name: "",
                     teamId: "",
                 },
                 isLoading: false,
+                workflowStepRefs: [],
             };
         },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.setCrumbsData();
-            },
-        },
         computed: {
-            canSave() {
-                return !this.stepsList.length > 0;
+            cantSave() {
+                return this.stepsList.length === 0;
             },
             formTitle() {
                 return this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title";
@@ -182,13 +209,7 @@
                 TeamsService.getTeamList()
                     .then((response) => {
                         if(response.error !== undefined) return;
-                        for (let i = 0; i < response.length; i++) {
-                            var item = {
-                                id: response[i].id,
-                                text: response[i].name,
-                            };
-                            this.teamsList.push(item);
-                        }
+                        this.teamsList = response.map(r => ({ id: r.id, text: r.name }));
                     });
             },
             getStatus() {
@@ -202,13 +223,7 @@
                 ProfilesService.getProfilesList()
                     .then((response) => {
                         if(response.error !== undefined) return;
-                        for (let i = 0; i < response.length; i++) {
-                            var item = {
-                                id: response[i].id,
-                                text: response[i].name,
-                            };
-                            this.profilesList.push(item);
-                        }
+                        this.profilesList = response.map(r => ({ id: r.id, text: r.name }));
                     });
             },
             setEdit() {
@@ -228,7 +243,11 @@
                         this.workflowData.id = response.id;
                         this.workflowData.name = response.name;
                         this.workflowData.teamId = response.teamId;
-                        this.stepsList = response.steps;
+                        this.stepsList = response.steps.map(step => ({
+                            ...step,
+                            profileId: step.profile?.id || "",
+                            statusId: step.status?.id || ""
+                        }));
                     })
                     .finally(() => {
                         this.isLoading = false;
@@ -239,6 +258,8 @@
             },
             addStep() {
                 this.stepsList.push({
+                    id: crypto.randomUUID?.() || Date.now() + Math.random(),
+                    name: '',
                     status: '',
                     profile: '',
                 });
@@ -246,7 +267,41 @@
             removeStep(index) {
                 this.stepsList.splice(index, 1);
             },
-            save() {
+            async save() {
+                if (!this.stepsList || this.stepsList.length === 0) {
+                    return this.$notify({
+                        title: 'Workflow',
+                        message: 'validation.oneStep',
+                        variant: 'warning',
+                        icon: 'CircleAlert',
+                    });
+                }
+
+                const nameValid = await this.$refs.nameField?.validate?.();
+                const teamValid = await this.$refs.teamField?.validate?.();
+
+                let stepsValid = true;
+                const stepRefs = this.$refs.stepRefs || [];
+                for (const stepRef of stepRefs) {
+                    if (stepRef?.validateStep) {
+                        const valid = await stepRef.validateStep();
+                        if (!valid) stepsValid = false;
+                    }
+                }
+
+                if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
+                    return this.$notify({
+                        title: 'Workflow',
+                        message: 'validation.hasInvalid',
+                        variant: 'warning',
+                        icon: 'CircleAlert',
+                    });
+                }
+                
+                this.stepsList.forEach((step, index) => {
+                    step.order = index + 1;
+                });
+
                 this.isLoading = true;
                 if(this.isEdit) {
                     return this.editWorkflow();
@@ -259,10 +314,10 @@
                     teamId: this.workflowData.teamId,
                     steps: this.stepsList
                 };
-
+                
                 WorkflowService.createWorkflow(params)
                     .then((response) => {
-                        if(response) {
+                        if(response.error === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
                                 title: 'Workflow',
@@ -292,7 +347,7 @@
 
                 WorkflowService.editWorkflow(params)
                     .then((response) => {
-                        if(response) {
+                        if(response.error === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
                                 title: 'Workflow',
@@ -313,7 +368,7 @@
                     });
             },
             redirectToIndex() {
-                return this.$router.push({ name: "Workflow" });
+                return this.$router.push({ name: "WorkflowEditor" });
             },
         },
         created() {

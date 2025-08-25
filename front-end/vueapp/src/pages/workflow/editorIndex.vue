@@ -4,9 +4,9 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("workflow.editTitle") }}</h5>
                         <p>
-                            <small class="text-muted">{{ $t("workflow.subtitle") }}</small>
+                            <small class="text-muted">{{ $t("workflow.subtitleEditor") }}</small>
                         </p>
                     </div>
                 </div>
@@ -78,6 +78,7 @@
                         <div class="kanban-wrapper">
                             <WorkflowCards 
                                 :kanbanData="board"
+                                :isEditor="true"
                                 @reload="reloadKanban"
                             />
                         </div>
@@ -85,7 +86,6 @@
                 </div>
             </div>
         </div>
-
         <FullscreenLoadingComponent 
             v-if="isDeleting"
         />
@@ -125,6 +125,7 @@
         },
         methods: {
             getWorkflowList() {
+                this.workflowList = [];
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
@@ -140,6 +141,8 @@
                         if(this.workflowList.length > 0) {
                             this.selectOption(this.workflowList[0]);
                             this.filteredworkflows();
+                        } else {
+                            this.isLoaded = false;
                         }
                     });
             },
@@ -191,6 +194,7 @@
                 WorkflowService.deleteWorkflowById(this.selectedOption.id)
                     .then((status) => {
                         if(status) {
+                            this.getWorkflowList();
                             return this.$notify({
                                 title: 'Workflow',
                                 message: 'workflow.removeSuccess',
