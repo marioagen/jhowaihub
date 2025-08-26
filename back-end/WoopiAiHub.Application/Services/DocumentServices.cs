@@ -10,6 +10,7 @@ using Refit;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Dto;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
@@ -55,6 +56,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
+        private const string FindingDocumentErrorMessage = "Error while finding document in database";
 
         public DocumentServices(IDocumentRepository documentRepository,
                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -144,7 +146,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> DocumentAnalysis(DocumentAnalysisResponseDto documentAnalysisResponseDto)
         {
-
             var document = _documentRepository.FindById(documentAnalysisResponseDto.Id);
             var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
 
@@ -346,7 +347,7 @@ namespace WoopiAiHub.Application.Services
 
             if (result == null)
             {
-                var ex = new ArgumentException("Error while finding document in database");
+                var ex = new ArgumentException(FindingDocumentErrorMessage);
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindByIdAnalyze)} method");
                 throw ex;
             }
@@ -445,7 +446,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<IEnumerable<DocumentEmbeddingsAddDto>> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
+        public async Task<DocumentEmbeddingsDataDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
         {
             var keyAccess = _config[ConfigKeyAccessName];
             if (string.IsNullOrEmpty(keyAccess))
@@ -456,7 +457,7 @@ namespace WoopiAiHub.Application.Services
             var documentoId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
             if (documentoId == 0)
             {
-                throw new ArgumentException("Error while finding document in database");
+                throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
             var documentEmbeddingsAddDtoList = await ExtractDocumentEmbeddingsAddDto(processOcrResultDto);
@@ -481,7 +482,14 @@ namespace WoopiAiHub.Application.Services
 
             _documentRepository.ChangeStatus(documentoId, DocumentStatus.OCR);
 
-            return documentEmbeddingsAddDtoList;
+            var documentEmbeddingsDto = new DocumentEmbeddingsDataDto
+            {
+                ResponseQueue = _messageQueues.EmbeddingQueueAiHubResponse,
+                ReferenceFile = processOcrResultDto.ReferenceFile,
+                DocumentEmbeddings = documentEmbeddingsAddDtoList
+            };
+
+            return documentEmbeddingsDto;
         }
 
         /// <summary>
@@ -790,16 +798,38 @@ namespace WoopiAiHub.Application.Services
         /// <param name="status"></param>
         /// <returns></returns>
         public bool ChangeStatusByReferenceFile(string referenceFile,
-                                                            string emailCreator,
-                                                            DocumentStatus status)
+                                                string emailCreator,
+                                                DocumentStatus status)
         {
             var id = _documentRepository.FindDocumentIdByReferenceFile(referenceFile);
             if (id == 0)
             {
-                throw new ArgumentException("Error while finding document in database");
+                throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
             return  _documentRepository.ChangeStatus(id, status);
+        }
+
+        /// <summary>
+        /// Process the result of the embeddings request and updates the document status.
+        /// </summary>
+        /// <param name="documentEmbeddingsResultDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
+        {
+            var resultRegisterConsumption = await RegisterConsumptionPages(documentEmbeddingsResultDto);
+            if (!resultRegisterConsumption)
+                throw new AppException(ErrorCode.DefaultError, "Failed to send page consumption", null);
+
+            var documentId = _documentRepository.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile);
+            if (documentId == 0)
+            {
+                throw new ArgumentException(FindingDocumentErrorMessage);
+            }
+
+            await ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
         }
 
         /// <summary>
@@ -1137,6 +1167,28 @@ namespace WoopiAiHub.Application.Services
                 id,
                 DateTime.Now
             );
+        }
+
+        /// <summary>
+        /// Sends page consumption to the marketplace
+        /// </summary>
+        /// <param name="documentEmbeddingsResultDto"></param>
+        /// <returns></returns>
+        private async Task<bool> RegisterConsumptionPages(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
+        {
+            var consumption = new ConsumptionPagesDto
+            {
+                Email = documentEmbeddingsResultDto.Email,
+                Pages = documentEmbeddingsResultDto.TotalPages,
+                Tenant = documentEmbeddingsResultDto.Tenant,
+                IsKeyOrigin = false
+            };
+
+            var keyAccess = _config["KeyAccess"]!;
+            var result = await _marketPlaceApi.ManageConsumptionPages(keyAccess,
+                                                                      consumption);
+
+            return result;
         }
 
         /// <summary>

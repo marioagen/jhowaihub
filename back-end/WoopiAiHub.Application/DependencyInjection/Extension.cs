@@ -38,6 +38,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<ICardServices, CardServices>();
 
             services.AddHostedService<OcrConsumer>();
+            services.AddHostedService<DocumentEmbeddingsConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

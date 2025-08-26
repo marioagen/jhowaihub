@@ -48,6 +48,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
                                                string emailCreator,
                                                DocumentStatus status);
 
-        Task<IEnumerable<DocumentEmbeddingsAddDto>> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto);
+        Task<DocumentEmbeddingsDataDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto);
+        Task ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto);
     };
 }
