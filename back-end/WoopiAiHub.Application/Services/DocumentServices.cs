@@ -10,6 +10,7 @@ using Refit;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Dto;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
@@ -55,6 +56,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
+        private const string FindingDocumentErrorMessage = "Error while finding document in database";
 
         public DocumentServices(IDocumentRepository documentRepository,
                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -345,7 +347,7 @@ namespace WoopiAiHub.Application.Services
 
             if (result == null)
             {
-                var ex = new ArgumentException("Error while finding document in database");
+                var ex = new ArgumentException(FindingDocumentErrorMessage);
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindByIdAnalyze)} method");
                 throw ex;
             }
@@ -455,7 +457,7 @@ namespace WoopiAiHub.Application.Services
             var documentoId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
             if (documentoId == 0)
             {
-                throw new ArgumentException("Error while finding document in database");
+                throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
             var documentEmbeddingsAddDtoList = await ExtractDocumentEmbeddingsAddDto(processOcrResultDto);
@@ -802,7 +804,7 @@ namespace WoopiAiHub.Application.Services
             var id = _documentRepository.FindDocumentIdByReferenceFile(referenceFile);
             if (id == 0)
             {
-                throw new ArgumentException("Error while finding document in database");
+                throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
             return  _documentRepository.ChangeStatus(id, status);
@@ -813,18 +815,18 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="documentEmbeddingsResultDto"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="AppException"></exception>
         /// <exception cref="ArgumentException"></exception>
         public async Task ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
         {
             var resultRegisterConsumption = await RegisterConsumptionPages(documentEmbeddingsResultDto);
             if (!resultRegisterConsumption)
-                throw new Exception("Failed to send page consumption");
+                throw new AppException(ErrorCode.DefaultError, "Failed to send page consumption", null);
 
             var documentId = _documentRepository.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile);
             if (documentId == 0)
             {
-                throw new ArgumentException("Error while finding document in database");
+                throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
             await ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);

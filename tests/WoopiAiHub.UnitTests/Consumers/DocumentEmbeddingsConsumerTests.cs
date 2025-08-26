@@ -9,7 +9,6 @@ using WoopiAiHub.Application.Messaging;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
-using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
@@ -89,7 +88,6 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task DocumentEmbeddingsConsumer_ConsumerAsync_ShouldConsumeMessage()
         {
             // Arrange
-            var documentId = 1;
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<DocumentEmbeddingsResultDto, Task>>()))
                          .Callback<string, Func<DocumentEmbeddingsResultDto, Task>>(async (queue, callback) =>
                          {
