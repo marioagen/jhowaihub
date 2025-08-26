@@ -1,22 +1,24 @@
 <template>
         <div class="card">
             <div class="card-content">
-                <div class="cover" v-if="progress < 100">
+                <div class="cover" v-if="this.statusProgress < 100">
                     <div class="spinner-cover">
                         <LucideIcon icon="Loader" size="24" class="me-1 animate-spin" />
                     </div>
-                    <div class="progress-content">
-                        <div class="mb-2">{{ $t("labelprogress") }} <span class="float-end">{{ progress }}%</span></div>
+                    <div class="progress-content" v-if="this.statusProgress === 0 || this.statusProgress === 2 || this.statusProgress === 3">
+                        <div class="mb-2">{{ $t("labelprogress") }} <span class="float-end">{{ getProgressPercentage(this.statusProgress) }}%</span></div>
                         <div class="progress">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
-                                :aria-valuenow="progress" 
-                                aria-valuemin="0" 
-                                aria-valuemax="100" 
-                                :style="{ width: (progress) + '%'}"></div>
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar"
+                                 :aria-valuenow="getProgressPercentage(this.statusProgress) || 0"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 :style="{ width: (getProgressPercentage(this.statusProgress) || 0) + '%' }">
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-body" :class="progress < 100 ? 'hide-card' : ''">
+                <div class="card-body" :class="this.statusProgress !== 4 ? 'hide-card' : ''">
                     <p>{{ dataCard.name }}</p>
                     <div class="mb-2">
                         <LucideIcon icon="FileText" size="12" class="me-1" />
@@ -63,11 +65,13 @@
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import CardsServices from "@/services/cards/CardsServices";
+    import signalRService from '@/services/signalR/signalRServices'
 
     export default {
         name: "CardComponent",
         data: () => ({
             isLoadingAnalysis: false,
+            statusProgress: 0
         }),
         props: {
             dataCard: {
@@ -90,11 +94,6 @@
                 required: true,
                 default: false,
             },
-            progress: {
-                type: Number,
-                required: true,
-                default: 0,
-            },
         },
         methods: {
             badgeStyle(color) {
@@ -113,22 +112,22 @@
                     this.updateStatus();
                 }
             },
-            getDocumentNormalized() {
-                let paramsReq = {
-                    Id: parseInt(this.dataCard.documentId),
-                    Embeddings_model_name: "",
-                };
-                DocumentsServices.normalizeDocument(paramsReq)
-                        .then((response) => {
-                            if (response.error !== undefined) {
-                                console.log(response.error);
-                            }
-                            this.updateStatus()
-                        })
-                        .finally(() => {
-                            this.isLoadingAnalysis = false;
-                        });
-            },
+            //getDocumentNormalized() {
+            //    let paramsReq = {
+            //        Id: parseInt(this.dataCard.documentId),
+            //        Embeddings_model_name: "",
+            //    };
+            //    DocumentsServices.normalizeDocument(paramsReq)
+            //            .then((response) => {
+            //                if (response.error !== undefined) {
+            //                    console.log(response.error);
+            //                }
+            //                this.updateStatus()
+            //            })
+            //            .finally(() => {
+            //                this.isLoadingAnalysis = false;
+            //            });
+            //},
             updateStatus() {
                 if (!this.isLastStep) {
                     var params = {
@@ -152,7 +151,31 @@
                             this.$emit('reload');
                         });
                 }
-            }
+            },
+            handleStatusChanged(message) {
+                const item = this.dataCard.documentId === message.documentId;
+                if (item) {
+                    this.statusProgress = message.status;
+                }
+            },
+            getProgressPercentage(status) {
+                switch (status) {
+                    case 0:
+                        return 0; // 0%
+                    case 2:
+                        return 50; // 50%
+                    case 3:
+                        return 90; // 90%
+                    default:
+                        return 0; // Valor padrão
+                }
+            },
+        },
+        mounted() {
+            signalRService.on(this.signalrEventStatusChanged, this.handleStatusChanged);
+        },
+        beforeUnmount() {
+            signalRService.off(this.signalrEventStatusChanged);
         },
         computed: {
             verifyFirst() {

@@ -11,6 +11,8 @@ using WoopiAiHub.Api.Exceptions;
 using System.Text.Json.Serialization;
 using WoopiAiHub.Infrastructure.DependencyInjection;
 using WoopiAiHub.Api.Hubs;
+using WoopiAiHub.Application.Services.Hubs;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,7 +80,8 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(config);
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+builder.Services.AddScoped<IDocumentNotifier, DocumentNotifier>();
+builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
 builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
