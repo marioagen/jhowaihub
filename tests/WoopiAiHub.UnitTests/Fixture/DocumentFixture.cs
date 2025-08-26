@@ -350,7 +350,39 @@ namespace WoopiAiHub.UnitTests.Fixture
                             }
                         }
                     },
-                    Tables = new List<CustomDocumentTable>()
+                    Tables = new List<CustomDocumentTable>() { new CustomDocumentTable(){
+                        BoundingRegions = new List<BoundingRegionCustom> { new BoundingRegionCustom { PageNumber = 1 } },
+                        Cells = new List<CustomDocumentTableCell>
+                            {
+                                new CustomDocumentTableCell
+                                {
+                                    ColumnIndex = 0,
+                                    RowIndex = 0,
+                                    Content = "Cell 1"
+                                },
+                                new CustomDocumentTableCell
+                                {
+                                    ColumnIndex = 1,
+                                    RowIndex = 0,
+                                    Content = "Cell 2"
+                                }
+                            }
+                        }
+                    }
+                });
+            return faker;
+        }
+
+        public static DocumentEmbeddingsResultDto FindValidDocumentEmbeddingsResultDto()
+        {
+            var faker = new Faker<DocumentEmbeddingsResultDto>("pt_BR")
+                .CustomInstantiator(f => new DocumentEmbeddingsResultDto
+                {
+                    ReferenceFile = f.Random.String(),
+                    Tenant = f.Random.String(),
+                    Email = f.Random.String(),
+                    KeyMongoAccess = f.Random.String(),
+                    TotalPages = f.Random.Int(1, 100)
                 });
             return faker;
         }

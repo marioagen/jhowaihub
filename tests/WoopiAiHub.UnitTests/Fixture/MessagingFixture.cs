@@ -1,4 +1,5 @@
-﻿using Bogus;
+﻿using Azure.Storage.Blobs.Models;
+using Bogus;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using Xunit;
@@ -55,7 +56,32 @@ namespace WoopiAiHub.UnitTests.Fixture
             .RuleFor(a => a.Email, "test");
 
             return documentEmbeddingsAddDto.Generate(2);
+        }
 
+        public static DocumentEmbeddingsDataDto FindValidDocumentEmbeddingsDataDto()
+        {
+            var faker = new Faker<DocumentEmbeddingsDataDto>("pt_BR")
+              .CustomInstantiator(f => new DocumentEmbeddingsDataDto
+              {
+                  ReferenceFile = f.Random.Guid().ToString(),
+                  ResponseQueue = f.Random.String(),
+                  DocumentEmbeddings = [.. FindValidDocumentEmbeddingsAddDto()]
+              });
+            return faker;
+        }
+
+        public static DocumentEmbeddingsResultDto FindValidDocumentEmbeddingsResultDto()
+        {
+            var faker = new Faker<DocumentEmbeddingsResultDto>("pt_BR")
+              .CustomInstantiator(f => new DocumentEmbeddingsResultDto
+              {
+                  ReferenceFile = f.Random.Guid().ToString(),
+                  KeyMongoAccess = f.Random.String(),
+                  Tenant = f.Random.String(),
+                  Email = f.Random.String(),
+                  TotalPages = f.Random.Int(1, 10)
+              });
+            return faker;
         }
     }
 

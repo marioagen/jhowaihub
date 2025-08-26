@@ -327,6 +327,7 @@ namespace WoopiAiHub.Application.Services
             var permissionsJson = JsonConvert.SerializeObject(permissionsList);
             var claims = new List<Claim>
             {
+                new Claim(ClaimTypes.Email, userEmail),
                 new Claim(JwtRegisteredClaimNames.Sub, userEmail),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),

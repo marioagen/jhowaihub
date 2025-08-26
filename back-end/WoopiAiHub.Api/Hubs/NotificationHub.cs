@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 

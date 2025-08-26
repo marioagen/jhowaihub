@@ -44,10 +44,11 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<FindDocumentDto> FindDocumentById(int id,
                                                string tenant);
 
-        bool ChangeStatusByReferenceFile(string referenceFile,
+        Task<bool> ChangeStatusByReferenceFile(string referenceFile,
                                                string emailCreator,
                                                DocumentStatus status);
 
-        Task<IEnumerable<DocumentEmbeddingsAddDto>> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto);
+        Task<DocumentEmbeddingsDataDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto);
+        Task ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto);
     };
 }

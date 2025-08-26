@@ -1,24 +1,24 @@
 <template>
         <div class="card">
             <div class="card-content">
-                <div class="cover" v-if="this.statusProgress < 100">
+                <div class="cover"  v-if="dataCard.statusDocument !== 1 && dataCard.statusDocument !== 5">
                     <div class="spinner-cover">
                         <LucideIcon icon="Loader" size="24" class="me-1 animate-spin" />
                     </div>
-                    <div class="progress-content" v-if="this.statusProgress === 0 || this.statusProgress === 2 || this.statusProgress === 3">
-                        <div class="mb-2">{{ $t("labelprogress") }} <span class="float-end">{{ getProgressPercentage(this.statusProgress) }}%</span></div>
+                    <div class="progress-content" v-if="dataCard.statusDocument !== 1 && dataCard.statusDocument !== 5">
+                        <div class="mb-2">{{ $t("labelprogress") }} <span class="float-end">{{ getProgressPercentage(dataCard.statusDocument) || 0 }}%</span></div>
                         <div class="progress">
                             <div class="progress-bar progress-bar-striped progress-bar-animated"
                                  role="progressbar"
-                                 :aria-valuenow="getProgressPercentage(this.statusProgress) || 0"
+                                 :aria-valuenow="getProgressPercentage(dataCard.statusDocument) || 0"
                                  aria-valuemin="0"
                                  aria-valuemax="100"
-                                 :style="{ width: (getProgressPercentage(this.statusProgress) || 0) + '%' }">
+                                 :style="{ width: (getProgressPercentage(dataCard.statusDocument) || 0) + '%' }">
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-body" :class="this.statusProgress !== 4 ? 'hide-card' : ''">
+                <div class="card-body" :class="(dataCard.statusDocument !== 1 && dataCard.statusDocument !== 5) ? 'hide-card' : ''">
                     <p>{{ dataCard.name }}</p>
                     <div class="mb-2">
                         <LucideIcon icon="FileText" size="12" class="me-1" />
@@ -41,23 +41,6 @@
                         <div class="badge" :style="badgeStyle(dataStep.status.color)">{{dataStep.status.name}}</div>
                     </div>
                 </div>
-                <hr>
-                <div class="mb-2">
-                    <LucideIcon icon="User" size="12" class="me-1" />
-                    <small>{{dataCard.owner}}</small>
-                </div>
-                <div class="mb-2">
-                    <button class="btn btn-sm btn-primary" style="float:right" @click="advanceStep" v-if="!isLastStep">
-                        <div v-if="isLoadingAnalysis">
-                            <span class="spinner-grow spinner-grow-sm" role="status"></span>
-                        </div>
-                        <div v-else>
-                            <span>{{ verifyFirst }}</span>
-                            <LucideIcon icon="ChevronRight" size="16" class="me-1" />
-                        </div>
-                    </button>
-                    <div class="badge" :style="badgeStyle(dataStep.status.color)">{{dataStep.status.name}}</div>
-                </div>
             </div>
         </div>
 </template>
@@ -71,7 +54,8 @@
         name: "CardComponent",
         data: () => ({
             isLoadingAnalysis: false,
-            statusProgress: 0
+            statusProgress: null,
+            signalrEventStatusChanged: "StatusChanged"
         }),
         props: {
             dataCard: {
@@ -112,22 +96,22 @@
                     this.updateStatus();
                 }
             },
-            //getDocumentNormalized() {
-            //    let paramsReq = {
-            //        Id: parseInt(this.dataCard.documentId),
-            //        Embeddings_model_name: "",
-            //    };
-            //    DocumentsServices.normalizeDocument(paramsReq)
-            //            .then((response) => {
-            //                if (response.error !== undefined) {
-            //                    console.log(response.error);
-            //                }
-            //                this.updateStatus()
-            //            })
-            //            .finally(() => {
-            //                this.isLoadingAnalysis = false;
-            //            });
-            //},
+            getDocumentNormalized() {
+                let paramsReq = {
+                    Id: parseInt(this.dataCard.documentId),
+                    Embeddings_model_name: "",
+                };
+               DocumentsServices.normalizeDocument(paramsReq)
+                        .then((response) => {
+                            if (response.error !== undefined) {
+                                console.log(response.error);
+                            }
+                            this.updateStatus()
+                        })
+                        .finally(() => {
+                           this.isLoadingAnalysis = false;
+                       });
+            },
             updateStatus() {
                 if (!this.isLastStep) {
                     var params = {
@@ -152,13 +136,8 @@
                         });
                 }
             },
-            handleStatusChanged(message) {
-                const item = this.dataCard.documentId === message.documentId;
-                if (item) {
-                    this.statusProgress = message.status;
-                }
-            },
             getProgressPercentage(status) {
+                console.log(this.dataCard);
                 switch (status) {
                     case 0:
                         return 0; // 0%
@@ -171,8 +150,14 @@
                 }
             },
         },
-        mounted() {
-            signalRService.on(this.signalrEventStatusChanged, this.handleStatusChanged);
+        async mounted() {
+            signalRService.on(this.signalrEventStatusChanged, (message) => {
+                const item = this.dataCard.documentId === message.documentId;
+                if (item) {
+                    this.dataCard.statusDocument = message.status;
+                    console.log(this.dataCard.statusDocument);
+                }
+            });
         },
         beforeUnmount() {
             signalRService.off(this.signalrEventStatusChanged);

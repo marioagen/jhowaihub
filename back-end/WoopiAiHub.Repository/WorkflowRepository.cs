@@ -129,7 +129,8 @@ namespace WoopiAiHub.Repository
                         Created = c.Created,
                         Description = c.Document.Description,
                         Owner = c.Document.EmailCreator,
-                        DocumentId = c.Document.Id
+                        DocumentId = c.Document.Id,
+                        StatusDocument = c.Document.Status,
                     }).ToList(),
                     WorkflowId = s.WorkflowId
                 }).ToList()

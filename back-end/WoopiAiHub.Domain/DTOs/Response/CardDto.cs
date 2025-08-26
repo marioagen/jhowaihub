@@ -1,4 +1,6 @@
-﻿namespace WoopiAiHub.Domain.DTOs.Response
+﻿using WoopiAiHub.Domain.Enum;
+
+namespace WoopiAiHub.Domain.DTOs.Response
 {
     public record class CardDto
     {
@@ -10,6 +12,7 @@
         public int Order { get; set; }
         public int DocumentId { get; set; }
         public ProfileDto Profile { get; set; } = new();
+        public DocumentStatus StatusDocument { get; set; } = new();
         public StatusDto Status { get; set; } = new();
         public DateTime Created { get; set; }
     }
