@@ -875,8 +875,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(processOcrResultDto.ReferenceFile, result.First().ReferenceFile);
-            Assert.Equal(processOcrResultDto.Tenant, result.First().Tenant);
+            Assert.Equal(processOcrResultDto.ReferenceFile, result.ReferenceFile);
+            Assert.Equal(processOcrResultDto.Tenant, result.DocumentEmbeddings.First().Tenant);
 
             configurationMock.Verify(c => c["keyAccess"], Times.Exactly(2));
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
