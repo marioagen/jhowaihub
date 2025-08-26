@@ -146,7 +146,7 @@ namespace WoopiAiHub.UnitTests.Services
             var ocrGoogle = _mocker.GetMock<IOcrGoogle>();
             var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var listOcr = new List<string> { "text" };            
+            var listOcr = new List<string> { "text" };
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
 
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
@@ -395,8 +395,8 @@ namespace WoopiAiHub.UnitTests.Services
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var functionFileRetriever = _mocker.GetMock<IFunctionFileRetriever>();
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), 
-                                                   It.IsAny<string>(), 
+            functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(),
+                                                   It.IsAny<string>(),
                                                    It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
 
             // Act
@@ -405,8 +405,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
-            functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), 
-                                                    It.IsAny<string>(), 
+            functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(),
+                                                    It.IsAny<string>(),
                                                     It.IsAny<string>()), Times.Once);
         }
 
@@ -470,7 +470,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(false);
 
             // Act
-            var result = await _documentServices.ChangeStatus(document.Id,DocumentStatus.Analyzed, document.EmailCreator);
+            var result = await _documentServices.ChangeStatus(document.Id, DocumentStatus.Analyzed, document.EmailCreator);
 
             // Assert
             Assert.False(result);
@@ -482,7 +482,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Delete_Success()
         {
             // Arrange
-            List<int> list = new List<int> { 1,2,3 };
+            List<int> list = new List<int> { 1, 2, 3 };
             List<string> stringArray = new List<string> { "test" };
             var document = _fixture.FindValidDocument();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
@@ -493,7 +493,7 @@ namespace WoopiAiHub.UnitTests.Services
             embeddingRepository.Setup(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess)).ReturnsAsync(_fixture.FindHttpResponseMessage);
 
             // Act
-            var result = await _documentServices.Delete(list, 
+            var result = await _documentServices.Delete(list,
                                                         headers);
 
             // Assert
@@ -508,7 +508,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Delete_FailAsync()
         {
             // Arrange
-            List<int> list = new List<int> { 1,2,3 };
+            List<int> list = new List<int> { 1, 2, 3 };
             List<string> stringArray = new List<string> { "test" };
             var document = _fixture.FindValidDocument();
             var headers = _fixture.FindValidHeadersDto();
@@ -696,7 +696,7 @@ namespace WoopiAiHub.UnitTests.Services
             var headers = _fixture.FindValidHeadersDto();
             var documentInput = _fixture.FindValidDocumentInputDto();
             headers.KeyMongoAccess = null;
-            
+
             // Act /Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _documentServices.InputDocument(documentInput, headers));
         }
@@ -755,7 +755,7 @@ namespace WoopiAiHub.UnitTests.Services
             var result = _documentServices.FindHashById(ids);
 
             Assert.NotNull(result);
-            documentRepository.Verify(a => a.FindHashById(ids),Times.Once);
+            documentRepository.Verify(a => a.FindHashById(ids), Times.Once);
         }
 
         [Fact(DisplayName = "FindHashById")]
@@ -884,6 +884,30 @@ namespace WoopiAiHub.UnitTests.Services
             documentNormalizedServicesMock.Verify(s => s.Create(It.IsAny<DocumentNormalized>()), Times.Once);
             keyGeneratorMock.Verify(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
+        }
+
+        //teste uniário para ProcessEmbeddingsResult method
+        [Fact(DisplayName = "ProcessEmbeddingsResult should successfully process embeddings result")]
+        [Trait("ProcessEmbeddingsResult", "Success")]
+        public async Task ProcessEmbeddingsResult_Success()
+        {
+            // Arrange
+            var documentEmbeddingsResultDto = DocumentFixture.FindValidDocumentEmbeddingsResultDto();
+            var idDocument = 1;
+            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+
+            marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
+            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile)).Returns(idDocument);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            await documentServices.ProcessEmbeddingsResult(documentEmbeddingsResultDto);
+
+            // Assert
+            documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile), Times.Once);
+            marketPlaceApi.Verify(s => s.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
         }
     }
 }

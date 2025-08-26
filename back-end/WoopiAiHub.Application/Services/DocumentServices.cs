@@ -796,8 +796,8 @@ namespace WoopiAiHub.Application.Services
         /// <param name="status"></param>
         /// <returns></returns>
         public bool ChangeStatusByReferenceFile(string referenceFile,
-                                                            string emailCreator,
-                                                            DocumentStatus status)
+                                                string emailCreator,
+                                                DocumentStatus status)
         {
             var id = _documentRepository.FindDocumentIdByReferenceFile(referenceFile);
             if (id == 0)
