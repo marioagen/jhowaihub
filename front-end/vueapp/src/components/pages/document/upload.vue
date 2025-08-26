@@ -304,7 +304,6 @@
                 hasError: true,
             };
         },
-
         components: {
             ModalAlert,
             ToastAlert,
@@ -472,7 +471,7 @@
                     });
                 });
                 localStorage.setItem("showToast", "true");
-                this.$router.push({ name: "DocumentList", query: { page: "1", showToast: "true" } });
+                this.$router.push({ name: "Workflow", query: { page: "1", showToast: "true" } });
             },
             backToListDocuments: function () {
                 this.$router.push({ name: "DocumentList", query: { page: "1", showToast: "true" } });
@@ -563,7 +562,6 @@
             this.loadTeams();
             this.validateSelection();
         },
-        unmounted() {},
     };
 </script>
 
