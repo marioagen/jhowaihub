@@ -412,7 +412,7 @@
                 }
                 return valid;
             },
-            save: function (e) {
+            save(e) {
                 e.preventDefault();
                 if (!this.validateForm()) return;
                 window.onbeforeunload = function () {
@@ -463,20 +463,21 @@
                     });
                 });
 
-                Promise.all(promises).then((fileDataChunksArray) => {
-                    fileDataChunksArray.forEach((chunks) => {
-                        chunks.forEach((chunkData) => {
-                            uploadFileWorker.send({ message: chunkData });
+                Promise.all(promises)
+                    .then((fileDataChunksArray) => {
+                        fileDataChunksArray.forEach((chunks) => {
+                            chunks.forEach((chunkData) => {
+                                uploadFileWorker.send({ message: chunkData });
+                            });
                         });
-                    });
+                    localStorage.setItem("showToast", "true");
+                    this.$router.push({ name: "Workflow" });
                 });
-                localStorage.setItem("showToast", "true");
-                this.$router.push({ name: "Workflow", query: { page: "1", showToast: "true" } });
             },
-            backToListDocuments: function () {
+            backToListDocuments() {
                 this.$router.push({ name: "DocumentList", query: { page: "1", showToast: "true" } });
             },
-            readFileAsArrayBuffer: function (file) {
+            readFileAsArrayBuffer(file) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
