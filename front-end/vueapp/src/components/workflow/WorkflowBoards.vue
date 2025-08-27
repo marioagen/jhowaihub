@@ -138,7 +138,7 @@
 </template>
 
 <script>
-    import { Field, Form, useForm } from "vee-validate";
+    import { Field, useForm } from "vee-validate";
     import WorkflowStepComponent from "@/components/workflow/WorkflowStepComponent.vue";
     import TeamsService from "@/services/teams/TeamsService";
     import StatusService from "@/services/status/StatusService";
@@ -152,7 +152,6 @@
             FullscreenLoadingComponent,
             WorkflowStepComponent,
             Field,
-            Form
         },
         props: {
             isEdit: {
