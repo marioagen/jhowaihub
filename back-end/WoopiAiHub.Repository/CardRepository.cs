@@ -43,5 +43,26 @@ namespace WoopiAiHub.Repository
             _context.Cards.Update(card);
             return _context.SaveChanges() > 0;
         }
+
+        /// <summary>
+        /// Deletes a card by its document id.
+        /// </summary>
+        /// <param name="card"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteByDocumentId(int documentId)
+        {
+            var cards = _context.Cards
+                .Where(c => c.DocumentId == documentId)
+                .ToList();
+
+            if (!cards.Any())
+                return false;
+
+            foreach (var card in cards)
+            {
+                card.Enable = false;
+            }
+            return _context.SaveChanges() > 0;
+        }
     }
 }
