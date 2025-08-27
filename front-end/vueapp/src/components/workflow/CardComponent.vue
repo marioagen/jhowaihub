@@ -33,12 +33,14 @@
                         <LucideIcon icon="User" size="12" class="me-1" />
                         <small>{{dataCard.owner}}</small>
                     </div>
-                    <div class="mb-2 footer">
+                    <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap">
+                        <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
+                            {{ dataStep.status.name }}
+                        </div>
                         <button class="btn btn-sm btn-primary float-end" @click="advanceStep" v-if="!isLastStep">
                             <span>{{ verifyFirst }}</span>
                             <LucideIcon icon="ChevronRight" size="16" class="me-1" />
                         </button>
-                        <div class="badge" :style="badgeStyle(dataStep.status.color)">{{dataStep.status.name}}</div>
                     </div>
                 </div>
             </div>
@@ -256,5 +258,17 @@
         100% {
             transform: rotate(360deg);
         }
+    }
+
+    .card-body p,
+    .card-body small {
+        overflow-wrap: break-word;
+        white-space: normal;
+    }
+
+    .card-body .badge {
+        max-width: 60%;
+        overflow-wrap: break-word;
+        white-space: normal;
     }
 </style>
