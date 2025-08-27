@@ -27,13 +27,14 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
+using WoopiAiHub.Repository;
 
 
 namespace WoopiAiHub.Application.Services
 {
     public class DocumentServices : IDocumentServices
     {
-
+        private readonly ICardRepository _cardRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly IValidator<RequestCreateDocumentDto> _documentDtoValidator;
         private readonly ILogger<DocumentServices> _logger;
@@ -59,6 +60,7 @@ namespace WoopiAiHub.Application.Services
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
 
         public DocumentServices(IDocumentRepository documentRepository,
+                                ICardRepository cardRepository,
                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
                                ILogger<DocumentServices> logger,
                                IEmbeddingsApi embbedingsApi,
@@ -79,6 +81,7 @@ namespace WoopiAiHub.Application.Services
                                IMessagePublisher<ProcessOcrDto> publisher,
                                IOptions<MessageQueues> messageQueues)
         {
+            _cardRepository = cardRepository;
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
             _logger = logger;
@@ -259,6 +262,11 @@ namespace WoopiAiHub.Application.Services
                 await this.DeleteHash(hash,
                                       headersDto.Tenant,
                                       headersDto.KeyMongoAccess);
+            }
+
+            foreach(var id in ids)
+            {
+                await _cardRepository.DeleteByDocumentId(id);
             }
             return result;
 
