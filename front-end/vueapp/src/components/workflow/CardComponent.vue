@@ -1,11 +1,11 @@
 <template>
         <div class="card">
             <div class="card-content">
-                <div class="cover"  v-if="dataCard.statusDocument !== 3 && dataCard.statusDocument !== 5">
+                <div class="cover"  v-if="showLoading">
                     <div class="spinner-cover">
                         <LucideIcon icon="Loader" size="24" class="me-1 animate-spin" />
                     </div>
-                    <div class="progress-content" v-if="dataCard.statusDocument !== 3 && dataCard.statusDocument !== 5">
+                    <div class="progress-content" v-if="showLoading">
                         <div class="mb-2">{{ $t("labelprogress") }} <span class="float-end">{{ getProgressPercentage(dataCard.statusDocument) || 0 }}%</span></div>
                         <div class="progress">
                             <div class="progress-bar progress-bar-striped progress-bar-animated"
@@ -18,7 +18,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body" :class="(dataCard.statusDocument !== 3 && dataCard.statusDocument !== 5) ? 'hide-card' : ''">
+                <div class="card-body" :class="showLoading ? 'hide-card' : ''">
                     <p>{{ dataCard.name }}</p>
                     <div class="mb-2">
                         <LucideIcon icon="FileText" size="12" class="me-1" />
@@ -165,6 +165,9 @@
         computed: {
             verifyFirst() {
                 return this.isFirstStep == true ? this.$t("labelAnalyze") : this.$t("labelAdvance");
+            },
+            showLoading() {
+                return this.dataCard.statusDocument === 2 || this.dataCard.statusDocument === 0 || this.dataCard.statusDocument === 4;
             }
         },
     };
