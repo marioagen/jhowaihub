@@ -83,7 +83,6 @@ namespace WoopiAiHub.Application.Services
                                IOptions<MessageQueues> messageQueues,
                                IDocumentNotifier documentNotifier)
         {
-
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
             _logger = logger;
