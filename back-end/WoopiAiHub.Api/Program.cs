@@ -76,8 +76,8 @@ if (!string.IsNullOrWhiteSpace(allowedOrigin))
 else
     throw new InvalidOperationException("CORS origin não está configurado. Verifique a chave 'CORS' no appsettings ou variável de ambiente.");
 
-builder.Services.AddApplication();
 builder.Services.AddInfrastructure(config);
+builder.Services.AddApplication();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IDocumentNotifier, DocumentNotifier>();

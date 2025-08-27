@@ -1,11 +1,11 @@
 <template>
         <div class="card">
             <div class="card-content">
-                <div class="cover"  v-if="dataCard.statusDocument !== 1 && dataCard.statusDocument !== 5">
+                <div class="cover"  v-if="dataCard.statusDocument !== 3 && dataCard.statusDocument !== 5">
                     <div class="spinner-cover">
                         <LucideIcon icon="Loader" size="24" class="me-1 animate-spin" />
                     </div>
-                    <div class="progress-content" v-if="dataCard.statusDocument !== 1 && dataCard.statusDocument !== 5">
+                    <div class="progress-content" v-if="dataCard.statusDocument !== 3 && dataCard.statusDocument !== 5">
                         <div class="mb-2">{{ $t("labelprogress") }} <span class="float-end">{{ getProgressPercentage(dataCard.statusDocument) || 0 }}%</span></div>
                         <div class="progress">
                             <div class="progress-bar progress-bar-striped progress-bar-animated"
@@ -18,7 +18,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body" :class="(dataCard.statusDocument !== 1 && dataCard.statusDocument !== 5) ? 'hide-card' : ''">
+                <div class="card-body" :class="(dataCard.statusDocument !== 3 && dataCard.statusDocument !== 5) ? 'hide-card' : ''">
                     <p>{{ dataCard.name }}</p>
                     <div class="mb-2">
                         <LucideIcon icon="FileText" size="12" class="me-1" />
@@ -137,16 +137,15 @@
                 }
             },
             getProgressPercentage(status) {
-                console.log(this.dataCard);
                 switch (status) {
                     case 0:
                         return 0; // 0%
                     case 2:
                         return 50; // 50%
                     case 3:
-                        return 90; // 90%
+                        return 100; // 90%
                     default:
-                        return 0; // Valor padrão
+                        return 0; // Valor padrï¿½o
                 }
             },
         },
@@ -155,7 +154,6 @@
                 const item = this.dataCard.documentId === message.documentId;
                 if (item) {
                     this.dataCard.statusDocument = message.status;
-                    console.log(this.dataCard.statusDocument);
                 }
             });
         },

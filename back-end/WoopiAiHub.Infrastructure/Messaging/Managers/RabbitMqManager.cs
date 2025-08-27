@@ -57,7 +57,8 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
                 HostName = _config.HostName,
                 UserName = _config.UserName,
                 Password = _config.Password,
-                VirtualHost = _config.VirtualHost
+                VirtualHost = _config.VirtualHost,
+                ClientProvidedName = "WoopiAiHub"
             };
 
             return factory;
