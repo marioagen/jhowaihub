@@ -26,7 +26,7 @@
         <template #footer>
             <div class="modal-footer">
                 <button 
-                    class="btn btn-secondary btn-sm" 
+                    class="btn btn-outline-primary btn-table btn-sm table-btn" 
                     @click="close"
                 >
                     {{ $t("labelCancel") }}
