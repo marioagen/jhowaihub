@@ -3,6 +3,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using WoopiAiHub.Application.Messaging;
 
 namespace WoopiAiHub.Application.DependencyInjection
 {
@@ -35,6 +36,10 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IValidateStep, ValidateStep>();
             services.AddScoped<IValidateWorkflow, ValidateWorkflow>();
             services.AddScoped<ICardServices, CardServices>();
+
+            services.AddHostedService<OcrConsumer>();
+            services.AddHostedService<DocumentEmbeddingsConsumer>();
+
             services.AddLogging();
             services.AddMemoryCache();
 

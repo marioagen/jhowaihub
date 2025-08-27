@@ -190,6 +190,8 @@ namespace WoopiAiHub.Repository
                                                   string emailUser)
         {
             return _context.Teams
+                           .Include(t => t.Workflow)
+                           .ThenInclude(w => w!.Steps)
                            .Where(t => ids.Contains(t.Id) &&
                                        t.Users.Any(s => s.Email.Equals(emailUser)))
                            .ToList();

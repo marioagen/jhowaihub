@@ -1,29 +1,42 @@
 <template>
-        <div class="card">
-            <div class="card-body">
-                <p>{{ dataCard.name }}</p>
-                <div class="mb-2">
-                    <LucideIcon icon="FileText" size="12" class="me-1" />
-                    <small>{{ dataCard.description }}</small>
+    <div class="card">
+        <div class="card-body">
+            <p>{{ dataCard.name }}</p>
+            <div class="mb-2">
+                <LucideIcon icon="FileText" size="12" class="me-1" />
+                <small>{{ dataCard.description }}</small>
+            </div>
+            <div class="mb-2">
+                <LucideIcon icon="Calendar" size="12" class="me-1" />
+                <small>{{ dataCard.created }}</small>
+            </div>
+            <hr>
+            <div class="mb-2">
+                <LucideIcon icon="User" size="12" class="me-1" />
+                <small>{{ dataCard.owner }}</small>
+            </div>
+            <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap">
+                <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
+                    {{ dataStep.status.name }}
                 </div>
-                <div class="mb-2">
-                    <LucideIcon icon="Calendar" size="12" class="me-1" />
-                    <small>{{dataCard.created}}</small>
-                </div>
-                <hr>
-                <div class="mb-2">
-                    <LucideIcon icon="User" size="12" class="me-1" />
-                    <small>{{dataCard.owner}}</small>
-                </div>
-                <div class="mb-2">
-                    <button class="btn btn-sm btn-primary" style="float:right" @click="advanceStep" v-if="!isLastStep">
+
+                <button
+                    class="btn btn-sm btn-primary flex-shrink-0"
+                    @click="advanceStep"
+                    v-if="!isLastStep"
+                >
+                    <div v-if="isLoadingAnalysis">
+                        <span class="spinner-grow spinner-grow-sm" role="status"></span>
+                    </div>
+                    <div v-else>
                         <span>{{ verifyFirst }}</span>
                         <LucideIcon icon="ChevronRight" size="16" class="me-1" />
-                    </button>
-                    <div class="badge" :style="badgeStyle(dataStep.status.color)">{{dataStep.status.name}}</div>
-                </div>
+                    </div>
+                </button>
             </div>
+
         </div>
+    </div>
 </template>
 
 <script>
@@ -31,6 +44,9 @@
     import CardsServices from "@/services/cards/CardsServices";
     export default {
         name: "CardComponent",
+        data: () => ({
+            isLoadingAnalysis: false,
+        }),
         props: {
             dataCard: {
                 type: Object,
@@ -62,6 +78,7 @@
                 };
             },
             advanceStep() {
+                this.isLoadingAnalysis = true;
                 if (this.isFirstStep) {
                     this.getDocumentNormalized();
                 }
@@ -82,6 +99,7 @@
                             this.updateStatus()
                         })
                         .finally(() => {
+                            this.isLoadingAnalysis = false;
                         });
             },
             updateStatus() {
@@ -94,10 +112,16 @@
                     CardsServices.updateStepAndStatus(params)
                         .then((response) => {
                             if (response.error !== undefined) {
-                                console.log(response.error);
+                                return this.$notify({
+                                    title: 'Error',
+                                    message: response.error,
+                                    variant: 'danger',
+                                    icon: 'CircleX',
+                                });
                             }
                         })
                         .finally(() => {
+                            this.isLoadingAnalysis = false;
                             this.$emit('reload');
                         });
                 }
@@ -134,5 +158,17 @@
     }
     .card {
         white-space: nowrap;
+    }
+
+    .card-body p,
+    .card-body small {
+        overflow-wrap: break-word;
+        white-space: normal;
+    }
+
+    .card-body .badge {
+        max-width: 60%;
+        overflow-wrap: break-word;
+        white-space: normal;
     }
 </style>

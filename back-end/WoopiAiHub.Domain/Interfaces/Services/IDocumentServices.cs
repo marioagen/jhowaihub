@@ -2,6 +2,8 @@
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.DTOs.Messaging;
 
 
 namespace WoopiAiHub.Domain.Interfaces.Services
@@ -25,8 +27,9 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         Task<bool> DocumentAnalysis(DocumentAnalysisResponseDto documentAnalysisResponseDto);
 
-        bool ChangeStatus(int id,
-                          string emailCreator);
+        Task<bool> ChangeStatus(int id,
+                                DocumentStatus status,
+                                string emailCreator);
 
         object FindStatusAndName(int id,
                                  string emailCreator);
@@ -40,5 +43,12 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         Task<FindDocumentDto> FindDocumentById(int id,
                                                string tenant);
+
+        bool ChangeStatusByReferenceFile(string referenceFile,
+                                               string emailCreator,
+                                               DocumentStatus status);
+
+        Task<DocumentEmbeddingsDataDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto);
+        Task ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto);
     };
 }

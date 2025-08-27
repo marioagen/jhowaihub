@@ -1,5 +1,15 @@
-﻿using WoopiAiHub.Application.Services;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Moq;
+using Moq.AutoMock;
+using Refit;
+using System.Net;
+using System.Text;
+using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
@@ -9,15 +19,10 @@ using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
+using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
+using WoopiAiHub.Infrastructure.Messaging.Configuration;
+using WoopiAiHub.Repository.Cache;
 using WoopiAiHub.UnitTests.Fixture;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Moq;
-using Moq.AutoMock;
-using Refit;
-using System.Net;
-using System.Text;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -33,6 +38,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             this._fixture = documentFixture;
             _mocker = new AutoMocker();
+
+            var mockQueues = new Mock<IOptions<MessageQueues>>();
+            mockQueues.Setup(x => x.Value).Returns(new MessageQueues
+            {
+                OcrQueue = "ocrQueue"
+            });
+
+            _mocker.Use(mockQueues);
 
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(x => x.GetSection("keyAccess").Value).Returns(Guid.NewGuid().ToString());
@@ -133,11 +146,11 @@ namespace WoopiAiHub.UnitTests.Services
             var ocrGoogle = _mocker.GetMock<IOcrGoogle>();
             var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var listOcr = new List<string> { "text" };            
+            var listOcr = new List<string> { "text" };
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
 
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(true);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
             documentNormalizedServices.Setup(a => a.Create(It.IsAny<DocumentNormalized>())).Returns(true);
             ocrGoogle.Setup(a => a.ProcessResult(It.IsAny<byte[]>())).ReturnsAsync(listOcr);
@@ -152,7 +165,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
             functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             documentNormalizedServices.Verify(a => a.Create(It.IsAny<DocumentNormalized>()), Times.Once);
             embeddingsApi.Verify(a => a.AddDocuments(It.IsAny<string>(), It.IsAny<AddDocumentsRequestRefitDto>(), It.IsAny<string>()), Times.Once);
@@ -180,7 +193,7 @@ namespace WoopiAiHub.UnitTests.Services
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
 
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(true);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
             documentNormalizedServices.Setup(a => a.Update(It.IsAny<DocumentNormalized>())).Returns(true);
             documentNormalizedServices.Setup(a => a.FindById(It.IsAny<int>(), It.IsAny<string>())).Returns(documentNormalized);
@@ -197,7 +210,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
             functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             documentNormalizedServices.Verify(a => a.Update(It.IsAny<DocumentNormalized>()), Times.Once);
             documentNormalizedServices.Verify(a => a.FindById(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
@@ -235,7 +248,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.Use(configMock.Object);
 
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(true);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
             documentNormalizedServices.Setup(a => a.Update(It.IsAny<DocumentNormalized>())).Returns(true);
             documentNormalizedServices.Setup(a => a.FindById(It.IsAny<int>(), It.IsAny<string>())).Returns(documentNormalized);
@@ -253,7 +266,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
             functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             documentNormalizedServices.Verify(a => a.Update(It.IsAny<DocumentNormalized>()), Times.Once);
             documentNormalizedServices.Verify(a => a.FindById(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
@@ -314,9 +327,23 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var requestCreateDocumentDto = _fixture.FindValidRequestCreateDocumentDto();
-            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
+            var tenant = _fixture.FindValidTenantInfoDto();
+            var team = DocumentFixture.FindValidTeam();
+            var workflow = DocumentFixture.FindValidWorkflow();
+            var step = DocumentFixture.FindValidStep();
+            workflow.Steps.Add(step);
+            team.Workflow = workflow;
+            List<Team> teams = new List<Team> { team };
+
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             fileRepositoryApi.Setup(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>())).ReturnsAsync(fileUploadSummaryDto);
+
+            var teamServicesMock = _mocker.GetMock<ITeamServices>();
+            teamServicesMock.Setup(a => a.FindByIdsAndUser(It.IsAny<List<int>>(), It.IsAny<string>())).Returns(teams);
+
+            var tenantCache = _mocker.GetMock<ITenantCacheServices>();
+            tenantCache.Setup(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>())).ReturnsAsync(tenant);
 
             // Act / Assert
             await _documentServices.ProcessChunks(requestCreateDocumentDto, "tenant");
@@ -368,8 +395,8 @@ namespace WoopiAiHub.UnitTests.Services
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var functionFileRetriever = _mocker.GetMock<IFunctionFileRetriever>();
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), 
-                                                   It.IsAny<string>(), 
+            functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(),
+                                                   It.IsAny<string>(),
                                                    It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
 
             // Act
@@ -378,8 +405,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
-            functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), 
-                                                    It.IsAny<string>(), 
+            functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(),
+                                                    It.IsAny<string>(),
                                                     It.IsAny<string>()), Times.Once);
         }
 
@@ -418,36 +445,36 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "ChangeStatus")]
         [Trait("ChangeStatus", "Success")]
-        public void ChangeStatus_Success()
+        public async Task ChangeStatus_Success()
         {
             // Arrange
             var document = _fixture.FindValidDocument();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(true);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
 
             // Act
-            var result = _documentServices.ChangeStatus(document.Id, document.EmailCreator);
+            var result = await _documentServices.ChangeStatus(document.Id, DocumentStatus.Analyzed, document.EmailCreator);
 
             // Assert
             Assert.True(result);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
         }
 
         [Fact(DisplayName = "ChangeStatus")]
         [Trait("ChangeStatus", "Fail")]
-        public void ChangeStatus_Fail()
+        public async Task ChangeStatus_Fail()
         {
             // Arrange
             var document = _fixture.FindValidDocument();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>())).Returns(false);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(false);
 
             // Act
-            var result = _documentServices.ChangeStatus(document.Id, document.EmailCreator);
+            var result = await _documentServices.ChangeStatus(document.Id, DocumentStatus.Analyzed, document.EmailCreator);
 
             // Assert
             Assert.False(result);
-            documentRepository.Verify(r => r.ChangeStatus(It.IsAny<int>()), Times.Once);
+            documentRepository.Verify(r => r.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
         }
 
         [Fact(DisplayName = "Delete")]
@@ -455,7 +482,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Delete_Success()
         {
             // Arrange
-            List<int> list = new List<int> { 1,2,3 };
+            List<int> list = new List<int> { 1, 2, 3 };
             List<string> stringArray = new List<string> { "test" };
             var document = _fixture.FindValidDocument();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
@@ -466,7 +493,7 @@ namespace WoopiAiHub.UnitTests.Services
             embeddingRepository.Setup(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess)).ReturnsAsync(_fixture.FindHttpResponseMessage);
 
             // Act
-            var result = await _documentServices.Delete(list, 
+            var result = await _documentServices.Delete(list,
                                                         headers);
 
             // Assert
@@ -481,7 +508,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Delete_FailAsync()
         {
             // Arrange
-            List<int> list = new List<int> { 1,2,3 };
+            List<int> list = new List<int> { 1, 2, 3 };
             List<string> stringArray = new List<string> { "test" };
             var document = _fixture.FindValidDocument();
             var headers = _fixture.FindValidHeadersDto();
@@ -669,7 +696,7 @@ namespace WoopiAiHub.UnitTests.Services
             var headers = _fixture.FindValidHeadersDto();
             var documentInput = _fixture.FindValidDocumentInputDto();
             headers.KeyMongoAccess = null;
-            
+
             // Act /Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _documentServices.InputDocument(documentInput, headers));
         }
@@ -728,7 +755,7 @@ namespace WoopiAiHub.UnitTests.Services
             var result = _documentServices.FindHashById(ids);
 
             Assert.NotNull(result);
-            documentRepository.Verify(a => a.FindHashById(ids),Times.Once);
+            documentRepository.Verify(a => a.FindHashById(ids), Times.Once);
         }
 
         [Fact(DisplayName = "FindHashById")]
@@ -743,6 +770,144 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act // Assert
             Assert.Throws<ArgumentException>(() => _documentServices.FindHashById(ids));
+        }
+
+        [Fact(DisplayName = "ChangeStatusByReferenceFile Success")]
+        [Trait("ChangeStatusByReferenceFile", "Success")]
+        public void ChangeStatusByReferenceFile_Success()
+        {
+            // Arrange
+            string referenceFile = string.Empty;
+            string emailCreator = string.Empty;
+            DocumentStatus status = DocumentStatus.Analyzed;
+            int documentId = 1;
+            var documentRepository = _mocker.GetMock<IDocumentRepository>();
+            documentRepository.Setup(a => a.FindDocumentIdByReferenceFile(referenceFile)).Returns(documentId);
+            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
+
+            //Act
+            var result = _documentServices.ChangeStatusByReferenceFile(referenceFile, emailCreator, status);
+
+            Assert.True(result);
+            documentRepository.Verify(a => a.FindDocumentIdByReferenceFile(referenceFile), Times.Once);
+            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "ProcessOcrResult should throw exception when keyAccess is not configured")]
+        [Trait("ProcessOcrResult", "Fail")]
+        public async Task ProcessOcrResult_ShouldThrowException_WhenKeyAccessIsNotConfigured()
+        {
+            // Arrange
+            var processOcrResultDto = new ProcessOcrResultDto
+            {
+                ReferenceFile = "validReferenceFile",
+                Tenant = "validTenant",
+                AnalyzeResult = new AnalyzeResultCustomDto()
+            };
+
+            var configMock = new Mock<IConfiguration>();
+            configMock.Setup(x => x["keyAccess"]).Returns(string.Empty);
+            _mocker.Use(configMock.Object);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _documentServices.ProcessOcrResult(processOcrResultDto));
+
+            Assert.Equal("KeyAccess is not configured in the application settings.", exception.Message);
+        }
+
+        [Fact(DisplayName = "ProcessOcrResult should throw exception when document id is not found")]
+        [Trait("ProcessOcrResult", "Fail")]
+        public async Task ProcessOcrResult_ShouldThrowException_WhenDocumentoIdIsNotFound()
+        {
+            // Arrange
+            int idDocument = 0;
+            var processOcrResultDto = new ProcessOcrResultDto
+            {
+                ReferenceFile = "invalidReferenceFile",
+                Tenant = "validTenant",
+                AnalyzeResult = new AnalyzeResultCustomDto()
+            };
+            var configMock = new Mock<IConfiguration>();
+            configMock.Setup(x => x["keyAccess"]).Returns(Guid.NewGuid().ToString);
+            _mocker.Use(configMock.Object);
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile))
+                                  .Returns(idDocument);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+                documentServices.ProcessOcrResult(processOcrResultDto));
+
+            Assert.Equal("Error while finding document in database", exception.Message);
+            documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
+        }
+
+        [Fact(DisplayName = "ProcessOcrResult should successfully process OCR result and list of DocumentEmbeddingsAddDto")]
+        [Trait("ProcessOcrResult", "Success")]
+        public async Task ProcessOcrResult_Success()
+        {
+            // Arrange
+            var processOcrResultDto = DocumentFixture.FindValidProcessOcrResultDto();
+            var idDocument = 1;
+            var generatedKey = Guid.NewGuid().ToString();
+            var tenant = _fixture.FindValidTenantInfoDto();
+
+            var configurationMock = new Mock<IConfiguration>();
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var documentNormalizedServicesMock = _mocker.GetMock<IDocumentNormalizedServices>();
+            var keyGeneratorMock = _mocker.GetMock<IKeyGeneratorApi>();
+            var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
+            configurationMock.Setup(x => x["keyAccess"]).Returns(Guid.NewGuid().ToString);
+            _mocker.Use(configurationMock.Object);
+            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile)).Returns(idDocument);
+            documentNormalizedServicesMock.Setup(s => s.FindById(idDocument, processOcrResultDto.Email)).Returns((DocumentNormalized?)null);
+            documentNormalizedServicesMock.Setup(s => s.Create(It.IsAny<DocumentNormalized>())).Returns(true);
+            keyGeneratorMock.Setup(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(generatedKey);
+            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                               .ReturnsAsync(tenant);
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            var result = await documentServices.ProcessOcrResult(processOcrResultDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(processOcrResultDto.ReferenceFile, result.ReferenceFile);
+            Assert.Equal(processOcrResultDto.Tenant, result.DocumentEmbeddings.First().Tenant);
+
+            configurationMock.Verify(c => c["keyAccess"], Times.Exactly(2));
+            documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
+            documentNormalizedServicesMock.Verify(s => s.FindById(idDocument, processOcrResultDto.Email), Times.Once);
+            documentNormalizedServicesMock.Verify(s => s.Create(It.IsAny<DocumentNormalized>()), Times.Once);
+            keyGeneratorMock.Verify(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
+        }
+
+        //teste uniário para ProcessEmbeddingsResult method
+        [Fact(DisplayName = "ProcessEmbeddingsResult should successfully process embeddings result")]
+        [Trait("ProcessEmbeddingsResult", "Success")]
+        public async Task ProcessEmbeddingsResult_Success()
+        {
+            // Arrange
+            var documentEmbeddingsResultDto = DocumentFixture.FindValidDocumentEmbeddingsResultDto();
+            var idDocument = 1;
+            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+
+            marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
+            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile)).Returns(idDocument);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            await documentServices.ProcessEmbeddingsResult(documentEmbeddingsResultDto);
+
+            // Assert
+            documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile), Times.Once);
+            marketPlaceApi.Verify(s => s.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
         }
     }
 }

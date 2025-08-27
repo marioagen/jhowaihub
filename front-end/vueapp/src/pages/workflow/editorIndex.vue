@@ -4,13 +4,12 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("workflow.editTitle") }}</h5>
                         <p>
-                            <small class="text-muted">{{ $t("workflow.subtitle") }}</small>
+                            <small class="text-muted">{{ $t("workflow.subtitleEditor") }}</small>
                         </p>
                     </div>
                 </div>
-
                 <div class="card mb-3">
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-3">
@@ -18,7 +17,6 @@
                                 <LucideIcon icon="Clock" size="14" class="me-2" />
                                 <span>{{$t("workflow.boardView")}}</span>
                             </div>
-
                             <div class="dropdown">
                                 <button 
                                     class="btn btn-light border text-start"
@@ -29,7 +27,6 @@
                                     <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
                                     <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
                                 </button>
-
                                 <ul class="dropdown-menu">
                                     <li v-for="item in workflowList" :key="item.id">
                                         <a class="dropdown-item" @click="selectOption(item)">
@@ -45,7 +42,6 @@
                                 <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
                         </div>
-
                         <div class="d-flex align-items-center gap-2">
                             <button 
                                 class="btn btn-outline-primary btn-sm" 
@@ -69,15 +65,14 @@
                                 {{ $t("workflow.deleteBtn") }}
                             </button>
                         </div>
-
                     </div>
                 </div>
-
                 <div v-if="isLoaded" class="card mb-3 h-100">
                     <div class="card-body d-flex flex-column p-2 card-container">
                         <div class="kanban-wrapper">
                             <WorkflowCards 
                                 :kanbanData="board"
+                                :isEditor="true"
                                 @reload="reloadKanban"
                             />
                         </div>
@@ -85,7 +80,6 @@
                 </div>
             </div>
         </div>
-
         <FullscreenLoadingComponent 
             v-if="isDeleting"
         />
@@ -125,6 +119,7 @@
         },
         methods: {
             getWorkflowList() {
+                this.workflowList = [];
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
@@ -140,6 +135,8 @@
                         if(this.workflowList.length > 0) {
                             this.selectOption(this.workflowList[0]);
                             this.filteredworkflows();
+                        } else {
+                            this.isLoaded = false;
                         }
                     });
             },
@@ -191,6 +188,7 @@
                 WorkflowService.deleteWorkflowById(this.selectedOption.id)
                     .then((status) => {
                         if(status) {
+                            this.getWorkflowList();
                             return this.$notify({
                                 title: 'Workflow',
                                 message: 'workflow.removeSuccess',

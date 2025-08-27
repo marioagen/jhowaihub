@@ -26,17 +26,18 @@
 
     <main class="main-scroll" v-if="!loading">
         <div class="container-fluid mt-4">
-            <div>
-                <div class="row align-items-center mb-3">
-                    <div class="col-auto">
-                        <button type="button" class="btn btn-custom-light btn-sm" @click="backToListDocuments">
-                            <LucideIcon icon="ArrowLeft" class="me-1" />
-                            {{ $t("labelBackToListDocuments") }}
+            <div clas="align-items-center">   
+                <div class="row">
+                    <div class="col-1">
+                        <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="backToListDocuments">
+                            <LucideIcon icon="ArrowLeft" />
                         </button>
                     </div>
-                    <div class="col">
-                        <h5 class="mb-1">{{ $t("pageTitleDocumentsForm") }}</h5>
-                        <small class="text-muted">{{ $t("pageSubtitleDocumentsForm") }}</small>
+                    <div class="col-10">
+                        <div>
+                            <h5 class="mb-1">{{ $t("pageTitleDocumentsForm") }}</h5>
+                            <p><small class="text-muted">{{ $t("pageSubtitleDocumentsForm") }}</small></p>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -304,7 +305,6 @@
                 hasError: true,
             };
         },
-
         components: {
             ModalAlert,
             ToastAlert,
@@ -413,7 +413,7 @@
                 }
                 return valid;
             },
-            save: function (e) {
+            save(e) {
                 e.preventDefault();
                 if (!this.validateForm()) return;
                 window.onbeforeunload = function () {
@@ -464,20 +464,21 @@
                     });
                 });
 
-                Promise.all(promises).then((fileDataChunksArray) => {
-                    fileDataChunksArray.forEach((chunks) => {
-                        chunks.forEach((chunkData) => {
-                            uploadFileWorker.send({ message: chunkData });
+                Promise.all(promises)
+                    .then((fileDataChunksArray) => {
+                        fileDataChunksArray.forEach((chunks) => {
+                            chunks.forEach((chunkData) => {
+                                uploadFileWorker.send({ message: chunkData });
+                            });
                         });
-                    });
+                    localStorage.setItem("showToast", "true");
+                    this.$router.push({ name: "Workflow" });
                 });
-                localStorage.setItem("showToast", "true");
+            },
+            backToListDocuments() {
                 this.$router.push({ name: "Documents", query: { page: "1", showToast: "true" } });
             },
-            backToListDocuments: function () {
-                this.$router.push({ name: "Documents", query: { page: "1", showToast: "true" } });
-            },
-            readFileAsArrayBuffer: function (file) {
+            readFileAsArrayBuffer(file) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
@@ -563,7 +564,6 @@
             this.loadTeams();
             this.validateSelection();
         },
-        unmounted() {},
     };
 </script>
 

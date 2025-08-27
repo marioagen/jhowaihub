@@ -1,17 +1,17 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
+using Microsoft.AspNetCore.Http;
+using System.Net;
+using System.Text;
 using WoopiAiHub.Application.Dto;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
-using Microsoft.AspNetCore.Http;
-using System.Net;
-using System.Text;
-using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Fixture
@@ -277,6 +277,114 @@ namespace WoopiAiHub.UnitTests.Fixture
             .RuleFor(a => a.IdQuestionnaire, 1);
 
             return documentQuestionnaireDto;
+        }
+
+        public static Team FindValidTeam()
+        {
+            Team team = new Faker<Team>("pt_BR")
+            .CustomInstantiator(f => new Team(
+                f.Company.CompanyName(), 
+                f.IndexFaker, 
+                f.Date.Past()
+                )
+            );
+            return team;
+        }
+
+        public static Workflow FindValidWorkflow()
+        {
+            Workflow workflow = new Faker<Workflow>("pt_BR")
+            .CustomInstantiator(f => new Workflow(
+                    f.IndexFaker,
+                    f.Date.Past(),
+                    f.IndexFaker,
+                    f.Lorem.Word()                 
+                )
+            );
+            return workflow;
+        }
+
+        public static Step FindValidStep()
+        {
+            Step step = new Faker<Step>("pt_BR")
+            .CustomInstantiator(f => new Step(
+                    f.IndexFaker,
+                    f.Date.Past(),
+                    f.IndexFaker,
+                    f.Lorem.Word(),
+                    f.Random.Int(1,1),
+                    f.IndexFaker,
+                    f.IndexFaker
+                )
+            );
+            return step;
+        }
+
+        public static ProcessOcrResultDto FindValidProcessOcrResultDto()
+        {
+            var faker = new Faker<ProcessOcrResultDto>("pt_BR")
+                .CustomInstantiator(f => new ProcessOcrResultDto
+                {
+                    ReferenceFile = f.Random.String(),
+                    Tenant = f.Random.String(),
+                    Email = f.Random.String(),
+                    AnalyzeResult = FindValidAnalyzeResultCustomDto()
+                });
+            return faker;
+        }
+
+        public static AnalyzeResultCustomDto FindValidAnalyzeResultCustomDto()
+        {
+            var faker = new Faker<AnalyzeResultCustomDto>("pt_BR")
+                .CustomInstantiator(f => new AnalyzeResultCustomDto
+                {
+                    Pages = new List<CustomDocumentPage>
+                    {
+                        new CustomDocumentPage
+                        {
+                            PageNumber = 1,
+                            Lines = new List<CustomDocumentLine>
+                            {
+                                new CustomDocumentLine { Content = "Line 1" },
+                                new CustomDocumentLine { Content = "Line 2" }
+                            }
+                        }
+                    },
+                    Tables = new List<CustomDocumentTable>() { new CustomDocumentTable(){
+                        BoundingRegions = new List<BoundingRegionCustom> { new BoundingRegionCustom { PageNumber = 1 } },
+                        Cells = new List<CustomDocumentTableCell>
+                            {
+                                new CustomDocumentTableCell
+                                {
+                                    ColumnIndex = 0,
+                                    RowIndex = 0,
+                                    Content = "Cell 1"
+                                },
+                                new CustomDocumentTableCell
+                                {
+                                    ColumnIndex = 1,
+                                    RowIndex = 0,
+                                    Content = "Cell 2"
+                                }
+                            }
+                        }
+                    }
+                });
+            return faker;
+        }
+
+        public static DocumentEmbeddingsResultDto FindValidDocumentEmbeddingsResultDto()
+        {
+            var faker = new Faker<DocumentEmbeddingsResultDto>("pt_BR")
+                .CustomInstantiator(f => new DocumentEmbeddingsResultDto
+                {
+                    ReferenceFile = f.Random.String(),
+                    Tenant = f.Random.String(),
+                    Email = f.Random.String(),
+                    KeyMongoAccess = f.Random.String(),
+                    TotalPages = f.Random.Int(1, 100)
+                });
+            return faker;
         }
     }
 
