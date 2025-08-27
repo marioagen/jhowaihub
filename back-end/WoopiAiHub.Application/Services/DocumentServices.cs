@@ -27,8 +27,7 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
-using WoopiAiHub.Repository;
-
+using WoopiAiHub.Domain.Interfaces.Utils;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -54,33 +53,36 @@ namespace WoopiAiHub.Application.Services
         private readonly ITeamServices _teamServices;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly MessageQueues _messageQueues;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
 
         public DocumentServices(IDocumentRepository documentRepository,
+                                IUnitOfWork unitOfWork,
                                 ICardRepository cardRepository,
-                               IValidator<RequestCreateDocumentDto> documentDtoValidator,
-                               ILogger<DocumentServices> logger,
-                               IEmbeddingsApi embbedingsApi,
-                               IMarketPlaceApi marketPlaceApi,
-                               IConfiguration config,
-                               IDocumentHistoryServices documentHistoryServices,
-                               IFileRepositoryApi fileRepositoryApi,
-                               IFunctionFileRetriever functionFileRetriever,
-                               IDocumentNormalizedServices documentNormalizedServices,
-                               IOcrGoogle ocrGoogle,
-                               IOcrAzure ocrAzure,
-                               IMemoryCache cache,
-                               IHttpContextAccessor httpContextAccessor,
-                               IQuestionnaireRepository questionnaireRepository,
-                               ITenantCacheServices tenantCacheServices,
-                               ITeamServices teamServices,
-                               IKeyGeneratorApi keyGeneratorApi,
-                               IMessagePublisher<ProcessOcrDto> publisher,
-                               IOptions<MessageQueues> messageQueues)
+                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
+                                ILogger<DocumentServices> logger,
+                                IEmbeddingsApi embbedingsApi,
+                                IMarketPlaceApi marketPlaceApi,
+                                IConfiguration config,
+                                IDocumentHistoryServices documentHistoryServices,
+                                IFileRepositoryApi fileRepositoryApi,
+                                IFunctionFileRetriever functionFileRetriever,
+                                IDocumentNormalizedServices documentNormalizedServices,
+                                IOcrGoogle ocrGoogle,
+                                IOcrAzure ocrAzure,
+                                IMemoryCache cache,
+                                IHttpContextAccessor httpContextAccessor,
+                                IQuestionnaireRepository questionnaireRepository,
+                                ITenantCacheServices tenantCacheServices,
+                                ITeamServices teamServices,
+                                IKeyGeneratorApi keyGeneratorApi,
+                                IMessagePublisher<ProcessOcrDto> publisher,
+                                IOptions<MessageQueues> messageQueues)
         {
+            _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
@@ -254,22 +256,32 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="Exception"></exception>
         public async Task<bool> Delete(List<int> ids, HeadersDto headersDto)
         {
-            var hashList = this.FindHashById(ids);
-            var result = _documentRepository.Delete(ids);
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var hashList = this.FindHashById(ids);
+                var result = _documentRepository.Delete(ids);
 
-            foreach (var hash in hashList)
+                foreach (var hash in hashList)
             {
                 await this.DeleteHash(hash,
                                       headersDto.Tenant,
                                       headersDto.KeyMongoAccess);
             }
 
-            foreach(var id in ids)
-            {
-                await _cardRepository.DeleteByDocumentId(id);
-            }
-            return result;
+                _unitOfWork.Commit();
+                foreach (var id in ids)
+                {
+                    await _cardRepository.DeleteByDocumentId(id);
+                }
 
+                return result;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
         }
 
         /// <summary>
