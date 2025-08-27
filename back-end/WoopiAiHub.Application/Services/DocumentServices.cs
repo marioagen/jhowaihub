@@ -216,7 +216,7 @@ namespace WoopiAiHub.Application.Services
                 _documentNormalizedServices.Create(documentNormalizedForDb);
             }
 
-            this.ChangeStatus(documentAnalysisResponseDto.Id, DocumentStatus.Analyzed, documentAnalysisResponseDto.EmailCreator);
+            await this.ChangeStatus(documentAnalysisResponseDto.Id, DocumentStatus.Analyzed, documentAnalysisResponseDto.EmailCreator);
 
             return true;
         }
@@ -491,7 +491,7 @@ namespace WoopiAiHub.Application.Services
                 _documentNormalizedServices.Create(documentNormalized);
             }
 
-            this.ChangeStatus(documentoId, DocumentStatus.OCR, processOcrResultDto.Email);
+            await this.ChangeStatus(documentoId, DocumentStatus.OCR, processOcrResultDto.Email);
 
             var documentEmbeddingsDto = new DocumentEmbeddingsDataDto
             {
@@ -840,7 +840,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
-            await ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
+            await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
         }
 
         /// <summary>

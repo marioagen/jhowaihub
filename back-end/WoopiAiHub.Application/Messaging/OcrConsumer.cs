@@ -59,7 +59,7 @@ namespace WoopiAiHub.Application.Messaging
                 catch (Exception ex)
                 {
                     var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
-                    documentServices.ChangeStatusByReferenceFile(message.ReferenceFile,
+                    await documentServices.ChangeStatusByReferenceFile(message.ReferenceFile,
                                                                        message.Email,
                                                                        DocumentStatus.Failure);
 
