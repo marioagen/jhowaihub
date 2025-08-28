@@ -17,6 +17,7 @@ using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
@@ -54,9 +55,11 @@ namespace WoopiAiHub.Application.Services
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly MessageQueues _messageQueues;
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
+        private readonly IDocumentNotifier _documentNotifier;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
+
 
         public DocumentServices(IDocumentRepository documentRepository,
                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -77,7 +80,8 @@ namespace WoopiAiHub.Application.Services
                                ITeamServices teamServices,
                                IKeyGeneratorApi keyGeneratorApi,
                                IMessagePublisher<ProcessOcrDto> publisher,
-                               IOptions<MessageQueues> messageQueues)
+                               IOptions<MessageQueues> messageQueues,
+                               IDocumentNotifier documentNotifier)
         {
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
@@ -99,6 +103,7 @@ namespace WoopiAiHub.Application.Services
             _keyGeneratorApi = keyGeneratorApi;
             _messageQueues = messageQueues.Value;
             _publisher = publisher;
+            _documentNotifier = documentNotifier;
         }
 
         /// <summary>
@@ -210,7 +215,7 @@ namespace WoopiAiHub.Application.Services
                 _documentNormalizedServices.Create(documentNormalizedForDb);
             }
 
-            _documentRepository.ChangeStatus(documentAnalysisResponseDto.Id, DocumentStatus.Analyzed);
+            await this.ChangeStatus(documentAnalysisResponseDto.Id, DocumentStatus.Analyzed, documentAnalysisResponseDto.EmailCreator);
 
             return true;
         }
@@ -388,7 +393,12 @@ namespace WoopiAiHub.Application.Services
                                              DocumentStatus status,
                                              string emailCreator)
         {
-            return _documentRepository.ChangeStatus(id, status);
+
+            var result = _documentRepository.ChangeStatus(id, status);
+
+            await _documentNotifier.NotifyStatusChangedAsync(emailCreator, id, status);
+
+            return result;
         }
 
         /// <summary>
@@ -480,7 +490,7 @@ namespace WoopiAiHub.Application.Services
                 _documentNormalizedServices.Create(documentNormalized);
             }
 
-            _documentRepository.ChangeStatus(documentoId, DocumentStatus.OCR);
+            await this.ChangeStatus(documentoId, DocumentStatus.OCR, processOcrResultDto.Email);
 
             var documentEmbeddingsDto = new DocumentEmbeddingsDataDto
             {
@@ -797,7 +807,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <param name="status"></param>
         /// <returns></returns>
-        public bool ChangeStatusByReferenceFile(string referenceFile,
+        public async Task<bool> ChangeStatusByReferenceFile(string referenceFile,
                                                 string emailCreator,
                                                 DocumentStatus status)
         {
@@ -807,7 +817,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
-            return  _documentRepository.ChangeStatus(id, status);
+            return await this.ChangeStatus(id, status, emailCreator);
         }
 
         /// <summary>
@@ -829,7 +839,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
-            await ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
+            await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
         }
 
         /// <summary>

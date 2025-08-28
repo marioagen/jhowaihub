@@ -774,7 +774,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "ChangeStatusByReferenceFile Success")]
         [Trait("ChangeStatusByReferenceFile", "Success")]
-        public void ChangeStatusByReferenceFile_Success()
+        public async Task ChangeStatusByReferenceFile_Success()
         {
             // Arrange
             string referenceFile = string.Empty;
@@ -786,7 +786,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
 
             //Act
-            var result = _documentServices.ChangeStatusByReferenceFile(referenceFile, emailCreator, status);
+            var result =  await _documentServices.ChangeStatusByReferenceFile(referenceFile, emailCreator, status);
 
             Assert.True(result);
             documentRepository.Verify(a => a.FindDocumentIdByReferenceFile(referenceFile), Times.Once);
