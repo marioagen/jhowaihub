@@ -26,17 +26,18 @@
 
     <main class="main-scroll" v-if="!loading">
         <div class="container-fluid mt-4">
-            <div>
-                <div class="row align-items-center mb-3">
-                    <div class="col-auto">
-                        <button type="button" class="btn btn-custom-light btn-sm" @click="backToListDocuments">
-                            <LucideIcon icon="ArrowLeft" class="me-1" />
-                            {{ $t("labelBackToListDocuments") }}
+            <div clas="align-items-center">   
+                <div class="row">
+                    <div class="col-1">
+                        <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="backToListDocuments">
+                            <LucideIcon icon="ArrowLeft" />
                         </button>
                     </div>
-                    <div class="col">
-                        <h5 class="mb-1">{{ $t("pageTitleDocumentsForm") }}</h5>
-                        <small class="text-muted">{{ $t("pageSubtitleDocumentsForm") }}</small>
+                    <div class="col-10">
+                        <div>
+                            <h5 class="mb-1">{{ $t("pageTitleDocumentsForm") }}</h5>
+                            <p><small class="text-muted">{{ $t("pageSubtitleDocumentsForm") }}</small></p>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
