@@ -87,6 +87,17 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Search the database for an document by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IQueryable<string>> FindHashByIdAsync(List<int> ids)
+        {
+            return _context.Documents.Where(a => ids.Contains(a.Id) && a.Enable.Equals(true))
+                                     .Select(b => b.ReferenceFile);
+        }
+
+        /// <summary>
         /// Create an document in the database
         /// </summary>
         /// <param name="document"></param>
@@ -105,6 +116,28 @@ namespace WoopiAiHub.Repository
         /// <param name="id"></param>
         /// <returns></returns>
         public bool Delete(List<int> ids)
+        {
+            var documents = _context.Documents.Where(a => ids.Contains(a.Id) && a.Enable.Equals(true));
+
+            if (documents.Any())
+            {
+                documents.ExecuteUpdate(b => b
+                .SetProperty(u => u.Enable, false));
+                _context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Search the database for an document by id and change the enable
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteAsync(List<int> ids)
         {
             var documents = _context.Documents.Where(a => ids.Contains(a.Id) && a.Enable.Equals(true));
 
