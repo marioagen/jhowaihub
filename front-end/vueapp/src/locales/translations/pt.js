@@ -243,6 +243,7 @@
     labelSaveSubTitleProfile: "Crie um novo perfil no sistema",
     labelEditType: "Editar tipo",
     labelSaveType: "Criar tipo",
+    labelProcessing: "Processando",
     login: {
         title: "Fazer Login",
         password: "Senha",

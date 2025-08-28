@@ -129,6 +129,8 @@ body {
     --icon-theme: "\f186";
     --text-sm: 0.775rem;
     --text-sm--line-height: calc(1.25 / 0.875);
+    --skeleton-base: #e0e0e0;
+    --skeleton-highlight: #f5f5f5;
 }
 
 .css-theme-dark {
@@ -203,6 +205,8 @@ body {
     --icon-theme: "\f0a3";
     --text-sm: 0.775rem;
     --text-sm--line-height: calc(1.25 / 0.875);
+    --skeleton-base: #2a2a2a;
+    --skeleton-highlight: #3a3a3a;    
 }
 
 html {

@@ -123,16 +123,17 @@ namespace WoopiAiHub.Repository
                         Color = s.Status.Color,
                     },
                     Cards = s.Cards
-                        .Where(c => c.Enable)
-                        .Select(c => new CardDto
-                        {
-                            Id = c.Id,
-                            Name = c.Name,
-                            Created = c.Created,
-                            Description = c.Document.Description,
-                            Owner = c.Document.EmailCreator,
-                            DocumentId = c.Document.Id
-                        }).ToList(),
+                    .Where(c => c.Enable)
+                    .Select(c => new CardDto
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Created = c.Created,
+                        Description = c.Document.Description,
+                        Owner = c.Document.EmailCreator,
+                        DocumentId = c.Document.Id,
+                        StatusDocument = c.Document.Status,
+                    }).ToList(),
                     WorkflowId = s.WorkflowId
                 }).ToList()
             };
