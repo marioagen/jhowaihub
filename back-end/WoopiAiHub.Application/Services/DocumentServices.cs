@@ -29,6 +29,7 @@ using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Domain.Interfaces.Utils;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -261,26 +262,19 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="Exception"></exception>
         public async Task<bool> Delete(List<int> ids, HeadersDto headersDto)
         {
+            ArgumentNullException.ThrowIfNull(ids);
+
+            var hashList = await _documentRepository.FindHashByIdAsync(ids);
             _unitOfWork.BeginTransaction();
             try
             {
-                var hashList = this.FindHashById(ids);
-                var result = _documentRepository.Delete(ids);
+                var deleted = await _documentRepository.DeleteAsync(ids);
+                var hasTasks = hashList.Select(hash => DeleteHash(hash, headersDto.Tenant, headersDto.KeyMongoAccess));
+                var cardTasks = ids.Select(id => _cardRepository.DeleteByDocumentId(id));
 
-                foreach (var hash in hashList)
-                {
-                    await this.DeleteHash(hash,
-                                      headersDto.Tenant,
-                                      headersDto.KeyMongoAccess);
-                }
-
-                foreach (var id in ids)
-                {
-                    await _cardRepository.DeleteByDocumentId(id);
-                }
-
+                await Task.WhenAll(hasTasks.Concat(cardTasks));
                 _unitOfWork.Commit();
-                return result;
+                return deleted;
             }
             catch
             {
