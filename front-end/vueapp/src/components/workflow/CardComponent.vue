@@ -40,7 +40,6 @@
 </template>
 
 <script>
-    import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import CardsServices from "@/services/cards/CardsServices";
     export default {
         name: "CardComponent",
@@ -80,27 +79,11 @@
             advanceStep() {
                 this.isLoadingAnalysis = true;
                 if (this.isFirstStep) {
-                    this.getDocumentNormalized();
+                    this.$router.push({ name: 'Analyzer', params: { id: this.dataCard.documentId }, query: { page: this.backPage } });
                 }
                 else {
                     this.updateStatus();
                 }
-            },
-            getDocumentNormalized() {
-                let paramsReq = {
-                    Id: parseInt(this.dataCard.documentId),
-                    Embeddings_model_name: "",
-                };
-                DocumentsServices.normalizeDocument(paramsReq)
-                        .then((response) => {
-                            if (response.error !== undefined) {
-                                console.log(response.error);
-                            }
-                            this.updateStatus()
-                        })
-                        .finally(() => {
-                            this.isLoadingAnalysis = false;
-                        });
             },
             updateStatus() {
                 if (!this.isLastStep) {
