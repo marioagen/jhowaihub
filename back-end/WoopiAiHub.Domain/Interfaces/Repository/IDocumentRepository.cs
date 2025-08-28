@@ -8,7 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         bool Create(Document document);
         bool Delete(List<int> ids);
-        async Task<bool> DeleteAsync(List<int> ids);
+        Task<bool> DeleteAsync(List<int> ids);
         Document FindById(int id);
         bool ChangeStatus(int id,
                           DocumentStatus documentStatus);
