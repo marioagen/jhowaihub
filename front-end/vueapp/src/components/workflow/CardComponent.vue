@@ -48,7 +48,6 @@
 </template>
 
 <script>
-    import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import CardsServices from "@/services/cards/CardsServices";
     import signalRService from '@/services/signalR/signalRServices'
 
@@ -92,27 +91,11 @@
             advanceStep() {
                 this.isLoadingAnalysis = true;
                 if (this.isFirstStep) {
-                    this.getDocumentNormalized();
+                    this.$router.push({ name: 'Analyzer', params: { id: this.dataCard.documentId }, query: { page: this.backPage } });
                 }
                 else {
                     this.updateStatus();
                 }
-            },
-            getDocumentNormalized() {
-                let paramsReq = {
-                    Id: parseInt(this.dataCard.documentId),
-                    Embeddings_model_name: "",
-                };
-               DocumentsServices.normalizeDocument(paramsReq)
-                        .then((response) => {
-                            if (response.error !== undefined) {
-                                console.log(response.error);
-                            }
-                            this.updateStatus()
-                        })
-                        .finally(() => {
-                           this.isLoadingAnalysis = false;
-                       });
             },
             updateStatus() {
                 if (!this.isLastStep) {
@@ -141,13 +124,13 @@
             getProgressPercentage(status) {
                 switch (status) {
                     case 0:
-                        return 0; // 0%
+                        return 0;
                     case 2:
-                        return 50; // 50%
+                        return 50;
                     case 3:
-                        return 100; // 90%
+                        return 100; 
                     default:
-                        return 0; // Valor padr�o
+                        return 0; 
                 }
             },
         },
