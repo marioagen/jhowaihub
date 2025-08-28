@@ -263,18 +263,18 @@ namespace WoopiAiHub.Application.Services
                 var result = _documentRepository.Delete(ids);
 
                 foreach (var hash in hashList)
-            {
-                await this.DeleteHash(hash,
+                {
+                    await this.DeleteHash(hash,
                                       headersDto.Tenant,
                                       headersDto.KeyMongoAccess);
-            }
+                }
 
-                _unitOfWork.Commit();
                 foreach (var id in ids)
                 {
                     await _cardRepository.DeleteByDocumentId(id);
                 }
 
+                _unitOfWork.Commit();
                 return result;
             }
             catch
