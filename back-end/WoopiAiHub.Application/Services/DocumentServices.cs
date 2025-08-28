@@ -264,11 +264,11 @@ namespace WoopiAiHub.Application.Services
         {
             ArgumentNullException.ThrowIfNull(ids);
 
-            var hashList = await _documentRepository.FindHashByIdAsync(ids);
+            var hashList = _documentRepository.FindHashById(ids);
             _unitOfWork.BeginTransaction();
             try
             {
-                var deleted = await _documentRepository.DeleteAsync(ids);
+                var deleted = _documentRepository.Delete(ids);
                 var hasTasks = hashList.Select(hash => DeleteHash(hash, headersDto.Tenant, headersDto.KeyMongoAccess));
                 var cardTasks = ids.Select(id => _cardRepository.DeleteByDocumentId(id));
 

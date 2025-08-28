@@ -8,14 +8,12 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         bool Create(Document document);
         bool Delete(List<int> ids);
-        Task<bool> DeleteAsync(List<int> ids);
         Document FindById(int id);
         bool ChangeStatus(int id,
                           DocumentStatus documentStatus);
         IQueryable<Document> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto, string email);
         int FindDocumentCount();
         IQueryable<string> FindHashById(List<int> ids);
-        Task<IQueryable<string>> FindHashByIdAsync(List<int> ids);
         int FindDocumentIdByReferenceFile(string referenceFile);
     }
 }
