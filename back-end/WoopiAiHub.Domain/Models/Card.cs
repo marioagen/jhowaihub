@@ -15,6 +15,8 @@ namespace WoopiAiHub.Domain.Models
 
         [Column("StatusId", TypeName = "int")]
         public int StatusId { get; private set; }
+        [Column("Enable", TypeName = "bit")]
+        public bool Enable { get; set; }
 
         [Column("Enable", TypeName = "bit")]
         public bool Enable { get; private set; }
