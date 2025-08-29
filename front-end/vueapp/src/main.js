@@ -7,6 +7,7 @@ import i18n from "./locales/i18n";
 import VueGtag from "vue-gtag";
 import tooltip from "@/directives/bootstrapTooltip";
 import "@/validators/validationRules";
+import signalRService from "./services/signalR/signalRServices";
 
 import LucideIcon from "@/components/global/LucideIcon.vue";
 import NotificationComponent from "@/components/global/NotificationComponent.vue";
@@ -17,6 +18,7 @@ import '@/validators/validationRules';
 import "@/assets/css/bootstrap-5.0.2/css/bootstrap.min.css";
 import "@/assets/webfont/fontawesome-5.15.4/css/all.min.css";
 import '@vueform/multiselect/themes/default.css'
+
 
 const app = createApp(App);
 app.use(router);
@@ -41,6 +43,7 @@ app.use(
 app.directive("tooltip", tooltip);
 app.component("NotificationComponent", NotificationComponent);
 app.component("LucideIcon", LucideIcon);
+signalRService.startConnection(); // Inicializa apenas uma vez
 
 app.config.globalProperties.$notify = notify;
 app.config.globalProperties.$appName = ENV_CONFIG.VUE_APP_NAME;

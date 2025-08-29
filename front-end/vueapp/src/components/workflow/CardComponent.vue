@@ -1,51 +1,62 @@
 <template>
-    <div class="card">
-        <div class="card-body">
-            <p>{{ dataCard.name }}</p>
-            <div class="mb-2">
-                <LucideIcon icon="FileText" size="12" class="me-1" />
-                <small>{{ dataCard.description }}</small>
-            </div>
-            <div class="mb-2">
-                <LucideIcon icon="Calendar" size="12" class="me-1" />
-                <small>{{ dataCard.created }}</small>
-            </div>
-            <hr>
-            <div class="mb-2">
-                <LucideIcon icon="User" size="12" class="me-1" />
-                <small>{{ dataCard.owner }}</small>
-            </div>
-            <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap">
-                <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
-                    {{ dataStep.status.name }}
+        <div class="card">
+            <div class="card-content">
+                <div class="cover"  v-if="showLoading">
+                    <div class="spinner-cover">
+                        <LucideIcon icon="Loader" size="24" class="me-1 animate-spin" />
+                    </div>
+                    <div class="progress-content" v-if="showLoading">
+                        <div class="mb-2">{{ $t("labelprogress") }} <span class="float-end">{{ getProgressPercentage(dataCard.statusDocument) || 0 }}%</span></div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar"
+                                 :aria-valuenow="getProgressPercentage(dataCard.statusDocument) || 0"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 :style="{ width: (getProgressPercentage(dataCard.statusDocument) || 0) + '%' }">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <button
-                    class="btn btn-sm btn-primary flex-shrink-0"
-                    @click="advanceStep"
-                    v-if="!isLastStep"
-                >
-                    <div v-if="isLoadingAnalysis">
-                        <span class="spinner-grow spinner-grow-sm" role="status"></span>
+                <div class="card-body" :class="showLoading ? 'hide-card' : ''">
+                    <p>{{ dataCard.name }}</p>
+                    <div class="mb-2">
+                        <LucideIcon icon="FileText" size="12" class="me-1" />
+                        <small>{{ dataCard.description }}</small>
                     </div>
-                    <div v-else>
-                        <span>{{ verifyFirst }}</span>
-                        <LucideIcon icon="ChevronRight" size="16" class="me-1" />
+                    <div class="mb-2">
+                        <LucideIcon icon="Calendar" size="12" class="me-1" />
+                        <small>{{dataCard.created}}</small>
                     </div>
-                </button>
+                    <hr>
+                    <div class="mb-2">
+                        <LucideIcon icon="User" size="12" class="me-1" />
+                        <small>{{dataCard.owner}}</small>
+                    </div>
+                    <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap">
+                        <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
+                            {{ dataStep.status.name }}
+                        </div>
+                        <button class="btn btn-sm btn-primary float-end" @click="advanceStep" v-if="!isLastStep">
+                            <span>{{ verifyFirst }}</span>
+                            <LucideIcon icon="ChevronRight" size="16" class="me-1" />
+                        </button>
+                    </div>
+                </div>
             </div>
-
         </div>
-    </div>
 </template>
 
 <script>
-    import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import CardsServices from "@/services/cards/CardsServices";
+    import signalRService from '@/services/signalR/signalRServices'
+
     export default {
         name: "CardComponent",
         data: () => ({
             isLoadingAnalysis: false,
+            statusProgress: null,
+            signalrEventStatusChanged: "StatusChanged"
         }),
         props: {
             dataCard: {
@@ -67,7 +78,7 @@
                 type: Boolean,
                 required: true,
                 default: false,
-            }
+            },
         },
         methods: {
             badgeStyle(color) {
@@ -80,27 +91,11 @@
             advanceStep() {
                 this.isLoadingAnalysis = true;
                 if (this.isFirstStep) {
-                    this.getDocumentNormalized();
+                    this.$router.push({ name: 'Analyzer', params: { id: this.dataCard.documentId }, query: { page: this.backPage } });
                 }
                 else {
                     this.updateStatus();
                 }
-            },
-            getDocumentNormalized() {
-                let paramsReq = {
-                    Id: parseInt(this.dataCard.documentId),
-                    Embeddings_model_name: "",
-                };
-                DocumentsServices.normalizeDocument(paramsReq)
-                        .then((response) => {
-                            if (response.error !== undefined) {
-                                console.log(response.error);
-                            }
-                            this.updateStatus()
-                        })
-                        .finally(() => {
-                            this.isLoadingAnalysis = false;
-                        });
             },
             updateStatus() {
                 if (!this.isLastStep) {
@@ -125,11 +120,37 @@
                             this.$emit('reload');
                         });
                 }
-            }
+            },
+            getProgressPercentage(status) {
+                switch (status) {
+                    case 0:
+                        return 0;
+                    case 2:
+                        return 50;
+                    case 3:
+                        return 100; 
+                    default:
+                        return 0; 
+                }
+            },
+        },
+        async mounted() {
+            signalRService.on(this.signalrEventStatusChanged, (message) => {
+                const item = this.dataCard.documentId === message.documentId;
+                if (item) {
+                    this.dataCard.statusDocument = message.status;
+                }
+            });
+        },
+        beforeUnmount() {
+            signalRService.off(this.signalrEventStatusChanged);
         },
         computed: {
             verifyFirst() {
                 return this.isFirstStep == true ? this.$t("labelAnalyze") : this.$t("labelAdvance");
+            },
+            showLoading() {
+                return this.dataCard.statusDocument === 2 || this.dataCard.statusDocument === 0 || this.dataCard.statusDocument === 4;
             }
         },
     };
@@ -156,8 +177,73 @@
         background-color: #d0fae5 !important;
         color: #007a55 !important;
     }
+    
     .card {
         white-space: nowrap;
+    }
+
+    .card-content {
+        position: relative
+    }
+
+    .progress-content{
+        width: 100%;
+        z-index: 11;
+        position: absolute;
+        bottom: 0;
+        padding: 15px;
+    }
+        .progress-content .progress {
+            height: 10px;
+        }
+
+    .spinner-cover {
+        position: absolute;
+        inset: calc(.25rem * 0);
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        z-index: 10;
+        background-color: var(--color-card-content);
+        opacity: 0.8;
+    }
+
+    .hide-card div, .hide-card p{
+        color: transparent;
+        height: 15px;
+        background: linear-gradient(
+            90deg,
+            var(--skeleton-base) 25%,
+            var(--skeleton-highlight) 37%,
+            var(--skeleton-base) 63%
+        );
+        background-size: 400% 100%;
+        animation: shimmer 1.4s ease infinite;
+        border-radius: 8px;
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -400px 0;
+        }
+        100% {
+            background-position: 400px 0;
+        }
+    }
+
+    .hide-card .footer {
+        display: none;
+    }
+
+    .animate-spin {
+        animation: spin 1s linear infinite;
+        color: var(--color-bg-icon-active);
+    }
+
+    @keyframes spin {
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     .card-body p,

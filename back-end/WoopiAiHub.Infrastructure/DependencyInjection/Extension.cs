@@ -23,6 +23,7 @@ namespace WoopiAiHub.Infrastructure.DependencyInjection
             {
                 case "RabbitMQ":
                     services.Configure<RabbitMqConfig>(configuration.GetSection("Messaging:Brokers:RabbitMQ"));
+                    services.AddSingleton<RabbitMqManager>();
                     services.AddSingleton<IMessageManager, RabbitMqManager>();
                     services.AddSingleton(typeof(IMessagePublisher<>), typeof(RabbitMqPublisher<>));
                     services.AddSingleton(typeof(IMessageConsumer<>), typeof(RabbitMqConsumer<>));
