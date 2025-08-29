@@ -16,17 +16,21 @@ namespace WoopiAiHub.Domain.Models
         [Column("StatusId", TypeName = "int")]
         public int StatusId { get; private set; }
 
+        [Column("Enable", TypeName = "bit")]
+        public bool Enable { get; private set; }
+
         public virtual Step? Step { get; set; }
         public virtual Document? Document { get; set; }
         public virtual Status? Status { get; set; }
 
-        public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId)
+        public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId, bool enable)
             : base(id, created)
         {
             StepId = stepId;
             DocumentId = documentId;
             Name = name;
             StatusId = statusId;
+            Enable = enable;
         }
 
         /// <summary>

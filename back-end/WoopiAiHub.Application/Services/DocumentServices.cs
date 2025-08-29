@@ -1074,7 +1074,8 @@ namespace WoopiAiHub.Application.Services
                         step!.Id,
                         0,
                         requestCreateDocumentDto.Filename,
-                        step.StatusId
+                        step.StatusId,
+                        true
                     ))
                 .ToList();
         }
