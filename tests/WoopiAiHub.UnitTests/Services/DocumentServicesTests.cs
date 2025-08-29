@@ -17,6 +17,7 @@ using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
@@ -482,25 +483,37 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Delete_Success()
         {
             // Arrange
-            List<int> list = new List<int> { 1, 2, 3 };
-            List<string> stringArray = new List<string> { "test" };
-            var document = _fixture.FindValidDocument();
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var embeddingRepository = _mocker.GetMock<IEmbeddingsApi>();
+            var ids = new List<int> { 1, 2, 3 };
+            var hashes = new List<string> { "hash1", "hash2" };
             var headers = _fixture.FindValidHeadersDto();
-            documentRepository.Setup(a => a.Delete(list)).Returns(true);
-            documentRepository.Setup(a => a.FindHashById(list)).Returns(stringArray.AsQueryable());
-            embeddingRepository.Setup(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess)).ReturnsAsync(_fixture.FindHttpResponseMessage);
+
+            var documentRepository = _mocker.GetMock<IDocumentRepository>();
+            var cardRepository = _mocker.GetMock<ICardRepository>();
+            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var unitOfWork = _mocker.GetMock<IUnitOfWork>();
+
+            documentRepository.Setup(r => r.Delete(ids)).Returns(true);
+            documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
+
+            embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), headers.Tenant, headers.KeyMongoAccess))
+                         .ReturnsAsync(_fixture.FindHttpResponseMessage);
+
+            cardRepository
+                .Setup(r => r.DeleteByDocumentId(It.IsAny<int>()))
+                .ReturnsAsync(true);
 
             // Act
-            var result = await _documentServices.Delete(list,
-                                                        headers);
+            var result = await _documentServices.Delete(ids, headers);
 
             // Assert
             Assert.True(result);
-            documentRepository.Verify(a => a.Delete(list), Times.Once);
-            documentRepository.Verify(a => a.FindHashById(list), Times.Once);
-            embeddingRepository.Verify(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess), Times.Once);
+            documentRepository.Verify(r => r.Delete(ids), Times.Once);
+            documentRepository.Verify(r => r.FindHashById(ids), Times.Once);
+            embeddingsApi.Verify(api => api.DeleteHash(It.IsAny<string>(), headers.Tenant, headers.KeyMongoAccess), Times.Exactly(hashes.Count));
+            cardRepository.Verify(r => r.DeleteByDocumentId(It.IsAny<int>()), Times.Exactly(ids.Count));
+            unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
+            unitOfWork.Verify(u => u.Commit(), Times.Once);
+            unitOfWork.Verify(u => u.Rollback(), Times.Never);
         }
 
         [Fact(DisplayName = "Delete")]
@@ -508,25 +521,36 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Delete_FailAsync()
         {
             // Arrange
-            List<int> list = new List<int> { 1, 2, 3 };
-            List<string> stringArray = new List<string> { "test" };
-            var document = _fixture.FindValidDocument();
+            List<int> list = new() { 1, 2, 3 };
+            List<string> stringArray = new() { "test" };
             var headers = _fixture.FindValidHeadersDto();
+
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var embeddingRepository = _mocker.GetMock<IEmbeddingsApi>();
+            var cardRepository = _mocker.GetMock<ICardRepository>();
+            var unitOfWork = _mocker.GetMock<IUnitOfWork>();
+
             documentRepository.Setup(a => a.Delete(list)).Returns(false);
             documentRepository.Setup(a => a.FindHashById(list)).Returns(stringArray.AsQueryable());
-            embeddingRepository.Setup(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess)).ReturnsAsync(_fixture.FindHttpResponseMessage);
+            embeddingRepository
+                .Setup(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess))
+                .ReturnsAsync(_fixture.FindHttpResponseMessage);
+            cardRepository
+                .Setup(a => a.DeleteByDocumentId(It.IsAny<int>()))
+                .ReturnsAsync(false);
 
             // Act
-            var result = await _documentServices.Delete(list,
-                                                        headers);
+            var result = await _documentServices.Delete(list, headers);
 
             // Assert
             Assert.False(result);
             documentRepository.Verify(a => a.Delete(list), Times.Once);
             documentRepository.Verify(a => a.FindHashById(list), Times.Once);
             embeddingRepository.Verify(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess), Times.Once);
+            cardRepository.Verify(a => a.DeleteByDocumentId(It.IsAny<int>()), Times.Exactly(list.Count));
+            unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
+            unitOfWork.Verify(u => u.Commit(), Times.Once);   // mesmo retornando false, ainda faz commit
+            unitOfWork.Verify(u => u.Rollback(), Times.Never);
         }
 
         [Fact(DisplayName = "InputQuestionnaire")]

@@ -28,13 +28,14 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
-
+using WoopiAiHub.Domain.Interfaces.Utils;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace WoopiAiHub.Application.Services
 {
     public class DocumentServices : IDocumentServices
     {
-
+        private readonly ICardRepository _cardRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly IValidator<RequestCreateDocumentDto> _documentDtoValidator;
         private readonly ILogger<DocumentServices> _logger;
@@ -54,6 +55,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ITeamServices _teamServices;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly MessageQueues _messageQueues;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private readonly IDocumentNotifier _documentNotifier;
         private const string ConfigKeyAccessName = "keyAccess";
@@ -62,27 +64,31 @@ namespace WoopiAiHub.Application.Services
 
 
         public DocumentServices(IDocumentRepository documentRepository,
-                               IValidator<RequestCreateDocumentDto> documentDtoValidator,
-                               ILogger<DocumentServices> logger,
-                               IEmbeddingsApi embbedingsApi,
-                               IMarketPlaceApi marketPlaceApi,
-                               IConfiguration config,
-                               IDocumentHistoryServices documentHistoryServices,
-                               IFileRepositoryApi fileRepositoryApi,
-                               IFunctionFileRetriever functionFileRetriever,
-                               IDocumentNormalizedServices documentNormalizedServices,
-                               IOcrGoogle ocrGoogle,
-                               IOcrAzure ocrAzure,
-                               IMemoryCache cache,
-                               IHttpContextAccessor httpContextAccessor,
-                               IQuestionnaireRepository questionnaireRepository,
-                               ITenantCacheServices tenantCacheServices,
-                               ITeamServices teamServices,
-                               IKeyGeneratorApi keyGeneratorApi,
-                               IMessagePublisher<ProcessOcrDto> publisher,
-                               IOptions<MessageQueues> messageQueues,
-                               IDocumentNotifier documentNotifier)
+                                IValidator<RequestCreateDocumentDto> documentDtoValidator,
+                                ILogger<DocumentServices> logger,
+                                IEmbeddingsApi embbedingsApi,
+                                IMarketPlaceApi marketPlaceApi,
+                                IConfiguration config,
+                                IDocumentHistoryServices documentHistoryServices,
+                                IFileRepositoryApi fileRepositoryApi,
+                                IFunctionFileRetriever functionFileRetriever,
+                                IDocumentNormalizedServices documentNormalizedServices,
+                                IOcrGoogle ocrGoogle,
+                                IOcrAzure ocrAzure,
+                                IMemoryCache cache,
+                                IHttpContextAccessor httpContextAccessor,
+                                IQuestionnaireRepository questionnaireRepository,
+                                ITenantCacheServices tenantCacheServices,
+                                ITeamServices teamServices,
+                                IKeyGeneratorApi keyGeneratorApi,
+                                IMessagePublisher<ProcessOcrDto> publisher,
+                                IOptions<MessageQueues> messageQueues,
+                                IDocumentNotifier documentNotifier,
+                                IUnitOfWork unitOfWork,
+                                ICardRepository cardRepository)
         {
+            _unitOfWork = unitOfWork;
+            _cardRepository = cardRepository;
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
             _logger = logger;
@@ -256,17 +262,25 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="Exception"></exception>
         public async Task<bool> Delete(List<int> ids, HeadersDto headersDto)
         {
-            var hashList = this.FindHashById(ids);
-            var result = _documentRepository.Delete(ids);
+            ArgumentNullException.ThrowIfNull(ids);
 
-            foreach (var hash in hashList)
+            var hashList = _documentRepository.FindHashById(ids);
+            _unitOfWork.BeginTransaction();
+            try
             {
-                await this.DeleteHash(hash,
-                                      headersDto.Tenant,
-                                      headersDto.KeyMongoAccess);
-            }
-            return result;
+                var deleted = _documentRepository.Delete(ids);
+                var hasTasks = hashList.Select(hash => DeleteHash(hash, headersDto.Tenant, headersDto.KeyMongoAccess));
+                var cardTasks = ids.Select(id => _cardRepository.DeleteByDocumentId(id));
 
+                await Task.WhenAll(hasTasks.Concat(cardTasks));
+                _unitOfWork.Commit();
+                return deleted;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
         }
 
         /// <summary>

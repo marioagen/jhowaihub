@@ -122,7 +122,9 @@ namespace WoopiAiHub.Repository
                         Name = s.Status.Name,
                         Color = s.Status.Color,
                     },
-                    Cards = s.Cards.Select(c => new CardDto
+                    Cards = s.Cards
+                    .Where(c => c.Enable)
+                    .Select(c => new CardDto
                     {
                         Id = c.Id,
                         Name = c.Name,
