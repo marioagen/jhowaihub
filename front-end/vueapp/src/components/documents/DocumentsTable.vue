@@ -19,7 +19,7 @@
             @change-page="changePage"
         >
             <template #cell-created="{ data }">
-                
+                {{ formatDate(data.row.created) }}
             </template>
             <template #cell-status="{ data }">
                 <BadgeComponent
@@ -43,19 +43,27 @@
             <template #cell-actions="{ data }">
                 <button
                     v-if="data.row.status === 0"
-                    class="btn btn-outline-primary btn-sm table-btn"
+                    class="btn btn-outline-primary btn-sm table-btn analyze-btn"
+                    @click="embedData(data.row.id)"
                 >
                     {{ $t("documents.actions.analyze") }}
                 </button>
                 <button
                     v-else
-                    class="btn btn-outline-success btn-sm table-btn"
+                    class="btn btn-outline-success btn-sm table-btn analyze-btn"
+                    @click="redirectToConsult(data.row.id)"
                 >
                     {{ $t("documents.actions.consult") }}
                 </button>
             </template>
         </TableComponent>
     </div>
+
+    <EmbeddingDocument
+        v-if="isEmbedding"
+        :docData="docDataEmbedding"
+        :isReprocessing="isReprocessing"
+    />
 
     <ConfirmModal
         id="deleteConfirm"
@@ -71,15 +79,18 @@
 </template>
 
 <script>
+    import dates from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import DocumentsServices from "@/services/documents/DocumentsServices";
     import BadgeComponent from "@/components/global/BadgeComponent";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent"
+    import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
 
     export default {
         name: "DocumentsTable",
         components: {
+            EmbeddingDocument,
             BadgeOutlinedComponent,
             BadgeComponent,
             TableComponent,
@@ -89,13 +100,11 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
                     { key: "name", label: "documents.name" },
                     { key: "description", label: "documents.description" },
                     { key: "created", label: "documents.createdDate" },
                     { key: "status", label: "documents.status" },
                     { key: "teams", label: "documents.teams" },
-                    { key: "emailCreator", label: "documents.owner" },
                     { key: "actions", label: "questions.actions" },
                 ],
                 data: [],
@@ -119,6 +128,12 @@
             toastMessage: "",
             searchInput: "",
             isDeleting: false,
+            isEmbedding: false,
+            docDataEmbedding: {
+                Id: "",
+                Embeddings_model_name: "",
+            },
+            isReprocessing: false,
         }),
         methods: {
             getDocuments(obj) {
@@ -172,9 +187,27 @@
                 this.selectedDocument = ids;
                 this.$refs.DeleteDialog.open();
             },
+            formatDate(date) {
+                return dates.formatDate(date);
+            },
             filterList(input) {
                 this.searchInput = input;
                 this.getDocuments({ search: input, page: this.queryPage, type: null });
+            },
+            embedData(id) {
+                this.docDataEmbedding.Id = id;
+                this.isEmbedding = true
+            },
+            redirectToConsult(id) {
+                this.$router.push({ 
+                    name: "Analyzer", 
+                    params: { 
+                        id: id 
+                    },
+                    query: { 
+                        page: this.table.pagination.currentPage 
+                    } 
+                });
             },
             deleteDocument() {
                 console.log("Remove Doc")
@@ -191,3 +224,9 @@
         },
     };
 </script>
+
+<style scoped>
+    .analyze-btn {
+        width: 94px;
+    }
+</style>
