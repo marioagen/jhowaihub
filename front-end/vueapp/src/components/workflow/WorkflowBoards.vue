@@ -7,13 +7,12 @@
             <div class="row align-items-center">
                 <div class="col-auto">                    
                     <div class="row">
-                        <div class="col">
+                        <div class="col-2">
                             <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="redirectToIndex" type="button">
                                 <LucideIcon icon="ArrowLeft" />
-                                {{ $t("labelBack") }}
                             </button>
                         </div>
-                        <div class="col-8">
+                        <div class="col-10">
                             <div>
                                 <h5 class="mb-0 fw-bold">{{ $t(formTitle) }}</h5>
                                 <p><small class="text-muted">{{ $t(formSubtitle) }}</small></p>
@@ -139,7 +138,7 @@
 </template>
 
 <script>
-    import { Field, Form, useForm } from "vee-validate";
+    import { Field, useForm } from "vee-validate";
     import WorkflowStepComponent from "@/components/workflow/WorkflowStepComponent.vue";
     import TeamsService from "@/services/teams/TeamsService";
     import StatusService from "@/services/status/StatusService";
@@ -153,7 +152,6 @@
             FullscreenLoadingComponent,
             WorkflowStepComponent,
             Field,
-            Form
         },
         props: {
             isEdit: {

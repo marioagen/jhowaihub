@@ -9,9 +9,9 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
 {
     public class RabbitMqConsumer<T> : IMessageConsumer<T>
     {
-        private readonly IMessageManager _manager;
+        private readonly RabbitMqManager _manager;
 
-        public RabbitMqConsumer(IMessageManager manager)
+        public RabbitMqConsumer(RabbitMqManager manager)
         {
             _manager = manager;
         }
@@ -24,7 +24,10 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
         /// <returns></returns>
         public async Task ConsumerAsync(string destination, Func<T, Task> process)
         {
-            using var channel = await _manager.CreateChannel<IChannel>();
+            var factory = _manager.ConnectionFactory;
+            var connection = await factory.CreateConnectionAsync().ConfigureAwait(false);
+            var channel = await connection.CreateChannelAsync().ConfigureAwait(false);
+
             var consumer = new AsyncEventingBasicConsumer(channel);
 
             consumer.ReceivedAsync += (sender, args) =>

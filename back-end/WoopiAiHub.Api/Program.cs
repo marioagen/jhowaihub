@@ -11,6 +11,8 @@ using WoopiAiHub.Api.Exceptions;
 using System.Text.Json.Serialization;
 using WoopiAiHub.Infrastructure.DependencyInjection;
 using WoopiAiHub.Api.Hubs;
+using WoopiAiHub.Application.Services.Hubs;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,11 +76,12 @@ if (!string.IsNullOrWhiteSpace(allowedOrigin))
 else
     throw new InvalidOperationException("CORS origin não está configurado. Verifique a chave 'CORS' no appsettings ou variável de ambiente.");
 
-builder.Services.AddApplication();
 builder.Services.AddInfrastructure(config);
+builder.Services.AddApplication();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+builder.Services.AddScoped<IDocumentNotifier, DocumentNotifier>();
+builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
 builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -93,6 +96,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidIssuer = builder.Configuration["JWT:Issuer"],
         ValidAudience = builder.Configuration["JWT:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // Permite autenticação JWT via query para SignalR
+            var accessToken = context.Request.Query["access_token"];
+
+            // Verifica se é requisição do SignalR
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        }
     };
 });
 builder.Services.AddHealthChecks();

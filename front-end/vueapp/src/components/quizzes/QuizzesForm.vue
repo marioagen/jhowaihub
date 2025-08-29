@@ -4,21 +4,19 @@
             <div class="row align-items-center">
                 <div class="col-auto">
                     <div class="row">
-                        <div class="col">
+                        <div class="col-2">
                             <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="returnToTable">
                                 <LucideIcon icon="ArrowLeft" />
-                                {{ $t("labelBack") }}
                             </button>
                         </div>
-                        <div class="col-8">
+                        <div class="col-10">
                             <div>
                                 <h5 class="mb-0 fw-bold">{{ $t(formTitle) }}</h5>
                                 <p><small class="text-muted">{{ $t(formSubtitle) }}</small></p>
                             </div>
                         </div>
                     </div>
-                </div>
-                
+                </div>                
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="save">
                         <LucideIcon icon="Save" size="15" />
@@ -26,7 +24,6 @@
                     </button>
                 </div>
             </div>
-
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
                      <div>
@@ -90,13 +87,12 @@
                         {{ $t("questions.createBtn") }}
                     </button>
                 </div>
-            </div>
-        
-        <QuestionsModal
-            :isEdit="false"
-            @reload="getQuestions()"
-            ref="QuestionsModal"
-        />
+            </div>        
+            <QuestionsModal
+                :isEdit="false"
+                @reload="getQuestions()"
+                ref="QuestionsModal"
+            />
         </div>
     </main>
 </template>

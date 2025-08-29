@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WoopiAiHub.Application.Dto;
+using System.Linq.Dynamic.Core;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
-using System.Linq.Dynamic.Core;
-using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Repository.Util;
 namespace WoopiAiHub.Repository
 {
@@ -88,6 +86,7 @@ namespace WoopiAiHub.Repository
                                      .Select(b => b.ReferenceFile);
         }
 
+
         /// <summary>
         /// Create an document in the database
         /// </summary>
@@ -129,13 +128,12 @@ namespace WoopiAiHub.Repository
         /// <param name="id"></param>
         /// <returns></returns>
         public bool ChangeStatus(int id,
-                                 DocumentStatus status)
+                                 DocumentStatus documentStatus)
         {
             var documents = _context.Documents.Where(a => a.Id.Equals(id));
             if (documents.Any())
             {
-                documents.ExecuteUpdate(b => b
-                .SetProperty(u => u.Status, status));
+                documents.ExecuteUpdate(b => b.SetProperty(u => u.Status, documentStatus));
                 _context.SaveChanges();
                 return true;
             }
@@ -158,6 +156,21 @@ namespace WoopiAiHub.Repository
                                                            .FirstOrDefault();
 
             return new JsonResult(inqueryHistory);
+        }
+
+        /// <summary>
+        /// Search the database for an document id by referenceFile
+        /// returns int
+        /// </summary>
+        /// <param name="referenceFile"></param>
+        /// <returns></returns>
+        public int FindDocumentIdByReferenceFile(string referenceFile)
+        {
+            var documentId = _context.Documents.Where(a => a.ReferenceFile.Equals(referenceFile))
+                                               .Select(a => a.Id)
+                                               .FirstOrDefault();
+
+            return documentId;
         }
     }
 }

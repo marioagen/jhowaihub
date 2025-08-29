@@ -10,7 +10,6 @@
                         </p>
                     </div>
                 </div>
-
                 <div class="card mb-3">
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-3">
@@ -18,7 +17,6 @@
                                 <LucideIcon icon="Clock" size="14" class="me-2" />
                                 <span>{{$t("workflow.boardView")}}</span>
                             </div>
-
                             <div class="dropdown">
                                 <button 
                                     class="btn btn-light border text-start"
@@ -29,7 +27,6 @@
                                     <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
                                     <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
                                 </button>
-
                                 <ul class="dropdown-menu">
                                     <li v-for="item in workflowList" :key="item.id">
                                         <a class="dropdown-item" @click="selectOption(item)">
@@ -45,7 +42,6 @@
                                 <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
                         </div>
-
                         <div class="d-flex align-items-center gap-2">
                             <button 
                                 class="btn btn-outline-primary btn-sm" 
@@ -69,10 +65,8 @@
                                 {{ $t("workflow.deleteBtn") }}
                             </button>
                         </div>
-
                     </div>
                 </div>
-
                 <div v-if="isLoaded" class="card mb-3 h-100">
                     <div class="card-body d-flex flex-column p-2 card-container">
                         <div class="kanban-wrapper">

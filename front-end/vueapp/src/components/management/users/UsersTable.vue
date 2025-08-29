@@ -242,9 +242,4 @@
         width: 30px;
         height: 30px;
     }
-
-    .column-align {
-        justify-content: center;
-        display: flex;
-    }
 </style>
