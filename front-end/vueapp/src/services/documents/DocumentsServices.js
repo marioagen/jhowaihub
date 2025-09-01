@@ -20,6 +20,17 @@ export default {
                 }
             });
     },
+    deleteDocument(ids) {
+        return api.delete("/Document/Delete", { data: ids })
+                .then(() => {
+                    return true;
+                })
+                .catch(function (e) {
+                    return {
+                        error: e,
+                    }
+                });
+    },
     getDocumentAnalyze(docId) {
         return api
             .get(`/Document/Analyze/${docId}`)

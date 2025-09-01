@@ -2,7 +2,7 @@
     <button 
         v-if="showMultiDelete" 
         class="btn btn-outline-danger btn-sm mb-2 ms-2" 
-        @click="openConfirmationMultiple"
+        @click="openConfirmation"
     >
         <LucideIcon icon="Trash2" size="15" />
         {{ $t("labelDelete") }}
@@ -176,14 +176,38 @@
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
-            openConfirmation(document) {
-                this.selectedDocument = [document.id];
-                this.$refs.DeleteDialog.open();
-            },
-            openConfirmationMultiple() {
+            openConfirmation() {
                 const ids = this.table.selectedRows.map((item) => item.id);
                 this.selectedDocument = ids;
                 this.$refs.DeleteDialog.open();
+            },
+            deleteDocument() {
+                this.isDeleting = true;
+                console.log(this.selectedDocument)
+                DocumentsServices.deleteDocument(this.selectedDocument)
+                    .then((success) => {
+                        if (success) {
+                            this.$refs.DeleteDialog.close();
+                            this.getDocuments({ search: "", page: 1, type: null });
+                            this.$notify({
+                                title: this.$t("documents.title"),
+                                message: this.$t("labelQuestionRemoveSuccess"),
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
+                        } else {
+                            this.$notify({
+                                title: this.$t("documents.title"),
+                                message: this.$t("labelQuestionRemoveError"),
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                    })
+                    .finally(() => {
+                        this.table.selectedRows = [];
+                        this.isDeleting = false;
+                    });
             },
             formatDate(date) {
                 return dates.formatDate(date);
@@ -207,9 +231,6 @@
                     } 
                 });
             },
-            deleteDocument() {
-                console.log("Remove Doc")
-            },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
@@ -217,7 +238,7 @@
         },
         computed: {
             showMultiDelete() {
-                return this.table.selectedRows.length > 1;
+                return this.table.selectedRows.length > 0;
             },
         },
     };

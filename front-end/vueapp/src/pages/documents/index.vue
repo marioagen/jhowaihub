@@ -48,22 +48,14 @@
             <DocumentsTable 
                 ref="DocumentsTable"
             />
-
-            <NormalizeIndex
-                :docData="docDataEmbedding"
-                :isReprocessing="isReprocessing"
-                v-if="showLoading"
-            ></NormalizeIndex>
         </div>
     </main>
 </template>
 
 <script>
-    import date from "@/helpers/date";
     import api from "@/services/api";
     import paginationDivider from "@/utils/paginationDivider";
     import GlobalEventService from "@/services/globalEventService.js";
-    import NormalizeIndex from "@/components/pages/normalize/loading";
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import DocumentsTable from "@/components/documents/DocumentsTable.vue";
 
@@ -102,7 +94,6 @@
             };
         },
         components: {
-            NormalizeIndex,
             SearchComponent,
             DocumentsTable,
         },
@@ -119,46 +110,13 @@
                 handler: async function (newValue) {
                     if (newValue) {
                         await this.loadTeams();
-                        this.getList({ search: "", page: this.queryPage, type: null });
+                        this.$refs.DocumentsTable.getDocuments({ search: "", page: this.queryPage, type: null });
                     }
                 },
             },
         },
         methods: {
-            embeddingData: function (id) {
-                this.docDataEmbedding.Id = id;
-                this.showLoading = true;
-            },
-            checkAll: function (event) {
-                const checkboxes = document.querySelectorAll(".checkbox");
-                let checkboxIds = [];
-                this.listIds = [];
-                checkboxes.forEach((checkbox) => {
-                    checkbox.checked = event.target.checked;
-                    checkboxIds.push(parseInt(checkbox.id));
-                });
-                this.countMultipleChecks(checkboxIds);
-            },
-            countChecks: function (id) {
-                let checkBox = document.getElementById(id);
-                if (checkBox.checked) {
-                    this.listIds.push(id);
-                } else {
-                    this.listIds = this.listIds.filter((i) => i !== id);
-                }
-            },
-            countMultipleChecks: function (checkboxIds) {
-                parseInt(checkboxIds);
-                checkboxIds.forEach((id) => {
-                    let checkBox = document.getElementById(id);
-                    if (checkBox.checked) {
-                        this.listIds.push(id);
-                    } else {
-                        this.listIds = this.listIds.filter((i) => i !== id);
-                    }
-                });
-            },
-            setCrumbsData: function () {
+            setCrumbsData() {
                 this.crumbsData = [
                     { crumb: this.$t("labelDocuments"), link: { to: "Documents" } },
                     { crumb: this.$t("labelListing"), link: { to: "Documents", queryPage: this.$route.query.page } },
@@ -203,111 +161,6 @@
             onTeamChange() {
                 this.getList({ page: 1, search: this.searchInput });
             },
-            getList(obj) {
-                this.prepareState(obj);
-
-                const teamIds = this.resolveTeamIds();
-                if (teamIds.length === 0) {
-                    this.handleEmptyTeams();
-                    return;
-                }
-
-                const queryParams = this.buildQueryParams(obj, teamIds);
-
-                api.get("/Document", { params: queryParams })
-                    .then((response) => {
-                        this.dataDocument = response.data.content;
-                        this.pagination = {
-                            currentPage: response.data.currentPage,
-                            pageCount: response.data.pageCount,
-                            rowCount: response.data.rowCount,
-                            listPage: this.divider.calculatePageCount(
-                                response.data.pageCount,
-                                response.data.currentPage
-                            ),
-                        };
-                        this.loading = false;
-                        if (obj.type === "search") this.searching = true;
-                    })
-                    .catch((e) => {
-                        this.loading = false;
-                        if (obj.type === "search") this.searching = true;
-                    })
-                    .finally(() => {
-                    });
-            },
-            prepareState(obj) {
-                this.searchInput = obj.search;
-                this.loading = true;
-                this.searching = false;
-                this.dataDocument = [];
-                this.listIds = [];
-            },
-            resolveTeamIds() {
-                if (this.selectedTeamId === 0) {
-                    return this.teamList.length > 0 ? this.teamList.map((team) => team.id) : [];
-                }
-                return [this.selectedTeamId];
-            },
-            handleEmptyTeams() {
-                this.loading = false;
-                this.dataDocument = [];
-                this.pagination = {
-                    currentPage: 1,
-                    pageCount: 0,
-                    rowCount: 0,
-                    listPage: [],
-                };
-            },
-            buildQueryParams(obj, teamIds) {
-                return {
-                    search: this.searchInput.trim() || "",
-                    pageSize: this.selectedOption,
-                    page: obj.page,
-                    isAscending: this.isAscending,
-                    colType: this.colType,
-                    teamIds,
-                };
-            },
-            deleteItem: function () {
-                let self = this;
-                var paramsReq = {
-                    ids: this.listIds,
-                };
-                api.delete("/Document/Delete", { data: this.listIds })
-                    .then(function (response) {
-                        // Handle success
-                        self.closeModal();
-                        self.getList({ search: "", page: 1, type: null });
-                    })
-                    .catch(function (e) {
-                    })
-                    .finally(function () {
-                    });
-                this.listIds = [];
-            },
-            dateFormat: function (str) {
-                return date.formatDate(str);
-            },
-            orderList: function (col) {
-                if (this.isAscending) {
-                    this.isAscending = false;
-                } else {
-                    this.isAscending = true;
-                }
-                this.colType = col;
-                this.getList({ search: "", page: this.queryPage, type: null });
-            },
-            reloadList() {
-                if (this.$route.name === "sList") {
-                    this.getList({ search: "", page: 1, type: null });
-                }
-            },
-            resetName(item) {
-                var itemClone = { ...item };
-                itemClone.name = null;
-                return itemClone;
-            },
             redirectToNewUpload: function (quiz) {
                 this.$router.push({ name: "DocumentsUpload" });
             },
@@ -324,18 +177,10 @@
         async created() {
             this.setCrumbsData();
             this.setEntitySearch();
-            if (localStorage.getItem("showToast") === "true") {
-                this.warningDialog();
-                localStorage.removeItem("showToast");
-            }
 
             await this.loadTeams();
             GlobalEventService.on("all-uploads-complete", this.reloadList);
             GlobalEventService.on("refresh-once", this.reloadList);
-            if (this.$store.state.userProfile.keyMongoAccess) {
-                this.getList({ search: "", page: this.queryPage, type: null });
-            }
-
             if (this.noTeams) {
                 this.selectedTeamId = null;
             }
