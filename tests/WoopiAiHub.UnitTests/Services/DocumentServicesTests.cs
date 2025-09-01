@@ -129,198 +129,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act / Assert
             Assert.Throws<ArgumentException>(() => _documentServices.FindAllPaged(pagedData, "email"));
-        }
-
-
-        [Fact(DisplayName = "DocumentAnalysisNoEbbCreate")]
-        [Trait("DocumentAnalysis", "Success")]
-        public async Task DocumentAnalysisNoEbbCreate_Success()
-        {
-            // Arrange
-            var document = _fixture.FindValidDocument();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var documentAnalysisResponseDto = _fixture.FindValidDocumentAnalysisResponseDto();
-            documentAnalysisResponseDto.Embeddings_model_name = "";
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var functionFileRetriever = _mocker.GetMock<IFunctionFileRetriever>();
-            var documentNormalizedServices = _mocker.GetMock<IDocumentNormalizedServices>();
-            var ocrGoogle = _mocker.GetMock<IOcrGoogle>();
-            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var listOcr = new List<string> { "text" };
-            var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
-
-            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
-            functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
-            documentNormalizedServices.Setup(a => a.Create(It.IsAny<DocumentNormalized>())).Returns(true);
-            ocrGoogle.Setup(a => a.ProcessResult(It.IsAny<byte[]>())).ReturnsAsync(listOcr);
-            marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
-            embeddingsApi.Setup(a => a.AddDocuments(It.IsAny<string>(), It.IsAny<AddDocumentsRequestRefitDto>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<string>());
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
-                               .ReturnsAsync(tenant);
-
-            // Act
-            var result = await _documentServices.DocumentAnalysis(documentAnalysisResponseDto);
-
-            // Assert
-            Assert.True(result);
-            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
-            functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            documentNormalizedServices.Verify(a => a.Create(It.IsAny<DocumentNormalized>()), Times.Once);
-            embeddingsApi.Verify(a => a.AddDocuments(It.IsAny<string>(), It.IsAny<AddDocumentsRequestRefitDto>(), It.IsAny<string>()), Times.Once);
-            ocrGoogle.Verify(a => a.ProcessResult(It.IsAny<byte[]>()), Times.Once);
-            marketPlaceApi.Verify(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Exactly(2));
-        }
-
-        [Fact(DisplayName = "DocumentAnalysisUpdateWithModel")]
-        [Trait("DocumentAnalysis", "Success")]
-        public async Task DocumentAnalysisUpdateWithModel_Success()
-        {
-            // Arrange
-            var document = _fixture.FindValidDocument();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var documentAnalysisResponseDto = _fixture.FindValidDocumentAnalysisResponseDto();
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var functionFileRetriever = _mocker.GetMock<IFunctionFileRetriever>();
-            var documentNormalizedServices = _mocker.GetMock<IDocumentNormalizedServices>();
-            var ocrGoogle = _mocker.GetMock<IOcrGoogle>();
-            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var documentNormalized = new DocumentNormalized(1, "text", 1, It.IsAny<DateTime>());
-            var listOcr = new List<string> { "text" };
-            var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
-
-            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
-            functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
-            documentNormalizedServices.Setup(a => a.Update(It.IsAny<DocumentNormalized>())).Returns(true);
-            documentNormalizedServices.Setup(a => a.FindById(It.IsAny<int>(), It.IsAny<string>())).Returns(documentNormalized);
-            embeddingsApi.Setup(a => a.DeleteHash(document.ReferenceFile, It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
-            embeddingsApi.Setup(a => a.AddDocuments(It.IsAny<string>(), It.IsAny<AddDocumentsRequestRefitDto>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<string>());
-            ocrGoogle.Setup(a => a.ProcessResult(It.IsAny<byte[]>())).ReturnsAsync(listOcr);
-            marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
-                               .ReturnsAsync(tenant);
-
-            // Act
-            var result = await _documentServices.DocumentAnalysis(documentAnalysisResponseDto);
-
-            // Assert
-            Assert.True(result);
-            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
-            functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            documentNormalizedServices.Verify(a => a.Update(It.IsAny<DocumentNormalized>()), Times.Once);
-            documentNormalizedServices.Verify(a => a.FindById(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-            embeddingsApi.Verify(a => a.DeleteHash(document.ReferenceFile, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            embeddingsApi.Verify(a => a.AddDocuments(It.IsAny<string>(), It.IsAny<AddDocumentsRequestRefitDto>(), It.IsAny<string>()), Times.Once);
-            ocrGoogle.Verify(a => a.ProcessResult(It.IsAny<byte[]>()), Times.Once);
-            marketPlaceApi.Verify(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
-        }
-
-        [Fact(DisplayName = "DocumentAnalysisUpdateWithModelOcrAzure")]
-        [Trait("DocumentAnalysis", "Success")]
-        public async Task DocumentAnalysisUpdateWithModelOcrAzure_Success()
-        {
-            // Arrange
-            var document = _fixture.FindValidDocument();
-            var analyzeResult = DocumentFixture.FindValidAnalyseResult();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var documentAnalysisResponseDto = _fixture.FindValidDocumentAnalysisResponseDto();
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var functionFileRetriever = _mocker.GetMock<IFunctionFileRetriever>();
-            var documentNormalizedServices = _mocker.GetMock<IDocumentNormalizedServices>();
-            var ocrAzure = _mocker.GetMock<IOcrAzure>();
-            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var documentNormalized = new DocumentNormalized(1, "text", 1, It.IsAny<DateTime>());
-            var listOcr = new List<string> { "text" };
-            var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
-
-            //Refazer o mock do IConfiguration para setar UseOcrGoogle para false
-            var configMock = new Mock<IConfiguration>();
-            configMock.Setup(x => x.GetSection("keyAccess").Value).Returns(Guid.NewGuid().ToString());
-            configMock.Setup(x => x.GetSection("UseOcrGoogle").Value).Returns(() => "false");
-            configMock.Setup(x => x["RefitExternalSettings:FunctionApiKey"]).Returns(Guid.NewGuid().ToString());
-            _mocker.Use(configMock.Object);
-
-            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            documentRepository.Setup(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>())).Returns(true);
-            functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
-            documentNormalizedServices.Setup(a => a.Update(It.IsAny<DocumentNormalized>())).Returns(true);
-            documentNormalizedServices.Setup(a => a.FindById(It.IsAny<int>(), It.IsAny<string>())).Returns(documentNormalized);
-            embeddingsApi.Setup(a => a.DeleteHash(document.ReferenceFile, It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
-            embeddingsApi.Setup(a => a.AddDocuments(It.IsAny<string>(), It.IsAny<AddDocumentsRequestRefitDto>(), It.IsAny<string>())).ReturnsAsync(It.IsAny<string>());
-            ocrAzure.Setup(a => a.ProcessResult(It.IsAny<Stream>(), It.IsAny<string>())).ReturnsAsync(analyzeResult);
-            marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
-                               .ReturnsAsync(tenant);
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
-
-            // Act
-            var result = await documentServices.DocumentAnalysis(documentAnalysisResponseDto);
-
-            // Assert
-            Assert.True(result);
-            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
-            functionFileRetriever.Verify(a => a.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            documentNormalizedServices.Verify(a => a.Update(It.IsAny<DocumentNormalized>()), Times.Once);
-            documentNormalizedServices.Verify(a => a.FindById(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-            embeddingsApi.Verify(a => a.DeleteHash(document.ReferenceFile, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            embeddingsApi.Verify(a => a.AddDocuments(It.IsAny<string>(), It.IsAny<AddDocumentsRequestRefitDto>(), It.IsAny<string>()), Times.Once);
-            ocrAzure.Verify(a => a.ProcessResult(It.IsAny<Stream>(), It.IsAny<string>()), Times.Once);
-            marketPlaceApi.Verify(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
-        }
-
-        [Fact(DisplayName = "DocumentAnalysis")]
-        [Trait("DocumentAnalysis", "Fail")]
-        public async Task DocumentAnalysis_Fail()
-        {
-            // Arrange
-            Document? document = null;
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var documentAnalysisResponseDto = _fixture.FindValidDocumentAnalysisResponseDto();
-            documentAnalysisResponseDto.Embeddings_model_name = "";
-            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            document = _fixture.FindValidDocument();
-
-            var configMockError = new Mock<IConfiguration>();
-            configMockError.Setup(x => x["RefitExternalSettings:FunctionApiKey"]).Returns(string.Empty);
-            _mocker.Use(configMockError.Object);
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
-
-            // Act / Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => documentServices.DocumentAnalysis(documentAnalysisResponseDto));
-            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-        }
-
-        [Fact(DisplayName = "DocumentAnalysisEmbedding")]
-        [Trait("DocumentAnalysis", "Fail")]
-        public async Task DocumentAnalysisEmbedding_Fail()
-        {
-            // Arrange
-            Document? document = null;
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var documentAnalysisResponseDto = _fixture.FindValidDocumentAnalysisResponseDto();
-            documentAnalysisResponseDto.Embeddings_model_name = "";
-            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            document = _fixture.FindValidDocument();
-
-            var configMockError = new Mock<IConfiguration>();
-            configMockError.Setup(x => x["EmbbedingsApiTemplate:Embeddings_model_name"]).Returns(string.Empty);
-            _mocker.Use(configMockError.Object);
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
-
-            // Act / Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => documentServices.DocumentAnalysis(documentAnalysisResponseDto));
-            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-        }
+        }     
 
         [Fact(DisplayName = "ProcessChunks")]
         [Trait("FindByIdAnalyze", "Success")]
@@ -765,37 +574,6 @@ namespace WoopiAiHub.UnitTests.Services
             await Assert.ThrowsAsync<ArgumentException>(() => _documentServices.DeleteHash("test", "test", "test"));
         }
 
-        [Fact(DisplayName = "FindHashById")]
-        [Trait("FindHashById", "Success")]
-        public void FindHashById_Success()
-        {
-            // Arrange
-            List<int> ids = new List<int> { 1 };
-            List<string> stringArray = new List<string> { "test" }; ;
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.FindHashById(ids)).Returns(stringArray.AsQueryable());
-
-            //Act
-            var result = _documentServices.FindHashById(ids);
-
-            Assert.NotNull(result);
-            documentRepository.Verify(a => a.FindHashById(ids), Times.Once);
-        }
-
-        [Fact(DisplayName = "FindHashById")]
-        [Trait("FindHashById", "Fail")]
-        public void FindHashById_Fail()
-        {
-            // Arrange
-            List<int> ids = new List<int> { 1, 2, 3 };
-            List<string> stringArray = new List<string>();
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.FindHashById(ids)).Returns(stringArray.AsQueryable());
-
-            // Act // Assert
-            Assert.Throws<ArgumentException>(() => _documentServices.FindHashById(ids));
-        }
-
         [Fact(DisplayName = "ChangeStatusByReferenceFile Success")]
         [Trait("ChangeStatusByReferenceFile", "Success")]
         public async Task ChangeStatusByReferenceFile_Success()
@@ -887,7 +665,7 @@ namespace WoopiAiHub.UnitTests.Services
             configurationMock.Setup(x => x["keyAccess"]).Returns(Guid.NewGuid().ToString);
             _mocker.Use(configurationMock.Object);
             documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile)).Returns(idDocument);
-            documentNormalizedServicesMock.Setup(s => s.FindById(idDocument, processOcrResultDto.Email)).Returns((DocumentNormalized?)null);
+            documentNormalizedServicesMock.Setup(s => s.FindById(idDocument)).Returns((DocumentNormalized?)null);
             documentNormalizedServicesMock.Setup(s => s.Create(It.IsAny<DocumentNormalized>())).Returns(true);
             keyGeneratorMock.Setup(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(generatedKey);
             tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
@@ -904,7 +682,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             configurationMock.Verify(c => c["keyAccess"], Times.Exactly(2));
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
-            documentNormalizedServicesMock.Verify(s => s.FindById(idDocument, processOcrResultDto.Email), Times.Once);
+            documentNormalizedServicesMock.Verify(s => s.FindById(idDocument), Times.Once);
             documentNormalizedServicesMock.Verify(s => s.Create(It.IsAny<DocumentNormalized>()), Times.Once);
             keyGeneratorMock.Verify(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());

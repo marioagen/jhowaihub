@@ -29,7 +29,6 @@ using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Domain.Interfaces.Utils;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -46,10 +45,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IDocumentNormalizedServices _documentNormalizedServices;
         private readonly IFileRepositoryApi _fileRepositoryApi;
         private readonly IFunctionFileRetriever _functionFileRetriever;
-        private readonly IOcrGoogle _ocrGoogle;
-        private readonly IOcrAzure _ocrAzure;
         private readonly IMemoryCache _cache;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly ITeamServices _teamServices;
@@ -62,7 +58,6 @@ namespace WoopiAiHub.Application.Services
         private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
 
-
         public DocumentServices(IDocumentRepository documentRepository,
                                 IValidator<RequestCreateDocumentDto> documentDtoValidator,
                                 ILogger<DocumentServices> logger,
@@ -73,10 +68,7 @@ namespace WoopiAiHub.Application.Services
                                 IFileRepositoryApi fileRepositoryApi,
                                 IFunctionFileRetriever functionFileRetriever,
                                 IDocumentNormalizedServices documentNormalizedServices,
-                                IOcrGoogle ocrGoogle,
-                                IOcrAzure ocrAzure,
                                 IMemoryCache cache,
-                                IHttpContextAccessor httpContextAccessor,
                                 IQuestionnaireRepository questionnaireRepository,
                                 ITenantCacheServices tenantCacheServices,
                                 ITeamServices teamServices,
@@ -99,10 +91,7 @@ namespace WoopiAiHub.Application.Services
             _fileRepositoryApi = fileRepositoryApi;
             _functionFileRetriever = functionFileRetriever;
             _documentNormalizedServices = documentNormalizedServices;
-            _ocrGoogle = ocrGoogle;
-            _ocrAzure = ocrAzure;
             _cache = cache;
-            _httpContextAccessor = httpContextAccessor;
             _questionnaireRepository = questionnaireRepository;
             _tenantCacheServices = tenantCacheServices;
             _teamServices = teamServices;
@@ -147,83 +136,6 @@ namespace WoopiAiHub.Application.Services
                 _logger.LogError(ex, $"An argument exception occurred in the {nameof(DocumentServices)} in the {nameof(FindAllPaged)} method");
                 throw ex;
             }
-        }
-
-        /// <summary>
-        /// This method sends a id to the File Repository and gets a filepath response
-        /// It also read the file, send to OCR and finally Embeddings.
-        /// </summary>
-        /// <param name="documentAnalysisResponseDto"></param>
-        /// <returns></returns>
-        public async Task<bool> DocumentAnalysis(DocumentAnalysisResponseDto documentAnalysisResponseDto)
-        {
-            var document = _documentRepository.FindById(documentAnalysisResponseDto.Id);
-            var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
-
-            if (string.IsNullOrEmpty(documentAnalysisResponseDto.Embeddings_model_name))
-            {
-                var tenant = await _tenantCacheServices.FindTenantAsync(documentAnalysisResponseDto.Tenant,
-                                                                        ColTypeModule.WoopiAiHub);
-                if (tenant == null || string.IsNullOrEmpty(tenant.EmbeddingModelName))
-                {
-                    throw new ArgumentNullException("Could not find embbedings model");
-                }
-                documentAnalysisResponseDto.Embeddings_model_name = tenant.EmbeddingModelName;
-            }
-            else
-            {
-                await this.DeleteHash(document.ReferenceFile,
-                                      documentAnalysisResponseDto.Tenant,
-                                      documentAnalysisResponseDto.KeyMongoAcess);
-            }
-
-            if (string.IsNullOrEmpty(functionApiKeyAuth))
-                throw new ArgumentNullException("Could not find function api key");
-
-            var resultRequestFunction = await _functionFileRetriever.Get(document.ReferenceFile,
-                                                                         functionApiKeyAuth,
-                                                                         documentAnalysisResponseDto.Tenant);
-
-            var bytesFile = await resultRequestFunction.Content.ReadAsByteArrayAsync();
-            var useOcrGoogle = _config.GetSection("UseOcrGoogle").Get<bool>();
-            var normalizedContext = "";
-
-            if (useOcrGoogle)
-            {
-                var result = await _ocrGoogle.ProcessResult(bytesFile);
-                normalizedContext = await this.SendDocumentsEmbbeddingsOcrByGoogle(result,
-                                                                                   document.ReferenceFile,
-                                                                                   documentAnalysisResponseDto);
-                await ManageConsumptionPages(documentAnalysisResponseDto,
-                                             result.Count,
-                                             false);
-            }
-            else
-            {
-                Stream stream = new MemoryStream(bytesFile);
-                var result = await _ocrAzure.ProcessResult(stream, documentAnalysisResponseDto.Tenant);
-                normalizedContext = await this.SendDocumentsEmbeddingsOcrByAzure(result,
-                                                                                 document.ReferenceFile,
-                                                                                 documentAnalysisResponseDto);
-                await ManageConsumptionPages(documentAnalysisResponseDto,
-                                             result.Pages.Count,
-                                             false);
-            }
-            var normalizedDocument = _documentNormalizedServices.FindById(documentAnalysisResponseDto.Id, documentAnalysisResponseDto.EmailCreator);
-            if (normalizedDocument is not null)
-            {
-                var documentNormalizedForDb = this.CreateDocumentNormalizedForDb(documentAnalysisResponseDto.Id, normalizedContext, normalizedDocument.Id);
-                _documentNormalizedServices.Update(documentNormalizedForDb);
-            }
-            else
-            {
-                var documentNormalizedForDb = this.CreateDocumentNormalizedForDb(documentAnalysisResponseDto.Id, normalizedContext, 0);
-                _documentNormalizedServices.Create(documentNormalizedForDb);
-            }
-
-            await this.ChangeStatus(documentAnalysisResponseDto.Id, DocumentStatus.Analyzed, documentAnalysisResponseDto.EmailCreator);
-
-            return true;
         }
 
         /// <summary>
@@ -286,26 +198,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Find hash by ids data
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        public List<string> FindHashById(List<int> ids)
-        {
-            var hashList = _documentRepository.FindHashById(ids);
-
-            if (hashList.AsEnumerable().All(s => string.IsNullOrEmpty(s)))
-            {
-                throw new ArgumentException("Some ids are incompatible");
-            }
-            else
-            {
-                return hashList.ToList();
-            }
-        }
-
-        /// <summary>
         /// This method sends a question to questionnaire and gets a response
         /// It also requests the repository layer to save the question and answer history
         /// </summary>
@@ -321,21 +213,18 @@ namespace WoopiAiHub.Application.Services
             if (string.IsNullOrEmpty(headersDto.KeyMongoAccess))
                 throw new ArgumentNullException(headersDto.KeyMongoAccess, KeyMongoAccessNotFoundMessage);
 
-            HttpContext context = _httpContextAccessor.HttpContext!;
-            var tenant = context.Request.Headers[HeaderNames.XTenant].ToString();
-
             var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
             var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
 
             foreach (var description in questionnaire.Questions.Select(u => u.Description))
             {
                 bool availableBalanceToQuestion = await ManagerConsumptionQuestions(headersDto.EmailCreator,
-                                                                                    tenant,
+                                                                                    headersDto.Tenant,
                                                                                     false);
                 if (availableBalanceToQuestion)
                 {
                     var customQueryRequestDto = await this.CreateCustomQueryRequestDto(description,
-                                                                                      tenant,
+                                                                                      headersDto.Tenant,
                                                                                       headersDto.Language);
 
                     var resultRequest = await _embbedingsApi.CustomQuery(documentDb.ReferenceFile.ToString(),
@@ -480,8 +369,8 @@ namespace WoopiAiHub.Application.Services
                 throw new InvalidOperationException("KeyAccess is not configured in the application settings.");
             }
 
-            var documentoId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
-            if (documentoId == 0)
+            var documentId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
+            if (documentId == 0)
             {
                 throw new ArgumentException(FindingDocumentErrorMessage);
             }
@@ -494,19 +383,9 @@ namespace WoopiAiHub.Application.Services
                 normalizedContext.AppendLine(page.Text);
             }
 
-            var normalizedDocument = _documentNormalizedServices.FindById(documentoId, processOcrResultDto.Email);
-            if (normalizedDocument is not null)
-            {
-                var documentNormalized = CreateDocumentNormalized(documentoId, normalizedContext.ToString(), normalizedDocument.Id);
-                _documentNormalizedServices.Update(documentNormalized);
-            }
-            else
-            {
-                var documentNormalized = CreateDocumentNormalized(documentoId, normalizedContext.ToString(), 0);
-                _documentNormalizedServices.Create(documentNormalized);
-            }
+            _documentNormalizedServices.InsertOrUpdate(documentId, normalizedContext.ToString());
 
-            await this.ChangeStatus(documentoId, DocumentStatus.OCR, processOcrResultDto.Email);
+            await this.ChangeStatus(documentId, DocumentStatus.OCR, processOcrResultDto.Email);
 
             var documentEmbeddingsDto = new DocumentEmbeddingsDataDto
             {
@@ -880,116 +759,7 @@ namespace WoopiAiHub.Application.Services
             if (resultUpload is not null)
                 return resultUpload.GuidId;
             else
-                throw new Exception("GuidId file reference returned null on upload FileRepository");
-        }
-
-        /// <summary>
-        /// Sends the text performed by OCR by Google to the Embeddings API
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="referenceFile"></param>
-        /// <returns></returns>
-        private async Task<String> SendDocumentsEmbbeddingsOcrByGoogle(ICollection<string> result,
-                                                                       string referenceFile,
-                                                                       DocumentAnalysisResponseDto documentAnalysisResponseDto)
-        {
-            var normalizedContext = new StringBuilder();
-            var tenant = await _tenantCacheServices.FindTenantAsync(documentAnalysisResponseDto.Tenant,
-                                                                    ColTypeModule.WoopiAiHub);
-
-            if (string.IsNullOrEmpty(documentAnalysisResponseDto.Embeddings_model_name))
-            {
-                documentAnalysisResponseDto.Embeddings_model_name = tenant.EmbeddingModelName;
-            }
-
-            foreach (var textPage in result)
-            {
-                var emptyJson = new { };
-                var documentRequestRefitDto = new AddDocumentsRequestRefitDto
-                {
-                    text = textPage,
-                    metadata = emptyJson,
-                    Tenant = documentAnalysisResponseDto.Tenant,
-                    embeddings_model_name = documentAnalysisResponseDto.Embeddings_model_name,
-                    Chunk_size = tenant.ChunkSize
-                };
-                normalizedContext.AppendLine(textPage);
-
-                var apiEmbbeddingsKeyAuth = documentAnalysisResponseDto.KeyMongoAcess;
-
-                if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                    throw new ArgumentNullException(apiEmbbeddingsKeyAuth, KeyMongoAccessNotFoundMessage);
-
-                await _embbedingsApi.AddDocuments(referenceFile,
-                                                  documentRequestRefitDto,
-                                                  apiEmbbeddingsKeyAuth);
-            }
-
-            return normalizedContext.ToString();
-        }
-
-        /// <summary>
-        /// Sends the text performed by OCR by Azure to the Embeddings API
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="referenceFile"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        private async Task<String> SendDocumentsEmbeddingsOcrByAzure(AnalyzeResult result,
-                                                                     string referenceFile,
-                                                                     DocumentAnalysisResponseDto documentAnalysisResponseDto)
-        {
-            var normalizedContext = new StringBuilder();
-            var apiEmbbeddingsKeyAuth = documentAnalysisResponseDto.KeyMongoAcess;
-
-            var tablesByPage = result.Tables
-                .GroupBy(table => table.BoundingRegions.Count > 0 ? table.BoundingRegions[0].PageNumber : 0)
-                .ToDictionary(group => group.Key, group => group.ToList());
-
-            foreach (var page in result.Pages)
-            {
-                var pageText = new StringBuilder($"----------- Página {page.PageNumber} do PDF -----------\n\n");
-
-                var paragraphTexts = page.Lines.Select(line => line.Content).ToList();
-
-                var pageTables = tablesByPage.ContainsKey(page.PageNumber)
-                    ? tablesByPage[page.PageNumber]
-                    : new List<DocumentTable>();
-
-                var tableTexts = pageTables.Select(table =>
-                {
-                    var tableContent = new StringBuilder($"\n--- Tabela ---\n");
-                    foreach (var row in table.Cells.GroupBy(c => c.RowIndex))
-                    {
-                        var line = string.Join(" | ", row.OrderBy(c => c.ColumnIndex).Select(c => c.Content));
-                        tableContent.AppendLine(line);
-                    }
-                    return tableContent.ToString();
-                }).ToList();
-
-                var remainingParagraphs = paragraphTexts
-                    .Where(paragraph => !tableTexts.Any(table => table.Contains(paragraph)))
-                    .ToList();
-
-                pageText.AppendLine(string.Join(Environment.NewLine, remainingParagraphs));
-                pageText.AppendLine(string.Join(Environment.NewLine, tableTexts));
-
-                normalizedContext.Append(pageText.ToString());
-
-                if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                    throw new ArgumentNullException(apiEmbbeddingsKeyAuth, KeyMongoAccessNotFoundMessage);
-
-                AddDocumentsRequestRefitDto addDocumentRequest = await CreateAddDocumentsRequestDtoAsync(pageText.ToString(),
-                                                                                              documentAnalysisResponseDto.Tenant,
-                                                                                              page,
-                                                                                              documentAnalysisResponseDto.Embeddings_model_name);
-                await _embbedingsApi.AddDocuments(referenceFile,
-                                                  addDocumentRequest,
-                                                  apiEmbbeddingsKeyAuth);
-            }
-
-            return normalizedContext.ToString();
-
+                throw new AppException(ErrorCode.UploadFailed, "GuidId file reference returned null on upload FileRepository", null);
         }
 
         /// <summary>
@@ -1078,7 +848,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private static List<Card> CreateDocumentCard(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Team> teams)
         {
-
             return teams
                 .Where(t => t.Workflow != null)
                 .Select(t => t.Workflow!.Steps.OrderBy(o => o.Order).FirstOrDefault())
@@ -1094,28 +863,6 @@ namespace WoopiAiHub.Application.Services
                         true
                     ))
                 .ToList();
-        }
-
-        /// <summary>
-        /// Send Pages cosumed in Azure Or Google OCR
-        /// </summary>
-        /// <param name="emailCreator"></param>
-        /// <param name="tenant"></param>
-        /// <param name="pages"></param>
-        /// <returns></returns>
-        private async Task<bool> ManageConsumptionPages(DocumentAnalysisResponseDto documentAnalysisResponseDto,
-                                                        int pages,
-                                                        bool isKeyOrigin)
-        {
-            return await _marketPlaceApi.ManageConsumptionPages(
-                _config[ConfigKeyAccessName]!,
-                new ConsumptionPagesDto()
-                {
-                    Email = documentAnalysisResponseDto.EmailCreator,
-                    Tenant = documentAnalysisResponseDto.Tenant,
-                    Pages = pages,
-                    IsKeyOrigin = isKeyOrigin
-                });
         }
 
         /// <summary>
@@ -1174,26 +921,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             return listDocument;
-        }
-
-        /// <summary>
-        /// Create a new DocumentNormalized for the database.
-        /// </summary>
-        /// <param name="idDocument"></param>
-        /// <param name="content"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        private static DocumentNormalized CreateDocumentNormalized(int idDocument,
-                                                                   string content,
-                                                                   int id)
-        {
-            return new DocumentNormalized
-            (
-                idDocument,
-                content,
-                id,
-                DateTime.Now
-            );
         }
 
         /// <summary>

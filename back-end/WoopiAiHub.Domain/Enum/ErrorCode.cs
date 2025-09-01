@@ -8,5 +8,6 @@
         NotFound = 3,
         Conflict = 4,
         InvalidValue = 5,
+        UploadFailed = 6,
     }
 }

@@ -25,14 +25,9 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         FindByIdAnalyzeDto FindByIdAnalyze(int id,
                                            HeadersDto headersDto);
 
-        Task<bool> DocumentAnalysis(DocumentAnalysisResponseDto documentAnalysisResponseDto);
-
         Task<bool> ChangeStatus(int id,
                                 DocumentStatus status,
                                 string emailCreator);
-
-        object FindStatusAndName(int id,
-                                 string emailCreator);
 
         int FindDocumentCount();
 
