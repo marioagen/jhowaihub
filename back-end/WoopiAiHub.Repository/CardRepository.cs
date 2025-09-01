@@ -49,17 +49,18 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="card"></param>
         /// <returns></returns>
-        public async Task<bool> DeleteByDocumentId(int documentId)
+        public async Task<bool> DeleteByDocumentIds(List<int> documentIds)
         {
-            var cards = await _context.Cards
-                .Where(c => c.DocumentId == documentId)
-                .ToListAsync();
+            var cards = _context.Cards.Where(c => documentIds.Contains(c.DocumentId));
 
-            if (cards.Count == 0)
-                return false;
+            if (await cards.AnyAsync())
+            {
+                await cards.ExecuteUpdateAsync(b => b
+                           .SetProperty(u => u.Enable, false));
 
-            cards.ForEach(c => c.Enable = false);
-            return await _context.SaveChangesAsync() > 0;
+                return await _context.SaveChangesAsync() > 0;
+            }
+            return false;
         }
     }
 }

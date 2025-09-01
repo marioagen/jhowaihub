@@ -17,7 +17,7 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static Card FindValidCard()
         {
-            return new Card(1, DateTime.Now, 1, 1, "Card", 1);
+            return new Card(1, DateTime.Now, 1, 1, "Card", 1, true);
         }
 
         public static Step FindValidStep()
