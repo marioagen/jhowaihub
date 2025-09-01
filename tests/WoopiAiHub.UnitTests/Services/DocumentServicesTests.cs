@@ -499,7 +499,7 @@ namespace WoopiAiHub.UnitTests.Services
                          .ReturnsAsync(_fixture.FindHttpResponseMessage);
 
             cardRepository
-                .Setup(r => r.DeleteByDocumentId(It.IsAny<int>()))
+                .Setup(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()))
                 .ReturnsAsync(true);
 
             // Act
@@ -510,7 +510,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(r => r.Delete(ids), Times.Once);
             documentRepository.Verify(r => r.FindHashById(ids), Times.Once);
             embeddingsApi.Verify(api => api.DeleteHash(It.IsAny<string>(), headers.Tenant, headers.KeyMongoAccess), Times.Exactly(hashes.Count));
-            cardRepository.Verify(r => r.DeleteByDocumentId(It.IsAny<int>()), Times.Exactly(ids.Count));
+            cardRepository.Verify(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);
             unitOfWork.Verify(u => u.Rollback(), Times.Never);
@@ -536,7 +536,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess))
                 .ReturnsAsync(_fixture.FindHttpResponseMessage);
             cardRepository
-                .Setup(a => a.DeleteByDocumentId(It.IsAny<int>()))
+                .Setup(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()))
                 .ReturnsAsync(false);
 
             // Act
@@ -547,7 +547,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.Delete(list), Times.Once);
             documentRepository.Verify(a => a.FindHashById(list), Times.Once);
             embeddingRepository.Verify(a => a.DeleteHash("test", headers.Tenant, headers.KeyMongoAccess), Times.Once);
-            cardRepository.Verify(a => a.DeleteByDocumentId(It.IsAny<int>()), Times.Exactly(list.Count));
+            cardRepository.Verify(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);   // mesmo retornando false, ainda faz commit
             unitOfWork.Verify(u => u.Rollback(), Times.Never);
