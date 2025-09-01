@@ -1,4 +1,5 @@
 import * as signalR from "@microsoft/signalr";
+import logService from '@/services/log/logService.js';
 import store from '@/store';
 
 class SignalRService {
@@ -9,7 +10,7 @@ class SignalRService {
 
     async startConnection(options = {}) {
         if (this.connection) {
-            console.warn("SignalR connection already exists.");
+            logService.showMessage("SignalR connection already exists.");
             return;
         }
 
@@ -23,22 +24,22 @@ class SignalRService {
             .build();
 
         this.connection.onreconnecting(() => {
-            console.log("SignalR reconnecting...");
+            logService.showMessage("SignalR reconnecting...");
         });
 
         this.connection.onreconnected(() => {
-            console.log("SignalR reconnected.");
+            logService.showMessage("SignalR reconnected");
         });
 
         this.connection.onclose(() => {
-            console.log("SignalR connection closed.");
+            logService.showMessage("SignalR connection closed");
         });
 
         try {
             await this.connection.start();
-            console.log("SignalR connection started.");
+            logService.showMessage("SignalR connection started");
         } catch (error) {
-            console.error("Error starting SignalR connection:", error);
+            logService.showMessage("Error starting SignalR connection:" + error);
         }
     }
 
@@ -46,9 +47,9 @@ class SignalRService {
         if (this.connection) {
             this.connection.stop();
             this.connection = null;
-            console.log("SignalR connection stopped.");
+            logService.showMessage("SignalR connection stopped.");
         } else {
-            console.warn("No SignalR connection to stop.");
+            logService.showMessage("No SignalR connection to stop.");
         }
     }
 
@@ -56,7 +57,7 @@ class SignalRService {
         if (this.connection) {
             this.connection.on(eventName, callback);
         } else {
-            console.warn("SignalR connection is not established.");
+            logService.showMessage("SignalR connection is not established.");
         }
     }
 
@@ -64,7 +65,7 @@ class SignalRService {
         if (this.connection) {
             this.connection.off(eventName);
         } else {
-            console.warn("SignalR connection is not established.");
+            logService.showMessage("SignalR connection is not established.");
         }
     }
 
@@ -73,10 +74,10 @@ class SignalRService {
             try {
                 await this.connection.invoke(eventName, ...args);
             } catch (error) {
-                console.error(`Error sending SignalR event '${eventName}':`, error);
+                logService.showMessage(`Error sending SignalR event '${eventName}':` +error);
             }
         } else {
-            console.warn("SignalR connection is not established.");
+            logService.showMessage("SignalR connection is not established.");
         }
     }
 }
