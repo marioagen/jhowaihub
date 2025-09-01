@@ -264,15 +264,17 @@ namespace WoopiAiHub.Application.Services
         {
             ArgumentNullException.ThrowIfNull(ids);
 
-            var hashList = _documentRepository.FindHashById(ids);
+            var hashList = _documentRepository.FindHashById(ids).ToList();
             _unitOfWork.BeginTransaction();
             try
             {
                 var deleted = _documentRepository.Delete(ids);
-                var hasTasks = hashList.Select(hash => DeleteHash(hash, headersDto.Tenant, headersDto.KeyMongoAccess));
-                var cardTasks = ids.Select(id => _cardRepository.DeleteByDocumentId(id));
 
-                await Task.WhenAll(hasTasks.Concat(cardTasks));
+                await Task.WhenAll(hashList.Select(hash =>
+                    DeleteHash(hash, headersDto.Tenant, headersDto.KeyMongoAccess)));
+
+                await _cardRepository.DeleteByDocumentIds(ids);
+
                 _unitOfWork.Commit();
                 return deleted;
             }
@@ -1088,7 +1090,8 @@ namespace WoopiAiHub.Application.Services
                         step!.Id,
                         0,
                         requestCreateDocumentDto.Filename,
-                        step.StatusId
+                        step.StatusId,
+                        true
                     ))
                 .ToList();
         }

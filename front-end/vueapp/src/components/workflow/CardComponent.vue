@@ -6,7 +6,7 @@
                         <LucideIcon icon="Loader" size="24" class="me-1 animate-spin" />
                     </div>
                     <div class="progress-content" v-if="showLoading">
-                        <div class="mb-2">{{ $t("labelprogress") }} <span class="float-end">{{ getProgressPercentage(dataCard.statusDocument) || 0 }}%</span></div>
+                        <div class="mb-2">{{ $t("labelProcessing") }} <span class="float-end">{{ getProgressPercentage(dataCard.statusDocument) || 0 }}%</span></div>
                         <div class="progress">
                             <div class="progress-bar progress-bar-striped progress-bar-animated"
                                  role="progressbar"
