@@ -137,10 +137,8 @@
         methods: {
             getDocuments(obj) {
                 this.table.isLoading = true;
-
                 const teamIds = this.resolveTeamIds();
                 if (teamIds.length === 0) return;
-
                 const params = {
                     search: this.searchInput.trim() || "",
                     pageSize: this.selectedOption,
@@ -149,6 +147,7 @@
                     colType: this.colType,
                     teamIds,
                 };
+
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
                         this.table.data = response.content;
@@ -164,7 +163,7 @@
                 }
                 return [this.selectedTeamId];
             },
-            orderList: function (col) {
+            orderList(col) {
                 if (this.isAscending) {
                     this.isAscending = false;
                 } else {
