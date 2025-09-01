@@ -4,7 +4,7 @@
             <div class="row justify-content-md-center" style="height: 100%">
                 <div class="col-md-auto">
                     <div class="div-center">
-                        <div v-if="loading">
+                        <div v-if="isLoading">
                             <div class="mb-3" style="width: 100%; float: left">
                                 <h5 class="h5-custom-modal" v-html="message"></h5>
                             </div>
@@ -23,22 +23,11 @@
             </div>
         </div>
     </main>
-    <!-- Component ModalAlert -->
-    <modal-alert
-        v-if="modalAlertShow"
-        :type="'Error'"
-        :alertTitle="$t('labelFailedToNormalize')"
-        :alertMessage="$t('labelTheFileMayBeUnreadableOrHaveAnError')"
-        :okLabel="$t('labelClose')"
-        @close="closeModal"
-    />
 </template>
 <script>
-    import ModalAlert from "@/components/common/modal-alert";
-    import api from "@/services/api";
-
+    import NormalizeServices from "@/services/documents/NormalizeServices";
     export default {
-        name: "NormalizeIndex",
+        name: "EmbeddingDocument",
         props: {
             docData: {
                 required: true,
@@ -54,22 +43,18 @@
         data() {
             return {
                 backPage: this.$route.query.page,
-                title: "Normalize Index",
-                loading: true,
+                isLoading: true,
                 message: "",
-                modalAlertShow: false,
-                myInterval: null,
                 timeoutMessage: ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
             };
         },
         components: {
-            ModalAlert,
         },
         methods: {
             verifyNormalizedDoc() {
-                api.get("/Document/Status/" + this.docData.Id)
+                NormalizeServices.VerifyNormalize(this.docData.Id)
                     .then((response) => {
-                        if (response.data.status === 0) {
+                        if (response.status === 0) {
                             this.message = this.$t("labelNormalizingTheDocument");
                             this.normalizeDoc();
                         } else {
@@ -78,14 +63,11 @@
                                 this.normalizeDoc();
                             } else {
                                 this.message = this.$t("labelDocumentHasAlreadyBeenStandardizedPreviously", [
-                                    response.data.name,
+                                    response.name,
                                 ]);
                                 this.redirectToDocument();
                             }
                         }
-                    })
-                    .catch((e) => {
-                        console.log(e);
                     });
             },
             normalizeDoc() {
@@ -97,32 +79,39 @@
                     Id: this.docData.Id,
                     Embeddings_model_name: this.docData.Embeddings_model_name,
                 };
-                this.loading = true;
-                api.post("/Document/Analyze/", paramsReq)
-                    .then(() => {
+
+                this.isLoading = true;
+                NormalizeServices.AnalyzeDocument(paramsReq)
+                    .then((response) => {
                         window.onbeforeunload = null;
+                        if(response.error !== undefined) {
+                            return this.$notify({
+                                title: this.$t('labelFailedToNormalize'),
+                                message: this.$t('labelTheFileMayBeUnreadableOrHaveAnError'),
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
                         if (this.isReprocessing) {
                             location.reload();
                         } else {
                             this.redirectToAnalyzer();
                         }
                     })
-                    .catch((e) => {
-                        window.onbeforeunload = null;
-                        console.log(e);
-                        this.loading = false;
-                        this.showModal();
-                    })
                     .finally(() => {
-                        this.loading = false;
-                    });
+                        this.isLoading = false;
+                    })
             },
             redirectToAnalyzer() {
                 setTimeout(() => {
                     this.$router.push({
                         name: "Analyzer",
-                        params: { id: this.docData.Id },
-                        query: { page: this.backPage },
+                        params: { 
+                            id: this.docData.Id 
+                        },
+                        query: { 
+                            page: this.backPage 
+                        },
                     });
                 }, 500);
             },
@@ -130,15 +119,6 @@
                 setTimeout(() => {
                     this.$router.push({ name: "Documents", query: { page: this.backPage } });
                 }, 6000);
-            },
-            showModal() {
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-                location.reload();
             },
         },
         created() {
