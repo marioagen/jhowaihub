@@ -64,7 +64,6 @@
         :docData="docDataEmbedding"
         :isReprocessing="isReprocessing"
     />
-
     <ConfirmModal
         id="deleteConfirm"
         title="documents.removeTitle"
@@ -130,7 +129,7 @@
             isDeleting: false,
             isEmbedding: false,
             docDataEmbedding: {
-                Id: "",
+                Id: Number,
                 Embeddings_model_name: "",
             },
             isReprocessing: false,
@@ -152,7 +151,6 @@
                 };
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
-                        console.log(response)
                         this.table.data = response.content;
                         this.table.pagination = response.pagination;
                     })
