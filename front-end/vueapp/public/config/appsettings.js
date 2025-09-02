@@ -5,6 +5,7 @@ const ENV_CONFIG = (() => {
         VUE_APP_WAITING_TIME_MSG_UPLD: "5000",
         VUE_APP_TIMER_REQ: "1",
         VUE_APP_GTAG_ID: "G-XXXXXXXXXX",
+        VUE_APP_ENV_TYPE: "Development",
     };
 })();
 
