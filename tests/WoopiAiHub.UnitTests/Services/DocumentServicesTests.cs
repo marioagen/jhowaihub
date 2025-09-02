@@ -22,7 +22,6 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
-using WoopiAiHub.Repository.Cache;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
@@ -665,8 +664,7 @@ namespace WoopiAiHub.UnitTests.Services
             configurationMock.Setup(x => x["keyAccess"]).Returns(Guid.NewGuid().ToString);
             _mocker.Use(configurationMock.Object);
             documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile)).Returns(idDocument);
-            documentNormalizedServicesMock.Setup(s => s.FindById(idDocument)).Returns((DocumentNormalized?)null);
-            documentNormalizedServicesMock.Setup(s => s.Create(It.IsAny<DocumentNormalized>())).Returns(true);
+            documentNormalizedServicesMock.Setup(s => s.InsertOrUpdate(It.IsAny<int>(), It.IsAny<string>()));
             keyGeneratorMock.Setup(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(generatedKey);
             tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
                                .ReturnsAsync(tenant);
@@ -682,8 +680,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             configurationMock.Verify(c => c["keyAccess"], Times.Exactly(2));
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
-            documentNormalizedServicesMock.Verify(s => s.FindById(idDocument), Times.Once);
-            documentNormalizedServicesMock.Verify(s => s.Create(It.IsAny<DocumentNormalized>()), Times.Once);
+            documentNormalizedServicesMock.Verify(s => s.InsertOrUpdate(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
             keyGeneratorMock.Verify(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
         }
