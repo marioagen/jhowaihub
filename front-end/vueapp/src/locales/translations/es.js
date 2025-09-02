@@ -319,6 +319,27 @@
         next: "Siguiente",
         previous: "Anterior",
     },
+    documents: {
+        title: "Documentos",
+        subtitle: "Gestiona documentos y extrae información",
+        notFound: "No se encontraron documentos",
+        removeTitle: "Está a punto de eliminar un documento del sistema",
+        createBtn: "Nuevo documento",
+        name: "Nombre",
+        description: "Descripción",
+        createdDate: "Fecha de carga",
+        status: "Estado",
+        owner: "Propietario",
+        teams: "Equipo",
+        statusList: {
+            analyzed: "Analizado",
+            notAnalyzed: "En espera de análisis",
+        },
+        actions: {
+            analyze: "Analizar",
+            consult: "Consultar",
+        },
+    },
     questions: {
         title: "Preguntas",
         subtitle: "Gestiona las preguntas del sistema",

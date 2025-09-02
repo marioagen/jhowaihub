@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <main class="flex-shrink-0" v-if="loading">
         <div class="container mb-5">
             <div class="row justify-content-md-center full-height">
@@ -217,7 +217,7 @@
 
                                 <router-link
                                     class="btn btn-secondary m-2 btn-custom-cancel float-right"
-                                    :to="{ name: 'DocumentList', query: { page: '1' } }"
+                                    :to="{ name: 'Documents', query: { page: '1' } }"
                                     :title="$t('labelCancel')"
                                 >
                                     {{ $t("labelCancel") }}
@@ -350,7 +350,7 @@
             },
             setCrumbsData: function () {
                 this.crumbsData = [
-                    { crumb: this.$t("labelDocuments"), link: { to: "DocumentList" } },
+                    { crumb: this.$t("labelDocuments"), link: { to: "Documents" } },
                     { crumb: this.$t("labelUpload"), link: { to: "DocumentUpload" } },
                 ];
             },
@@ -476,7 +476,7 @@
                 });
             },
             backToListDocuments() {
-                this.$router.push({ name: "DocumentList", query: { page: "1", showToast: "true" } });
+                this.$router.push({ name: "Documents", query: { page: "1", showToast: "true" } });
             },
             readFileAsArrayBuffer(file) {
                 return new Promise((resolve, reject) => {
