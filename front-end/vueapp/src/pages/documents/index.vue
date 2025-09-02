@@ -16,17 +16,9 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <div class="flex-grow-1">
-                                <DocumentFilters 
-                                    @filter="filterData"
-                                />
-                            </div>
-
-                            <div class="w-auto">
-                                
-                            </div>
-                        </div>
+                        <DocumentFilters 
+                            @filter="filterData"
+                        />
                     </div>
                 </div>
             </div>
@@ -59,7 +51,7 @@
                 immediate: true,
                 handler: async function (newValue) {
                     if (newValue) {
-                        //filter data
+                        this.reloadData();
                     }
                 },
             },
@@ -68,9 +60,12 @@
             redirectToNewUpload() {
                 this.$router.push({ name: "DocumentsUpload" });
             },
+            reloadData() {
+                this.$refs.DocumentsTable.getDocuments();
+            },
             filterData(filters) {
                 this.$refs.DocumentsTable.filters = filters;
-                this.$refs.DocumentsTable.getDocuments();
+                this.reloadData();
             },
         },
         computed: {
@@ -79,17 +74,12 @@
             },
         },
         async created() {
-            //Ask Gab
-            GlobalEventService.on("all-uploads-complete", this.reloadList);
-            GlobalEventService.on("refresh-once", this.reloadList);
-            if (this.noTeams) {
-                this.selectedTeamId = null;
-            }
+            GlobalEventService.on("all-uploads-complete", this.reloadData());
+            GlobalEventService.on("refresh-once", this.reloadData());
         },
         beforeUnmount() {
-            //Ask Gab
-            GlobalEventService.off("all-uploads-complete", this.reloadList);
-            GlobalEventService.off("refresh-once", this.reloadList);
+            GlobalEventService.off("all-uploads-complete", this.reloadData());
+            GlobalEventService.off("refresh-once", this.reloadData());
         },
     };
 </script>
