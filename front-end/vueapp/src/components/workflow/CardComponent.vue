@@ -52,7 +52,7 @@
 
 <script>
     import CardsServices from "@/services/cards/CardsServices";
-    import signalRService from '@/services/signalR/signalRServices'
+    //import signalRService from '@/services/signalR/signalRServices'
 
     export default {
         name: "CardComponent",
@@ -154,15 +154,15 @@
             },
         },
         async mounted() {
-            signalRService.on(this.signalrEventStatusChanged, (message) => {
-                const item = this.dataCard.documentId === message.documentId;
-                if (item) {
-                    this.dataCard.statusDocument = message.status;
-                }
-            });
+            // signalRService.on(this.signalrEventStatusChanged, (message) => {
+            //     const item = this.dataCard.documentId === message.documentId;
+            //     if (item) {
+            //         this.dataCard.statusDocument = message.status;
+            //     }
+            // });
         },
         beforeUnmount() {
-            signalRService.off(this.signalrEventStatusChanged);
+            //signalRService.off(this.signalrEventStatusChanged);
         },
         computed: {
             verifyFirst() {

@@ -85,6 +85,8 @@
 <script>
     import WorkflowService from "@/services/workflow/WorkflowService.js";
     import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
+    import signalRService from "@/services/signalR/signalRServices";
+
     export default {
         name: "WorkflowPage",
         data() {
@@ -170,6 +172,21 @@
         },
         created() {
             this.getWorkflowList();
+        },
+        async mounted() {
+            await signalRService.startConnection();
+
+            signalRService.on(this.signalrEventStatusChanged, (message) => {
+                const steps = this.kanbanCards.steps.find(s => s.order === 0);
+                const item = steps.find(card => card.documentId === message.documentId);
+                if (item) {
+                    item.status = message.status;
+                }
+            });
+        },
+        beforeUnmount() {
+            signalRService.off(this.signalrEventStatusChanged);
+            signalRService.stopConnection();
         },
     };
 </script>
