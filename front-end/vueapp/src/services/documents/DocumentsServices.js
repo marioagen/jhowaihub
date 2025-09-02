@@ -1,8 +1,8 @@
 import api from "@/services/api";
 
 export default {
-    getDocuments(params) {
-        return api.get("/Document", { params: params })
+    getDocuments(filters) {
+        return api.get("/Document", { params: filters })
             .then(({ data }) => {
                 return {
                     content: data.content,
