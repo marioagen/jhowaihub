@@ -1,5 +1,5 @@
 <template>
-    <main>
+    <main :key="changeLanguage">
         <div class="container-fluid scroll-area mx-2">
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -38,6 +38,7 @@
         name: "DocumentsPage",
         data() {
             return {
+                changeLanguage: false,
             };
         },
         components: {
@@ -46,6 +47,7 @@
         },
         watch: {
             "$store.state.userProfile.language"() {
+                this.changeLanguage = !this.changeLanguage;
             },
             keyMongoAccess: {
                 immediate: true,
