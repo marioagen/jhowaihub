@@ -257,7 +257,7 @@
         userIncorrectPassword: "A senha informada está incorreta.",
         userTokenMicrosoftInvalid: "Não foi possível validar sua autenticação. Por favor, faça login novamente."
     },
-    "validation": {
+    validation: {
         "required": "Campo obrigatório.",
         "email": "Informe um email válido.",
         "min": "Mínimo de {length} caracteres.",
@@ -265,6 +265,17 @@
         "password_min": "A senha deve ter no mínimo 6 caracteres.",
         "password_uppercase": "A senha deve conter uma letra maiúscula.",
         "password_number": "A senha deve conter um número."
+    },
+    filters: {
+        documentInput: "Buscar por documento, descrição ou usuário, ...",
+        teamsSelect: {
+            all: "Todos os times",
+            none: "Selecione um time",
+        },
+        assignment: {
+            currentUser: "Meus documentos",
+            allUsers: "Todos os usuários",
+        }
     },
     labelBackToListDocuments: "Voltar para documentos",
     pageTitleDocumentsForm: "Novo Documento",

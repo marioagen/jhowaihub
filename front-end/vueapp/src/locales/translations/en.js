@@ -257,7 +257,7 @@
         userIncorrectPassword: "The password entered is incorrect.",
         userTokenMicrosoftInvalid: "We were unable to validate your authentication. Please log in again."
     },
-    "validation": {
+    validation: {
       "required": "This field is required.",
       "email": "Please enter a valid email address.",
       "min": "Minimum of {length} characters.",
@@ -265,6 +265,17 @@
       "password_min": "Password must be at least 6 characters.",
       "password_uppercase": "Password must contain at least one uppercase letter.",
       "password_number": "Password must contain at least one number."
+    },
+    filters: {
+        documentInput: "Search by document, description or user, ...",
+        teamsSelect: {
+            all: "All teams",
+            none: "Select a team",
+        },
+        assignment: {
+            currentUser: "My documents",
+            allUsers: "All users",
+        }
     },
     labelBackToListDocuments: "Back to documents",
     pageTitleDocumentsForm: "New Document",

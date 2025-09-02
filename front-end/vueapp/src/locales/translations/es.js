@@ -261,7 +261,7 @@
         userIncorrectPassword: "La contraseña ingresada es incorrecta.",
         userTokenMicrosoftInvalid: "No pudimos validar tu autenticación. Inicia sesión de nuevo."
     },
-    "validation": {
+    validation: {
         "required": "Campo obligatorio.",
         "email": "Por favor, introduce un correo electrónico válido.",
         "min": "Mínimo de {length} caracteres.",
@@ -269,6 +269,17 @@
         "password_min": "La contraseña debe tener al menos 6 caracteres.",
         "password_uppercase": "La contraseña debe contener al menos una letra mayúscula.",
         "password_number": "La contraseña debe contener al menos un número."
+    },
+    filters: {
+        documentInput: "Buscar por documento, descripción o usuario, ...",
+        teamsSelect: {
+            all: "Todos los equipos",
+            none: "Seleccione un equipo",
+        },
+        assignment: {
+            currentUser: "Mis documentos",
+            allUsers: "Todos los usuarios",
+        }
     },
     labelBackToListDocuments: "Volver a los documentos",
     pageTitleDocumentsForm: "Nuevo documento",
