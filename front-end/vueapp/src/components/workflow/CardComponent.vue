@@ -1,6 +1,6 @@
 <template>
     <div v-if="isLoadingAnalysis" class="overlay-loading">
-        <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+        <div class="spinner-grow text-primary" role="status"></div>
     </div>
     <div class="card" @click="redirectToAnalyzer">
         <div class="card-content">
@@ -287,6 +287,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 3rem;
+        height: 3rem;
     }
 
 </style>
