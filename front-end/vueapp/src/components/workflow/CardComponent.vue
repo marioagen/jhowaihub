@@ -2,7 +2,7 @@
     <div v-if="isLoadingAnalysis" class="overlay-loading">
         <div class="spinner-grow text-primary" role="status"></div>
     </div>
-    <div class="card" @click="redirectToAnalyzer">
+    <div class="card clickable" @click="redirectToAnalyzer">
         <div class="card-content">
             <div class="cover" v-if="showLoading">
                 <div class="spinner-cover">
@@ -36,11 +36,11 @@
                     <LucideIcon icon="User" size="12" class="me-1" />
                     <small>{{dataCard.owner}}</small>
                 </div>
-                <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap">
+                <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap" v-if="!showLoading">
                     <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
                         {{ dataStep.status.name }}
                     </div>
-                    <button class="btn btn-sm btn-primary float-end" @click="advanceStep" v-if="!isLastStep">
+                    <button class="btn btn-sm btn-primary float-end" @click.stop="advanceStep" v-if="!isLastStep">
                         <span>{{ verifyFirst }}</span>
                         <LucideIcon icon="ChevronRight" size="16" class="me-1" />
                     </button>
@@ -123,7 +123,7 @@
                     try {
                         await this.updateStatus();
                         if (this.isFirstStep) {
-                            this.$router.push({ name: 'Analyzer', params: { id: this.dataCard.documentId }, query: { page: this.backPage } });
+                            redirectToAnalyzer();
                         }
                         
                     } catch (e) {
@@ -150,8 +150,10 @@
                 }
             },
             redirectToAnalyzer() {
-                this.$router.push({ name: 'Analyzer', params: { id: this.dataCard.documentId }, query: { page: this.backPage } });
-            },
+                if (!this.showLoading) {
+                    this.$router.push({ name: 'Analyzer', params: { id: this.dataCard.documentId }, query: { page: this.backPage } });
+                }
+            }
         },
         async mounted() {
             // signalRService.on(this.signalrEventStatusChanged, (message) => {
@@ -289,6 +291,10 @@
         justify-content: center;
         width: 3rem;
         height: 3rem;
+    }
+
+    .clickable {
+        cursor: pointer;
     }
 
 </style>

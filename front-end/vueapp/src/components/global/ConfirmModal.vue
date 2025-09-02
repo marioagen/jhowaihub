@@ -25,7 +25,7 @@
                 <div class="d-flex justify-content-center mx-4 my-4">
                     <button
                         type="button"
-                        class="btn btn-outline-secondary mx-4"
+                        class="btn btn-outline-primary btn-table table-btn mx-4"
                         data-bs-dismiss="modal"
                         :disabled="isLoading"
                         @click="$emit('cancel')"
