@@ -14,7 +14,6 @@
                         {{ $t("documents.createBtn") }}
                     </button>
                 </div>
-
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -44,7 +43,6 @@
                     </div>
                 </div>
             </div>
-
             <DocumentsTable 
                 ref="DocumentsTable"
             />
