@@ -52,7 +52,6 @@
 
 <script>
     import CardsServices from "@/services/cards/CardsServices";
-    import signalRService from '@/services/signalR/signalRServices'
 
     export default {
         name: "CardComponent",
@@ -91,15 +90,6 @@
                     backgroundColor: 'color-mix(in srgb, var(--cor-base) 30%, white)'
                 };
             },
-            advanceStep() {
-                this.isLoadingAnalysis = true;
-                if (this.isFirstStep) {
-                    redirectToAnalyzer();
-                }
-                else {
-                    this.updateStatus();
-                }
-            },
             async updateStatus() {
                 if (!this.isLastStep) {
                     var params = {
@@ -123,8 +113,11 @@
                     try {
                         await this.updateStatus();
                         if (this.isFirstStep) {
-                            redirectToAnalyzer();
+                            this.redirectToAnalyzer();
+                        } else {
+                            this.reloadList();
                         }
+
                         
                     } catch (e) {
                         this.$notify({
@@ -153,18 +146,10 @@
                 if (!this.showLoading) {
                     this.$router.push({ name: 'Analyzer', params: { id: this.dataCard.documentId }, query: { page: this.backPage } });
                 }
-            }
-        },
-        async mounted() {
-            signalRService.on(this.signalrEventStatusChanged, (message) => {
-                const item = this.dataCard.documentId === message.documentId;
-                if (item) {
-                    this.dataCard.statusDocument = message.status;
-                }
-            });
-        },
-        beforeUnmount() {
-            signalRService.off(this.signalrEventStatusChanged);
+            },
+            reloadList() {
+                this.$emit('reload');
+            },
         },
         computed: {
             verifyFirst() {

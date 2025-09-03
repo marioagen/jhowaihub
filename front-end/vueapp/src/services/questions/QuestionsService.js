@@ -36,14 +36,13 @@ export default {
             .then(() => {
                 return true;
             })
-            .catch(function (e) {
+            .catch((e) => {
                 let errorMessage = "";
                 if (e.response.status == 409) {
                     errorMessage = "labelQuestionAlreadyExists";
                 } else {
-                    errorMessage = "labelQuestionError";
+                    errorMessage = e;
                 }
-
                 return {
                     error: errorMessage,
                 }

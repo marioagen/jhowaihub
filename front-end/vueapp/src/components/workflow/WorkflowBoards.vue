@@ -256,7 +256,7 @@
             },
             addStep() {
                 this.stepsList.push({
-                    id: crypto.randomUUID?.() || Date.now() + Math.random(),
+                    id: 0,
                     name: '',
                     status: '',
                     profile: '',
