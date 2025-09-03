@@ -9,14 +9,13 @@
                             <small class="text-muted">{{$t("workflow.subtitle")}}</small>
                         </p>
                     </div>
-                </div>
-                
+                </div>                
                 <div class="card mb-3">
                     <div class="card-body">
-                        <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
-                            <div>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center">
                                 <LucideIcon icon="Clock" size="14" class="me-2" />
-                                <span>{{$t("workflow.boardView")}}</span>
+                                <span>{{ $t("workflow.boardView") }}:</span>
                             </div>
                             <div class="dropdown">
                                 <button 
@@ -28,7 +27,6 @@
                                     <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
                                     <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
                                 </button>
-
                                 <ul class="dropdown-menu">
                                     <li v-for="item in workflowList" :key="item.id">
                                         <a class="dropdown-item" @click="selectOption(item)">
@@ -38,14 +36,14 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="badge bg-secondary badge-custom">
+                            <div class="badge bg-light text-dark border d-flex align-items-center">
                                 <LucideIcon icon="Workflow" size="14" class="me-2" stroke="#0d6efd" />
                                 <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
+                            <WorkflowFilters @filter="filterData" class="ms-auto" />
                         </div>
                     </div>
                 </div>
-
                 <div v-if="isWorkflowSelected && isLoaded">
                     <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
@@ -56,8 +54,7 @@
                                 />
                             </div>
                         </div>
-                    </div>
-    
+                    </div>    
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
@@ -79,7 +76,7 @@
                 </div>
             </div>
         </div>
-</main>
+    </main>
 </template>
 
 <script>
@@ -87,6 +84,7 @@
     import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
+    import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
 
     export default {
         name: "WorkflowPage",
@@ -107,11 +105,16 @@
                 kanbanCards: [],
                 numDocs: 0,
                 isLoaded: false,
-                signalrEventStatusChanged: "StatusChanged"
+                signalrEventStatusChanged: "StatusChanged",
+                filters: {
+                    Input: "",
+                    IsAllUsers: false,
+                },
             };
         },
         components: {
-            WorkflowCards
+            WorkflowFilters,
+            WorkflowCards,
         },
         watch: {
             "$store.state.userProfile.language": function () {
@@ -122,12 +125,12 @@
             getWorkflowList() {
                 this.isLoaded = false;
                 var email = this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email)
+                WorkflowService.getWorkflowList(email, this.filters)
                     .then((response) => {
                         if(response.error !== undefined) {
                             this.$notify({
                                 title: 'Error',
-                                message: 'Dados salvos com erro com sucesso!',
+                                message: response.error,
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
@@ -165,6 +168,10 @@
             },
             reloadKanban() {
                 this.getWorkflowbyTeam(this.selectedOption.teamId);
+            },
+            filterData(filters) {
+                this.filters = filters;
+                this.getWorkflowList();
             },
         },
         computed: {
