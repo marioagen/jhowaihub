@@ -22,6 +22,7 @@
                                     :entity="entitySearch"
                                     :resetInput="resetInputSearch"
                                     @search="filterList"
+                                    @clean="filterList"
                                 />
                             </div>
 
@@ -164,7 +165,7 @@
             },
             filterList(obj) {
                 this.searchInput = obj.search;
-                this.getList({ search: obj.search, page: this.queryPage, type: null });
+                this.$refs.DocumentsTable.getDocuments({ search: obj.search, page: this.queryPage, type: null });
             },
         },
         computed: {

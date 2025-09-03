@@ -140,7 +140,7 @@
                 const teamIds = this.resolveTeamIds();
                 if (teamIds.length === 0) return;
                 const params = {
-                    search: this.searchInput.trim() || "",
+                    search: obj.search.trim() || "",
                     pageSize: this.selectedOption,
                     page: obj.page,
                     isAscending: this.isAscending,
