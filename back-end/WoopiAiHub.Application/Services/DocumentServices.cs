@@ -1,5 +1,4 @@
-﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -298,7 +297,6 @@ namespace WoopiAiHub.Application.Services
                                              DocumentStatus status,
                                              string emailCreator)
         {
-
             var result = _documentRepository.ChangeStatus(id, status);
 
             await _documentNotifier.NotifyStatusChangedAsync(emailCreator, id, status);
@@ -351,7 +349,7 @@ namespace WoopiAiHub.Application.Services
                 return textResponse;
             }
 
-            throw new ApplicationException("No Credits to send a Question");
+            throw new AppException(ErrorCode.NoCreditsAvailable, "No Credits to send a Question", null);
         }
 
         /// <summary>
@@ -435,10 +433,10 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// 
         private async Task<string> FinalizeUploadAsync(RequestCreateDocumentDto requestCreateDocumentDto,
-                                               Byte[] chunks,
-                                               string tenant)
+                                                       Byte[] chunks,
+                                                       string tenant)
         {
-            _documentDtoValidator.ValidateAndThrow(requestCreateDocumentDto);
+            await _documentDtoValidator.ValidateAndThrowAsync(requestCreateDocumentDto);
             var formFile = new FormFile(new MemoryStream(chunks),
                                         0,
                                         chunks.Length,
@@ -447,7 +445,7 @@ namespace WoopiAiHub.Application.Services
 
             var referenceFile = await this.UploadFileToRepositoryApi(formFile,
                                                                      tenant);
-            var documentForDataBase = this.CreateDocumentForDb(requestCreateDocumentDto,
+            var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto,
                                                                referenceFile);
 
             var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
@@ -480,9 +478,9 @@ namespace WoopiAiHub.Application.Services
                 var queryResponse = await resultRequest.Content.ReadAsStringAsync();
                 var queryResponseModel = JsonConvert.DeserializeObject<QueryResponseModelRefitDto>(queryResponse);
 
-                var documentHistoryForDb = this.CreateDocumentHistoryForDb(id,
-                                                                           queryResponseModel.response,
-                                                                           input);
+                var documentHistoryForDb = CreateDocumentHistoryForDb(id,
+                                                                      queryResponseModel!.response,
+                                                                      input);
 
                 _documentHistoryServices.Create(documentHistoryForDb);
 
@@ -494,7 +492,7 @@ namespace WoopiAiHub.Application.Services
             }
             else
             {
-                throw new Exception("Error while sending question to Embeddings API");
+                throw new AppException(ErrorCode.RefitApiError, "Error while sending question to Embeddings API", null);
             }
         }
 
@@ -537,7 +535,7 @@ namespace WoopiAiHub.Application.Services
             return new CustomQueryRequestRefitDto
             {
                 Question = input,
-                Model = tenant.Model,
+                Model = tenant!.Model,
                 kValue = tenant.KValue,
                 Temperature = 0,
                 Template = tenant.Template.Replace("{language}", language.ConvertLanguageCodeToName()),
@@ -555,7 +553,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="output"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private DocumentHistory CreateDocumentHistoryForDb(int id,
+        private static DocumentHistory CreateDocumentHistoryForDb(int id,
                                                            string output,
                                                            string input)
         {
@@ -570,32 +568,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Creates an object of type DocumentNormalized
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="output"></param>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        private DocumentNormalized CreateDocumentNormalizedForDb(int idDocument,
-                                                                 string content,
-                                                                 int id)
-        {
-            return new DocumentNormalized
-            (
-                idDocument,
-                content,
-                id,
-                DateTime.Now
-            );
-        }
-
-        /// <summary>
         /// Creates an Document type object to save in the database
         /// </summary>
         /// <param name="requestCreateDocumentDto"></param>
         /// <param name="referenceFile"></param>
         /// <returns></returns>
-        private Document CreateDocumentForDb(RequestCreateDocumentDto requestCreateDocumentDto,
+        private static Document CreateDocumentForDb(RequestCreateDocumentDto requestCreateDocumentDto,
                                              string referenceFile)
         {
             return new Document
@@ -609,34 +587,6 @@ namespace WoopiAiHub.Application.Services
                 0,
                 DateTime.Now
             );
-        }
-
-        /// <summary>
-        /// Creates an object of type AddDocumentsRequestDto
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        private async Task<AddDocumentsRequestRefitDto> CreateAddDocumentsRequestDtoAsync(string text,
-                                                                                          string tenantName,
-                                                                                          DocumentPage page,
-                                                                                          string embeddings_model_name)
-        {
-            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName,
-                                                                    ColTypeModule.WoopiAiHub);
-
-            if (string.IsNullOrEmpty(embeddings_model_name))
-            {
-                embeddings_model_name = tenant.EmbeddingModelName;
-            }
-
-            return new AddDocumentsRequestRefitDto
-            {
-                text = text,
-                metadata = new { PageNumber = page.PageNumber },
-                Tenant = tenantName,
-                embeddings_model_name = embeddings_model_name,
-                Chunk_size = tenant.ChunkSize
-            };
         }
 
         /// <summary>
@@ -679,7 +629,7 @@ namespace WoopiAiHub.Application.Services
             if (string.IsNullOrEmpty(functionApiKeyAuth))
             {
                 _logger.LogError("Function API key is missing in the configuration.");
-                throw new ArgumentNullException("Function API key is missing in the configuration.");
+                throw new ArgumentNullException(functionApiKeyAuth, "Function API key is missing in the configuration.");
             }
 
             HttpResponseMessage document = await _functionFileRetriever.Get(documentDb.ReferenceFile,
@@ -773,13 +723,13 @@ namespace WoopiAiHub.Application.Services
         {
             byte[] newBytes;
             if (_cache.TryGetValue(requestCreateDocumentDto.Name,
-                                   out byte[] existingBytes))
+                                   out byte[]? existingBytes))
             {
                 using (var memoryStream = new MemoryStream())
                 {
                     requestCreateDocumentDto.Chunk.CopyTo(memoryStream);
                     byte[] bytesChunk = memoryStream.ToArray();
-                    newBytes = existingBytes.Concat(bytesChunk).ToArray();
+                    newBytes = existingBytes!.Concat(bytesChunk).ToArray();
 
                     _cache.Set(requestCreateDocumentDto.Name,
                                newBytes,

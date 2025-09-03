@@ -9,5 +9,7 @@
         Conflict = 4,
         InvalidValue = 5,
         UploadFailed = 6,
+        NoCreditsAvailable = 7,
+        RefitApiError = 8,
     }
 }

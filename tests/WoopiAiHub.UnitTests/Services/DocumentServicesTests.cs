@@ -8,6 +8,7 @@ using Refit;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
@@ -517,7 +518,7 @@ namespace WoopiAiHub.UnitTests.Services
             marketPlaceApi.Setup(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>())).ReturnsAsync(false);
 
             // Act /Assert
-            await Assert.ThrowsAsync<ApplicationException>(() => _documentServices.InputDocument(documentInput, headers));
+            await Assert.ThrowsAsync<AppException>(() => _documentServices.InputDocument(documentInput, headers));
         }
 
         [Fact(DisplayName = "InputDocument")]
