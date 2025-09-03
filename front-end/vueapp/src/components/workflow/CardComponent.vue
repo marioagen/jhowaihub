@@ -6,7 +6,7 @@
         <div class="card-content">
             <div class="cover" v-if="showLoading">
                 <div class="spinner-cover">
-                    <LucideIcon icon="Loader" size="24" class="me-1 animate-spin" />
+                    <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
                 </div>
                 <div class="progress-content" v-if="showLoading">
                     <div class="mb-2">{{ $t("labelProcessing") }} <span class="float-end">{{ getProgressPercentage(dataCard.statusDocument) || 0 }}%</span></div>
@@ -24,16 +24,16 @@
             <div class="card-body" :class="showLoading ? 'hide-card' : ''">
                 <p>{{ dataCard.name }}</p>
                 <div class="mb-2">
-                    <LucideIcon icon="FileText" size="12" class="me-1" />
+                    <LucideIcon icon="FileText" :size="12" class="me-1" />
                     <small>{{ dataCard.description }}</small>
                 </div>
                 <div class="mb-2">
-                    <LucideIcon icon="Calendar" size="12" class="me-1" />
+                    <LucideIcon icon="Calendar" :size="12" class="me-1" />
                     <small>{{ dataCard.created }}</small>
                 </div>
                 <hr>
                 <div class="mb-2">
-                    <LucideIcon icon="User" size="12" class="me-1" />
+                    <LucideIcon icon="User" :size="12" class="me-1" />
                     <small>{{ dataCard.owner }}</small>
                 </div>
                 <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap" v-if="!showLoading">
@@ -42,7 +42,7 @@
                     </div>
                     <button class="btn btn-sm btn-primary float-end" @click.stop="advanceStep" v-if="!isLastStep">
                         <span>{{ verifyFirst }}</span>
-                        <LucideIcon icon="ChevronRight" size="16" class="me-1" />
+                        <LucideIcon icon="ChevronRight" :size="16" class="me-1" />
                     </button>
                 </div>
             </div>

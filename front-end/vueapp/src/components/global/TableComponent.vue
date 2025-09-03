@@ -23,9 +23,9 @@
                                     style="line-height: 1"
                                     @click="setOrder(column.key)"
                                 >
-                                    <LucideIcon v-if="showOrderDescByColumn(column.key)" icon="MoveUp" size="15" />
-                                    <LucideIcon v-else-if="showOrderAscByColumn(column.key)" icon="MoveDown" size="15" />
-                                    <LucideIcon v-else icon="ArrowDownUp" size="15" />
+                                    <LucideIcon v-if="showOrderDescByColumn(column.key)" icon="MoveUp" :size="15" />
+                                    <LucideIcon v-else-if="showOrderAscByColumn(column.key)" icon="MoveDown" :size="15" />
+                                    <LucideIcon v-else icon="ArrowDownUp" :size="15" />
                                 </button>
                             </div>
                         </div>

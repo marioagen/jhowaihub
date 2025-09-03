@@ -27,7 +27,7 @@
                         type="button"
                         @click="save"
                     >
-                        <LucideIcon icon="Save" size="15" />
+                        <LucideIcon icon="Save" :size="15" />
                         {{ $t("quizzes.formSave") }}
                     </button>
                 </div>
@@ -61,7 +61,7 @@
                             <label>{{ $t("workflow.responsableTeam") }}</label>
                             <div class="input-group">
                                 <span class="input-group-text border-end-0 bg-white">
-                                    <LucideIcon icon="Users" size="16" />
+                                    <LucideIcon icon="Users" :size="16" />
                                 </span>
 
                                 <Field 
@@ -102,7 +102,7 @@
                     </div>
                     <div class="col-auto">
                         <button class="btn btn-primary btn-sm" type="button" @click="addStep">
-                            <LucideIcon icon="Plus" size="15" />
+                            <LucideIcon icon="Plus" :size="15" />
                             {{ $t("workflow.createNewStep") }}
                         </button>
                     </div>
@@ -125,7 +125,7 @@
                         
                         <div class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0" @click="addStep">
                             <div class="icon-circle mb-2">
-                                <LucideIcon icon="Plus" size="16" />
+                                <LucideIcon icon="Plus" :size="16" />
                             </div>
                             <h6 class="fw-semibold mb-1">{{ $t("workflow.addBtn") }}</h6>
                             <p class="text-muted small mb-0">{{ $t("workflow.addBtnDescription") }}</p>

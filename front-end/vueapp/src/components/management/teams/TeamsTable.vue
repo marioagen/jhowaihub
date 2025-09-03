@@ -11,7 +11,7 @@
             @change-page="changePage"
         >
             <template #cell-members="{ data }">
-                <LucideIcon icon="UsersRound" size="15" />
+                <LucideIcon icon="UsersRound" :size="15" />
                 {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">

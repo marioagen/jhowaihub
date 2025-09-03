@@ -10,7 +10,7 @@
                         </p>
                     </div>
                     <button class="btn btn-primary btn-sm" @click="openModalQuestion">
-                        <LucideIcon icon="Plus" size="17" />
+                        <LucideIcon icon="Plus" :size="17" />
                         {{ $t("questions.createBtn") }}
                     </button>
                 </div>

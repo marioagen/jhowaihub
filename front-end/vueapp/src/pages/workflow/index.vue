@@ -15,7 +15,7 @@
                     <div class="card-body">
                         <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
                             <div>
-                                <LucideIcon icon="Clock" size="14" class="me-2" />
+                                <LucideIcon icon="Clock" :size="14" class="me-2" />
                                 <span>{{$t("workflow.boardView")}}</span>
                             </div>
                             <div class="dropdown">
@@ -39,7 +39,7 @@
                                 </ul>
                             </div>
                             <div class="badge bg-secondary badge-custom">
-                                <LucideIcon icon="Workflow" size="14" class="me-2" stroke="#0d6efd" />
+                                <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
                                 <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
                         </div>

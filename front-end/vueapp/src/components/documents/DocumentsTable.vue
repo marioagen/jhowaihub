@@ -4,7 +4,7 @@
         class="btn btn-outline-danger btn-sm mb-2 ms-2" 
         @click="openConfirmation"
     >
-        <LucideIcon icon="Trash2" size="15" />
+        <LucideIcon icon="Trash2" :size="15" />
         {{ $t("labelDelete") }}
     </button>
     <div>

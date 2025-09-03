@@ -14,7 +14,7 @@
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-3">
                             <div class="d-flex align-items-center">
-                                <LucideIcon icon="Clock" size="14" class="me-2" />
+                                <LucideIcon icon="Clock" :size="14" class="me-2" />
                                 <span>{{$t("workflow.boardView")}}</span>
                             </div>
                             <div class="dropdown">
@@ -38,7 +38,7 @@
                             </div>
 
                             <div class="badge bg-secondary badge-custom">
-                                <LucideIcon icon="Workflow" size="14" class="me-2" stroke="#0d6efd" />
+                                <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
                                 <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
                         </div>
@@ -47,21 +47,21 @@
                                 class="btn btn-outline-primary btn-sm" 
                                 @click="redirectToForm"
                             >
-                                <LucideIcon icon="Plus" size="14" class="me-2" />
+                                <LucideIcon icon="Plus" :size="14" class="me-2" />
                                 {{ $t("workflow.createBtn") }}
                             </button>
                             <button 
                                 class="btn btn-primary btn-sm" 
                                 @click="editWorkflow"
                             >
-                                <LucideIcon icon="PenLine" size="14" class="me-2" />
+                                <LucideIcon icon="PenLine" :size="14" class="me-2" />
                                 {{ $t("workflow.editBtn") }}
                             </button>
                             <button 
                                 class="btn btn-outline-danger btn-sm"
                                 @click="deleteWorkflow"
                             >
-                                <LucideIcon icon="Trash2" size="14" class="me-2" />
+                                <LucideIcon icon="Trash2" :size="14" class="me-2" />
                                 {{ $t("workflow.deleteBtn") }}
                             </button>
                         </div>
