@@ -38,11 +38,7 @@
         </TableComponent>
     </div>
 
-    <QuestionsModal
-        :isEdit="true"
-        @reload="reload"
-        ref="QuestionsModal"
-    />
+     <QuestionsModal :isEdit="true" @reload="reload" ref="QuestionsModal" />
 
     <ConfirmModal
         id="deleteConfirm"
@@ -105,6 +101,7 @@
         }),
         methods: {
             getQuestions(obj) {
+                console.log("chegou");
                 this.table.isLoading = true;
                 this.searchInput = obj.search;
                 var paramsReq = {
@@ -116,13 +113,14 @@
                 };
 
                 QuestionsService.getQuestions(paramsReq)
-                    .then((resposne) => {
-                        this.table.data = resposne.content;
-                        this.table.pagination = resposne.pagination;
+                    .then((response) => {
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
+                        this.searchInput = "";
                     });
             },
             formatDate(date) {

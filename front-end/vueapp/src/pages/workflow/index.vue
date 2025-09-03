@@ -85,7 +85,8 @@
 <script>
     import WorkflowService from "@/services/workflow/WorkflowService.js";
     import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
-    import signalRService from "@/services/signalR/signalRServices";
+    import signalRService from "@/services/signalR/signalRServices.js";
+    import GlobalEventService from "@/services/globalEventService.js";
 
     export default {
         name: "WorkflowPage",
@@ -106,6 +107,7 @@
                 kanbanCards: [],
                 numDocs: 0,
                 isLoaded: false,
+                signalrEventStatusChanged: "StatusChanged"
             };
         },
         components: {
@@ -172,21 +174,28 @@
         },
         created() {
             this.getWorkflowList();
+            GlobalEventService.on("all-uploads-complete", this.getWorkflowList);
+            GlobalEventService.on("refresh-once", this.getWorkflowList);
         },
         async mounted() {
             await signalRService.startConnection();
 
             signalRService.on(this.signalrEventStatusChanged, (message) => {
-                const steps = this.kanbanCards.steps.find(s => s.order === 0);
-                const item = steps.find(card => card.documentId === message.documentId);
+                const step = this.kanbanCards.steps.find(s => s.order === 1);
+                if (!step?.cards) return;
+
+                const item = step.cards.find(card => card.documentId === message.documentId);
+                console.log(item);
                 if (item) {
-                    item.status = message.status;
+                    item.statusDocument = message.status;
                 }
             });
         },
         beforeUnmount() {
             signalRService.off(this.signalrEventStatusChanged);
             signalRService.stopConnection();
+            GlobalEventService.off("all-uploads-complete", this.reloadList);
+            GlobalEventService.off("refresh-once", this.reloadList);
         },
     };
 </script>

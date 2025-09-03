@@ -256,7 +256,7 @@
             },
             addStep() {
                 this.stepsList.push({
-                    id: crypto.randomUUID?.() || Date.now() + Math.random(),
+                    id: 0,
                     name: '',
                     status: '',
                     profile: '',
@@ -342,7 +342,7 @@
                     teamId: this.workflowData.teamId,
                     steps: this.stepsList
                 };
-
+                console.log(params);
                 WorkflowService.editWorkflow(params)
                     .then((response) => {
                         if(response.error === undefined) {
