@@ -1,5 +1,5 @@
 <template>
-    <main>
+    <main :key="changeLanguage">
         <div class="container-fluid scroll-area mx-2">
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -106,6 +106,7 @@
                     name: "Nome"
                 },
                 board: [],
+                changeLanguage: false,
             };
         },
         components: {
@@ -114,7 +115,7 @@
         },
         watch: {
             "$store.state.userProfile.language": function () {
-                this.setEntitySearch();
+                this.changeLanguage = !this.changeLanguage;
             },
         },
         methods: {
@@ -164,14 +165,6 @@
                     (workflow) => workflow.id !== this.selectedOption.id
                 );
             },
-            setEntitySearch() {
-                this.entitySearch = {
-                    screen: "quizzes",
-                    labelInput: this.$t("quizzes.filters.input"),
-                    placeholderInput: this.$t("quizzes.filters.input"),
-                    labelButton: this.$t("quizzes.createBtn"),
-                };
-            },
             redirectToForm() {
                 this.$router.push({ name: "NewWorkflow" });
             },
@@ -190,14 +183,14 @@
                         if(status) {
                             this.getWorkflowList();
                             return this.$notify({
-                                title: 'Workflow',
+                                title: 'workflow.index',
                                 message: 'workflow.removeSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         }
                         this.$notify({
-                            title: 'Workflow',
+                            title: 'workflow.index',
                             message: 'workflow.removeError',
                             variant: 'danger',
                             icon: 'CircleX',
@@ -210,7 +203,6 @@
         },
         created() {
             this.getWorkflowList();
-            this.setEntitySearch();
         },
     };
 </script>

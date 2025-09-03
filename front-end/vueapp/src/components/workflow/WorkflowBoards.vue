@@ -232,7 +232,7 @@
                         if(response.error !== undefined) {
                             this.$router.push({ name: "Workflow" });
                             return this.$notify({
-                                title: 'Workflow',
+                                title: 'workflow.index',
                                 message: response.error,
                                 variant: 'danger',
                                 icon: 'CircleX',
@@ -268,7 +268,7 @@
             async save() {
                 if (!this.stepsList || this.stepsList.length === 0) {
                     return this.$notify({
-                        title: 'Workflow',
+                        title: 'workflow.index',
                         message: 'validation.oneStep',
                         variant: 'warning',
                         icon: 'CircleAlert',
@@ -289,7 +289,7 @@
 
                 if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
                     return this.$notify({
-                        title: 'Workflow',
+                        title: 'workflow.index',
                         message: 'validation.hasInvalid',
                         variant: 'warning',
                         icon: 'CircleAlert',
@@ -318,14 +318,14 @@
                         if(response.error === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
-                                title: 'Workflow',
+                                title: 'workflow.index',
                                 message: 'workflow.createSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         }
                         this.$notify({
-                            title: 'Workflow',
+                            title: 'workflow.index',
                             message: 'workflow.createError',
                             variant: 'danger',
                             icon: 'CircleX',
@@ -348,14 +348,14 @@
                         if(response.error === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
-                                title: 'Workflow',
+                                title: 'workflow.index',
                                 message: 'workflow.editSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         }
                         this.$notify({
-                            title: 'Workflow',
+                            title: 'workflow.index',
                             message: 'workflow.editError',
                             variant: 'danger',
                             icon: 'CircleX',

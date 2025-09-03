@@ -110,7 +110,7 @@ export default {
     name: "NavBarComponent",
     props: {
         sidebarData: {
-            required: true,
+            required: false,
             type: String,
             default: "",
         },

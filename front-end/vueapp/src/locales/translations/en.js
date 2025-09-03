@@ -411,6 +411,7 @@
     transferListPlaceholder: "Search in list",
     unexpectedError: "An unexpected error occurred. Please contact the system administrator.",
     workflow: {
+        index: "Workflow",
         title: "Document Processing Board",
         editTitle: "Workflow Editor",
         subtitle: "View the flow of documents through the processing stages",

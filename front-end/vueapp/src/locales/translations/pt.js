@@ -402,6 +402,7 @@
     transferListPlaceholder: "Busque na lista",
     unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
     workflow: {
+        index: "Workflow",
         title: "Board de Processamento de Documentos",
         editTitle: "Editor de Workflow",
         subtitle: "Visualize o fluxo de documentos através das etapas de processamento",

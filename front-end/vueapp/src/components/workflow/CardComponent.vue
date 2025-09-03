@@ -29,12 +29,12 @@
                 </div>
                 <div class="mb-2">
                     <LucideIcon icon="Calendar" size="12" class="me-1" />
-                    <small>{{dataCard.created}}</small>
+                    <small>{{ dataCard.created }}</small>
                 </div>
                 <hr>
                 <div class="mb-2">
                     <LucideIcon icon="User" size="12" class="me-1" />
-                    <small>{{dataCard.owner}}</small>
+                    <small>{{ dataCard.owner }}</small>
                 </div>
                 <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap" v-if="!showLoading">
                     <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
