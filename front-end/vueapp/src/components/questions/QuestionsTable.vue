@@ -38,11 +38,7 @@
         </TableComponent>
     </div>
 
-    <QuestionsModal
-        :isEdit="true"
-        @reload="reload"
-        ref="QuestionsModal"
-    />
+     <QuestionsModal :isEdit="true" @reload="reload" ref="QuestionsModal" />
 
     <ConfirmModal
         id="deleteConfirm"
@@ -116,13 +112,14 @@
                 };
 
                 QuestionsService.getQuestions(paramsReq)
-                    .then((resposne) => {
-                        this.table.data = resposne.content;
-                        this.table.pagination = resposne.pagination;
+                    .then((response) => {
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
+                        this.searchInput = "";
                     });
             },
             formatDate(date) {
@@ -160,14 +157,14 @@
                             this.$refs.DeleteDialog.close();
                             this.getQuestions({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: 'Perguntas',
+                                title: this.$t("questions.title"),
                                 message: this.$t("labelQuestionRemoveSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
-                                title: 'Perguntas',
+                                title: this.$t("questions.title"),
                                 message: this.$t("labelQuestionRemoveError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
