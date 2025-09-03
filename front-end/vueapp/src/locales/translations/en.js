@@ -411,6 +411,11 @@
     transferListTitle: "Selection list",
     transferListPlaceholder: "Search in list",
     unexpectedError: "An unexpected error occurred. Please contact the system administrator.",
+     types: {
+        title: "Types",
+        subtitle: "Manage system document types",
+        createBtn: "Create type",
+    },
     workflow: {
         index: "Workflow",
         title: "Document Processing Board",

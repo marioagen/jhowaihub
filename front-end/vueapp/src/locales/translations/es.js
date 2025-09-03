@@ -415,6 +415,11 @@
     transferListTitle: "Lista para seleccionar",
     transferListPlaceholder: "Buscar en la lista",
     unexpectedError: "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",
+    types: {
+        title: "Tipos",
+        subtitle: "Administre los tipos de documentos del sistema",
+        createBtn: "Crear tipo",
+    },
     workflow: {
         index: "Workflow",
         title: "Tablero de Procesamiento de Documentos",

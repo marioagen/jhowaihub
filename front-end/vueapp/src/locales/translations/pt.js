@@ -358,6 +358,11 @@
         },
         availableList: "Perguntas disponíveis",
     },
+    types: {
+        title: "Tipos",
+        subtitle: "Gerencie tipos de documentos do sistema",
+        createBtn: "Criar tipo",
+    },
     quizzes: {
         title: "Questionários",
         subtitle: "Gerencie questionários do sistema",
