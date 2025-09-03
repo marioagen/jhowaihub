@@ -268,6 +268,7 @@
     },
     filters: {
         documentInput: "Buscar por documento, descrição ou usuário, ...",
+        workflowInput: "Buscar por documento",
         teamsSelect: {
             all: "Todos os times",
             none: "Selecione um time",

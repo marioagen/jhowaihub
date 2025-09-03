@@ -272,6 +272,7 @@
     },
     filters: {
         documentInput: "Buscar por documento, descripción o usuario, ...",
+        workflowInput: "Buscar por documento",
         teamsSelect: {
             all: "Todos los equipos",
             none: "Seleccione un equipo",

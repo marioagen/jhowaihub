@@ -268,6 +268,7 @@
     },
     filters: {
         documentInput: "Search by document, description or user, ...",
+        workflowInput: "Search by document",
         teamsSelect: {
             all: "All teams",
             none: "Select a team",
