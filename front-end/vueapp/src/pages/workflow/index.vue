@@ -185,7 +185,6 @@
                 if (!step?.cards) return;
 
                 const item = step.cards.find(card => card.documentId === message.documentId);
-                console.log(item);
                 if (item) {
                     item.statusDocument = message.status;
                 }
