@@ -95,6 +95,7 @@
         @confirm="deleteUser"
     />
 </template>
+
 <script>
     import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import UserService from "@/services/users/UserService";

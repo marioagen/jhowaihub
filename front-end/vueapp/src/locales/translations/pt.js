@@ -15,6 +15,7 @@
     labelAttentionDependingOnTheSpeed:
         "Atenção, dependendo da velocidade da sua conexão com a Internet e do tamanho do arquivo carregado, essa operação pode demorar alguns minutos.",
     labelAttentionPDFDisplayFailed: "Ocorreu uma falha ao carregar o PDF. Clique aqui para tentar novamente",
+    id: "Id",
     labelAll: "Tudo",
     labelBack: "Voltar",
     labelCancel: "Cancelar",

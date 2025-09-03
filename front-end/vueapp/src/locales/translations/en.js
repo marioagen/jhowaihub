@@ -407,6 +407,7 @@
             subtitle: "Update the quiz information",
         },
     },
+    id: "Id",
     transferListTitle: "Selection list",
     transferListPlaceholder: "Search in list",
     unexpectedError: "An unexpected error occurred. Please contact the system administrator.",

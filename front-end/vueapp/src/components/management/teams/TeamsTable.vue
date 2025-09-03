@@ -78,7 +78,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "name", label: "labelTeamName" },
                     { key: "members", label: "labelMembers" },
                     { key: "actions", label: "labelAction" },

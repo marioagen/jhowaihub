@@ -61,7 +61,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "name", label: "labelName" },
                     { key: "created", label: "labelInclusionDate" },
                     { key: "emailCreator", label: "labelOwner" },
@@ -71,7 +71,6 @@
                 pagination: {
                     currentPage: 1,
                     totalPages: 100,
-                    itemsPerPage: 10,
                     totalItems: 2000,
                 },
                 selectedRows: [],

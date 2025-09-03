@@ -411,6 +411,7 @@
             subtitle: "Actualiza la información del cuestionario",
         },
     },
+    id: "Id",
     transferListTitle: "Lista para seleccionar",
     transferListPlaceholder: "Buscar en la lista",
     unexpectedError: "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",

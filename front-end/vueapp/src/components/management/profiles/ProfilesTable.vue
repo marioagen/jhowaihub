@@ -76,7 +76,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "name", label: "labelProfile" },
                     { key: "users", label: "labelUsers" },
                     { key: "permissions", label: "labelPermissions" },

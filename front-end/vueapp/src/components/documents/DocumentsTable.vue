@@ -58,7 +58,6 @@
             </template>
         </TableComponent>
     </div>
-
     <EmbeddingDocument
         v-if="isEmbedding"
         :docData="docDataEmbedding"
@@ -229,6 +228,9 @@
                         page: this.table.pagination.currentPage 
                     } 
                 });
+            },
+            changePage(page) {
+                this.getDocuments({ search: "", page: page, type: null });
             },
         },
         created() {

@@ -76,7 +76,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "title", label: "quizzes.name" },
                     { key: "typeDocName", label: "quizzes.type" },
                     { key: "questions", label: "quizzes.questions" },

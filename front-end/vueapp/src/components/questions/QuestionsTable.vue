@@ -71,7 +71,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "description", label: "questions.description" },
                     { key: "created", label: "questions.createdData" },
                     { key: "emailCreator", label: "questions.owner" },
@@ -184,6 +184,9 @@
             reload() {
                 this.$refs.QuestionsModal.close();
                 this.getQuestions({ search: "", page: this.queryPage, type: null });
+            },
+            changePage(page) {
+                this.getQuestions({ search: "", page: page, type: null });
             },
         },
         created() {
