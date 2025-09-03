@@ -7,7 +7,7 @@
         role="button"
         tabindex="0"
     >
-        {{ text }}
+        {{ $t(text) }}
     </span>
 </template>
 

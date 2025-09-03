@@ -2,15 +2,15 @@
     <button 
         v-if="showMultiDelete" 
         class="btn btn-outline-danger btn-sm mb-2 ms-2" 
-        @click="openConfirmationMultiple"
+        @click="openConfirmation"
     >
         <LucideIcon icon="Trash2" size="15" />
         {{ $t("labelDelete") }}
     </button>
     <div>
         <TableComponent
-            modalName="questions.title"
-            emptyMessage="questions.notFound"
+            modalName="documents.title"
+            emptyMessage="documents.notFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -21,60 +21,89 @@
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
+            <template #cell-status="{ data }">
+                <BadgeComponent
+                    v-if="data.row.status === 0" 
+                    text="documents.statusList.notAnalyzed"
+                />
+                <BadgeComponent
+                    v-else 
+                    text="documents.statusList.analyzed"
+                    variant="success"
+                />
+            </template>
+            <template #cell-teams="{ data }">
+                <BadgeOutlinedComponent
+                    v-for="(team, index) in data.row.teams"
+                    :key="index"
+                    :text="team.name"
+                    :clickable="false"
+                />
+            </template>
             <template #cell-actions="{ data }">
-                <button 
-                    class="btn btn-outline-success btn-sm table-btn" 
-                    @click="openEditModal(data.row)"
+                <button
+                    v-if="data.row.status === 0"
+                    class="btn btn-outline-primary btn-sm table-btn analyze-btn"
+                    @click="embedData(data.row.id)"
                 >
-                    <LucideIcon icon="SquarePen" />
+                    {{ $t("documents.actions.analyze") }}
                 </button>
-                <button 
-                    class="btn btn-outline-danger btn-sm ms-2 table-btn" 
-                    @click="openConfirmation(data.row)"
+                <button
+                    v-else
+                    class="btn btn-outline-success btn-sm table-btn analyze-btn"
+                    @click="redirectToConsult(data.row.id)"
                 >
-                    <LucideIcon icon="Trash2" />
+                    {{ $t("documents.actions.consult") }}
                 </button>
             </template>
         </TableComponent>
     </div>
 
-     <QuestionsModal :isEdit="true" @reload="reload" ref="QuestionsModal" />
-
+    <EmbeddingDocument
+        v-if="isEmbedding"
+        :docData="docDataEmbedding"
+        :isReprocessing="isReprocessing"
+    />
     <ConfirmModal
         id="deleteConfirm"
-        title="questions.removeTitle"
+        title="documents.removeTitle"
         message="labelThisActionCannotBeUndone"
         cancelText="labelCancel"
         confirmText="labelConfirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
-        @confirm="deleteQuestion"
+        @confirm="deleteDocument"
     />
 </template>
 
 <script>
     import dates from "@/helpers/date";
-    import QuestionsService from "@/services/questions/QuestionsService";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
-    import QuestionsModal from "@/components/questions/QuestionsModal.vue";
+    import DocumentsServices from "@/services/documents/DocumentsServices";
+    import BadgeComponent from "@/components/global/BadgeComponent";
+    import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent"
+    import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
 
     export default {
-        name: "QuestionsTable",
+        name: "DocumentsTable",
         components: {
+            EmbeddingDocument,
+            BadgeOutlinedComponent,
+            BadgeComponent,
             TableComponent,
             ConfirmModal,
-            QuestionsModal,
         },
         data: () => ({
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
-                    { key: "description", label: "questions.description" },
-                    { key: "created", label: "questions.createdData" },
-                    { key: "emailCreator", label: "questions.owner" },
+                    { key: "name", label: "documents.name" },
+                    { key: "description", label: "documents.description" },
+                    { key: "created", label: "documents.createdDate" },
+                    { key: "status", label: "documents.status" },
+                    { key: "teams", label: "documents.teams" },
                     { key: "actions", label: "questions.actions" },
                 ],
                 data: [],
@@ -86,7 +115,7 @@
                 },
                 selectedRows: [],
             },
-            selectedQuestion: {},
+            selectedDocument: {},
             queryPage: 1,
             selectedOption: 10,
             isAscending: false,
@@ -98,34 +127,43 @@
             toastMessage: "",
             searchInput: "",
             isDeleting: false,
+            isEmbedding: false,
+            docDataEmbedding: {
+                Id: Number,
+                Embeddings_model_name: "",
+            },
+            isReprocessing: false,
         }),
         methods: {
-            getQuestions(obj) {
+            getDocuments(obj) {
                 this.table.isLoading = true;
-                this.searchInput = obj.search;
-                var paramsReq = {
-                    search: this.searchInput.trim() ? this.searchInput.trim() : "",
-                    page: obj.page,
+                const teamIds = this.resolveTeamIds();
+                if (teamIds.length === 0) return;
+                const params = {
+                    search: this.searchInput.trim() || "",
                     pageSize: this.selectedOption,
+                    page: obj.page,
                     isAscending: this.isAscending,
                     colType: this.colType,
+                    teamIds,
                 };
 
-                QuestionsService.getQuestions(paramsReq)
+                DocumentsServices.getDocuments(params)
                     .then((response) => {
                         this.table.data = response.content;
                         this.table.pagination = response.pagination;
                     })
                     .finally(() => {
-                        if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
-                        this.searchInput = "";
                     });
             },
-            formatDate(date) {
-                return dates.formatDate(date);
+            resolveTeamIds() {
+                if (this.selectedTeamId === 0) {
+                    return this.teamList.length > 0 ? this.teamList.map((team) => team.id) : [];
+                }
+                return [this.selectedTeamId];
             },
-            orderList: function (col) {
+            orderList(col) {
                 if (this.isAscending) {
                     this.isAscending = false;
                 } else {
@@ -137,34 +175,28 @@
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
-            openEditModal(question) {
-                this.$refs.QuestionsModal.open(question);
-            },
-            openConfirmation(question) {
-                this.selectedQuestion = [question.id];
-                this.$refs.DeleteDialog.open();
-            },
-            openConfirmationMultiple() {
+            openConfirmation() {
                 const ids = this.table.selectedRows.map((item) => item.id);
-                this.selectedQuestion = ids;
+                this.selectedDocument = ids;
                 this.$refs.DeleteDialog.open();
             },
-            deleteQuestion() {
+            deleteDocument() {
                 this.isDeleting = true;
-                QuestionsService.deleteQuestionById(this.selectedQuestion)
+                console.log(this.selectedDocument)
+                DocumentsServices.deleteDocument(this.selectedDocument)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getQuestions({ search: "", page: 1, type: null });
+                            this.getDocuments({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: this.$t("questions.title"),
+                                title: this.$t("documents.title"),
                                 message: this.$t("labelQuestionRemoveSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
-                                title: this.$t("questions.title"),
+                                title: this.$t("documents.title"),
                                 message: this.$t("labelQuestionRemoveError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
@@ -172,28 +204,47 @@
                         }
                     })
                     .finally(() => {
-                        this.listIds = [];
                         this.table.selectedRows = [];
                         this.isDeleting = false;
-                    })
+                    });
+            },
+            formatDate(date) {
+                return dates.formatDate(date);
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getQuestions({ search: input, page: this.queryPage, type: null });
+                this.getDocuments({ search: input, page: this.queryPage, type: null });
             },
-            reload() {
-                this.$refs.QuestionsModal.close();
-                this.getQuestions({ search: "", page: this.queryPage, type: null });
+            embedData(id) {
+                this.docDataEmbedding.Id = id;
+                this.isEmbedding = true
+            },
+            redirectToConsult(id) {
+                this.$router.push({ 
+                    name: "Analyzer", 
+                    params: { 
+                        id: id 
+                    },
+                    query: { 
+                        page: this.table.pagination.currentPage 
+                    } 
+                });
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getQuestions({ search: "", page: this.queryPage, type: null });
+            this.getDocuments({ search: "", page: this.queryPage, type: null });
         },
         computed: {
             showMultiDelete() {
-                return this.table.selectedRows.length > 1;
+                return this.table.selectedRows.length > 0;
             },
         },
     };
 </script>
+
+<style scoped>
+    .analyze-btn {
+        width: 94px;
+    }
+</style>

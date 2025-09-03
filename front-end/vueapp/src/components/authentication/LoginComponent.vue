@@ -292,7 +292,7 @@ export default {
                 });
         },
         redirectToDocument() {
-            this.$router.push({ name: "DocumentList" });
+            this.$router.push({ name: "Documents" });
         },
         getPermissions(token) {
             return getJWTPermissions(token);
@@ -313,7 +313,7 @@ export default {
         let login = this.$store.state.userProfile.login;
         let tenant = this.$store.state.userProfile.tenant;
         if (login !== "" || tenant !== "") {
-            this.$router.push({ name: "DocumentList" });
+            this.$router.push({ name: "Documents" });
         }
         this.checkTheme();
     },
