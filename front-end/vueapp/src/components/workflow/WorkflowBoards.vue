@@ -342,7 +342,7 @@
                     teamId: this.workflowData.teamId,
                     steps: this.stepsList
                 };
-                console.log(params);
+
                 WorkflowService.editWorkflow(params)
                     .then((response) => {
                         if(response.error === undefined) {

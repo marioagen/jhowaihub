@@ -101,7 +101,6 @@
         }),
         methods: {
             getQuestions(obj) {
-                console.log("chegou");
                 this.table.isLoading = true;
                 this.searchInput = obj.search;
                 var paramsReq = {
