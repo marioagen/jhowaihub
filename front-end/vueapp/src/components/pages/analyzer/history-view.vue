@@ -360,7 +360,7 @@
                     if (el) {
                     el.scrollTo({
                         top: el.scrollHeight,
-                        behavior: "smooth", // animação
+                        behavior: "smooth",
                     });
                     }
                 });
