@@ -325,6 +325,8 @@
         notFound: "No se encontraron documentos",
         removeTitle: "Está a punto de eliminar un documento del sistema",
         createBtn: "Nuevo documento",
+        removeSuccess: "Documento eliminado con éxito",
+        removeError: "Error al eliminar el documento",
         name: "Nombre",
         description: "Descripción",
         createdDate: "Fecha de carga",

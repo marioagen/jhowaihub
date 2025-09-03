@@ -321,6 +321,8 @@
         notFound: "No documents found",
         removeTitle: "You are about to delete a document from the system",
         createBtn: "New document",
+        removeSuccess: "Document successfully removed",
+        removeError: "Error removing document",
         name: "Name",
         description: "Description",
         createdDate: "Upload date",
