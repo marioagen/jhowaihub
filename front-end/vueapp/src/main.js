@@ -7,7 +7,6 @@ import i18n from "./locales/i18n";
 import VueGtag from "vue-gtag";
 import tooltip from "@/directives/bootstrapTooltip";
 import "@/validators/validationRules";
-import signalRService from "./services/signalR/signalRServices";
 
 import LucideIcon from "@/components/global/LucideIcon.vue";
 import NotificationComponent from "@/components/global/NotificationComponent.vue";
@@ -43,7 +42,6 @@ app.use(
 app.directive("tooltip", tooltip);
 app.component("NotificationComponent", NotificationComponent);
 app.component("LucideIcon", LucideIcon);
-signalRService.startConnection(); // Inicializa apenas uma vez
 
 app.config.globalProperties.$notify = notify;
 app.config.globalProperties.$appName = ENV_CONFIG.VUE_APP_NAME;

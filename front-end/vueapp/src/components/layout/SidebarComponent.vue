@@ -1,7 +1,7 @@
 <template>
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
         <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
-            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'DocumentList' }">
+            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Documents' }">
                 <img
                     v-if="!showLogoDarkMode && isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
@@ -89,7 +89,7 @@
         },
         data() {
             return {
-                title: "Component SideBarTest",
+                title: "SideBarComponent",
                 showLogoDarkMode: this.theme,
                 permissions: {
                     management: hasPermission("Management", "View"),
@@ -109,7 +109,7 @@
                     },
                     {
                         activeKey: 'DocumentList',
-                        to: '/document-list',
+                        to: '/documents',
                         icon: { 
                             name: 'FileText', 
                             color: '#2f80ed' 

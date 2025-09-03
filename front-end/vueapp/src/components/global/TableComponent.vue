@@ -49,7 +49,7 @@
                     </td>
                 </tr>
             </tbody>
-            <tbody v-else-if="data.length > 0">
+            <tbody v-else-if="data?.length > 0">
                 <tr v-for="(row, index) in data" :key="index">
                     <td v-if="hasSelection">
                         <input
@@ -219,7 +219,7 @@
         },
         computed: {
             allSelected() {
-                return this.data.length > 0 && this.selectedRows.length === this.data.length;
+                return this.data?.length > 0 && this.selectedRows.length === this.data.length;
             },
             showPagination() {
                 return this.pagination.totalPages > 1;
