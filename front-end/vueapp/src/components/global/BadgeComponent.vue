@@ -7,7 +7,7 @@
         role="button"
         tabindex="0"
     >
-        {{ $t(text) }}
+        {{ typeof text === 'string' ? $t(text) : text }}
     </span>
 </template>
 
@@ -16,7 +16,7 @@ export default {
     name: "BadgeComponent",
     props: {
         text: { 
-            type: String, 
+            type: [Number, String], 
             required: true 
         },
         variant: { 

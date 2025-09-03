@@ -9,8 +9,8 @@
     </button>
     <div>
         <TableComponent
-            modalName="quizz.tableTitle"
-            emptyMessage="quizz.notFound"
+            modalName="quizzes.title"
+            emptyMessage="quizzes.notFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -44,7 +44,6 @@
             </template>
         </TableComponent>
     </div>
-
     <ConfirmModal
         id="deleteConfirm"
         title="questions.removeTitle"
@@ -193,6 +192,9 @@
             reload() {
                 this.$refs.QuizzesModal.close();
                 this.getQuizzes({ search: "", page: this.queryPage, type: null });
+            },
+            changePage(page) {
+                this.getQuizzes({ search: "", page: page, type: null });
             },
         },
         created() {
