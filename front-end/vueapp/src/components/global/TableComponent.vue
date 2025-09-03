@@ -87,7 +87,7 @@
             class="mt-2"
             :current-page="pagination.currentPage"
             :total-pages="pagination.totalPages"
-            :items-per-page="pagination.itemsPerPage"
+            :items-per-page="10"
             :total-items="pagination.totalItems"
             @change-page="changePage"
         />
