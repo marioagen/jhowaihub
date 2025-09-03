@@ -87,7 +87,7 @@
         <div class="row mb-2" v-if="!loadingHistory && historyList.length == 0">
             <span>&nbsp;&nbsp;&nbsp;{{ $t("labelQueryWithoutHistory") }}.</span>
         </div>
-        <div class="div-row-overflow">
+        <div class="div-row-overflow" ref="historyDiv">
             <div class="row" v-for="(history, index) in historyList" :key="index">
                 <div class="col-md-12">
                     <div class="div-card">
@@ -329,12 +329,20 @@
                 this.isExpandedHistory = !this.isExpandedHistory;
                 this.$emit("expandHistory");
             },
-            unshiftHistoryList: function (data) {
+            unshiftHistoryList(data) {
                 this.historyList.unshift({
                     input: data.input,
                     output: data.output,
                 });
-                $(".div-row-overflow").animate({ scrollTop: 0 }, 500);
+
+                this.$nextTick(() => {
+                    if (this.$refs.historyDiv) {
+                    this.$refs.historyDiv.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                    });
+                    }
+                });
             },
             pushHistoryList: function (data) {
                 this.historyList.push({
@@ -346,8 +354,16 @@
                     self.moveSidebar();
                 }, 100);
             },
-            moveSidebar: function () {
-                $(".div-row-overflow").animate({ scrollTop: $(".div-row-overflow")[0].scrollHeight }, 500);
+            moveSidebar() {
+                this.$nextTick(() => {
+                    const el = this.$refs.historyDiv;
+                    if (el) {
+                    el.scrollTo({
+                        top: el.scrollHeight,
+                        behavior: "smooth", // animação
+                    });
+                    }
+                });
             },
             copyToClipboard: function (content) {
                 navigator.clipboard.writeText(content);

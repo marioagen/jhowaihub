@@ -86,7 +86,7 @@ export default {
                     if (!result.error) { 
                         this.$emit("reload");
                         return this.$notify({
-                            title: 'Perguntas',
+                            title: this.$t("questions.title"),
                             message: this.$t("questions.createSuccess"),
                             variant: 'success',
                             icon: 'CircleCheckBig',
@@ -98,7 +98,7 @@ export default {
                         : "questions.createError";
 
                     this.$notify({
-                        title: 'Perguntas',
+                        title: this.$t("questions.title"),
                         message: this.$t(messageKey),
                         variant: 'danger',
                         icon: 'CircleX',
@@ -115,7 +115,7 @@ export default {
                     if (result) {
                         this.$emit("reload");
                         return this.$notify({
-                            title: 'Perguntas',
+                            title: this.$t("questions.title"),
                             message: this.$t("questions.editSuccess"),
                             variant: 'success',
                             icon: 'CircleCheckBig',
@@ -124,7 +124,7 @@ export default {
 
                     const messageKey = result.status === 409 ? "questions.errorDuplicated" : "questions.editError";
                     this.$notify({
-                        title: 'TipoPerguntass',
+                       title: this.$t("questions.title"),
                         message: this.$t(messageKey),
                         variant: 'danger',
                         icon: 'CircleX',

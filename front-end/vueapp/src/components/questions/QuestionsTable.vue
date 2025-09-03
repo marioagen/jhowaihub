@@ -158,14 +158,14 @@
                             this.$refs.DeleteDialog.close();
                             this.getQuestions({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: 'Perguntas',
+                                title: this.$t("questions.title"),
                                 message: this.$t("labelQuestionRemoveSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
-                                title: 'Perguntas',
+                                title: this.$t("questions.title"),
                                 message: this.$t("labelQuestionRemoveError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
