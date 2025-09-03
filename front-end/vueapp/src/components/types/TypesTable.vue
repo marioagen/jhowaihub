@@ -27,9 +27,7 @@
             </template>
         </TableComponent>
     </div>
-
     <TypesModal :isEdit="true" @reload="reload" ref="TypesModal" />
-
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteType"
