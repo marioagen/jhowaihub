@@ -81,7 +81,7 @@
 
         <template #footer>
             <div class="modal-footer">
-                <button class="btn btn-secondary btn-sm" @click="close">
+                <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
                     {{ $t("labelCancel") }}
                 </button>
                 <button class="btn btn-primary btn-sm" @click="save">
