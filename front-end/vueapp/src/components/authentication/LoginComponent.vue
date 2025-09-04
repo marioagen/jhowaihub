@@ -117,6 +117,11 @@ export default {
                 email: "",
                 password: ""
             },
+            field: { 
+                username: "", 
+                password: "" 
+            },
+            errorMessage: ""
         };
     },
     methods: {
@@ -124,8 +129,8 @@ export default {
             const result = await this.validate();
             if (!result.valid) {
                 return this.$notify({
-                    title: 'Login',
-                    message: 'Campo inválidos',
+                    title: 'login.index',
+                    message: 'login.invalid',
                     variant: 'warning',
                     icon: 'CircleAlert',
                 });
@@ -159,7 +164,7 @@ export default {
                     const message = exists ? this.$t(labelKey) : this.$t('unexpectedError');
 
                     this.$notify({
-                        title: 'Error',
+                        title: 'login.error',
                         message,
                         variant: 'danger',
                         icon: 'CircleX',
@@ -174,7 +179,7 @@ export default {
             AuthService.GetClientId()
                 .then((response) => {
                     this.$notify({
-                        title: 'Login',
+                        title: 'login.index',
                         message: 'login.validateClient',
                         variant: 'info',
                         icon: 'MessageCircle',
@@ -183,8 +188,8 @@ export default {
                 })
                 .catch(() => {
                     this.$notify({
-                        title: 'Error',
-                        message: this.$t('unexpectedError'),
+                        title: "login.error",
+                        message: "unexpectedError",
                         variant: 'danger',
                         icon: 'CircleX',
                     });
@@ -207,8 +212,8 @@ export default {
             MSALobj.handleRedirectPromise()
                 .catch(() => {
                     this.$notify({
-                        title: 'Error',
-                        message: this.$t('unexpectedError'),
+                        title: "login.error",
+                        message: "unexpectedError",
                         variant: 'danger',
                         icon: 'CircleX',
                     });
@@ -233,7 +238,7 @@ export default {
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     this.authenticateUser(response.account.name, response.account.username, response.accessToken);
                     this.$notify({
-                        title: 'Login',
+                        title: 'login.index',
                         message: 'login.authSSO',
                         variant: 'info',
                         icon: 'MessageCircle',
@@ -241,8 +246,8 @@ export default {
                 })
                 .catch((error) => {
                     this.$notify({
-                        title: 'Error',
-                        message: this.$t('unexpectedError'),
+                        title: "login.error",
+                        message: "unexpectedError",
                         variant: 'danger',
                         icon: 'CircleX',
                     });
@@ -281,7 +286,7 @@ export default {
                     const message = exists ? this.$t(labelKey) : this.$t('unexpectedError');
 
                     this.$notify({
-                        title: 'Error',
+                        title: "login.error",
                         message,
                         variant: 'danger',
                         icon: 'CircleX',

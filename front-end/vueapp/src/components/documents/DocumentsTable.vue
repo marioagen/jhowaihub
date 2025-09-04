@@ -7,7 +7,7 @@
         <LucideIcon icon="Trash2" :size="15" />
         {{ $t("labelDelete") }}
     </button>
-    <div>
+    <div v-if="showTable">
         <TableComponent
             modalName="documents.title"
             emptyMessage="documents.notFound"
@@ -240,6 +240,9 @@
         computed: {
             showMultiDelete() {
                 return this.table.selectedRows.length > 0;
+            },
+            showTable() {
+                return this.table.data !== undefined;
             },
         },
     };
