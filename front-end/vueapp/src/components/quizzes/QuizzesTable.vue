@@ -4,13 +4,13 @@
         class="btn btn-outline-danger btn-sm mb-2 ms-2" 
         @click="openConfirmationMultiple"
     >
-        <LucideIcon icon="Trash2" size="15" />
+        <LucideIcon icon="Trash2" :size="15" />
         {{ $t("labelDelete") }}
     </button>
     <div>
         <TableComponent
-            modalName="quizz.tableTitle"
-            emptyMessage="quizz.notFound"
+            modalName="quizzes.title"
+            emptyMessage="quizzes.notFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -54,7 +54,6 @@
             </template>
         </TableComponent>
     </div>
-
     <ConfirmModal
         id="deleteConfirm"
         title="questions.removeTitle"
@@ -86,7 +85,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "title", label: "quizzes.name" },
                     { key: "typeDocName", label: "quizzes.type" },
                     { key: "questions", label: "quizzes.questions" },
@@ -203,6 +202,9 @@
             reload() {
                 this.$refs.QuizzesModal.close();
                 this.getQuizzes({ search: "", page: this.queryPage, type: null });
+            },
+            changePage(page) {
+                this.getQuizzes({ search: "", page: page, type: null });
             },
         },
         created() {

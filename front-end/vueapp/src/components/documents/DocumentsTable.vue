@@ -4,10 +4,10 @@
         class="btn btn-outline-danger btn-sm mb-2 ms-2" 
         @click="openConfirmation"
     >
-        <LucideIcon icon="Trash2" size="15" />
+        <LucideIcon icon="Trash2" :size="15" />
         {{ $t("labelDelete") }}
     </button>
-    <div>
+    <div v-if="showTable">
         <TableComponent
             modalName="documents.title"
             emptyMessage="documents.notFound"
@@ -239,6 +239,9 @@
                     } 
                 });
             },
+            changePage(page) {
+                this.getDocuments({ search: "", page: page, type: null });
+            },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
@@ -247,6 +250,9 @@
         computed: {
             showMultiDelete() {
                 return this.table.selectedRows.length > 0;
+            },
+            showTable() {
+                return this.table.data !== undefined;
             },
         },
     };

@@ -78,7 +78,7 @@
                 default: "",
             },
             theme: {
-                required: true,
+                required: false,
                 type: Boolean,
                 default: false,
             },
@@ -124,7 +124,7 @@
                             name: 'Workflow', 
                             color: '#615FFF' 
                         },
-                        labelKey: 'Workflow'
+                        labelKey: 'workflow.index'
                     },
                     {
                         permission: 'Workflow',

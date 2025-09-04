@@ -15,6 +15,7 @@
     labelAttentionDependingOnTheSpeed:
         "Atenção, dependendo da velocidade da sua conexão com a Internet e do tamanho do arquivo carregado, essa operação pode demorar alguns minutos.",
     labelAttentionPDFDisplayFailed: "Ocorreu uma falha ao carregar o PDF. Clique aqui para tentar novamente",
+    id: "Id",
     labelAll: "Tudo",
     labelBack: "Voltar",
     labelCancel: "Cancelar",
@@ -241,10 +242,14 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Criar tipo",
     labelProcessing: "Processando",
+    Admin: "Admin",
     login: {
+        index: "Login",
         title: "Fazer Login",
         password: "Senha",
         subtitle: "Acesse sua conta para gerenciar documentos",
+        invalid: "Campo inválidos",
+        error: "Error",
         loading: "Carregando...",
         sso: "Login com Microsoft",
         authSSO: "Autenticado na Microsoft",
@@ -347,6 +352,11 @@
         },
         availableList: "Perguntas disponíveis",
     },
+    types: {
+        title: "Tipos",
+        subtitle: "Gerencie tipos de documentos do sistema",
+        createBtn: "Criar tipo",
+    },
     quizzes: {
         title: "Questionários",
         subtitle: "Gerencie questionários do sistema",
@@ -392,6 +402,7 @@
     transferListPlaceholder: "Busque na lista",
     unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
     workflow: {
+        index: "Workflow",
         title: "Board de Processamento de Documentos",
         editTitle: "Editor de Workflow",
         subtitle: "Visualize o fluxo de documentos através das etapas de processamento",

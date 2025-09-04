@@ -245,18 +245,22 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
     labelProcessing: "Procesando",
-    login: {
+    Admin: "Admin",
+     login: {
+        index: "Login",
         title: "Iniciar sesión",
         password: "Contraseña",
         subtitle: "Accede a tu cuenta para gestionar documentos",
+        invalid: "Campo inválido",
+        error: "Error",
         loading: "Cargando...",
-        sso: "Iniciar sesión con Microsoft",
-        authSSO: "Autenticado con Microsoft",
+        sso: "Login con Microsoft",
+        authSSO: "Autenticado en Microsoft",
         validateClient: "Cliente validado",
         userNotFound: "Usuario no encontrado.",
         userWithoutAccess: "Usuario sin permiso de acceso.",
         userIncorrectPassword: "La contraseña ingresada es incorrecta.",
-        userTokenMicrosoftInvalid: "No pudimos validar tu autenticación. Inicia sesión de nuevo."
+        userTokenMicrosoftInvalid: "No se pudo validar tu autenticación. Por favor, inicia sesión nuevamente."
     },
     validation: {
         required: "Campo obligatorio",
@@ -395,10 +399,17 @@
             subtitle: "Actualiza la información del cuestionario",
         },
     },
+    id: "Id",
     transferListTitle: "Lista para seleccionar",
     transferListPlaceholder: "Buscar en la lista",
     unexpectedError: "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",
+    types: {
+        title: "Tipos",
+        subtitle: "Administre los tipos de documentos del sistema",
+        createBtn: "Crear tipo",
+    },
     workflow: {
+        index: "Workflow",
         title: "Tablero de Procesamiento de Documentos",
         editTitle: "Editor de Workflow",
         subtitle: "Visualiza el flujo de documentos a través de las etapas de procesamiento",

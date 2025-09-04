@@ -22,9 +22,9 @@
                                     style="line-height: 1"
                                     @click="setOrder(column.key)"
                                 >
-                                    <LucideIcon v-if="showOrderDescByColumn(column.key)" icon="MoveUp" size="15" />
-                                    <LucideIcon v-else-if="showOrderAscByColumn(column.key)" icon="MoveDown" size="15" />
-                                    <LucideIcon v-else icon="ArrowDownUp" size="15" />
+                                    <LucideIcon v-if="showOrderDescByColumn(column.key)" icon="MoveUp" :size="15" />
+                                    <LucideIcon v-else-if="showOrderAscByColumn(column.key)" icon="MoveDown" :size="15" />
+                                    <LucideIcon v-else icon="ArrowDownUp" :size="15" />
                                 </button>
                             </div>
                         </div>
@@ -86,7 +86,7 @@
             class="mt-2"
             :current-page="pagination.currentPage"
             :total-pages="pagination.totalPages"
-            :items-per-page="pagination.itemsPerPage"
+            :items-per-page="10"
             :total-items="pagination.totalItems"
             @change-page="changePage"
         />

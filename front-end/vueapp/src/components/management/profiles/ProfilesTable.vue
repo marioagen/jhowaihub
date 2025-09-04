@@ -11,7 +11,7 @@
             @change-page="changePage"
         >
             <template #cell-users="{ data }">
-                <LucideIcon icon="UsersRound" size="15" />
+                <LucideIcon icon="UsersRound" :size="15" />
                 {{ data.row.users.length }}
             </template>
             <template #cell-permissions="{ data }">
@@ -76,7 +76,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "name", label: "labelProfile" },
                     { key: "users", label: "labelUsers" },
                     { key: "permissions", label: "labelPermissions" },

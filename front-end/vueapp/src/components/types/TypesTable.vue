@@ -1,6 +1,6 @@
 <template>
     <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
-        <LucideIcon icon="Trash2" size="15" />
+        <LucideIcon icon="Trash2" :size="15" />
         {{ $t("labelDelete") }}
     </button>
     <div>
@@ -43,9 +43,7 @@
             </template>
         </TableComponent>
     </div>
-
     <TypesModal :isEdit="true" @reload="reload" ref="TypesModal" />
-
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteType"
@@ -77,7 +75,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "name", label: "labelName" },
                     { key: "created", label: "labelInclusionDate" },
                     { key: "emailCreator", label: "labelOwner" },
@@ -87,7 +85,6 @@
                 pagination: {
                     currentPage: 1,
                     totalPages: 100,
-                    itemsPerPage: 10,
                     totalItems: 2000,
                 },
                 selectedRows: [],

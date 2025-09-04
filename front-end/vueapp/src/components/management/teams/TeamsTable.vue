@@ -11,7 +11,7 @@
             @change-page="changePage"
         >
             <template #cell-members="{ data }">
-                <LucideIcon icon="UsersRound" size="15" />
+                <LucideIcon icon="UsersRound" :size="15" />
                 {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">
@@ -78,7 +78,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "name", label: "labelTeamName" },
                     { key: "members", label: "labelMembers" },
                     { key: "actions", label: "labelAction" },
