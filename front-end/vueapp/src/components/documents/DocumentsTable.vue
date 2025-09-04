@@ -189,14 +189,14 @@
                             this.getDocuments({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: this.$t("documents.title"),
-                                message: this.$t("documents.RemoveSuccess"),
+                                message: this.$t("documents.removeSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
                                 title: this.$t("documents.title"),
-                                message: this.$t("documents.RemoveError"),
+                                message: this.$t("documents.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
