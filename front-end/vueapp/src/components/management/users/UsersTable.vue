@@ -50,7 +50,7 @@
                 <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown column-align">
+                <div class="dropdown">
                     <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <LucideIcon icon="Ellipsis" />
                     </a>
