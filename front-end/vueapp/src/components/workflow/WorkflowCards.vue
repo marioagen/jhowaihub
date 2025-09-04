@@ -37,7 +37,6 @@
                                 :isFirstStep="step.order === minOrder"
                                 :isLastStep="step.order === maxOrder"
                                 @reload="reloadList"
-                                label="labelAnalyze"
                             />
                         </div>
                     </div>
@@ -56,9 +55,8 @@
         },
         props: {
             kanbanData: {
-                type: Array,
-                required: false,
-                default: () => []
+                type: [Array, Object],
+                required: true,
             },
             isEditor: {
                 type: Boolean,
