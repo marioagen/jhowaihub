@@ -317,6 +317,8 @@
         notFound: "Documentos não encontrados",
         removeTitle: "Você está prestes a deletar uma documento do sistema",
         createBtn: "Novo documento",
+        removeSuccess: "Documento removido com sucesso",
+        removeError: "Erro ao remover documento",
         name: "Nome",
         description: "Descrição",
         createdDate: "Data de upload",

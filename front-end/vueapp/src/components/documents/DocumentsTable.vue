@@ -139,7 +139,7 @@
                 const teamIds = this.resolveTeamIds();
                 if (teamIds.length === 0) return;
                 const params = {
-                    search: this.searchInput.trim() || "",
+                    search: obj.search.trim() || "",
                     pageSize: this.selectedOption,
                     page: obj.page,
                     isAscending: this.isAscending,
@@ -181,7 +181,6 @@
             },
             deleteDocument() {
                 this.isDeleting = true;
-                console.log(this.selectedDocument)
                 DocumentsServices.deleteDocument(this.selectedDocument)
                     .then((success) => {
                         if (success) {
@@ -189,14 +188,14 @@
                             this.getDocuments({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: this.$t("documents.title"),
-                                message: this.$t("labelQuestionRemoveSuccess"),
+                                message: this.$t("documents.RemoveSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
                                 title: this.$t("documents.title"),
-                                message: this.$t("labelQuestionRemoveError"),
+                                message: this.$t("documents.RemoveError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });

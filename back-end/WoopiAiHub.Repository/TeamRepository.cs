@@ -41,6 +41,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams
                            .Include(u => u.Users)
+                           .Include(w => w.Workflow)
                            .Select(t => new TeamDto
                            {
                                Id = t.Id,
@@ -56,7 +57,14 @@ namespace WoopiAiHub.Repository
                                            IsActive = u.IsActive,
                                            Created = u.Created
                                        })
-                                       .ToList()
+                                       .ToList(),
+                               Workflow = t.Workflow != null ? new WorkflowDto
+                               {
+                                   Id = t.Workflow.Id,
+                                   Name = t.Workflow.Name,
+                                   TeamId = t.Workflow.TeamId,
+                                   Created = t.Created                                  
+                               } : null
                            })
                            .Where(t => t.Users.Any(u => u.Email == userEmail && u.IsActive))
                            .AsNoTracking();
