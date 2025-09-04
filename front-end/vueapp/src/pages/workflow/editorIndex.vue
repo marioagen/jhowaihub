@@ -73,7 +73,6 @@
                             <WorkflowCards 
                                 :kanbanData="board"
                                 :isEditor="true"
-                                @reload="reloadKanban"
                             />
                         </div>
                     </div>
@@ -92,7 +91,7 @@
     import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
 
     export default {
-        name: "QuizzesPage",
+        name: "WorkflorEditorIndex",
         data() {
             return {
                 isLoaded: false,
