@@ -12,8 +12,7 @@
                     <th
                         v-for="(column, index) in columns"
                         :key="index"
-                        :class="{ 'text-center': column.key === 'actions' }"
-                        :style="column.key === 'actions' ? { width: '12%' } : {}"
+                        :class="{'text-end': column.key === 'actions'}"
                     >
                         <div v-if="column.key !== 'actions'" class="d-flex align-items-center gap-1">
                             <span>{{ $t(column.label) }}</span>
