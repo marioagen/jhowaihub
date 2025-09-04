@@ -4,18 +4,26 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">
-                        {{ dataQuiz.title }} 
-                        <span class="badge rounded-pill bg-primary badge-custom" title="Total"> 
-                            <i class="fas fa-pen-square"></i> {{ dataQuiz.questions.length }}
+                        {{ dataQuiz.title }}
+                        <span class="badge rounded-pill bg-primary badge-custom" title="Total">
+                            <i class="fas fa-pen-square"></i>
+                            {{ dataQuiz.questions.length }}
                         </span>
                     </h5>
-                    <button type="button" class="btn-close" :title="$t('labelClose')" data-bs-dismiss="modal" aria-label="Close" @click="close"></button>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        :title="$t('labelClose')"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        @click="close"
+                    ></button>
                 </div>
                 <div class="modal-body">
-                    <div style="overflow: auto; max-height: 329px;">
+                    <div style="overflow: auto; max-height: 329px">
                         <ul class="list-group">
                             <li class="list-group-item" v-for="(item, index) in dataQuiz.questions" :key="index">
-                                {{ index+1 }}. {{ item.description }}
+                                {{ index + 1 }}. {{ item.description }}
                             </li>
                         </ul>
                     </div>
@@ -31,18 +39,18 @@
             dataQuiz: {
                 required: true,
                 type: Object,
-                default: {}
+                default: {},
             },
         },
         data() {
-            return {}
+            return {};
         },
         methods: {
             close: function () {
-                this.$emit('close');
+                this.$emit("close");
             },
         },
-    }
+    };
 </script>
 <style scoped>
     .show {

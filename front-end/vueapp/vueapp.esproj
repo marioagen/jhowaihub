@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.74-alpha">
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.74-alpha">
   <PropertyGroup>
     <StartupCommand>npm run serve</StartupCommand>
     <JavaScriptTestRoot>.\</JavaScriptTestRoot>
@@ -13,12 +13,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="public\config\" />
-    <Folder Include="src\assets\css\" />
     <Folder Include="src\components\pages\logout\" />
     <Folder Include="src\components\pages\normalize\" />
     <Folder Include="src\workers\" />
     <Folder Include="src\store\" />
-    <Folder Include="src\services\" />
     <Folder Include="src\router\" />
   </ItemGroup>
 </Project>

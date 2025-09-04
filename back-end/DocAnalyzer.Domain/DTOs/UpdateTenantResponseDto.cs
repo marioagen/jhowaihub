@@ -1,8 +1,0 @@
-﻿namespace DocAnalyzer.Domain.DTOs
-{
-    public class UpdateTenantResponseDto
-    {
-        public string Message { get; set; } = string.Empty;
-        public bool Success { get; set; }
-    }
-}

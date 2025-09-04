@@ -1,97 +1,213 @@
-﻿import { createRouter, createWebHashHistory } from 'vue-router';
-import LoginIndex from '@/components/pages/login';
-import LogoutIndex from '@/components/pages/logout';
-import DocumentUpload from '@/components/pages/document/upload';
-import DocumentList from '@/components/pages/document/list';
-import TypeManager from '@/components/pages/manager/type';
-import QuestionManager from '@/components/pages/manager/question';
-import QuizFormNew from '@/components/pages/quiz/form-new';
-import QuizFormEdit from '@/components/pages/quiz/form-edit';
-import QuizManager from '@/components/pages/manager/quiz';
-import NormalizeIndex from '@/components/pages/normalize/loading';
-import AnalyzerIndex from '@/components/pages/analyzer';
+﻿import { createRouter, createWebHashHistory } from "vue-router";
+import DocumentsUpload from "@/pages/documents/uploads.vue";
+import DocumentsPage from "@/pages/documents/index.vue";
+import NormalizeIndex from "@/components/pages/normalize/loading";
+import AnalyzerIndex from "@/components/pages/analyzer";
 
+import LoginIndex from "@/pages/login.vue";
+import LogoutPage from "@/pages/logout";
+import UnauthorizedPage from "@/pages/unauthorized.vue";
+import TypesPage from "@/pages/types.vue";
+import QuestionsPage from "@/pages/questions.vue";
+import ManagementPage from "@/pages/management.vue";
+import QuizzesPage from "@/pages/quizzes/index.vue";
+import NewQuizz from "@/pages/quizzes/newQuizz.vue";
+import EditQuizz from "@/pages/quizzes/editQuizz.vue";
+import WorkflowPage from "@/pages/workflow/index.vue";
+import WorkflowEditor from "@/pages/workflow/editorIndex.vue";
+import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
+import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
+
+import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
-    var usuario = JSON.parse(window.localStorage.getItem('project'));
-    if (usuario != null) {
-        if (usuario.isLogged === true) {
-            next();
-        }
-    } else next({
-        path: '/'
-    })
+    const userStr = window.localStorage.getItem("project");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) {
+        return next({ path: "/" });
+    }
+
+    if (user.isLogged !== true) {
+        return next({ path: "/" });
+    }
+
+    if (!hasPermission(to.meta.module, to.meta.action)) {
+        return next({ path: "/unauthorized" });
+    }
+
+    return next();
 }
 
 const routes = [
     {
-        path: '/',
-        name: 'Login',
+        path: "/",
+        name: "Login",
         component: LoginIndex,
+        meta: { 
+            layout: "auth",
+        },
     },
     {
-        path: '/logout',
-        name: 'Logout',
-        component: LogoutIndex,
+        path: "/logout",
+        name: "Logout",
+        component: LogoutPage,
+        meta: {
+            public: true
+        }
     },
     {
-        path: '/document-upload',
-        name: 'DocumentUpload',
-        component: DocumentUpload,
+        path: "/unauthorized",
+        name: "Unauthorized",
+        component: UnauthorizedPage,
+        meta: { 
+            layout: "auth",
+        },
+    },
+    {
+        path: "/documents",
+        name: "Documents",
+        component: DocumentsPage,
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
+    },
+    {
+        path: "/documents/upload",
+        name: "DocumentsUpload",
+        component: DocumentsUpload,
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
+    },
+    {
+        path: "/types",
+        name: "Type",
+        component: TypesPage,
+        meta: {
+            layout: "default",
+            module: "Types",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
-        path: '/document-list',
-        name: 'DocumentList',
-        component: DocumentList,
+        path: "/questions",
+        name: "Question",
+        component: QuestionsPage,
+        meta: { 
+            layout: "default",
+            module: "Questions",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
-        path: '/manage-type',
-        name: 'Type',
-        component: TypeManager,
+        path: "/quizzes",
+        name: "Quiz",
+        component: QuizzesPage,
+        meta: { 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
-        path: '/manage-question',
-        name: 'Question',
-        component: QuestionManager,
+        path: "/quizzes/new",
+        name: "NewQuizz",
+        component: NewQuizz,
+        meta: { 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
-        path: '/quiz-new',
-        name: 'QuizNew',
-        component: QuizFormNew,
+        path: "/quizzes/edit/:id",
+        name: "EditQuizz",
+        component: EditQuizz,
+        meta: { 
+            layout: "default",
+            module: "Quizzes",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
-        path: '/quiz-edit/:id',
-        name: 'QuizEdit',
-        component: QuizFormEdit,
-        beforeEnter: authenticate,
-    },
-    {
-        path: '/manage-quiz',
-        name: 'Quiz',
-        component: QuizManager,
-        beforeEnter: authenticate,
-    },
-    {
-        path: '/normalize/:id',
-        name: 'Normalize',
+        path: "/normalize/:id",
+        name: "Normalize",
         component: NormalizeIndex,
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
+    },
+    {
+        path: "/analyzer/:id",
+        name: "Analyzer",
+        component: AnalyzerIndex,
+        meta: { 
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
+    },
+    {
+        path: "/management",
+        name: "Management",
+        component: ManagementPage,
+        meta: { 
+            layout: "default",
+            module: "Management",
+            action: "View",
+        },
         beforeEnter: authenticate,
     },
     {
-        path: '/analyzer/:id',
-        name: 'Analyzer',
-        component: AnalyzerIndex,
-        beforeEnter: authenticate,
+        path: "/workflow",
+        name: "Workflow",
+        component: WorkflowPage,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow/editor",
+        name: "WorkflowEditor",
+        component: WorkflowEditor,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow/new",
+        name: "NewWorkflow",
+        component: NewWorkflow,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
+    },
+    {
+        path: "/workflow/edit/:id",
+        name: "EditWorkflow",
+        component: EditWorkflow,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
     },
 ];
 
 const router = createRouter({
-    history: createWebHashHistory(process.env.BASE_URL),
+    history: createWebHashHistory(),
     routes,
 });
-
 export default router;

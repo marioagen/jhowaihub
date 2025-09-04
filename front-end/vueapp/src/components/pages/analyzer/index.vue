@@ -1,12 +1,6 @@
 ﻿<template>
     <main>
-        <div class="container-fluid">
-            <div class="mb-2 navbar-container">
-                <div class="row">
-                    <!-- Component NavBar -->
-                    <nav-bar :sidebarData="sidebarData" />
-                </div>
-            </div>
+        <div class="container-fluid mt-4">
             <div class="custom-padding">
                 <div class="row">
                     <!-- Component Breadcrumb -->
@@ -14,18 +8,34 @@
                 </div>
                 <div class="row">
                     <!-- Component PromptView -->
-                    <prompt-view :hashDocument="hashDocument" :historyListOrder="historyListOrder" @showHistory="showHistory"
-                     @unshiftHistoryList="unshiftHistoryList" @pushHistoryList="pushHistoryList" @showAlertToast="showAlertToast" @clearMyInterval="clearMyInterval" v-if=!isExpandedHistory />
+                    <prompt-view
+                        :hashDocument="hashDocument"
+                        :historyListOrder="historyListOrder"
+                        @showHistory="showHistory"
+                        @unshiftHistoryList="unshiftHistoryList"
+                        @pushHistoryList="pushHistoryList"
+                        @showAlertToast="showAlertToast"
+                        @clearMyInterval="clearMyInterval"
+                        v-if="!isExpandedHistory"
+                    />
                     <!-- Component DocView -->
                     <doc-view @showNormalize="normalize" id="docView" />
                     <div :class="!isExpandedHistory ? 'col-md-3' : 'col-md-6'" id="docHistory">
                         <!--Component HistoryView-->
-                        <history-view :dataShowHistory="dataShowHistory" :dataIsExpandedHistory="isExpandedHistory" 
-                         :dataUnshiftHistoryList="dataUnshiftHistoryList" :dataPushHistoryList="dataPushHistoryList" @expandHistory="expandHistory" @showAlertToast="showAlertToast" @clearMyInterval="clearMyInterval" @updateHistoryListOrder="updateHistoryListOrder" />
+                        <history-view
+                            :dataShowHistory="dataShowHistory"
+                            :dataIsExpandedHistory="isExpandedHistory"
+                            :dataUnshiftHistoryList="dataUnshiftHistoryList"
+                            :dataPushHistoryList="dataPushHistoryList"
+                            @expandHistory="expandHistory"
+                            @showAlertToast="showAlertToast"
+                            @clearMyInterval="clearMyInterval"
+                            @updateHistoryListOrder="updateHistoryListOrder"
+                        />
                     </div>
                 </div>
             </div>
-            <div v-if="isExpandedHistory" style="position: absolute; top: 50%;">
+            <div v-if="isExpandedHistory" style="position: absolute; top: 50%">
                 <a class="btn btn-light btn-sm shadow" :title="$t('labelQuestionnaireAndAi')" @click="expandHistory">
                     <img src="./../../../assets/img/prompt.png" />
                 </a>
@@ -38,21 +48,19 @@
 </template>
 
 <script>
-    import NavBar from '@/components/common/nav-bar';
-    import Breadcrumb from '@/components/common/breadcrumb';
-    import PromptView from '@/components/pages/analyzer/prompt-view';
-    import DocView from '@/components/pages/analyzer/doc-view';
-    import HistoryView from '@/components/pages/analyzer/history-view';
-    import ToastAlert from '@/components/common/toast-alert';
+    import PromptView from "@/components/pages/analyzer/prompt-view";
+    import DocView from "@/components/pages/analyzer/doc-view";
+    import HistoryView from "@/components/pages/analyzer/history-view";
+    import ToastAlert from "@/components/common/toast-alert";
     import api from "@/services/api";
-    import NormalizeIndex from '@/components/pages/normalize/loading';
+    import NormalizeIndex from "@/components/pages/normalize/loading";
 
     export default {
         name: "AnalyzerIndex",
         data() {
             return {
                 crumbsData: [],
-                sidebarData: "DocumentList",
+                sidebarData: "Documents",
                 idAnalyzer: this.$route.params.id,
                 backPage: this.$route.query.page,
                 hashDocument: "",
@@ -65,26 +73,23 @@
                 dataShowHistory: true,
                 dataUnshiftHistoryList: {},
                 dataPushHistoryList: {},
-                dataView:
-                {
+                dataView: {
                     Id: parseInt(this.idAnalyzer),
                     Embeddings_model_name: "",
                 },
                 isReprocessing: true,
                 showLoading: false,
-            }
+            };
         },
         components: {
-            NavBar,
-            Breadcrumb,
             PromptView,
             DocView,
             HistoryView,
             ToastAlert,
-            NormalizeIndex
+            NormalizeIndex,
         },
         watch: {
-            '$store.state.userProfile.language': function () {
+            "$store.state.userProfile.language": function () {
                 this.setCrumbsData();
             },
         },
@@ -96,9 +101,9 @@
             },
             setCrumbsData: function () {
                 this.crumbsData = [
-                    { crumb: this.$t('labelDocuments'), link: { to: 'DocumentList' } },
-                    { crumb: this.$t('labelListing'), link: { to: 'DocumentList', queryPage: this.$route.query.page } },
-                    { crumb: this.$t('labelConsult'), link: { to: 'Analyzer', queryPage: this.$route.query.page } },
+                    { crumb: this.$t("labelDocuments"), link: { to: "Documents" } },
+                    { crumb: this.$t("labelListing"), link: { to: "Documents", queryPage: this.$route.query.page } },
+                    { crumb: this.$t("labelConsult"), link: { to: "Analyzer", queryPage: this.$route.query.page } },
                 ];
             },
             expandHistory: function () {
@@ -121,12 +126,17 @@
             },
             getDataDocument: function () {
                 let self = this;
-                api.get('/Document/Analyze/' + this.idAnalyzer)
-                    .then(function (result) { // Handle success
+                api.get("/Document/Analyze/" + this.idAnalyzer)
+                    .then(function (result) {
+                        // Handle success
                         self.hashDocument = result.data.referenceFile;
-                    }).catch(function (e) { // Handle error
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         console.log(e);
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
@@ -156,9 +166,9 @@
             this.setCrumbsData();
             this.getDataDocument();
         },
-        mounted() { },
-        unmounted() { },
-    }
+        mounted() {},
+        unmounted() {},
+    };
 </script>
 
 <style scoped>
@@ -168,7 +178,7 @@
 
     @media (min-width: 320px) and (max-width: 767px) {
         #docView {
-            display:none;
+            display: none;
         }
         #docHistory {
             display: none;

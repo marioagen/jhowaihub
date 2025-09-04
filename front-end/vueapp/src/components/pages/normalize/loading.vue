@@ -1,13 +1,21 @@
 ﻿<template>
     <main class="flex-shrink-0 overlay">
         <div class="container mb-5">
-            <div class="row justify-content-md-center" style="height: 100%;">
+            <div class="row justify-content-md-center" style="height: 100%">
                 <div class="col-md-auto">
                     <div class="div-center">
                         <div v-if="loading">
-                            <div class="mb-3" style="width: 100%;float: left;"> <h5 class="h5-custom-modal" v-html="message"></h5> </div>
-                            <div style="text-align: center;">
-                                <img svg-inline src="@/assets/img/icon-load-circle.svg" alt="Loading" width="60" class="refresh-animated" />
+                            <div class="mb-3" style="width: 100%; float: left">
+                                <h5 class="h5-custom-modal" v-html="message"></h5>
+                            </div>
+                            <div style="text-align: center">
+                                <img
+                                    svg-inline
+                                    src="@/assets/img/icon-load-circle.svg"
+                                    alt="Loading"
+                                    width="60"
+                                    class="refresh-animated"
+                                />
                             </div>
                         </div>
                     </div>
@@ -16,10 +24,17 @@
         </div>
     </main>
     <!-- Component ModalAlert -->
-    <modal-alert v-if="modalAlertShow" :type="'Error'" :alertTitle="$t('labelFailedToNormalize')" :alertMessage="$t('labelTheFileMayBeUnreadableOrHaveAnError')" :okLabel="$t('labelClose')" @close="closeModal" />
+    <modal-alert
+        v-if="modalAlertShow"
+        :type="'Error'"
+        :alertTitle="$t('labelFailedToNormalize')"
+        :alertMessage="$t('labelTheFileMayBeUnreadableOrHaveAnError')"
+        :okLabel="$t('labelClose')"
+        @close="closeModal"
+    />
 </template>
 <script>
-    import ModalAlert from '@/components/common/modal-alert';
+    import ModalAlert from "@/components/common/modal-alert";
     import api from "@/services/api";
 
     export default {
@@ -28,13 +43,13 @@
             docData: {
                 required: true,
                 type: Object,
-                default: {}
+                default: {},
             },
             isReprocessing: {
                 required: true,
                 type: Boolean,
-                default: false
-            }
+                default: false,
+            },
         },
         data() {
             return {
@@ -45,8 +60,7 @@
                 modalAlertShow: false,
                 myInterval: null,
                 timeoutMessage: ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
-            }
-
+            };
         },
         components: {
             ModalAlert,
@@ -55,72 +69,88 @@
         methods: {
             verifyNormalizedDoc: function () {
                 let self = this;
-                api.get('/Document/Status/' + this.docData.Id)
-                    .then(function (response) { // Handle success
-                        if (response.data.status === 0) { // Status not analyzed
-                            self.message = self.$t('labelNormalizingTheDocument');
+                api.get("/Document/Status/" + this.docData.Id)
+                    .then(function (response) {
+                        // Handle success
+                        if (response.data.status === 0) {
+                            // Status not analyzed
+                            self.message = self.$t("labelNormalizingTheDocument");
                             self.normalizeDoc();
                         } else {
                             if (self.isReprocessing) {
-                                self.message = self.$t('labelNormalizingTheDocument');
+                                self.message = self.$t("labelNormalizingTheDocument");
                                 self.normalizeDoc();
-                            }
-                            else {
-                                self.message = self.$t('labelDocumentHasAlreadyBeenStandardizedPreviously', [response.data.name]);
+                            } else {
+                                self.message = self.$t("labelDocumentHasAlreadyBeenStandardizedPreviously", [
+                                    response.data.name,
+                                ]);
                                 self.redirectToDocument();
                             }
                         }
-                    }).catch(function (e) { // Handle error
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         console.log(e);
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                     });
             },
-            normalizeDoc () {
-                window.onbeforeunload = function () { return true; };
+            normalizeDoc() {
+                window.onbeforeunload = function () {
+                    return true;
+                };
                 let self = this;
                 let paramsReq = {
                     Id: this.docData.Id,
                     Embeddings_model_name: this.docData.Embeddings_model_name,
-                }
+                };
                 this.loading = true;
-                api.post('/Document/Analyze/', paramsReq)
-                    .then(function (response) { // Handle success
+                api.post("/Document/Analyze/", paramsReq)
+                    .then(function (response) {
+                        // Handle success
                         window.onbeforeunload = null;
                         if (self.isReprocessing) {
                             location.reload();
+                        } else {
+                            self.redirectToAnalyzer();
                         }
-                        else {
-                            self.redirectToAnalyzer()
-                        }
-                    }).catch(function (e) { // Handle error
+                    })
+                    .catch(function (e) {
+                        // Handle error
                         window.onbeforeunload = null;
                         console.log(e);
                         self.loading = false;
                         self.showModal();
-                    }).finally(function () { // Always executed
+                    })
+                    .finally(function () {
+                        // Always executed
                         console.log("Finished request.");
                         self.loading = false;
-                        
                     });
             },
-            redirectToAnalyzer () {
+            redirectToAnalyzer() {
                 let self = this;
                 setTimeout(function () {
-                    self.$router.push({ name: 'Analyzer', params: { id: self.docData.Id }, query: { page: self.backPage } });
+                    self.$router.push({
+                        name: "Analyzer",
+                        params: { id: self.docData.Id },
+                        query: { page: self.backPage },
+                    });
                 }, 500);
             },
-            redirectToDocument () {
+            redirectToDocument() {
                 let self = this;
                 setTimeout(function () {
-                    self.$router.push({ name: 'DocumentList', query: { page: self.backPage } });
+                    self.$router.push({ name: "Documents", query: { page: self.backPage } });
                 }, 6000);
             },
-            showModal () {
+            showModal() {
                 this.modalAlertShow = true;
                 document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
-            closeModal () {
+            closeModal() {
                 this.modalAlertShow = false;
                 document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
                 location.reload();
@@ -128,12 +158,12 @@
         },
         computed: {},
         created() {
-            this.message = this.$t('labelPreparingTheDocument');
+            this.message = this.$t("labelPreparingTheDocument");
             this.verifyNormalizedDoc();
         },
-        mounted() { },
-        unmounted() { },
-    }
+        mounted() {},
+        unmounted() {},
+    };
 </script>
 
 <style scoped>
@@ -148,7 +178,7 @@
 
     .h5-custom-modal {
         font-weight: initial;
-        color: #0073E6;
+        color: #0073e6;
         text-align: center;
     }
 
