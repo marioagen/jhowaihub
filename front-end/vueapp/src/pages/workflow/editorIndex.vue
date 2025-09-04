@@ -97,7 +97,6 @@
                 isLoaded: false,
                 crumbsData: [],
                 entitySearch: {},
-                resetInputSearch: false,
                 isDeleting: false,
                 workflowList: [],
                 selectedOption: {

@@ -79,7 +79,7 @@
                 </div>
             </div>
         </div>
-</main>
+    </main>
 </template>
 
 <script>
@@ -94,7 +94,6 @@
             return {
                 crumbsData: [],
                 entitySearch: {},
-                resetInputSearch: false,
                 modalQuestion: {
                     name: "",
                 },

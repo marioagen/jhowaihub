@@ -11,7 +11,7 @@
             @change-page="changePage"
         >
             <template #cell-name="{ data }">
-                <div v-if="!loading" class="p-1">
+                <div class="p-1">
                      <div class="d-flex">
                         <label class="form-check-label d-flex align-items-center w-100">
                             <AvatarComponent :name="data.row.name" />
@@ -75,14 +75,12 @@
             </template>
         </TableComponent>
     </div>
-
     <modal-user
         v-if="modalUserShow"
+        :userEditing="selectedUser"
         @userCreated="handleUserCreated"
         @close="closeModalUser"
-        :userEditing="selectedUser"
     />
-
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteUser"
@@ -107,6 +105,7 @@
 
     export default {
         name: "UsersTable",
+        emits: ["setFilter"],
         components: {
             BadgeOutlinedComponent,
             AvatarComponent,
