@@ -245,6 +245,7 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Criar tipo",
     labelProcessing: "Processando",
+    Admin: "Admin",
     login: {
         title: "Fazer Login",
         password: "Senha",

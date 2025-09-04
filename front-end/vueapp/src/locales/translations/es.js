@@ -248,6 +248,7 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
     labelProcessing: "Procesando",
+    Admin: "Admin",
     login: {
         title: "Iniciar sesión",
         password: "Contraseña",
