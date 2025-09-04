@@ -55,6 +55,7 @@
 
     export default {
         name: "CardComponent",
+        emits: ["reload"],
         data: () => ({
             isLoadingAnalysis: false,
             statusProgress: null,
