@@ -246,17 +246,20 @@
     labelProcessing: "Processing",
     Admin: "Admin",
     login: {
-        title: "Login",
+        index: "Login",
+        title: "Sign In",
         password: "Password",
         subtitle: "Access your account to manage documents",
+        invalid: "Invalid field",
+        error: "Error",
         loading: "Loading...",
         sso: "Login with Microsoft",
         authSSO: "Authenticated with Microsoft",
         validateClient: "Client validated",
         userNotFound: "User not found.",
-        userWithoutAccess: "User without access permission.",
-        userIncorrectPassword: "The password entered is incorrect.",
-        userTokenMicrosoftInvalid: "We were unable to validate your authentication. Please log in again."
+        userWithoutAccess: "User does not have access permission.",
+        userIncorrectPassword: "The entered password is incorrect.",
+        userTokenMicrosoftInvalid: "Could not validate your authentication. Please log in again."
     },
     "validation": {
       "required": "This field is required.",

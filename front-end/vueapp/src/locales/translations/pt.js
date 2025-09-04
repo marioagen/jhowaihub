@@ -247,9 +247,12 @@
     labelProcessing: "Processando",
     Admin: "Admin",
     login: {
+        index: "Login",
         title: "Fazer Login",
         password: "Senha",
         subtitle: "Acesse sua conta para gerenciar documentos",
+        invalid: "Campo inválidos",
+        error: "Error",
         loading: "Carregando...",
         sso: "Login com Microsoft",
         authSSO: "Autenticado na Microsoft",

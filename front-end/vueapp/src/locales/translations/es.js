@@ -249,18 +249,21 @@
     labelSaveType: "Crear tipo",
     labelProcessing: "Procesando",
     Admin: "Admin",
-    login: {
+     login: {
+        index: "Login",
         title: "Iniciar sesión",
         password: "Contraseña",
         subtitle: "Accede a tu cuenta para gestionar documentos",
+        invalid: "Campo inválido",
+        error: "Error",
         loading: "Cargando...",
-        sso: "Iniciar sesión con Microsoft",
-        authSSO: "Autenticado con Microsoft",
+        sso: "Login con Microsoft",
+        authSSO: "Autenticado en Microsoft",
         validateClient: "Cliente validado",
         userNotFound: "Usuario no encontrado.",
         userWithoutAccess: "Usuario sin permiso de acceso.",
         userIncorrectPassword: "La contraseña ingresada es incorrecta.",
-        userTokenMicrosoftInvalid: "No pudimos validar tu autenticación. Inicia sesión de nuevo."
+        userTokenMicrosoftInvalid: "No se pudo validar tu autenticación. Por favor, inicia sesión nuevamente."
     },
     "validation": {
         "required": "Campo obligatorio.",
