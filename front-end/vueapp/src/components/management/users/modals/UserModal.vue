@@ -110,7 +110,7 @@
                         </SelectionListComponent>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" @click="close">
+                        <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
                             {{ $t("labelCancel") }}
                         </button>
                         <button v-if="userData.id" type="submit" class="btn btn-primary btn-sm">

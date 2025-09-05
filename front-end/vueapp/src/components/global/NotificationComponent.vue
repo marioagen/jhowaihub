@@ -7,7 +7,7 @@
                 :class="['alert', `alert-${notification.variant}`, 'd-flex', 'align-items-center', 'fade', 'show']"
                 role="alert"
             >
-                <LucideIcon v-if="notification.icon" :icon="notification.icon" size="20" class="me-2" />
+                <LucideIcon v-if="notification.icon" :icon="notification.icon" :size="20" class="me-2" />
 
                 <div class="flex-grow-1">
                     <strong v-if="notification.title">{{ $t(notification.title) }}:</strong>

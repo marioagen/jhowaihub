@@ -11,14 +11,14 @@
             @change-page="changePage"
         >
             <template #cell-users="{ data }">
-                <LucideIcon icon="UsersRound" size="15" />
+                <LucideIcon icon="UsersRound" :size="15" />
                 {{ data.row.users.length }}
             </template>
             <template #cell-permissions="{ data }">
                 {{ data.row.permissions.length }} {{ $t("labelShowingToTotal") }} {{ this.permissionsCount }}
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown column-align">
+                <div class="dropdown">
                     <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <LucideIcon icon="Ellipsis" />
                     </a>
@@ -76,7 +76,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "name", label: "labelProfile" },
                     { key: "users", label: "labelUsers" },
                     { key: "permissions", label: "labelPermissions" },

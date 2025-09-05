@@ -4,7 +4,7 @@
         class="btn btn-outline-danger btn-sm mb-2 ms-2" 
         @click="openConfirmationMultiple"
     >
-        <LucideIcon icon="Trash2" size="15" />
+        <LucideIcon icon="Trash2" :size="15" />
         {{ $t("labelDelete") }}
     </button>
     <div>
@@ -22,18 +22,28 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <button 
-                    class="btn btn-outline-success btn-sm table-btn" 
-                    @click="openEditModal(data.row)"
-                >
-                    <LucideIcon icon="SquarePen" />
-                </button>
-                <button 
-                    class="btn btn-outline-danger btn-sm ms-2 table-btn" 
-                    @click="openConfirmation(data.row)"
-                >
-                    <LucideIcon icon="Trash2" />
-                </button>
+                <div class="dropdown">
+                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <LucideIcon icon="Ellipsis" />
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
+                                <LucideIcon icon="SquarePen" />
+                                {{ $t("labelEdit") }}
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                @click="openConfirmation(data.row)"
+                            >
+                                <LucideIcon icon="Trash2" />
+                                {{ $t("labelDelete") }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </template>
         </TableComponent>
     </div>
@@ -71,7 +81,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "description", label: "questions.description" },
                     { key: "created", label: "questions.createdData" },
                     { key: "emailCreator", label: "questions.owner" },
@@ -184,6 +194,9 @@
             reload() {
                 this.$refs.QuestionsModal.close();
                 this.getQuestions({ search: "", page: this.queryPage, type: null });
+            },
+            changePage(page) {
+                this.getQuestions({ search: "", page: page, type: null });
             },
         },
         created() {

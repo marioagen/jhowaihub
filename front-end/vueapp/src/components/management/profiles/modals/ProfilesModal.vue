@@ -49,12 +49,7 @@
                     </div>
 
                     <div class="border rounded p-1 user-list">
-                        <div v-if="loading" class="text-center">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">{{ $t("labelLoading") }}</span>
-                            </div>
-                        </div>
-                        <div v-if="!loading" v-for="permission in filteredPermissions" :key="permission.id" class="p-1">
+                        <div v-for="permission in filteredPermissions" :key="permission.id" class="p-1">
                             <div class="form-check d-flex align-items-center">
                                 <input
                                     class="form-check-input me-3"
@@ -81,7 +76,7 @@
 
         <template #footer>
             <div class="modal-footer">
-                <button class="btn btn-secondary btn-sm" @click="close">
+                <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
                     {{ $t("labelCancel") }}
                 </button>
                 <button class="btn btn-primary btn-sm" @click="save">

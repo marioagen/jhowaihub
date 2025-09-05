@@ -13,7 +13,7 @@
                         class="btn btn-primary btn-sm" 
                         @click="redirectToForm"
                     >
-                        <LucideIcon icon="Plus" size="17" />
+                        <LucideIcon icon="Plus" :size="17" />
                         {{ $t("quizzes.createBtn") }}
                     </button>
                 </div>

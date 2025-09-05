@@ -78,7 +78,7 @@
                     <div class="d-flex flex-column">
                         <div class="input-group">
                             <span class="input-group-text border-end-0 bg-white">
-                                <LucideIcon icon="Users" size="16" />
+                                <LucideIcon icon="Users" :size="16" />
                             </span>
                             <select class="form-select form-select-sm border-start-0 flex-grow-1" v-bind="field">
                                 <option value="">{{ $t("workflow.responsableTeam") }}</option>

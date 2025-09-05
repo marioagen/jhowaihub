@@ -8,10 +8,10 @@ export default {
                     content: data.content,
                     pagination: {
                         currentPage: data.currentPage,
-                        pageCount: data.pageCount,
+                        totalPages: data.pageCount,
                         rowCount: data.rowCount,
-                        listPage: data.rowCount,
-                    }
+                        totalItems: data.rowCount,
+                    },
                 }
             })
             .catch((e) => {

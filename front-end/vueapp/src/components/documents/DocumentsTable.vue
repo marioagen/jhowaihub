@@ -4,10 +4,10 @@
         class="btn btn-outline-danger btn-sm mb-2 ms-2" 
         @click="openConfirmation"
     >
-        <LucideIcon icon="Trash2" size="15" />
+        <LucideIcon icon="Trash2" :size="15" />
         {{ $t("labelDelete") }}
     </button>
-    <div>
+    <div v-if="showTable">
         <TableComponent
             modalName="documents.title"
             emptyMessage="documents.notFound"
@@ -41,20 +41,31 @@
                 />
             </template>
             <template #cell-actions="{ data }">
-                <button
-                    v-if="data.row.status === 0"
-                    class="btn btn-outline-primary btn-sm table-btn analyze-btn"
-                    @click="embedData(data.row.id)"
-                >
-                    {{ $t("documents.actions.analyze") }}
-                </button>
-                <button
-                    v-else
-                    class="btn btn-outline-success btn-sm table-btn analyze-btn"
-                    @click="redirectToConsult(data.row.id)"
-                >
-                    {{ $t("documents.actions.consult") }}
-                </button>
+                <div class="dropdown">
+                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <LucideIcon icon="Ellipsis" />
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li v-if="data.row.status === 0">
+                            <a 
+                                class="dropdown-item d-flex align-items-center gap-2" 
+                                @click="embedData(data.row.id)"
+                            >
+                                <LucideIcon icon="TextSearch" />
+                                {{ $t("documents.actions.analyze") }}
+                            </a>
+                        </li>
+                        <li v-else>
+                            <a
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                @click="redirectToConsult(data.row.id)"
+                            >
+                                <LucideIcon icon="Search" />
+                                {{ $t("documents.actions.consult") }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </template>
         </TableComponent>
     </div>
@@ -160,14 +171,14 @@
                             this.getDocuments({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: this.$t("documents.title"),
-                                message: this.$t("labelQuestionRemoveSuccess"),
+                                message: this.$t("documents.removeSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
                                 title: this.$t("documents.title"),
-                                message: this.$t("labelQuestionRemoveError"),
+                                message: this.$t("documents.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
@@ -196,6 +207,9 @@
                     } 
                 });
             },
+            changePage(page) {
+                this.getDocuments({ search: "", page: page, type: null });
+            },
         },
         created() {
             this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
@@ -204,6 +218,9 @@
         computed: {
             showMultiDelete() {
                 return this.table.selectedRows.length > 0;
+            },
+            showTable() {
+                return this.table.data !== undefined;
             },
         },
     };

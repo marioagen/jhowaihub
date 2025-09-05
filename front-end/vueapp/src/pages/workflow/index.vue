@@ -12,10 +12,10 @@
                 </div>                
                 <div class="card mb-3">
                     <div class="card-body">
-                        <div class="d-flex align-items-center gap-3 flex-wrap">
-                            <div class="d-flex align-items-center">
-                                <LucideIcon icon="Clock" size="14" class="me-2" />
-                                <span>{{ $t("workflow.boardView") }}:</span>
+                        <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
+                            <div>
+                                <LucideIcon icon="Clock" :size="14" class="me-2" />
+                                <span>{{$t("workflow.boardView")}}</span>
                             </div>
                             <div class="dropdown">
                                 <button 
@@ -36,8 +36,8 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="badge bg-light text-dark border d-flex align-items-center">
-                                <LucideIcon icon="Workflow" size="14" class="me-2" stroke="#0d6efd" />
+                            <div class="badge bg-secondary badge-custom">
+                                <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
                                 <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
                             <WorkflowFilters @filter="filterData" class="ms-auto" />
@@ -92,7 +92,6 @@
             return {
                 crumbsData: [],
                 entitySearch: {},
-                resetInputSearch: false,
                 modalQuestion: {
                     name: "",
                 },
