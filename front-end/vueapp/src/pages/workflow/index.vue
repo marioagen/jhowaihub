@@ -80,10 +80,10 @@
 </template>
 
 <script>
-    import WorkflowService from "@/services/workflow/WorkflowService.js";
-    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
+    import WorkflowService from "@/services/workflow/WorkflowService.js";
+    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
     import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
 
     export default {
@@ -106,8 +106,8 @@
                 isLoaded: false,
                 signalrEventStatusChanged: "StatusChanged",
                 filters: {
-                    Input: "",
-                    IsAllUsers: false,
+                    input: "",
+                    isAllUsers: false,
                 },
             };
         },
@@ -121,10 +121,10 @@
             },
         },
         methods: {
-            getWorkflowList() {
+            getWorkflowByUser() {
                 this.isLoaded = false;
                 var email = this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email, this.filters)
+                WorkflowService.getWorkflowList(email)
                     .then((response) => {
                         if(response.error !== undefined) {
                             this.$notify({
@@ -143,7 +143,7 @@
             },
             getWorkflowbyTeam(id) {
                 this.isLoaded = false;
-                WorkflowService.getWorkflowByTeamId(id)
+                WorkflowService.getWorkflowByTeamId(id, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
                     })
@@ -170,7 +170,7 @@
             },
             filterData(filters) {
                 this.filters = filters;
-                this.getWorkflowList();
+                this.getWorkflowbyTeam();
             },
         },
         computed: {
@@ -179,7 +179,7 @@
             },
         },
         created() {
-            this.getWorkflowList();
+            this.getWorkflowByUser();
             GlobalEventService.on("all-uploads-complete", this.getWorkflowList);
             GlobalEventService.on("refresh-once", this.getWorkflowList);
         },

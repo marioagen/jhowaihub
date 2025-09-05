@@ -10,7 +10,7 @@
                     type="text"
                     class="form-control form-control-sm border-start-0 custom-input"
                     :class="{ 'border-end-0': showCleanBtn }"
-                    v-model="filters.Input"
+                    v-model="filters.input"
                     @keydown.enter="filterData"
                     @keydown.delete="filterData"
                     :placeholder="$t('filters.workflowInput')"
@@ -23,9 +23,9 @@
         </div>
         <div class="col-1">
             <button
-                v-tooltip="filters.IsAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
+                v-tooltip="filters.isAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
                 class="btn table-btn btn-sm"
-                :class="filters.IsAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
                 type="button"
                 style="display: flex; align-items: center; justify-content: center;"
                 @click="filterUsers"
@@ -43,8 +43,8 @@
             return {
                 teamsList: [],
                 filters: {
-                    Input: "",
-                    IsAllUsers: false,
+                    input: "",
+                    isAllUsers: false,
                 }
             };
         },
@@ -53,22 +53,20 @@
                 this.$emit("filter", this.filters)
             },
             filterUsers() {
-                this.filters.IsAllUsers = !this.filters.IsAllUsers;
+                this.filters.isAllUsers = !this.filters.isAllUsers;
                 this.filterData();
                 console.log(this.filters)
             },
             cleanInput() {
-                this.filters.Input = "";
+                this.filters.input = "";
                 this.filterData();
             },
         },
         computed: {
             showCleanBtn() {
-                return this.filters.Input !== "";
+                return this.filters.input !== "";
             },
         },
-        created() {
-        }
     };
 </script>
 
