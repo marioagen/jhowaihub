@@ -50,6 +50,7 @@
                 listIds: [],
                 teamEditing: {},
                 entitySearch: {},
+                resetInputSearch: "",
             };
         },
         watch: {

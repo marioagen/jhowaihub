@@ -1,5 +1,5 @@
 <template>
-    <main>
+    <main :key="changeLanguage">
         <div class="container-fluid scroll-area mx-2">
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -14,7 +14,7 @@
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-3">
                             <div class="d-flex align-items-center">
-                                <LucideIcon icon="Clock" size="14" class="me-2" />
+                                <LucideIcon icon="Clock" :size="14" class="me-2" />
                                 <span>{{$t("workflow.boardView")}}</span>
                             </div>
                             <div class="dropdown">
@@ -38,7 +38,7 @@
                             </div>
 
                             <div class="badge bg-secondary badge-custom">
-                                <LucideIcon icon="Workflow" size="14" class="me-2" stroke="#0d6efd" />
+                                <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
                                 <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
                         </div>
@@ -47,15 +47,22 @@
                                 class="btn btn-outline-primary btn-sm" 
                                 @click="redirectToForm"
                             >
-                                <LucideIcon icon="Plus" size="14" class="me-2" />
+                                <LucideIcon icon="Plus" :size="14" class="me-2" />
                                 {{ $t("workflow.createBtn") }}
                             </button>
                             <button 
                                 class="btn btn-primary btn-sm" 
                                 @click="editWorkflow"
                             >
-                                <LucideIcon icon="PenLine" size="14" class="me-2" />
+                                <LucideIcon icon="PenLine" :size="14" class="me-2" />
                                 {{ $t("workflow.editBtn") }}
+                            </button>
+                            <button 
+                                class="btn btn-outline-danger btn-sm"
+                                @click="deleteWorkflow"
+                            >
+                                <LucideIcon icon="Trash2" :size="14" class="me-2" />
+                                {{ $t("workflow.deleteBtn") }}
                             </button>
                         </div>
                     </div>
@@ -66,7 +73,6 @@
                             <WorkflowCards 
                                 :kanbanData="board"
                                 :isEditor="true"
-                                @reload="reloadKanban"
                             />
                         </div>
                     </div>
@@ -85,13 +91,12 @@
     import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
 
     export default {
-        name: "QuizzesPage",
+        name: "WorkflorEditorIndex",
         data() {
             return {
                 isLoaded: false,
                 crumbsData: [],
                 entitySearch: {},
-                resetInputSearch: false,
                 isDeleting: false,
                 workflowList: [],
                 selectedOption: {
@@ -99,6 +104,7 @@
                     name: "Nome"
                 },
                 board: [],
+                changeLanguage: false,
             };
         },
         components: {
@@ -107,7 +113,7 @@
         },
         watch: {
             "$store.state.userProfile.language": function () {
-                this.setEntitySearch();
+                this.changeLanguage = !this.changeLanguage;
             },
         },
         methods: {
@@ -157,14 +163,6 @@
                     (workflow) => workflow.id !== this.selectedOption.id
                 );
             },
-            setEntitySearch() {
-                this.entitySearch = {
-                    screen: "quizzes",
-                    labelInput: this.$t("quizzes.filters.input"),
-                    placeholderInput: this.$t("quizzes.filters.input"),
-                    labelButton: this.$t("quizzes.createBtn"),
-                };
-            },
             redirectToForm() {
                 this.$router.push({ name: "NewWorkflow" });
             },
@@ -176,10 +174,33 @@
                     }, 
                 });
             },
+            deleteWorkflow() {
+                this.isDeleting = true;
+                WorkflowService.deleteWorkflowById(this.selectedOption.id)
+                    .then((status) => {
+                        if(status) {
+                            this.getWorkflowList();
+                            return this.$notify({
+                                title: 'workflow.index',
+                                message: 'workflow.removeSuccess',
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
+                        }
+                        this.$notify({
+                            title: 'workflow.index',
+                            message: 'workflow.removeError',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    })
+                    .finally(() => {
+                        this.isDeleting = false;
+                    })
+            },
         },
         created() {
             this.getWorkflowList();
-            this.setEntitySearch();
         },
     };
 </script>

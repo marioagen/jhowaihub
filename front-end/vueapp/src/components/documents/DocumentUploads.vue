@@ -526,16 +526,9 @@
                 }
             },
             loadTeams() {
-                var paramsReq = {
-                    search: "",
-                    pageSize: 0,
-                    page: 1,
-                    isAscending: this.isAscending,
-                };
-
-                api.get("/Team/PagedByUser", { params: paramsReq })
+                api.get("/Team")
                     .then((response) => {
-                        this.teams = response.data.content;
+                        this.teams = response.data.filter(t => t.workflow);                        
                         this.loading = false;
                     })
                     .catch((e) => {
