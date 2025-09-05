@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
@@ -43,11 +44,60 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="teamId"></param>
         /// <returns></returns>
-        public async Task<WorkflowDto?> FindByTeamId(int teamId)
+        public async Task<WorkflowDto?> FindByTeamId(int teamId, WorkflowFilterDto? workflowFilterDto)
         {
-            return await _context.Workflows
-                .Where(w => w.TeamId == teamId)
-                .Select(GetWorkflowProjection())
+            var query = _context.Workflows
+                .Where(w => w.TeamId == teamId);
+
+            // if filter is set, restrict Workflows to only those with at least one matching Card
+            if (!string.IsNullOrWhiteSpace(workflowFilterDto?.Input))
+            {
+                query = query.Where(w =>
+                    w.Steps.Any(s =>
+                        s.Cards.Any(c =>
+                            c.Enable &&
+                            c.Name.Contains(workflowFilterDto.Input))));
+            }
+
+            return await query
+                .Select(w => new WorkflowDto
+                {
+                    Id = w.Id,
+                    Name = w.Name,
+                    TeamId = w.TeamId,
+                    Steps = w.Steps.Select(s => new StepDto
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Order = s.Order,
+                        Profile = new ProfileDto
+                        {
+                            Id = s.Profile!.Id,
+                            Name = s.Profile.Name
+                        },
+                        Status = new StatusDto
+                        {
+                            Id = s.Status!.Id,
+                            Name = s.Status.Name,
+                            Color = s.Status.Color,
+                        },
+                        Cards = s.Cards
+                            .Where(c => c.Enable &&
+                                (string.IsNullOrWhiteSpace(workflowFilterDto!.Input)
+                                 || c.Name.Contains(workflowFilterDto.Input)))
+                            .Select(c => new CardDto
+                            {
+                                Id = c.Id,
+                                Name = c.Name,
+                                Created = c.Created,
+                                Description = c.Document.Description,
+                                Owner = c.Document.EmailCreator,
+                                DocumentId = c.Document.Id,
+                                StatusDocument = c.Document.Status,
+                            }).ToList(),
+                        WorkflowId = s.WorkflowId
+                    }).ToList()
+                })
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
         }

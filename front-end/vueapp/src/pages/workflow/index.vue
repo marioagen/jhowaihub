@@ -122,7 +122,6 @@
         },
         methods: {
             getWorkflowByUser() {
-                console.log("Load list")
                 this.isLoaded = false;
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
@@ -143,7 +142,6 @@
                     });
             },
             getWorkflowbyTeam(id) {
-                console.log("Load workflow using teamId")
                 this.isLoaded = false;
                 WorkflowService.getWorkflowByTeamId(id, this.filters)
                     .then((response) => {
