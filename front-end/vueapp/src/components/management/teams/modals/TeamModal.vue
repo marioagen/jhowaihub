@@ -31,7 +31,7 @@
                         <SelectionListComponent
                             :id="'users'"
                             :labelPanel="'labelTeamMembers'"
-                            :labelSelectedQuantity="'labelSelectedTeams'"
+                            :labelSelectedQuantity="'labelSelectedUsers'"
                             :labelSearch="'labelSearchUsers'"
                             :items="filteredUsers"
                             :loading="loading"
