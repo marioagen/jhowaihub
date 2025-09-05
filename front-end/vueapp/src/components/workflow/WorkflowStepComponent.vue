@@ -81,7 +81,7 @@
                                 <LucideIcon icon="Users" :size="16" />
                             </span>
                             <select class="form-select form-select-sm border-start-0 flex-grow-1" v-bind="field">
-                                <option value="">{{ $t("workflow.responsableTeam") }}</option>
+                                <option value="">{{ $t("workflow.profiles") }}</option>
                                 <option v-for="p in profilesList" :key="p.id" :value="String(p.id)">
                                     {{ p.text }}
                                 </option>
