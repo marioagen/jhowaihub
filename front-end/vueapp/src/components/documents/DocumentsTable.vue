@@ -131,6 +131,7 @@
                 isAsc: true,
                 isAllUsers: false,
             },
+            isEmbedding: false,
             isDeleting: false,
         }),
         methods: {
