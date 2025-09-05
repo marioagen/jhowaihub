@@ -7,7 +7,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     {
         Task<bool> Create(WorkflowCreateDto workflowCreateDto);
         Task<bool> Update(WorkflowUpdateDto workflowUpdateDto);
-        Task<WorkflowDto> FindByTeamId(int teamId);
+        Task<WorkflowDto> FindByTeamId(int teamId, WorkflowFilterDto workflowFilterDto);
         Task<WorkflowDto> FindById(int id);
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string email);

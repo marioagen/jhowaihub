@@ -117,9 +117,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="teamId"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<WorkflowDto> FindByTeamId(int teamId)
+        public async Task<WorkflowDto> FindByTeamId(int teamId, WorkflowFilterDto workflowFilterDto)
         {
-            var workflow = await _workflowRepository.FindByTeamId(teamId);
+            var workflow = await _workflowRepository.FindByTeamId(teamId, workflowFilterDto);
 
             if (workflow == null)
             {
