@@ -1,7 +1,4 @@
 <template>
-    <div v-if="isLoadingAnalysis" class="overlay-loading">
-        <div class="spinner-grow text-primary" role="status"></div>
-    </div>
     <div class="card clickable" @click="redirectToAnalyzer">
         <div class="card-content">
             <div class="cover" v-if="showLoading">
@@ -42,7 +39,8 @@
                     </div>
                     <button class="btn btn-sm btn-primary float-end" @click.stop="advanceStep" v-if="!isLastStep">
                         <span>{{ verifyFirst }}</span>
-                        <LucideIcon icon="ChevronRight" :size="16" class="me-1" />
+                        <LucideIcon icon="ChevronRight" :size="16" class="me-1" v-if="!isLoadingAnalysis" />
+                        <div class="spinner-grow text-light" role="status"  v-if="isLoadingAnalysis"></div>
                     </button>
                 </div>
             </div>
@@ -281,6 +279,12 @@
 
     .clickable {
         cursor: pointer;
+    }
+
+    .spinner-grow{
+        width: 1rem;
+        height: 1rem;
+        margin-left: 5px;
     }
 
 </style>
