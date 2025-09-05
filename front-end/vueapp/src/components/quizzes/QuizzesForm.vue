@@ -19,7 +19,7 @@
                 </div>                
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="save">
-                        <LucideIcon icon="Save" size="15" />
+                        <LucideIcon icon="Save" :size="15" />
                         {{ $t("quizzes.formSave") }}
                     </button>
                 </div>
@@ -83,7 +83,7 @@
                         class="btn btn-outline-primary btn-sm table-btn mt-4"
                         @click="openModalQuestion"
                     >
-                        <LucideIcon icon="Plus" size="17" />
+                        <LucideIcon icon="Plus" :size="17" />
                         {{ $t("questions.createBtn") }}
                     </button>
                 </div>

@@ -40,6 +40,8 @@
                 pagination: { currentPage: 0, pageCount: 0, rowCount: 0, listPage: 0 },
                 listIds: [],
                 entitySearch: {},
+                resetInputSearch: "",
+                modalType: "",
             };
         },
         watch: {

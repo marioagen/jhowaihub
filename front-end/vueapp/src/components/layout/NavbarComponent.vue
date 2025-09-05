@@ -12,7 +12,7 @@
                             text-align: left;
                         "
                     >
-                        <AvatarComponent :name="initials" size="30" />
+                        <AvatarComponent :name="initials" :size="30" />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-sidebar text-small shadow" aria-labelledby="tenantDropdown"
                         id="tenantDropdownMenu" style="white-space: normal; overflow-wrap: break-word">
@@ -110,7 +110,7 @@ export default {
     name: "NavBarComponent",
     props: {
         sidebarData: {
-            required: true,
+            required: false,
             type: String,
             default: "",
         },
