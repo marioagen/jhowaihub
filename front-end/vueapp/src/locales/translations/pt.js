@@ -438,6 +438,11 @@
             subtitle: "Modifique as etapas e configurações do workflow",
         },
     },
+    card:{
+        userAssigned: "Responsável",
+        userApplicant: "Solicitante",
+        assignBtn: "Atribuir"
+    }
 };
 
 export default portuguese;

@@ -135,6 +135,11 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        public async Task<ICollection<UserDto>> FindByTeamId(int teamId)
+        {
+            return await _userRepository.FindByTeamIdAsync(teamId);
+        }
+
         /// <summary>
         /// Ordenates the list of users and returns a paged result.
         /// </summary>

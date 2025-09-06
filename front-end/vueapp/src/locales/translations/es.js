@@ -449,6 +449,11 @@
         labelWorkflowBoard: "Tablero de procesamiento de documentos",
         labelWorkflowSubTitle: "Visualice el flujo de documentos a través de los pasos de procesamiento",
     },
+    card:{
+        userAssigned: "Responsable",
+        userApplicant: "Solicitante",
+        assignBtn: "Asignar"
+    }
 };
 
 export default spanish;

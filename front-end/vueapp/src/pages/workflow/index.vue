@@ -52,6 +52,7 @@
                             <div class="kanban-wrapper">
                                 <WorkflowCards 
                                     :kanbanData="kanbanCards"
+                                    :users="users"
                                     @reload="reloadKanban"
                                 />
                             </div>
@@ -87,6 +88,7 @@
     import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
+    import UserService from "@/services/users/UserService";
 
     export default {
         name: "WorkflowPage",
@@ -106,7 +108,8 @@
                 kanbanCards: [],
                 numDocs: 0,
                 isLoaded: false,
-                signalrEventStatusChanged: "StatusChanged"
+                signalrEventStatusChanged: "StatusChanged",
+                users: []
             };
         },
         components: {
@@ -161,10 +164,21 @@
                     teamId: workflow.team.id,
                 }
                 this.getWorkflowbyTeam(workflow.team.id);
+                this.getUsersByTeamId(workflow.team.id);     
             },
             reloadKanban() {
                 this.getWorkflowbyTeam(this.selectedOption.teamId);
             },
+            getUsersByTeamId(teamId) {
+                this.isLoaded = false;
+                UserService.getUsersByTeamId(teamId)
+                    .then((response) => {                        
+                        this.users = response;
+                    })
+                    .finally(() => {
+                        this.isLoaded = true;
+                    });                  
+            }
         },
         computed: {
             isWorkflowSelected() {

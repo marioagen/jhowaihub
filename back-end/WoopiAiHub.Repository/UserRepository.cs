@@ -172,5 +172,16 @@ namespace WoopiAiHub.Repository
                                  .Distinct()
                                  .ToListAsync();
         }
+
+
+        public async Task<ICollection<UserDto>> FindByTeamIdAsync(int teamId)
+        {
+            return await _context.Users
+                                 .Include(u => u.Teams)
+                                 .AsNoTracking()
+                                 .Where(u => u.IsActive && u.Teams.Any(a => a.Id.Equals(teamId)))
+                                 .Select(s=> new UserDto { Id =  s.Id, Name = s.Name, Email = s.Email })
+                                 .ToListAsync();
+        }
     }
 }

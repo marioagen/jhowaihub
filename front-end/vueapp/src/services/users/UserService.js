@@ -30,4 +30,14 @@ export default {
                 return false;
             });
     },
+    getUsersByTeamId(teamId){
+        return api
+            .get(`/User/team/${teamId}`)
+            .then(({data}) => {
+                return data;
+            })
+            .catch(function (e) {
+                console.log(e);
+            });
+    }
 };
