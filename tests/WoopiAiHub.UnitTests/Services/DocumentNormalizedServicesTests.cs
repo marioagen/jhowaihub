@@ -1,9 +1,10 @@
-﻿using WoopiAiHub.Application.Services;
+﻿using Moq;
+using Moq.AutoMock;
+using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixture;
-using Moq;
-using Moq.AutoMock;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -67,7 +68,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentNormalizedRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(documentNormalized);
 
             // Act
-            var result = _documentNormalizedServices.FindById(document.Id, document.EmailCreator);
+            var result = _documentNormalizedServices.FindById(document.Id);
 
             // Assert
             Assert.NotNull(result);
@@ -86,7 +87,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentNormalizedRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(documentNormalized);
 
             // Act
-            var result = _documentNormalizedServices.FindById(document.Id, document.EmailCreator);
+            var result = _documentNormalizedServices.FindById(document.Id);
 
             // Assert
             Assert.Null(result);
@@ -108,12 +109,11 @@ namespace WoopiAiHub.UnitTests.Services
             documentNormalizedRepository.Verify(a => a.FindDocumentNormalizedCount(), Times.Once);
         }
 
-        [Fact(DisplayName = "Update")]
+        [Fact(DisplayName = "Update updates sucessfully")]
         [Trait("Update", "Success")]
         public void Update_Success()
         {
             // Arrange
-            var documentNormalized = _fixture.FindValidDocumentNormalized();
             var documentNormalizedRepository = _mocker.GetMock<IDocumentNormalizedRepository>();
             documentNormalizedRepository.Setup(a => a.Update(It.IsAny<DocumentNormalized>())).Returns(true);
 
@@ -124,7 +124,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentNormalizedRepository.Verify(a => a.Update(It.IsAny<DocumentNormalized>()),Times.Once);
         }
 
-        [Fact(DisplayName = "Update")]
+        [Fact(DisplayName = "Update fails when try to update")]
         [Trait("Update", "Fail")]
         public void Update_Fail()
         {
@@ -137,6 +137,43 @@ namespace WoopiAiHub.UnitTests.Services
             var result = _documentNormalizedServices.Update(It.IsAny<DocumentNormalized>());
 
             Assert.False(result);
+        }
+
+        [Fact(DisplayName = "InsertOrUpdate updates when document exists")]
+        [Trait("InsertOrUpdate", "Success")]
+        public void InsertOrUpdate_ShouldUpdateDocument_WhenDocumentExists()
+        {
+            // Arrange
+            int documentId = 1;
+            string normalizedContext = "Test Content";
+            var existingDocument = _fixture.FindValidDocumentNormalized();
+            var _documentNormalizedRepositoryMock = _mocker.GetMock<IDocumentNormalizedRepository>();
+            _documentNormalizedRepositoryMock.Setup(repo => repo.FindById(documentId))
+                                             .Returns(existingDocument);
+
+            // Act
+            _documentNormalizedServices.InsertOrUpdate(documentId, normalizedContext);
+
+            // Assert
+            _documentNormalizedRepositoryMock.Verify(repo => repo.Update(It.IsAny<DocumentNormalized>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "InsertOrUpdate creates when document exists")]
+        [Trait("InsertOrUpdate", "Success")]
+        public void InsertOrUpdate_ShouldCreateDocument_WhenDocumentDoesNotExist()
+        {
+            // Arrange
+            int documentId = 1;
+            string normalizedContext = "Test Content";
+            var _documentNormalizedRepositoryMock = _mocker.GetMock<IDocumentNormalizedRepository>();
+            _documentNormalizedRepositoryMock.Setup(repo => repo.FindById(documentId))
+                                             .Returns((DocumentNormalized)null);
+
+            // Act
+            _documentNormalizedServices.InsertOrUpdate(documentId, normalizedContext);
+
+            // Assert
+            _documentNormalizedRepositoryMock.Verify(repo => repo.Create(It.IsAny<DocumentNormalized>()), Times.Once);
         }
 
     }
