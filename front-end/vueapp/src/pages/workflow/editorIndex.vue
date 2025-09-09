@@ -57,13 +57,6 @@
                                 <LucideIcon icon="PenLine" :size="14" class="me-2" />
                                 {{ $t("workflow.editBtn") }}
                             </button>
-                            <button 
-                                class="btn btn-outline-danger btn-sm"
-                                @click="deleteWorkflow"
-                            >
-                                <LucideIcon icon="Trash2" :size="14" class="me-2" />
-                                {{ $t("workflow.deleteBtn") }}
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -173,30 +166,6 @@
                         id: this.selectedOption.id,
                     }, 
                 });
-            },
-            deleteWorkflow() {
-                this.isDeleting = true;
-                WorkflowService.deleteWorkflowById(this.selectedOption.id)
-                    .then((status) => {
-                        if(status) {
-                            this.getWorkflowList();
-                            return this.$notify({
-                                title: 'workflow.index',
-                                message: 'workflow.removeSuccess',
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
-                            });
-                        }
-                        this.$notify({
-                            title: 'workflow.index',
-                            message: 'workflow.removeError',
-                            variant: 'danger',
-                            icon: 'CircleX',
-                        });
-                    })
-                    .finally(() => {
-                        this.isDeleting = false;
-                    })
             },
         },
         created() {
