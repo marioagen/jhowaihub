@@ -101,6 +101,7 @@
                 },
                 workflowList: [],
                 selectedOption: {
+                    id: 0,
                     name: "Select a workflow",
                     teamName: "Select a team",
                     teamId: 0,
@@ -135,7 +136,19 @@
                         }
                         this.workflowList = response;
                         if(this.workflowList.length > 0) {
-                            this.selectOption(this.workflowList[0]);
+                            const lastSelected = this.$store.state.lastSelectedWorkflow;
+                            let workflowToSelect = this.workflowList[0];
+
+                            if (lastSelected) {
+                                const foundWorkflow = this.workflowList.find(w => 
+                                    w.team.id === lastSelected.teamId && w.id === lastSelected.id
+                                );
+                                if (foundWorkflow) {
+                                    workflowToSelect = foundWorkflow;
+                                }
+                            }
+
+                            this.selectOption(workflowToSelect);
                             this.filteredworkflows();
                         }
                     });
@@ -158,10 +171,19 @@
             selectOption(workflow) {
                 this.isLoaded = false;
                 this.selectedOption = {
+                    id: workflow.id,
                     name: workflow.name,
                     teamName: workflow.team.name,
                     teamId: workflow.team.id,
                 }
+                
+                this.$store.commit('setLastSelectedWorkflow', {
+                    id: workflow.id,
+                    name: workflow.name,
+                    teamName: workflow.team.name,
+                    teamId: workflow.team.id,
+                });
+
                 this.getWorkflowbyTeam(workflow.team.id);
             },
             reloadKanban() {
