@@ -152,7 +152,6 @@
                 }
             },
             async updateAssignedUser(userId) {
-                console.log(userId)
                 var params = {
                     CardId: this.dataCard.id,
                     UserId: userId
@@ -180,9 +179,7 @@
                             this.redirectToAnalyzer();
                         } else {
                             this.reloadList();
-                        }
-
-                        
+                        }                        
                     } catch (e) {
                         this.$notify({
                             title: 'Error',
