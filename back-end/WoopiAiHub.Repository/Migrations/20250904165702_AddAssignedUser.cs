@@ -12,20 +12,20 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<Guid>(
-                name: "AssignedUserId ",
+                name: "AssignedUserId",
                 table: "Cards",
                 type: "uniqueidentifier",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cards_AssignedUserId ",
+                name: "IX_Cards_AssignedUserId",
                 table: "Cards",
-                column: "AssignedUserId ");
+                column: "AssignedUserId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Cards_Users_AssignedUserId ",
+                name: "FK_Cards_Users_AssignedUserId",
                 table: "Cards",
-                column: "AssignedUserId ",
+                column: "AssignedUserId",
                 principalTable: "Users",
                 principalColumn: "Id");
         }
@@ -34,15 +34,15 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Cards_Users_AssignedUserId ",
+                name: "FK_Cards_Users_AssignedUserId",
                 table: "Cards");
 
             migrationBuilder.DropIndex(
-                name: "IX_Cards_AssignedUserId ",
+                name: "IX_Cards_AssignedUserId",
                 table: "Cards");
 
             migrationBuilder.DropColumn(
-                name: "AssignedUserId ",
+                name: "AssignedUserId",
                 table: "Cards");
         }
     }

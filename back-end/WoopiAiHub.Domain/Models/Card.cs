@@ -11,7 +11,7 @@ namespace WoopiAiHub.Domain.Models
         [Column("DocumentId", TypeName = "int")]
         public int DocumentId { get; private set; }
 
-        [Column("AssignedUserId ", TypeName = "uniqueidentifier")]
+        [Column("AssignedUserId", TypeName = "uniqueidentifier")]
         public Guid? AssignedUserId { get; private set; }
 
         [Column("Name", TypeName = "varchar(255)")]
