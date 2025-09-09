@@ -72,9 +72,7 @@
                     </div>
                     <div class="row">
                         <div v-if="isLoadingQuestions" class="d-flex justify-content-center">
-                            <div class="spinner-border" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
+                            <div class="spinner-border" role="status"></div>
                         </div>
                         <TransferListComponent
                             v-else
