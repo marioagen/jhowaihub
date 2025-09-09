@@ -118,7 +118,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<Guid?>("AssignedUserId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("AssignedUserId ");
+                        .HasColumnName("AssignedUserId");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime")
