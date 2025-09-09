@@ -18,7 +18,6 @@ namespace WoopiAiHub.Application.Services
             _stepRepository = stepRepository;
         }
 
-
         /// <summary>
         /// Updates assigned user
         /// </summary>
