@@ -8,24 +8,26 @@ namespace WoopiAiHub.Repository.Migrations
     /// <inheritdoc />
     public partial class AddAssignedUser : Migration
     {
+        private const string CardsTableName = "Cards";
+        private const string AssignedUserIdColumnName = "AssignedUserId";
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<Guid>(
-                name: "AssignedUserId",
-                table: "Cards",
+                name: AssignedUserIdColumnName,
+                table: CardsTableName,
                 type: "uniqueidentifier",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cards_AssignedUserId",
-                table: "Cards",
-                column: "AssignedUserId");
+                table: CardsTableName,
+                column: AssignedUserIdColumnName);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Cards_Users_AssignedUserId",
-                table: "Cards",
-                column: "AssignedUserId",
+                table: CardsTableName,
+                column: AssignedUserIdColumnName,
                 principalTable: "Users",
                 principalColumn: "Id");
         }
@@ -35,15 +37,15 @@ namespace WoopiAiHub.Repository.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_Cards_Users_AssignedUserId",
-                table: "Cards");
+                table: CardsTableName);
 
             migrationBuilder.DropIndex(
                 name: "IX_Cards_AssignedUserId",
-                table: "Cards");
+                table: CardsTableName);
 
             migrationBuilder.DropColumn(
-                name: "AssignedUserId",
-                table: "Cards");
+                name: AssignedUserIdColumnName,
+                table: CardsTableName);
         }
     }
 }
