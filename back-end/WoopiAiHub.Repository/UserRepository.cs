@@ -173,7 +173,11 @@ namespace WoopiAiHub.Repository
                                  .ToListAsync();
         }
 
-
+        /// <summary>
+        /// Finds a tem by id
+        /// </summary>
+        /// <param name="teamId"></param>
+        /// <returns></returns>
         public async Task<ICollection<UserDto>> FindByTeamIdAsync(int teamId)
         {
             return await _context.Users
