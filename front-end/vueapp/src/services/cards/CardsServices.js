@@ -13,4 +13,16 @@ export default {
                 };
             });
     },
+    updateAssignedUser(params){
+        return api
+            .put(`/Card/UpdateAssignedUser`, params)
+            .then((result) => {
+                return result.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    }
 };

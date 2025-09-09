@@ -32,5 +32,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _cardServices.UpdateStepAndStatus(updateCardStepStatusDto);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Updates the card assigning user
+        /// </summary>
+        /// <param name="updateAssignedUserDto"></param>
+        /// <returns></returns>
+        [HttpPut("UpdateAssignedUser")]
+        [SwaggerOperation("EndPoint that update assinged user of card")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateAssignedUser(UpdateAssignedUserDto updateAssignedUserDto)
+        {
+            var result = await _cardServices.UpdateAssignedUser(updateAssignedUserDto);
+            return Ok(result);
+        }
     }
 }

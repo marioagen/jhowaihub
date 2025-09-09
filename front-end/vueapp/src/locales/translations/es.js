@@ -452,7 +452,8 @@
     card:{
         userAssigned: "Responsable",
         userApplicant: "Solicitante",
-        assignBtn: "Asignar"
+        assignBtn: "Asignar",
+        unassignInfo: "Desasignar documento"
     }
 };
 

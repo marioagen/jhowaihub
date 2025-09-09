@@ -448,7 +448,8 @@
     card:{
         userAssigned: "Assigned",
         userApplicant: "Applicant",
-        assignBtn: "Assign"
+        assignBtn: "Assign",
+        unassignInfo: "Unassign document"
     }
 };
 

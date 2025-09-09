@@ -133,6 +133,15 @@ namespace WoopiAiHub.Repository
                         Owner = c.Document.EmailCreator,
                         DocumentId = c.Document.Id,
                         StatusDocument = c.Document.Status,
+                        AssignedUser = c.AssignedUser != null ?
+                        new UserDto 
+                        { 
+                            Name = c.AssignedUser.Name,
+                            Email = c.AssignedUser.Email,
+                            Created = c.AssignedUser.Created,
+                            Id = c.AssignedUser.Id
+                        }
+                        : null
                     }).ToList(),
                     WorkflowId = s.WorkflowId
                 }).ToList()
