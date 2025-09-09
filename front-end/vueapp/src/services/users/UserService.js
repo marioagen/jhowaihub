@@ -32,7 +32,7 @@ export default {
     },
     getUsersByTeamId(teamId){
         return api
-            .get(`/User/team/${teamId}`)
+            .get(`/User/Team/${teamId}`)
             .then(({data}) => {
                 return data;
             })

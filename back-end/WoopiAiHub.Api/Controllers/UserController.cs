@@ -104,7 +104,7 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
-        [HttpGet("team/{id}")]
+        [HttpGet("Team/{id}")]
         [SwaggerOperation("Endpoint that receives the request to return all team's users")]
         [ProducesResponseType(typeof(ICollection<UserDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ICollection<UserDto>>> FindByTeamId(int id)
