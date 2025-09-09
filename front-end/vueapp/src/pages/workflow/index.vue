@@ -1,16 +1,19 @@
 <template>
     <main>
         <div class="container-fluid scroll-area mx-2">
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="mb-3">            
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
                         <p>
                             <small class="text-muted">{{$t("workflow.subtitle")}}</small>
                         </p>
                     </div>
+                    <button class="btn btn-primary btn-sm" @click="redirectToNewUpload">
+                        <LucideIcon icon="Plus" :size="17" />
+                        {{ $t("documents.createBtn") }}
+                    </button>
                 </div>
-                
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
@@ -45,7 +48,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div v-if="isWorkflowSelected && isLoaded">
                     <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
@@ -164,6 +166,9 @@
             },
             reloadKanban() {
                 this.getWorkflowbyTeam(this.selectedOption.teamId);
+            },
+            redirectToNewUpload() {
+                this.$router.push({ name: "DocumentsUpload" });
             },
         },
         computed: {
