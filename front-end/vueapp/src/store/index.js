@@ -17,6 +17,7 @@ export default new Vuex.Store({
             isAdmin: false,
         },
         permissions: [],
+        lastSelectedWorkflow: null,
     },
     mutations: {
         updateUserProfile(state, payload) {
@@ -39,6 +40,9 @@ export default new Vuex.Store({
         },
         setTenantInitialized(state, value) {
             state.tenantInitialized = value;
+        },
+        setLastSelectedWorkflow(state, workflow) {
+            state.lastSelectedWorkflow = workflow;
         },
     },
     plugins: [

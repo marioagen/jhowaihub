@@ -1,9 +1,6 @@
 <template>
-    <div v-if="isLoadingAnalysis" class="overlay-loading">
-        <div class="spinner-grow text-primary" role="status"></div>
-    </div>
-    <div class="card">
-        <div class="card-content"  @click="redirectToAnalyzer">
+    <div class="card clickable" @click="redirectToAnalyzer">
+        <div class="card-content">
             <div class="cover" v-if="showLoading">
                 <div class="spinner-cover">
                     <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
@@ -52,7 +49,8 @@
                     </div>
                     <button v-if="!isLastStep && dataCard.assignedUser" class="btn btn-sm btn-primary float-end" @click.stop="advanceStep">
                         <span>{{ verifyFirst }}</span>
-                        <LucideIcon icon="ChevronRight" :size="16" class="me-1" />
+                        <LucideIcon icon="ChevronRight" :size="16" class="me-1" v-if="!isLoadingAnalysis" />
+                        <div class="spinner-grow text-light" role="status"  v-if="isLoadingAnalysis"></div>
                     </button>
                     <div v-else-if="!isLastStep && !dataCard.assignedUser">
                         <div v-if="isAdmin"  class="btn-group">
@@ -376,6 +374,12 @@
         cursor: pointer;
     }
 
+    .spinner-grow{
+        width: 1rem;
+        height: 1rem;
+        margin-left: 5px;
+    }
+
     .assing-btn{
         background-color: var(--btn-primary-dark-bg) !important;
         color: var(--color-dropdown-menu);
@@ -384,23 +388,25 @@
     hr{
         margin: 0.5rem 0;
     }
+
     .dropdown-toggle::after {
         display: none; 
     }
 
     .dropdown-toggle .icon-closed {
-    display: inline-block;
+        display: inline-block;
     }
+
     .dropdown-toggle .icon-open {
-    display: none;
+        display: none;
     }
 
     .dropdown-toggle.show .icon-closed {
-    display: none;
+        display: none;
     }
 
     .dropdown-toggle.show .icon-open {
-    display: inline-block;
+        display: inline-block;
     }
 
     .btn-unlink{

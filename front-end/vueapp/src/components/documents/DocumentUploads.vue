@@ -192,7 +192,7 @@
                                     </div>
 
                                     <div v-if="selectedTeams.length > 0" class="mt-3">
-                                        <label class="form-label">{{ $t("labelSelectedTeamsTitle") }}</label>
+                                        <label class="form-label">{{ $t("labelSelectedTeams") }}</label>
                                         <div class="d-flex flex-wrap gap-2">
                                             <div
                                                 v-for="id in selectedTeams"
