@@ -135,6 +135,11 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Find a Team by id
+        /// </summary>
+        /// <param name="teamId"></param>
+        /// <returns></returns>
         public async Task<ICollection<UserDto>> FindByTeamId(int teamId)
         {
             return await _userRepository.FindByTeamIdAsync(teamId);
