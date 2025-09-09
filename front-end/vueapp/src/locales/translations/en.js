@@ -28,7 +28,6 @@
     labelCharacter: "character",
     labelCharacters: "characters",
     labelCopy: "Copy text",
-    labelDarkTheme: "Dark Theme",
     labelDelete: "Delete",
     labelDeleteHistory: "Delete history",
     labelDescription: "Description",

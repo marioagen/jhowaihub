@@ -10,10 +10,10 @@ export default {
                 console.warn("Erro ao deslogar no back-end:", err);
             })
             .finally(() => {
-                document.documentElement.className = to.query.darkMode === "true"
-                    ? "css-theme-dark"
-                    : "css-theme-light";
-
+                // Always use light theme
+                document.documentElement.className = "css-theme-light";
+                // Clear any theme data from localStorage
+                window.localStorage.removeItem("theme");
                 window.localStorage.removeItem("project");
 
                 const dataUser = {
