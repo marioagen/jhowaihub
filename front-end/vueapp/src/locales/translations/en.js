@@ -425,6 +425,7 @@
         manage: "Manage workflow:",
         boardView: "Viewing workflow:",
         steps: "Workflow Steps",
+        error: "Error fetching workflows",
         addBtn: "Add Step",
         addBtnDescription: "Click to create a new step",
         createNewStep: "New Step",

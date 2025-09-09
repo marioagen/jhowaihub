@@ -132,8 +132,8 @@
                     .then((response) => {
                         if(response.error !== undefined) {
                             this.$notify({
-                                title: 'Error',
-                                message: response.error,
+                                title: "workflow.index",
+                                message: "workflow.error",
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });

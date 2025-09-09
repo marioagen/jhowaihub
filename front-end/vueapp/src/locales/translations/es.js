@@ -429,6 +429,7 @@
         manage: "Gestionar workflow:",
         boardView: "Visualizando workflow:",
         steps: "Etapas del Workflow",
+        error: "Error al buscar workflows",
         addBtn: "Agregar Etapa",
         addBtnDescription: "Haz clic para crear una nueva etapa",
         createNewStep: "Nueva Etapa",
