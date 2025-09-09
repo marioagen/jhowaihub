@@ -46,20 +46,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<WorkflowDto?> FindByTeamId(int teamId, WorkflowFilterDto? workflowFilterDto)
         {
-            var query = _context.Workflows
-                .Where(w => w.TeamId == teamId);
-
-            // if filter is set, restrict Workflows to only those with at least one matching Card
-            if (!string.IsNullOrWhiteSpace(workflowFilterDto?.Input))
-            {
-                query = query.Where(w =>
-                    w.Steps.Any(s =>
-                        s.Cards.Any(c =>
-                            c.Enable &&
-                            c.Name.Contains(workflowFilterDto.Input))));
-            }
-
-            return await query
+            return await _context.Workflows.Where(w => w.TeamId == teamId)
                 .Select(w => new WorkflowDto
                 {
                     Id = w.Id,
