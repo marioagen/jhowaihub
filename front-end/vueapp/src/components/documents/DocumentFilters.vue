@@ -80,7 +80,6 @@
             filterUsers() {
                 this.filters.isAllUsers = !this.filters.isAllUsers;
                 this.filterData();
-                console.log(this.filters)
             },
             cleanInput() {
                 this.filters.input = "";
