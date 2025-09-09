@@ -125,7 +125,21 @@
                         }
                         this.workflowList = response;
                         if(this.workflowList.length > 0) {
-                            this.selectOption(this.workflowList[0]);
+                            // Try to restore the last selected workflow
+                            const lastSelected = this.$store.state.lastSelectedWorkflow;
+                            let workflowToSelect = this.workflowList[0]; // Default to first
+
+                            if (lastSelected) {
+                                // Find the workflow that matches the last selected one
+                                const foundWorkflow = this.workflowList.find(w => 
+                                    w.team.id === lastSelected.teamId && w.id === lastSelected.id
+                                );
+                                if (foundWorkflow) {
+                                    workflowToSelect = foundWorkflow;
+                                }
+                            }
+
+                            this.selectOption(workflowToSelect);
                             this.filteredworkflows();
                         } else {
                             this.isLoaded = false;
@@ -139,6 +153,15 @@
                     teamName: workflow.team.name,
                     teamId: workflow.team.id,
                 }
+                
+                // Save the selected workflow to the store for persistence
+                this.$store.commit('setLastSelectedWorkflow', {
+                    id: workflow.id,
+                    name: workflow.name,
+                    teamName: workflow.team.name,
+                    teamId: workflow.team.id,
+                });
+
                 this.getWorkflowbyTeam(workflow.team.id);
             },
             getWorkflowbyTeam(id) {
