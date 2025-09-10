@@ -193,7 +193,6 @@
                 });
 
                 this.getWorkflowbyTeam(workflow.team.id);
-                this.getUsersByTeamId(workflow.team.id);     
             },
             reloadKanban() {
                 this.getWorkflowbyTeam(this.selectedOption.teamId);
@@ -223,8 +222,8 @@
         },
         created() {
             this.getWorkflowByUser();
-            GlobalEventService.on("all-uploads-complete", this.getWorkflowList);
-            GlobalEventService.on("refresh-once", this.getWorkflowList);
+            GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
+            GlobalEventService.on("refresh-once", this.getWorkflowByUser);
         },
         async mounted() {
             await signalRService.startConnection();
@@ -242,8 +241,8 @@
         beforeUnmount() {
             signalRService.off(this.signalrEventStatusChanged);
             signalRService.stopConnection();
-            GlobalEventService.off("all-uploads-complete", this.reloadList);
-            GlobalEventService.off("refresh-once", this.reloadList);
+            GlobalEventService.off("all-uploads-complete", this.reloadKanban);
+            GlobalEventService.off("refresh-once", this.reloadKanban);
         },
     };
 </script>
