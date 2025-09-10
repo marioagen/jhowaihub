@@ -273,6 +273,18 @@
         hasInvalid: "Invalid fields",
         oneStep: "At least one step is required to save",
     },
+    filters: {
+        documentInput: "Search by document, description or user, ...",
+        workflowInput: "Search by document",
+        teamsSelect: {
+            all: "All teams",
+            none: "Select a team",
+        },
+        assignment: {
+            currentUser: "My documents",
+            allUsers: "All users",
+        }
+    },
     labelBackToListDocuments: "Back to documents",
     pageTitleDocumentsForm: "New Document",
     pageSubtitleDocumentsForm: "Upload new documents for analysis",
@@ -413,6 +425,7 @@
         manage: "Manage workflow:",
         boardView: "Viewing workflow:",
         steps: "Workflow Steps",
+        error: "Error fetching workflows",
         addBtn: "Add Step",
         addBtnDescription: "Click to create a new step",
         createNewStep: "New Step",

@@ -277,6 +277,18 @@
         hasInvalid: "Campos inválidos",
         oneStep: "Se requiere al menos un paso para guardar",
     },
+    filters: {
+        documentInput: "Buscar por documento, descripción o usuario, ...",
+        workflowInput: "Buscar por documento",
+        teamsSelect: {
+            all: "Todos los equipos",
+            none: "Seleccione un equipo",
+        },
+        assignment: {
+            currentUser: "Mis documentos",
+            allUsers: "Todos los usuarios",
+        }
+    },
     labelBackToListDocuments: "Volver a los documentos",
     pageTitleDocumentsForm: "Nuevo documento",
     pageSubtitleDocumentsForm: "Cargar nuevos documentos para su análisis",
@@ -417,6 +429,7 @@
         manage: "Gestionar workflow:",
         boardView: "Visualizando workflow:",
         steps: "Etapas del Workflow",
+        error: "Error al buscar workflows",
         addBtn: "Agregar Etapa",
         addBtnDescription: "Haz clic para crear una nueva etapa",
         createNewStep: "Nueva Etapa",

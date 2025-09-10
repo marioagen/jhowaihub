@@ -29,6 +29,12 @@ export default {
                 }
             });
     },
+    getTeamsByUser() {
+        return api.get("/Team")
+            .then(({ data }) => {
+                return data;
+            })
+    },
     deleteTeamById(teamId) {
         return api
             .delete("/Team/DeleteByIds", { data: [teamId] })

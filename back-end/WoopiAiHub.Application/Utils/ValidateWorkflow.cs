@@ -32,7 +32,7 @@ namespace WoopiAiHub.Application.Utils
                 throw new AppException(ErrorCode.RequiredField, "Workflow name cannot be empty", WorkflowLabel.NameRequired);
             }
 
-            var workflowDto = await _workflowRepository.FindByTeamId(workflowCreateDto.TeamId);
+            var workflowDto = await _workflowRepository.FindByTeamId(workflowCreateDto.TeamId, null);
             if (workflowDto != null)
             {
                 throw new AppException(ErrorCode.Conflict, "Workflow already exists for this team", WorkflowLabel.AlreadyExists);
