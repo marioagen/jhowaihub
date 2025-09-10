@@ -1,4 +1,5 @@
 import api from "@/services/api";
+import logService from '@/services/log/logService.js';
 
 export default {
     getUsers(params) {
@@ -16,7 +17,7 @@ export default {
                 };
             })
             .catch(function (e) {
-                console.log(e);
+                logService.showMessage(e);
             });
     },
     deleteUsersById(userId) {
@@ -26,7 +27,7 @@ export default {
                 return true;
             })
             .catch(function (e) {
-                console.log(e);
+                logService.showMessage(e);
                 return false;
             });
     },
@@ -37,7 +38,7 @@ export default {
                 return data;
             })
             .catch(function (e) {
-                console.log(e);
+                logService.showMessage(e);
             });
     }
 };

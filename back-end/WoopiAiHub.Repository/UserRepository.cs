@@ -174,7 +174,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Finds a tem by id
+        /// Find users by team id
         /// </summary>
         /// <param name="teamId"></param>
         /// <returns></returns>
