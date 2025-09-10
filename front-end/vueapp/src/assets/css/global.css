@@ -131,6 +131,7 @@ body {
     --text-sm--line-height: calc(1.25 / 0.875);
     --skeleton-base: #e0e0e0;
     --skeleton-highlight: #f5f5f5;
+    --btn-primary-dark-bg: #123263;
 }
 
 .css-theme-dark {
@@ -206,7 +207,8 @@ body {
     --text-sm: 0.775rem;
     --text-sm--line-height: calc(1.25 / 0.875);
     --skeleton-base: #2a2a2a;
-    --skeleton-highlight: #3a3a3a;    
+    --skeleton-highlight: #3a3a3a;
+    --btn-primary-dark-bg: #123263;
 }
 
 html {

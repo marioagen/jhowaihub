@@ -458,6 +458,12 @@
         labelWorkflowBoard: "Document Processing Board",
         labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
     },
+    card:{
+        userAssigned: "Assigned",
+        userApplicant: "Applicant",
+        assignBtn: "Assign",
+        unassignInfo: "Unassign document"
+    }
 };
 
 export default english;

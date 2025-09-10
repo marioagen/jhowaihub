@@ -2,8 +2,10 @@
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.UnitTests.Fixture;
@@ -75,6 +77,125 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act
             var result = await _cardServices.UpdateStepAndStatus(updateDto);
+
+            // Assert
+            Assert.True(result);
+            _cardRepositoryMock.Verify(repo => repo.Update(card), Times.Once);
+        }
+
+        [Fact(DisplayName = "Tests update UnassignUser when card not found and throws AppException")]
+        [Trait("UnassignUser", "Fail")]
+        public async Task UnassignUser_CardNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var cardId = 1;
+            _cardRepositoryMock.Setup(repo => repo.FindById(cardId))
+                               .ReturnsAsync((Card?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UnassignUser(cardId));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("Card not found", exception.Message);
+        }
+
+        [Fact(DisplayName = "Tests update UnassignUser to null successfully")]
+        [Trait("UnassignUser", "Success")]
+        public async Task UnassignUser_Success()
+        {
+            //Arrange
+            var cardId = 1;
+            var card = CardFixture.FindValidCard();
+
+            _cardRepositoryMock.Setup(repo => repo.FindById(cardId))
+                               .ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+
+            //Act
+            var result = await _cardServices.UnassignUser(cardId);
+
+            //Assert
+            Assert.True(result);
+            _cardRepositoryMock.Verify(repo => repo.Update(card), Times.Once);
+            Assert.Null(card.AssignedUserId);
+        }
+
+        [Fact(DisplayName = "Tests update AssignedUser when card not found and throws AppException")]
+        [Trait("AssignUser", "Fail")]
+        public async Task AssignUser_CardNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
+            _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
+                               .ReturnsAsync((Card?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignUser(updateAssignedUserDto));
+            Assert.Equal(Domain.Enum.ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("Card not found", exception.Message);
+        }
+
+        [Fact(DisplayName = "Tests update AssignedUser throws ArgumentNullException when userId is empty")]
+        [Trait("AssignUser", "Fail")]
+        public async Task UpdateAssignedUser_UserIdIsEmpty_ThrowsArgumentNullException()
+        {
+            // Arrange
+            var card = CardFixture.FindValidCard();
+            var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
+            updateAssignedUserDto.UserId = Guid.Empty;
+
+            _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
+                               .ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.AssignUser(updateAssignedUserDto));
+
+            // Assert
+            _cardRepositoryMock.Verify(repo => repo.FindById(updateAssignedUserDto.CardId), Times.Once);
+        }
+
+        [Fact(DisplayName = "Tests update AssignedUser when User not in Team and throws AppException")]
+        [Trait("AssignUser", "Fail")]
+        public async Task AssignUser_UserNotInTeam_ThrowsAppException()
+        {
+            // Arrange
+            var card = CardFixture.FindValidCard();
+            card.Step = new Step(1,DateTime.Now, 1, "Step", 1, 1, 1);
+            card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
+            card.Step.Workflow.Team = new Team("Team", 1, DateTime.Now);
+            card.Step.Workflow.Team.Users = new List<User>();
+            var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
+
+            _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
+                               .ReturnsAsync(card);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignUser(updateAssignedUserDto));
+            Assert.Equal(Domain.Enum.ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("User not found", exception.Message);
+        }
+
+        [Fact(DisplayName = "Tests update AssignedUser when UserId is valid")]
+        [Trait("AssignUser", "Sucess")]
+        public async Task AssignUser_ValidUser_UpdatesAssignedUser()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var card = CardFixture.FindValidCard();
+            card.UpdateAssignedUser(userId);
+            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1);
+            card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
+            card.Step.Workflow.Team = new Team("Team", 1, DateTime.Now);
+            card.Step.Workflow.Team.Users = new List<User>() { new User(userId, "User","user@user.com", true, DateTime.Now) };
+            var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
+            updateAssignedUserDto.UserId = userId;
+
+            _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
+                               .ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+
+            // Act
+            var result = await _cardServices.AssignUser(updateAssignedUserDto);
 
             // Assert
             Assert.True(result);
