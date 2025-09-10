@@ -72,9 +72,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("Teams/{teamId}")]
         [SwaggerOperation("Endpoint that receive an team id and return a valid workflow")]
         [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindByTeamId(int teamId)
+        public async Task<IActionResult> FindByTeamId(int teamId, [FromQuery] WorkflowFilterDto workflowFilterDto)
         {
-            var workflow = await _workflowServices.FindByTeamId(teamId);
+            var workflow = await _workflowServices.FindByTeamId(teamId, workflowFilterDto);
             return Ok(workflow);
         }
 

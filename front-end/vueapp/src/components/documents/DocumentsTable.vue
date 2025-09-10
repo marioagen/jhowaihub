@@ -125,37 +125,25 @@
                 },
                 selectedRows: [],
             },
-            selectedDocument: {},
-            queryPage: 1,
-            selectedOption: 10,
-            isAscending: false,
-            colType: 2,
-            modalTypeShow: false,
-            modalAlertShow: false,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
-            searchInput: "",
-            isDeleting: false,
-            isEmbedding: false,
-            docDataEmbedding: {
-                Id: Number,
-                Embeddings_model_name: "",
+            filters: {
+                input: "",
+                teamId: "",
+                isAsc: true,
+                isAllUsers: false,
             },
-            isReprocessing: false,
+            isEmbedding: false,
+            isDeleting: false,
         }),
         methods: {
-            getDocuments(obj) {
+            getDocuments() {
                 this.table.isLoading = true;
-                const teamIds = this.resolveTeamIds();
-                if (teamIds.length === 0) return;
                 const params = {
-                    search: obj.search.trim() || "",
-                    pageSize: this.selectedOption,
-                    page: obj.page,
-                    isAscending: this.isAscending,
+                    search: this.filters.input,
+                    pageSize: this.table.pagination.itemsPerPage,
+                    page: this.table.pagination.currentPage,
+                    isAscending: this.filters.isAsc,
                     colType: this.colType,
-                    teamIds,
+                    teamId: this.filters.teamId,
                 };
 
                 DocumentsServices.getDocuments(params)
@@ -166,21 +154,6 @@
                     .finally(() => {
                         this.table.isLoading = false;
                     });
-            },
-            resolveTeamIds() {
-                if (this.selectedTeamId === 0) {
-                    return this.teamList.length > 0 ? this.teamList.map((team) => team.id) : [];
-                }
-                return [this.selectedTeamId];
-            },
-            orderList(col) {
-                if (this.isAscending) {
-                    this.isAscending = false;
-                } else {
-                    this.isAscending = true;
-                }
-                this.colType = col;
-                this.getQuestions({ search: "", page: this.queryPage, type: null });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
@@ -220,10 +193,6 @@
             formatDate(date) {
                 return dates.formatDate(date);
             },
-            filterList(input) {
-                this.searchInput = input;
-                this.getDocuments({ search: input, page: this.queryPage, type: null });
-            },
             embedData(id) {
                 this.docDataEmbedding.Id = id;
                 this.isEmbedding = true
@@ -235,7 +204,7 @@
                         id: id 
                     },
                     query: { 
-                        page: this.table.pagination.currentPage 
+                        page: this.table.pagination.currentPage
                     } 
                 });
             },
@@ -244,8 +213,8 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getDocuments({ search: "", page: this.queryPage, type: null });
+            this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
+            this.getDocuments();
         },
         computed: {
             showMultiDelete() {
