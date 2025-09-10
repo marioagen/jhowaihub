@@ -333,6 +333,9 @@
             analyze: "Analisar",
             consult: "Consultar",
         },
+        upload: {
+            warningTeamsNotListed: "O time não apareceu na lista? É porque ele ainda não tem um workflow associado a ele.",
+        }
     },
     questions: {
         title: "Perguntas",
