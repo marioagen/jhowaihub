@@ -98,5 +98,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _userServices.IsEmailInUseAsync(userEmailDto);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Endpoint that receives the request to return team's users.
+        /// </summary>
+        /// <param name="pagedDataDto"></param>
+        /// <returns></returns>
+        [HttpGet("Team/{id}")]
+        [SwaggerOperation("Endpoint that receives the request to return all team's users")]
+        [ProducesResponseType(typeof(ICollection<UserDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ICollection<UserDto>>> FindByTeamId(int id)
+        {
+            var result = await _userServices.FindByTeamId(id);
+            return Ok(result);
+        }
     }
 }

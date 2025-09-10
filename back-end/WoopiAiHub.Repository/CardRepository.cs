@@ -30,7 +30,13 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Card?> FindById(int id)
         {
-            return await _context.Cards.FindAsync(id);
+            return await _context.Cards
+                                 .Where(c => c.Id == id)
+                                 .Include(s => s.Step)
+                                 .ThenInclude(w => w!.Workflow)
+                                 .ThenInclude(t => t!.Team)
+                                 .ThenInclude(u => u!.Users)
+                                 .FirstOrDefaultAsync();
         }
 
         /// <summary>
