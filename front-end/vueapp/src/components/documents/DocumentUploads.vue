@@ -142,7 +142,7 @@
                                             />
                                         </div>
                                     </div>
-                                    <div class="mb-3 d-flex gap-2 p-2 rounded">
+                                    <div class="mb-1 d-flex gap-2 p-2 rounded">
                                         <button
                                             type="button"
                                             class="btn btn-custom-light btn-sm"
@@ -160,7 +160,9 @@
                                             {{ $t("labelClearSelection") }}
                                         </button>
                                     </div>
-
+                                    <div class="text-muted small mb-1">
+                                        {{$t("documents.upload.warningTeamsNotListed")}}
+                                    </div>
                                     <div class="border rounded p-1 user-list scrollable-list bg-white">
                                         <div v-if="loading" class="text-center">
                                             <div class="spinner-border text-primary" role="status">

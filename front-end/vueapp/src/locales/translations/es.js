@@ -339,6 +339,9 @@
             analyze: "Analizar",
             consult: "Consultar",
         },
+        upload: {
+            warningTeamsNotListed: "¿El equipo no apareció en la lista? Es porque aún no tiene un workflow asociado.",
+        }
     },
     questions: {
         title: "Preguntas",
