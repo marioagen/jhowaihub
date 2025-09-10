@@ -24,7 +24,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="updateAssingnedUserDto"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<bool> UpdateAssignedUser(UpdateAssignedUserDto updateAssingnedUserDto)
+        public async Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto)
         {
             var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
             if (card == null)
@@ -32,20 +32,37 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             }
 
-            if (updateAssingnedUserDto.UserId == null || updateAssingnedUserDto.UserId == Guid.Empty)
+            if (updateAssingnedUserDto.UserId == Guid.Empty)
             {
-                card.UpdateAssignedUser(null);
+                throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
-            else
+        
+            var isValidTeamUser = card.Step?.Workflow?.Team?.Users.Any(a => a.Id.Equals(updateAssingnedUserDto.UserId));
+            if (!isValidTeamUser.HasValue || !isValidTeamUser.Value)
             {
-                var isValidTeamUser = card.Step?.Workflow?.Team?.Users.Any(a => a.Id.Equals(updateAssingnedUserDto.UserId));
-                if (!isValidTeamUser.HasValue || !isValidTeamUser.Value)
-                {
-                    throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found", CardLabel.UserCannotBeAssigned);
-                }
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found", CardLabel.UserCannotBeAssigned);
+            }
 
-                card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
+            card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
+
+            return _cardRepository.Update(card);
+        }
+
+        /// <summary>
+        /// Updates assigned user to null
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<bool> UnassignUser(int cardId)
+        {
+            var card = await _cardRepository.FindById(cardId);
+            if (card == null)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             }
+
+            card.UpdateAssignedUser(null);
 
             return _cardRepository.Update(card);
         }

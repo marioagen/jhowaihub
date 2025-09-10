@@ -5,6 +5,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     public interface ICardServices
     {
         Task<bool> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto);
-        Task<bool> UpdateAssignedUser(UpdateAssignedUserDto updateAssingnedUserDto);
+        Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto);
+        Task<bool> UnassignUser(int cardId);
     }
 }

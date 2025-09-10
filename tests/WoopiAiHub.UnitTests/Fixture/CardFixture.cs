@@ -15,12 +15,12 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
-        public static UpdateAssignedUserDto FindValidUpdateAssignedUserDto(Guid? userId)
+        public static UpdateAssignedUserDto FindValidUpdateAssignedUserDto()
         {
             return new UpdateAssignedUserDto
             {
                 CardId = 1,
-                UserId = userId
+                UserId = Guid.NewGuid(),
             };
         }
 

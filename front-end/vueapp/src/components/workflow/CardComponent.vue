@@ -36,9 +36,10 @@
                 <div v-if="dataCard.assignedUser" class="mb-2">
                     <LucideIcon icon="User" size="12" class="me-1" />
                     <small class="user">{{ $t("card.userApplicant") }}: {{dataCard.assignedUser.name}}</small>
-                    <button type="button" @click.stop="updateAssignedUser(null)" class="btn btn-sm btn-unlink ms-1 px-1"  
+                    <button type="button" @click.stop="unassignUser" class="btn btn-sm btn-unlink ms-1 px-1"  
                             v-tooltip.right="$t('card.unassignInfo')">
-                        <LucideIcon icon="Unlink" size="16" class="unlink-icon"/>
+                        <LucideIcon v-if="isUnassigningUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
+                        <LucideIcon v-else icon="Unlink" size="16" class="unlink-icon"/>
                     </button>
                 </div>
             </div>
@@ -54,7 +55,7 @@
                     </button>
                     <div v-else-if="!isLastStep && !dataCard.assignedUser">
                         <div v-if="isAdmin"  class="btn-group">
-                            <button type="button" class="btn btn-sm  btn-primary assing-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button type="button" class="btn btn-sm  btn-primary assing-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" @click.stop="">
                                 <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
                                 <span>{{ $t("card.assignBtn") }}</span>
                                 <LucideIcon icon="ChevronRight" size="20" class="ml-2 icon-closed"/>
@@ -69,10 +70,10 @@
                                         <input :id="`filter-user-${dataCard.id}`" v-model="userSearchText" type="text" name="filter" class="form-control" @input="searchUser" />
                                     </div>
                                 </li>
-                                <li v-for="user in filteredUsers" :key="user.id" @click.stop="updateAssignedUser(user.id)"><a class="dropdown-item" href="#">{{user.name}}</a></li>
+                                <li v-for="user in filteredUsers" :key="user.id" @click.stop="assignUser(user.id)"><span class="dropdown-item">{{user.name}}</span></li>
                             </ul>
                         </div>
-                        <button v-else type="button" class="btn btn-sm btn-primary assing-btn" @click.stop="updateAssignedUser(loggedUserId)">
+                        <button v-else type="button" class="btn btn-sm btn-primary assing-btn" @click.stop="assignUser(loggedUserId)">
                             <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
                             {{ $t("card.assignBtn") }} 
                             <LucideIcon icon="NotebookPen" size="16" class="ml-2" />
@@ -93,6 +94,7 @@
         data: () => ({
             isLoadingAnalysis: false,
             isUpdatingAssignedUser: false,
+            isUnassigningUser: false,
             statusProgress: null,
             signalrEventStatusChanged: "StatusChanged",
             userSearchText: "",
@@ -151,13 +153,13 @@
                     }
                 }
             },
-            async updateAssignedUser(userId) {
+            async assignUser(userId) {
                 var params = {
                     CardId: this.dataCard.id,
                     UserId: userId
                 }
                 this.isUpdatingAssignedUser = true;
-                const response = await CardsServices.updateAssignedUser(params);
+                const response = await CardsServices.assignUser(params);
                 if (response?.error !== undefined) {
                     this.$notify({
                         title: 'Error',
@@ -170,7 +172,23 @@
                     this.reloadList();
                 }
                 this.isUpdatingAssignedUser = false;
-            },            
+            },   
+            async unassignUser() {
+                this.isUnassigningUser = true;
+                const response = await CardsServices.unassignUser(this.dataCard.id);
+                if (response?.error !== undefined) {
+                    this.$notify({
+                        title: 'Error',
+                        message: response.error,
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                }
+                else{
+                    this.reloadList();
+                }
+                this.isUnassigningUser = false;
+            },                      
             async advanceStep() {
                this.isLoadingAnalysis = true;
                     try {
