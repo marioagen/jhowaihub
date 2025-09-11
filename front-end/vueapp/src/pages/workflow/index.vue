@@ -191,7 +191,7 @@
                     teamName: workflow.team.name,
                     teamId: workflow.team.id,
                 });
-
+                this.getUsersByTeamId(workflow.team.id);
                 this.getWorkflowbyTeam(workflow.team.id);
             },
             reloadKanban() {
