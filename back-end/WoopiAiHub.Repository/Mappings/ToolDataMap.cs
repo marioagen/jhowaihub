@@ -22,9 +22,13 @@ namespace WoopiAiHub.Repository.Mappings
                    .HasColumnType("bit")
                    .IsRequired();
 
-            builder.HasMany(td => td.Tools)
+            builder.HasMany(td => td.InputTools)
                    .WithOne(t => t.InputData)
                    .HasForeignKey(t => t.InputDataId);
+
+            builder.HasMany(td => td.OutputTools)
+                   .WithOne(t => t.OutputData)
+                   .HasForeignKey(t => t.OutputDataId);
         }
     }
 }

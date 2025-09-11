@@ -9,7 +9,8 @@ namespace WoopiAiHub.Domain.Models
         [Column("IsActive", TypeName = "bit")]
         public bool IsActive { get; private set; }
 
-        public virtual ICollection<Tool>? Tools { get; set; }
+        public virtual ICollection<Tool>? InputTools { get; set; }
+        public virtual ICollection<Tool>? OutputTools { get; set; }
 
         public ToolData(int id, DateTime created, string name, bool isActive) : base(id, created)
         {
