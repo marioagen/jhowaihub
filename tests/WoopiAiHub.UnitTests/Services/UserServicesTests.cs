@@ -54,7 +54,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userServices = _mocker.CreateInstance<UserServices>();
         }
 
-        [Fact(DisplayName = "CreateUser")]
+        [Fact(DisplayName = "Create should return true when user is created")]
         [Trait("CreateUser", "Success")]
         public async Task Create_ShouldReturnTrue_WhenUserIsCreated()
         {
@@ -90,7 +90,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<User>()), Times.Once);
         }
 
-        [Fact(DisplayName = "CreateUser")]
+        [Fact(DisplayName = "Create should return false when user is disabled")]
         [Trait("CreateUser", "Fail")]
         public async Task Create_ShouldReturnFalse_WhenUserNotEnabled()
         {
@@ -236,7 +236,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
-                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .Setup(repo => repo.FindByEmailAsync(userUpdateDto.Email))
                 .ReturnsAsync(user);
 
             _teamRepositoryMock
@@ -280,7 +280,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
-                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .Setup(repo => repo.FindByEmailAsync(userUpdateDto.Email))
                 .ReturnsAsync((User?)null);
 
             // Act
@@ -335,12 +335,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
-                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .Setup(repo => repo.FindByEmailAsync(userUpdateDto.Email))
                 .ReturnsAsync(user);
-
-            _userRepositoryMock
-                .Setup(repo => repo.Update(It.IsAny<User>()))
-                .Returns(false);
 
             // Act & Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _userServices.Update(userUpdateDto, headersDto));
@@ -381,7 +377,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
-                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .Setup(repo => repo.FindByEmailAsync(dto.Email))
                 .ReturnsAsync(existingUser);
 
             _userRepositoryMock
@@ -395,6 +391,27 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _userRepositoryMock.Verify(repo => repo.Update(It.Is<User>(u =>
                 u.Email == dto.Email && u.Name == dto.Name)), Times.Once);
+        }
+
+        [Fact(DisplayName = "Create should throw exception when user is duplicated")]
+        [Trait("CreateUser", "Fail")]
+        public async Task Create_ShouldThrowAppException_WhenUserIsDuplicated()
+        {
+            // Arrange
+            var dto = new UserCreateDto { Name = "name", Email = "email", Password = "Password123" };
+            var headers = new HeadersDto { Tenant = "tenant" };
+            var userId = Guid.NewGuid();
+            var existingUser = new User(userId, "Old Name", "old@email.com", true, DateTime.Now);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByEmailAsync(dto.Email))
+                .ReturnsAsync(existingUser);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _userServices.Create(dto, headers));
+
+            Assert.Equal("Duplicated user", exception.Message);
         }
 
         [Fact(DisplayName = "Create should assign teams when TeamIds are present")]
@@ -424,7 +441,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
-                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .Setup(repo => repo.FindByEmailAsync(dto.Email))
                 .ReturnsAsync((User?)null);
 
             _teamRepositoryMock
@@ -474,7 +491,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(userId);
 
             _userRepositoryMock
-                .Setup(repo => repo.FindByReferenceAsync(userId))
+                .Setup(repo => repo.FindByEmailAsync(dto.Email))
                 .ReturnsAsync((User?)null);
 
             _teamRepositoryMock

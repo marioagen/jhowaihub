@@ -116,7 +116,7 @@
                         <button v-if="userData.id" type="submit" class="btn btn-primary btn-sm">
                             {{ $t("labelEdit") }}
                         </button>
-                        <button v-else type="submit" class="btn btn-primary btn-sm">
+                        <button v-else type="submit" class="btn btn-primary btn-sm btn-save">
                             {{ $t("labelCreate") }}
                         </button>
                     </div>
@@ -226,6 +226,7 @@
                     .then(function (response) {
                         if (response && response.data && response.data === true) {
                             self.$refs.formRef.setFieldError("userEmail", self.$t("labelErrorEmailAlreadyExists"));
+
                         } else {
                             self.$refs.formRef.setFieldError("userEmail", "");
                         }
@@ -317,9 +318,20 @@
                     .then((response) => {
                         this.$emit("userCreated");
                         this.close();
+                        this.$notify({
+                            title: this.$t("users.title"),
+                            message: this.$t("users.saveSuccess"),
+                            variant: "success",
+                            icon: "CircleX",
+                        });
                     })
                     .catch((e) => {
-                        self.alertToast(self.$t("labelUserError"), "toast-warning");
+                        this.$notify({
+                            title: this.$t("users.title"),
+                            message: this.$t("users.saveError"),
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
                     });
             },
             resetForm() {

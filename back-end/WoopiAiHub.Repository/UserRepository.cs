@@ -153,7 +153,7 @@ namespace WoopiAiHub.Repository
             {
                 query = query.Where(u => u.Id != excludeUserId.Value);
             }
-            return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
+            return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail && u.IsActive == true);
         }
 
         /// <summary>

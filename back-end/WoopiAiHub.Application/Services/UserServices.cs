@@ -1,6 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System.Data.SqlTypes;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
@@ -52,21 +50,25 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new ArgumentException("Data cannot be empty");
             }
-            var userEnabledReference = await CreateUserMarketplace(userCreateDto.Email, Guid.Empty, headersDto);
 
-            if (userEnabledReference == Guid.Empty)
-                return false;
+            var existingUser = await _userRepository.FindByEmailAsync(userCreateDto.Email);
 
-            var existingUser = await _userRepository.FindByReferenceAsync(userEnabledReference);
-
-            if (existingUser != null)
+            if (existingUser != null && !existingUser.IsActive)
             {
-                return ReactivateUser(existingUser, userCreateDto);
+                return await ReactivateUser(existingUser, userCreateDto, headersDto);
             }
-            else 
-            { 
+            else if (existingUser != null && existingUser.IsActive)
+            {
+                throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
+            }
+            else
+            {
+                var userEnabledReference = await AssignLicensesMarketplace(userCreateDto.Email, Guid.Empty, headersDto);
+
+                if (userEnabledReference == Guid.Empty)
+                    return false;
                 return await CreateUser(userCreateDto, userEnabledReference);
-            }
+            }    
         }
 
         // <summary>
@@ -101,10 +103,32 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Update(UserUpdateDto userUpdateDto, HeadersDto headersDto)
         {
-           var marketplaceIdentifier = await CreateUserMarketplace(userUpdateDto.Email, userUpdateDto.Id, headersDto);
-            if (marketplaceIdentifier != Guid.Empty)
+            var existingUser = await _userRepository.FindByEmailAsync(userUpdateDto.Email);
+
+            if (existingUser != null && !existingUser.IsActive)
             {
-                return await UpdateUser(userUpdateDto);
+                var userCreateDto = new UserCreateDto
+                {
+                    Name = userUpdateDto.Name,
+                    Email = userUpdateDto.Email,
+                    Password = userUpdateDto.Password,
+                    TeamIds =  userUpdateDto.TeamIds,
+                    ProfileIds = userUpdateDto.ProfileIds,
+                };
+                return await ReactivateUser(existingUser, userCreateDto, headersDto);
+            }
+            else if (existingUser != null && existingUser.IsActive)
+            {
+                throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
+
+            }
+            else
+            {
+                var marketplaceIdentifier = await AssignLicensesMarketplace(userUpdateDto.Email, userUpdateDto.Id, headersDto);
+                if (marketplaceIdentifier != Guid.Empty)
+                {
+                    return await UpdateUser(userUpdateDto);
+                }
             }
 
             return false;
@@ -291,16 +315,24 @@ namespace WoopiAiHub.Application.Services
         /// <param name="user"></param>
         /// <param name="userCreateDto"></param>
         /// <returns></returns>
-        private bool ReactivateUser(User user,
-                                    UserCreateDto userCreateDto)
+        private async Task<bool> ReactivateUser(User user,
+                                                UserCreateDto userCreateDto,
+                                                HeadersDto headersDto)
         {
             user.Reactivate(userCreateDto.Name,
                             userCreateDto.Email);
 
-            SetSaltAndPassword(userCreateDto.Password, user, user.Salt);
 
-            _userRepository.Update(user);
+            if (!string.IsNullOrEmpty(userCreateDto.Password))
+            {
+                SetSaltAndPassword(userCreateDto.Password, user, user.Salt);
+            }
 
+            var marketplaceIdentifier = await AssignLicensesMarketplace(userCreateDto.Email, user.Id, headersDto);
+            if (marketplaceIdentifier != Guid.Empty)
+            {
+                _userRepository.Update(user);
+            }
             return true;
         }
 
@@ -329,10 +361,6 @@ namespace WoopiAiHub.Application.Services
                 AddProfiles(userUpdateDto.ProfileIds, user);
 
                 var updateResult = _userRepository.Update(user);
-                if (!updateResult)
-                {
-                    throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
-                }
                 return updateResult;
         }
 
@@ -343,9 +371,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <param name="headersDto"></param>
         /// <returns></returns>
-        private async Task<Guid> CreateUserMarketplace(string email,
-                                                       Guid id,
-                                                       HeadersDto headersDto)
+        private async Task<Guid> AssignLicensesMarketplace(string email,
+                                                           Guid id,
+                                                           HeadersDto headersDto)
         {
             var KeyAccess = _config.GetSection("KeyAccess").Get<string>()!;
             var requestAssignLicensesByHub = new RequestAssignLicensesByHub

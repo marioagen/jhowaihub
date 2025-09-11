@@ -12,5 +12,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
                           HeadersDto headersDto);
         UserPagedResultDto FindAllPaged(PagedDataDto pagedDataDto);
         Task<bool> IsEmailInUseAsync(UserEmailDto userEmailDto);
+
     }
 }
