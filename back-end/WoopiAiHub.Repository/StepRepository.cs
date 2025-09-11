@@ -46,6 +46,7 @@ namespace WoopiAiHub.Repository
                            .Include(s => s.Profile)
                            .Include(s => s.Status)
                            .Include(s => s.Cards)
+                           .Include(s => s.Workflow)
                            .FirstOrDefaultAsync(s => s.Id == id);
         }
 

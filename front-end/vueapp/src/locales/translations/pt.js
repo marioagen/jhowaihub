@@ -333,6 +333,9 @@
             analyze: "Analisar",
             consult: "Consultar",
         },
+        upload: {
+            warningTeamsNotListed: "O time não apareceu na lista? É porque ele ainda não tem um workflow associado a ele.",
+        }
     },
     questions: {
         title: "Perguntas",
@@ -451,6 +454,12 @@
             subtitle: "Modifique as etapas e configurações do workflow",
         },
     },
+    card:{
+        userAssigned: "Responsável",
+        userApplicant: "Solicitante",
+        assignBtn: "Atribuir",
+        unassignInfo: "Desatribuir documento"
+    }
 };
 
 export default portuguese;

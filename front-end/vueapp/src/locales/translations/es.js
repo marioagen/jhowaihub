@@ -339,6 +339,9 @@
             analyze: "Analizar",
             consult: "Consultar",
         },
+        upload: {
+            warningTeamsNotListed: "¿El equipo no apareció en la lista? Es porque aún no tiene un workflow asociado.",
+        }
     },
     questions: {
         title: "Preguntas",
@@ -462,6 +465,12 @@
         labelWorkflowBoard: "Tablero de procesamiento de documentos",
         labelWorkflowSubTitle: "Visualice el flujo de documentos a través de los pasos de procesamiento",
     },
+    card:{
+        userAssigned: "Responsable",
+        userApplicant: "Solicitante",
+        assignBtn: "Asignar",
+        unassignInfo: "Desasignar documento"
+    }
 };
 
 export default spanish;
