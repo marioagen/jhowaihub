@@ -215,16 +215,16 @@ namespace WoopiAiHub.UnitTests.Services
                 TeamIds = new List<int> { 1, 2 }
             };
             var headersDto = new HeadersDto { Tenant = "tenant" };
-
-            var user = new User(userId, "Antigo Nome", "antigo@email.com", true, DateTime.Now)
-            {
-                Teams = new List<Team>()
-            };
             var teams = new List<Team>
             {
                 new Team("Time 1", 1, DateTime.Now),
                 new Team("Time 2", 2, DateTime.Now)
             };
+            var user = new User(userId, "Antigo Nome", "antigo@email.com", false, DateTime.Now)
+            {
+                Teams = teams
+            };
+            
             var profiles = new List<Profile>
             {
                 new Profile("Profile 1", 1, DateTime.Now),
