@@ -319,16 +319,16 @@
                         this.$emit("userCreated");
                         this.close();
                         this.$notify({
-                            title: this.$t("users.title"),
-                            message: this.$t("users.saveSuccess"),
+                            title: "users.title",
+                            message: "users.saveSuccess",
                             variant: "success",
                             icon: "CircleX",
                         });
                     })
                     .catch((e) => {
                         this.$notify({
-                            title: this.$t("users.title"),
-                            message: this.$t("users.saveError"),
+                            title: "users.title",
+                            message: "users.saveError",
                             variant: "danger",
                             icon: "CircleX",
                         });
