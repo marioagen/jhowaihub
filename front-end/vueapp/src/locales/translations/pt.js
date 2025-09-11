@@ -459,7 +459,43 @@
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
         unassignInfo: "Desatribuir documento"
-    }
+    },
+    tools: {
+        index: "Ferramentas",
+        title: "Ferramentas",
+        subtitle: "Gerencie e configure suas ferramentas de processamento de documentos",
+        createBtn: "Nova Ferramenta",
+        editBtn: "Salvar alterações",
+        type: "Tipo",
+        entry: "Entrada",
+        output: "Saida",
+        quantityUsed: "Uso",
+        status: "Status",
+        created: "Criado em",
+        createSuccess: "Ferramenta criada com sucesso",
+        createError: "Erro ao criar Ferramenta",
+        editSuccess: "Ferramenta editada com sucesso",
+        editError: "Erro ao editar Ferramenta",
+        removeSuccess: "Ferramenta removida com sucesso",
+        removeError: "Erro ao remover Ferramenta",
+        form: {
+            name: "Nome da Ferramenta",
+            types: "Tipo da Ferramenta",
+            typesSelect: "Selecione tipo da Ferramenta",
+            entries: "Entrada (Input)",
+            entriesSelect: "Selecione o tipo de entrada",
+            output: "Saida (Output)",
+            outputSelect: "Selecione o tipo de saida",
+        },
+        formCreate: {
+            title: "Nova Ferramenta",
+            subtitle: "Crie uma nova ferramenta para processar documentos",
+        },
+        formEdit: {
+            title: "Editar Ferramenta",
+            subtitle: "Atualize as informações da ferramenta selecionada",
+        },
+    },
 };
 
 export default portuguese;
