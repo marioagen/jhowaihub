@@ -165,7 +165,17 @@
                             color: '#a259ff' 
                         },
                         labelKey: 'quizzes.title'
-                    }
+                    },
+                    {
+                        permission: 'Tools',
+                        activeKey: 'Tools',
+                        to: '/tools',
+                        icon: { 
+                            name: 'PocketKnife', 
+                            color: '#f59e0b'
+                        },
+                        labelKey: 'tools.title'
+                    },
                 ]
             };
         },
@@ -188,7 +198,6 @@
 </script>
 
 <style scoped>
-    /* Hover do botão colapsar */
     .collapse-toggle-container:hover,
     .collapse-toggle-container .btn.toggle-button:hover {
         background-color: #e1e9f8 !important;
@@ -196,18 +205,15 @@
         cursor: pointer;
     }
 
-    /* Hover: fundo azul clarinho e texto mantendo cor padrão */
     .btn-toggle-nav a:hover {
         color: #676879 !important;
         background-color: #e1e9f8 !important;
         cursor: pointer;
     }
 
-    /* Ativo: fundo azul clarinho e texto azul */
     .btn-toggle-nav a.active {
         background-color: #e1e9f8 !important;
         color: #007bff !important;
-        /* azul padrão do bootstrap, pode trocar */
         font-weight: 600;
         cursor: default;
     }
@@ -254,17 +260,13 @@
         padding-top: 10px;
         padding-bottom: 10px;
         padding-left: 4px;
-        /* mantém lateral apertadinha */
         padding-right: 4px;
         background: transparent;
         border: none;
         font-size: 12px;
-        /* se quiser manter a seta mais fina */
         color: #737477;
         width: 28px;
-        /* ajuste se quiser */
         height: 40px;
-        /* deixa a altura ser definida pelo padding */
     }
 
     .sidebar-horizontal-separator {
@@ -272,7 +274,6 @@
         height: 1px;
         background-color: #d0d4d9;
         margin: 0;
-        /* remove espaçamentos extras */
         padding: 0;
     }
 
