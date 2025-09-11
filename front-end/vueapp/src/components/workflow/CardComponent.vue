@@ -26,14 +26,14 @@
                 </div>
                 <div class="mb-2">
                     <LucideIcon icon="Calendar" :size="12" class="me-1" />
-                    <small>{{ dataCard.created }}</small>
+                    <small>{{ formatDate(dataCard.created) }}</small>
                 </div>
                 <hr>
                 <div class="mb-2 overflow-x">
                     <LucideIcon icon="User" size="12" class="me-1" />
                     <small class="user">{{ $t("card.userApplicant") }}: {{dataCard.owner}}</small>
                 </div>
-                <div v-if="dataCard.assignedUser" class="mb-2">
+                <div v-if="!isLastStep && dataCard.assignedUser" class="mb-2">
                     <LucideIcon icon="User" size="12" class="me-1" />
                     <small class="user">{{ $t("card.userApplicant") }}: {{dataCard.assignedUser.name}}</small>
                     <button type="button" @click.stop="unassignUser" class="btn btn-sm btn-unlink ms-1 px-1"  
@@ -48,36 +48,38 @@
                     <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
                         {{ dataStep.status.name }}
                     </div>
-                    <button v-if="!isLastStep && dataCard.assignedUser" class="btn btn-sm btn-primary float-end" @click.stop="advanceStep">
-                        <span>{{ verifyFirst }}</span>
-                        <LucideIcon icon="ChevronRight" :size="16" class="me-1" v-if="!isLoadingAnalysis" />
-                        <div class="spinner-grow text-light" role="status"  v-if="isLoadingAnalysis"></div>
-                    </button>
-                    <div v-else-if="!isLastStep && !dataCard.assignedUser">
-                        <div v-if="isAdmin"  class="btn-group">
-                            <button type="button" class="btn btn-sm  btn-primary assing-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" @click.stop="">
-                                <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
-                                <span>{{ $t("card.assignBtn") }}</span>
-                                <LucideIcon icon="ChevronRight" size="20" class="ml-2 icon-closed"/>
-                                <LucideIcon icon="ChevronDown" size="20" class="ml-2 icon-open"/>
-                            </button>
-                            <ul class="dropdown-menu p-2">
-                                <li v-if="users.length > 5" class="mb-1">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text p-1">
-                                            <LucideIcon icon="Search" :size="16" class="me-1" />
-                                        </span>
-                                        <input :id="`filter-user-${dataCard.id}`" v-model="userSearchText" type="text" name="filter" class="form-control" @input="searchUser" />
-                                    </div>
-                                </li>
-                                <li v-for="user in filteredUsers" :key="user.id" @click.stop="assignUser(user.id)"><span class="dropdown-item">{{user.name}}</span></li>
-                            </ul>
-                        </div>
-                        <button v-else type="button" class="btn btn-sm btn-primary assing-btn" @click.stop="assignUser(loggedUserId)">
-                            <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
-                            {{ $t("card.assignBtn") }} 
-                            <LucideIcon icon="NotebookPen" size="16" class="ml-2" />
+                    <div v-if="!isLastStep">
+                        <button v-if="!isFirstStep || dataCard.assignedUser" class="btn btn-sm btn-primary float-end" @click.stop="advanceStep">
+                            <span>{{ $t("labelAdvance") }}</span>
+                            <LucideIcon icon="ChevronRight" :size="16" class="me-1" v-if="!isLoadingAnalysis" />
+                            <div class="spinner-grow text-light" role="status"  v-if="isLoadingAnalysis"></div>
                         </button>
+                        <div v-else-if="!dataCard.assignedUser">
+                            <div v-if="isAdmin"  class="btn-group">
+                                <button type="button" class="btn btn-sm  btn-primary assing-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" @click.stop="">
+                                    <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
+                                    <span>{{ $t("card.assignBtn") }}</span>
+                                    <LucideIcon icon="ChevronRight" size="20" class="ml-2 icon-closed"/>
+                                    <LucideIcon icon="ChevronDown" size="20" class="ml-2 icon-open"/>
+                                </button>
+                                <ul class="dropdown-menu p-2">
+                                    <li v-if="users.length > 5" class="mb-1">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text p-1">
+                                                <LucideIcon icon="Search" :size="16" class="me-1" />
+                                            </span>
+                                            <input :id="`filter-user-${dataCard.id}`" v-model="userSearchText" type="text" name="filter" class="form-control" @input="searchUser" @click.stop=""/>
+                                        </div>
+                                    </li>
+                                    <li v-for="user in filteredUsers" :key="user.id" @click.stop="assignUser(user.id)"><span class="dropdown-item">{{user.name}}</span></li>
+                                </ul>
+                            </div>
+                            <button v-else type="button" class="btn btn-sm btn-primary assing-btn" @click.stop="assignUser(loggedUserId)">
+                                <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
+                                {{ $t("card.assignBtn") }} 
+                                <LucideIcon icon="NotebookPen" size="16" class="ml-2" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,6 +89,7 @@
 
 <script>
     import CardsServices from "@/services/cards/CardsServices";
+    import dates from "@/helpers/date";
 
     export default {
         name: "CardComponent",
@@ -235,15 +238,15 @@
             },
             setUsers(){
                 this.filteredUsers = this.users;
-            }
+            },
+            formatDate(date) {
+                return dates.formatDate(date);
+            },
         },
         mounted (){
             this.setUsers();
         },
         computed: {
-            verifyFirst() {
-                return this.isFirstStep == true ? this.$t("labelAnalyze") : this.$t("labelAdvance");
-            },
             showLoading() {
                 return this.dataCard.statusDocument === 2 || this.dataCard.statusDocument === 0 || this.dataCard.statusDocument === 4;
             },
