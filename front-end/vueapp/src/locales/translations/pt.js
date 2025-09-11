@@ -416,6 +416,11 @@
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
     unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
+    users: {
+        title: "Usuários",
+        saveSuccess: "Usuário salvo com sucesso",
+        saveError: "Erro ao salvar usuário",
+    },
     workflow: {
         index: "Workflow",
         title: "Board de Processamento de Documentos",

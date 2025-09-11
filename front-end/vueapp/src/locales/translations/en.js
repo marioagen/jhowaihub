@@ -419,6 +419,11 @@
         subtitle: "Manage system document types",
         createBtn: "Create type",
     },
+    users: {
+        title: "Users",
+        saveSuccess: "User saved successfully",
+        saveError: "Error while saving user",
+    },
     workflow: {
         index: "Workflow",
         title: "Document Processing Board",

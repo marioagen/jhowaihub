@@ -423,6 +423,11 @@
         subtitle: "Administre los tipos de documentos del sistema",
         createBtn: "Crear tipo",
     },
+    users: {
+        title: "Usuarios",
+        saveSuccess: "Usuario guardado exitosamente",
+        saveError: "Error al guardar usuario",
+    },
     workflow: {
         index: "Workflow",
         title: "Tablero de Procesamiento de Documentos",
