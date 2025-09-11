@@ -37,6 +37,34 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
+        /// Endpoint that receives the request to return tool types
+        /// </summary>
+        /// <param name="typeDocPagedDataDto"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Types")]
+        [SwaggerOperation("Endpoint that receives the request to return tool types")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult FindAllToolTypes()
+        {
+            return Ok();
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to return tool data
+        /// </summary>
+        /// <param name="typeDocPagedDataDto"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Data")]
+        [SwaggerOperation("Endpoint that receives the request to return tool data")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult FindAllToolData()
+        {
+            return Ok();
+        }
+
+        /// <summary>
         /// Endpoint that receives the request to create a tool in the database
         /// </summary>
         /// <param name="toolCreateDto"></param>
