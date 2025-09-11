@@ -37,6 +37,8 @@
                                 :isFirstStep="step.order === minOrder"
                                 :isLastStep="step.order === maxOrder"
                                 @reload="reloadList"
+                                label="labelAnalyze"
+                                :users="users"
                             />
                         </div>
                     </div>
@@ -57,6 +59,11 @@
             kanbanData: {
                 type: [Array, Object],
                 required: true,
+            },
+            users:{
+                type: Array,
+                required: true,
+                default: () => []
             },
             isEditor: {
                 type: Boolean,

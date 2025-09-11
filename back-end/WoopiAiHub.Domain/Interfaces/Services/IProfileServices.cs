@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.DTOs.Request;
 
 
 namespace WoopiAiHub.Domain.Interfaces.Services

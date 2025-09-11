@@ -71,10 +71,13 @@
                         </p>
                     </div>
                     <div class="row">
-                        <TransferListComponent 
+                        <div v-if="isLoadingQuestions" class="d-flex justify-content-center">
+                            <div class="spinner-border" role="status"></div>
+                        </div>
+                        <TransferListComponent
+                            v-else
                             v-model="form.questions"
                             :available="questionsList"
-                            :key="questionsList"
                             transferListTitle="questions.availableList"
                             transferListPlaceholder="questions.filters.input"
                         />    
@@ -123,6 +126,7 @@
         },
         data() {
             return {
+                isLoadingQuestions: true,
                 docTypesList: [],
                 questionsList: [],
                 form: {
@@ -148,6 +152,8 @@
                     });
             },
             getQuestions() {
+                this.isLoadingQuestions = true;
+                this.questionsList = [];
                 QuestionsService.getQuestionsList()
                     .then((response) => {
                         for (let i = 0; i < response.length; i++) {
@@ -157,6 +163,9 @@
                             };
                             this.questionsList.push(item);
                         }
+                    })
+                    .finally(() => {
+                        this.isLoadingQuestions = false;
                     });
             },
             setForm() {

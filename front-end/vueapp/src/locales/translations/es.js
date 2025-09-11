@@ -277,6 +277,18 @@
         hasInvalid: "Campos inválidos",
         oneStep: "Se requiere al menos un paso para guardar",
     },
+    filters: {
+        documentInput: "Buscar por documento, descripción o usuario, ...",
+        workflowInput: "Buscar por documento",
+        teamsSelect: {
+            all: "Todos los equipos",
+            none: "Seleccione un equipo",
+        },
+        assignment: {
+            currentUser: "Mis documentos",
+            allUsers: "Todos los usuarios",
+        }
+    },
     labelBackToListDocuments: "Volver a los documentos",
     pageTitleDocumentsForm: "Nuevo documento",
     pageSubtitleDocumentsForm: "Cargar nuevos documentos para su análisis",
@@ -327,6 +339,9 @@
             analyze: "Analizar",
             consult: "Consultar",
         },
+        upload: {
+            warningTeamsNotListed: "¿El equipo no apareció en la lista? Es porque aún no tiene un workflow asociado.",
+        }
     },
     questions: {
         title: "Preguntas",
@@ -422,6 +437,7 @@
         manage: "Gestionar workflow:",
         boardView: "Visualizando workflow:",
         steps: "Etapas del Workflow",
+        error: "Error al buscar workflows",
         addBtn: "Agregar Etapa",
         addBtnDescription: "Haz clic para crear una nueva etapa",
         createNewStep: "Nueva Etapa",
@@ -454,6 +470,12 @@
         labelWorkflowBoard: "Tablero de procesamiento de documentos",
         labelWorkflowSubTitle: "Visualice el flujo de documentos a través de los pasos de procesamiento",
     },
+    card:{
+        userAssigned: "Responsable",
+        userApplicant: "Solicitante",
+        assignBtn: "Asignar",
+        unassignInfo: "Desasignar documento"
+    }
 };
 
 export default spanish;

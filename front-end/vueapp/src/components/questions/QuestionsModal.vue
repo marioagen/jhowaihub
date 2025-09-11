@@ -83,8 +83,10 @@ export default {
             this.isLoading = true;
             QuestionsService.createQuestion(this.questionData.description)
                 .then((result) => {
-                    if (!result.error) { 
+                    if (!result.error) {
+                        this.resetData();
                         this.$emit("reload");
+                        this.close();
                         return this.$notify({
                             title: this.$t("questions.title"),
                             message: this.$t("questions.createSuccess"),

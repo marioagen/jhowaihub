@@ -12,8 +12,8 @@ export default {
                 }
             });
     },
-    getWorkflowByTeamId(teamId) {
-        return api.get(`/Workflow/Teams/${teamId}`)
+    getWorkflowByTeamId(teamId, filters) {
+        return api.get(`/Workflow/Teams/${teamId}`, { params: filters })
             .then(({ data }) => {
                 return data;
             })

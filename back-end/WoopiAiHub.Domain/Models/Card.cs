@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Google.Api;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -9,6 +10,9 @@ namespace WoopiAiHub.Domain.Models
 
         [Column("DocumentId", TypeName = "int")]
         public int DocumentId { get; private set; }
+
+        [Column("AssignedUserId", TypeName = "uniqueidentifier")]
+        public Guid? AssignedUserId { get; private set; }
 
         [Column("Name", TypeName = "varchar(255)")]
         public string Name { get; private set; } = string.Empty;
@@ -22,8 +26,9 @@ namespace WoopiAiHub.Domain.Models
         public virtual Step? Step { get; set; }
         public virtual Document? Document { get; set; }
         public virtual Status? Status { get; set; }
+        public virtual User? AssignedUser { get; set; }
 
-        public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId, bool enable)
+        public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId, bool enable, Guid? assignedUserId)
             : base(id, created)
         {
             StepId = stepId;
@@ -31,6 +36,7 @@ namespace WoopiAiHub.Domain.Models
             Name = name;
             StatusId = statusId;
             Enable = enable;
+            AssignedUserId = assignedUserId;
         }
 
         /// <summary>
@@ -42,6 +48,11 @@ namespace WoopiAiHub.Domain.Models
         {
             StepId = stepId;
             StatusId = statusId;
+        }
+
+        public void UpdateAssignedUser(Guid? userId)
+        {
+            AssignedUserId = userId;
         }
     }
 }
