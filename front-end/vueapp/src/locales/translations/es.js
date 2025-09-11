@@ -486,8 +486,6 @@
         type: "Tipo",
         entry: "Entrada",
         output: "Salida",
-        quantityUsed: "Uso",
-        status: "Estado",
         created: "Creado en",
         createSuccess: "Herramienta creada con éxito",
         createError: "Error al crear la herramienta",

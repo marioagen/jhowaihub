@@ -482,8 +482,6 @@
         type: "Type",
         entry: "Input",
         output: "Output",
-        quantityUsed: "Usage",
-        status: "Status",
         created: "Created on",
         createSuccess: "Tool created successfully",
         createError: "Error creating tool",

@@ -475,8 +475,6 @@
         type: "Tipo",
         entry: "Entrada",
         output: "Saida",
-        quantityUsed: "Uso",
-        status: "Status",
         created: "Criado em",
         createSuccess: "Ferramenta criada com sucesso",
         createError: "Erro ao criar Ferramenta",
