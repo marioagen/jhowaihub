@@ -1,25 +1,24 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class ToolController : ControllerBase
     {
-        private readonly ILogger<TypeDocController> _logger;
-        //private readonly IToolServices _toolServices;
+        private readonly IToolServices _toolServices;
 
-        public ToolController(ILogger<TypeDocController> logger)
+        public ToolController(IToolServices toolServices)
         {
-            _logger = logger;
-            //IToolServices toolServices
-            //_toolServices = toolServices;
+            _toolServices = toolServices;
         }
 
         /// <summary>
@@ -27,41 +26,26 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="typeDocPagedDataDto"></param>
         /// <returns></returns>
-        [HttpGet]
-        [Route("Paged")]
+        [HttpGet("Paged")]
         [SwaggerOperation("Endpoint that receives the request to return all tools paginated")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult FindAllPaged()
+        public IActionResult FindAllPaged(PagedDataDto pagedDataDto)
         {
-            return Ok();
+            var result = _toolServices.FindAllPaged(pagedDataDto);
+            return Ok(result);
         }
 
         /// <summary>
-        /// Endpoint that receives the request to return tool types
+        /// Endpoint that receives the request to return all tools
         /// </summary>
-        /// <param name="typeDocPagedDataDto"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("Types")]
         [SwaggerOperation("Endpoint that receives the request to return tool types")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult FindAllToolTypes()
+        [ProducesResponseType(typeof(PagedResponseDto<ToolDto>),StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindAll()
         {
-            return Ok();
-        }
-
-        /// <summary>
-        /// Endpoint that receives the request to return tool data
-        /// </summary>
-        /// <param name="typeDocPagedDataDto"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Data")]
-        [SwaggerOperation("Endpoint that receives the request to return tool data")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult FindAllToolData()
-        {
-            return Ok();
+            var result = await _toolServices.FindAllAsync();
+            return Ok(result);
         }
 
         /// <summary>
@@ -71,24 +55,25 @@ namespace WoopiAiHub.Api.Controllers
         /// <returns></returns>
         [HttpPost]
         [SwaggerOperation("Endpoint that receives the request to create a tool in the database")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Create()
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Create(ToolCreateDto toolCreateDto)
         {
-            return Ok();
+            var result = await _toolServices.CreateAsync(toolCreateDto);
+            return Ok(result);
         }
 
         /// <summary>
         /// EndPoint that update a tool
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="name"></param>
+        /// /// <param name="toolUpdateDto"></param>
         /// <returns></returns>
         [HttpPut]
         [SwaggerOperation("EndPoint that update a tool")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Update()
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Update(ToolUpdateDto toolUpdateDto)
         {
-            return Ok();
+            var result = await _toolServices.UpdateAsync(toolUpdateDto);
+            return Ok(result);
         }
 
         /// <summary>
@@ -96,12 +81,13 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        [HttpDelete("Delete")]
+        [HttpDelete]
         [SwaggerOperation("EndPoint that delete tools by id")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult DeleteByIds()
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public IActionResult DeleteByIds(List<int> ids)
         {
-            return Ok();
+            var result = _toolServices.DeleteAsync(ids);
+            return Ok(result);
         }
     }
 }
