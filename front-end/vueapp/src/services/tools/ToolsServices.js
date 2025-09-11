@@ -3,7 +3,7 @@ import api from "@/services/api";
 export default {
     getTools() {
         return api
-            .get("/Tool/Paged/", { params: params })
+            .get("/Tool/Paged/")
             .then(({ data }) => {
                 return true;
                 // return {
