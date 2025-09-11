@@ -22,30 +22,6 @@ export default {
                 }
             });
     },
-    getToolTypes() {
-        return api
-            .get("/Tool/Types")
-            .then(() => {
-                return true;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
-    },
-    getToollData() {
-        return api
-            .get("/Tool/Data")
-            .then(() => {
-                return true;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
-    },
     createTool() {
         return api
             .post("/Tool")
