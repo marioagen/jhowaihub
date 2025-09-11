@@ -277,9 +277,14 @@
     filters: {
         documentInput: "Buscar por documento, descrição ou usuário, ...",
         workflowInput: "Buscar por documento",
+        toolInput: "Buscar por name da ferramenta",
         teamsSelect: {
             all: "Todos os times",
             none: "Selecione um time",
+        },
+        typesSelect: {
+            all: "Todos os tipos",
+            none: "Selecione um tipo",
         },
         assignment: {
             currentUser: "Meus documentos",
@@ -464,6 +469,7 @@
         index: "Ferramentas",
         title: "Ferramentas",
         subtitle: "Gerencie e configure suas ferramentas de processamento de documentos",
+        notFound: "Não há ferramentas cadastradas",
         createBtn: "Nova Ferramenta",
         editBtn: "Salvar alterações",
         type: "Tipo",
@@ -478,6 +484,7 @@
         editError: "Erro ao editar Ferramenta",
         removeSuccess: "Ferramenta removida com sucesso",
         removeError: "Erro ao remover Ferramenta",
+        removeTitle: "Você está prestes a deletar uma ferramenta do sistema",
         form: {
             name: "Nome da Ferramenta",
             types: "Tipo da Ferramenta",
