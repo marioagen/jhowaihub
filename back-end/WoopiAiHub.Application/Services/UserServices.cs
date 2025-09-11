@@ -120,7 +120,6 @@ namespace WoopiAiHub.Application.Services
             else if (existingUser != null && existingUser.IsActive)
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
-
             }
             else
             {

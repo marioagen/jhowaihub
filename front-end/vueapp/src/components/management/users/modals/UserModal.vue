@@ -116,7 +116,7 @@
                         <button v-if="userData.id" type="submit" class="btn btn-primary btn-sm">
                             {{ $t("labelEdit") }}
                         </button>
-                        <button v-else type="submit" class="btn btn-primary btn-sm btn-save">
+                        <button v-else type="submit" class="btn btn-primary btn-sm">
                             {{ $t("labelCreate") }}
                         </button>
                     </div>
