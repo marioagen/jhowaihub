@@ -30,11 +30,11 @@
                 <option value="" disabled>{{ $t("filters.typesSelect.none") }}</option>
                 <option :value="0">{{ $t("filters.typesSelect.all") }}</option>
                 <option 
-                    v-for="team in toolsTypesList"
-                    :key="team.id" 
-                    :value="team.id"
+                    v-for="toolType in toolsTypesList"
+                    :key="toolType.id" 
+                    :value="toolType.id"
                 >
-                    {{ team.name }}
+                    {{ toolType.name }}
                 </option>
             </select>
         </div>
@@ -42,12 +42,12 @@
 </template>
 
 <script>
-    import TeamsService from '@/services/teams/TeamsService';
+    import ToolsService from '@/services/tools/ToolsServices';
     export default {
         name: "DocumentFilters",
         data() {
             return {
-                teamsList: [],
+                toolsTypesList: [],
                 filters: {
                     input: "",
                     toolTypeId: "",
@@ -56,9 +56,9 @@
         },
         methods: {
             getTeams() {
-                TeamsService.getTeamsByUser()
+                ToolsService.getToolTypes()
                     .then((response) => {
-                        this.teamsList = response;
+                        this.toolsTypesList = response;
                     });
             },
             filterData() {
