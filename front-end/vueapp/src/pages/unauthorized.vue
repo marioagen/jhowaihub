@@ -5,10 +5,7 @@
                 <div class="col-auto col-fix">
                     <form @submit="returnToPreviousPage" style="text-align: center">
                         <img src="../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px" width="160"
-                            height="80" v-if="showLogoDarkMode" />
-
-                        <img src="../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px" width="160"
-                            height="61" v-else />
+                            height="61" />
 
                         <h5 class="fw-bold">{{ $t("unauthorized.title") }}</h5>
                         <button class="btn btn-outline-primary" @click="returnToPreviousPage">

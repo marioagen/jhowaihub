@@ -1,7 +1,20 @@
 import api from "@/services/api";
+import store from "@/store";
 
 export default {
     getDocuments(filters) {
+        if (!store.state.userProfile.keyMongoAccess) {
+            return Promise.resolve({
+                content: [],
+                pagination: {
+                    currentPage: 1,
+                    totalPages: 100,
+                    itemsPerPage: 10,
+                    totalItems: 2000,
+                }
+            });
+        }
+        
         return api.get("/Document", { params: filters })
             .then(({ data }) => {
                 return {
@@ -9,7 +22,7 @@ export default {
                     pagination: {
                         currentPage: data.currentPage,
                         totalPages: data.pageCount,
-                        rowCount: data.rowCount,
+                        itemsPerPage: 10,
                         totalItems: data.rowCount,
                     },
                 }

@@ -1,4 +1,4 @@
-﻿import "@/assets/css/global.css";
+import "@/assets/css/global.css";
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
@@ -19,6 +19,9 @@ import '@/validators/validationRules';
 import "@/assets/css/bootstrap-5.0.2/css/bootstrap.min.css";
 import "@/assets/webfont/fontawesome-5.15.4/css/all.min.css";
 import '@vueform/multiselect/themes/default.css'
+
+localStorage.removeItem("theme");
+document.documentElement.className = "css-theme-light";
 
 
 const app = createApp(App);
