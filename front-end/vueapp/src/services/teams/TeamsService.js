@@ -44,12 +44,13 @@ export default {
     deleteTeamById(teamId) {
         return api
             .delete("/Team/DeleteByIds", { data: [teamId] })
-            .then(() => {
-                return true;
+            .then(({ data }) => {
+                return data;
             })
-            .catch(function (e) {
-                console.log(e);
-                return false;
+            .catch((error) => {
+                return {
+                    error: error,
+                }
             });
     },
 };
