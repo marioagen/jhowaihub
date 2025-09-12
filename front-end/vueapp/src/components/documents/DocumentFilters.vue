@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-10">
+       <div class="col">
             <div class="input-group">
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
@@ -21,7 +21,7 @@
                 </span>
             </div>
         </div>
-        <div class="col-2">
+        <div class="col-auto">
             <select
                 v-model="filters.teamId"
                 class="form-select form-select-sm w-auto"
@@ -54,28 +54,41 @@
 </template>
 
 <script>
-    import TeamsService from '@/services/teams/TeamsService';
     export default {
         name: "DocumentFilters",
+        props: {
+            teamsList: { type: Array, required: true } // prop vinda do pai
+        },
         data() {
             return {
-                teamsList: [],
                 filters: {
                     input: "",
-                    teamId: 0,
+                    teamId: "",
+                    teams: [],
                     isAllUsers: false,
                 }
             };
         },
+        watch: {
+            teamsList: {
+                immediate: true, 
+                handler(newVal) {
+                    if (newVal.length) {
+                        this.filters.teams = this.filters.teamId
+                            ? [this.filters.teamId]
+                            : newVal.map(t => t.id);
+                            
+                        this.$emit("filter", { ...this.filters });
+                    }
+                }
+            }
+        },
         methods: {
-            getTeams() {
-                TeamsService.getTeamsByUser()
-                    .then((response) => {
-                        this.teamsList = response;
-                    });
-            },
             filterData() {
-                this.$emit("filter", this.filters)
+                this.filters.teams = this.filters.teamId
+                    ? [this.filters.teamId]                
+                    : this.teamsList.map(t => t.id);      
+                this.$emit("filter", { ...this.filters });
             },
             filterUsers() {
                 this.filters.isAllUsers = !this.filters.isAllUsers;
@@ -90,9 +103,6 @@
             showCleanBtn() {
                 return this.filters.input !== "";
             },
-        },
-        created() {
-            this.getTeams();
         }
     };
 </script>

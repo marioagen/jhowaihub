@@ -43,6 +43,7 @@ namespace WoopiAiHub.Repository
             {
                 query = query.Where(i =>
                              EF.Functions.Like(i.Name, $"%{search}%") ||
+                             EF.Functions.Like(i.Description, $"%{search}%") ||
                              i.Id.ToString().Contains(search) ||
                              i.Teams.Any(t => EF.Functions.Like(t.Name, $"%{search}%")));
             }

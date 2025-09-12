@@ -143,13 +143,22 @@
                     page: this.table.pagination.currentPage,
                     isAscending: this.filters.isAsc,
                     colType: this.colType,
-                    teamId: this.filters.teamId,
+                    teamIds: this.filters.teams,
                 };
-
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
-                        this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        if (response?.error !== undefined) {
+                            this.$notify({
+                                title: 'Error',
+                                message: "response.error",
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        else{
+                            this.table.data = response.content;
+                            this.table.pagination = response.pagination;
+                        }
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -209,12 +218,12 @@
                 });
             },
             changePage(page) {
-                this.getDocuments({ search: "", page: page, type: null });
+                this.table.pagination.currentPage = page;
+                this.getDocuments();
             },
         },
         created() {
             this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getDocuments();
         },
         computed: {
             showMultiDelete() {
