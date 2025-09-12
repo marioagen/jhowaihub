@@ -7,6 +7,8 @@ import i18n from "./locales/i18n";
 import VueGtag from "vue-gtag";
 import tooltip from "@/directives/bootstrapTooltip";
 import "@/validators/validationRules";
+import FloatingVue from 'floating-vue'
+import 'floating-vue/dist/style.css'
 
 import LucideIcon from "@/components/global/LucideIcon.vue";
 import NotificationComponent from "@/components/global/NotificationComponent.vue";
@@ -23,6 +25,7 @@ document.documentElement.className = "css-theme-light";
 
 
 const app = createApp(App);
+app.use(FloatingVue)
 app.use(router);
 app.use(store);
 app.use(i18n);

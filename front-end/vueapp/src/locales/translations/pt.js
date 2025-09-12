@@ -273,6 +273,18 @@
         hasInvalid: "Campos inválidos",
         oneStep: "Ao menos um step é necessário para salvar",
     },
+    filters: {
+        documentInput: "Buscar por documento, descrição ou usuário, ...",
+        workflowInput: "Buscar por documento",
+        teamsSelect: {
+            all: "Todos os times",
+            none: "Selecione um time",
+        },
+        assignment: {
+            currentUser: "Meus documentos",
+            allUsers: "Todos os usuários",
+        }
+    },
     labelBackToListDocuments: "Voltar para documentos",
     pageTitleDocumentsForm: "Novo Documento",
     pageSubtitleDocumentsForm: "Faça upload de novos documentos para análise",
@@ -320,6 +332,9 @@
             analyze: "Analisar",
             consult: "Consultar",
         },
+        upload: {
+            warningTeamsNotListed: "O time não apareceu na lista? É porque ele ainda não tem um workflow associado a ele.",
+        }
     },
     questions: {
         title: "Perguntas",
@@ -409,6 +424,7 @@
         manage: "Gerenciar workflow:",
         boardView: "Visualizando workflow:",
         steps: "Etapas do Workflow",
+        error: "Erro ao buscar workflows",
         addBtn: "Adicionar Etapa",
         addBtnDescription: "Clique para criar uma nova etapa",
         createNewStep: "Nova etapa",
@@ -437,6 +453,12 @@
             subtitle: "Modifique as etapas e configurações do workflow",
         },
     },
+    card:{
+        userAssigned: "Responsável",
+        userApplicant: "Solicitante",
+        assignBtn: "Atribuir",
+        unassignInfo: "Desatribuir documento"
+    }
 };
 
 export default portuguese;

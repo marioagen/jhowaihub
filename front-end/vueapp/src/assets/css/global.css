@@ -131,6 +131,7 @@ body {
     --text-sm--line-height: calc(1.25 / 0.875);
     --skeleton-base: #e0e0e0;
     --skeleton-highlight: #f5f5f5;
+    --btn-primary-dark-bg: #123263;
 }
 
 html {

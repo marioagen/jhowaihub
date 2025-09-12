@@ -272,6 +272,18 @@
         hasInvalid: "Invalid fields",
         oneStep: "At least one step is required to save",
     },
+    filters: {
+        documentInput: "Search by document, description or user, ...",
+        workflowInput: "Search by document",
+        teamsSelect: {
+            all: "All teams",
+            none: "Select a team",
+        },
+        assignment: {
+            currentUser: "My documents",
+            allUsers: "All users",
+        }
+    },
     labelBackToListDocuments: "Back to documents",
     pageTitleDocumentsForm: "New Document",
     pageSubtitleDocumentsForm: "Upload new documents for analysis",
@@ -322,6 +334,9 @@
             analyze: "Analyze",
             consult: "Consult",
         },
+        upload: {
+            warningTeamsNotListed: "The team did not appear in the list? It's because it doesn't have a workflow associated with it yet.",
+        }
     },
     questions: {
         title: "Questions",
@@ -412,6 +427,7 @@
         manage: "Manage workflow:",
         boardView: "Viewing workflow:",
         steps: "Workflow Steps",
+        error: "Error fetching workflows",
         addBtn: "Add Step",
         addBtnDescription: "Click to create a new step",
         createNewStep: "New Step",
@@ -444,6 +460,12 @@
         labelWorkflowBoard: "Document Processing Board",
         labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
     },
+    card:{
+        userAssigned: "Assigned",
+        userApplicant: "Applicant",
+        assignBtn: "Assign",
+        unassignInfo: "Unassign document"
+    }
 };
 
 export default english;
