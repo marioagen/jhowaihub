@@ -48,7 +48,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="isWorkflowSelected && isLoaded">
+                <div v-if="isWorkflowSelected && isLoaded && isLoadedUsers">
                     <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
@@ -111,6 +111,7 @@
                 kanbanCards: [],
                 numDocs: 0,
                 isLoaded: false,
+                isLoadedUsers: false,
                 signalrEventStatusChanged: "StatusChanged",
                 filters: {
                     input: "",
@@ -131,6 +132,7 @@
         methods: {
             getWorkflowByUser() {
                 this.isLoaded = false;
+                this.isLoadedUsers = false;
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
@@ -178,6 +180,7 @@
             },
             selectOption(workflow) {
                 this.isLoaded = false;
+                this.isLoadedUsers = false;
                 this.selectedOption = {
                     id: workflow.id,
                     name: workflow.name,
@@ -205,13 +208,13 @@
                 this.$router.push({ name: "DocumentsUpload" });
             },
             getUsersByTeamId(teamId) {
-                this.isLoaded = false;
+                this.isLoadedUsers = false;
                 UserService.getUsersByTeamId(teamId)
-                    .then((response) => {                        
+                    .then((response) => {                 
                         this.users = response;
                     })
                     .finally(() => {
-                        this.isLoaded = true;
+                        this.isLoadedUsers = true;
                     });                  
             }
         },
