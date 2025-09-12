@@ -16,9 +16,9 @@ namespace WoopiAiHub.UnitTests.Fixture
             {
                 Id = _faker.Random.Int(1, 1000),
                 Name = _faker.Name.FullName(),
-                InputData = ToolDataFixture.FindValidToolDataDto(),
-                OutputData = ToolDataFixture.FindValidToolDataDto(),
-                ToolType = ToolTypeFixture.FindValidToolTypeDto(),
+                InputData = _faker.Name.FullName(),
+                OutputData = _faker.Name.FullName(),
+                ToolType = _faker.Name.FullName(),
             };
         }
 

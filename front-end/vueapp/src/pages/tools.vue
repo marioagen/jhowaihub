@@ -65,7 +65,7 @@
                 this.$refs.ToolsModal.open();
             },
             reloadData() {
-                this.$refs.ToolsTable.getDocuments();
+                this.$refs.ToolsTable.getTools();
             },
             filterData(filters) {
                 this.$refs.ToolsTable.filters = filters;

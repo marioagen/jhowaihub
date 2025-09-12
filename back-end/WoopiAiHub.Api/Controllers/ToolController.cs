@@ -29,7 +29,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("Paged")]
         [SwaggerOperation("Endpoint that receives the request to return all tools paginated")]
         [ProducesResponseType(typeof(PagedResponseDto<ToolDto>), StatusCodes.Status200OK)]
-        public IActionResult FindAllPaged(PagedDataDto pagedDataDto)
+        public IActionResult FindAllPaged([FromQuery] PagedDataDto pagedDataDto)
         {
             var result = _toolServices.FindAllPaged(pagedDataDto);
             return Ok(result);
@@ -56,7 +56,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPost]
         [SwaggerOperation("Endpoint that receives the request to create a tool in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Create(ToolCreateDto toolCreateDto)
+        public async Task<IActionResult> Create([FromBody] ToolCreateDto toolCreateDto)
         {
             var result = await _toolServices.CreateAsync(toolCreateDto);
             return Ok(result);
@@ -70,7 +70,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut]
         [SwaggerOperation("EndPoint that update a tool")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Update(ToolUpdateDto toolUpdateDto)
+        public async Task<IActionResult> Update([FromBody] ToolUpdateDto toolUpdateDto)
         {
             var result = await _toolServices.UpdateAsync(toolUpdateDto);
             return Ok(result);

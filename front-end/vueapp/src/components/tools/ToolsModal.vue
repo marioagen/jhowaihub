@@ -25,7 +25,7 @@
                         >
                             <option value="">{{ $t("tools.form.typesSelect") }}</option>
                             <option 
-                                v-for="(item, index) in entriesList" 
+                                v-for="(item, index) in typesList" 
                                 :key="index"
                                 :value="item.id" 
                             >
@@ -44,7 +44,7 @@
                         >
                             <option value="">{{ $t("tools.form.entriesSelect") }}</option>
                             <option 
-                                v-for="(item, index) in entriesList" 
+                                v-for="(item, index) in inputsList" 
                                 :key="index"
                                 :value="item.id" 
                             >
@@ -89,6 +89,8 @@
 <script>
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import ToolsService from "@/services/tools/ToolsServices";
+    import ToolsTypesService from '@/services/tools/ToolsTypesService';
+    import ToolsDataService from '@/services/tools/ToolsDataService';
 
     export default {
         components: {
@@ -104,7 +106,7 @@
         },
         data: () => ({
             typesList: [],
-            entriesList: [],
+            inputsList: [],
             outputsList: [],
             isLoading: false,
             toolsData: {
@@ -152,9 +154,15 @@
             },
             createTool() {
                 this.isLoading = true;
-                ToolsService.createTool(this.toolsData.name)
+                let params = {
+                    name: this.toolsData.name,
+                    toolTypeId: this.toolsData.toolTypeId,
+                    inputDataId: this.toolsData.inputDataId,
+                    outputDataId: this.toolsData.outputDataId,
+                };
+                ToolsService.createTool(params)
                     .then((result) => {
-                        if (result.success) {
+                        if (result) {
                             this.$emit("reload");
                             return this.$notify({
                                 title: "tools.index",
@@ -163,7 +171,8 @@
                                 icon: "CircleCheckBig",
                             });
                         }
-                        
+                    })
+                    .catch(() => {
                         this.$notify({
                             title: "tools.index",
                             message: "tools.createError",
@@ -175,11 +184,24 @@
                         this.isLoading = false;
                     });
             },
+            getToolTypes() {
+                ToolsTypesService.getToolTypes()
+                    .then((response) => {
+                        this.typesList = response;
+                    });
+            },
+            getToolDatas() {
+                ToolsDataService.getToollData()
+                    .then((response) => {
+                        this.inputsList = response;
+                        this.outputsList = response;
+                    });
+            },
             editTool() {
                 this.isLoading = true;
                 ToolsService.editTool(this.toolsData)
-                    .then((result) => {
-                        if (result.success) {
+                    .then((result) => {                        
+                        if (result) {
                             this.$emit("reload");
                             return this.$notify({
                                 title: "tools.index",
@@ -188,7 +210,8 @@
                                 icon: "CircleCheckBig",
                             });
                         }
-
+                    })
+                    .catch(() => {
                         this.$notify({
                             title: "tools.index",
                             message: "tools.editError",
@@ -201,5 +224,9 @@
                     });
             },
         },
+        created() {
+            this.getToolTypes();
+            this.getToolDatas();
+        }
     };
 </script>

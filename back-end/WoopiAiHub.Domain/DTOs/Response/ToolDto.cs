@@ -4,8 +4,8 @@
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public ToolTypeDto ToolType { get; set; }
-        public ToolDataDto InputData { get; set; }
-        public ToolDataDto OutputData { get; set; }
+        public string ToolType { get; set; } = string.Empty;
+        public string InputData { get; set; } = string.Empty;
+        public string OutputData { get; set; } = string.Empty;
     }
 }

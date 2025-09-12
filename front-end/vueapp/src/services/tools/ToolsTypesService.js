@@ -4,8 +4,8 @@ export default {
     getToolTypes() {
         return api
             .get("/ToolType")
-            .then(() => {
-                return true;
+            .then((response) => {
+                return response.data;
             })
             .catch((error) => {
                 return {

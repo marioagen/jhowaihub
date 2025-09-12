@@ -1,20 +1,19 @@
 import api from "@/services/api";
 
 export default {
-    getTools() {
+    getTools(params) {
         return api
-            .get("/Tool/Paged/")
+            .get("/Tool/Paged/", { params: params })
             .then(({ data }) => {
-                return true;
-                // return {
-                //     content: data.content,
-                //     pagination: {
-                //         currentPage: data.currentPage,
-                //         totalPages: data.pageCount,
-                //         rowCount: data.rowCount,
-                //         totalItems: data.rowCount,
-                //     },
-                // };
+                return {
+                    content: data.items,
+                    pagination: {
+                        currentPage: data.currentPage,
+                        totalPages: data.totalPages,
+                        rowCount: data.totalCount,
+                        totalItems: data.totalCount,
+                    },
+                };
             })
             .catch((error) => {
                 return {
@@ -22,9 +21,9 @@ export default {
                 }
             });
     },
-    createTool() {
+    createTool(params) {
         return api
-            .post("/Tool")
+            .post("/Tool", params)
             .then(() => {
                 return true;
             })

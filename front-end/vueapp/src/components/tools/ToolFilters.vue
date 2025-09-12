@@ -42,7 +42,8 @@
 </template>
 
 <script>
-    import ToolsService from '@/services/tools/ToolsServices';
+    import ToolsTypesService from '@/services/tools/ToolsTypesService';
+
     export default {
         name: "DocumentFilters",
         data() {
@@ -55,8 +56,8 @@
             };
         },
         methods: {
-            getTeams() {
-                ToolsService.getToolTypes()
+            getToolTypes() {
+                ToolsTypesService.getToolTypes()
                     .then((response) => {
                         this.toolsTypesList = response;
                     });
@@ -78,7 +79,7 @@
             },
         },
         created() {
-            this.getTeams();
+            this.getToolTypes();
         }
     };
 </script>

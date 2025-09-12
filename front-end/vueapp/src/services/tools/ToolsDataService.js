@@ -4,8 +4,8 @@ export default {
     getToollData() {
         return api
             .get("/ToolData")
-            .then(() => {
-                return true;
+            .then((response) => {
+                return response.data;
             })
             .catch((error) => {
                 return {

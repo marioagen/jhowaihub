@@ -47,7 +47,7 @@
     />
     <ConfirmModal
         id="deleteConfirm"
-        title="tool.removeTitle"
+        title="tools.removeTitle"
         message="labelThisActionCannotBeUndone"
         cancelText="labelCancel"
         confirmText="labelConfirm"
@@ -78,9 +78,9 @@
                 columns: [
                     { key: "id", label: "id" },
                     { key: "name", label: "labelName" },
-                    { key: "type", label: "tools.type" },
-                    { key: "inputs", label: "tools.entry" },
-                    { key: "output", label: "tools.output" },
+                    { key: "toolType", label: "tools.type" },
+                    { key: "inputData", label: "tools.entry" },
+                    { key: "outputData", label: "tools.output" },
                     { key: "actions", label: "labelAction" },
                 ],
                 data: [],
