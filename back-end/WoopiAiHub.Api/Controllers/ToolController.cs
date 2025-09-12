@@ -24,11 +24,11 @@ namespace WoopiAiHub.Api.Controllers
         /// <summary>
         /// Endpoint that receives the request to return all tools paginated
         /// </summary>
-        /// <param name="typeDocPagedDataDto"></param>
+        /// <param name="pagedDataDto"></param>
         /// <returns></returns>
         [HttpGet("Paged")]
         [SwaggerOperation("Endpoint that receives the request to return all tools paginated")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedResponseDto<ToolDto>), StatusCodes.Status200OK)]
         public IActionResult FindAllPaged(PagedDataDto pagedDataDto)
         {
             var result = _toolServices.FindAllPaged(pagedDataDto);
@@ -41,7 +41,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [SwaggerOperation("Endpoint that receives the request to return tool types")]
-        [ProducesResponseType(typeof(PagedResponseDto<ToolDto>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<ToolDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindAll()
         {
             var result = await _toolServices.FindAllAsync();

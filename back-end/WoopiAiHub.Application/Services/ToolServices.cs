@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Application.Utils;
+﻿using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -145,8 +146,8 @@ namespace WoopiAiHub.Application.Services
 
             if (!string.IsNullOrEmpty(pagedDataDto.Search))
             {
-                totalList = totalList.Where(i => i.Name.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
-                                                 i.Id.ToString().Contains(pagedDataDto.Search));
+                totalList = totalList.Where(i => EF.Functions.Like(i.Name, $"%{pagedDataDto.Search}%") ||
+                                                 EF.Functions.Like(i.Id.ToString(), $"%{pagedDataDto.Search}%"));
             }
 
             var totalListCount = totalList.Count();

@@ -8,11 +8,13 @@ namespace WoopiAiHub.Repository.Migrations
     /// <inheritdoc />
     public partial class ToolsTables : Migration
     {
+        private const string ToolDatasTableName = "ToolDatas";
+        private const string ToolsTableName = "Tools";
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ToolDatas",
+                name: ToolDatasTableName,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -42,7 +44,7 @@ namespace WoopiAiHub.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tools",
+                name: ToolsTableName,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -60,13 +62,13 @@ namespace WoopiAiHub.Repository.Migrations
                     table.ForeignKey(
                         name: "FK_Tools_ToolDatas_InputDataId",
                         column: x => x.InputDataId,
-                        principalTable: "ToolDatas",
+                        principalTable: ToolDatasTableName,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Tools_ToolDatas_OutputDataId",
                         column: x => x.OutputDataId,
-                        principalTable: "ToolDatas",
+                        principalTable: ToolDatasTableName,
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -79,17 +81,17 @@ namespace WoopiAiHub.Repository.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tools_InputDataId",
-                table: "Tools",
+                table: ToolsTableName,
                 column: "InputDataId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tools_OutputDataId",
-                table: "Tools",
+                table: ToolsTableName,
                 column: "OutputDataId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tools_ToolTypeId",
-                table: "Tools",
+                table: ToolsTableName,
                 column: "ToolTypeId");
         }
 
@@ -97,10 +99,10 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Tools");
+                name: ToolsTableName);
 
             migrationBuilder.DropTable(
-                name: "ToolDatas");
+                name: ToolDatasTableName);
 
             migrationBuilder.DropTable(
                 name: "ToolTypes");

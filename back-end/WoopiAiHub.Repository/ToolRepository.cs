@@ -47,7 +47,7 @@ namespace WoopiAiHub.Repository
         {
             var tools = _context.Tools.Where(a => ids.Contains(a.Id));
 
-            if (tools.Any())
+            if (await tools.AnyAsync())
             {
                 _context.Tools.RemoveRange(tools);
                 await _context.SaveChangesAsync();
@@ -154,7 +154,7 @@ namespace WoopiAiHub.Repository
         /// Creates a projection for the Tool entity to ToolDto.
         /// </summary>
         /// <returns></returns>
-        private static Expression<Func<Tool, ToolDto>> GetToolProjection(String? input = null)
+        private static Expression<Func<Tool, ToolDto>> GetToolProjection()
         {
             return t => new ToolDto
             {
