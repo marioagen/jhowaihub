@@ -17,6 +17,7 @@ import WorkflowPage from "@/pages/workflow/index.vue";
 import WorkflowEditor from "@/pages/workflow/editorIndex.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
+import ToolsPage from "@/pages/tools.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -199,6 +200,15 @@ const routes = [
         path: "/workflow/edit/:id",
         name: "EditWorkflow",
         component: EditWorkflow,
+        meta: { 
+            layout: "default",
+        },
+        // beforeEnter: authenticate,
+    },
+    {
+        path: "/tools",
+        name: "Tools",
+        component: ToolsPage,
         meta: { 
             layout: "default",
         },

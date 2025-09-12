@@ -209,7 +209,8 @@
                 });
             },
             changePage(page) {
-                this.getDocuments({ search: "", page: page, type: null });
+                this.table.pagination.currentPage = page;
+                this.getDocuments();
             },
         },
         created() {

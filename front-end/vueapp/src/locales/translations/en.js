@@ -276,9 +276,14 @@
     filters: {
         documentInput: "Search by document, description or user, ...",
         workflowInput: "Search by document",
+        toolInput: "Search by tool name",
         teamsSelect: {
             all: "All teams",
             none: "Select a team",
+        },
+        typesSelect: {
+            all: "All types",
+            none: "Select a type",
         },
         assignment: {
             currentUser: "My documents",
@@ -466,7 +471,43 @@
         userApplicant: "Applicant",
         assignBtn: "Assign",
         unassignInfo: "Unassign document"
-    }
+    },
+    tools: {
+        index: "Tools",
+        title: "Tools",
+        subtitle: "Manage and configure your document processing tools",
+        notFound: "No tools registered",
+        createBtn: "New Tool",
+        editBtn: "Save changes",
+        type: "Type",
+        entry: "Input",
+        output: "Output",
+        created: "Created on",
+        createSuccess: "Tool created successfully",
+        createError: "Error creating tool",
+        editSuccess: "Tool updated successfully",
+        editError: "Error updating tool",
+        removeSuccess: "Tool removed successfully",
+        removeError: "Error removing tool",
+        removeTitle: "You are about to delete a tool from the system",
+        form: {
+            name: "Tool Name",
+            types: "Tool Type",
+            typesSelect: "Select tool type",
+            entries: "Input",
+            entriesSelect: "Select input type",
+            output: "Output",
+            outputSelect: "Select output type",
+        },
+        formCreate: {
+            title: "New Tool",
+            subtitle: "Create a new tool to process documents",
+        },
+        formEdit: {
+            title: "Edit Tool",
+            subtitle: "Update the selected tool’s information",
+        },
+    },
 };
 
 export default english;

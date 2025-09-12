@@ -3,7 +3,7 @@ import api from "@/services/api";
 export default {
     getTools() {
         return api
-            .get("/Tool/Paged/", { params: params })
+            .get("/Tool/Paged/")
             .then(({ data }) => {
                 return true;
                 // return {
@@ -20,30 +20,6 @@ export default {
                 return {
                     error: error
                 }
-            });
-    },
-    getToolTypes() {
-        return api
-            .get("/Tool/Types")
-            .then(() => {
-                return true;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
-    },
-    getToollData() {
-        return api
-            .get("/Tool/Data")
-            .then(() => {
-                return true;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
             });
     },
     createTool() {
