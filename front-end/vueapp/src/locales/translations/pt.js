@@ -29,7 +29,6 @@
     labelCharacter: "caractere",
     labelCharacters: "caracteres",
     labelCopy: "Copiar texto",
-    labelDarkTheme: "Tema Escuro",
     labelDelete: "Excluir",
     labelDeleteHistory: "Deletar histórico",
     labelDescription: "Descrição",
@@ -416,6 +415,11 @@
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
     unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
+    users: {
+        title: "Usuários",
+        saveSuccess: "Usuário salvo com sucesso",
+        saveError: "Erro ao salvar usuário",
+    },
     workflow: {
         index: "Workflow",
         title: "Board de Processamento de Documentos",
@@ -459,6 +463,12 @@
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
         unassignInfo: "Desatribuir documento"
+    },
+    team: {
+        title: "Times",
+        deleteSuccess: "Time deletado com sucesso",
+        deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
+        deleteError: "Erro ao deletar time"
     }
 };
 

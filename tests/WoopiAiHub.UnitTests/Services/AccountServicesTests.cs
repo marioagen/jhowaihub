@@ -75,7 +75,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mockHttpContextAccessor.Setup(x => x.HttpContext).Returns(_mockHttpContext.Object);
 
             iGraphApi.Setup(a => a.FindEmailUserAzure(It.IsAny<string>())).Returns(Task.FromResult(graphApiResponse));
-            iMarketPlaceApi.Setup(a => a.CheckAccess(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
+            iMarketPlaceApi.Setup(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
             _mockRefreshTokenServices
                 .Setup(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
@@ -98,7 +98,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             iGraphApi.Verify(r => r.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
-            iMarketPlaceApi.Verify(a => a.CheckAccess(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Fact(DisplayName = "Test authenticate Sucess")]
@@ -138,7 +138,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mockHttpContextAccessor.Setup(x => x.HttpContext).Returns(_mockHttpContext.Object);
 
             iGraphApi.Setup(a => a.FindEmailUserAzure(It.IsAny<string>())).Returns(Task.FromResult(graphApiResponse));
-            iMarketPlaceApi.Setup(a => a.CheckAccess(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
+            iMarketPlaceApi.Setup(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
             _mockRefreshTokenServices
                 .Setup(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
@@ -159,7 +159,7 @@ namespace WoopiAiHub.UnitTests.Services
             var result = await _accountServices.Login(loginDto);
 
             // Assert
-            iMarketPlaceApi.Verify(a => a.CheckAccess(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             _mockPasswordHasher.Verify(a => a.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()), Times.Once);
         }
 
@@ -200,7 +200,7 @@ namespace WoopiAiHub.UnitTests.Services
             var iMarketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
 
             iGraphApi.Setup(a => a.FindEmailUserAzure(It.IsAny<string>())).Returns(Task.FromResult(graphApiResponse));
-            iMarketPlaceApi.Setup(a => a.CheckAccess(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
+            iMarketPlaceApi.Setup(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
             _mockTenantContextService
                 .Setup(x => x.InitializeTenantAsync(It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
@@ -289,7 +289,7 @@ namespace WoopiAiHub.UnitTests.Services
             var _mockResponseCookies = _mocker.GetMock<IResponseCookies>();
             var iMarketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
 
-            iMarketPlaceApi.Setup(a => a.CheckAccess(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
+            iMarketPlaceApi.Setup(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
 
             _mockHttpContext.Setup(x => x.Response).Returns(_mockHttpResponse.Object);
             _mockHttpResponse.Setup(x => x.Cookies).Returns(_mockResponseCookies.Object);

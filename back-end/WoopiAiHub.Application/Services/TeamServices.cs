@@ -183,6 +183,12 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
+            var teams = _teamRepository.FindByIds(ids);
+            bool hasDocuments = teams.Any(d => d.Documents.Count > 0);
+            if (hasDocuments)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.InvalidValue, "Can't delete with documents", null);
+            }
             return _teamRepository.DeleteByIds(ids);
         }
 

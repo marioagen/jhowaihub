@@ -18,9 +18,9 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<bool> ManageConsumptionPages([Header("KeyAccess")] string KeyAccess,
                                           ConsumptionPagesDto consumptionPages);
 
-        [Get("/user/CheckAccess")]
-        Task<ResponseCheckAccessDto> CheckAccess([Header("KeyAccess")] string KeyAccess,
-                                                 [Query] string email);
+        [Get("/user/CheckAccessByHub")]
+        Task<ResponseCheckAccessDto> CheckAccessByHub([Header("KeyAccess")] string KeyAccess,
+                                                      [Query] string email);
 
         [Get("/Consumption/CheckExceededPages")]
         Task<bool> CheckExceededPages([Header("KeyAccess")] string KeyAccess,

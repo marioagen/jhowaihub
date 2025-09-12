@@ -131,11 +131,11 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
-            var types = _context.Teams.Where(a => ids.Contains(a.Id));
+            var teams = _context.Teams.Where(a => ids.Contains(a.Id));
 
-            if (types.Any())
+            if (teams.Any())
             {
-                _context.Teams.RemoveRange(types);
+                _context.Teams.RemoveRange(teams);
                 _context.SaveChanges();
                 return true;
             }
@@ -185,7 +185,9 @@ namespace WoopiAiHub.Repository
         /// matches are found, an empty list is returned.</returns>
         public List<Team> FindByIds(IEnumerable<int> ids)
         {
-            return _context.Teams.Where(t => ids.Contains(t.Id)).ToList();
+            return _context.Teams.Where(t => ids.Contains(t.Id))
+                                  .Include(t => t.Documents)
+                                  .ToList();
         }
 
         /// <summary>

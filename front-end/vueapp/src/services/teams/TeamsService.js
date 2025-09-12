@@ -1,7 +1,8 @@
 import api from "@/services/api";
+import store from "@/store";
 
 export default {
-    getTeams(params) {
+    getTeams(params) {    
         return api.get("/Team/Paged/", { params: params })
             .then(({ data }) => {
                 return {
@@ -30,6 +31,11 @@ export default {
             });
     },
     getTeamsByUser() {
+        if (!store.state.userProfile.keyMongoAccess) {
+            return Promise.resolve({
+                data: [], 
+            });
+        }   
         return api.get("/Team")
             .then(({ data }) => {
                 return data;
@@ -38,12 +44,13 @@ export default {
     deleteTeamById(teamId) {
         return api
             .delete("/Team/DeleteByIds", { data: [teamId] })
-            .then(() => {
-                return true;
+            .then(({ data }) => {
+                return data;
             })
-            .catch(function (e) {
-                console.log(e);
-                return false;
+            .catch((error) => {
+                return {
+                    error: error,
+                }
             });
     },
 };
