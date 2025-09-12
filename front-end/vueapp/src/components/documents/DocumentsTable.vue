@@ -144,6 +144,7 @@
                     isAscending: this.filters.isAsc,
                     colType: this.colType,
                     teamId: this.filters.teamId,
+                    login: this.$store.state.userProfile.login
                 };
 
                 DocumentsServices.getDocuments(params)

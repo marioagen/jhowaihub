@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-10">
+        <div class="col-9">
             <div class="input-group">
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
@@ -38,7 +38,7 @@
                 </option>
             </select>
         </div>
-        <!-- <div class="col-1">
+        <div class="col-1">
             <button
                 v-tooltip="filters.isAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
                 class="btn table-btn btn-sm"
@@ -49,7 +49,7 @@
             >
                 <LucideIcon icon="User" />
             </button>
-        </div> -->
+        </div>
     </div>
 </template>
 
@@ -64,6 +64,7 @@
                     input: "",
                     teamId: 0,
                     isAllUsers: false,
+                    login: this.$store.state.userProfile.login
                 }
             };
         },
