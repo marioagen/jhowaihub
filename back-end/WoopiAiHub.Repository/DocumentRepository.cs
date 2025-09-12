@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Linq.Dynamic.Core;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Enum;
@@ -27,7 +28,7 @@ namespace WoopiAiHub.Repository
                                                    string email)
         {
             var search = documentPagedDataDto.Search?.ToLower();
-
+            var login = documentPagedDataDto.Login?.ToLower();
             var query = _context.Documents
                                 .Include(t => t.Teams)
                                 .AsNoTracking()
@@ -46,6 +47,11 @@ namespace WoopiAiHub.Repository
                              EF.Functions.Like(i.Description, $"%{search}%") ||
                              i.Id.ToString().Contains(search) ||
                              i.Teams.Any(t => EF.Functions.Like(t.Name, $"%{search}%")));
+            }
+
+            if(!documentPagedDataDto.IsAllUsers)
+            {
+                query = query.Where(d => d.Cards.Any(c => c.AssignedUser != null && c.AssignedUser.Email.ToLower() == login));
             }
 
             query = documentPagedDataDto.IsAscending ? 

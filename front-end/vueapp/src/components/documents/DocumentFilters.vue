@@ -17,11 +17,11 @@
                     ref="searchInpt"
                 />
                 <span v-if="showCleanBtn" class="input-group-text border-start-0 bg-white" @click="cleanInput">
-                    <LucideIcon icon="X" size="16" />
+                    <LucideIcon icon="X" :size="16" />
                 </span>
             </div>
         </div>
-        <div class="col-auto">
+        <div class="col-2">
             <select
                 v-model="filters.teamId"
                 class="form-select form-select-sm w-auto"
@@ -40,9 +40,9 @@
         </div>
         <div class="col-1">
             <button
-                v-tooltip="filters.isAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
+                v-tooltip="filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')"
                 class="btn table-btn btn-sm"
-                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                :class="filters.isAllUsers ? 'btn-outline-primary' : 'btn-outline-secondary'"
                 type="button"
                 style="display: flex; align-items: center; justify-content: center;"
                 @click="filterUsers"
