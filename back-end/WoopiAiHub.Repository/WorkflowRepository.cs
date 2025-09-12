@@ -101,7 +101,10 @@ namespace WoopiAiHub.Repository
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>
         /// <returns></returns>
-        private static Expression<Func<Workflow, WorkflowDto>> GetWorkflowProjection(String? input = null, Boolean? allUsers = true, String? login = null)
+        private static Expression<Func<Workflow, WorkflowDto>> GetWorkflowProjection(String? input = null, 
+                Boolean? allUsers = true, 
+                String? login = null
+            )
         {
             return w => new WorkflowDto
             {
