@@ -57,7 +57,7 @@
     export default {
         name: "DocumentFilters",
         props: {
-            teamsList: { type: Array, required: true } // prop vinda do pai
+            teamsList: { type: Array, required: true } 
         },
         data() {
             return {
