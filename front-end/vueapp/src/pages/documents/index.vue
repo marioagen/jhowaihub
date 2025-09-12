@@ -17,7 +17,9 @@
                 <div class="card mb-3">
                     <div class="card-body">
                         <DocumentFilters 
+                            :teamsList="teamsList"
                             @filter="filterData"
+                            ref="DocumentFilters"
                         />
                     </div>
                 </div>
@@ -33,12 +35,14 @@
     import GlobalEventService from "@/services/globalEventService.js";
     import DocumentFilters from "@/components/documents/DocumentFilters.vue";
     import DocumentsTable from "@/components/documents/DocumentsTable.vue";
+    import TeamsService from '@/services/teams/TeamsService';
 
     export default {
         name: "DocumentsPage",
         data() {
             return {
                 changeLanguage: false,
+                teamsList: [],
             };
         },
         components: {
@@ -50,10 +54,10 @@
                 this.changeLanguage = !this.changeLanguage;
             },
             keyMongoAccess: {
-                immediate: true,
                 handler: async function (newValue) {
                     if (newValue) {
                         this.reloadData();
+                        this.reloadTeams();
                     }
                 },
             },
@@ -65,9 +69,15 @@
             reloadData() {
                 this.$refs.DocumentsTable.getDocuments();
             },
+            reloadTeams() {
+                this.searchTeamsFirstLoad();
+            },
             filterData(filters) {
                 this.$refs.DocumentsTable.filters = filters;
                 this.reloadData();
+            },
+            async searchTeamsFirstLoad() {
+                this.teamsList = await TeamsService.getTeamsByUser();
             },
         },
         computed: {
@@ -76,12 +86,13 @@
             },
         },
         async created() {
-            GlobalEventService.on("all-uploads-complete", this.reloadData());
-            GlobalEventService.on("refresh-once", this.reloadData());
+            GlobalEventService.on("all-uploads-complete", this.reloadData);
+            GlobalEventService.on("refresh-once", this.reloadData);
+            await this.searchTeamsFirstLoad();
         },
         beforeUnmount() {
-            GlobalEventService.off("all-uploads-complete", this.reloadData());
-            GlobalEventService.off("refresh-once", this.reloadData());
+            GlobalEventService.off("all-uploads-complete", this.reloadData);
+            GlobalEventService.off("refresh-once", this.reloadData);
         },
     };
 </script>
