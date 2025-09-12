@@ -35,6 +35,9 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IWorkflowRepository, WorkflowRepository>();
             services.AddScoped<IStepRepository, StepRepository>();
             services.AddScoped<ICardRepository, CardRepository>();
+            services.AddScoped<IToolRepository, ToolRepository>();
+            services.AddScoped<IToolTypeRepository, ToolTypeRepository>();
+            services.AddScoped<IToolDataRepository, ToolDataRepository>();
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = configuration.GetConnectionString("Redis");

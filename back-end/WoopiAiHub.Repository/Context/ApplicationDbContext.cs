@@ -37,6 +37,9 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<Step> Steps { get; set; }
         public DbSet<Card> Cards { get; set; }
         public DbSet<Status> Status { get; set; }
+        public DbSet<ToolData> ToolDatas { get; set; }
+        public DbSet<ToolType> ToolTypes { get; set; }
+        public DbSet<Tool> Tools { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -66,6 +69,9 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<Step>(new StepMap().Configure);
             modelBuilder.Entity<Card>(new CardMap().Configure);
             modelBuilder.Entity<Status>(new StatusMap().Configure);
+            modelBuilder.Entity<ToolData>(new ToolDataMap().Configure);
+            modelBuilder.Entity<ToolType>(new ToolTypeMap().Configure);
+            modelBuilder.Entity<Tool>(new ToolMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }
