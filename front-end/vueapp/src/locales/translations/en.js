@@ -471,6 +471,12 @@
         userApplicant: "Applicant",
         assignBtn: "Assign",
         unassignInfo: "Unassign document"
+    },
+    team: {
+        title: "Teams",
+        deleteSuccess: "Team deleted successfully",
+        deleteDocError: "Could not delete the team: there are related documents",
+        deleteError: "Error while deleting team"
     }
 };
 

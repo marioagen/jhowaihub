@@ -464,6 +464,12 @@
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
         unassignInfo: "Desatribuir documento"
+    },
+    team: {
+        title: "Times",
+        deleteSuccess: "Time deletado com sucesso",
+        deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
+        deleteError: "Erro ao deletar time"
     }
 };
 
