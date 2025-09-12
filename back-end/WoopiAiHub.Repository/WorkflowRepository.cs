@@ -129,7 +129,7 @@ namespace WoopiAiHub.Repository
                             (
                                 (string.IsNullOrWhiteSpace(input) || c.Name.Contains(input)) ||
                                 (string.IsNullOrWhiteSpace(input) ||
-                                    (c.Document.Name.Contains(input) || c.Document.Description.Contains(input)))
+                                (c.Document.Name.Contains(input) || c.Document.Description.Contains(input)))
                             ) &&
                             (
                                 allUsers == false ||
