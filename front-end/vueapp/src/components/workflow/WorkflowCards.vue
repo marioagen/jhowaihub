@@ -71,6 +71,11 @@
                 default: false,
             }
         },
+        watch: {
+            kanbanData() {
+                this.setCard();
+            },
+        },
         data: () => ({
             firstStep: false,
             lastStep: false,
@@ -101,7 +106,7 @@
                 this.stepsList = this.kanbanData.steps;
             },
         },
-        created() {
+        mounted() {
             this.setCard();
         }
     };
