@@ -61,8 +61,7 @@
                             aria-labelledby="dropdownUser1" id="dropdown-menu-button">
                             <li class="remove-hover mt-2">
                                 <router-link class="dropdown-item mx-2 my-2" :to="{
-                                    name: 'Logout',
-                                    query: { darkMode: this.showLogoDarkMode },
+                                    name: 'Logout'
                                 }" title="Sair">
                                     <LucideIcon icon="LogOut" />
                                     {{ $t("labelSignOut") }}
@@ -97,7 +96,6 @@ export default {
     data() {
         return {
             title: "Component NavBar",
-            showLogoDarkMode: false,
             profileImage: "",
             user: this.$store.state.userProfile.name,
             selectedTenant: null,
@@ -174,19 +172,6 @@ export default {
             if (strSplit.length === 1) return strSplit[0];
             return `${strSplit[0]} ${strSplit[strSplit.length - 1]}`;
         },
-        toggleTheme() {
-            if (localStorage.getItem("theme") === "css-theme-dark") {
-                this.setTheme("css-theme-light");
-                this.showLogoDarkMode = false;
-            } else {
-                this.setTheme("css-theme-dark");
-                this.showLogoDarkMode = true;
-            }
-        },
-        setTheme(themeName) {
-            localStorage.setItem("theme", themeName);
-            document.documentElement.className = themeName;
-        },
     },
     computed: {
         tenantInitialized() {
@@ -221,13 +206,7 @@ export default {
         this.getUserTenants(userEmail, savedTenant);
     },
     mounted() {
-        if (localStorage.getItem("theme") === "css-theme-dark") {
-            this.setTheme("css-theme-dark");
-            this.showLogoDarkMode = true;
-        } else {
-            this.setTheme("css-theme-light");
-            this.showLogoDarkMode = false;
-        }
+        document.documentElement.className = "css-theme-light";
     },
 };
 </script>
