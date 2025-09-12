@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-       <div class="col">
+        <div class="col-9">
             <div class="input-group">
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
@@ -17,11 +17,11 @@
                     ref="searchInpt"
                 />
                 <span v-if="showCleanBtn" class="input-group-text border-start-0 bg-white" @click="cleanInput">
-                    <LucideIcon icon="X" size="16" />
+                    <LucideIcon icon="X" :size="16" />
                 </span>
             </div>
         </div>
-        <div class="col-auto">
+        <div class="col-2">
             <select
                 v-model="filters.teamId"
                 class="form-select form-select-sm w-auto"
@@ -38,18 +38,18 @@
                 </option>
             </select>
         </div>
-        <!-- <div class="col-1">
+        <div class="col-1">
             <button
-                v-tooltip="filters.isAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
+                v-tooltip="filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')"
                 class="btn table-btn btn-sm"
-                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                :class="filters.isAllUsers ? 'btn-outline-primary' : 'btn-outline-secondary'"
                 type="button"
                 style="display: flex; align-items: center; justify-content: center;"
                 @click="filterUsers"
             >
                 <LucideIcon icon="User" />
             </button>
-        </div> -->
+        </div>
     </div>
 </template>
 
@@ -66,6 +66,7 @@
                     teamId: "",
                     teams: [],
                     isAllUsers: false,
+                    login: this.$store.state.userProfile.login
                 }
             };
         },

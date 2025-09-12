@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-12">
+        <div class="col-10">
             <div class="input-group">
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
@@ -21,7 +21,7 @@
                 </span>
             </div>
         </div>
-        <!-- <div class="col-1">
+        <div class="col-1">
             <button
                 v-tooltip="filters.isAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
                 class="btn table-btn btn-sm"
@@ -32,7 +32,7 @@
             >
                 <LucideIcon icon="User" />
             </button>
-        </div> -->
+        </div>
     </div>
 </template>
 
@@ -45,6 +45,7 @@
                 filters: {
                     input: "",
                     isAllUsers: false,
+                    login: this.$store.state.userProfile.login
                 }
             };
         },

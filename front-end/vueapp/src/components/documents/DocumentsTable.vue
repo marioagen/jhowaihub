@@ -130,6 +130,7 @@
                 teamId: "",
                 isAsc: true,
                 isAllUsers: false,
+                login: null
             },
             isEmbedding: false,
             isDeleting: false,
@@ -142,9 +143,12 @@
                     pageSize: this.table.pagination.itemsPerPage,
                     page: this.table.pagination.currentPage,
                     isAscending: this.filters.isAsc,
+                    isAllUsers: this.filters.isAllUsers,
                     colType: this.colType,
                     teamIds: this.filters.teams,
+                    login: this.filters.login,
                 };
+                
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
                         if (response?.error !== undefined) {
@@ -223,6 +227,7 @@
             },
         },
         created() {
+            this.filters.login = this.$store.state.userProfile.login;
             this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
         },
         computed: {
