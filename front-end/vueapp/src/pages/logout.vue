@@ -10,9 +10,7 @@ export default {
                 console.warn("Erro ao deslogar no back-end:", err);
             })
             .finally(() => {
-                // Always use light theme
                 document.documentElement.className = "css-theme-light";
-                // Clear any theme data from localStorage
                 window.localStorage.removeItem("theme");
                 window.localStorage.removeItem("project");
 

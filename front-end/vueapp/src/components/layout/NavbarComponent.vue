@@ -206,7 +206,6 @@ export default {
         this.getUserTenants(userEmail, savedTenant);
     },
     mounted() {
-        // Ensure light theme is always applied
         document.documentElement.className = "css-theme-light";
     },
 };
