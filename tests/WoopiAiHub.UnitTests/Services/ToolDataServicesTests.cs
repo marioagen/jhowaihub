@@ -12,7 +12,7 @@ namespace WoopiAiHub.UnitTests.Services
     public class ToolDataServicesTests
     {
         private readonly AutoMocker _mocker;
-        private readonly IToolDataServices _toolDataServices;
+        private readonly ToolDataServices _toolDataServices;
         private readonly Mock<IToolDataRepository> _toolDataRepositoryMock;
 
         public ToolDataServicesTests()
