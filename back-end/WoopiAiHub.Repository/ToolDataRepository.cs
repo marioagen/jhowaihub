@@ -21,12 +21,14 @@ namespace WoopiAiHub.Repository
         public async Task<IEnumerable<ToolDataDto>> FindAllAsync()
         {
             return await _context.ToolDatas
+                .AsNoTracking()
                 .Where(td => td.IsActive)
                 .Select(td => new ToolDataDto
                 {
                     Id = td.Id,
                     Name = td.Name,
-                }).ToListAsync();
+                })
+                .ToListAsync();
         }
     }
 }
