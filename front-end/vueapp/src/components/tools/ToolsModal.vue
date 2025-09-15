@@ -11,62 +11,62 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label>{{ $t("tools.form.name") }}</label>
-                        <input v-model="toolsData.name" class="form-control form-control-sm" />
+                        <Field name="name" rules="required" v-slot="{ field, errorMessage }">
+                            <input v-bind="field" class="form-control form-control-sm"
+                                :class="{ 'is-invalid': errorMessage }" />
+                            <span v-if="errorMessage" class="validation-message text-danger">
+                                {{ errorMessage }}
+                            </span>
+                        </Field>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col">
                         <label>{{ $t("tools.form.types") }}</label>
-                        <select
-                            id="toolTypeId"
-                            class="form-select form-select-sm"
-                            v-model="toolsData.toolTypeId"
-                        >
-                            <option value="">{{ $t("tools.form.typesSelect") }}</option>
-                            <option 
-                                v-for="(item, index) in typesList" 
-                                :key="index"
-                                :value="item.id" 
-                            >
-                                {{ item.id }} - {{ item.name }}
-                            </option>
-                        </select>
+                        <Field name="toolTypeId" rules="required" v-slot="{ field, errorMessage }">
+                            <select v-bind="field" class="form-select form-select-sm"
+                                :class="{ 'is-invalid': errorMessage }">
+                                <option value="">{{ $t("tools.form.typesSelect") }}</option>
+                                <option v-for="(item, index) in typesList" :key="index" :value="item.id">
+                                    {{ item.id }} - {{ item.name }}
+                                </option>
+                            </select>
+                            <span v-if="errorMessage" class="validation-message text-danger">
+                                {{ errorMessage }}
+                            </span>
+                        </Field>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-6">
                         <label>{{ $t("tools.form.entries") }}</label>
-                        <select
-                            id="inputDataId"
-                            class="form-select form-select-sm"
-                            v-model="toolsData.inputDataId"
-                        >
-                            <option value="">{{ $t("tools.form.entriesSelect") }}</option>
-                            <option 
-                                v-for="(item, index) in inputsList" 
-                                :key="index"
-                                :value="item.id" 
-                            >
-                                {{ item.id }} - {{ item.name }}
-                            </option>
-                        </select>
+                        <Field name="inputDataId" rules="required" v-slot="{ field, errorMessage }">
+                            <select v-bind="field" class="form-select form-select-sm"
+                                :class="{ 'is-invalid': errorMessage }">
+                                <option value="">{{ $t("tools.form.entriesSelect") }}</option>
+                                <option v-for="(item, index) in inputsList" :key="index" :value="item.id">
+                                    {{ item.id }} - {{ item.name }}
+                                </option>
+                            </select>
+                            <span v-if="errorMessage" class="validation-message text-danger">
+                                {{ errorMessage }}
+                            </span>
+                        </Field>
                     </div>
                     <div class="col-6">
                         <label>{{ $t("tools.form.output") }}</label>
-                        <select
-                            id="outputDataId"
-                            class="form-select form-select-sm"
-                            v-model="toolsData.outputDataId"
-                        >
-                            <option value="">{{ $t("tools.form.outputSelect") }}</option>
-                            <option 
-                                v-for="(item, index) in outputsList" 
-                                :key="index"
-                                :value="item.id" 
-                            >
-                                {{ item.id }} - {{ item.name }}
-                            </option>
-                        </select>
+                        <Field name="outputDataId" rules="required" v-slot="{ field, errorMessage }">
+                            <select v-bind="field" class="form-select form-select-sm"
+                                :class="{ 'is-invalid': errorMessage }">
+                                <option value="">{{ $t("tools.form.outputSelect") }}</option>
+                                <option v-for="(item, index) in outputsList" :key="index" :value="item.id">
+                                    {{ item.id }} - {{ item.name }}
+                                </option>
+                            </select>
+                            <span v-if="errorMessage" class="validation-message text-danger">
+                                {{ errorMessage }}
+                            </span>
+                        </Field>
                     </div>
                 </div>
             </div>
@@ -89,10 +89,16 @@
     import ToolsService from "@/services/tools/ToolsServices";
     import ToolsTypesService from '@/services/tools/ToolsTypesService';
     import ToolsDataService from '@/services/tools/ToolsDataService';
+    import { Field, useForm } from "vee-validate";
 
     export default {
         components: {
             ModalComponent,
+            Field,
+        },
+        setup() {
+            const { validate, setValues, values } = useForm();
+            return { validate, setValues, values };
         },
         emits: ["reload"],
         props: {
@@ -138,10 +144,17 @@
                     });
             },
             open(tool = null) {
+                console.log(tool)
                 if (tool === null) {
                     this.resetData();
                 } else {
-                    this.toolsData = tool;
+                    this.setValues({
+                        id: tool.id,
+                        name: tool.name,
+                        toolTypeId: tool.toolTypeId,
+                        inputDataId: tool.inputDataId,
+                        outputDataId: tool.outputDataId,
+                    });
                 }
                 this.$refs.ToolModal.open();
             },
@@ -149,29 +162,30 @@
                 this.$refs.ToolModal.close();
             },
             resetData() {
-                this.toolsData = {
-                    id: "",
-                    name: "",
-                    toolTypeId: "",
-                    inputDataId: "",
-                    outputDataId: "",
-                };
+                this.values.name = "";
+                this.values.toolTypeId = "";
+                this.values.inputDataId = "";
+                this.values.outputDataId = "";
             },
-            save() {
+            async save() {
+                const result = await this.validate();
+                if (!result.valid) {
+                    return this.$notify({
+                        title: "tools.index",
+                        message: "tools.validationError",
+                        variant: "warning",
+                        icon: "CircleAlert",
+                    });
+                }
+
                 if (this.isEdit) {
                     return this.editTool();
                 }
                 return this.createTool();
             },
             createTool() {
-                this.isLoading = true;
-                let params = {
-                    name: this.toolsData.name,
-                    toolTypeId: this.toolsData.toolTypeId,
-                    inputDataId: this.toolsData.inputDataId,
-                    outputDataId: this.toolsData.outputDataId,
-                };
-                ToolsService.createTool(params)
+                this.isLoading = true;                
+                ToolsService.createTool(this.values)
                     .then((result) => {
                         if (result) {
                             this.$emit("reload");
@@ -197,8 +211,9 @@
                     });
             },            
             editTool() {
+                console.log(this.values)
                 this.isLoading = true;
-                ToolsService.editTool(this.toolsData)
+                ToolsService.editTool(this.values)
                     .then((result) => {                        
                         if (result) {
                             this.$emit("reload");

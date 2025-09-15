@@ -14,6 +14,12 @@
             @selectedRows="selectedRows"
             @change-page="changePage"
         >
+            <template #cell-inputData="{ data }">
+                {{ data.row.inputData }}
+            </template>
+            <template #cell-outputData="{ data }">
+                {{ data.row.outputData }}
+            </template>
             <template #cell-actions="{ data }">
                 <div class="dropdown">
                     <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -63,7 +69,7 @@
     import ToolsService from '@/services/tools/ToolsServices';
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
-    import ToolsModal from "@/components/tools/ToolsModal.vue"
+    import ToolsModal from "@/components/tools/ToolsModal.vue";    
 
     export default {
         name: "ToolsTable",
@@ -114,7 +120,7 @@
                     .then((response) => {
                         const content = response?.content || [];
                         const pagination = response?.pagination || {};
-
+                        console.log(response)
                         this.table.data = content;
                         this.table.pagination = pagination;
                     })
