@@ -176,7 +176,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/workflow/editor",
@@ -185,7 +185,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/workflow/new",
@@ -194,7 +194,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/workflow/edit/:id",
@@ -203,7 +203,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/tools",
@@ -212,7 +212,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
 ];
 
