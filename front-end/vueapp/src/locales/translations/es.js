@@ -511,6 +511,7 @@
             title: "Editar Herramienta",
             subtitle: "Actualiza la información de la herramienta seleccionada",
         },
+        validationError: "Error al validar los campos",
     },
 };
 

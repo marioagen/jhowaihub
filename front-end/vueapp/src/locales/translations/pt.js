@@ -500,6 +500,7 @@
             title: "Editar Ferramenta",
             subtitle: "Atualize as informações da ferramenta selecionada",
         },
+        validationError: "Erro ao validar campos",
     },
 };
 

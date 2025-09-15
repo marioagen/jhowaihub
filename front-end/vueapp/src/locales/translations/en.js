@@ -507,6 +507,7 @@
             title: "Edit Tool",
             subtitle: "Update the selected tool’s information",
         },
+        validationError: "Error validating fields",
     },
 };
 

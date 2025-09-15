@@ -25,7 +25,7 @@
             <ToolsTable 
                 ref="ToolsTable"
             />
-            <ToolsModal 
+            <ToolsModal
                 :isEdit="false" 
                 :type="modalTool" 
                 @reload="reloadData"
