@@ -144,7 +144,6 @@
                     });
             },
             open(tool = null) {
-                console.log(tool)
                 if (tool === null) {
                     this.resetData();
                 } else {
@@ -211,7 +210,6 @@
                     });
             },            
             editTool() {
-                console.log(this.values)
                 this.isLoading = true;
                 ToolsService.editTool(this.values)
                     .then((result) => {                        

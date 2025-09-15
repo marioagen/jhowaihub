@@ -120,7 +120,7 @@
                     .then((response) => {
                         const content = response?.content || [];
                         const pagination = response?.pagination || {};
-                        console.log(response)
+                        
                         this.table.data = content;
                         this.table.pagination = pagination;
                     })
