@@ -29,9 +29,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("Paged")]
         [SwaggerOperation("Endpoint that receives the request to return all tools paginated")]
         [ProducesResponseType(typeof(PagedResponseDto<ToolDto>), StatusCodes.Status200OK)]
-        public IActionResult FindAllPaged([FromQuery] PagedDataDto pagedDataDto)
+        public IActionResult FindAllPaged([FromQuery] ToolPagedDataDto toolPagedDataDto)
         {
-            var result = _toolServices.FindAllPaged(pagedDataDto);
+            var result = _toolServices.FindAllPaged(toolPagedDataDto);
             return Ok(result);
         }
 

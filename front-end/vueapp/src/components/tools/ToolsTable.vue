@@ -88,6 +88,7 @@
                     currentPage: 1,
                     totalPages: 100,
                     totalItems: 2000,
+                    itemsPerPage: 10,
                 },
                 selectedRows: [],
             },
@@ -106,7 +107,7 @@
                     page: this.table.pagination.currentPage,
                     pageSize: this.table.pagination.itemsPerPage,
                     isAscending: this.filters.isAsc,
-                    colType: 2,
+                    toolTypeId: this.filters.toolTypeId,
                 };
 
                 ToolsService.getTools(params)

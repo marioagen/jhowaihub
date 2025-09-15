@@ -193,7 +193,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindAllPaged_PageLessThanOrEqualToZero_ThrowsArgumentException()
         {
             // Arrange
-            var pagedDataDto = new PagedDataDto { Page = 0 };
+            var pagedDataDto = new ToolPagedDataDto { Page = 0 };
 
             // Act & Assert
             var exception = Assert.Throws<ArgumentException>(() => _toolServices.FindAllPaged(pagedDataDto));
@@ -206,7 +206,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var tools = ToolFixture.FindValidTools().AsQueryable();
-            var pagedDataDto = ToolFixture.FindValidPagedDataDto();
+            var pagedDataDto = ToolFixture.FindValidToolPagedDataDto();
             pagedDataDto.PageSize = 0;
             pagedDataDto.Search = tools.First().Id.ToString();
 
@@ -230,7 +230,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var tools = ToolFixture.FindValidTools().AsQueryable();
-            var pagedDataDto = ToolFixture.FindValidPagedDataDto();
+            var pagedDataDto = ToolFixture.FindValidToolPagedDataDto();
             pagedDataDto.IsAscending = order;
 
             _toolRepositoryMock.Setup(repo => repo.FindAllPaged()).Returns(tools);

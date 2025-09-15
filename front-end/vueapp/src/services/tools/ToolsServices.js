@@ -1,7 +1,7 @@
 import api from "@/services/api";
 
 export default {
-    getTools(params) {
+    getTools(params) {        
         return api
             .get("/Tool/Paged/", { params: params })
             .then(({ data }) => {
@@ -12,6 +12,7 @@ export default {
                         totalPages: data.totalPages,
                         rowCount: data.totalCount,
                         totalItems: data.totalCount,
+                        itemsPerPage: params.pageSize,
                     },
                 };
             })

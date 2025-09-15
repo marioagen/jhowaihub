@@ -75,24 +75,24 @@ namespace WoopiAiHub.Application.Services
         /// Retrieves a paginated list of tools based on the specified paging and sorting criteria.
         /// </summary>
         /// <remarks>The tools are sorted by their name in ascending or descending order, based on the
-        /// value of <see cref="PagedDataDto.IsAscending"/>.</remarks>
-        /// <param name="pagedDataDto">An object containing the paging and sorting parameters, including the page number, page size, and sorting
-        /// direction. The <see cref="PagedDataDto.Page"/> property must be greater than 0.</param>
+        /// value of <see cref="ToolPagedDataDto.IsAscending"/>.</remarks>
+        /// <param name="toolPagedDataDto">An object containing the paging and sorting parameters, including the page number, page size, and sorting
+        /// direction. The <see cref="ToolPagedDataDto.Page"/> property must be greater than 0.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentException">Thrown if <paramref name="pagedDataDto"/> specifies a page number less than or equal to 0.</exception>
-        public PagedResponseDto<ToolDto> FindAllPaged(PagedDataDto pagedDataDto)
+        /// <exception cref="ArgumentException">Thrown if <paramref name="toolPagedDataDto"/> specifies a page number less than or equal to 0.</exception>
+        public PagedResponseDto<ToolDto> FindAllPaged(ToolPagedDataDto toolPagedDataDto)
         {
-            if (pagedDataDto.Page <= 0)
+            if (toolPagedDataDto.Page <= 0)
             {
                 throw new ArgumentException("The number of pages must be greater than 0");
             }
 
             var query = _toolRepository.FindAllPaged();
-            query = pagedDataDto.IsAscending
+            query = toolPagedDataDto.IsAscending
                 ? query.OrderBy(t => t.Name)
                 : query.OrderByDescending(t => t.Name);
 
-            return Pagination(query, pagedDataDto);
+            return Pagination(query, toolPagedDataDto);
         }
 
         /// <summary>
@@ -140,30 +140,35 @@ namespace WoopiAiHub.Application.Services
         /// on the search criteria.</param>
         /// <param name="pagedDataDto"></returns>
         private static PagedResponseDto<ToolDto> Pagination(IQueryable<ToolDto> totalList,
-                                                            PagedDataDto pagedDataDto)
+                                                            ToolPagedDataDto toolPagedDataDto)
         {
             int pageCount, currentPage = 0;
 
-            if (!string.IsNullOrEmpty(pagedDataDto.Search))
+            if (!string.IsNullOrEmpty(toolPagedDataDto.Search))
             {
-                totalList = totalList.Where(i => i.Name.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
-                                                 i.Id.ToString().Contains(pagedDataDto.Search));
+                totalList = totalList.Where(i => i.Name.ToLower().Contains(toolPagedDataDto.Search.ToLower()) ||
+                                                 i.Id.ToString().Contains(toolPagedDataDto.Search));
+            }
+
+            if (toolPagedDataDto.ToolTypeId.HasValue)
+            {
+                totalList = totalList.Where(i => i.ToolTypeId == toolPagedDataDto.ToolTypeId.Value);
             }
 
             var totalListCount = totalList.Count();
 
-            if (pagedDataDto.PageSize == 0)
+            if (toolPagedDataDto.PageSize == 0)
             {
                 pageCount = 1;
                 currentPage = 1;
-                pagedDataDto.PageSize = totalListCount;
+                toolPagedDataDto.PageSize = totalListCount;
             }
             else
             {
-                pageCount = (int)Math.Ceiling((double)totalListCount / pagedDataDto.PageSize);
-                currentPage = pagedDataDto.Page <= pageCount ? pagedDataDto.Page : 1;
-                totalList = totalList.Skip((currentPage - 1) * pagedDataDto.PageSize)
-                                     .Take(pagedDataDto.PageSize);
+                pageCount = (int)Math.Ceiling((double)totalListCount / toolPagedDataDto.PageSize);
+                currentPage = toolPagedDataDto.Page <= pageCount ? toolPagedDataDto.Page : 1;
+                totalList = totalList.Skip((currentPage - 1) * toolPagedDataDto.PageSize)
+                                     .Take(toolPagedDataDto.PageSize);
             }
 
             return new PagedResponseDto<ToolDto>()

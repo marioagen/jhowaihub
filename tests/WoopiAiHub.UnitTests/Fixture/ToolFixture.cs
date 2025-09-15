@@ -70,10 +70,10 @@ namespace WoopiAiHub.UnitTests.Fixture
             );
         }
 
-        public static PagedDataDto FindValidPagedDataDto()
+        public static ToolPagedDataDto FindValidToolPagedDataDto()
         {
             var _faker = new Faker("pt_BR");
-            return new PagedDataDto
+            return new ToolPagedDataDto
             {
                 Page = _faker.Random.Int(1, 100),
                 PageSize = _faker.Random.Int(1, 100),

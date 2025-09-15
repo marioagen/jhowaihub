@@ -28,7 +28,7 @@
                 @change="filterData"
             >
                 <option value="" disabled>{{ $t("filters.typesSelect.none") }}</option>
-                <option :value="0">{{ $t("filters.typesSelect.all") }}</option>
+                <option :value="''">{{ $t("filters.typesSelect.all") }}</option>
                 <option 
                     v-for="toolType in toolsTypesList"
                     :key="toolType.id" 
