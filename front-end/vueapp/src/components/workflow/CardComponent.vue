@@ -45,7 +45,7 @@
             </div>
             <div class="card-footer pt-0">
                 <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap" v-if="!showLoading">
-                    <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
+                    <div class="badge flex-shrink-1 mb-1" :style="badgeStyle(dataStep.status.color)">
                         {{ dataStep.status.name }}
                     </div>
                     <div v-if="!isLastStep">
@@ -357,10 +357,10 @@
         white-space: normal;
     }
 
-    .card-body small.user {
-        overflow-wrap: normal;
-        white-space: nowrap;
-    }
+        .card-body small.user {
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
 
     .card-body .badge {
         max-width: 60%;
