@@ -162,8 +162,10 @@ namespace WoopiAiHub.Repository
                 Name = t.Name,
                 ToolTypeId = t.ToolType!.Id,
                 ToolType = t.ToolType!.Name,
-                InputData =  t.InputData!.Name,                
-                OutputData = t.OutputData!.Name                
+                InputData =  t.InputData!.Name,     
+                InputDataId = t.InputData!.Id,
+                OutputData = t.OutputData!.Name,
+                OutputDataId = t.OutputData!.Id
             };
         }
     }

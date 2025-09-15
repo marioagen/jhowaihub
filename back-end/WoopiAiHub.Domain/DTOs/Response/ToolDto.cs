@@ -6,7 +6,9 @@
         public string Name { get; set; } = string.Empty;
         public int ToolTypeId { get; set; }
         public string ToolType { get; set; } = string.Empty;
+        public int InputDataId { get; set; }
         public string InputData { get; set; } = string.Empty;
+        public int OutputDataId { get; set; }
         public string OutputData { get; set; } = string.Empty;
     }
 }

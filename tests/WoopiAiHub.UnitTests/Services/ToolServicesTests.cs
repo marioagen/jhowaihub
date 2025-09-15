@@ -48,18 +48,18 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "DeleteAsync should delete all tools in list")]
         [Trait("DeleteAsync", "Success")]
-        public async Task DeleteAsync_ShouldDeleteAllToolsInList()
+        public void DeleteAsync_ShouldDeleteAllToolsInList()
         {
             // Arrange
             var ids =  new List<int>() { 1, 2};
-            _toolRepositoryMock.Setup(x => x.DeleteAsync(It.IsAny<List<int>>())).ReturnsAsync(true);
+            _toolRepositoryMock.Setup(x => x.Delete(It.IsAny<List<int>>())).Returns(true);
 
             // Act
-            var result = await _toolServices.DeleteAsync(ids);
+            var result = _toolServices.Delete(ids);
 
             // Assert
             Assert.True(result);        
-            _toolRepositoryMock.Verify(x => x.DeleteAsync(ids), Times.Once);
+            _toolRepositoryMock.Verify(x => x.Delete(ids), Times.Once);
         }
 
         [Fact(DisplayName = "FindByIdAsync should return a Tool")]
