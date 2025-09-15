@@ -119,7 +119,7 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "Tool not found", null);
             }
 
-            tool.Update(toolUpdateDto.Name, toolUpdateDto.InputDataId, toolUpdateDto.OutputDataId, toolUpdateDto.ToolTypeId);
+            tool.Update(toolUpdateDto.Name, toolUpdateDto.ToolTypeId, toolUpdateDto.InputDataId, toolUpdateDto.OutputDataId);
 
             var result = await _toolRepository.UpdateAsync(tool);
             if (!result)
