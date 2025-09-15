@@ -65,7 +65,7 @@
                     input: "",
                     teamId: "",
                     teams: [],
-                    isAllUsers: false,
+                    isAllUsers: true,
                     login: this.$store.state.userProfile.login
                 }
             };
