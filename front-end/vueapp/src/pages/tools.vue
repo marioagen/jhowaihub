@@ -28,7 +28,7 @@
             <ToolsModal 
                 :isEdit="false" 
                 :type="modalTool" 
-                @reload="reloadTable" 
+                @reload="reloadData"
                 ref="ToolsModal" 
             />
         </div>

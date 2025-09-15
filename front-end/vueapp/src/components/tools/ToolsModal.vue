@@ -6,16 +6,15 @@
                 <button class="btn-close" data-bs-dismiss="modal" @click="close" />
             </div>
         </template>
-
         <template #body>
             <div class="modal-body">
-                <div class="row">
+                <div class="row mb-3">
                     <div class="col">
                         <label>{{ $t("tools.form.name") }}</label>
                         <input v-model="toolsData.name" class="form-control form-control-sm" />
                     </div>
                 </div>
-                <div class="row">
+                <div class="row mb-3">
                     <div class="col">
                         <label>{{ $t("tools.form.types") }}</label>
                         <select
@@ -34,7 +33,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row mb-3">
                     <div class="col-6">
                         <label>{{ $t("tools.form.entries") }}</label>
                         <select
@@ -72,7 +71,6 @@
                 </div>
             </div>
         </template>
-
         <template #footer>
             <div class="modal-footer">
                 <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
@@ -126,6 +124,19 @@
             },
         },
         methods: {
+            getToolTypes() {
+                ToolsTypesService.getToolTypes()
+                    .then((response) => {
+                        this.typesList = response;
+                    });
+            },
+            getToolDatas() {
+                ToolsDataService.getToollData()
+                    .then((response) => {
+                        this.inputsList = response;
+                        this.outputsList = response;
+                    });
+            },
             open(tool = null) {
                 if (tool === null) {
                     this.resetData();
@@ -164,6 +175,7 @@
                     .then((result) => {
                         if (result) {
                             this.$emit("reload");
+                            this.close();
                             return this.$notify({
                                 title: "tools.index",
                                 message: "tools.createSuccess",
@@ -183,26 +195,14 @@
                     .finally(() => {
                         this.isLoading = false;
                     });
-            },
-            getToolTypes() {
-                ToolsTypesService.getToolTypes()
-                    .then((response) => {
-                        this.typesList = response;
-                    });
-            },
-            getToolDatas() {
-                ToolsDataService.getToollData()
-                    .then((response) => {
-                        this.inputsList = response;
-                        this.outputsList = response;
-                    });
-            },
+            },            
             editTool() {
                 this.isLoading = true;
                 ToolsService.editTool(this.toolsData)
                     .then((result) => {                        
                         if (result) {
                             this.$emit("reload");
+                            this.close();
                             return this.$notify({
                                 title: "tools.index",
                                 message: "tools.editSuccess",
