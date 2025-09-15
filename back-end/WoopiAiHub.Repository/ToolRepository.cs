@@ -43,14 +43,14 @@ namespace WoopiAiHub.Repository
         /// matching tools are found, no changes are made to the database.</remarks>
         /// <param name="ids">A list of tool IDs to delete. Each ID must correspond to an existing tool in the database.</param>
         /// <returns></returns>
-        public async Task<bool> DeleteAsync(List<int> ids)
+        public bool Delete(List<int> ids)
         {
             var tools = _context.Tools.Where(a => ids.Contains(a.Id));
 
-            if (await tools.AnyAsync())
+            if (tools.Any())
             {
                 _context.Tools.RemoveRange(tools);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
                 return true;
             }
             return false;

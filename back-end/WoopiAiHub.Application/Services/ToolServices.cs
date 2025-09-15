@@ -55,9 +55,9 @@ namespace WoopiAiHub.Application.Services
         /// that the provided identifiers correspond to valid items.</remarks>
         /// <param name="ids">A list of item identifiers to delete. The list cannot be null or empty.</param>
         /// <returns></returns>
-        public async Task<bool> DeleteAsync(List<int> ids)
+        public bool Delete(List<int> ids)
         {
-            return await _toolRepository.DeleteAsync(ids);
+            return _toolRepository.Delete(ids);
         }
 
         /// <summary>

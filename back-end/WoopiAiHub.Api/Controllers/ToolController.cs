@@ -86,7 +86,7 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public IActionResult DeleteByIds(List<int> ids)
         {
-            var result = _toolServices.DeleteAsync(ids);
+            var result = _toolServices.Delete(ids);
             return Ok(result);
         }
     }

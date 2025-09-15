@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<ToolDto?> FindByIdAsync(int id);
         Task<bool> CreateAsync(ToolCreateDto toolCreateDto);
         Task<bool> UpdateAsync(ToolUpdateDto toolUpdateDto);
-        Task<bool> DeleteAsync(List<int> ids);
+        bool Delete(List<int> ids);
         PagedResponseDto<ToolDto> FindAllPaged(ToolPagedDataDto toolPagedDataDto);
     }
 }
