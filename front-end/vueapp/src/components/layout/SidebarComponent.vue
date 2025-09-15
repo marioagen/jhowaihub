@@ -3,21 +3,7 @@
         <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
             <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Documents' }">
                 <img
-                    v-if="!showLogoDarkMode && isCollapsed"
-                    src="./../../assets/img/woopiai-hub-small-logo.png"
-                    :title="$t('labelGoHome')"
-                    width="30"
-                    height="30"
-                />
-                <img
-                    v-else-if="!showLogoDarkMode"
-                    src="./../../assets/img/woopiai-hub-logo.png"
-                    :title="$t('labelGoHome')"
-                    width="120"
-                    height="40"
-                />
-                <img
-                    v-else-if="isCollapsed"
+                    v-if="isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
                     :title="$t('labelGoHome')"
                     width="30"
@@ -27,7 +13,7 @@
                     v-else
                     src="./../../assets/img/woopiai-hub-logo.png"
                     :title="$t('labelGoHome')"
-                    width="186"
+                    width="120"
                     height="40"
                 />
             </router-link>
@@ -77,11 +63,6 @@
                 type: String,
                 default: "",
             },
-            theme: {
-                required: false,
-                type: Boolean,
-                default: false,
-            },
             isCollapsed: {
                 type: Boolean,
                 default: false,
@@ -90,7 +71,6 @@
         data() {
             return {
                 title: "SideBarComponent",
-                showLogoDarkMode: this.theme,
                 permissions: {
                     management: hasPermission("Management", "View"),
                     questions: hasPermission("Questions", "View"),
@@ -183,16 +163,6 @@
             isRouteActive(item) {
                 return this.$route.path === item.to;
             }
-        },
-        updated() {
-            let self = this;
-            (function () {
-                if (localStorage.getItem("theme") === "css-theme-dark") {
-                    self.showLogoDarkMode = true;
-                } else {
-                    self.showLogoDarkMode = false;
-                }
-            })();
         },
     };
 </script>

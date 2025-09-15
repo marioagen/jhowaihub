@@ -69,7 +69,12 @@
                 type: Boolean,
                 required: false,
                 default: false,
-            }
+            },
+        },
+        watch: {
+            kanbanData() {
+                this.setCard();
+            },
         },
         data: () => ({
             firstStep: false,
@@ -101,7 +106,7 @@
                 this.stepsList = this.kanbanData.steps;
             },
         },
-        created() {
+        mounted() {
             this.setCard();
         }
     };

@@ -28,7 +28,6 @@
     labelCharacter: "character",
     labelCharacters: "characters",
     labelCopy: "Copy text",
-    labelDarkTheme: "Dark Theme",
     labelDelete: "Delete",
     labelDeleteHistory: "Delete history",
     labelDescription: "Description",
@@ -424,6 +423,11 @@
         subtitle: "Manage system document types",
         createBtn: "Create type",
     },
+    users: {
+        title: "Users",
+        saveSuccess: "User saved successfully",
+        saveError: "Error while saving user",
+    },
     workflow: {
         index: "Workflow",
         title: "Document Processing Board",
@@ -509,6 +513,12 @@
         },
         validationError: "Error validating fields",
     },
+    team: {
+        title: "Teams",
+        deleteSuccess: "Team deleted successfully",
+        deleteDocError: "Could not delete the team: there are related documents",
+        deleteError: "Error while deleting team"
+    }
 };
 
 export default english;

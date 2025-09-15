@@ -28,7 +28,6 @@
     labelCharacter: "carácter",
     labelCharacters: "caracteres",
     labelCopy: "Copiar texto",
-    labelDarkTheme: "Tema Oscuro",
     labelDelete: "Borrar",
     labelDeleteHistory: "Borrar historial",
     labelDescription: "Descripción",
@@ -428,6 +427,11 @@
         subtitle: "Administre los tipos de documentos del sistema",
         createBtn: "Crear tipo",
     },
+    users: {
+        title: "Usuarios",
+        saveSuccess: "Usuario guardado exitosamente",
+        saveError: "Error al guardar usuario",
+    },
     workflow: {
         index: "Workflow",
         title: "Tablero de Procesamiento de Documentos",
@@ -513,6 +517,12 @@
         },
         validationError: "Error al validar los campos",
     },
+    team: {
+        title: "Equipos",
+        deleteSuccess: "Equipo eliminado exitosamente",
+        deleteDocError: "No se pudo eliminar el equipo: hay documentos relacionados",
+        deleteError: "Error al eliminar el equipo"
+    }
 };
 
 export default spanish;

@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-10">
+        <div class="col-9">
             <div class="input-group">
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
@@ -17,7 +17,7 @@
                     ref="searchInpt"
                 />
                 <span v-if="showCleanBtn" class="input-group-text border-start-0 bg-white" @click="cleanInput">
-                    <LucideIcon icon="X" size="16" />
+                    <LucideIcon icon="X" :size="16" />
                 </span>
             </div>
         </div>
@@ -38,44 +38,58 @@
                 </option>
             </select>
         </div>
-        <!-- <div class="col-1">
+        <div class="col-1">
             <button
-                v-tooltip="filters.isAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
+                v-tooltip="filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')"
                 class="btn table-btn btn-sm"
-                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                :class="filters.isAllUsers ? 'btn-outline-primary' : 'btn-outline-secondary'"
                 type="button"
                 style="display: flex; align-items: center; justify-content: center;"
                 @click="filterUsers"
             >
                 <LucideIcon icon="User" />
             </button>
-        </div> -->
+        </div>
     </div>
 </template>
 
 <script>
-    import TeamsService from '@/services/teams/TeamsService';
     export default {
         name: "DocumentFilters",
+        props: {
+            teamsList: { type: Array, required: true } 
+        },
         data() {
             return {
-                teamsList: [],
                 filters: {
                     input: "",
-                    teamId: 0,
+                    teamId: "",
+                    teams: [],
                     isAllUsers: false,
+                    login: this.$store.state.userProfile.login
                 }
             };
         },
+        watch: {
+            teamsList: {
+                immediate: true, 
+                handler(newVal) {
+                    if (newVal.length) {
+                        this.filters.teams = this.filters.teamId
+                            ? [this.filters.teamId]
+                            : newVal.map(t => t.id);
+                            
+                        this.$emit("filter", { ...this.filters });
+                    }
+                }
+            }
+        },
         methods: {
-            getTeams() {
-                TeamsService.getTeamsByUser()
-                    .then((response) => {
-                        this.teamsList = response;
-                    });
-            },
             filterData() {
-                this.$emit("filter", this.filters)
+                this.filters.teams = this.filters.teamId
+                    ? [this.filters.teamId]                
+                    : this.teamsList.map(t => t.id);      
+                this.$emit("filter", { ...this.filters });
             },
             filterUsers() {
                 this.filters.isAllUsers = !this.filters.isAllUsers;
@@ -90,9 +104,6 @@
             showCleanBtn() {
                 return this.filters.input !== "";
             },
-        },
-        created() {
-            this.getTeams();
         }
     };
 </script>

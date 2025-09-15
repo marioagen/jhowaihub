@@ -226,6 +226,7 @@
                     .then(function (response) {
                         if (response && response.data && response.data === true) {
                             self.$refs.formRef.setFieldError("userEmail", self.$t("labelErrorEmailAlreadyExists"));
+
                         } else {
                             self.$refs.formRef.setFieldError("userEmail", "");
                         }
@@ -317,9 +318,20 @@
                     .then((response) => {
                         this.$emit("userCreated");
                         this.close();
+                        this.$notify({
+                            title: "users.title",
+                            message: "users.saveSuccess",
+                            variant: "success",
+                            icon: "CircleX",
+                        });
                     })
                     .catch((e) => {
-                        self.alertToast(self.$t("labelUserError"), "toast-warning");
+                        this.$notify({
+                            title: "users.title",
+                            message: "users.saveError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
                     });
             },
             resetForm() {

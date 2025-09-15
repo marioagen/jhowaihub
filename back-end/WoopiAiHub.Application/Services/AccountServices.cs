@@ -271,7 +271,7 @@ namespace WoopiAiHub.Application.Services
         private async Task<ResponseCheckAccessDto> CheckMarketplaceAccess(string login)
         {
             var keyAccess = _config.GetSection("KeyAccess").Get<string>()!;
-            return await _marketPlaceApi.CheckAccess(keyAccess, login);
+            return await _marketPlaceApi.CheckAccessByHub(keyAccess, login);
         }
 
         /// <summary>

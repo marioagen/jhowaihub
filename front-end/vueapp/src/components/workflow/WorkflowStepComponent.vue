@@ -41,7 +41,7 @@
             <button 
                 type="button" 
                 class="btn btn-link btn-sm"
-                @click="remove"
+                @click="removeStep"
             >
                 <LucideIcon icon="X"/>
             </button>
@@ -160,8 +160,8 @@
             },
         },
         methods: {
-            remove() {
-                this.$emit('remove-step');
+            removeStep() {
+                this.$emit("remove-step", { ...this.step, isActive: false });
             },
             startEditingTitle() {
                 this.editingTitle = true;

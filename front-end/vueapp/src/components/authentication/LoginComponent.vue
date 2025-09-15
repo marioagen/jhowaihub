@@ -3,10 +3,8 @@
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <img v-if="showLogoDarkMode" src="../../assets/img/woopiai-hub-logo.png"
-                        style="padding-bottom: 10px" width="160" height="80" />
-                    <img v-else src="../../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px" width="160"
-                        height="61" />
+                    <img src="../../assets/img/woopiai-hub-logo.png"
+                        style="padding-bottom: 10px" width="160" height="61" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
                     <div class="text-center mt-3">
@@ -111,7 +109,6 @@ export default {
         return {
             isLoading: false,
             isLoadingSSO: false,
-            showLogoDarkMode: false,
             showPassword: false,
             credentials: {
                 email: "",
@@ -302,14 +299,6 @@ export default {
         getPermissions(token) {
             return getJWTPermissions(token);
         },
-        checkTheme() {
-            const element = document.querySelector("html");
-            if (element.classList.value == "css-theme-dark") {
-                this.showLogoDarkMode = true;
-            } else {
-                this.showLogoDarkMode = false;
-            }
-        },
         togglePassword() {
             this.showPassword = !this.showPassword;
         },
@@ -320,7 +309,6 @@ export default {
         if (login !== "" || tenant !== "") {
             this.$router.push({ name: "Documents" });
         }
-        this.checkTheme();
     },
 };
 </script>

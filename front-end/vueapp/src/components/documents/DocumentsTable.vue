@@ -130,6 +130,7 @@
                 teamId: "",
                 isAsc: true,
                 isAllUsers: false,
+                login: null
             },
             isEmbedding: false,
             isDeleting: false,
@@ -142,14 +143,26 @@
                     pageSize: this.table.pagination.itemsPerPage,
                     page: this.table.pagination.currentPage,
                     isAscending: this.filters.isAsc,
+                    isAllUsers: this.filters.isAllUsers,
                     colType: this.colType,
-                    teamId: this.filters.teamId,
+                    teamIds: this.filters.teams,
+                    login: this.filters.login,
                 };
-
+                
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
-                        this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        if (response?.error !== undefined) {
+                            this.$notify({
+                                title: 'Error',
+                                message: "response.error",
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        else{
+                            this.table.data = response.content;
+                            this.table.pagination = response.pagination;
+                        }
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -214,8 +227,8 @@
             },
         },
         created() {
+            this.filters.login = this.$store.state.userProfile.login;
             this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getDocuments();
         },
         computed: {
             showMultiDelete() {
