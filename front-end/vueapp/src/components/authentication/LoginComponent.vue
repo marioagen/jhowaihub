@@ -3,10 +3,8 @@
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <img v-if="showLogoDarkMode" src="../../assets/img/woopiai-hub-logo.png"
-                        style="padding-bottom: 10px" width="160" height="80" />
-                    <img v-else src="../../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px" width="160"
-                        height="61" />
+                    <img src="../../assets/img/woopiai-hub-logo.png"
+                        style="padding-bottom: 10px" width="160" height="61" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
                     <div class="text-center mt-3">
@@ -26,7 +24,7 @@
                             <Field name="email" rules="required|email" v-slot="{ field, errorMessage }">
                                 <div class="input-group">
                                     <span class="input-group-text border-end-0 bg-white">
-                                        <LucideIcon icon="Mail" size="16" />
+                                        <LucideIcon icon="Mail" :size="16" />
                                     </span>
                                     <input v-bind="field" type="text" id="email"
                                         class="form-control form-control-sm border-start-0"
@@ -40,7 +38,7 @@
                             <label for="password" class="form-label">{{ $t("login.password") }}</label>
                             <div class="input-group">
                                 <span class="input-group-text border-end-0 bg-white">
-                                    <LucideIcon icon="Lock" size="16" />
+                                    <LucideIcon icon="Lock" :size="16" />
                                 </span>
                                 <input v-bind="field" id="password" name="password" placeholder="******"
                                     v-model="credentials.password"
@@ -48,8 +46,8 @@
                                     :type="showPassword ? 'text' : 'password'"
                                     :class="{ 'is-invalid': errorMessage }" />
                                 <span class="input-group-text border-start-0 bg-white">
-                                    <LucideIcon v-if="showPassword" icon="Eye" size="16" @click="togglePassword" />
-                                    <LucideIcon v-else icon="EyeClosed" size="16" @click="togglePassword" />
+                                    <LucideIcon v-if="showPassword" icon="Eye" :size="16" @click="togglePassword" />
+                                    <LucideIcon v-else icon="EyeClosed" :size="16" @click="togglePassword" />
                                 </span>
                             </div>
                         </div>
@@ -60,7 +58,7 @@
                                 {{ $t("login.loading") }}
                             </a>
                             <button v-else type="button" class="btn btn-primary btn-sm w-100" @click="login">
-                                <LucideIcon icon="LogIn" size="15" class="me-1" />
+                                <LucideIcon icon="LogIn" :size="15" class="me-1" />
                                 Login
                             </button>
                         </div>
@@ -111,12 +109,16 @@ export default {
         return {
             isLoading: false,
             isLoadingSSO: false,
-            showLogoDarkMode: false,
             showPassword: false,
             credentials: {
                 email: "",
                 password: ""
             },
+            field: { 
+                username: "", 
+                password: "" 
+            },
+            errorMessage: ""
         };
     },
     methods: {
@@ -124,8 +126,8 @@ export default {
             const result = await this.validate();
             if (!result.valid) {
                 return this.$notify({
-                    title: 'Login',
-                    message: 'Campo inválidos',
+                    title: 'login.index',
+                    message: 'login.invalid',
                     variant: 'warning',
                     icon: 'CircleAlert',
                 });
@@ -159,7 +161,7 @@ export default {
                     const message = exists ? this.$t(labelKey) : this.$t('unexpectedError');
 
                     this.$notify({
-                        title: 'Error',
+                        title: 'login.error',
                         message,
                         variant: 'danger',
                         icon: 'CircleX',
@@ -174,7 +176,7 @@ export default {
             AuthService.GetClientId()
                 .then((response) => {
                     this.$notify({
-                        title: 'Login',
+                        title: 'login.index',
                         message: 'login.validateClient',
                         variant: 'info',
                         icon: 'MessageCircle',
@@ -183,8 +185,8 @@ export default {
                 })
                 .catch(() => {
                     this.$notify({
-                        title: 'Error',
-                        message: this.$t('unexpectedError'),
+                        title: "login.error",
+                        message: "unexpectedError",
                         variant: 'danger',
                         icon: 'CircleX',
                     });
@@ -207,8 +209,8 @@ export default {
             MSALobj.handleRedirectPromise()
                 .catch(() => {
                     this.$notify({
-                        title: 'Error',
-                        message: this.$t('unexpectedError'),
+                        title: "login.error",
+                        message: "unexpectedError",
                         variant: 'danger',
                         icon: 'CircleX',
                     });
@@ -233,7 +235,7 @@ export default {
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     this.authenticateUser(response.account.name, response.account.username, response.accessToken);
                     this.$notify({
-                        title: 'Login',
+                        title: 'login.index',
                         message: 'login.authSSO',
                         variant: 'info',
                         icon: 'MessageCircle',
@@ -241,8 +243,8 @@ export default {
                 })
                 .catch((error) => {
                     this.$notify({
-                        title: 'Error',
-                        message: this.$t('unexpectedError'),
+                        title: "login.error",
+                        message: "unexpectedError",
                         variant: 'danger',
                         icon: 'CircleX',
                     });
@@ -281,7 +283,7 @@ export default {
                     const message = exists ? this.$t(labelKey) : this.$t('unexpectedError');
 
                     this.$notify({
-                        title: 'Error',
+                        title: "login.error",
                         message,
                         variant: 'danger',
                         icon: 'CircleX',
@@ -297,14 +299,6 @@ export default {
         getPermissions(token) {
             return getJWTPermissions(token);
         },
-        checkTheme() {
-            const element = document.querySelector("html");
-            if (element.classList.value == "css-theme-dark") {
-                this.showLogoDarkMode = true;
-            } else {
-                this.showLogoDarkMode = false;
-            }
-        },
         togglePassword() {
             this.showPassword = !this.showPassword;
         },
@@ -315,7 +309,6 @@ export default {
         if (login !== "" || tenant !== "") {
             this.$router.push({ name: "Documents" });
         }
-        this.checkTheme();
     },
 };
 </script>

@@ -19,7 +19,7 @@
                 </div>                
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="save">
-                        <LucideIcon icon="Save" size="15" />
+                        <LucideIcon icon="Save" :size="15" />
                         {{ $t("quizzes.formSave") }}
                     </button>
                 </div>
@@ -71,10 +71,13 @@
                         </p>
                     </div>
                     <div class="row">
-                        <TransferListComponent 
+                        <div v-if="isLoadingQuestions" class="d-flex justify-content-center">
+                            <div class="spinner-border" role="status"></div>
+                        </div>
+                        <TransferListComponent
+                            v-else
                             v-model="form.questions"
                             :available="questionsList"
-                            :key="questionsList"
                             transferListTitle="questions.availableList"
                             transferListPlaceholder="questions.filters.input"
                         />    
@@ -83,7 +86,7 @@
                         class="btn btn-outline-primary btn-sm table-btn mt-4"
                         @click="openModalQuestion"
                     >
-                        <LucideIcon icon="Plus" size="17" />
+                        <LucideIcon icon="Plus" :size="17" />
                         {{ $t("questions.createBtn") }}
                     </button>
                 </div>
@@ -123,6 +126,7 @@
         },
         data() {
             return {
+                isLoadingQuestions: true,
                 docTypesList: [],
                 questionsList: [],
                 form: {
@@ -148,6 +152,8 @@
                     });
             },
             getQuestions() {
+                this.isLoadingQuestions = true;
+                this.questionsList = [];
                 QuestionsService.getQuestionsList()
                     .then((response) => {
                         for (let i = 0; i < response.length; i++) {
@@ -157,6 +163,9 @@
                             };
                             this.questionsList.push(item);
                         }
+                    })
+                    .finally(() => {
+                        this.isLoadingQuestions = false;
                     });
             },
             setForm() {

@@ -1,17 +1,30 @@
 import api from "@/services/api";
+import store from "@/store";
 
 export default {
-    getDocuments(params) {
-        return api.get("/Document", { params: params })
+    getDocuments(filters) {
+        if (!store.state.userProfile.keyMongoAccess) {
+            return Promise.resolve({
+                content: [],
+                pagination: {
+                    currentPage: 1,
+                    totalPages: 100,
+                    itemsPerPage: 10,
+                    totalItems: 2000,
+                }
+            });
+        }
+        
+        return api.get("/Document", { params: filters })
             .then(({ data }) => {
                 return {
                     content: data.content,
                     pagination: {
                         currentPage: data.currentPage,
-                        pageCount: data.pageCount,
-                        rowCount: data.rowCount,
-                        listPage: data.rowCount,
-                    }
+                        totalPages: data.pageCount,
+                        itemsPerPage: 10,
+                        totalItems: data.rowCount,
+                    },
                 }
             })
             .catch((e) => {

@@ -13,7 +13,7 @@
                     :aria-controls="tab.name"
                     type="button"
                 >
-                    <LucideIcon v-if="tab.icon" :icon="tab.icon" size="16" class="icon-pill" />
+                    <LucideIcon v-if="tab.icon" :icon="tab.icon" :size="16" class="icon-pill" />
                     {{ $t(tab.label) }}
                 </a>
             </li>

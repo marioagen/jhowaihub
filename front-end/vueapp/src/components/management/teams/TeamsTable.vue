@@ -11,7 +11,7 @@
             @change-page="changePage"
         >
             <template #cell-members="{ data }">
-                <LucideIcon icon="UsersRound" size="15" />
+                <LucideIcon icon="UsersRound" :size="15" />
                 {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">
@@ -78,7 +78,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "Id" },
+                    { key: "id", label: "id" },
                     { key: "name", label: "labelTeamName" },
                     { key: "members", label: "labelMembers" },
                     { key: "actions", label: "labelAction" },
@@ -152,11 +152,32 @@
                 this.isDeleting = true;
                 let teamId = this.selectedTeam.id;
                 TeamsService.deleteTeamById(teamId)
-                    .then((status) => {
-                        if (status) {
+                    .then((response) => {
+                        if (response.error === undefined) {
                             this.$refs.DeleteDialog.close();
                             this.getTeams({ search: "", page: 1, type: null });
+                            return this.$notify({
+                                title: 'team.title',
+                                message: 'team.deleteSuccess',
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                         }
+                        else if (response.error.response.data.errorCode == 5) {
+                             return this.$notify({
+                                title: 'team.title',
+                                message: 'team.deleteDocError',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+
+                        this.$notify({
+                            title: 'team.title',
+                            message: 'team.deleteError',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
                     })
                     .finally(() => {
                         this.isDeleting = false;

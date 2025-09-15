@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -43,11 +45,11 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="teamId"></param>
         /// <returns></returns>
-        public async Task<WorkflowDto?> FindByTeamId(int teamId)
+        public async Task<WorkflowDto?> FindByTeamId(int teamId, WorkflowFilterDto? workflowFilterDto)
         {
             return await _context.Workflows
                 .Where(w => w.TeamId == teamId)
-                .Select(GetWorkflowProjection())
+                .Select(GetWorkflowProjection(workflowFilterDto?.Input, workflowFilterDto?.IsAllUsers, workflowFilterDto?.Login))
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
@@ -99,7 +101,10 @@ namespace WoopiAiHub.Repository
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>
         /// <returns></returns>
-        private static Expression<Func<Workflow, WorkflowDto>> GetWorkflowProjection()
+        private static Expression<Func<Workflow, WorkflowDto>> GetWorkflowProjection(String? input = null, 
+                Boolean? allUsers = true, 
+                String? login = null
+            )
         {
             return w => new WorkflowDto
             {
@@ -123,7 +128,16 @@ namespace WoopiAiHub.Repository
                         Color = s.Status.Color,
                     },
                     Cards = s.Cards
-                    .Where(c => c.Enable)
+                    .Where(c => c.Enable &&
+                            (
+                                (string.IsNullOrWhiteSpace(input) || c.Name.Contains(input)) ||
+                                (string.IsNullOrWhiteSpace(input) ||
+                                (c.Document.Name.Contains(input) || c.Document.Description.Contains(input)))
+                            ) &&
+                            (
+                                allUsers == false ||
+                                (c.AssignedUser != null && c.AssignedUser.Email == login)
+                            ))
                     .Select(c => new CardDto
                     {
                         Id = c.Id,
@@ -133,6 +147,15 @@ namespace WoopiAiHub.Repository
                         Owner = c.Document.EmailCreator,
                         DocumentId = c.Document.Id,
                         StatusDocument = c.Document.Status,
+                        AssignedUser = c.AssignedUser != null ?
+                        new UserDto 
+                        { 
+                            Name = c.AssignedUser.Name,
+                            Email = c.AssignedUser.Email,
+                            Created = c.AssignedUser.Created,
+                            Id = c.AssignedUser.Id
+                        }
+                        : null
                     }).ToList(),
                     WorkflowId = s.WorkflowId
                 }).ToList()

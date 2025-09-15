@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
@@ -46,8 +47,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public DocumentNormalized FindById(int id,
-                                           string emailCreator)
+        public DocumentNormalized FindById(int id)
         {
             return _documentNormalizedRepository.FindById(id);
         }
@@ -59,6 +59,46 @@ namespace WoopiAiHub.Application.Services
         public int FindDocumentNormalizedCount()
         {
             return _documentNormalizedRepository.FindDocumentNormalizedCount();
+        }
+
+        /// <summary>
+        /// Insert or update a normalized document
+        /// </summary>
+        /// <param name="documentId"></param>
+        /// <param name="normalizedContext"></param>
+        public void InsertOrUpdate(int documentId, string normalizedContext)
+        {
+            var normalizedDocument = _documentNormalizedRepository.FindById(documentId);
+            if (normalizedDocument is not null)
+            {
+                var documentNormalized = CreateDocumentNormalized(documentId, normalizedContext, normalizedDocument.Id);
+                _documentNormalizedRepository.Update(documentNormalized);
+            }
+            else
+            {
+                var documentNormalized = CreateDocumentNormalized(documentId, normalizedContext, 0);
+                _documentNormalizedRepository.Create(documentNormalized);
+            }
+        }
+
+        /// <summary>
+        /// Create a new DocumentNormalized for the database.
+        /// </summary>
+        /// <param name="idDocument"></param>
+        /// <param name="content"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private static DocumentNormalized CreateDocumentNormalized(int documentId,
+                                                                   string content,
+                                                                   int id)
+        {
+            return new DocumentNormalized
+            (
+                documentId,
+                content,
+                id,
+                DateTime.Now
+            );
         }
     }
 }

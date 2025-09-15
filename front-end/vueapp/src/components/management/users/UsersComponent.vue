@@ -46,7 +46,6 @@
     import ModalUser from "@/components/management/users/modals/UserModal.vue";
     import paginationDivider from "@/utils/paginationDivider";
     import UsersTable from "@/components/management/users/UsersTable.vue";
-    import SearchBar from "@/components/common/search-bar";
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import editIcon from "@/assets/img/edit-outlined.svg";
     import deleteIcon from "@/assets/img/delete-outlined.svg";
@@ -69,6 +68,7 @@
                 divider: new paginationDivider(),
                 listIds: [],
                 userEditing: {},
+                resetInputSearch: "",
             };
         },
         watch: {
@@ -89,7 +89,6 @@
             ModalAlert,
             ModalUser,
             UsersTable,
-            SearchBar,
             SearchComponent,
         },
         methods: {

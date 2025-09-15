@@ -1,21 +1,24 @@
 <template>
     <main>
         <div class="container-fluid scroll-area mx-2">
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center">
+            <div class="mb-3">            
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
                         <p>
                             <small class="text-muted">{{$t("workflow.subtitle")}}</small>
                         </p>
                     </div>
+                    <button class="btn btn-primary btn-sm" @click="redirectToNewUpload">
+                        <LucideIcon icon="Plus" :size="17" />
+                        {{ $t("documents.createBtn") }}
+                    </button>
                 </div>
-                
                 <div class="card mb-3">
                     <div class="card-body">
                         <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
                             <div>
-                                <LucideIcon icon="Clock" size="14" class="me-2" />
+                                <LucideIcon icon="Clock" :size="14" class="me-2" />
                                 <span>{{$t("workflow.boardView")}}</span>
                             </div>
                             <div class="dropdown">
@@ -28,7 +31,6 @@
                                     <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
                                     <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
                                 </button>
-
                                 <ul class="dropdown-menu">
                                     <li v-for="item in workflowList" :key="item.id">
                                         <a class="dropdown-item" @click="selectOption(item)">
@@ -39,25 +41,25 @@
                                 </ul>
                             </div>
                             <div class="badge bg-secondary badge-custom">
-                                <LucideIcon icon="Workflow" size="14" class="me-2" stroke="#0d6efd" />
+                                <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
                                 <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
                             </div>
+                            <WorkflowFilters @filter="filterData" class="ms-auto" />
                         </div>
                     </div>
                 </div>
-
-                <div v-if="isWorkflowSelected && isLoaded">
+                <div v-if="isWorkflowSelected && isLoaded && isLoadedUsers">
                     <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
                                 <WorkflowCards 
                                     :kanbanData="kanbanCards"
+                                    :users="users"
                                     @reload="reloadKanban"
                                 />
                             </div>
                         </div>
-                    </div>
-    
+                    </div>    
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
@@ -79,14 +81,16 @@
                 </div>
             </div>
         </div>
-</main>
+    </main>
 </template>
 
 <script>
-    import WorkflowService from "@/services/workflow/WorkflowService.js";
-    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
+    import WorkflowService from "@/services/workflow/WorkflowService.js";
+    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
+    import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
+    import UserService from "@/services/users/UserService";
 
     export default {
         name: "WorkflowPage",
@@ -94,12 +98,12 @@
             return {
                 crumbsData: [],
                 entitySearch: {},
-                resetInputSearch: false,
                 modalQuestion: {
                     name: "",
                 },
                 workflowList: [],
                 selectedOption: {
+                    id: 0,
                     name: "Select a workflow",
                     teamName: "Select a team",
                     teamId: 0,
@@ -107,11 +111,18 @@
                 kanbanCards: [],
                 numDocs: 0,
                 isLoaded: false,
-                signalrEventStatusChanged: "StatusChanged"
+                isLoadedUsers: false,
+                signalrEventStatusChanged: "StatusChanged",
+                filters: {
+                    input: "",
+                    isAllUsers: false,
+                },
+                users: []
             };
         },
         components: {
-            WorkflowCards
+            WorkflowFilters,
+            WorkflowCards,
         },
         watch: {
             "$store.state.userProfile.language": function () {
@@ -119,29 +130,42 @@
             },
         },
         methods: {
-            getWorkflowList() {
+            getWorkflowByUser() {
                 this.isLoaded = false;
+                this.isLoadedUsers = false;
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
                         if(response.error !== undefined) {
                             this.$notify({
-                                title: 'Error',
-                                message: 'Dados salvos com erro com sucesso!',
+                                title: "workflow.index",
+                                message: "workflow.error",
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
                         }
                         this.workflowList = response;
                         if(this.workflowList.length > 0) {
-                            this.selectOption(this.workflowList[0]);
+                            const lastSelected = this.$store.state.lastSelectedWorkflow;
+                            let workflowToSelect = this.workflowList[0];
+
+                            if (lastSelected) {
+                                const foundWorkflow = this.workflowList.find(w => 
+                                    w.team.id === lastSelected.teamId && w.id === lastSelected.id
+                                );
+                                if (foundWorkflow) {
+                                    workflowToSelect = foundWorkflow;
+                                }
+                            }
+
+                            this.selectOption(workflowToSelect);
                             this.filteredworkflows();
                         }
                     });
             },
             getWorkflowbyTeam(id) {
                 this.isLoaded = false;
-                WorkflowService.getWorkflowByTeamId(id)
+                WorkflowService.getWorkflowByTeamId(id, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
                     })
@@ -156,16 +180,43 @@
             },
             selectOption(workflow) {
                 this.isLoaded = false;
+                this.isLoadedUsers = false;
                 this.selectedOption = {
+                    id: workflow.id,
                     name: workflow.name,
                     teamName: workflow.team.name,
                     teamId: workflow.team.id,
                 }
+                
+                this.$store.commit('setLastSelectedWorkflow', {
+                    id: workflow.id,
+                    name: workflow.name,
+                    teamName: workflow.team.name,
+                    teamId: workflow.team.id,
+                });
+                this.getUsersByTeamId(workflow.team.id);
                 this.getWorkflowbyTeam(workflow.team.id);
             },
             reloadKanban() {
                 this.getWorkflowbyTeam(this.selectedOption.teamId);
             },
+            filterData(filters) {
+                this.filters = filters;
+                this.reloadKanban();
+            },
+            redirectToNewUpload() {
+                this.$router.push({ name: "DocumentsUpload" });
+            },
+            getUsersByTeamId(teamId) {
+                this.isLoadedUsers = false;
+                UserService.getUsersByTeamId(teamId)
+                    .then((response) => {                 
+                        this.users = response;
+                    })
+                    .finally(() => {
+                        this.isLoadedUsers = true;
+                    });                  
+            }
         },
         computed: {
             isWorkflowSelected() {
@@ -173,9 +224,9 @@
             },
         },
         created() {
-            this.getWorkflowList();
-            GlobalEventService.on("all-uploads-complete", this.getWorkflowList);
-            GlobalEventService.on("refresh-once", this.getWorkflowList);
+            this.getWorkflowByUser();
+            GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
+            GlobalEventService.on("refresh-once", this.getWorkflowByUser);
         },
         async mounted() {
             await signalRService.startConnection();
@@ -193,8 +244,8 @@
         beforeUnmount() {
             signalRService.off(this.signalrEventStatusChanged);
             signalRService.stopConnection();
-            GlobalEventService.off("all-uploads-complete", this.reloadList);
-            GlobalEventService.off("refresh-once", this.reloadList);
+            GlobalEventService.off("all-uploads-complete", this.reloadKanban);
+            GlobalEventService.off("refresh-once", this.reloadKanban);
         },
     };
 </script>
@@ -226,5 +277,4 @@
         overflow-x: auto;
         white-space: nowrap;
     }
-
 </style>

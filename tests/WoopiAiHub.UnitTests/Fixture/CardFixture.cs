@@ -15,9 +15,18 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
+        public static UpdateAssignedUserDto FindValidUpdateAssignedUserDto()
+        {
+            return new UpdateAssignedUserDto
+            {
+                CardId = 1,
+                UserId = Guid.NewGuid(),
+            };
+        }
+
         public static Card FindValidCard()
         {
-            return new Card(1, DateTime.Now, 1, 1, "Card", 1, true);
+            return new Card(1, DateTime.Now, 1, 1, "Card", 1, true, null);
         }
 
         public static Step FindValidStep()

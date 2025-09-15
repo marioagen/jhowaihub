@@ -4,10 +4,10 @@
         class="btn btn-outline-danger btn-sm mb-2 ms-2" 
         @click="openConfirmation"
     >
-        <LucideIcon icon="Trash2" size="15" />
+        <LucideIcon icon="Trash2" :size="15" />
         {{ $t("labelDelete") }}
     </button>
-    <div>
+    <div v-if="showTable">
         <TableComponent
             modalName="documents.title"
             emptyMessage="documents.notFound"
@@ -41,24 +41,34 @@
                 />
             </template>
             <template #cell-actions="{ data }">
-                <button
-                    v-if="data.row.status === 0"
-                    class="btn btn-outline-primary btn-sm table-btn analyze-btn"
-                    @click="embedData(data.row.id)"
-                >
-                    {{ $t("documents.actions.analyze") }}
-                </button>
-                <button
-                    v-else
-                    class="btn btn-outline-success btn-sm table-btn analyze-btn"
-                    @click="redirectToConsult(data.row.id)"
-                >
-                    {{ $t("documents.actions.consult") }}
-                </button>
+                <div class="dropdown">
+                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <LucideIcon icon="Ellipsis" />
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li v-if="data.row.status === 0">
+                            <a 
+                                class="dropdown-item d-flex align-items-center gap-2" 
+                                @click="embedData(data.row.id)"
+                            >
+                                <LucideIcon icon="TextSearch" />
+                                {{ $t("documents.actions.analyze") }}
+                            </a>
+                        </li>
+                        <li v-else>
+                            <a
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                @click="redirectToConsult(data.row.id)"
+                            >
+                                <LucideIcon icon="Search" />
+                                {{ $t("documents.actions.consult") }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </template>
         </TableComponent>
     </div>
-
     <EmbeddingDocument
         v-if="isEmbedding"
         :docData="docDataEmbedding"
@@ -115,62 +125,48 @@
                 },
                 selectedRows: [],
             },
-            selectedDocument: {},
-            queryPage: 1,
-            selectedOption: 10,
-            isAscending: false,
-            colType: 2,
-            modalTypeShow: false,
-            modalAlertShow: false,
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
-            searchInput: "",
-            isDeleting: false,
-            isEmbedding: false,
-            docDataEmbedding: {
-                Id: Number,
-                Embeddings_model_name: "",
+            filters: {
+                input: "",
+                teamId: "",
+                isAsc: true,
+                isAllUsers: false,
+                login: null
             },
-            isReprocessing: false,
+            isEmbedding: false,
+            isDeleting: false,
         }),
         methods: {
-            getDocuments(obj) {
+            getDocuments() {
                 this.table.isLoading = true;
-                const teamIds = this.resolveTeamIds();
-                if (teamIds.length === 0) return;
                 const params = {
-                    search: obj.search.trim() || "",
-                    pageSize: this.selectedOption,
-                    page: obj.page,
-                    isAscending: this.isAscending,
+                    search: this.filters.input,
+                    pageSize: this.table.pagination.itemsPerPage,
+                    page: this.table.pagination.currentPage,
+                    isAscending: this.filters.isAsc,
+                    isAllUsers: this.filters.isAllUsers,
                     colType: this.colType,
-                    teamIds,
+                    teamIds: this.filters.teams,
+                    login: this.filters.login,
                 };
-
+                
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
-                        this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        if (response?.error !== undefined) {
+                            this.$notify({
+                                title: 'Error',
+                                message: "response.error",
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        else{
+                            this.table.data = response.content;
+                            this.table.pagination = response.pagination;
+                        }
                     })
                     .finally(() => {
                         this.table.isLoading = false;
                     });
-            },
-            resolveTeamIds() {
-                if (this.selectedTeamId === 0) {
-                    return this.teamList.length > 0 ? this.teamList.map((team) => team.id) : [];
-                }
-                return [this.selectedTeamId];
-            },
-            orderList(col) {
-                if (this.isAscending) {
-                    this.isAscending = false;
-                } else {
-                    this.isAscending = true;
-                }
-                this.colType = col;
-                this.getQuestions({ search: "", page: this.queryPage, type: null });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
@@ -189,14 +185,14 @@
                             this.getDocuments({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: this.$t("documents.title"),
-                                message: this.$t("documents.RemoveSuccess"),
+                                message: this.$t("documents.removeSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
                                 title: this.$t("documents.title"),
-                                message: this.$t("documents.RemoveError"),
+                                message: this.$t("documents.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
@@ -210,10 +206,6 @@
             formatDate(date) {
                 return dates.formatDate(date);
             },
-            filterList(input) {
-                this.searchInput = input;
-                this.getDocuments({ search: input, page: this.queryPage, type: null });
-            },
             embedData(id) {
                 this.docDataEmbedding.Id = id;
                 this.isEmbedding = true
@@ -225,18 +217,25 @@
                         id: id 
                     },
                     query: { 
-                        page: this.table.pagination.currentPage 
+                        page: this.table.pagination.currentPage
                     } 
                 });
             },
+            changePage(page) {
+                this.table.pagination.currentPage = page;
+                this.getDocuments();
+            },
         },
         created() {
-            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getDocuments({ search: "", page: this.queryPage, type: null });
+            this.filters.login = this.$store.state.userProfile.login;
+            this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
         },
         computed: {
             showMultiDelete() {
                 return this.table.selectedRows.length > 0;
+            },
+            showTable() {
+                return this.table.data !== undefined;
             },
         },
     };

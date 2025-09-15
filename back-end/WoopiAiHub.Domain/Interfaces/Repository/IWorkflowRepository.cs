@@ -1,4 +1,5 @@
 ﻿using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
@@ -7,7 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<bool> Create(Workflow workflow);
         Task<bool> Update(Workflow workflow);
-        Task<WorkflowDto?> FindByTeamId(int teamId);
+        Task<WorkflowDto?> FindByTeamId(int teamId, WorkflowFilterDto? workflowFilterDto);
         Task<WorkflowDto?> FindById(int id);
         Task<Workflow?> FindByIdReturnModel(int id);
         Task<bool> DeleteById(int id);

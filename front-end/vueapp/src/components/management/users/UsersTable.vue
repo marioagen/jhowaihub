@@ -11,7 +11,7 @@
             @change-page="changePage"
         >
             <template #cell-name="{ data }">
-                <div v-if="!loading" class="p-1">
+                <div class="p-1">
                      <div class="d-flex">
                         <label class="form-check-label d-flex align-items-center w-100">
                             <AvatarComponent :name="data.row.name" />
@@ -50,7 +50,7 @@
                 <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown column-align">
+                <div class="dropdown">
                     <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <LucideIcon icon="Ellipsis" />
                     </a>
@@ -75,14 +75,12 @@
             </template>
         </TableComponent>
     </div>
-
     <modal-user
         v-if="modalUserShow"
+        :userEditing="selectedUser"
         @userCreated="handleUserCreated"
         @close="closeModalUser"
-        :userEditing="selectedUser"
     />
-
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteUser"
@@ -95,6 +93,7 @@
         @confirm="deleteUser"
     />
 </template>
+
 <script>
     import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import UserService from "@/services/users/UserService";
@@ -106,6 +105,7 @@
 
     export default {
         name: "UsersTable",
+        emits: ["setFilter"],
         components: {
             BadgeOutlinedComponent,
             AvatarComponent,

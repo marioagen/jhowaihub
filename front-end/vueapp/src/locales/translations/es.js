@@ -28,7 +28,6 @@
     labelCharacter: "carácter",
     labelCharacters: "caracteres",
     labelCopy: "Copiar texto",
-    labelDarkTheme: "Tema Oscuro",
     labelDelete: "Borrar",
     labelDeleteHistory: "Borrar historial",
     labelDescription: "Descripción",
@@ -125,6 +124,7 @@
     labelSelected: "Seleccionada",
     labelSelecteds: "Selecionadas",
     labelSelectedList: "Selecionadas",
+    labelSelectedUsers: "Usuarios seleccionados",
     labelSelectQuestions: "Seleccionar preguntas",
     labelSelectQuestionnaire: "Seleccione uno cuestionario",
     labelSearchDocument: "Buscar documento",
@@ -182,7 +182,6 @@
     labelUser: "Usuario",
     labelTeams: "Equipos",
     labelTeam: "Equipo",
-    labelTypes: "Tipos",
     labelDocumentTypeSuccess: "Tipo de documento insertado exitosamente",
     labelDocumentTypeEditSuccess: "Tipo de documento actualizado exitosamente",
     labelDocumentTypeRemoveSuccess: "Tipo de documento eliminado correctamente",
@@ -211,10 +210,8 @@
     labelSearchUsers: "Buscar usuarios...",
     labelSearchPermissions: "Buscar permisos...",
     labelSelectAll: "Seleccionar Todos",
-    labelClearSelection: "Limpiar selección",
     labelNewUser: "Nuevo usuario",
     labelEditUser: "Editar usuario",
-    labelTeamName: "Nombre del equipo",
     labelTypeTeamName: "Nombre del equipo",
     labelTypeUserName: "Introduce el nombre del usuario",
     labelTypeUserEmail: "Introduce el email del usuario",
@@ -248,27 +245,48 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
     labelProcessing: "Procesando",
-    login: {
+    Admin: "Admin",
+     login: {
+        index: "Login",
         title: "Iniciar sesión",
         password: "Contraseña",
         subtitle: "Accede a tu cuenta para gestionar documentos",
+        invalid: "Campo inválido",
+        error: "Error",
         loading: "Cargando...",
-        sso: "Iniciar sesión con Microsoft",
-        authSSO: "Autenticado con Microsoft",
+        sso: "Login con Microsoft",
+        authSSO: "Autenticado en Microsoft",
         validateClient: "Cliente validado",
         userNotFound: "Usuario no encontrado.",
         userWithoutAccess: "Usuario sin permiso de acceso.",
         userIncorrectPassword: "La contraseña ingresada es incorrecta.",
-        userTokenMicrosoftInvalid: "No pudimos validar tu autenticación. Inicia sesión de nuevo."
+        userTokenMicrosoftInvalid: "No se pudo validar tu autenticación. Por favor, inicia sesión nuevamente."
     },
-    "validation": {
-        "required": "Campo obligatorio.",
-        "email": "Por favor, introduce un correo electrónico válido.",
-        "min": "Mínimo de {length} caracteres.",
-        "max": "Máximo de {length} caracteres.",
-        "password_min": "La contraseña debe tener al menos 6 caracteres.",
-        "password_uppercase": "La contraseña debe contener al menos una letra mayúscula.",
-        "password_number": "La contraseña debe contener al menos un número."
+    validation: {
+        required: "Campo obligatorio",
+        email: "Correo electrónico inválido",
+        min: "Mínimo de {limit} caracteres",
+        max: "Máximo de {limit} caracteres",
+        password_min: "La contraseña debe tener al menos 6 caracteres.",
+        password_lowercase: "La contraseña debe contener al menos una letra minúscula.",
+        password_uppercase: "La contraseña debe contener al menos una letra mayúscula.",
+        password_number: "La contraseña debe contener al menos un número.",
+        password_special: "La contraseña debe contener al menos un carácter especial.",
+        password_confirmed: "La confirmación de la contraseña no coincide.",
+        hasInvalid: "Campos inválidos",
+        oneStep: "Se requiere al menos un paso para guardar",
+    },
+    filters: {
+        documentInput: "Buscar por documento, descripción o usuario, ...",
+        workflowInput: "Buscar por documento",
+        teamsSelect: {
+            all: "Todos los equipos",
+            none: "Seleccione un equipo",
+        },
+        assignment: {
+            currentUser: "Mis documentos",
+            allUsers: "Todos los usuarios",
+        }
     },
     labelBackToListDocuments: "Volver a los documentos",
     pageTitleDocumentsForm: "Nuevo documento",
@@ -277,7 +295,6 @@
     labelTeamsSubtextDocuments: "Seleccione al menos un equipo para asociarlo al documento.",
     labelNoTeamsFound: "Ningún equipo vinculado a su usuario",
     labelNoPermissionChosen: "Ningún permiso vinculado",
-    labelSelectedTeamsTitle: "Selected teams",
     labelDocumentsMessage: "Gestione documentos y extraiga información",
     labelAllTeams: "Todos los equipos",
     labelNoTeams: "No hay equipos disponibles.",
@@ -291,29 +308,9 @@
     labelSelectedTeams: "Equipos seleccionados",
     labelProfiles: "Perfiles",
     labelSelectedProfiles: "Perfiles seleccionados",
-    labelSearchProfiles: "Buscar perfiles",
     unauthorized: {
         title: "No tiene permiso para acceder a esta pantalla.",
         returnToHome: "Volver",
-    },
-    workflow: {
-        labelWatchingWorkflow: "Visualización del workflow:",
-        labelWorkflowDocs: "Workflow de documentos",
-        labelWorkflowBoard: "Tablero de procesamiento de documentos",
-        labelWorkflowSubTitle: "Visualice el flujo de documentos a través de los pasos de procesamiento",
-    },
-    validation: {
-        required: "El campo es obligatorio.",
-        max: "El número máximo de caracteres es {limit}.",
-        min: "El número mínimo de caracteres es {limit}.",
-        password_lowercase: "La contraseña debe contener al menos una letra minúscula.",
-        password_uppercase: "La contraseña debe contener al menos una letra mayúscula.",
-        password_number: "La contraseña debe contener al menos un número.",
-        password_special: "La contraseña debe contener al menos un carácter especial.",
-        password_confirmed: "La confirmación de la contraseña no coincide.",
-        email: "Correo electrónico inválido.",
-        hasInvalid: "Campos inválidos",
-        oneStep: "Al menos un paso es necesario para guardar"
     },
     pagination: {
         next: "Siguiente",
@@ -341,6 +338,9 @@
             analyze: "Analizar",
             consult: "Consultar",
         },
+        upload: {
+            warningTeamsNotListed: "¿El equipo no apareció en la lista? Es porque aún no tiene un workflow asociado.",
+        }
     },
     questions: {
         title: "Preguntas",
@@ -413,10 +413,22 @@
             subtitle: "Actualiza la información del cuestionario",
         },
     },
+    id: "Id",
     transferListTitle: "Lista para seleccionar",
     transferListPlaceholder: "Buscar en la lista",
     unexpectedError: "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",
+    types: {
+        title: "Tipos",
+        subtitle: "Administre los tipos de documentos del sistema",
+        createBtn: "Crear tipo",
+    },
+    users: {
+        title: "Usuarios",
+        saveSuccess: "Usuario guardado exitosamente",
+        saveError: "Error al guardar usuario",
+    },
     workflow: {
+        index: "Workflow",
         title: "Tablero de Procesamiento de Documentos",
         editTitle: "Editor de Workflow",
         subtitle: "Visualiza el flujo de documentos a través de las etapas de procesamiento",
@@ -424,6 +436,7 @@
         manage: "Gestionar workflow:",
         boardView: "Visualizando workflow:",
         steps: "Etapas del Workflow",
+        error: "Error al buscar workflows",
         addBtn: "Agregar Etapa",
         addBtnDescription: "Haz clic para crear una nueva etapa",
         createNewStep: "Nueva Etapa",
@@ -451,7 +464,23 @@
             title: "Edición de Workflow",
             subtitle: "Modifica las etapas y configuraciones del workflow",
         },
+        labelWatchingWorkflow: "Visualización del workflow:",
+        labelWorkflowDocs: "Workflow de documentos",
+        labelWorkflowBoard: "Tablero de procesamiento de documentos",
+        labelWorkflowSubTitle: "Visualice el flujo de documentos a través de los pasos de procesamiento",
     },
+    card:{
+        userAssigned: "Responsable",
+        userApplicant: "Solicitante",
+        assignBtn: "Asignar",
+        unassignInfo: "Desasignar documento"
+    },
+    team: {
+        title: "Equipos",
+        deleteSuccess: "Equipo eliminado exitosamente",
+        deleteDocError: "No se pudo eliminar el equipo: hay documentos relacionados",
+        deleteError: "Error al eliminar el equipo"
+    }
 };
 
 export default spanish;

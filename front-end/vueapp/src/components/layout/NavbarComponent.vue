@@ -2,31 +2,7 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <div class="navbar-main-area d-flex align-items-center flex-grow-1 ps-4">
-                <div class="dropdown" id="tenantDropdownContainer">
-                    <button class="btn dropdown-toggle d-flex align-items-center" type="button"
-                        id="tenantDropdownButton" data-bs-toggle="dropdown" aria-expanded="false" style="
-                            background-color: var(--dropdown-bg-color);
-                            border: 1px solid var(--border-color);
-                            color: var(--dropdown-text-color);
-                            padding-right: 20px;
-                            text-align: left;
-                        "
-                    >
-                        <AvatarComponent :name="initials" size="30" />
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-sidebar text-small shadow" aria-labelledby="tenantDropdown"
-                        id="tenantDropdownMenu" style="white-space: normal; overflow-wrap: break-word">
-                        <li v-for="tenant in tenantsFromState" :key="tenant" class="remove-hover">
-                            <label class="dropdown-item" id="tenantDropdownLabel"
-                                style="display: flex; align-items: center; word-break: break-word">
-                                <input type="radio" name="tenant" :value="tenant" v-model="selectedTenant"
-                                    @change="handleTenantChange" style="margin-right: 10px" />
-                                {{ tenant }}
-                            </label>
-                        </li>
-                    </ul>
-                </div>
-
+              <AvatarComponent :name="initials" :size="30" />
                 <div class="dropdown nav-buttons">
                     <button
                         class="btn btn-outline-primary table-btn btn-sm"
@@ -85,8 +61,7 @@
                             aria-labelledby="dropdownUser1" id="dropdown-menu-button">
                             <li class="remove-hover mt-2">
                                 <router-link class="dropdown-item mx-2 my-2" :to="{
-                                    name: 'Logout',
-                                    query: { darkMode: this.showLogoDarkMode },
+                                    name: 'Logout'
                                 }" title="Sair">
                                     <LucideIcon icon="LogOut" />
                                     {{ $t("labelSignOut") }}
@@ -110,7 +85,7 @@ export default {
     name: "NavBarComponent",
     props: {
         sidebarData: {
-            required: true,
+            required: false,
             type: String,
             default: "",
         },
@@ -121,7 +96,6 @@ export default {
     data() {
         return {
             title: "Component NavBar",
-            showLogoDarkMode: false,
             profileImage: "",
             user: this.$store.state.userProfile.name,
             selectedTenant: null,
@@ -198,19 +172,6 @@ export default {
             if (strSplit.length === 1) return strSplit[0];
             return `${strSplit[0]} ${strSplit[strSplit.length - 1]}`;
         },
-        toggleTheme() {
-            if (localStorage.getItem("theme") === "css-theme-dark") {
-                this.setTheme("css-theme-light");
-                this.showLogoDarkMode = false;
-            } else {
-                this.setTheme("css-theme-dark");
-                this.showLogoDarkMode = true;
-            }
-        },
-        setTheme(themeName) {
-            localStorage.setItem("theme", themeName);
-            document.documentElement.className = themeName;
-        },
     },
     computed: {
         tenantInitialized() {
@@ -245,21 +206,17 @@ export default {
         this.getUserTenants(userEmail, savedTenant);
     },
     mounted() {
-        if (localStorage.getItem("theme") === "css-theme-dark") {
-            this.setTheme("css-theme-dark");
-            this.showLogoDarkMode = true;
-        } else {
-            this.setTheme("css-theme-light");
-            this.showLogoDarkMode = false;
-        }
+        document.documentElement.className = "css-theme-light";
     },
 };
 </script>
 
 <style scoped>
-.navbar {
-    padding: 1;
-}
+    .navbar {
+        padding: 1;
+        padding-top: 0.9rem;
+        padding-bottom: 0.8rem;
+    }
 
 .navbar-light {
     background-color: #ffffff;

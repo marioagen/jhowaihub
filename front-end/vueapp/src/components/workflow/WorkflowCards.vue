@@ -38,6 +38,7 @@
                                 :isLastStep="step.order === maxOrder"
                                 @reload="reloadList"
                                 label="labelAnalyze"
+                                :users="users"
                             />
                         </div>
                     </div>
@@ -56,15 +57,24 @@
         },
         props: {
             kanbanData: {
+                type: [Array, Object],
+                required: true,
+            },
+            users:{
                 type: Array,
-                required: false,
+                required: true,
                 default: () => []
             },
             isEditor: {
                 type: Boolean,
                 required: false,
                 default: false,
-            }
+            },
+        },
+        watch: {
+            kanbanData() {
+                this.setCard();
+            },
         },
         data: () => ({
             firstStep: false,
@@ -96,7 +106,7 @@
                 this.stepsList = this.kanbanData.steps;
             },
         },
-        created() {
+        mounted() {
             this.setCard();
         }
     };

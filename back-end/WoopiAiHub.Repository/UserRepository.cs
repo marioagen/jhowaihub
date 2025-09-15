@@ -153,7 +153,7 @@ namespace WoopiAiHub.Repository
             {
                 query = query.Where(u => u.Id != excludeUserId.Value);
             }
-            return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail);
+            return await query.AnyAsync(u => u.Email.ToLower() == normalizedEmail && u.IsActive == true);
         }
 
         /// <summary>
@@ -170,6 +170,21 @@ namespace WoopiAiHub.Repository
                                  .SelectMany(u => u.Profiles)
                                  .Select(p => p.Name.ToLower())
                                  .Distinct()
+                                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Find users by team id
+        /// </summary>
+        /// <param name="teamId"></param>
+        /// <returns></returns>
+        public async Task<ICollection<UserDto>> FindByTeamIdAsync(int teamId)
+        {
+            return await _context.Users
+                                 .Include(u => u.Teams)
+                                 .AsNoTracking()
+                                 .Where(u => u.IsActive && u.Teams.Any(a => a.Id.Equals(teamId)))
+                                 .Select(s=> new UserDto { Id =  s.Id, Name = s.Name, Email = s.Email })
                                  .ToListAsync();
         }
     }

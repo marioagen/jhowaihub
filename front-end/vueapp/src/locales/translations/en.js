@@ -28,7 +28,6 @@
     labelCharacter: "character",
     labelCharacters: "characters",
     labelCopy: "Copy text",
-    labelDarkTheme: "Dark Theme",
     labelDelete: "Delete",
     labelDeleteHistory: "Delete history",
     labelDescription: "Description",
@@ -132,6 +131,7 @@
     labelSelected: "Selected",
     labelSelecteds: "Selected",
     labelSelectedList: "Selected list",
+    labelSelectedUsers: "Selected users",
     labelSelectQuestions: "Select questions",
     labelSelectQuestionnaire: "Select a questionnaire",
     labelSearchDocument: "Search document",
@@ -192,7 +192,6 @@
     labelUser: "User",
     labelTeams: "Teams",
     labelTeam: "Team",
-    labelTypes: "Types",
     labelTeamsMessage: "Manage teams and their members",
     labelProfilesMessage: "Manage profiles and permissions from system",
     labelId: "ID",
@@ -207,10 +206,8 @@
     labelSearchUsers: "Search users...",
     labelSearchPermissions: "Search permissions...",
     labelSelectAll: "Select All",
-    labelClearSelection: "Clear Selection",
     labelNewUser: "New user",
     labelEditUser: "Edit user",
-    labelTeamName: "Team name",
     labelTypeTeamName: "Enter the team name",
     labelTypeUserName: "Enter the user name ",
     labelTypeUserEmail: "Enter the user email",
@@ -244,27 +241,48 @@
     labelEditType: "Edit",
     labelSaveType: "Create",
     labelProcessing: "Processing",
+    Admin: "Admin",
     login: {
-        title: "Login",
+        index: "Login",
+        title: "Sign In",
         password: "Password",
         subtitle: "Access your account to manage documents",
+        invalid: "Invalid field",
+        error: "Error",
         loading: "Loading...",
         sso: "Login with Microsoft",
         authSSO: "Authenticated with Microsoft",
         validateClient: "Client validated",
         userNotFound: "User not found.",
-        userWithoutAccess: "User without access permission.",
-        userIncorrectPassword: "The password entered is incorrect.",
-        userTokenMicrosoftInvalid: "We were unable to validate your authentication. Please log in again."
+        userWithoutAccess: "User does not have access permission.",
+        userIncorrectPassword: "The entered password is incorrect.",
+        userTokenMicrosoftInvalid: "Could not validate your authentication. Please log in again."
     },
-    "validation": {
-      "required": "This field is required.",
-      "email": "Please enter a valid email address.",
-      "min": "Minimum of {length} characters.",
-      "max": "Maximum of {length} characters.",
-      "password_min": "Password must be at least 6 characters.",
-      "password_uppercase": "Password must contain at least one uppercase letter.",
-      "password_number": "Password must contain at least one number."
+    validation: {
+        required: "Required field",
+        email: "Invalid email",
+        min: "Minimum of {limit} characters",
+        max: "Maximum of {limit} characters",
+        password_min: "Password must be at least 6 characters.",
+        password_lowercase: "Password must contain at least one lowercase letter.",
+        password_uppercase: "Password must contain at least one uppercase letter.",
+        password_number: "Password must contain at least one number.",
+        password_special: "Password must contain at least one special character.",
+        password_confirmed: "Password confirmation does not match.",
+        hasInvalid: "Invalid fields",
+        oneStep: "At least one step is required to save",
+    },
+    filters: {
+        documentInput: "Search by document, description or user, ...",
+        workflowInput: "Search by document",
+        teamsSelect: {
+            all: "All teams",
+            none: "Select a team",
+        },
+        assignment: {
+            currentUser: "My documents",
+            allUsers: "All users",
+        }
     },
     labelBackToListDocuments: "Back to documents",
     pageTitleDocumentsForm: "New Document",
@@ -273,7 +291,6 @@
     labelTeamsSubtextDocuments: "Select at least one team to associate with the document.",
     labelNoTeamsFound: "No team linked to your user",
     labelNoPermissionChosen: "No permission selected",
-    labelSelectedTeamsTitle: "Equipos seleccionados",
     labelDocumentsMessage: "Manage documents and extract information",
     labelAllTeams: "All teams",
     labelNoTeams: "No teams available",
@@ -287,29 +304,9 @@
     labelSelectedTeams: "Selected teams",
     labelProfiles: "Profiles",
     labelSelectedProfiles: "Selected profiles",
-    labelSearchProfiles: "Search profiles",
     unauthorized: {
         title: "You do not have permission to access this screen.",
         returnToHome: "Return",
-    },
-    workflow: {
-        labelWatchingWorkflow: "Viewing workflow:",
-        labelWorkflowDocs: "Documents Workflow",
-        labelWorkflowBoard: "Document Processing Board",
-        labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
-    },
-    validation: {
-        required: "This field is required.",
-        max: "Maximum {limit} characters",
-        min: "Minimum {limit} characters",
-        password_lowercase: "The password must contain at least one lowercase letter.",
-        password_uppercase: "The password must contain at least one uppercase letter.",
-        password_number: "The password must contain at least one number.",
-        password_special: "The password must contain at least one special character.",
-        password_confirmed: "The password confirmation does not match.",
-        email: "Invalid email",
-        hasInvalid: "Invalid fields",
-        oneStep: "At least one step is required to save"
     },
     pagination: {
         next: "Next",
@@ -337,6 +334,9 @@
             analyze: "Analyze",
             consult: "Consult",
         },
+        upload: {
+            warningTeamsNotListed: "The team did not appear in the list? It's because it doesn't have a workflow associated with it yet.",
+        }
     },
     questions: {
         title: "Questions",
@@ -409,10 +409,22 @@
             subtitle: "Update the quiz information",
         },
     },
+    id: "Id",
     transferListTitle: "Selection list",
     transferListPlaceholder: "Search in list",
     unexpectedError: "An unexpected error occurred. Please contact the system administrator.",
+     types: {
+        title: "Types",
+        subtitle: "Manage system document types",
+        createBtn: "Create type",
+    },
+    users: {
+        title: "Users",
+        saveSuccess: "User saved successfully",
+        saveError: "Error while saving user",
+    },
     workflow: {
+        index: "Workflow",
         title: "Document Processing Board",
         editTitle: "Workflow Editor",
         subtitle: "View the flow of documents through the processing stages",
@@ -420,6 +432,7 @@
         manage: "Manage workflow:",
         boardView: "Viewing workflow:",
         steps: "Workflow Steps",
+        error: "Error fetching workflows",
         addBtn: "Add Step",
         addBtnDescription: "Click to create a new step",
         createNewStep: "New Step",
@@ -447,7 +460,23 @@
             title: "Workflow Editing",
             subtitle: "Modify the workflow steps and settings",
         },
+        labelWatchingWorkflow: "Viewing workflow:",
+        labelWorkflowDocs: "Documents Workflow",
+        labelWorkflowBoard: "Document Processing Board",
+        labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
     },
+    card:{
+        userAssigned: "Assigned",
+        userApplicant: "Applicant",
+        assignBtn: "Assign",
+        unassignInfo: "Unassign document"
+    },
+    team: {
+        title: "Teams",
+        deleteSuccess: "Team deleted successfully",
+        deleteDocError: "Could not delete the team: there are related documents",
+        deleteError: "Error while deleting team"
+    }
 };
 
 export default english;

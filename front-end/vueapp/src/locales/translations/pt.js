@@ -15,6 +15,7 @@
     labelAttentionDependingOnTheSpeed:
         "Atenção, dependendo da velocidade da sua conexão com a Internet e do tamanho do arquivo carregado, essa operação pode demorar alguns minutos.",
     labelAttentionPDFDisplayFailed: "Ocorreu uma falha ao carregar o PDF. Clique aqui para tentar novamente",
+    id: "Id",
     labelAll: "Tudo",
     labelBack: "Voltar",
     labelCancel: "Cancelar",
@@ -28,7 +29,6 @@
     labelCharacter: "caractere",
     labelCharacters: "caracteres",
     labelCopy: "Copiar texto",
-    labelDarkTheme: "Tema Escuro",
     labelDelete: "Excluir",
     labelDeleteHistory: "Deletar histórico",
     labelDescription: "Descrição",
@@ -123,6 +123,7 @@
     labelSelected: "Selecionada",
     labelSelecteds: "Selecionadas",
     labelSelectedList: "Selecionadas",
+    labelSelectedUsers: "Usuários selecionados",
     labelSelectQuestions: "Selecione as perguntas",
     labelSelectQuestionnaire: "Selecione um questionário",
     labelSearchDocument: "Buscar documento",
@@ -188,7 +189,6 @@
     labelUser: "Usuário",
     labelTeams: "Times",
     labelTeam: "Time",
-    labelTypes: "Tipos",
     labelTeamsMessage: "Gerencie os times e suas equipes",
     labelProfilesMessage: "Gerencie os perfis e permissões do sistema",
     labelNewTeam: "Novo time",
@@ -207,10 +207,8 @@
     labelSearchUsers: "Buscar usuários...",
     labelSearchPermissions: "Buscar permissões...",
     labelSelectAll: "Selecionar Todos",
-    labelClearSelection: "Limpar Seleção",
     labelNewUser: "Novo usuário",
     labelEditUser: "Editar usuário",
-    labelTeamName: "Nome do time",
     labelTypeTeamName: "Digite o nome do time",
     labelTypeUserName: "Digite o nome do usuário",
     labelTypeUserEmail: "Digite o email do usuário",
@@ -244,10 +242,14 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Criar tipo",
     labelProcessing: "Processando",
+    Admin: "Admin",
     login: {
+        index: "Login",
         title: "Fazer Login",
         password: "Senha",
         subtitle: "Acesse sua conta para gerenciar documentos",
+        invalid: "Campo inválidos",
+        error: "Error",
         loading: "Carregando...",
         sso: "Login com Microsoft",
         authSSO: "Autenticado na Microsoft",
@@ -257,14 +259,31 @@
         userIncorrectPassword: "A senha informada está incorreta.",
         userTokenMicrosoftInvalid: "Não foi possível validar sua autenticação. Por favor, faça login novamente."
     },
-    "validation": {
-        "required": "Campo obrigatório.",
-        "email": "Informe um email válido.",
-        "min": "Mínimo de {length} caracteres.",
-        "max": "Máximo de {length} caracteres.",
-        "password_min": "A senha deve ter no mínimo 6 caracteres.",
-        "password_uppercase": "A senha deve conter uma letra maiúscula.",
-        "password_number": "A senha deve conter um número."
+    validation: {
+        required: "Campo obrigatório",
+        email: "Email inválido",
+        min: "Mínimo de {limit} caracteres",
+        max: "Máximo de {limit} caracteres",
+        password_min: "A senha deve ter no mínimo 6 caracteres.",
+        password_lowercase: "A senha deve conter pelo menos uma letra minúscula.",
+        password_uppercase: "A senha deve conter pelo menos uma letra maiúscula.",
+        password_number: "A senha deve conter pelo menos um número.",
+        password_special: "A senha deve conter pelo menos um caractere especial.",
+        password_confirmed: "A confirmação da senha não confere.",
+        hasInvalid: "Campos inválidos",
+        oneStep: "Ao menos um step é necessário para salvar",
+    },
+    filters: {
+        documentInput: "Buscar por documento, descrição ou usuário, ...",
+        workflowInput: "Buscar por documento",
+        teamsSelect: {
+            all: "Todos os times",
+            none: "Selecione um time",
+        },
+        assignment: {
+            currentUser: "Meus documentos",
+            allUsers: "Todos os usuários",
+        }
     },
     labelBackToListDocuments: "Voltar para documentos",
     pageTitleDocumentsForm: "Novo Documento",
@@ -273,7 +292,6 @@
     labelTeamsSubtextDocuments: "Selecione pelo menos um time para associar ao documento.",
     labelNoTeamsFound: "Nenhum time vinculado ao seu usuário",
     labelNoPermissionChosen: "Nenhuma permissão selecionada",
-    labelSelectedTeamsTitle: "Times selecionados",
     labelDocumentsMessage: "Gerencie documentos e extraia informações",
     labelAllTeams: "Todos os times",
     labelNoTeams: "Nenhum time disponível",
@@ -284,23 +302,9 @@
     labelSelectedTeams: "Times selecionados",
     labelProfiles: "Perfis",
     labelSelectedProfiles: "Perfis selecionados",
-    labelSearchProfiles: "Buscar perfis",
     unauthorized: {
         title: "Você não tem permissão para acessar esta tela.",
         returnToHome: "Retornar",
-    },   
-    validation: {
-        required: "Campo obrigatório",
-        max: "Máximo de {limit} caracteres",
-        min: "Mínimo de {limit} caracteres",
-        password_lowercase: "A senha deve conter pelo menos uma letra minúscula.",
-        password_uppercase: "A senha deve conter pelo menos uma letra maiúscula.",
-        password_number: "A senha deve conter pelo menos um número.",
-        password_special: "A senha deve conter pelo menos um caractere especial.",
-        password_confirmed: "A confirmação da senha não confere.",
-        email: "Email inválido",
-        hasInvalid: "Campos inválidos",
-        oneStep: "Ao menos um step é necessário para salvar",
     },
     pagination: {
         next: "Próximo",
@@ -328,6 +332,9 @@
             analyze: "Analisar",
             consult: "Consultar",
         },
+        upload: {
+            warningTeamsNotListed: "O time não apareceu na lista? É porque ele ainda não tem um workflow associado a ele.",
+        }
     },
     questions: {
         title: "Perguntas",
@@ -358,6 +365,11 @@
             save: "Salvar edição",
         },
         availableList: "Perguntas disponíveis",
+    },
+    types: {
+        title: "Tipos",
+        subtitle: "Gerencie tipos de documentos do sistema",
+        createBtn: "Criar tipo",
     },
     quizzes: {
         title: "Questionários",
@@ -403,7 +415,13 @@
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
     unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
+    users: {
+        title: "Usuários",
+        saveSuccess: "Usuário salvo com sucesso",
+        saveError: "Erro ao salvar usuário",
+    },
     workflow: {
+        index: "Workflow",
         title: "Board de Processamento de Documentos",
         editTitle: "Editor de Workflow",
         subtitle: "Visualize o fluxo de documentos através das etapas de processamento",
@@ -411,6 +429,7 @@
         manage: "Gerenciar workflow:",
         boardView: "Visualizando workflow:",
         steps: "Etapas do Workflow",
+        error: "Erro ao buscar workflows",
         addBtn: "Adicionar Etapa",
         addBtnDescription: "Clique para criar uma nova etapa",
         createNewStep: "Nova etapa",
@@ -439,6 +458,18 @@
             subtitle: "Modifique as etapas e configurações do workflow",
         },
     },
+    card:{
+        userAssigned: "Responsável",
+        userApplicant: "Solicitante",
+        assignBtn: "Atribuir",
+        unassignInfo: "Desatribuir documento"
+    },
+    team: {
+        title: "Times",
+        deleteSuccess: "Time deletado com sucesso",
+        deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
+        deleteError: "Erro ao deletar time"
+    }
 };
 
 export default portuguese;

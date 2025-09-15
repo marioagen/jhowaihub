@@ -27,7 +27,7 @@
                         type="button"
                         @click="save"
                     >
-                        <LucideIcon icon="Save" size="15" />
+                        <LucideIcon icon="Save" :size="15" />
                         {{ $t("quizzes.formSave") }}
                     </button>
                 </div>
@@ -61,7 +61,7 @@
                             <label>{{ $t("workflow.responsableTeam") }}</label>
                             <div class="input-group">
                                 <span class="input-group-text border-end-0 bg-white">
-                                    <LucideIcon icon="Users" size="16" />
+                                    <LucideIcon icon="Users" :size="16" />
                                 </span>
 
                                 <Field 
@@ -76,7 +76,7 @@
                                         class="form-select form-select-sm border-start-0"
                                         v-bind="field"
                                     >
-                                        <option value="">{{ $t("workflow.responsableTeam") }}</option>
+                                        <option value="" disabled>{{ $t("workflow.responsableTeam") }}</option>
                                         <option 
                                             v-for="(item, index) in teamsList"
                                             :key="index"
@@ -102,30 +102,34 @@
                     </div>
                     <div class="col-auto">
                         <button class="btn btn-primary btn-sm" type="button" @click="addStep">
-                            <LucideIcon icon="Plus" size="15" />
+                            <LucideIcon icon="Plus" :size="15" />
                             {{ $t("workflow.createNewStep") }}
                         </button>
                     </div>
                 </div>
-                <div class="row">
+                <div v-if="isLoadingSteps">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                </div>
+                <div v-else class="row">
                     <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
                         <WorkflowStepComponent
-                            v-for="(step, index) in stepsList"
+                            v-for="(step, index) in activeStepsList"
                             :key="step.id || index"
                             :step="step"
                             :index="index + 1"
-                            :is-last="index === stepsList.length - 1" 
+                            :is-last="index === activeStepsList.length - 1" 
                             :profilesList="profilesList"
                             :statusList="statusList"
                             @update-step="updateStep(index, $event)"
-                            @remove-step="removeStep(index)"
+                            @remove-step="removeStep(index, $event)"
                             class="workflow-step-card"
                             ref="stepRefs"
-                        />
-                        
+                        />                        
                         <div class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0" @click="addStep">
                             <div class="icon-circle mb-2">
-                                <LucideIcon icon="Plus" size="16" />
+                                <LucideIcon icon="Plus" :size="16" />
                             </div>
                             <h6 class="fw-semibold mb-1">{{ $t("workflow.addBtn") }}</h6>
                             <p class="text-muted small mb-0">{{ $t("workflow.addBtnDescription") }}</p>
@@ -188,6 +192,7 @@
                     teamId: "",
                 },
                 isLoading: false,
+                isLoadingSteps: false,
                 workflowStepRefs: [],
             };
         },
@@ -200,6 +205,9 @@
             },
             formSubtitle() {
                 return this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle";
+            },
+            activeStepsList() {
+                return this.stepsList.filter(s => s.isActive !== false);
             },
         },
         methods: {
@@ -232,7 +240,7 @@
                         if(response.error !== undefined) {
                             this.$router.push({ name: "Workflow" });
                             return this.$notify({
-                                title: 'Workflow',
+                                title: 'workflow.index',
                                 message: response.error,
                                 variant: 'danger',
                                 icon: 'CircleX',
@@ -244,7 +252,8 @@
                         this.stepsList = response.steps.map(step => ({
                             ...step,
                             profileId: step.profile?.id || "",
-                            statusId: step.status?.id || ""
+                            statusId: step.status?.id || "",
+                            isActive: true,
                         }));
                     })
                     .finally(() => {
@@ -260,15 +269,31 @@
                     name: '',
                     status: '',
                     profile: '',
+                    isActive: true,
                 });
             },
-            removeStep(index) {
-                this.stepsList.splice(index, 1);
+            removeStep(index, deactivatedStep) {
+                this.isLoadingSteps = true;
+                if (this.isEdit) {
+                    const i = this.stepsList.findIndex(s => s.id === deactivatedStep.id);
+                    if (i !== -1) {
+                        this.stepsList.splice(i, 1, { ...this.stepsList[i], ...deactivatedStep });
+                    }
+                } else {
+                    const active = this.activeStepsList[index];
+                    const i = this.stepsList.findIndex(s => s === active);
+                    if (i !== -1) {
+                        this.stepsList.splice(i, 1, { ...this.stepsList[i], ...deactivatedStep });
+                    }
+                }
+                setTimeout(() => {
+                   this.isLoadingSteps = false;
+                }, 3000);
             },
             async save() {
                 if (!this.stepsList || this.stepsList.length === 0) {
                     return this.$notify({
-                        title: 'Workflow',
+                        title: 'workflow.index',
                         message: 'validation.oneStep',
                         variant: 'warning',
                         icon: 'CircleAlert',
@@ -289,14 +314,14 @@
 
                 if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
                     return this.$notify({
-                        title: 'Workflow',
+                        title: 'workflow.index',
                         message: 'validation.hasInvalid',
                         variant: 'warning',
                         icon: 'CircleAlert',
                     });
                 }
                 
-                this.stepsList.forEach((step, index) => {
+                this.activeStepsList.forEach((step, index) => {
                     step.order = index + 1;
                 });
 
@@ -310,7 +335,7 @@
                 let params = {
                     name: this.workflowData.name,
                     teamId: this.workflowData.teamId,
-                    steps: this.stepsList
+                    steps: this.stepsList.filter(s => s.isActive !== false)
                 };
                 
                 WorkflowService.createWorkflow(params)
@@ -318,14 +343,14 @@
                         if(response.error === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
-                                title: 'Workflow',
+                                title: 'workflow.index',
                                 message: 'workflow.createSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         }
                         this.$notify({
-                            title: 'Workflow',
+                            title: 'workflow.index',
                             message: 'workflow.createError',
                             variant: 'danger',
                             icon: 'CircleX',
@@ -340,7 +365,7 @@
                     id: this.workflowData.id,
                     name: this.workflowData.name,
                     teamId: this.workflowData.teamId,
-                    steps: this.stepsList
+                    steps: this.stepsList.filter(s => s.isActive !== false)
                 };
 
                 WorkflowService.editWorkflow(params)
@@ -348,14 +373,14 @@
                         if(response.error === undefined) {
                             this.redirectToIndex();
                             return this.$notify({
-                                title: 'Workflow',
+                                title: 'workflow.index',
                                 message: 'workflow.editSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         }
                         this.$notify({
-                            title: 'Workflow',
+                            title: 'workflow.index',
                             message: 'workflow.editError',
                             variant: 'danger',
                             icon: 'CircleX',

@@ -277,13 +277,11 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("Normalized/{id}")]
         [SwaggerOperation("EndPoint that returns the normalized text of an Document by id")]
         [ProducesResponseType(typeof(DocumentNormalized), StatusCodes.Status200OK)]
-        public IActionResult FindDocumentNormalizedText(int id,
-                                                       [FromHeader] HeadersDto headersDto)
+        public IActionResult FindDocumentNormalizedText(int id)
         {
             try
             {
-                var result = _documentNormalizedServices.FindById(id,
-                                                                  headersDto.EmailCreator);
+                var result = _documentNormalizedServices.FindById(id);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -314,62 +312,6 @@ namespace WoopiAiHub.Api.Controllers
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(FindByIdAnalyze)} method");
                 return BadRequest("Error while finding documents by id" + ex);
-            }
-        }
-
-        /// <summary>
-        /// Receive a dto and normalize the Document text (OCR + embeddings).
-        /// </summary>
-        /// <param name="documentAnalysisRequestDto"></param>
-        /// <returns></returns>
-        [HttpPost("Analyze")]
-        [SwaggerOperation("EndPoint async that normalize the Document text and returns a boolean")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> DocumentAnalysis(DocumentAnalysisRequestDto documentAnalysisRequestDto,
-                                                         [FromHeader] HeadersDto headersDto)
-        {
-            var documentAnalysisResponseDto = new DocumentAnalysisResponseDto
-            {
-                Id = documentAnalysisRequestDto.Id,
-                EmailCreator = headersDto.EmailCreator,
-                Tenant = headersDto.Tenant,
-                KeyMongoAcess = headersDto.KeyMongoAccess,
-                Embeddings_model_name = documentAnalysisRequestDto.Embeddings_model_name
-            };
-
-            try
-            {
-                var result = await _documentServices.DocumentAnalysis(documentAnalysisResponseDto);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(DocumentAnalysis)} method");
-                return BadRequest("Error while analyzing documents" + ex);
-            }
-        }
-
-        /// <summary>
-        /// Receive a id and return the status and name of the Document
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet("Status/{id}")]
-        [SwaggerOperation("EndPoint that returns the status and name of an Document by id")]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-        public IActionResult FindStatusAndName(int id,
-                                              [FromHeader] HeadersDto headersDto)
-        {
-            try
-            {
-                var result = _documentServices.FindStatusAndName(id,
-                                                                 headersDto.EmailCreator);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(FindStatusAndName)} method");
-                return BadRequest("Id not found" + ex);
             }
         }
 
