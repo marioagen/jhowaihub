@@ -279,9 +279,14 @@
     filters: {
         documentInput: "Buscar por documento, descripción o usuario, ...",
         workflowInput: "Buscar por documento",
+        toolInput: "Buscar por nombre de la herramienta",
         teamsSelect: {
             all: "Todos los equipos",
-            none: "Seleccione un equipo",
+            none: "Selecciona un equipo",
+        },
+        typesSelect: {
+            all: "Todos los tipos",
+            none: "Selecciona un tipo",
         },
         assignment: {
             currentUser: "Mis documentos",
@@ -474,6 +479,43 @@
         userApplicant: "Solicitante",
         assignBtn: "Asignar",
         unassignInfo: "Desasignar documento"
+    },
+    tools: {
+        index: "Herramientas",
+        title: "Herramientas",
+        subtitle: "Administra y configura tus herramientas de procesamiento de documentos",
+        notFound: "No hay herramientas registradas",
+        createBtn: "Nueva Herramienta",
+        editBtn: "Guardar cambios",
+        type: "Tipo",
+        entry: "Entrada",
+        output: "Salida",
+        created: "Creado en",
+        createSuccess: "Herramienta creada con éxito",
+        createError: "Error al crear la herramienta",
+        editSuccess: "Herramienta actualizada con éxito",
+        editError: "Error al actualizar la herramienta",
+        removeSuccess: "Herramienta eliminada con éxito",
+        removeError: "Error al eliminar la herramienta",
+        removeTitle: "Estás a punto de eliminar una herramienta del sistema",
+        form: {
+            name: "Nombre de la Herramienta",
+            types: "Tipo de Herramienta",
+            typesSelect: "Selecciona el tipo de herramienta",
+            entries: "Entrada",
+            entriesSelect: "Selecciona el tipo de entrada",
+            output: "Salida",
+            outputSelect: "Selecciona el tipo de salida",
+        },
+        formCreate: {
+            title: "Nueva Herramienta",
+            subtitle: "Crea una nueva herramienta para procesar documentos",
+        },
+        formEdit: {
+            title: "Editar Herramienta",
+            subtitle: "Actualiza la información de la herramienta seleccionada",
+        },
+        validationError: "Error al validar los campos",
     },
     team: {
         title: "Equipos",

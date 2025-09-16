@@ -36,6 +36,9 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IValidateStep, ValidateStep>();
             services.AddScoped<IValidateWorkflow, ValidateWorkflow>();
             services.AddScoped<ICardServices, CardServices>();
+            services.AddScoped<IToolServices, ToolServices>();
+            services.AddScoped<IToolTypeServices, ToolTypeServices>();
+            services.AddScoped<IToolDataServices, ToolDataServices>();
 
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();

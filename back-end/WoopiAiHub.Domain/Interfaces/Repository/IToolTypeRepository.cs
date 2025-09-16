@@ -1,0 +1,9 @@
+﻿using WoopiAiHub.Domain.DTOs.Response;
+
+namespace WoopiAiHub.Domain.Interfaces.Repository
+{
+    public interface IToolTypeRepository
+    {
+        Task<IEnumerable<ToolTypeDto>> FindAllAsync();
+    }
+}
