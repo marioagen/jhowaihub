@@ -156,6 +156,16 @@
                         },
                         labelKey: 'tools.title'
                     },
+                    {
+                        permission: 'Tools',
+                        activeKey: 'Flow',
+                        to: '/flow',
+                        icon: { 
+                            name: 'Church', 
+                            color: '#629460'
+                        },
+                        labelKey: 'Flow temp'
+                    },
                 ]
             };
         },
