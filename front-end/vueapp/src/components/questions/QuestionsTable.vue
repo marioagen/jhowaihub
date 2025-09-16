@@ -22,7 +22,7 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown">
+                <div class="dropdown position-static">
                     <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <LucideIcon icon="Ellipsis" />
                     </a>
@@ -168,14 +168,14 @@
                             this.getQuestions({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: this.$t("questions.title"),
-                                message: this.$t("labelQuestionRemoveSuccess"),
+                                message: this.$t("questions.removeSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
                                 title: this.$t("questions.title"),
-                                message: this.$t("labelQuestionRemoveError"),
+                                message: this.$t("removeError.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
