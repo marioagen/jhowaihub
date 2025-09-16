@@ -124,11 +124,6 @@
             WorkflowFilters,
             WorkflowCards,
         },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.setEntitySearch();
-            },
-        },
         methods: {
             getWorkflowByUser() {
                 this.isLoaded = false;
