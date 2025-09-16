@@ -60,7 +60,7 @@
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
-        @confirm="deleteType"
+        @confirm="deleteTool"
     />
 </template>
 
@@ -146,7 +146,7 @@
                 this.selectedTool = ids;
                 this.$refs.DeleteDialog.open();
             },
-            deleteType() {
+            deleteTool() {
                 this.isDeleting = true;
                 ToolsService.deleteTool(this.selectedTool)
                     .then((success) => {
