@@ -70,7 +70,7 @@ namespace WoopiAiHub.Repository
                 .Include(t => t.InputData)
                 .Include(t => t.OutputData)
                 .Include(t => t.ToolType)
-                .Select(GetToolProjection())
+                .Select(FormatToolProjection())
                 .ToListAsync();
         }
 
@@ -90,7 +90,7 @@ namespace WoopiAiHub.Repository
                 .Include(t => t.InputData)
                 .Include(t => t.OutputData)
                 .Include(t => t.ToolType)
-                .Select(GetToolProjection())
+                .Select(FormatToolProjection())
                 .FirstOrDefaultAsync();
         }
 
@@ -144,7 +144,7 @@ namespace WoopiAiHub.Repository
                     .Include(t => t.InputData)
                     .Include(t => t.OutputData)
                     .Include(t => t.ToolType)
-                    .Select(GetToolProjection())
+                    .Select(FormatToolProjection())
                     .AsQueryable()
                     .AsNoTracking();
         }
@@ -153,7 +153,7 @@ namespace WoopiAiHub.Repository
         /// Creates a projection for the Tool entity to ToolDto.
         /// </summary>
         /// <returns></returns>
-        private static Expression<Func<Tool, ToolDto>> GetToolProjection()
+        private static Expression<Func<Tool, ToolDto>> FormatToolProjection()
         {
             return t => new ToolDto
             {
