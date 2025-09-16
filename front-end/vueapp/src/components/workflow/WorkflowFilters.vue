@@ -25,7 +25,7 @@
             <button
                 v-tooltip="filters.isAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
                 class="btn table-btn btn-sm"
-                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                :class="filters.isAllUsers ? 'btn-outline-primary' : 'btn-outline-secondary'"
                 type="button"
                 style="display: flex; align-items: center; justify-content: center;"
                 @click="filterUsers"

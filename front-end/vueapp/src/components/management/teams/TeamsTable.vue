@@ -15,28 +15,23 @@
                 {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown column-align position-static">
-                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <LucideIcon icon="Ellipsis" />
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2" @click="editTeam(data.row)">
-                                <LucideIcon icon="SquarePen" />
-                                {{ $t("labelEdit") }}
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                class="dropdown-item d-flex align-items-center gap-2"
-                                @click="openConfirmation(data.row)"
-                            >
-                                <LucideIcon icon="Trash2" />
-                                {{ $t("labelDelete") }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <DropdownComponent>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="editTeam(data.row)">
+                            <LucideIcon icon="SquarePen" />
+                            {{ $t("labelEdit") }}
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="openConfirmation(data.row)"
+                        >
+                            <LucideIcon icon="Trash2" />
+                            {{ $t("labelDelete") }}
+                        </a>
+                    </li>
+                </DropdownComponent>
             </template>
         </TableComponent>
     </div>
@@ -66,10 +61,12 @@
     import ModalTeam from "@/components/management/teams/modals/TeamModal.vue";
     import TeamsService from "@/services/teams/TeamsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import DropdownComponent from "@/components/global/DropdownComponent.vue";
 
     export default {
         name: "TeamsTable",
         components: {
+            DropdownComponent,
             TableComponent,
             ModalTeam,
             ConfirmModal,

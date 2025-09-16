@@ -42,7 +42,7 @@
             <button
                 v-tooltip="filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')"
                 class="btn table-btn btn-sm"
-                :class="filters.isAllUsers ? 'btn-outline-primary' : 'btn-outline-secondary'"
+                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
                 type="button"
                 style="display: flex; align-items: center; justify-content: center;"
                 @click="filterUsers"
@@ -65,7 +65,7 @@
                     input: "",
                     teamId: "",
                     teams: [],
-                    isAllUsers: false,
+                    isAllUsers: true,
                     login: this.$store.state.userProfile.login
                 }
             };

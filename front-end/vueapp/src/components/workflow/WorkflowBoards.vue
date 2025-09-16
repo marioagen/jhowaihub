@@ -169,11 +169,6 @@
                 default: null,
             },
         },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.setCrumbsData();
-            },
-        },
         setup() {
             const { validate, values } = useForm();
             return {

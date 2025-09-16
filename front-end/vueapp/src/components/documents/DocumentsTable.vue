@@ -41,31 +41,26 @@
                 />
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown position-static">
-                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <LucideIcon icon="Ellipsis" />
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li v-if="data.row.status === 0">
-                            <a 
-                                class="dropdown-item d-flex align-items-center gap-2" 
-                                @click="embedData(data.row.id)"
-                            >
-                                <LucideIcon icon="TextSearch" />
-                                {{ $t("documents.actions.analyze") }}
-                            </a>
-                        </li>
-                        <li v-else>
-                            <a
-                                class="dropdown-item d-flex align-items-center gap-2"
-                                @click="redirectToConsult(data.row.id)"
-                            >
-                                <LucideIcon icon="Search" />
-                                {{ $t("documents.actions.consult") }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <DropdownComponent>
+                    <li v-if="data.row.status === 0">
+                        <a 
+                            class="dropdown-item d-flex align-items-center gap-2" 
+                            @click="embedData(data.row.id)"
+                        >
+                            <LucideIcon icon="TextSearch" />
+                            {{ $t("documents.actions.analyze") }}
+                        </a>
+                    </li>
+                    <li v-else>
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="redirectToConsult(data.row.id)"
+                        >
+                            <LucideIcon icon="Search" />
+                            {{ $t("documents.actions.consult") }}
+                        </a>
+                    </li>
+                </DropdownComponent>
             </template>
         </TableComponent>
     </div>
@@ -95,10 +90,12 @@
     import BadgeComponent from "@/components/global/BadgeComponent";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent"
     import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
+    import DropdownComponent from "@/components/global/DropdownComponent.vue";
 
     export default {
         name: "DocumentsTable",
         components: {
+            DropdownComponent,
             EmbeddingDocument,
             BadgeOutlinedComponent,
             BadgeComponent,
