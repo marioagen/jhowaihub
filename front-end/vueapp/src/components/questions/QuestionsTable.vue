@@ -163,14 +163,14 @@
                             this.getQuestions({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: this.$t("questions.title"),
-                                message: this.$t("labelQuestionRemoveSuccess"),
+                                message: this.$t("questions.removeSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
                                 title: this.$t("questions.title"),
-                                message: this.$t("labelQuestionRemoveError"),
+                                message: this.$t("removeError.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
