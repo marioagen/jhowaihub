@@ -50,11 +50,6 @@ export default {
         QuestionsModal,
         QuestionsTable
     },
-    watch: {
-        "$store.state.userProfile.language": function () {
-            this.setEntitySearch();
-        },
-    },
     methods: {
         setEntitySearch() {
             this.entitySearch = {

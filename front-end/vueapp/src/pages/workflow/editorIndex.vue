@@ -104,11 +104,6 @@
             FullscreenLoadingComponent,
             WorkflowCards,
         },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.changeLanguage = !this.changeLanguage;
-            },
-        },
         methods: {
             getWorkflowList() {
                 this.workflowList = [];
