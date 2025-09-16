@@ -172,15 +172,15 @@
                             this.$refs.DeleteDialog.close();
                             this.getQuizzes({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: 'quizzes.removeTitle',
-                                message: this.$t("quizzes.removeSuccess"),
+                                title: "quizzes.title",
+                                message: "quizzes.removeSuccess",
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
-                                title: 'quizzes.removeTitle',
-                                message: this.$t("quizzes.removeError"),
+                                title: "quizzes.title",
+                                message: "quizzes.removeError",
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
