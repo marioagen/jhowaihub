@@ -56,7 +56,7 @@ export default {
             });
     },
     deleteQuizzById(ids) {
-        return api.delete("/Question/DeleteByIds", { data: ids })
+        return api.delete("/Questionnaire/DeleteByIds", { data: ids })
             .then(() => {
                 return true;
             })
