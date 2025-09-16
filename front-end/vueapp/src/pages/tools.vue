@@ -44,7 +44,6 @@
         name: "DocumentsPage",
         data() {
             return {
-                changeLanguage: false,
                 modalTool: {
                     name: "",
                 },
@@ -54,11 +53,6 @@
             ToolFilters,
             ToolsModal,
             ToolsTable,
-        },
-        watch: {
-            "$store.state.userProfile.language"() {
-                this.changeLanguage = !this.changeLanguage;
-            },
         },
         methods: {
             openModalTool() {
