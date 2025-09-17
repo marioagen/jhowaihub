@@ -44,6 +44,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Create(UserCreateDto userCreateDto, HeadersDto headersDto)
         {
+            //logica de private teams
             if (string.IsNullOrEmpty(userCreateDto.Name) ||
                 string.IsNullOrEmpty(userCreateDto.Email) ||
                 string.IsNullOrEmpty(userCreateDto.Password))
@@ -266,6 +267,21 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        private void UpdateTeamsAndProfiles(UserCreateDto userCreateDto,
+                                            User user)
+        {
+
+            if (userCreateDto.TeamIds.Count > 0)
+            {
+                AddTeams(userCreateDto.TeamIds, user);
+            }
+
+            if (userCreateDto.ProfileIds.Count > 0)
+            {
+                AddProfiles(userCreateDto.ProfileIds, user);
+            }
+        }
+
         /// <summary>
         /// Sets the password and salt for a user based on the provided DTO and user object.
         /// </summary>
@@ -305,15 +321,7 @@ namespace WoopiAiHub.Application.Services
 
             SetSaltAndPassword(userCreateDto.Password, user, null);
 
-            if (userCreateDto.TeamIds.Count > 0)
-            {
-                AddTeams(userCreateDto.TeamIds, user);
-            }
-
-            if (userCreateDto.ProfileIds.Count > 0)
-            {
-                AddProfiles(userCreateDto.ProfileIds, user);
-            }
+            UpdateTeamsAndProfiles(userCreateDto, user);
 
             return await _userRepository.CreateAsync(user);
         }
@@ -328,6 +336,8 @@ namespace WoopiAiHub.Application.Services
                                                 UserCreateDto userCreateDto,
                                                 HeadersDto headersDto)
         {
+            UpdateTeamsAndProfiles(userCreateDto, user);
+
             user.Reactivate(userCreateDto.Name,
                             userCreateDto.Email);
 
@@ -364,12 +374,19 @@ namespace WoopiAiHub.Application.Services
                 {
                     SetSaltAndPassword(userUpdateDto.Password, user, user.Salt);
                 }
+            
+                var userCreateDto = new UserCreateDto
+                {
+                    Name = userUpdateDto.Name,
+                    Email = userUpdateDto.Email,
+                    Password = userUpdateDto.Password,
+                    TeamIds =  userUpdateDto.TeamIds,
+                    ProfileIds = userUpdateDto.ProfileIds,
+                };
 
-                AddTeams(userUpdateDto.TeamIds, user);
+                UpdateTeamsAndProfiles(userCreateDto, user);
 
-                AddProfiles(userUpdateDto.ProfileIds, user);
-
-                var updateResult = _userRepository.Update(user);
+             var updateResult = _userRepository.Update(user);
                 return updateResult;
         }
 
