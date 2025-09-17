@@ -321,6 +321,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var userId = Guid.NewGuid();
+            var userIdDuplicated = Guid.NewGuid();
             var userUpdateDto = new UserUpdateDto
             {
                 Id = userId,
@@ -328,7 +329,7 @@ namespace WoopiAiHub.UnitTests.Services
                 Email = "email@email.com"
             };
             var headersDto = new HeadersDto { Tenant = "tenant" };
-            var user = new User(userId, "Nome", "email@email.com", true, DateTime.Now);
+            var user = new User(userIdDuplicated, "Nome", "email@email.com", true, DateTime.Now);
 
             _marketPlaceApiMock
                 .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))

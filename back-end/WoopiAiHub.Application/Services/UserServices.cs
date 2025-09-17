@@ -117,7 +117,7 @@ namespace WoopiAiHub.Application.Services
                 };
                 return await ReactivateUser(existingUser, userCreateDto, headersDto);
             }
-            else if (existingUser != null && existingUser.IsActive)
+            else if (existingUser != null && existingUser.IsActive && !existingUser.Id.Equals(userUpdateDto.Id))
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
             }
