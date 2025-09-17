@@ -9,7 +9,7 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body vue-flow-container p-0">
-                        <VueFlow :nodes="nodes" :edges="edges" :style="{ width: '100%', height: '100%' }" @connect="onConnect">
+                        <VueFlow :nodes="nodes" :edges="edges" :style="{ width: '100%', height: '100%' }" @connect="onConnect" @pane-ready="onPaneReady">
                             <Background  patternColor="#BCD5F2" gap="10" variant="dots" size="1"/>
                             <template #node-hub="props">
                                 <HubNode :node="props" @deleteNode="deleteNode" @openNodeConfig="openNodeConfig"/>
@@ -26,13 +26,12 @@
 </template>
 
 <script>
-import { VueFlow, useVueFlow } from '@vue-flow/core'
+import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import HubNode from '@/components/flow/HubNode.vue';
 import FlowService from '@/services/flow/FlowService';
 import SpecialEdge from '../components/flow/SpecialEdge.vue';
 
-const { addEdges } = useVueFlow()
 
     export default {
         name: "FlowPage",
@@ -46,6 +45,7 @@ const { addEdges } = useVueFlow()
             return{
                 nodes:[],
                 edges:[],
+                instance: null,
             }
         },
         components: {
@@ -55,6 +55,9 @@ const { addEdges } = useVueFlow()
             SpecialEdge
         },
         methods: {
+             onPaneReady(instance) {
+                this.instance = instance
+            },
             getFlow(){
                 FlowService.getFlowById(this.flowId).then(response => {
                     this.nodes = response.nodes;
@@ -68,7 +71,6 @@ const { addEdges } = useVueFlow()
                 this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
             },
             deleteEdge(edgeId) {
-                console.log("Deleting edge with ID:", edgeId);
                 this.edges = this.edges.filter(edge => edge.id !== edgeId);
             },
             openNodeConfig(nodeId) {
@@ -78,7 +80,7 @@ const { addEdges } = useVueFlow()
                 }
             },
             onConnect(params) {
-                this.edges.value = addEdges({ ...params, type: 'step' }, this.edges.value)
+                this.instance?.addEdges([ { ...params, type: 'special' } ])
             }
         },
         mounted(){
@@ -88,10 +90,7 @@ const { addEdges } = useVueFlow()
 </script>
 
 <style>
-/* import the necessary styles for Vue Flow to work */
 @import '@vue-flow/core/dist/style.css';
-
-/* import the default theme, this is optional but generally recommended */
 @import '@vue-flow/core/dist/theme-default.css';
 
 .vue-flow-container{
