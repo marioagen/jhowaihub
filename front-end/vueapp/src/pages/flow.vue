@@ -96,7 +96,6 @@
             },
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;
-                console.log("Tests of Collapse")
             },
         },
     };

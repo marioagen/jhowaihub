@@ -11,16 +11,22 @@
 </template>
 
 <script>
+    import ToolsServices from '@/services/tools/ToolsServices';
     export default {
         name: "ToolsList",
         data: () => ({
-            toolsList: [
-                { id: 0, name: "OCR" },
-                { id: 1, name: "OCR II" },
-                { id: 2, name: "OCR III" },
-                { id: 3, name: "OCR IV" },
-                { id: 4, name: "OCR V" },
-            ],
+            toolsList: [],
         }),
+        methods: {
+            getToolsList() {
+                ToolsServices.getToolsList()
+                    .then((response) => {
+                        this.toolsList = response;
+                    });
+            },
+        },
+        created() {
+            this.getToolsList();
+        },
     }
 </script>
