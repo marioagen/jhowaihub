@@ -522,7 +522,25 @@
         deleteSuccess: "Equipo eliminado exitosamente",
         deleteDocError: "No se pudo eliminar el equipo: hay documentos relacionados",
         deleteError: "Error al eliminar el equipo"
-    }
+    },
+    flow: {
+        title: "Flujo de Automatización",
+        subtitle: "",
+        save: "Guardar",
+        downloadJson: "Descargar JSON",
+        upload: "Subir",
+        showTools: "Agregar Herramientas",
+        hideTools: "Ocultar Herramientas",
+        flowListEnd: "Finalizar Flujo",
+        formCreate: {
+            title: "Flujo de Automatización",
+            subtitle: "Crea una nueva herramienta para procesar documentos",
+        },
+        formEdit: {
+            title: "Flujo de Automatización:",
+            subtitle: "Actualiza la información de la herramienta seleccionada",
+        },
+    },
 };
 
 export default spanish;
