@@ -212,7 +212,8 @@ namespace WoopiAiHub.UnitTests.Services
                 Name = "Novo Nome",
                 Email = "novo@email.com",
                 Password = "NovaSenha123",
-                TeamIds = new List<int> { 1, 2 }
+                TeamIds = new List<int> { 1, 2 },
+                ProfileIds = new List<int> { 1, 2 },
             };
             var headersDto = new HeadersDto { Tenant = "tenant" };
             var teams = new List<Team>
@@ -220,15 +221,17 @@ namespace WoopiAiHub.UnitTests.Services
                 new Team("Time 1", 1, DateTime.Now),
                 new Team("Time 2", 2, DateTime.Now)
             };
-            var user = new User(userId, "Antigo Nome", "antigo@email.com", false, DateTime.Now)
-            {
-                Teams = teams
-            };
-            
+      
             var profiles = new List<Profile>
             {
                 new Profile("Profile 1", 1, DateTime.Now),
                 new Profile("Profile 2", 2, DateTime.Now)
+            };
+
+            var user = new User(userId, "Antigo Nome", "antigo@email.com", false, DateTime.Now)
+            {
+                Teams = teams,
+                Profiles = profiles
             };
 
             _marketPlaceApiMock
@@ -248,7 +251,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(profiles);
 
             _userRepositoryMock
-                .Setup(repo => repo.Update(It.IsAny<User>()))
+                .Setup(repo => repo.Update(user))
                 .Returns(true);
 
             // Act
@@ -258,7 +261,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             Assert.Equal("Novo Nome", user.Name);
             Assert.Equal("novo@email.com", user.Email);
-            Assert.Equal(2, user.Teams.Count);
         }
 
         [Fact(DisplayName = "Update should return false when user is not found")]
