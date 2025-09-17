@@ -524,6 +524,105 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Teams", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int>("InputDataId")
+                        .HasColumnType("int")
+                        .HasColumnName("InputDataId");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Name");
+
+                    b.Property<int>("OutputDataId")
+                        .HasColumnType("int")
+                        .HasColumnName("OutputDataId");
+
+                    b.Property<int>("ToolTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("ToolTypeId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InputDataId");
+
+                    b.HasIndex("OutputDataId");
+
+                    b.HasIndex("ToolTypeId");
+
+                    b.ToTable("Tools", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ToolDatas", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ToolTypes", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.TypeDoc", b =>
                 {
                     b.Property<int>("Id")
@@ -811,6 +910,33 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Workflow");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.ToolData", "InputData")
+                        .WithMany("InputTools")
+                        .HasForeignKey("InputDataId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.ToolData", "OutputData")
+                        .WithMany("OutputTools")
+                        .HasForeignKey("OutputDataId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.ToolType", "ToolType")
+                        .WithMany("Tools")
+                        .HasForeignKey("ToolTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("InputData");
+
+                    b.Navigation("OutputData");
+
+                    b.Navigation("ToolType");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Team", "Team")
@@ -861,6 +987,18 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
                     b.Navigation("Workflow");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolData", b =>
+                {
+                    b.Navigation("InputTools");
+
+                    b.Navigation("OutputTools");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolType", b =>
+                {
+                    b.Navigation("Tools");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.TypeDoc", b =>

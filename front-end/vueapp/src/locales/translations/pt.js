@@ -276,9 +276,14 @@
     filters: {
         documentInput: "Buscar por documento, descrição ou usuário, ...",
         workflowInput: "Buscar por documento",
+        toolInput: "Buscar por name da ferramenta",
         teamsSelect: {
             all: "Todos os times",
             none: "Selecione um time",
+        },
+        typesSelect: {
+            all: "Todos os tipos",
+            none: "Selecione um tipo",
         },
         assignment: {
             currentUser: "Meus documentos",
@@ -463,6 +468,43 @@
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
         unassignInfo: "Desatribuir documento"
+    },
+    tools: {
+        index: "Ferramentas",
+        title: "Ferramentas",
+        subtitle: "Gerencie e configure suas ferramentas de processamento de documentos",
+        notFound: "Não há ferramentas cadastradas",
+        createBtn: "Nova Ferramenta",
+        editBtn: "Salvar alterações",
+        type: "Tipo",
+        entry: "Entrada",
+        output: "Saida",
+        created: "Criado em",
+        createSuccess: "Ferramenta criada com sucesso",
+        createError: "Erro ao criar Ferramenta",
+        editSuccess: "Ferramenta editada com sucesso",
+        editError: "Erro ao editar Ferramenta",
+        removeSuccess: "Ferramenta removida com sucesso",
+        removeError: "Erro ao remover Ferramenta",
+        removeTitle: "Você está prestes a deletar uma ferramenta do sistema",
+        form: {
+            name: "Nome da Ferramenta",
+            types: "Tipo da Ferramenta",
+            typesSelect: "Selecione tipo da Ferramenta",
+            entries: "Entrada (Input)",
+            entriesSelect: "Selecione o tipo de entrada",
+            output: "Saida (Output)",
+            outputSelect: "Selecione o tipo de saida",
+        },
+        formCreate: {
+            title: "Nova Ferramenta",
+            subtitle: "Crie uma nova ferramenta para processar documentos",
+        },
+        formEdit: {
+            title: "Editar Ferramenta",
+            subtitle: "Atualize as informações da ferramenta selecionada",
+        },
+        validationError: "Erro ao validar campos",
     },
     team: {
         title: "Times",

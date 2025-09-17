@@ -49,9 +49,12 @@ namespace WoopiAiHub.Repository
                              i.Teams.Any(t => EF.Functions.Like(t.Name, $"%{search}%")));
             }
 
-            if(!documentPagedDataDto.IsAllUsers)
+            if (!documentPagedDataDto.IsAllUsers)
             {
-                query = query.Where(d => d.Cards.Any(c => c.AssignedUser != null && c.AssignedUser.Email.ToLower() == login));
+                query = query.Where(d => d.Cards.Any(c =>
+                    c.AssignedUser != null &&
+                    EF.Functions.Like(c.AssignedUser.Email, login)
+                ));
             }
 
             query = documentPagedDataDto.IsAscending ? 

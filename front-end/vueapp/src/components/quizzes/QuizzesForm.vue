@@ -137,11 +137,6 @@
                 myInterval: null,
             };
         },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.setCrumbsData();
-            },
-        },
         methods: {
             getDocTypes() {
                 TypesService.getTypesList()

@@ -3,6 +3,7 @@
         <div class="d-flex flex-grow-1" style="overflow: hidden; position: relative; height: 100%">
             <div :class="['sidebar-wrapper', { collapsed: isSidebarCollapsed }]">
                 <SidebarComponent
+                    :key="languageChange"
                     :isCollapsed="isSidebarCollapsed"
                     :menuActive="sidebarData"
                     @toggle-collapse="toggleSidebar"
@@ -10,9 +11,14 @@
             </div>
 
             <div :class="['content-wrapper', { collapsed: isSidebarCollapsed }]">
-                <NavbarComponent :isSidebarCollapsed="isSidebarCollapsed" />
+                <NavbarComponent
+                    :key="languageChange" 
+                    :isSidebarCollapsed="isSidebarCollapsed" 
+                />
                 <div class="horizontal-separator-fixed"></div>
-                <router-view :key="$route.fullPath" />
+                <router-view 
+                    :key="updatePage"
+                />
                 <toast-notification :showToast="toastShow" @close="closeToast" />
             </div>
 
@@ -38,8 +44,14 @@
             SidebarComponent,
             ToastNotification,
         },
+        watch: {
+            "$store.state.userProfile.language": function () {
+                this.languageChange++;
+            },
+        },
         data() {
             return {
+                languageChange: 0,
                 toastShow: false,
                 sidebarData: "",
                 isSidebarCollapsed: window.innerWidth < SIDEBAR_COLLAPSE_WIDTH,
@@ -56,6 +68,11 @@
             GlobalEventService.off("uploadInProgress", this.handleUploadInProgress);
             GlobalEventService.off("uploadComplete", this.handleUploadComplete);
             GlobalEventService.off("uploadStarted", this.handleUploadStarted);
+        },
+        computed: {
+            updatePage() {
+                return this.languageChange + this.$route.fullPath;
+            }
         },
         methods: {
             checkWindowSize() {

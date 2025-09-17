@@ -312,9 +312,6 @@
             ToastAlert,
         },
         watch: {
-            "$store.state.userProfile.language": function () {
-                this.setCrumbsData();
-            },
             selectedTeams() {
                 this.validateSelection();
             },

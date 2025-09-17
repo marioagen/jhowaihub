@@ -52,11 +52,6 @@
             TypesTable,
             TypesModal,
         },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.changeLanguage = !this.changeLanguage;
-            },
-        },
         methods: {
             filterList(obj) {
                 this.$refs.TypesTable.filterList(obj.search);

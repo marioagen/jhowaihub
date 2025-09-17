@@ -22,34 +22,27 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown">
-                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <LucideIcon icon="Ellipsis" />
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
-                                <LucideIcon icon="SquarePen" />
-                                {{ $t("labelEdit") }}
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                class="dropdown-item d-flex align-items-center gap-2"
-                                @click="openConfirmation(data.row)"
-                            >
-                                <LucideIcon icon="Trash2" />
-                                {{ $t("labelDelete") }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <DropdownComponent>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
+                            <LucideIcon icon="SquarePen" />
+                            {{ $t("labelEdit") }}
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="openConfirmation(data.row)"
+                        >
+                            <LucideIcon icon="Trash2" />
+                            {{ $t("labelDelete") }}
+                        </a>
+                    </li>
+                </DropdownComponent>
             </template>
         </TableComponent>
     </div>
-
-     <QuestionsModal :isEdit="true" @reload="reload" ref="QuestionsModal" />
-
+    <QuestionsModal :isEdit="true" @reload="reload" ref="QuestionsModal" />
     <ConfirmModal
         id="deleteConfirm"
         title="questions.removeTitle"
@@ -69,10 +62,12 @@
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import QuestionsModal from "@/components/questions/QuestionsModal.vue";
+    import DropdownComponent from "@/components/global/DropdownComponent.vue";
 
     export default {
         name: "QuestionsTable",
         components: {
+            DropdownComponent,
             TableComponent,
             ConfirmModal,
             QuestionsModal,
@@ -168,14 +163,14 @@
                             this.getQuestions({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: this.$t("questions.title"),
-                                message: this.$t("labelQuestionRemoveSuccess"),
+                                message: this.$t("questions.removeSuccess"),
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         } else {
                             this.$notify({
                                 title: this.$t("questions.title"),
-                                message: this.$t("labelQuestionRemoveError"),
+                                message: this.$t("removeError.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
