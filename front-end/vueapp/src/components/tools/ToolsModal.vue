@@ -85,11 +85,11 @@
 </template>
 
 <script>
+    import { Field, useForm } from "vee-validate";
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import ToolsService from "@/services/tools/ToolsServices";
     import ToolsTypesService from '@/services/tools/ToolsTypesService';
     import ToolsDataService from '@/services/tools/ToolsDataService';
-    import { Field, useForm } from "vee-validate";
 
     export default {
         components: {
@@ -97,8 +97,8 @@
             Field,
         },
         setup() {
-            const { validate, setValues, values } = useForm();
-            return { validate, setValues, values };
+            const { validate, setValues, values, resetForm } = useForm();
+            return { validate, setValues, values, resetForm };
         },
         emits: ["reload"],
         props: {
@@ -144,9 +144,8 @@
                     });
             },
             open(tool = null) {
-                if (tool === null) {
-                    this.resetData();
-                } else {
+                this.resetData();
+                if (tool !== null) {
                     this.setValues({
                         id: tool.id,
                         name: tool.name,
@@ -161,10 +160,15 @@
                 this.$refs.ToolModal.close();
             },
             resetData() {
-                this.values.name = "";
-                this.values.toolTypeId = "";
-                this.values.inputDataId = "";
-                this.values.outputDataId = "";
+                this.resetForm({
+                    values: {
+                        id: "",
+                        name: "",
+                        toolTypeId: "",
+                        inputDataId: "",
+                        outputDataId: "",
+                    }
+                });
             },
             async save() {
                 const result = await this.validate();
