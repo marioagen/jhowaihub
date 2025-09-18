@@ -27,10 +27,9 @@
                     </div>
                     <div class="offcanvas-body">
                         <div class="mb-3">
-                            <h6>Inputs</h6>
-                            <hr>
+                            <h6>Inputs</h6><hr>
                             <div class="background-div">
-                                <p class="mb-2">Receber de: nomedoNodoAnterior</p>
+                                <p class="mb-2 font-medium">Receber de: nomedoNodoAnterior</p>
                                 <span class="text-sm">Selecione o output de origem:</span>
                                 <select class="form-select form-select-sm mt-2" aria-label="Default select example">
                                     <option selected>Open this select menu</option>
@@ -41,12 +40,11 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <h6>Outputs</h6>
-                            <hr>
+                            <h6>Outputs</h6><hr>
                             <div class="background-div">
-                                <span>
+                                <span class="font-medium">
                                     nomeOutput
-                                    <LucideIcon :icon="'Copy'" class="copy" :size="16"/>
+                                    <LucideIcon :icon="'Copy'" class="copy float-end" :size="16"/>
                                 </span>
                             </div>
                         </div>
@@ -131,5 +129,9 @@ const { addEdges } = useVueFlow()
         border-width: 1px;
         border-radius: 0.375rem;
         padding: 15px;
+    }
+
+    .font-medium {
+        font-weight: 500;
     }
 </style>
