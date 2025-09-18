@@ -511,6 +511,9 @@
         deleteSuccess: "Time deletado com sucesso",
         deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
         deleteError: "Erro ao deletar time"
+    },
+    flow: {
+        start: "Início",
     }
 };
 

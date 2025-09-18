@@ -518,6 +518,9 @@
         deleteSuccess: "Team deleted successfully",
         deleteDocError: "Could not delete the team: there are related documents",
         deleteError: "Error while deleting team"
+    },
+    flow: {
+        start: "Start",
     }
 };
 
