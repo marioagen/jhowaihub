@@ -522,6 +522,9 @@
         deleteSuccess: "Equipo eliminado exitosamente",
         deleteDocError: "No se pudo eliminar el equipo: hay documentos relacionados",
         deleteError: "Error al eliminar el equipo"
+    },
+    flow: {
+        start: "Inicio",
     }
 };
 
