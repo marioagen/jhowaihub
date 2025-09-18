@@ -22,7 +22,7 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body vue-flow-container p-0">
-                        <VueFlowComponent :stepId="stepId"/>
+                        <VueFlowComponent :stepId="1" :isEditMode="true"/>
                     </div>
                 </div>               
             </div>

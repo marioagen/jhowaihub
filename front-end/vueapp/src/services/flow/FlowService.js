@@ -7,7 +7,7 @@ export default {
             { Id: 1, ToolId: 201, Label: "OCR", PositionX: 100, PositionY: 100 },
             { Id: 2, ToolId: 202, Label: "Validação", PositionX: 200, PositionY: 100 },
             { Id: 3, ToolId: 203, Label: "Exportação", PositionX: 300, PositionY: 200 },
-            { Id: 4, ToolId: 203, Label: "Importação", PositionX: 400, PositionY: 300 }
+            { Id: 4, ToolId: 203, Label: "Importação", PositionX: 400, PositionY: 300, input: {type: 'string', value:"sadlakdladk"} }
         ];
         return Promise.resolve(stepTools);
     },

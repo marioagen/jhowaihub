@@ -74,7 +74,7 @@ export default {
                     id: tool.Id.toString(),
                     position: { x: tool.PositionX, y: tool.PositionY },
                     label: tool.Label,
-                    data: { icon: "MessageCircle", color: "blue" },
+                    data: { icon: "MessageCircle", color: "blue", input: tool.input || null },
                     sourcePosition: "right",
                     targetPosition: "left",
                     type: "hub"
