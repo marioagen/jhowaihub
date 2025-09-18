@@ -4,20 +4,20 @@
             <div class="mt-3 mb-3">
                 <div class="card mb-3">
                     <div class="card-body palette">
-                             <div
-                        class="palette-item"
-                        draggable="true"
-                        @dragstart="onDragStart($event, {id:0,name:'processo'})"
-                    >
-                        Processo
-                    </div>
-                    <div
-                        class="palette-item"
-                        draggable="true"
-                        @dragstart="onDragStart($event,  {id:0,name:'decisao'})"
-                    >
-                        Decisão
-                    </div>
+                        <div
+                            class="palette-item"
+                            draggable="true"
+                            @dragstart="onDragStart($event, {id:0,name:'processo'})"
+                        >
+                            Processo
+                        </div>
+                        <div
+                            class="palette-item"
+                            draggable="true"
+                            @dragstart="onDragStart($event,  {id:0,name:'decisao'})"
+                        >
+                            Decisão
+                        </div>
                     </div>
                 </div>
                 <div class="card mb-3">

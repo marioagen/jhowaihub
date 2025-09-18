@@ -3,7 +3,7 @@
         <button
             v-for="tool in toolsList"
             :key="tool.id"
-            class="btn btn-outline-primary btn-sm me-2"
+            class="btn btn-outline-primary btn-sm me-2 mt-2"
         >
             {{ tool.name }}
         </button>

@@ -66,13 +66,19 @@
                     </div>
                 </div>
             </div>
-            <!-- Vueflow stuff -->
+            <div class="card-body vue-flow-container p-0">
+                <VueFlowComponent 
+                    :isEditMode="isEdit"
+                    :stepId="id"
+                />
+            </div>
         </div>
     </main>
 </template>
 
 <script>
     import ToolsListComponent from '@/components/flow/ToolsListComponent.vue';
+    import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
     export default {
         name: "FlowPage",
         props: {
@@ -81,6 +87,11 @@
                 required: false,
                 default: false,
             },
+            id: {
+                type: Number,
+                required: false,
+                default: null,
+            },
         },
         data() {
             return {
@@ -88,7 +99,8 @@
             };
         },
         components: {
-            ToolsListComponent
+            ToolsListComponent,
+            VueFlowComponent,
         },
         methods: {
             redirectToIndex() {
