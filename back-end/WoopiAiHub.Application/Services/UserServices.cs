@@ -44,7 +44,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> Create(UserCreateDto userCreateDto, HeadersDto headersDto)
         {
-            //logica de private teams
             if (string.IsNullOrEmpty(userCreateDto.Name) ||
                 string.IsNullOrEmpty(userCreateDto.Email) ||
                 string.IsNullOrEmpty(userCreateDto.Password))
@@ -267,10 +266,14 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Updates the teams and profiles of a user based on the provided UserCreateDto.
+        /// </summary>
+        /// <param name="userCreateDto"></param>
+        /// <param name="user"></param>
         private void UpdateTeamsAndProfiles(UserCreateDto userCreateDto,
                                             User user)
         {
-
             if (userCreateDto.TeamIds.Count > 0)
             {
                 AddTeams(userCreateDto.TeamIds, user);
