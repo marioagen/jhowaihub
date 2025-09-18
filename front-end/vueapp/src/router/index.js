@@ -18,7 +18,8 @@ import WorkflowEditor from "@/pages/workflow/editorIndex.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
 import ToolsPage from "@/pages/tools.vue";
-import FlowPage from "@/pages/flow.vue";
+import NewFlow from "@/pages/flows/newFlow.vue";
+import EditFlow from "@/pages/flows/editFlow.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -217,8 +218,17 @@ const routes = [
     },
     {
         path: "/flow",
-        name: "Flow",
-        component: FlowPage,
+        name: "NewFlow",
+        component: NewFlow,
+        meta: { 
+            layout: "default",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/flow/:id",
+        name: "EditFlow",
+        component: EditFlow,
         meta: { 
             layout: "default",
         },
