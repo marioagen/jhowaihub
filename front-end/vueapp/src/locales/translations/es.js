@@ -531,6 +531,7 @@
         upload: "Subir",
         showTools: "Agregar Herramientas",
         hideTools: "Ocultar Herramientas",
+        start: "Inicio",
         flowListEnd: "Finalizar Flujo",
         formCreate: {
             title: "Flujo de Automatización",

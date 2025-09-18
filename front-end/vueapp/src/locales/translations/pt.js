@@ -521,6 +521,7 @@
         showTools: "Adicionar Ferramentas",
         hideTools: "Ocultar Ferramentas",
         flowListEnd: "Finalizar fluxo",
+        start: "Início",
         formCreate: {
             title: "Fluxo de Automação",
             subtitle: "Crie uma nova ferramenta para processar documentos",

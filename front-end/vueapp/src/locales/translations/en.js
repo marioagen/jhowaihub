@@ -525,6 +525,7 @@
         save: "Save",
         downloadJson: "Download JSON",
         upload: "Upload",
+        start: "Start",
         showTools: "Add Tools",
         hideTools: "Hide Tools",
         flowListEnd: "Finish Flow",
