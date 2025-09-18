@@ -84,7 +84,7 @@ namespace WoopiAiHub.Repository
             }
 
             _context.Users.UpdateRange(usersInDb);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
 
             return true;
         }
