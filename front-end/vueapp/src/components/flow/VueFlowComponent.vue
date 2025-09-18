@@ -17,6 +17,7 @@ import { Background } from '@vue-flow/background'
 import HubNode from '@/components/flow/HubNode.vue';
 import FlowService from '@/services/flow/FlowService';
 import SpecialEdge from '@/components/flow/SpecialEdge.vue';
+import LogService from '@/services/log/logService';
 
 export default {
     name: "VueFlowComponent",
@@ -103,7 +104,7 @@ export default {
                 this.edges = mappedEdges;
 
             } catch (e) {
-                console.log("Erro ao carregar fluxo", e);
+                LogService.showMessage("Erro ao carregar fluxo");
             }
         },
         deleteNode(nodeId) {
@@ -178,9 +179,9 @@ export default {
             try {
                 const payload = this.buildFlowPayload();
                 await FlowService.saveFlow(this.stepId, payload);
-                console.log("Fluxo salvo com sucesso!", payload);
+                LogService.showMessage("Fluxo salvo com sucesso!");
             } catch (e) {
-                console.error("Erro ao salvar fluxo", e);
+                LogService.showMessage("Erro ao salvar fluxo");
             }
         }
     },
