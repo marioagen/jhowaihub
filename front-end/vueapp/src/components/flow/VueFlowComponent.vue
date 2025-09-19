@@ -21,6 +21,7 @@ import LogService from '@/services/log/logService';
 
 export default {
     name: "VueFlowComponent",
+    emits: ['openNodeConfig'],
     props: {
         stepId: {
             type: Number,
@@ -71,9 +72,9 @@ export default {
 
                 // StepTools -> Nodes
                 const mappedNodes = stepTools.map(tool => ({
-                    id: tool.Id.toString(),
-                    position: { x: tool.PositionX, y: tool.PositionY },
-                    label: tool.Label,
+                    id: tool.id.toString(),
+                    position: { x: tool.positionX, y: tool.positionY },
+                    label: tool.label,
                     data: { icon: "MessageCircle", color: "blue", input: tool.input || null },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -93,9 +94,9 @@ export default {
                 if (stepTools.length > 0) {
                     const firstTool = stepTools[0];
                     mappedEdges.unshift({
-                        id: `start-${firstTool.Id}`,
+                        id: `start-${firstTool.id}`,
                         source: "start",
-                        target: firstTool.Id.toString(),
+                        target: firstTool.id.toString(),
                         type: "special"
                     });
                 }
@@ -111,14 +112,15 @@ export default {
             this.nodes = this.nodes.filter(node => node.id !== nodeId);
             this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
         },
+        updateNode(nodeFlow) {
+             const idx = this.nodes.findIndex(node => node.id === nodeFlow.id);
+             this.nodes[idx] = nodeFlow;
+        },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
         },
-        openNodeConfig(nodeId) {
-            const node = this.nodes.find(n => n.id === nodeId);
-            if (node) {
-                alert(`Open config for node: ${node.label}`);
-            }
+        openNodeConfig(node) {
+            this.$emit('openNodeConfig', node)
         },
         onConnect(params) {
             this.vueFlowInstance?.addEdges([{ ...params, type: 'special' }])
@@ -159,7 +161,8 @@ export default {
                     PositionX: node.position.x,
                     PositionY: node.position.y,
                     Order: index + 1,
-                    Status: "Active"
+                    Status: "Active",
+                    Input: node.data.input || null //atualizar com update
                 }));
 
             // Mapeia edges (ignorando edges que saem do "start")
