@@ -6,5 +6,6 @@
         public int ToolTypeId { get; set; }
         public int InputDataId { get; set; }
         public int OutputDataId { get; set; }
+        public bool IsEditableInput { get; set; }
     }
 }

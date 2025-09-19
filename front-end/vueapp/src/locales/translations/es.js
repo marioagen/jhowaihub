@@ -504,6 +504,7 @@
             typesSelect: "Selecciona el tipo de herramienta",
             entries: "Entrada",
             entriesSelect: "Selecciona el tipo de entrada",
+            entriesEditable: "Entrada editable",
             output: "Salida",
             outputSelect: "Selecciona el tipo de salida",
         },
