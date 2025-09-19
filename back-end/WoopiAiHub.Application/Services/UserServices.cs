@@ -117,7 +117,7 @@ namespace WoopiAiHub.Application.Services
                 };
                 return await ReactivateUser(existingUser, userCreateDto, headersDto);
             }
-            else if (existingUser != null && existingUser.IsActive)
+            else if (existingUser != null && existingUser.IsActive && !existingUser.Id.Equals(userUpdateDto.Id))
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
             }
@@ -267,6 +267,25 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Updates the teams and profiles of a user based on the provided UserCreateDto.
+        /// </summary>
+        /// <param name="userCreateDto"></param>
+        /// <param name="user"></param>
+        private void UpdateTeamsAndProfiles(UserCreateDto userCreateDto,
+                                            User user)
+        {
+            if (userCreateDto.TeamIds.Count > 0)
+            {
+                AddTeams(userCreateDto.TeamIds, user);
+            }
+
+            if (userCreateDto.ProfileIds.Count > 0)
+            {
+                AddProfiles(userCreateDto.ProfileIds, user);
+            }
+        }
+
+        /// <summary>
         /// Sets the password and salt for a user based on the provided DTO and user object.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -305,15 +324,7 @@ namespace WoopiAiHub.Application.Services
 
             SetSaltAndPassword(userCreateDto.Password, user, null);
 
-            if (userCreateDto.TeamIds.Count > 0)
-            {
-                AddTeams(userCreateDto.TeamIds, user);
-            }
-
-            if (userCreateDto.ProfileIds.Count > 0)
-            {
-                AddProfiles(userCreateDto.ProfileIds, user);
-            }
+            UpdateTeamsAndProfiles(userCreateDto, user);
 
             return await _userRepository.CreateAsync(user);
         }
@@ -328,6 +339,8 @@ namespace WoopiAiHub.Application.Services
                                                 UserCreateDto userCreateDto,
                                                 HeadersDto headersDto)
         {
+            UpdateTeamsAndProfiles(userCreateDto, user);
+
             user.Reactivate(userCreateDto.Name,
                             userCreateDto.Email);
 
@@ -364,12 +377,19 @@ namespace WoopiAiHub.Application.Services
                 {
                     SetSaltAndPassword(userUpdateDto.Password, user, user.Salt);
                 }
+            
+                var userCreateDto = new UserCreateDto
+                {
+                    Name = userUpdateDto.Name,
+                    Email = userUpdateDto.Email,
+                    Password = userUpdateDto.Password,
+                    TeamIds =  userUpdateDto.TeamIds,
+                    ProfileIds = userUpdateDto.ProfileIds,
+                };
 
-                AddTeams(userUpdateDto.TeamIds, user);
+                UpdateTeamsAndProfiles(userCreateDto, user);
 
-                AddProfiles(userUpdateDto.ProfileIds, user);
-
-                var updateResult = _userRepository.Update(user);
+             var updateResult = _userRepository.Update(user);
                 return updateResult;
         }
 
