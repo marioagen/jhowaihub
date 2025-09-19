@@ -424,6 +424,7 @@
         title: "Usuários",
         saveSuccess: "Usuário salvo com sucesso",
         saveError: "Erro ao salvar usuário",
+        removeSuccess: "Usuário removido com sucesso"
     },
     workflow: {
         index: "Workflow",
@@ -493,6 +494,7 @@
             typesSelect: "Selecione tipo da Ferramenta",
             entries: "Entrada (Input)",
             entriesSelect: "Selecione o tipo de entrada",
+            entriesEditable: "Entrada editável",
             output: "Saida (Output)",
             outputSelect: "Selecione o tipo de saida",
         },

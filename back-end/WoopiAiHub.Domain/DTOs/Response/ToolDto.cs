@@ -10,5 +10,6 @@
         public string InputData { get; set; } = string.Empty;
         public int OutputDataId { get; set; }
         public string OutputData { get; set; } = string.Empty;
+        public bool IsEditableInput { get; set; }
     }
 }

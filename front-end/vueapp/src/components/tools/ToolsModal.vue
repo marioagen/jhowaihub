@@ -52,6 +52,14 @@
                                 {{ errorMessage }}
                             </span>
                         </Field>
+                        <Field v-slot="{ field }" name="isEditableInput" type="checkbox" :value="true" :unchecked-value="false">
+                            <div class="form-check mt-1 p-0">
+                                <input type="checkbox" name="isEditableInput" v-bind="field" :value="true" id="isEditableInput"/>
+                                <label class="form-check-label ps-1" for="isEditableInput">
+                                    {{ $t("tools.form.entriesEditable") }}
+                                </label>
+                            </div>
+                        </Field>
                     </div>
                     <div class="col-6">
                         <label>{{ $t("tools.form.output") }}</label>
@@ -119,6 +127,7 @@
                 toolTypeId: "",
                 inputDataId: "",
                 outputDataId: "",
+                isEditableInput: false,
             },
         }),
         computed: {
@@ -152,6 +161,7 @@
                         toolTypeId: tool.toolTypeId,
                         inputDataId: tool.inputDataId,
                         outputDataId: tool.outputDataId,
+                        isEditableInput: tool.isEditableInput,
                     });
                 }
                 this.$refs.ToolModal.open();
@@ -167,6 +177,7 @@
                         toolTypeId: "",
                         inputDataId: "",
                         outputDataId: "",
+                        isEditableInput: false,
                     }
                 });
             },
