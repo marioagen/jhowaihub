@@ -493,6 +493,7 @@
             typesSelect: "Selecione tipo da Ferramenta",
             entries: "Entrada (Input)",
             entriesSelect: "Selecione o tipo de entrada",
+            entriesEditable: "Entrada editável",
             output: "Saida (Output)",
             outputSelect: "Selecione o tipo de saida",
         },

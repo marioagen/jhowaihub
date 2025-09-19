@@ -500,6 +500,7 @@
             typesSelect: "Select tool type",
             entries: "Input",
             entriesSelect: "Select input type",
+            entriesEditable: "Editable input",
             output: "Output",
             outputSelect: "Select output type",
         },

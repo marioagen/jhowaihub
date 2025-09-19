@@ -66,7 +66,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                 true,
                 _faker.Random.Int(1, 1000),
                 _faker.Random.Int(1, 1000),
-                _faker.Random.Int(1, 1000)
+                _faker.Random.Int(1, 1000),
+                true
             );
         }
 

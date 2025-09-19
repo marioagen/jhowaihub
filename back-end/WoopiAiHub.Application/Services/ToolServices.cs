@@ -37,7 +37,8 @@ namespace WoopiAiHub.Application.Services
                 true,
                 toolCreateDto.ToolTypeId,
                 toolCreateDto.InputDataId,
-                toolCreateDto.OutputDataId
+                toolCreateDto.OutputDataId,
+                toolCreateDto.IsEditableInput
              );
 
             var result = await _toolRepository.CreateUniqueAsync(tool);
@@ -119,7 +120,11 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "Tool not found", null);
             }
 
-            tool.Update(toolUpdateDto.Name, toolUpdateDto.ToolTypeId, toolUpdateDto.InputDataId, toolUpdateDto.OutputDataId);
+            tool.Update(toolUpdateDto.Name, 
+                        toolUpdateDto.ToolTypeId, 
+                        toolUpdateDto.InputDataId, 
+                        toolUpdateDto.OutputDataId,
+                        toolUpdateDto.IsEditableInput);
 
             var result = await _toolRepository.UpdateAsync(tool);
             if (!result)
