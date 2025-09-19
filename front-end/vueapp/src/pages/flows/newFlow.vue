@@ -1,5 +1,5 @@
 <template>
-    <FlowComponent />
+    <FlowComponent :stepId="1"/>
 </template>
 
 <script>

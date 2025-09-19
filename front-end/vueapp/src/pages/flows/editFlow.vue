@@ -1,5 +1,6 @@
 <template>
-    <FlowComponent 
+    <FlowComponent
+        :stepId="1" 
         :isEdit="true"
         :id="$route.params.id"
     />
