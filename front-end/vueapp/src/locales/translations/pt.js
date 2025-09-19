@@ -424,6 +424,7 @@
         title: "Usuários",
         saveSuccess: "Usuário salvo com sucesso",
         saveError: "Erro ao salvar usuário",
+        removeSuccess: "Usuário removido com sucesso"
     },
     workflow: {
         index: "Workflow",
