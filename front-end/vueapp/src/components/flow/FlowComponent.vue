@@ -45,7 +45,27 @@
             <VueFlowComponent 
                 :isEditMode="isEdit"
                 :stepId="id"
+                @openNodeConfig="openNodeConfig" ref="vueflowComponent"
             />
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel" ref="sidebar">
+                <div class="offcanvas-header">
+                    <h5 id="offcanvasRightLabel">Configurar I/O: {{nodeFlow.label}}</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" @click="closeSidebar"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div class="mb-3">
+                        <h6>Inputs</h6><hr>
+                        <div class="background-div">
+                            <div v-if="nodeFlow.data.input.type == 'string'">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" v-model="nodeFlow.data.input.value"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-primary" @click="updateNode">{{$t("labelSave")}}</button>
+                        </div>
+                    </div> 
+                </div>
+            </div>
         </div>
     </main>
 </template>
@@ -55,6 +75,10 @@
     export default {
         name: "FlowPage",
         props: {
+            stepId: {
+                type: Number,
+                required: true
+            },
             isEdit: {
                 type: Boolean,
                 required: false,
@@ -69,6 +93,15 @@
         data() {
             return {
                 isActiveCollapse: false,
+                nodeFlow: {
+                    data: {
+                        input: {
+                            type: "",
+                            value: "",
+                        }
+                    },
+                    label: ""
+                },
             };
         },
         components: {
@@ -90,6 +123,40 @@
             upload() {
                 console.log("upload")
             },
+            openNodeConfig(node) {
+                this.nodeFlow = node;
+                console.log(this.nodeFlow);
+                const sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
+                sidebar.show();
+            },
+            closeSidebar() {
+                sidebar.hide();
+            },
+            updateNode() {
+                this.$refs.vueflowComponent.updateNode(this.nodeFlow);
+            },
         },
     };
 </script>
+
+<style>
+/* import the necessary styles for Vue Flow to work */
+@import '@vue-flow/core/dist/style.css';
+
+/* import the default theme, this is optional but generally recommended */
+@import '@vue-flow/core/dist/theme-default.css';
+
+.vue-flow-container{
+    height: calc(100vh - 200px);
+}
+    .background-div {
+        background-color: rgb(249 250 251);
+        border-width: 1px;
+        border-radius: 0.375rem;
+        padding: 15px;
+    }
+
+    .font-medium {
+        font-weight: 500;
+    }
+</style>

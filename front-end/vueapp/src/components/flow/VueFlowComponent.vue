@@ -242,7 +242,7 @@ export default {
         },
         showCollapse() {
             this.isActiveCollapse = !this.isActiveCollapse;
-        }
+        },
     },
     mounted() {
         this.getToolsList();
