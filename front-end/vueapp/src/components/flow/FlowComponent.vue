@@ -41,43 +41,16 @@
                     </button>
                 </div>
             </div>
-            <hr/>
-            <div class="row">
-                <div class="col">
-                    <button 
-                        class="btn btn-primary btn-sm me-2" 
-                        data-bs-toggle="collapse" 
-                        data-bs-target="#toolsCollapse" 
-                        aria-expanded="false" 
-                        aria-controls="toolsCollapse"
-                        @click="showCollapse"
-                    >
-                        <LucideIcon icon="Plus" :size="15" />
-                        {{ isActiveCollapse ? $t("flow.hideTools") : $t("flow.showTools") }}
-                    </button>
-                </div>      
-            </div>
-            <div class="collapse" id="toolsCollapse">
-                <div class="mt-3 mb-3">
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <ToolsListComponent />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body vue-flow-container p-0">
-                <VueFlowComponent 
-                    :isEditMode="isEdit"
-                    :stepId="id"
-                />
-            </div>
+            <hr/>            
+            <VueFlowComponent 
+                :isEditMode="isEdit"
+                :stepId="id"
+            />
         </div>
     </main>
 </template>
 
 <script>
-    import ToolsListComponent from '@/components/flow/ToolsListComponent.vue';
     import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
     export default {
         name: "FlowPage",
@@ -99,7 +72,6 @@
             };
         },
         components: {
-            ToolsListComponent,
             VueFlowComponent,
         },
         methods: {
