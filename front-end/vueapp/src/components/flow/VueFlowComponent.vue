@@ -84,6 +84,7 @@ export default {
             nodes: [],
             edges: [],
             vueFlowInstance: null,
+            isActiveCollapse: false,
         }
     },
     components: {
@@ -235,6 +236,9 @@ export default {
             } catch (e) {
                 LogService.showMessage("Erro ao salvar fluxo");
             }
+        },
+        showCollapse() {
+            this.isActiveCollapse = !this.isActiveCollapse;
         }
     },
     mounted() {
