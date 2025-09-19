@@ -6,7 +6,7 @@
       <h5 class="mb-0">{{ node.label }}</h5>
     </div>
     <div class="item-right" v-if="!node.data.isStartNode">
-      <LucideIcon v-if="node.data.input" :icon="'Settings'" class="settings" :size="16" @click="$emit('openNodeConfig', node.id)" />
+      <LucideIcon v-if="node.data.input" :icon="'Settings'" class="settings" :size="16" @click="$emit('openNodeConfig', node)" />
       <LucideIcon :icon="'X'" class="delete" :size="16" @click="$emit('deleteNode', node.id)" />
     </div>
     <Handle type="source" position="right" class="hub-handle" />
@@ -28,7 +28,8 @@ export default {
   components: {
     Handle,
     LucideIcon
-  }
+   },
+   methods: {}
 }
 </script>
 <style>
