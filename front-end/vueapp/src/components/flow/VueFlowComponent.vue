@@ -1,14 +1,50 @@
 <template>
-    <VueFlow v-model:nodes="nodes" v-model:edges="edges" :style="{ width: '100%', height: '100%' }" @connect="onConnect"
-        @pane-ready="onPaneReady" @drop="onDrop" @dragover="onDragOver" @nodes-change="onNodesChange">
-        <Background patternColor="#BCD5F2" gap="10" variant="dots" size="1" />
-        <template #node-hub="props">
-            <HubNode :node="props" @deleteNode="deleteNode" @openNodeConfig="openNodeConfig" />
-        </template>
-        <template #edge-special="props">
-            <SpecialEdge v-bind="props" @deleteEdge="deleteEdge" :data="props" />
-        </template>
-    </VueFlow>
+    <div class="row mb-2">
+        <div class="col">
+            <button 
+                class="btn btn-primary btn-sm me-2" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#toolsCollapse" 
+                aria-expanded="false" 
+                aria-controls="toolsCollapse"
+                @click="showCollapse"
+            >
+                <LucideIcon icon="Plus" :size="15" />
+                {{ isActiveCollapse ? $t("flow.hideTools") : $t("flow.showTools") }}
+            </button>
+        </div>
+    </div>
+    <div class="collapse" id="toolsCollapse">
+        <div class="mt-3 mb-3">
+            <div class="card mb-3">
+                <div class="card-body palette">
+                    <div>
+                        <button
+                            v-for="tool in toolsList"
+                            :key="tool.id"
+                            class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item"
+                            draggable="true"
+                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name })"
+                        >
+                            {{ tool.name }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card vue-flow-container p-0">
+        <VueFlow v-model:nodes="nodes" v-model:edges="edges" :style="{ width: '100%', height: '100%' }" @connect="onConnect"
+            @pane-ready="onPaneReady" @drop="onDrop" @dragover="onDragOver" @nodes-change="onNodesChange">
+            <Background patternColor="#BCD5F2" gap="10" variant="dots" size="1" />
+            <template #node-hub="props">
+                <HubNode :node="props" @deleteNode="deleteNode" @openNodeConfig="openNodeConfig" />
+            </template>
+            <template #edge-special="props">
+                <SpecialEdge v-bind="props" @deleteEdge="deleteEdge" :data="props" />
+            </template>
+        </VueFlow>
+    </div>
 </template>
 
 <script>
@@ -18,6 +54,7 @@ import HubNode from '@/components/flow/HubNode.vue';
 import FlowService from '@/services/flow/FlowService';
 import SpecialEdge from '@/components/flow/SpecialEdge.vue';
 import LogService from '@/services/log/logService';
+import ToolsServices from '@/services/tools/ToolsServices';
 
 export default {
     name: "VueFlowComponent",
@@ -35,6 +72,7 @@ export default {
     },
     data() {
         return {
+            toolsList: [],
             nodes: [],
             edges: [],
             vueFlowInstance: null,
@@ -47,6 +85,12 @@ export default {
         SpecialEdge
     },
     methods: {
+        getToolsList() {
+            ToolsServices.getToolsList()
+                .then((response) => {
+                    this.toolsList = response;
+                });
+        },
         onPaneReady(instance) {
             this.vueFlowInstance = instance
         },
@@ -186,6 +230,7 @@ export default {
         }
     },
     mounted() {
+        this.getToolsList();
         if (!this.isEditMode) {
             this.newFlow();
         } else {
