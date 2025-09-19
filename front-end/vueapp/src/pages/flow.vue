@@ -3,51 +3,45 @@
         <div class="container-fluid scroll-area mx-2">
             <div class="mt-3 mb-3">
                 <div class="card mb-3">
-                    <div class="card-body">
-                        <!-- controles aqui -->
+                    <div class="card-body palette">
+                             <div
+                        class="palette-item"
+                        draggable="true"
+                        @dragstart="onDragStart($event, {id:0,name:'processo'})"
+                    >
+                        Processo
+                    </div>
+                    <div
+                        class="palette-item"
+                        draggable="true"
+                        @dragstart="onDragStart($event,  {id:0,name:'decisao'})"
+                    >
+                        Decisão
+                    </div>
                     </div>
                 </div>
                 <div class="card mb-3">
                     <div class="card-body vue-flow-container p-0">
-                        <VueFlow :nodes="nodes" :edges="edges" :style="{ width: '100%', height: '100%' }" @connect="onConnect">
-                            <Background patternColor="#BCD5F2" gap="10" variant="dots" size="1" />
-                            <template #node-hub="props">
-                                <HubNode :node="props" @deleteNode="deleteNode" @openNodeConfig="openNodeConfig" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"/>
-                            </template>
-                            <template #edge-special="props">
-                                <SpecialEdge v-bind="props" @deleteEdge="deleteEdge" :data="props" />
-                            </template>
-                        </VueFlow>
+                        <VueFlowComponent :stepId="1" :isEditMode="true" @openNodeConfig="openNodeConfig" ref="vueflowComponent"/>
                     </div>
                 </div>
-                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel" ref="sidebar">
                     <div class="offcanvas-header">
-                        <h5 id="offcanvasRightLabel">Configurar I/O: nomeFerramenta</h5>
-                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        <h5 id="offcanvasRightLabel">Configurar I/O: {{nodeFlow.label}}</h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" @click="closeSidebar"></button>
                     </div>
                     <div class="offcanvas-body">
                         <div class="mb-3">
                             <h6>Inputs</h6><hr>
                             <div class="background-div">
-                                <p class="mb-2 font-medium">Receber de: nomedoNodoAnterior</p>
-                                <span class="text-sm">Selecione o output de origem:</span>
-                                <select class="form-select form-select-sm mt-2" aria-label="Default select example">
-                                    <option selected>Open this select menu</option>
-                                    <option value="1">One</option>
-                                    <option value="2">Two</option>
-                                    <option value="3">Three</option>
-                                </select>
+                                <div v-if="nodeFlow.data.input.type == 'string'">
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" v-model="nodeFlow.data.input.value"></textarea>
+                                </div>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <h6>Outputs</h6><hr>
-                            <div class="background-div">
-                                <span class="font-medium">
-                                    nomeOutput
-                                    <LucideIcon :icon="'Copy'" class="copy float-end" :size="16"/>
-                                </span>
+                            <div class="mt-4">
+                                <button type="button" class="btn btn-primary" @click="updateNode">{{$t("labelSave")}}</button>
                             </div>
-                        </div>
+                        </div> 
                     </div>
                 </div>
             </div>
@@ -56,62 +50,46 @@
 </template>
 
 <script>
-import { VueFlow, useVueFlow } from '@vue-flow/core'
-import { Background } from '@vue-flow/background'
-import HubNode from '@/components/flow/HubNode.vue';
-import FlowService from '@/services/flow/FlowService';
-import SpecialEdge from '../components/flow/SpecialEdge.vue';
-
-const { addEdges } = useVueFlow()
-
+    import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
     export default {
         name: "FlowPage",
+        components: {
+            VueFlowComponent
+        },
         props: {
-            flowId: {
+            stepId: {
                 type: Number,
-                required: false
+                required: true
             }
         },
         data() {
-            return{
-                nodes:[],
-                edges:[],
+            return {
+                nodeFlow: {
+                    data: {
+                        input: {
+                            type: "",
+                            value: "",
+                        }
+                    },
+                    label: ""
+                },
             }
-        },
-        components: {
-            VueFlow,
-            Background,
-            HubNode,
-            SpecialEdge
         },
         methods: {
-            getFlow(){
-                FlowService.getFlowById(this.flowId).then(response => {
-                    this.nodes = response.nodes;
-                    this.edges = response.edges;
-                }).catch(e => {
-                    console.log(e);
-                });
+            openNodeConfig(node) {
+                this.nodeFlow = node;
+                console.log(this.nodeFlow);
+                const sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
+                sidebar.show();
             },
-            deleteNode(nodeId) {
-                this.nodes = this.nodes.filter(node => node.id !== nodeId);
-                this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
+            closeSidebar() {
+                sidebar.hide();
             },
-            deleteEdge(edgeId) {
-                console.log("Deleting edge with ID:", edgeId);
-                this.edges = this.edges.filter(edge => edge.id !== edgeId);
-            },
-            openNodeConfig(nodeId) {
-                const node = this.nodes.find(n => n.id === nodeId);
-            },
-            onConnect(params) {
-                this.edges.value = addEdges({ ...params, type: 'step' }, this.edges.value)
+            updateNode() {
+                this.$refs.vueflowComponent.updateNode(this.nodeFlow);
             }
         },
-        mounted(){
-            this.getFlow();
-        }
-    };
+    }
 </script>
 
 <style>
