@@ -123,7 +123,6 @@ export default {
                 const stepTools = await FlowService.getStepToolsByStepId(this.stepId);
                 const dependencies = await FlowService.getStepToolDependenciesByStepId(this.stepId);
 
-                // StepTools -> Nodes
                 const mappedNodes = stepTools.map(tool => ({
                     id: tool.id.toString(),
                     position: { x: tool.positionX, y: tool.positionY },
@@ -134,7 +133,6 @@ export default {
                     type: "hub"
                 }));
 
-                // StepToolDependencies -> Edges
                 const mappedEdges = dependencies.map(dep => ({
                     id: `${dep.StepToolIdFrom}-${dep.StepToolIdTo}`,
                     source: dep.StepToolIdFrom.toString(),
@@ -143,7 +141,6 @@ export default {
                     type: "special"
                 }));
 
-                // Edge inicial (Início -> primeiro StepTool)
                 if (stepTools.length > 0) {
                     const firstTool = stepTools[0];
                     mappedEdges.unshift({
@@ -204,7 +201,6 @@ export default {
             this.vueFlowInstance?.addNodes([newNode])
         },
         buildFlowPayload() {
-            // Mapeia nodes (ignorando o nó "start")
             const stepTools = this.nodes
                 .filter(node => node.id !== "start")
                 .map((node, index) => ({
@@ -218,7 +214,6 @@ export default {
                     Input: node.data.input || null //atualizar com update
                 }));
 
-            // Mapeia edges (ignorando edges que saem do "start")
             const stepToolDependencies = this.edges
                 .filter(edge => edge.source !== "start")
                 .map(edge => ({
