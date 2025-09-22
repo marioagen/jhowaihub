@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.Models
         [Column("ToolId", TypeName = "int")]
         public int ToolId { get; private set; }
 
-        [Column("Order", TypeName = "int")]
+        [Column("StepOrder", TypeName = "int")]
         public int Order { get; private set; }
 
         [Column("PositionX", TypeName = "decimal(9,2)")]
@@ -19,8 +19,13 @@ namespace WoopiAiHub.Domain.Models
         [Column("PositionY", TypeName = "decimal(9,2)")]
         public decimal PositionY { get; private set; }
 
+        [Column("DependsOnStepToolId", TypeName = "int")]
+        public int? DependsOnStepToolId { get; private set; }
+
+        public virtual StepTool? DependsOnStepTool { get; private set; }
         public virtual required Step Step { get; set; }
         public virtual required Tool Tool { get; set; }
+        public virtual ICollection<StepToolOutput> Outputs { get; private set; } = new List<StepToolOutput>();
 
         public StepTool(int id, 
                        DateTime created, 

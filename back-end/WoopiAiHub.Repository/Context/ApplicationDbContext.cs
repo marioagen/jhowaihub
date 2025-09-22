@@ -40,6 +40,10 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<ToolData> ToolDatas { get; set; }
         public DbSet<ToolType> ToolTypes { get; set; }
         public DbSet<Tool> Tools { get; set; }
+        public DbSet<StepTool> StepTools { get; set; }
+        public DbSet<StepToolExecution> StepToolExecutions { get; set; }
+        public DbSet<StepToolOutput> StepToolOutputs { get; set; }
+        public DbSet<StepToolParameter> StepToolParameters { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -72,6 +76,10 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<ToolData>(new ToolDataMap().Configure);
             modelBuilder.Entity<ToolType>(new ToolTypeMap().Configure);
             modelBuilder.Entity<Tool>(new ToolMap().Configure);
+            modelBuilder.Entity<StepTool>(new StepToolMap().Configure);
+            modelBuilder.Entity<StepToolExecution>(new StepToolExecutionMap().Configure);
+            modelBuilder.Entity<StepToolParameter>(new StepToolParameterMap().Configure);
+            modelBuilder.Entity<StepToolOutput>(new StepToolOutputMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }
