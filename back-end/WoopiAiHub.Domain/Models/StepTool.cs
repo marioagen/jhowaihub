@@ -22,10 +22,10 @@ namespace WoopiAiHub.Domain.Models
         [Column("DependsOnStepToolId", TypeName = "int")]
         public int? DependsOnStepToolId { get; private set; }
 
-        public virtual StepTool? DependsOnStepTool { get; private set; }
+        public virtual StepTool? DependsOnStepTool { get; set; }
         public virtual required Step Step { get; set; }
         public virtual required Tool Tool { get; set; }
-        public virtual ICollection<StepToolOutput> Outputs { get; private set; } = new List<StepToolOutput>();
+        public virtual ICollection<StepToolOutput> Outputs { get; set; } = new List<StepToolOutput>();
 
         public StepTool(int id, 
                        DateTime created, 
