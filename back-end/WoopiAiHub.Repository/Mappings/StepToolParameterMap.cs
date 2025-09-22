@@ -1,0 +1,30 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using WoopiAiHub.Domain.Models;
+
+namespace WoopiAiHub.Repository.Mappings
+{
+    public class StepToolParameterMap : IEntityTypeConfiguration<StepToolParameter>
+    {
+        public void Configure(EntityTypeBuilder<StepToolParameter> builder)
+        {
+            builder.ToTable("StepToolParameters");
+
+            builder.HasKey(p => p.Id);
+
+            builder.HasOne<StepTool>()
+                   .WithMany() 
+                   .HasForeignKey(p => p.StepToolId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Property(p => p.Value)
+                   .HasColumnType("nvarchar(max)")
+                   .IsRequired();
+
+            builder.Property(p => p.Created)
+                   .HasColumnType("datetime")
+                   .IsRequired();
+        }
+    }
+}

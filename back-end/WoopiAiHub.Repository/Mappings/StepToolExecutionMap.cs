@@ -1,0 +1,42 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using WoopiAiHub.Domain.Models;
+
+namespace WoopiAiHub.Repository.Mappings
+{
+    public class StepToolExecutionMap : IEntityTypeConfiguration<StepToolExecution>
+    {
+        public void Configure(EntityTypeBuilder<StepToolExecution> builder)
+        {
+            builder.ToTable("StepToolExecutions");
+
+            builder.HasKey(e => e.Id);
+
+            builder.HasOne<StepTool>()
+                   .WithMany() 
+                   .HasForeignKey(e => e.StepToolId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne<Card>()
+                   .WithMany()
+                   .HasForeignKey(e => e.CardId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(e => e.Started)
+                   .HasColumnType("datetime")
+                   .IsRequired();
+
+            builder.Property(e => e.Completed)
+                   .HasColumnType("datetime")
+                   .IsRequired(false);
+
+            builder.Property(e => e.Status)
+                   .HasConversion<int>()
+                   .IsRequired();
+
+            builder.Property(p => p.Created)
+                   .HasColumnType("datetime")
+                   .IsRequired();
+        }
+    }
+}
