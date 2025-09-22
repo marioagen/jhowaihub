@@ -211,7 +211,7 @@ export default {
                     PositionY: node.position.y,
                     Order: index + 1,
                     Status: "Active",
-                    Input: node.data.input || null //atualizar com update
+                    Input: node.data.input || null
                 }));
 
             const stepToolDependencies = this.edges
