@@ -520,8 +520,24 @@
         deleteError: "Error while deleting team"
     },
     flow: {
+        title: "Automation Flow",
+        subtitle: "",
+        save: "Save",
+        downloadJson: "Download JSON",
+        upload: "Upload",
         start: "Start",
-    }
+        showTools: "Add Tools",
+        hideTools: "Hide Tools",
+        flowListEnd: "Finish Flow",
+        formCreate: {
+            title: "Automation Flow",
+            subtitle: "Create a new tool to process documents",
+        },
+        formEdit: {
+            title: "Automation Flow:",
+            subtitle: "Update the information of the selected tool",
+        },
+    },
 };
 
 export default english;

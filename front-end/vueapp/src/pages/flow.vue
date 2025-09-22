@@ -22,7 +22,11 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body vue-flow-container p-0">
-                        <VueFlowComponent :stepId="1" :isEditMode="true" @openNodeConfig="openNodeConfig" ref="vueflowComponent"/>
+                        <VueFlowComponent 
+                            :stepId="1" 
+                            :isEditMode="true" 
+                            @openNodeConfig="openNodeConfig" ref="vueflowComponent"
+                        />
                     </div>
                 </div>
                 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel" ref="sidebar">

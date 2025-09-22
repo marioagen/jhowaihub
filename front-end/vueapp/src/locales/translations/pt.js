@@ -513,8 +513,24 @@
         deleteError: "Erro ao deletar time"
     },
     flow: {
+        title: "Fluxo de Automação",
+        subtitle: "",
+        save: "Salvar",
+        downloadJson: "Baixar JSON",
+        upload: "Upload",
+        showTools: "Adicionar Ferramentas",
+        hideTools: "Ocultar Ferramentas",
+        flowListEnd: "Finalizar fluxo",
         start: "Início",
-    }
+        formCreate: {
+            title: "Fluxo de Automação",
+            subtitle: "Crie uma nova ferramenta para processar documentos",
+        },
+        formEdit: {
+            title: "Fluxo de Automação:",
+            subtitle: "Atualize as informações da ferramenta selecionada",
+        },
+    },
 };
 
 export default portuguese;
