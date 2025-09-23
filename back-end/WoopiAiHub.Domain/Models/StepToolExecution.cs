@@ -39,5 +39,10 @@ namespace WoopiAiHub.Domain.Models
         /// Use to EF context
         /// </summary>
         private StepToolExecution(int id, DateTime created) : base(id, created) { }
+
+        public void UpdateStatusExecution(StatusExecution status)
+        {
+            Status = status;
+        }
     }
 }

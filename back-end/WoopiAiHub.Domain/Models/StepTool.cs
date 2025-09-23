@@ -46,5 +46,15 @@ namespace WoopiAiHub.Domain.Models
         /// Use to EF context
         /// </summary>
         private StepTool(int id, DateTime created) : base(id, created) { }
+
+        public void UpdateDependencyStepTool(StepTool stepTool)
+        {
+            ArgumentNullException.ThrowIfNull(stepTool);
+            if (Id == stepTool.Id)
+            {
+                return;
+            }
+            DependsOnStepTool = stepTool;
+        }
     }
 }
