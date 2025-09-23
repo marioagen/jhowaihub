@@ -1,33 +1,36 @@
-﻿using WoopiAiHub.Domain.DTOs;
+﻿using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
     public class AutomationServices : IAutomationServices
     {
-        public AutomationServices()
-        {
-            /// <summary>
-            /// Find all questions
-            /// </summary>
-            /// <returns></returns>
-        public ICollection<AutomationDto> FindAll()
-        {
-            return _questionRepository.FindAll();
-        }
+        private readonly IStepToolRepository _stepToolRepository;
+        private readonly IToolRepository _toolRepository;
+        private readonly IStepRepository _stepRepository;
 
-        /// <summary>
-        /// Find a question by description
-        /// </summary>
-        /// <param name="desc"></param>
-        /// <returns></returns>
-        public AutomationDto FindByDescriptionAndEmail(string desc,
-                                                     string emailCreator)
+        public AutomationServices(IStepToolRepository stepToolRepository,
+                                  IToolRepository toolRepository,
+                                  IStepRepository stepRepository)
         {
-            return _questionRepository.FindByDescriptionAndEmail(desc,
-                                                                 emailCreator);
+            _stepToolRepository = stepToolRepository;
+            _toolRepository = toolRepository;
+            _stepRepository = stepRepository;
+        }
+        /// <summary>
+        /// Find all questions
+        /// </summary>
+        /// <returns></returns>
+        /// 
+        public ICollection<StepToolDto> FindAll()
+        {
+            return _stepToolRepository.FindAll().ToList();
         }
 
         /// <summary>
@@ -35,9 +38,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public QuestionDto FindById(int id)
+        public async Task<StepToolDto> FindById(int id)
         {
-            return _questionRepository.FindById(id);
+            return await _stepToolRepository.FindById(id);
         }
 
         /// <summary>
@@ -47,28 +50,15 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
-            var idsQuestionnaires = _questionnaireRepository.FindByQuestionIds(ids);
-            var result = _questionRepository.DeleteByIds(ids);
-
-            if (result)
+            var idsSteps = _stepToolRepository.FindByIds(ids);
             {
-                var questionnaireList = _questionnaireRepository.FindByIds(idsQuestionnaires);
-
-                foreach (var q in questionnaireList)
+                if (!idsSteps.Any())
                 {
-                    var emptyQuestions = q.QuestionQuestionnaire.Count == 0;
-                    if (emptyQuestions)
-                    {
-                        _questionnaireRepository.DeleteById(q.Id);
-                    }
+                    throw new Exception("No StepTools found with the provided IDs.");
                 }
-
-                return true;
             }
-            else
-            {
-                return false;
-            }
+            var result = _stepToolRepository.DeleteByIds(ids);
+            return result;
         }
 
         /// <summary>
@@ -76,87 +66,39 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="updatequestionDto"></param>
         /// <returns></returns>
-        public bool Update(QuestionUpdateDto updatequestionDto)
+        public async Task<bool> Update(int id,
+                                       string input)
         {
-            var questionResult = _questionRepository.Update(updatequestionDto);
-            if (!questionResult)
+            var stepToolResult = await _stepToolRepository.FindById(id);
+            if (stepToolResult == null)
             {
-                throw new ArgumentException("Duplicated TypeDoc");
-
+                throw new Exception("StepTool not found");
             }
+            stepToolResult.Parameters.First().Value = input;
+            var result = await _stepToolRepository.Update(stepToolResult);
 
-            return questionResult;
+            return result;
+
         }
 
-        /// <summary>
-        /// Get all questions paged
-        /// </summary>
-        /// <param name="updatequestionDto"></param>
-        /// <returns></returns>
-        public QuestionPagedResultDto FindAllPaged(QuestionPagedDataDto questionPagedDataDto)
+         /// <summary>
+         /// 
+         /// </summary>
+         /// <param name="stepToolCreateDto"></param>
+         /// <returns></returns>
+        public async Task<bool> CreateAsync(StepToolCreateDto stepToolCreateDto)
         {
-            if (questionPagedDataDto.Page > 0)
-            {
-                var totalList = _questionRepository.FindAllPaged(questionPagedDataDto);
+            var stepTool = new StepTool(
+                0,
+                DateTime.UtcNow,
+                stepToolCreateDto.StepId,
+                stepToolCreateDto.ToolId,
+                stepToolCreateDto.Order,
+                stepToolCreateDto.PositionX,
+                stepToolCreateDto.PositionY
+             );
 
-                totalList = questionPagedDataDto.IsAscending ?
-                totalList.OrderBy(questionPagedDataDto.ColType.ToString()) :
-                totalList.OrderBy(questionPagedDataDto.ColType.ToString() + " descending");
-
-                var result = this.QuestionPagination(totalList, questionPagedDataDto);
-                return result;
-            }
-            else
-            {
-                var ex = new ArgumentException("The number of pages must be greater than 0");
-                throw ex;
-            }
+            return await _stepToolRepository.Create(stepTool);
         }
-
-        /// <summary>
-        /// Ordenates the list of Questions and returns a paged result
-        /// </summary>
-        /// <param name="totalList"></param>
-        /// <param name="questionPagedDataDto"></param>
-        /// <returns></returns>
-        private QuestionPagedResultDto QuestionPagination(IQueryable<QuestionDto> totalList,
-                                                          QuestionPagedDataDto questionPagedDataDto)
-        {
-            int pageCount, currentPage = 0;
-
-            if (string.IsNullOrEmpty(questionPagedDataDto.Search) is false)
-            {
-                totalList = totalList.Where(i => i.Description.ToLower()
-                                     .Contains(questionPagedDataDto.Search.ToLower()) ||
-                                               i.Id.ToString().Contains(questionPagedDataDto.Search));
-            }
-
-            var totalListCount = totalList.Count();
-
-            if (questionPagedDataDto.PageSize == 0)
-            {
-                pageCount = 1;
-                currentPage = 1;
-                questionPagedDataDto.PageSize = totalListCount;
-            }
-            else
-            {
-                pageCount = (int)Math.Ceiling((double)totalListCount / questionPagedDataDto.PageSize);
-                currentPage = questionPagedDataDto.Page <= pageCount ? questionPagedDataDto.Page : 1;
-                totalList = totalList.Skip((currentPage - 1) * questionPagedDataDto.PageSize)
-                                     .Take(questionPagedDataDto.PageSize);
-            }
-
-            return new QuestionPagedResultDto()
-            {
-                Content = totalList,
-                CurrentPage = currentPage,
-                PageCount = pageCount,
-                RowCount = totalListCount,
-            };
-        }
-    }
-}
-        } 
     }
 }

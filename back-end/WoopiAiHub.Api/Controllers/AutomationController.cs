@@ -15,7 +15,7 @@ namespace WoopiAiHub.Api.Controllers
         private readonly IAutomationServices _automationServices;
         private readonly ILogger<AutomationController> _logger;
 
-        public AutomationController(IAccountServices automationServices,
+        public AutomationController(IAutomationServices automationServices,
                                     ILogger<AutomationController> logger)
         {
             _automationServices = automationServices;
@@ -30,42 +30,11 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPost]
         [SwaggerOperation("Endpoint that receives the request to create a question in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Create([FromQuery] AutomationCreateDto automationCreateDto,
-                                                [FromHeader] HeadersDto headersDto)
+        public async Task<IActionResult> Create([FromQuery] StepToolCreateDto stepToolCreateDto)
         {
-            var result = _automationServices.CreateAutomation(automationCreateDto,
-                                                              headersDto);
+            var result =  await _automationServices.CreateAsync(stepToolCreateDto);
             return Ok(result);
         }
-
-        /// <summary>
-        /// Endpoint that receives the request to return all questions paginated by email
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Paged")]
-        [SwaggerOperation("Endpoint that receives the request to return all questions paginated")]
-        [ProducesResponseType(typeof(QuestionPagedResultDto), StatusCodes.Status200OK)]
-        public IActionResult FindAllPaged([FromQuery] AutomationPagedDataDto automationPagedDataDto)
-        {
-            try
-            {
-                var result = _automationServices.FindAllPaged(automationPagedDataDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, $"Argument Exception ocurred in the {nameof(AutomationController)} in the {nameof(FindAllPaged)} method");
-                return BadRequest("The number of pages must be greater than 0");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AutomationController)} in the {nameof(FindAllPaged)}method");
-                return BadRequest("Error returning paginated questions by email: " + ex);
-            }
-        }
-
         /// <summary>
         /// Endpoint that receives the request to return all questions
         /// </summary>
@@ -139,11 +108,12 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut]
         [SwaggerOperation("EndPoint that update a question by passing an UpdateQuestionDto")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Update(QuestionUpdateDto updatequestionDto)
+        public IActionResult Update(int id,
+                                    string input)
         {
             try
             {
-                var result = _automationServices.Update(updatequestionDto);
+                var result = _automationServices.Update(id,input);
                 return Ok(result);
             }
             catch (ArgumentException ex)
