@@ -653,6 +653,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var processOcrResultDto = DocumentFixture.FindValidProcessOcrResultDto();
+            var ProcessOcrDataAutomationDto = DocumentFixture.FindValidProcessOcrDataAutomationDto();
             var idDocument = 1;
             var generatedKey = Guid.NewGuid().ToString();
             var tenant = _fixture.FindValidTenantInfoDto();
@@ -676,8 +677,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(processOcrResultDto.ReferenceFile, result.ReferenceFile);
-            Assert.Equal(processOcrResultDto.Tenant, result.DocumentEmbeddings.First().Tenant);
+            Assert.Equal(ProcessOcrDataAutomationDto.CardId, result.CardId);
+            Assert.Equal(ProcessOcrDataAutomationDto.StepToolId, result.StepToolId);
 
             configurationMock.Verify(c => c["keyAccess"], Times.Exactly(2));
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
