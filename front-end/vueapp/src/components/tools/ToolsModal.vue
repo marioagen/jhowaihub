@@ -52,6 +52,14 @@
                                 {{ errorMessage }}
                             </span>
                         </Field>
+                        <Field v-slot="{ field }" name="isEditableInput" type="checkbox" :value="true" :unchecked-value="false">
+                            <div class="form-check mt-1 p-0">
+                                <input type="checkbox" name="isEditableInput" v-bind="field" :value="true" id="isEditableInput"/>
+                                <label class="form-check-label ps-1" for="isEditableInput">
+                                    {{ $t("tools.form.entriesEditable") }}
+                                </label>
+                            </div>
+                        </Field>
                     </div>
                     <div class="col-6">
                         <label>{{ $t("tools.form.output") }}</label>
@@ -85,11 +93,11 @@
 </template>
 
 <script>
+    import { Field, useForm } from "vee-validate";
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import ToolsService from "@/services/tools/ToolsServices";
     import ToolsTypesService from '@/services/tools/ToolsTypesService';
     import ToolsDataService from '@/services/tools/ToolsDataService';
-    import { Field, useForm } from "vee-validate";
 
     export default {
         components: {
@@ -97,8 +105,8 @@
             Field,
         },
         setup() {
-            const { validate, setValues, values } = useForm();
-            return { validate, setValues, values };
+            const { validate, setValues, values, resetForm } = useForm();
+            return { validate, setValues, values, resetForm };
         },
         emits: ["reload"],
         props: {
@@ -119,6 +127,7 @@
                 toolTypeId: "",
                 inputDataId: "",
                 outputDataId: "",
+                isEditableInput: false,
             },
         }),
         computed: {
@@ -144,15 +153,15 @@
                     });
             },
             open(tool = null) {
-                if (tool === null) {
-                    this.resetData();
-                } else {
+                this.resetData();
+                if (tool !== null) {
                     this.setValues({
                         id: tool.id,
                         name: tool.name,
                         toolTypeId: tool.toolTypeId,
                         inputDataId: tool.inputDataId,
                         outputDataId: tool.outputDataId,
+                        isEditableInput: tool.isEditableInput,
                     });
                 }
                 this.$refs.ToolModal.open();
@@ -161,10 +170,16 @@
                 this.$refs.ToolModal.close();
             },
             resetData() {
-                this.values.name = "";
-                this.values.toolTypeId = "";
-                this.values.inputDataId = "";
-                this.values.outputDataId = "";
+                this.resetForm({
+                    values: {
+                        id: "",
+                        name: "",
+                        toolTypeId: "",
+                        inputDataId: "",
+                        outputDataId: "",
+                        isEditableInput: false,
+                    }
+                });
             },
             async save() {
                 const result = await this.validate();

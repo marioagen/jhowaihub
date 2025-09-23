@@ -424,6 +424,7 @@
         title: "Usuários",
         saveSuccess: "Usuário salvo com sucesso",
         saveError: "Erro ao salvar usuário",
+        removeSuccess: "Usuário removido com sucesso"
     },
     workflow: {
         index: "Workflow",
@@ -493,6 +494,7 @@
             typesSelect: "Selecione tipo da Ferramenta",
             entries: "Entrada (Input)",
             entriesSelect: "Selecione o tipo de entrada",
+            entriesEditable: "Entrada editável",
             output: "Saida (Output)",
             outputSelect: "Selecione o tipo de saida",
         },
@@ -511,7 +513,26 @@
         deleteSuccess: "Time deletado com sucesso",
         deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
         deleteError: "Erro ao deletar time"
-    }
+    },
+    flow: {
+        title: "Fluxo de Automação",
+        subtitle: "",
+        save: "Salvar",
+        downloadJson: "Baixar JSON",
+        upload: "Upload",
+        showTools: "Adicionar Ferramentas",
+        hideTools: "Ocultar Ferramentas",
+        flowListEnd: "Finalizar fluxo",
+        start: "Início",
+        formCreate: {
+            title: "Fluxo de Automação",
+            subtitle: "Crie uma nova ferramenta para processar documentos",
+        },
+        formEdit: {
+            title: "Fluxo de Automação:",
+            subtitle: "Atualize as informações da ferramenta selecionada",
+        },
+    },
 };
 
 export default portuguese;

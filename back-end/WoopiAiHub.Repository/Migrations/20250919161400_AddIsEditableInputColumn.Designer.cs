@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WoopiAiHub.Repository.Context;
 
@@ -11,9 +12,11 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250919161400_AddIsEditableInputColumn")]
+    partial class AddIsEditableInputColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -501,162 +504,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Steps", (string)null);
                 });
 
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepTool", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Created");
-
-                    b.Property<int?>("DependsOnStepToolId")
-                        .HasColumnType("int")
-                        .HasColumnName("DependsOnStepToolId");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int")
-                        .HasColumnName("StepOrder");
-
-                    b.Property<decimal>("PositionX")
-                        .HasColumnType("decimal(9,2)")
-                        .HasColumnName("PositionX");
-
-                    b.Property<decimal>("PositionY")
-                        .HasColumnType("decimal(9,2)")
-                        .HasColumnName("PositionY");
-
-                    b.Property<int>("StepId")
-                        .HasColumnType("int")
-                        .HasColumnName("StepId");
-
-                    b.Property<int>("ToolId")
-                        .HasColumnType("int")
-                        .HasColumnName("ToolId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DependsOnStepToolId")
-                        .IsUnique()
-                        .HasFilter("[DependsOnStepToolId] IS NOT NULL");
-
-                    b.HasIndex("StepId");
-
-                    b.HasIndex("ToolId");
-
-                    b.ToTable("StepTools", (string)null);
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolExecution", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CardId")
-                        .HasColumnType("int")
-                        .HasColumnName("CardId");
-
-                    b.Property<DateTime?>("Completed")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Completed");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Created");
-
-                    b.Property<DateTime>("Started")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Started");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("Status");
-
-                    b.Property<int>("StepToolId")
-                        .HasColumnType("int")
-                        .HasColumnName("StepToolId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CardId");
-
-                    b.HasIndex("StepToolId");
-
-                    b.ToTable("StepToolExecutions", (string)null);
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolOutput", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CardId")
-                        .HasColumnType("int")
-                        .HasColumnName("CardId");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Created");
-
-                    b.Property<int>("StepToolId")
-                        .HasColumnType("int")
-                        .HasColumnName("StepToolId");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Value");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CardId");
-
-                    b.HasIndex("StepToolId");
-
-                    b.ToTable("StepToolOutputs", (string)null);
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolParameter", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Created");
-
-                    b.Property<int>("StepToolId")
-                        .HasColumnType("int")
-                        .HasColumnName("StepToolId");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Value");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StepToolId");
-
-                    b.ToTable("StepToolParameters", (string)null);
-                });
-
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
                     b.Property<int>("Id")
@@ -1070,81 +917,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Workflow");
                 });
 
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepTool", b =>
-                {
-                    b.HasOne("WoopiAiHub.Domain.Models.StepTool", "DependsOnStepTool")
-                        .WithOne()
-                        .HasForeignKey("WoopiAiHub.Domain.Models.StepTool", "DependsOnStepToolId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("WoopiAiHub.Domain.Models.Step", "Step")
-                        .WithMany("StepTools")
-                        .HasForeignKey("StepId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("WoopiAiHub.Domain.Models.Tool", "Tool")
-                        .WithMany("StepTools")
-                        .HasForeignKey("ToolId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DependsOnStepTool");
-
-                    b.Navigation("Step");
-
-                    b.Navigation("Tool");
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolExecution", b =>
-                {
-                    b.HasOne("WoopiAiHub.Domain.Models.Card", "Card")
-                        .WithMany("Executions")
-                        .HasForeignKey("CardId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
-                        .WithMany("Executions")
-                        .HasForeignKey("StepToolId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Card");
-
-                    b.Navigation("StepTool");
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolOutput", b =>
-                {
-                    b.HasOne("WoopiAiHub.Domain.Models.Card", "Card")
-                        .WithMany("Outputs")
-                        .HasForeignKey("CardId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
-                        .WithMany("Outputs")
-                        .HasForeignKey("StepToolId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Card");
-
-                    b.Navigation("StepTool");
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolParameter", b =>
-                {
-                    b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
-                        .WithMany("Parameters")
-                        .HasForeignKey("StepToolId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("StepTool");
-                });
-
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.ToolData", "InputData")
@@ -1183,13 +955,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Team");
                 });
 
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
-                {
-                    b.Navigation("Executions");
-
-                    b.Navigation("Outputs");
-                });
-
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Document", b =>
                 {
                     b.Navigation("Cards");
@@ -1224,27 +989,11 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>
                 {
                     b.Navigation("Cards");
-
-                    b.Navigation("StepTools");
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepTool", b =>
-                {
-                    b.Navigation("Executions");
-
-                    b.Navigation("Outputs");
-
-                    b.Navigation("Parameters");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
                     b.Navigation("Workflow");
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
-                {
-                    b.Navigation("StepTools");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolData", b =>

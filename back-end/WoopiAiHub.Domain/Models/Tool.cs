@@ -14,12 +14,15 @@ namespace WoopiAiHub.Domain.Models
         public int InputDataId { get; private set; }
         [Column("OutputDataId", TypeName = "int")]
         public int OutputDataId { get; private set; }
+        [Column("IsEditableInput", TypeName = "bit")]
+        public bool IsEditableInput { get; private set; }
 
         public virtual ToolType? ToolType { get; set; }
         public virtual ToolData? InputData { get; set; }
         public virtual ToolData? OutputData { get; set; }
+        public virtual ICollection<StepTool> StepTools { get; set; } = new List<StepTool>();
 
-        public Tool(int id, DateTime created, string name, bool isActive, int toolTypeId, int inputDataId, int outputDataId) 
+        public Tool(int id, DateTime created, string name, bool isActive, int toolTypeId, int inputDataId, int outputDataId, bool isEditableInput) 
             : base(id, created)
         {
             Name = name;
@@ -27,15 +30,17 @@ namespace WoopiAiHub.Domain.Models
             ToolTypeId = toolTypeId;
             InputDataId = inputDataId;
             OutputDataId = outputDataId;
+            IsEditableInput = isEditableInput;
         }
         public Tool(int id, DateTime created) : base(id, created) { }
 
-        public void Update(string name, int toolTypeId, int inputDataId, int outputDataId)
+        public void Update(string name, int toolTypeId, int inputDataId, int outputDataId, bool isEditableInput)
         {
             Name = name;
             ToolTypeId = toolTypeId;
             InputDataId = inputDataId;
             OutputDataId = outputDataId;
+            IsEditableInput = isEditableInput;
         }
     }
 }

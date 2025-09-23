@@ -85,6 +85,8 @@ namespace WoopiAiHub.Domain.Models
         public void Deactivate()
         {
             IsActive = false;
+            Profiles.Clear();
+            Teams.Clear();
         }
 
         public void SetPassword(byte[] passwordHash, byte[] salt)

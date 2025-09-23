@@ -181,6 +181,12 @@
                         if (status) {
                             this.$refs.DeleteDialog.close();
                             this.getUsers({ search: "", page: 1, type: null });
+                            this.$notify({
+                                title: "users.title",
+                                message: "users.removeSuccess",
+                                variant: "success",
+                                icon: "CircleX",
+                            });
                         }
                     })
                     .finally(() => {

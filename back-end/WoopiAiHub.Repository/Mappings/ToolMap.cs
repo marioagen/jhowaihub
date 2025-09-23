@@ -36,6 +36,11 @@ namespace WoopiAiHub.Repository.Mappings
                    .WithMany(td => td.OutputTools)
                    .HasForeignKey(t => t.OutputDataId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(t => t.IsEditableInput)
+                   .HasColumnName("IsEditableInput")
+                   .HasColumnType("bit")
+                   .IsRequired();
         }
     }
 }
