@@ -23,8 +23,8 @@ namespace WoopiAiHub.Domain.Models
         public int? DependsOnStepToolId { get; private set; }
 
         public virtual StepTool? DependsOnStepTool { get; set; }
-        public virtual required Step Step { get; set; }
-        public virtual required Tool Tool { get; set; }
+        public virtual Step? Step { get; set; }
+        public virtual Tool? Tool { get; set; }
         public virtual ICollection<StepToolOutput> Outputs { get; set; } = new List<StepToolOutput>();
         public virtual ICollection<StepToolExecution> Executions { get; private set; } = new List<StepToolExecution>();
         public virtual ICollection<StepToolParameter> Parameters { get; private set; } = new List<StepToolParameter>();
@@ -48,5 +48,15 @@ namespace WoopiAiHub.Domain.Models
         /// Use to EF context
         /// </summary>
         private StepTool(int id, DateTime created) : base(id, created) { }
+
+        public void UpdateDependencyStepTool(StepTool stepTool)
+        {
+            ArgumentNullException.ThrowIfNull(stepTool);
+            if (Id == stepTool.Id)
+            {
+                return;
+            }
+            DependsOnStepTool = stepTool;
+        }
     }
 }

@@ -28,6 +28,7 @@ using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -53,6 +54,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private readonly IDocumentNotifier _documentNotifier;
+        private readonly IAutomationServices _automationServices;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
@@ -76,7 +78,8 @@ namespace WoopiAiHub.Application.Services
                                 IOptions<MessageQueues> messageQueues,
                                 IDocumentNotifier documentNotifier,
                                 IUnitOfWork unitOfWork,
-                                ICardRepository cardRepository)
+                                ICardRepository cardRepository,
+                                IAutomationServices automationServices)
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
@@ -98,6 +101,7 @@ namespace WoopiAiHub.Application.Services
             _messageQueues = messageQueues.Value;
             _publisher = publisher;
             _documentNotifier = documentNotifier;
+            _automationServices = automationServices;
         }
 
         /// <summary>
@@ -158,9 +162,6 @@ namespace WoopiAiHub.Application.Services
             {
                 var referenceFile = await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
                 _cache.Remove(requestCreateDocumentDto.Name);
-                await PublishOcrDto(tenant,
-                                    referenceFile,
-                                    requestCreateDocumentDto.EmailCreator);
             }
         }
 
@@ -396,36 +397,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// realize the publish in rabbitMq to ocr queue
-        /// </summary>
-        /// <param name="tenant"></param>
-        /// <param name="referenceFile"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        public async Task PublishOcrDto(string tenant,
-                                        string referenceFile,
-                                        string email)
-        {
-            var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenant,
-                                                                        ColTypeModule.WoopiAiHub);
-            if (string.IsNullOrEmpty(tenantInfo!.OcrModel))
-            {
-                throw new ArgumentException("Ocr not found");
-            }
-
-            var processOcrDto = new ProcessOcrDto
-            {
-                Tenant = tenant,
-                ReferenceFile = referenceFile,
-                Model = tenantInfo.OcrModel,
-                Email = email,
-                ResponseQueue = _messageQueues.OcrQueueAiHubResponse
-            };
-
-            await _publisher.PublishAsync(_messageQueues.OcrQueue, processOcrDto);
-        }
-
-        /// <summary>
         /// It uploads the document PDF file to the fileRepository and after uploading 
         /// it saves the document data in the database.
         /// </summary>
@@ -436,28 +407,41 @@ namespace WoopiAiHub.Application.Services
                                                        Byte[] chunks,
                                                        string tenant)
         {
-            await _documentDtoValidator.ValidateAndThrowAsync(requestCreateDocumentDto);
-            var formFile = new FormFile(new MemoryStream(chunks),
-                                        0,
-                                        chunks.Length,
-                                        requestCreateDocumentDto.Filename,
-                                        requestCreateDocumentDto.Filename);
+            _unitOfWork.BeginTransaction();
 
-            var referenceFile = await this.UploadFileToRepositoryApi(formFile,
-                                                                     tenant);
-            var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto,
-                                                               referenceFile);
+            try
+            {
+                await _documentDtoValidator.ValidateAndThrowAsync(requestCreateDocumentDto);
+                var formFile = new FormFile(new MemoryStream(chunks),
+                                            0,
+                                            chunks.Length,
+                                            requestCreateDocumentDto.Filename,
+                                            requestCreateDocumentDto.Filename);
 
-            var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
-                                                       requestCreateDocumentDto.EmailCreator);
+                var referenceFile = await this.UploadFileToRepositoryApi(formFile,
+                                                                         tenant);
+                var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto,
+                                                                   referenceFile);
 
-            ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, teams);
+                var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
+                                                           requestCreateDocumentDto.EmailCreator);
 
-            documentForDataBase.Cards = cards;
-            documentForDataBase.Teams = teams;
-            _documentRepository.Create(documentForDataBase);
+                ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, teams);
 
-            return referenceFile;
+                documentForDataBase.Cards = cards;
+                documentForDataBase.Teams = teams;
+                _documentRepository.Create(documentForDataBase);
+
+                var worflows = teams.Select(s => s.Workflow).ToList();
+                await _automationServices.PrepareExecution(worflows!);
+
+                return referenceFile;
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
         }
 
         /// <summary>

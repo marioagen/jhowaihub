@@ -20,8 +20,8 @@ namespace WoopiAiHub.Domain.Models
         [Column("Status", TypeName = "int")]
         public StatusExecution Status { get; private set; }
 
-        public virtual required StepTool StepTool { get; set; }
-        public virtual required Card Card { get; set; }
+        public virtual StepTool? StepTool { get; set; }
+        public virtual Card? Card { get; set; }
 
         public StepToolExecution(int id, 
                                  DateTime created, 
@@ -39,5 +39,10 @@ namespace WoopiAiHub.Domain.Models
         /// Use to EF context
         /// </summary>
         private StepToolExecution(int id, DateTime created) : base(id, created) { }
+
+        public void UpdateStatusExecution(StatusExecution status)
+        {
+            Status = status;
+        }
     }
 }

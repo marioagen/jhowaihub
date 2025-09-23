@@ -190,11 +190,29 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new Step(
                 f.IndexFaker,
                 f.Date.Past(),
-                f.Random.Int(1,5),
+                f.Random.Int(1, 5),
                 f.Person.FirstName,
                 f.Random.Int(1, 5),
                 f.Random.Int(1, 5),
-                f.Random.Int(1, 5));
+                f.Random.Int(1, 5))
+            { 
+                Cards = new List<Card> { FindValidCard() } 
+            };
+        }
+
+        public static Card FindValidCard()
+        {
+            var _faker = new Faker("pt_BR");
+            return new Card(
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Name.FullName(),
+                _faker.Random.Int(1, 1000),
+                true,
+                Guid.NewGuid()
+             );
         }
     }
 
