@@ -122,6 +122,7 @@
                             :is-last="index === activeStepsList.length - 1" 
                             :profilesList="profilesList"
                             :statusList="statusList"
+                            :isEdit="this.isEdit"
                             @update-step="updateStep(index, $event)"
                             @remove-step="removeStep(index, $event)"
                             class="workflow-step-card"

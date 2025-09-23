@@ -22,6 +22,17 @@ export default {
                 }
             });
     },
+    getToolsList() {
+        return api.get("/Tool")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
     createTool(params) {
         return api
             .post("/Tool", params)

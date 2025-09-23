@@ -59,8 +59,6 @@ namespace WoopiAiHub.Repository.Migrations
                     Started = table.Column<DateTime>(type: "datetime", nullable: false),
                     Completed = table.Column<DateTime>(type: "datetime", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    StepToolId1 = table.Column<int>(type: "int", nullable: false),
-                    CardId1 = table.Column<int>(type: "int", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
@@ -73,23 +71,11 @@ namespace WoopiAiHub.Repository.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_StepToolExecutions_Cards_CardId1",
-                        column: x => x.CardId1,
-                        principalTable: "Cards",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_StepToolExecutions_StepTools_StepToolId",
                         column: x => x.StepToolId,
                         principalTable: "StepTools",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_StepToolExecutions_StepTools_StepToolId1",
-                        column: x => x.StepToolId1,
-                        principalTable: "StepTools",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -101,8 +87,6 @@ namespace WoopiAiHub.Repository.Migrations
                     StepToolId = table.Column<int>(type: "int", nullable: false),
                     CardId = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StepToolId1 = table.Column<int>(type: "int", nullable: false),
-                    CardId1 = table.Column<int>(type: "int", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
@@ -115,23 +99,11 @@ namespace WoopiAiHub.Repository.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_StepToolOutputs_Cards_CardId1",
-                        column: x => x.CardId1,
-                        principalTable: "Cards",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_StepToolOutputs_StepTools_StepToolId",
                         column: x => x.StepToolId,
                         principalTable: "StepTools",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_StepToolOutputs_StepTools_StepToolId1",
-                        column: x => x.StepToolId1,
-                        principalTable: "StepTools",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -142,7 +114,6 @@ namespace WoopiAiHub.Repository.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     StepToolId = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StepToolId1 = table.Column<int>(type: "int", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
@@ -154,12 +125,6 @@ namespace WoopiAiHub.Repository.Migrations
                         principalTable: "StepTools",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_StepToolParameters_StepTools_StepToolId1",
-                        column: x => x.StepToolId1,
-                        principalTable: "StepTools",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -168,19 +133,9 @@ namespace WoopiAiHub.Repository.Migrations
                 column: "CardId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StepToolExecutions_CardId1",
-                table: "StepToolExecutions",
-                column: "CardId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_StepToolExecutions_StepToolId",
                 table: "StepToolExecutions",
                 column: "StepToolId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StepToolExecutions_StepToolId1",
-                table: "StepToolExecutions",
-                column: "StepToolId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StepToolOutputs_CardId",
@@ -188,29 +143,14 @@ namespace WoopiAiHub.Repository.Migrations
                 column: "CardId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StepToolOutputs_CardId1",
-                table: "StepToolOutputs",
-                column: "CardId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_StepToolOutputs_StepToolId",
                 table: "StepToolOutputs",
                 column: "StepToolId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_StepToolOutputs_StepToolId1",
-                table: "StepToolOutputs",
-                column: "StepToolId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_StepToolParameters_StepToolId",
                 table: "StepToolParameters",
                 column: "StepToolId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StepToolParameters_StepToolId1",
-                table: "StepToolParameters",
-                column: "StepToolId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StepTools_DependsOnStepToolId",
