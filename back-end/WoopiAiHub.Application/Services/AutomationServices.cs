@@ -12,16 +12,12 @@ namespace WoopiAiHub.Application.Services
     public class AutomationServices : IAutomationServices
     {
         private readonly IStepToolRepository _stepToolRepository;
-        private readonly IToolRepository _toolRepository;
-        private readonly IStepRepository _stepRepository;
 
         public AutomationServices(IStepToolRepository stepToolRepository,
                                   IToolRepository toolRepository,
                                   IStepRepository stepRepository)
         {
             _stepToolRepository = stepToolRepository;
-            _toolRepository = toolRepository;
-            _stepRepository = stepRepository;
         }
         /// <summary>
         /// Find all questions
