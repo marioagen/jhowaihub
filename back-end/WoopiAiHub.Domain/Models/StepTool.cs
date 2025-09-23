@@ -26,6 +26,8 @@ namespace WoopiAiHub.Domain.Models
         public virtual required Step Step { get; set; }
         public virtual required Tool Tool { get; set; }
         public virtual ICollection<StepToolOutput> Outputs { get; set; } = new List<StepToolOutput>();
+        public virtual ICollection<StepToolExecution> Executions { get; private set; } = new List<StepToolExecution>();
+        public virtual ICollection<StepToolParameter> Parameters { get; private set; } = new List<StepToolParameter>();
 
         public StepTool(int id, 
                        DateTime created, 

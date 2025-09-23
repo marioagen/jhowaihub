@@ -12,13 +12,13 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.HasKey(o => o.Id);
 
-            builder.HasOne<StepTool>()
-                   .WithMany() 
+            builder.HasOne(e => e.StepTool)
+                   .WithMany(u => u.Outputs) 
                    .HasForeignKey(o => o.StepToolId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne<Card>()
-                   .WithMany() 
+            builder.HasOne(e => e.Card)
+                   .WithMany(u => u.Outputs) 
                    .HasForeignKey(o => o.CardId)
                    .OnDelete(DeleteBehavior.Restrict);
 
