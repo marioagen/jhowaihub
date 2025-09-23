@@ -73,7 +73,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task StartExecutionByStep(Step step)
         {
-            var stepTool = step.StepTools.Where(s => !s.DependsOnStepToolId.HasValue).FirstOrDefault();
+            var stepTool = step.StepTools.FirstOrDefault(s => !s.DependsOnStepToolId.HasValue);
 
             if (stepTool is not null)
             {                
