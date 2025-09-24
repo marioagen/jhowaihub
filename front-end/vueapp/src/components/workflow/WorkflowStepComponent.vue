@@ -228,6 +228,7 @@
                 return titleValid?.valid && statusValid?.valid && profileValid?.valid;
             },
             redirectToFlow() {
+                this.$emit("saveWorkflow");
                 if(this.isEdit) {
                     return this.$router.push({
                         name: 'EditFlow',

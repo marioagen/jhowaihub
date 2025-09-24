@@ -125,6 +125,7 @@
                             :isEdit="this.isEdit"
                             @update-step="updateStep(index, $event)"
                             @remove-step="removeStep(index, $event)"
+                            @saveWorkflow="saveWorkflowInStore"
                             class="workflow-step-card"
                             ref="stepRefs"
                         />                        
@@ -171,10 +172,11 @@
             },
         },
         setup() {
-            const { validate, values } = useForm();
+            const { validate, values, setValues } = useForm();
             return {
                 validate,
-                values
+                values,
+                setValues
             }
         },
         data() {
@@ -229,7 +231,12 @@
                     });
             },
             setEdit() {
-                if(!this.isEdit) return;
+                if(!this.isEdit) {
+                    let hasInStore = this.$store.state.tempWorkflow.status;
+                    if(!hasInStore) return;
+                    return this.setWorkflowFromStore();
+                }
+
                 this.isLoading = true;
                 WorkflowService.getWorkflowById(this.id)
                     .then((response) => {
@@ -255,6 +262,12 @@
                     .finally(() => {
                         this.isLoading = false;
                     });
+            },
+            setWorkflowFromStore() {
+                let workflowData = this.$store.state.tempWorkflow.data;
+                this.workflowData.name = workflowData.name;
+                this.workflowData.teamId = workflowData.teamId;
+                this.stepsList = this.$store.state.tempWorkflow.list;
             },
             updateStep(index, updatedStep) {
                 this.stepsList[index] = { ...this.stepsList[index], ...updatedStep };
@@ -317,15 +330,18 @@
                     });
                 }
                 
-                this.activeStepsList.forEach((step, index) => {
-                    step.order = index + 1;
-                });
+                this.reorderList();
 
                 this.isLoading = true;
                 if(this.isEdit) {
                     return this.editWorkflow();
                 }
                 return this.createWorkflow();
+            },
+            reorderList() {
+                this.activeStepsList.forEach((step, index) => {
+                    step.order = index + 1;
+                });
             },
             createWorkflow() {
                 let params = {
@@ -338,6 +354,7 @@
                     .then((response) => {
                         if(response.error === undefined) {
                             this.redirectToIndex();
+                            this.$store.commit('cleanTempWorkflow');
                             return this.$notify({
                                 title: 'workflow.index',
                                 message: 'workflow.createSuccess',
@@ -388,6 +405,13 @@
             },
             redirectToIndex() {
                 return this.$router.push({ name: "WorkflowEditor" });
+            },
+            saveWorkflowInStore() {
+                this.reorderList();
+                this.$store.commit('setTempWorkflow', {
+                    list: this.activeStepsList, 
+                    data: this.workflowData
+                });
             },
         },
         created() {
