@@ -543,6 +543,7 @@
             title: "Flujo de Automatización:",
             subtitle: "Actualiza la información de la herramienta seleccionada",
         },
+        sidebarTitle: "Configurar I/O:"
     },
 };
 

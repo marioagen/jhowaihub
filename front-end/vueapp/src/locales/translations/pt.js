@@ -532,6 +532,7 @@
             title: "Fluxo de Automação:",
             subtitle: "Atualize as informações da ferramenta selecionada",
         },
+        sidebarTitle: "Configurar I/O:"
     },
 };
 

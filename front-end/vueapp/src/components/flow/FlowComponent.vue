@@ -49,7 +49,7 @@
             />
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel" ref="sidebar">
                 <div class="offcanvas-header">
-                    <h5 id="offcanvasRightLabel">Configurar I/O: {{nodeFlow.label}}</h5>
+                    <h5 id="offcanvasRightLabel">{{$t("flow.sidebarTitle")}} {{nodeFlow.label}}</h5>
                     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" @click="closeSidebar"></button>
                 </div>
                 <div class="offcanvas-body">
