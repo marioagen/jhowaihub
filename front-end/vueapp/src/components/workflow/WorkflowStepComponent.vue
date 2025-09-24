@@ -94,7 +94,7 @@
                     </Field>
                 </div>
             </div>
-            <div v-if="isEdit" class="row mt-3">
+            <div v-if="showEditFlow" class="row mt-3">
                 <div class="col-12 d-flex align-items-center justify-content-between">
                     <p class="mb-0">Automação de Documentos</p>
                     <div class="d-flex">
@@ -202,6 +202,9 @@
                 set(val) {
                     this.$emit("update-step", { ...this.step, profileId: String(val) });
                 },
+            },
+            showEditFlow() {
+                return this.isEdit && this.step?.stepTool?.length > 0;
             },
         },
         methods: {
