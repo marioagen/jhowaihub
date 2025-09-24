@@ -163,6 +163,11 @@
                 required: false,
                 default: false,
             },
+            workflowId: {
+                type: Number,
+                required: false,
+                default: 0,
+            },
         },
         data() {
             return {
@@ -233,7 +238,7 @@
                     return this.$router.push({
                         name: 'EditFlow',
                         params: {
-                            id: 1,
+                            id: this.workflowId,
                         },
                     });
                 }
