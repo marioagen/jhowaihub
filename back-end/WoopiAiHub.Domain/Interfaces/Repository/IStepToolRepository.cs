@@ -16,5 +16,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         public Task<bool> Create(StepTool stepTool);
         public Task<bool> Update(StepToolDto stepToolDto);
         public IQueryable<StepToolDto> FindAll();
+        public ICollection<StepTool> FindStepToolsByStepId(int stepId);
     }
 }

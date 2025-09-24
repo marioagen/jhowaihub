@@ -156,5 +156,12 @@ namespace WoopiAiHub.Repository
 
             return query;
         }
+
+        public ICollection<StepTool> FindStepToolsByStepId(int stepId)
+        {
+            return _context.StepTools.Where(a => a.StepId == stepId)
+                .AsNoTracking()
+                .ToList();
+        }
     }
 }

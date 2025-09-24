@@ -14,6 +14,5 @@ namespace WoopiAiHub.Domain.DTOs
         public decimal PositionX { get; set; }
         public decimal PositionY { get; set; }
         public int? DependsOnStepToolId { get; set; }
-
     }
 }

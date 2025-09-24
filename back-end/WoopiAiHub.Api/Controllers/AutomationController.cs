@@ -5,6 +5,7 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 
 namespace WoopiAiHub.Api.Controllers
 {
@@ -70,6 +71,28 @@ namespace WoopiAiHub.Api.Controllers
             try
             {
                 var result = _automationServices.FindById(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(AutomationController)} in the {nameof(FindAll)} method");
+                return BadRequest("Error when returning questions: " + ex);
+            }
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to return all questions
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("StepId/{id}")]
+        [SwaggerOperation("Endpoint that receives the request to return all questions")]
+        [ProducesResponseType(typeof(QuestionDto), StatusCodes.Status200OK)]
+        public IActionResult FindByStepId(int id)
+        {
+            try
+            {
+                var result = _automationServices.FindStepToolsByStepId(id);
                 return Ok(result);
             }
             catch (Exception ex)
