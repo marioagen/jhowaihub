@@ -543,6 +543,8 @@
         formFlow: {
             progressFlowSuccess: "Flow inserted successfully",
             progressFlowFail: "Failed to insert flow",
+            editFlowNodeSuccess: "Node edited successfully",
+            editFlowNodeFail: "Failed to edit node",
         }
     },
 };

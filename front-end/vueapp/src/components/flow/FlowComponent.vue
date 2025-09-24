@@ -134,7 +134,41 @@
             },
             updateNode() {
                 this.$refs.vueflowComponent.updateNode(this.nodeFlow);
+                try {
+                    return this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.editFlowNodeSuccess',
+                        variant: 'success',
+                        icon: 'CircleCheckBig',
+                    });
+                }
+                catch (e) {
+                    this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.editFlowNodeFail',
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                }
             },
+            save() {
+                try {
+                    return this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.progressFlowSuccess',
+                        variant: 'success',
+                        icon: 'CircleCheckBig',
+                    });
+                }
+                catch (e) {
+                    this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.progressFlowFail',
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                }
+            }
         },
     };
 </script>

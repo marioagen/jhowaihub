@@ -230,19 +230,9 @@ export default {
             try {
                 const payload = this.buildFlowPayload();
                 await FlowService.saveFlow(this.stepId, payload);
-                return this.$notify({
-                    title: 'flow.title',
-                    message: 'flow.formFlow.progressFlowSuccess',
-                    variant: 'success',
-                    icon: 'CircleCheckBig',
-                });
+               
             } catch (e) {
-                this.$notify({
-                    title: 'flow.title',
-                    message: 'flow.formFlow.progressFlowFail',
-                    variant: 'danger',
-                    icon: 'CircleX',
-                });
+                
             }
         },
         showCollapse() {

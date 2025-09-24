@@ -536,6 +536,8 @@
         formFlow: {
             progressFlowSuccess: "Fluxo inserido com sucesso",
             progressFlowFail: "Não foi possível inserir fluxo",
+            editFlowNodeSuccess: "Nodo editado com sucesso",
+            editFlowNodeFail: "Falha ao editar o nodo",
         }
     },
 };
