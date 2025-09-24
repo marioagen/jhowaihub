@@ -140,7 +140,7 @@ export default {
                     animated: true,
                     type: "special"
                 }));
-
+                const startNode = { ...this.createStartNode(), data: { ...this.createStartNode().data, isActive: true } };
                 if (stepTools.length > 0) {
                     const firstTool = stepTools[0];
                     mappedEdges.unshift({
@@ -151,7 +151,7 @@ export default {
                     });
                 }
 
-                this.nodes = [this.createStartNode(), ...mappedNodes];
+                this.nodes = [startNode, ...mappedNodes];
                 this.edges = mappedEdges;
 
             } catch (e) {
