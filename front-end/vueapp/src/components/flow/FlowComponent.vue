@@ -32,7 +32,7 @@
                 :isEditMode="isEdit"
                 :stepId="id"
                 @openNodeConfig="openNodeConfig" 
-                ref="vueflowComponent"
+                ref="VueflowComponent"
             />
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel" ref="sidebar">
                 <div class="offcanvas-header">
@@ -117,7 +117,7 @@
                 sidebar.hide();
             },
             updateNode() {
-                this.$refs.vueflowComponent.updateNode(this.nodeFlow);
+                this.$refs.VueflowComponent.updateNode(this.nodeFlow);
                 try {
                     return this.$notify({
                         title: 'flow.title',
@@ -137,9 +137,10 @@
             },
             save() {
                 try {
+                    let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
                     this.$store.commit('setFlowByStep', {
                         stepId: this.stepId,
-                        flowData: this.nodeFlow,
+                        flowData: nodesList,
                     });
                     return this.$notify({
                         title: 'flow.title',

@@ -196,44 +196,24 @@ export default {
                 type: 'hub',
                 position,
                 label: nodeData.name,
+                toolId: nodeData.id,
                 data: { icon: 'Activity', color: '#000', isStartNode: false }
             }
             this.vueFlowInstance?.addNodes([newNode])
         },
         buildFlowPayload() {
-            const stepTools = this.nodes
+            return this.nodes
                 .filter(node => node.id !== "start")
                 .map((node, index) => ({
                     Id: parseInt(node.id, 10),
-                    ToolId: node.data.toolId || null,
+                    ToolId: node.toolId || null,
                     Label: node.label,
-                    PositionX: node.position.x,
-                    PositionY: node.position.y,
+                    PositionX: parseFloat((node.position.x).toFixed(2)),
+                    PositionY: parseFloat((node.position.y).toFixed(2)),
                     Order: index + 1,
                     Status: "Active",
                     Input: node.data.input || null
                 }));
-
-            const stepToolDependencies = this.edges
-                .filter(edge => edge.source !== "start")
-                .map(edge => ({
-                    StepToolIdFrom: parseInt(edge.source, 10),
-                    StepToolIdTo: parseInt(edge.target, 10)
-                }));
-
-            return {
-                StepTools: stepTools,
-                StepToolDependencies: stepToolDependencies
-            };
-        },
-        async saveFlow() {
-            try {
-                const payload = this.buildFlowPayload();
-                await FlowService.saveFlow(this.stepId, payload);
-               
-            } catch (e) {
-                
-            }
         },
         showCollapse() {
             this.isActiveCollapse = !this.isActiveCollapse;
