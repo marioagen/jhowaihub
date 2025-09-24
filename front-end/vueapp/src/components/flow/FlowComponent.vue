@@ -142,6 +142,7 @@
                         stepId: this.stepId,
                         flowData: nodesList,
                     });
+                    this.redirectToIndex();
                     return this.$notify({
                         title: 'flow.title',
                         message: 'flow.formFlow.progressFlowSuccess',
