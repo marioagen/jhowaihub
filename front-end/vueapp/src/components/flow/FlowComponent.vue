@@ -107,12 +107,6 @@
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;
             },
-            save() {
-                this.$store.commit('setFlowByStep', {
-                    stepId: this.stepId,
-                    flowData: this.nodeFlow,
-                });
-            },
             openNodeConfig(node) {
                 this.nodeFlow = node;
                 console.log(this.nodeFlow);
@@ -143,6 +137,10 @@
             },
             save() {
                 try {
+                    this.$store.commit('setFlowByStep', {
+                        stepId: this.stepId,
+                        flowData: this.nodeFlow,
+                    });
                     return this.$notify({
                         title: 'flow.title',
                         message: 'flow.formFlow.progressFlowSuccess',
