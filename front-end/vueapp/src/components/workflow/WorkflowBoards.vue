@@ -122,9 +122,11 @@
                             :is-last="index === activeStepsList.length - 1" 
                             :profilesList="profilesList"
                             :statusList="statusList"
-                            :isEdit="this.isEdit"
+                            :isEdit="isEdit"
+                            :workflowId="id"
                             @update-step="updateStep(index, $event)"
                             @remove-step="removeStep(index, $event)"
+                            @saveWorkflow="saveWorkflowInStore"
                             class="workflow-step-card"
                             ref="stepRefs"
                         />                        
@@ -171,10 +173,11 @@
             },
         },
         setup() {
-            const { validate, values } = useForm();
+            const { validate, values, setValues } = useForm();
             return {
                 validate,
-                values
+                values,
+                setValues
             }
         },
         data() {
@@ -229,32 +232,46 @@
                     });
             },
             setEdit() {
-                if(!this.isEdit) return;
-                this.isLoading = true;
-                WorkflowService.getWorkflowById(this.id)
-                    .then((response) => {
-                        if(response.error !== undefined) {
-                            this.$router.push({ name: "Workflow" });
-                            return this.$notify({
-                                title: 'workflow.index',
-                                message: response.error,
-                                variant: 'danger',
-                                icon: 'CircleX',
-                            });
-                        }
-                        this.workflowData.id = response.id;
-                        this.workflowData.name = response.name;
-                        this.workflowData.teamId = response.teamId;
-                        this.stepsList = response.steps.map(step => ({
-                            ...step,
-                            profileId: step.profile?.id || "",
-                            statusId: step.status?.id || "",
-                            isActive: true,
-                        }));
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
+                let hasInStore = this.$store.state.tempWorkflow.status;
+                if(hasInStore && !this.isEdit) {
+                    this.setWorkflowFromStore();
+                }
+
+                if(this.isEdit) {
+                    this.isLoading = true;
+                    WorkflowService.getWorkflowById(this.id)
+                        .then((response) => {
+                            if(response.error !== undefined) {
+                                this.$router.push({ name: "Workflow" });
+                                return this.$notify({
+                                    title: 'workflow.index',
+                                    message: response.error,
+                                    variant: 'danger',
+                                    icon: 'CircleX',
+                                });
+                            }
+                            this.workflowData.id = response.id;
+                            this.workflowData.name = response.name;
+                            this.workflowData.teamId = response.teamId;
+                            this.stepsList = response.steps.map(step => ({
+                                ...step,
+                                profileId: step.profile?.id || "",
+                                statusId: step.status?.id || "",
+                                isActive: true,
+                            }));
+                        })
+                        .finally(() => {
+                            this.saveWorkflowInStore();
+                            this.setWorkflowFromStore();
+                            this.isLoading = false;
+                        });
+                }
+            },
+            setWorkflowFromStore() {
+                let workflowData = this.$store.state.tempWorkflow.data;
+                this.workflowData.name = workflowData.name;
+                this.workflowData.teamId = workflowData.teamId;
+                this.stepsList = this.$store.state.tempWorkflow.list;
             },
             updateStep(index, updatedStep) {
                 this.stepsList[index] = { ...this.stepsList[index], ...updatedStep };
@@ -317,15 +334,18 @@
                     });
                 }
                 
-                this.activeStepsList.forEach((step, index) => {
-                    step.order = index + 1;
-                });
+                this.reorderList();
 
                 this.isLoading = true;
                 if(this.isEdit) {
                     return this.editWorkflow();
                 }
                 return this.createWorkflow();
+            },
+            reorderList() {
+                this.activeStepsList.forEach((step, index) => {
+                    step.order = index + 1;
+                });
             },
             createWorkflow() {
                 let params = {
@@ -338,6 +358,7 @@
                     .then((response) => {
                         if(response.error === undefined) {
                             this.redirectToIndex();
+                            this.$store.commit('cleanTempWorkflow');
                             return this.$notify({
                                 title: 'workflow.index',
                                 message: 'workflow.createSuccess',
@@ -388,6 +409,13 @@
             },
             redirectToIndex() {
                 return this.$router.push({ name: "WorkflowEditor" });
+            },
+            saveWorkflowInStore() {
+                this.reorderList();
+                this.$store.commit('setTempWorkflow', {
+                    list: this.activeStepsList, 
+                    data: this.workflowData
+                });
             },
         },
         created() {

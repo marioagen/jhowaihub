@@ -163,6 +163,11 @@
                 required: false,
                 default: false,
             },
+            workflowId: {
+                type: Number,
+                required: false,
+                default: 0,
+            },
         },
         data() {
             return {
@@ -228,11 +233,13 @@
                 return titleValid?.valid && statusValid?.valid && profileValid?.valid;
             },
             redirectToFlow() {
+                this.$emit("saveWorkflow");
                 if(this.isEdit) {
                     return this.$router.push({
                         name: 'EditFlow',
                         params: {
-                            id: 1,
+                            id: this.workflowId,
+                            stepId: this.step.id,
                         },
                     });
                 }

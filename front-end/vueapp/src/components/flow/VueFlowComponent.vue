@@ -163,8 +163,8 @@ export default {
             this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
         },
         updateNode(nodeFlow) {
-             const idx = this.nodes.findIndex(node => node.id === nodeFlow.id);
-             this.nodes[idx] = nodeFlow;
+            const idx = this.nodes.findIndex(node => node.id === nodeFlow.id);
+            this.nodes[idx] = nodeFlow;
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
