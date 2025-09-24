@@ -363,7 +363,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<ProcessoOcrDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
+        public async Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
         {
             var documentEmbeddingsAddDtoList = await ExtractDocumentEmbeddingsAddDto(processOcrResultDto);
 
@@ -373,8 +373,8 @@ namespace WoopiAiHub.Application.Services
                 normalizedContext.AppendLine(page.Text);
             }
 
-            var resultData = JsonConvert.DeserializeObject<ProcessoOcrDataAutomationDto>((processOcrResultDto.Data));
-            if (resultData.Equals(default(ProcessoOcrDataAutomationDto))) return new ProcessoOcrDataAutomationDto();
+            var resultData = JsonConvert.DeserializeObject<MetaDataAutomationDto>((processOcrResultDto.Data));
+            if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
 
             var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(resultData.StepToolId,
                                                                                               resultData.CardId);
@@ -660,7 +660,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public async Task ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
+        public async Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
         {
             var resultRegisterConsumption = await RegisterConsumptionPages(documentEmbeddingsResultDto);
             if (!resultRegisterConsumption)
@@ -673,6 +673,11 @@ namespace WoopiAiHub.Application.Services
             }
 
             await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
+
+            var resultData = JsonConvert.DeserializeObject<MetaDataAutomationDto>((documentEmbeddingsResultDto.Data));
+            if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
+
+            return resultData;
         }
 
         /// <summary>

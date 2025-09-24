@@ -333,10 +333,10 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
-        public static ProcessoOcrDataAutomationDto FindValidProcessOcrDataAutomationDto()
+        public static MetaDataAutomationDto FindValidProcessOcrDataAutomationDto()
         {
             var faker = new Faker("pt_BR");
-            var dto = new ProcessoOcrDataAutomationDto
+            var dto = new MetaDataAutomationDto
             {
                 CardId = faker.Random.Int(1, 1000),
                 StepToolId = faker.Random.Int(1, 1000),
