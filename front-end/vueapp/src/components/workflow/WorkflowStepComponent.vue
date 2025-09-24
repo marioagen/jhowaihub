@@ -239,6 +239,7 @@
                         name: 'EditFlow',
                         params: {
                             id: this.workflowId,
+                            stepId: this.step.id,
                         },
                     });
                 }

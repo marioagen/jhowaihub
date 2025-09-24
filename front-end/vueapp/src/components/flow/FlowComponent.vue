@@ -25,27 +25,14 @@
                         <LucideIcon icon="Save" :size="15" />
                         {{ $t("flow.save") }}
                     </button>
-                    <button 
-                        class="btn btn-outline-primary btn-table btn-sm table-btn me-2"
-                        @click="downloadJson"
-                    >
-                        <LucideIcon icon="Download" :size="15" />
-                        {{ $t("flow.downloadJson") }}
-                    </button>
-                    <button 
-                        class="btn btn-outline-primary btn-table btn-sm table-btn me-2"
-                        @click="upload"
-                    >
-                        <LucideIcon icon="Upload" :size="15" />
-                        {{ $t("flow.upload") }}
-                    </button>
                 </div>
             </div>
             <hr/>            
             <VueFlowComponent 
                 :isEditMode="isEdit"
                 :stepId="id"
-                @openNodeConfig="openNodeConfig" ref="vueflowComponent"
+                @openNodeConfig="openNodeConfig" 
+                ref="vueflowComponent"
             />
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel" ref="sidebar">
                 <div class="offcanvas-header">
@@ -108,6 +95,9 @@
             VueFlowComponent,
         },
         methods: {
+            setEdit() {
+                console.log("Gotcha")
+            },
             redirectToIndex() {
                 if(this.isEdit) {
                     return this.$router.push({ name: "EditWorkflow" });
@@ -117,11 +107,11 @@
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;
             },
-            downloadJson() {
-                console.log("download")
-            },
-            upload() {
-                console.log("upload")
+            save() {
+                this.$store.commit('setFlowByStep', {
+                    stepId: this.stepId,
+                    flowData: this.nodeFlow,
+                });
             },
             openNodeConfig(node) {
                 this.nodeFlow = node;
@@ -135,6 +125,9 @@
             updateNode() {
                 this.$refs.vueflowComponent.updateNode(this.nodeFlow);
             },
+        },
+        created() {
+            this.setEdit();
         },
     };
 </script>

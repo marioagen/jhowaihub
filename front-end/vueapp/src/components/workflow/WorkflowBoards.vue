@@ -232,37 +232,40 @@
                     });
             },
             setEdit() {
-                if(!this.isEdit) {
-                    let hasInStore = this.$store.state.tempWorkflow.status;
-                    if(!hasInStore) return;
-                    return this.setWorkflowFromStore();
+                let hasInStore = this.$store.state.tempWorkflow.status;
+                if(hasInStore && !this.isEdit) {
+                    this.setWorkflowFromStore();
                 }
 
-                this.isLoading = true;
-                WorkflowService.getWorkflowById(this.id)
-                    .then((response) => {
-                        if(response.error !== undefined) {
-                            this.$router.push({ name: "Workflow" });
-                            return this.$notify({
-                                title: 'workflow.index',
-                                message: response.error,
-                                variant: 'danger',
-                                icon: 'CircleX',
-                            });
-                        }
-                        this.workflowData.id = response.id;
-                        this.workflowData.name = response.name;
-                        this.workflowData.teamId = response.teamId;
-                        this.stepsList = response.steps.map(step => ({
-                            ...step,
-                            profileId: step.profile?.id || "",
-                            statusId: step.status?.id || "",
-                            isActive: true,
-                        }));
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
+                if(this.isEdit) {
+                    this.isLoading = true;
+                    WorkflowService.getWorkflowById(this.id)
+                        .then((response) => {
+                            if(response.error !== undefined) {
+                                this.$router.push({ name: "Workflow" });
+                                return this.$notify({
+                                    title: 'workflow.index',
+                                    message: response.error,
+                                    variant: 'danger',
+                                    icon: 'CircleX',
+                                });
+                            }
+                            this.workflowData.id = response.id;
+                            this.workflowData.name = response.name;
+                            this.workflowData.teamId = response.teamId;
+                            this.stepsList = response.steps.map(step => ({
+                                ...step,
+                                profileId: step.profile?.id || "",
+                                statusId: step.status?.id || "",
+                                isActive: true,
+                            }));
+                        })
+                        .finally(() => {
+                            this.saveWorkflowInStore();
+                            this.setWorkflowFromStore();
+                            this.isLoading = false;
+                        });
+                }
             },
             setWorkflowFromStore() {
                 let workflowData = this.$store.state.tempWorkflow.data;

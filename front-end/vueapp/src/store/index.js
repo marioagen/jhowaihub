@@ -57,6 +57,12 @@ export default new Vuex.Store({
             state.tempWorkflow.list = payload.list;
             state.tempWorkflow.data = payload.data;
         },
+        setFlowByStep(state, payload) {
+            const { stepId, flowData } = payload;
+            state.tempWorkflow.list = state.tempWorkflow.list.map(item =>
+                item.id == stepId ? { ...item, flow: flowData } : item
+            );
+        },
         cleanTempWorkflow(state) {
             state.tempWorkflow = {
                 status: false,
