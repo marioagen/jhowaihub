@@ -230,9 +230,19 @@ export default {
             try {
                 const payload = this.buildFlowPayload();
                 await FlowService.saveFlow(this.stepId, payload);
-                LogService.showMessage("Fluxo salvo com sucesso!");
+                return this.$notify({
+                    title: 'flow.title',
+                    message: 'flow.formFlow.progressFlowSuccess',
+                    variant: 'success',
+                    icon: 'CircleCheckBig',
+                });
             } catch (e) {
-                LogService.showMessage("Erro ao salvar fluxo");
+                this.$notify({
+                    title: 'flow.title',
+                    message: 'flow.formFlow.progressFlowFail',
+                    variant: 'danger',
+                    icon: 'CircleX',
+                });
             }
         },
         showCollapse() {
