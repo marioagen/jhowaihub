@@ -4,7 +4,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services.Automation
 {
     public interface IAutomationServices
     {
-        Task PrepareExecutionAsync(ICollection<Workflow> workflows);
+        void PrepareExecutionAsync(ICollection<Workflow> workflows);
         Task StartExecutionByWorkflowsAsync(ICollection<Workflow> workflows);
         Task StartExecutionByStepAsync(Step step);
         Task StartExecutionByCardAsync(int stepId, int cardId);

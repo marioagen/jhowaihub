@@ -437,7 +437,8 @@ namespace WoopiAiHub.Application.Services
                 _documentRepository.Create(documentForDataBase);
 
                 var worflows = teams.Select(s => s.Workflow).ToList();
-                await _automationServices.PrepareExecutionAsync(worflows!);
+                _automationServices.PrepareExecutionAsync(worflows!);
+                await _automationServices.StartExecutionByWorkflowsAsync(worflows!);
 
                 return referenceFile;
             }

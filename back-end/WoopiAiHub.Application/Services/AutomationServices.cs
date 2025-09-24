@@ -36,11 +36,11 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="workflows"></param>
         /// <returns></returns>
-        public async Task PrepareExecutionAsync(ICollection<Workflow> workflows)
+        public void PrepareExecutionAsync(ICollection<Workflow> workflows)
         {
             var executions = new List<StepToolExecution>();
             var stepIds = workflows.SelectMany(wf => wf.Steps.Select(s => s.Id)).ToList();
-            var allStepTools = await _stepToolRepository.FindStepToolsByStepIdsAsync(stepIds);
+            var allStepTools = _stepToolRepository.FindStepToolsByStepIdsAsync(stepIds).Result;
 
             foreach (var workflow in workflows)
             {
@@ -65,7 +65,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             if (executions.Any())
-                await _stepToolExecutionRepository.CreateRangeAsync(executions);
+                _stepToolExecutionRepository.CreateRangeAsync(executions);
         }
 
         /// <summary>
@@ -182,5 +182,7 @@ namespace WoopiAiHub.Application.Services
                 await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
             }
         }
+
+
     }
 }
