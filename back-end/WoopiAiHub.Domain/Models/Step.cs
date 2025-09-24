@@ -54,5 +54,10 @@ namespace WoopiAiHub.Domain.Models
                 return;
             Cards.Add(card);
         }
+
+        public void AddStepTool(StepTool stepTool)
+        {
+            StepTools.Add(stepTool);
+        }
     }
 }

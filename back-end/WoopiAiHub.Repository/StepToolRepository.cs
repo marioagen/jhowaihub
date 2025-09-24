@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -108,6 +107,17 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Creates a new step in the database.
+        /// </summary>
+        /// <param name="step"></param>
+        /// <returns></returns>
+        public async Task<bool> CreateRangeAsync(List<StepTool> stepTools)
+        {
+            await _context.StepTools.AddRangeAsync(stepTools);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
         /// Updates an existing step in the database.
         /// </summary>
         /// <param name="step"></param>
@@ -188,6 +198,25 @@ namespace WoopiAiHub.Repository
                 .Where(st => st.StepId == stepId)
                 .OrderBy(st => st.Order)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Delete by stepId
+        /// </summary>
+        /// <param name="stepId"></param>
+        /// <returns></returns>
+        public bool DeleteByStepId(int stepId)
+        {
+            var stepTools = _context.StepTools.Where(st => st.StepId == stepId);
+
+            if (stepTools.Any())
+            {
+                _context.StepTools.RemoveRange(stepTools);
+                _context.SaveChanges();
+                return true;
+            }
+
+            return false;
         }
     }
 }

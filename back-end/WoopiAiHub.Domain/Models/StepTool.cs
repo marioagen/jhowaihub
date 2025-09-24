@@ -58,5 +58,10 @@ namespace WoopiAiHub.Domain.Models
             }
             DependsOnStepTool = stepTool;
         }
+
+        public void UpdateDependencyStepToolId(int stepToolId)
+        {
+            DependsOnStepToolId = stepToolId;
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using WoopiAiHub.Application.Utils;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -19,6 +21,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
+        private readonly IStepToolRepository _stepToolRepository;
+        private readonly IStepToolParameterRepository _stepParameterRepository;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
@@ -27,7 +31,10 @@ namespace WoopiAiHub.Application.Services
                                 IStepRepository stepRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
-                                IValidateWorkflow validateWorkflow)
+                                IValidateWorkflow validateWorkflow,
+                                IStepToolRepository stepToolRepository,
+                                IStepToolOutputRepository stepToolOutputRepository,
+                                IStepToolParameterRepository stepToolParameterRepository)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -36,6 +43,8 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
+            _stepToolRepository = stepToolRepository;
+            _stepParameterRepository = stepToolParameterRepository;
         }
 
         /// <summary>
@@ -197,8 +206,20 @@ namespace WoopiAiHub.Application.Services
         {
             var updatedStepIds = workflowUpdateDto.Steps.Select(s => s.Id).ToHashSet();
             var stepsToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id)).Select(s => s.Id).ToList();
+            var stepToolIdsToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id))
+                                                    .SelectMany(s => s.StepTools)
+                                                    .Select(st => st.Id)
+                                                    .ToList();
+            var parametersToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id))
+                                                    .SelectMany(s => s.StepTools)
+                                                    .SelectMany(st => st.Parameters)
+                                                    .Select(p => p.Id)
+                                                    .ToList();
 
             await _validateStep.ValidateDeleteStep(stepsToRemove);
+
+            _stepParameterRepository.DeleteByIds(parametersToRemove);
+            _stepToolRepository.DeleteByIds(stepToolIdsToRemove);
             _stepRepository.DeleteByIds(stepsToRemove);
         }
 
@@ -220,8 +241,53 @@ namespace WoopiAiHub.Application.Services
 
                     await ValidateProfileAndStatus(existingStep);
                     await _stepRepository.Update(existingStep);
+                    await ProcessStepTools(existingStep, step.StepTools);
                 }
             }
+        }
+
+        /// <summary>
+        /// Process StepTools deletion or inclusion 
+        /// </summary>
+        /// <param name="step"></param>
+        /// <param name="stepToolUpdateDtos"></param>
+        /// <returns></returns>
+        public async Task ProcessStepTools(Step step, ICollection<StepToolUpdateDto> stepToolUpdateDtos)
+        {
+            var updateStepToolIds = stepToolUpdateDtos.Select(s => s.Id).ToHashSet();
+            var stepToolsToRemove = step.StepTools.Where(p => !updateStepToolIds.Contains(p.Id))
+                                                  .Select(p => p.Id)
+                                                  .ToList();
+
+            _stepParameterRepository.DeleteByStepToolsIds(stepToolsToRemove);
+            _stepToolRepository.DeleteByIds(stepToolsToRemove);
+
+            var stepToolsInsert = new List<StepTool>();
+            foreach (var stepToolUpdate in stepToolUpdateDtos)
+            {
+                var stepTool = new StepTool(
+                                            0,
+                                            DateTime.Now,
+                                            step.Id,
+                                            stepToolUpdate.ToolId,
+                                            stepToolUpdate.Order,
+                                            stepToolUpdate.PositionX,
+                                            stepToolUpdate.PositionY
+                                        );
+                if (stepToolUpdate.DependsOnStepToolId.HasValue)
+                {
+                    stepTool.UpdateDependencyStepToolId(stepToolUpdate.DependsOnStepToolId.Value);
+                }
+
+                if (!string.IsNullOrEmpty(stepToolUpdate.Input))
+                {
+                    stepTool.Parameters.Add(new StepToolParameter(0, DateTime.Now, 0, stepToolUpdate.Input));
+                }
+
+                stepToolsInsert.Add(stepTool);
+            }
+
+            await _stepToolRepository.CreateRangeAsync(stepToolsInsert);
         }
 
         /// <summary>
@@ -233,18 +299,39 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int teamId) where T : IStepDto
         {
-            var steps = stepsDto.Select(s => new Step(
-                0,
-                DateTime.UtcNow,
-                teamId,
-                s.Name,
-                s.Order,
-                s.ProfileId,
-                s.StatusId)).ToList();
+            var steps = new List<Step>();
+            foreach (var stepDto in stepsDto) {
+                var step = new Step(
+                    0,
+                    DateTime.UtcNow,
+                    teamId,
+                    stepDto.Name,
+                    stepDto.Order,
+                    stepDto.ProfileId,
+                    stepDto.StatusId);
+
+                foreach (var stepToolDto in stepDto.StepTools) {
+                    var stepTool = new StepTool(0, DateTime.Now, 0, stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY);
+                    
+                    if (!string.IsNullOrEmpty(stepToolDto.Input))
+                    {
+                        stepTool.Parameters.Add(new StepToolParameter(0, DateTime.Now, 0, stepToolDto.Input));
+                    }
+
+                    if (stepToolDto.DependsOnStepToolId.HasValue)
+                    {
+                        stepTool.UpdateDependencyStepToolId(stepToolDto.DependsOnStepToolId.Value);
+                    }
+
+                    step.AddStepTool(stepTool);
+                }
+               
+                steps.Add(step);
+            }
 
             foreach(var step in steps)
             {
-                await ValidateProfileAndStatus(step);
+                await ValidateProfileAndStatus(step);                
             }
 
             return steps;

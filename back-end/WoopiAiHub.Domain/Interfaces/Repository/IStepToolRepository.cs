@@ -11,12 +11,14 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface IStepToolRepository
     {
-        public bool DeleteByIds(ICollection<int> ids);
-        public Task<StepToolDto?> FindById(int id);
-        public IQueryable<StepToolDto> FindByIds(ICollection<int> ids);
-        public Task<bool> Create(StepTool stepTool);
-        public Task<bool> Update(StepToolDto stepToolDto);
-        public IQueryable<StepToolDto> FindAll();
+        bool DeleteByIds(ICollection<int> ids);
+        bool DeleteByStepId(int stepId);
+        Task<StepToolDto?> FindById(int id);
+        IQueryable<StepToolDto> FindByIds(ICollection<int> ids);
+        Task<bool> Create(StepTool stepTool);
+        Task<bool> CreateRangeAsync(List<StepTool> stepTools);
+        Task<bool> Update(StepToolDto stepToolDto);
+        IQueryable<StepToolDto> FindAll();
         Task<List<StepTool>> FindStepToolsByStepIdsAsync(IEnumerable<int> stepIds);
         Task<StepTool?> FindDependentAsync(int id);
         Task<StepTool?> FindByStepIdAndOrderAsync(int stepId, int order);
