@@ -83,11 +83,11 @@ namespace WoopiAiHub.Application.Services
 
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
 
-                await DeleteSteps(workflowUpdateDto, workflow);
+                DeleteSteps(workflowUpdateDto, workflow);
 
-                await UpdateSteps(workflowUpdateDto);
+               // await UpdateSteps(workflowUpdateDto);
 
-                ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.Where(s => s.Id == 0).ToList(), 
+                ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.ToList(), 
                                                                           workflow.TeamId);
 
                 workflow.AddSteps(stepsAdd);
@@ -202,25 +202,15 @@ namespace WoopiAiHub.Application.Services
         /// <param name="workflow"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private async Task DeleteSteps(WorkflowUpdateDto workflowUpdateDto, Workflow workflow)
+        private void DeleteSteps(WorkflowUpdateDto workflowUpdateDto, Workflow workflow)
         {
-            var updatedStepIds = workflowUpdateDto.Steps.Select(s => s.Id).ToHashSet();
-            var stepsToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id)).Select(s => s.Id).ToList();
-            var stepToolIdsToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id))
-                                                    .SelectMany(s => s.StepTools)
-                                                    .Select(st => st.Id)
-                                                    .ToList();
-            var parametersToRemove = workflow.Steps.Where(s => !updatedStepIds.Contains(s.Id))
-                                                    .SelectMany(s => s.StepTools)
-                                                    .SelectMany(st => st.Parameters)
-                                                    .Select(p => p.Id)
-                                                    .ToList();
+            var stepIds = workflow.Steps.Select(s => s.Id).ToList();
+            var stepToolIds = workflow.Steps.SelectMany(s => s.StepTools).Select(st => st.Id).ToList();
+            var parameterIds = workflow.Steps.SelectMany(s => s.StepTools).SelectMany(st => st.Parameters).Select(p => p.Id).ToList();
 
-            await _validateStep.ValidateDeleteStep(stepsToRemove);
-
-            _stepParameterRepository.DeleteByIds(parametersToRemove);
-            _stepToolRepository.DeleteByIds(stepToolIdsToRemove);
-            _stepRepository.DeleteByIds(stepsToRemove);
+            _stepParameterRepository.DeleteByIds(parameterIds);
+            _stepToolRepository.DeleteByIds(stepToolIds);
+            _stepRepository.DeleteByIds(stepIds);
         }
 
         /// <summary>
@@ -241,7 +231,6 @@ namespace WoopiAiHub.Application.Services
 
                     await ValidateProfileAndStatus(existingStep);
                     await _stepRepository.Update(existingStep);
-                    await ProcessStepTools(existingStep, step.StepTools);
                 }
             }
         }
@@ -254,14 +243,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task ProcessStepTools(Step step, ICollection<StepToolUpdateDto> stepToolUpdateDtos)
         {
-            var updateStepToolIds = stepToolUpdateDtos.Select(s => s.Id).ToHashSet();
-            var stepToolsToRemove = step.StepTools.Where(p => !updateStepToolIds.Contains(p.Id))
-                                                  .Select(p => p.Id)
-                                                  .ToList();
-
-            _stepParameterRepository.DeleteByStepToolsIds(stepToolsToRemove);
-            _stepToolRepository.DeleteByIds(stepToolsToRemove);
-
             var stepToolsInsert = new List<StepTool>();
             foreach (var stepToolUpdate in stepToolUpdateDtos)
             {
@@ -300,7 +281,10 @@ namespace WoopiAiHub.Application.Services
         private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int teamId) where T : IStepDto
         {
             var steps = new List<Step>();
-            foreach (var stepDto in stepsDto) {
+            StepTool? lastStepTool = null; // último StepTool criado (de qualquer Step)
+
+            foreach (var stepDto in stepsDto)
+            {
                 var step = new Step(
                     0,
                     DateTime.UtcNow,
@@ -310,28 +294,49 @@ namespace WoopiAiHub.Application.Services
                     stepDto.ProfileId,
                     stepDto.StatusId);
 
-                foreach (var stepToolDto in stepDto.StepTools) {
-                    var stepTool = new StepTool(0, DateTime.Now, 0, stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY);
-                    
+                StepTool? previousStepToolInSameStep = null;
+
+                foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                {
+                    var stepTool = new StepTool(
+                        0,
+                        DateTime.Now,
+                        0,
+                        stepToolDto.ToolId,
+                        stepToolDto.Order,
+                        stepToolDto.PositionX,
+                        stepToolDto.PositionY);
+
                     if (!string.IsNullOrEmpty(stepToolDto.Input))
                     {
-                        stepTool.Parameters.Add(new StepToolParameter(0, DateTime.Now, 0, stepToolDto.Input));
+                        stepTool.Parameters.Add(
+                            new StepToolParameter(0, DateTime.Now, 0, stepToolDto.Input));
                     }
 
-                    if (stepToolDto.DependsOnStepToolId.HasValue)
+                    // 1) Se for o primeiro do step, e existir um "último do step anterior", ele depende dele
+                    if (previousStepToolInSameStep == null && lastStepTool != null)
                     {
-                        stepTool.UpdateDependencyStepToolId(stepToolDto.DependsOnStepToolId.Value);
+                        stepTool.DependsOnStepTool = lastStepTool;
+                    }
+                    // 2) Se não for o primeiro do step, depende do anterior dentro do mesmo step
+                    else if (previousStepToolInSameStep != null)
+                    {
+                        stepTool.DependsOnStepTool = previousStepToolInSameStep;
                     }
 
                     step.AddStepTool(stepTool);
+
+                    // Atualiza controles
+                    previousStepToolInSameStep = stepTool;
+                    lastStepTool = stepTool;
                 }
-               
+
                 steps.Add(step);
             }
 
-            foreach(var step in steps)
+            foreach (var step in steps)
             {
-                await ValidateProfileAndStatus(step);                
+                await ValidateProfileAndStatus(step);
             }
 
             return steps;

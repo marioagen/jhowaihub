@@ -40,7 +40,7 @@ namespace WoopiAiHub.UnitTests.Services
             stepToolExecutionRepositoryMock.Setup(s => s.CreateRangeAsync(It.IsAny<List<StepToolExecution>>())).ReturnsAsync(true);
 
             // Act
-            await _service.PrepareExecutionAsync(workflows);
+            _service.PrepareExecutionAsync(workflows);
 
             // Assert
             stepToolRepositoryMock.Verify(s => s.FindStepToolsByStepIdsAsync(It.IsAny<IEnumerable<int>>()), Times.Once);

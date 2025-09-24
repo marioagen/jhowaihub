@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -94,6 +95,9 @@ namespace WoopiAiHub.Repository
                     .ThenInclude(s => s.Status)
                 .Include(w => w.Steps)
                     .ThenInclude(s => s.Cards)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                        .ThenInclude(p => p.Parameters)
                 .FirstOrDefaultAsync(w => w.Id == id);
         }
 
@@ -157,7 +161,23 @@ namespace WoopiAiHub.Repository
                         }
                         : null
                     }).ToList(),
-                    WorkflowId = s.WorkflowId
+                    WorkflowId = s.WorkflowId,
+                    StepTools = s.StepTools
+                                .Select(st => new StepToolDto
+                                {
+                                    Id = st.Id,
+                                    ToolId = st.ToolId,
+                                    Order = st.Order,
+                                    PositionX = st.PositionX,
+                                    PositionY = st.PositionY,
+                                    DependsOnStepToolId = st.DependsOnStepToolId,
+                                    Parameters = st.Parameters.Select(p => new StepToolParameterDto
+                                    {
+                                        Id = p.Id,
+                                        Value = p.Value,
+                                    }).ToList(),
+                                })
+                                .ToList()
                 }).ToList()
             };
         }
