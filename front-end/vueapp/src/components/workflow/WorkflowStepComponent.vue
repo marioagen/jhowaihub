@@ -246,7 +246,13 @@
                         },
                     });
                 }
-                this.$router.push({ name: 'NewFlow' });
+                console.log(this.step)
+                this.$router.push({ 
+                    name: 'NewFlow',
+                    params: {
+                        stepOrder: this.step.order
+                    }
+                });
             },
             removeFlow() {
                 //remove the given flow endpoint

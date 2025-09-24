@@ -217,7 +217,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow",
+        path: "/flow/:stepOrder",
         name: "NewFlow",
         component: NewFlow,
         meta: { 

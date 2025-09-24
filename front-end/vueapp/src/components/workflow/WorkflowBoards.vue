@@ -206,6 +206,7 @@
                 return this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle";
             },
             activeStepsList() {
+                console.log(this.stepsList);
                 return this.stepsList.filter(s => s.isActive !== false);
             },
         },
@@ -271,6 +272,7 @@
                 let workflowData = this.$store.state.tempWorkflow.data;
                 this.workflowData.name = workflowData.name;
                 this.workflowData.teamId = workflowData.teamId;
+                console.log(this.$store.state.tempWorkflow)
                 this.stepsList = this.$store.state.tempWorkflow.list;
             },
             updateStep(index, updatedStep) {
@@ -283,6 +285,7 @@
                     status: '',
                     profile: '',
                     isActive: true,
+                    stepTools: []
                 });
             },
             removeStep(index, deactivatedStep) {
@@ -348,12 +351,14 @@
                 });
             },
             createWorkflow() {
+                console.log(this.$store.state.tempWorkflow.list);
                 let params = {
                     name: this.workflowData.name,
                     teamId: this.workflowData.teamId,
-                    steps: this.stepsList.filter(s => s.isActive !== false)
+                    // steps: this.stepsList.filter(s => s.isActive !== false)
+                    steps: this.$store.state.tempWorkflow.list,
                 };
-                
+
                 WorkflowService.createWorkflow(params)
                     .then((response) => {
                         if(response.error === undefined) {
@@ -378,13 +383,14 @@
                     });
             },
             editWorkflow() {
+                console.log( this.$store.state.tempWorkflow.list);
                 let params = {
                     id: this.workflowData.id,
                     name: this.workflowData.name,
                     teamId: this.workflowData.teamId,
-                    steps: this.stepsList.filter(s => s.isActive !== false)
+                    steps: this.$store.state.tempWorkflow.list,
                 };
-
+                console.log(params);
                 WorkflowService.editWorkflow(params)
                     .then((response) => {
                         if(response.error === undefined) {

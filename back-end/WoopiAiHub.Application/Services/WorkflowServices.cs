@@ -214,28 +214,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Updates existing steps in a workflow based on the provided DTO.
-        /// </summary>
-        /// <param name="workflowUpdateDto"></param>
-        /// <returns></returns>
-        private async Task UpdateSteps(WorkflowUpdateDto workflowUpdateDto)
-        {
-            var stepsToUpdate = workflowUpdateDto.Steps.Where(s => s.Id > 0).ToList();
-
-            foreach (var step in stepsToUpdate)
-            {
-                var existingStep = await _stepRepository.FindById(step.Id);
-                if (existingStep != null)
-                {
-                    existingStep.Update(step.Name, step.Order, step.ProfileId, step.StatusId);
-
-                    await ValidateProfileAndStatus(existingStep);
-                    await _stepRepository.Update(existingStep);
-                }
-            }
-        }
-
-        /// <summary>
         /// Process StepTools deletion or inclusion 
         /// </summary>
         /// <param name="step"></param>

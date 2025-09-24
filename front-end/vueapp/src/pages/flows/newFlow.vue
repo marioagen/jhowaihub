@@ -1,5 +1,5 @@
 <template>
-    <FlowComponent :stepId="1"/>
+    <FlowComponent :stepOrder="$route.params.stepOrder"/>
 </template>
 
 <script>

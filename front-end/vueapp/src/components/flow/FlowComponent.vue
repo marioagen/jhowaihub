@@ -76,6 +76,11 @@
                 required: false,
                 default: null,
             },
+            stepOrder: {
+                type: Number,
+                required: false,
+                default: 0,
+            }
         },
         data() {
             return {
@@ -100,9 +105,9 @@
             },
             redirectToIndex() {
                 if(this.isEdit) {
-                    return this.$router.push({ name: "EditWorkflow" });
+                    return this.$router.push({ name: "EditWorkflow", params: { stepId: this.stepId, id: this.Id } });
                 }
-                return this.$router.push({ name: "NewWorkflow" });
+                return this.$router.push({ name: "NewWorkflow", params: { stepOrder: this.stepOrder } });
             },
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;
@@ -139,7 +144,7 @@
                 try {
                     let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
                     this.$store.commit('setFlowByStep', {
-                        stepId: this.stepId,
+                        stepOrder: this.stepOrder,
                         flowData: nodesList,
                     });
                     this.redirectToIndex();
