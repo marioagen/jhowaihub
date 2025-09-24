@@ -230,9 +230,9 @@ export default {
             try {
                 const payload = this.buildFlowPayload();
                 await FlowService.saveFlow(this.stepId, payload);
-                LogService.showMessage("Fluxo salvo com sucesso!");
+               
             } catch (e) {
-                LogService.showMessage("Erro ao salvar fluxo");
+                
             }
         },
         showCollapse() {

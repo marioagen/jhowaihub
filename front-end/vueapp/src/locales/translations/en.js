@@ -539,7 +539,13 @@
             title: "Automation Flow:",
             subtitle: "Update the information of the selected tool",
         },
-        sidebarTitle: "Configure I/O:"
+        sidebarTitle: "Configure I/O:",
+        formFlow: {
+            progressFlowSuccess: "Flow inserted successfully",
+            progressFlowFail: "Failed to insert flow",
+            editFlowNodeSuccess: "Node edited successfully",
+            editFlowNodeFail: "Failed to edit node",
+        }
     },
 };
 
