@@ -182,5 +182,12 @@ namespace WoopiAiHub.Repository
 
             return documentId;
         }
+
+        public Document? FindByReferenceFile(string referenceFile)
+        {
+            return _context.Documents.Where(a => a.ReferenceFile.Equals(referenceFile))
+                                     .AsNoTracking()
+                                     .FirstOrDefault();
+        }
     }
 }

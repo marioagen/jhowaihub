@@ -1,9 +1,10 @@
-﻿using WoopiAiHub.Application.Services;
+﻿using Microsoft.Extensions.DependencyInjection;
+using WoopiAiHub.Application.Messaging;
+using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
-using Microsoft.Extensions.DependencyInjection;
-using WoopiAiHub.Application.Messaging;
 
 namespace WoopiAiHub.Application.DependencyInjection
 {
@@ -39,6 +40,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IToolServices, ToolServices>();
             services.AddScoped<IToolTypeServices, ToolTypeServices>();
             services.AddScoped<IToolDataServices, ToolDataServices>();
+            services.AddScoped<IToolFactoryHandlerServices, ToolFactoryHandlerServices>();
+            services.AddScoped<IToolOutputServices, ToolOutputServices>();
             services.AddScoped<IAutomationServices, AutomationServices>();
 
             services.AddHostedService<OcrConsumer>();

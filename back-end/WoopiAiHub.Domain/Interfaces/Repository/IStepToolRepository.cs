@@ -1,4 +1,5 @@
-﻿using System;
+﻿using WoopiAiHub.Domain.DTOs.Request;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,9 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         public Task<bool> Create(StepTool stepTool);
         public Task<bool> Update(StepToolDto stepToolDto);
         public IQueryable<StepToolDto> FindAll();
-        public ICollection<StepTool> FindStepToolsByStepId(int stepId);
+        Task<List<StepTool>> FindStepToolsByStepIdsAsync(IEnumerable<int> stepIds);
+        Task<StepTool?> FindDependentAsync(int id);
+        Task<StepTool?> FindByStepIdAndOrderAsync(int stepId, int order);
+        ICollection<StepTool> FindStepToolsByStepId(int stepId);
     }
 }

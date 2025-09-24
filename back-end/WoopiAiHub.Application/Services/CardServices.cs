@@ -2,6 +2,7 @@
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
@@ -9,7 +10,8 @@ namespace WoopiAiHub.Application.Services
     public class CardServices : ICardServices
     {
         private readonly ICardRepository _cardRepository;
-        private readonly IStepRepository _stepRepository;        
+        private readonly IStepRepository _stepRepository;
+        private readonly IAutomationServices _automationServices;
 
         public CardServices(ICardRepository cardRepository,
                             IStepRepository stepRepository)
@@ -36,7 +38,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
-        
+
             var isValidTeamUser = card.Step?.Workflow?.Team?.Users.Any(a => a.Id.Equals(updateAssingnedUserDto.UserId));
             if (!isValidTeamUser.HasValue || !isValidTeamUser.Value)
             {
@@ -88,8 +90,12 @@ namespace WoopiAiHub.Application.Services
             }
 
             card.UpdateStepAndSatus(step.Id, step.StatusId);
+            var result = _cardRepository.Update(card);
 
-            return _cardRepository.Update(card);
+            if (result)
+                await _automationServices.StartExecutionByCardAsync(step.Id, card.Id);
+
+            return true;
         }
     }
 }

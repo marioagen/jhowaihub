@@ -7,9 +7,11 @@ namespace WoopiAiHub.Domain.Interfaces.Services.Automation
 {
     public interface IAutomationServices
     {
-        Task PrepareExecution(ICollection<Workflow> workflows);
-        Task StartExecutionByWorkflows(ICollection<Workflow> workflows);
-        Task StartExecutionByStep(Step step);
+        void PrepareExecutionAsync(ICollection<Workflow> workflows);
+        Task StartExecutionByWorkflowsAsync(ICollection<Workflow> workflows);
+        Task StartExecutionByStepAsync(Step step);
+        Task StartExecutionByCardAsync(int stepId, int cardId);
+        Task ContinueExecution(int stepToolId, int cardId);
         ICollection<StepTool> FindStepToolsByStepId(int stepId);
         ICollection<StepToolDto> FindAll();
         Task<StepToolDto> FindById(int id);

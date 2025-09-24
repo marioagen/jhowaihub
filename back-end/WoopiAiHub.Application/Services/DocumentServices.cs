@@ -42,7 +42,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _config;
         private readonly IDocumentHistoryServices _documentHistoryServices;
-        private readonly IDocumentNormalizedServices _documentNormalizedServices;
+        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IFileRepositoryApi _fileRepositoryApi;
         private readonly IFunctionFileRetriever _functionFileRetriever;
         private readonly IMemoryCache _cache;
@@ -55,6 +55,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private readonly IDocumentNotifier _documentNotifier;
         private readonly IAutomationServices _automationServices;
+        private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
@@ -68,7 +69,7 @@ namespace WoopiAiHub.Application.Services
                                 IDocumentHistoryServices documentHistoryServices,
                                 IFileRepositoryApi fileRepositoryApi,
                                 IFunctionFileRetriever functionFileRetriever,
-                                IDocumentNormalizedServices documentNormalizedServices,
+                                IStepToolExecutionRepository stepToolExecutionRepository,
                                 IMemoryCache cache,
                                 IQuestionnaireRepository questionnaireRepository,
                                 ITenantCacheServices tenantCacheServices,
@@ -79,7 +80,8 @@ namespace WoopiAiHub.Application.Services
                                 IDocumentNotifier documentNotifier,
                                 IUnitOfWork unitOfWork,
                                 ICardRepository cardRepository,
-                                IAutomationServices automationServices)
+                                IAutomationServices automationServices,
+                                IStepToolOutputRepository stepToolOutputRepository)
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
@@ -92,7 +94,7 @@ namespace WoopiAiHub.Application.Services
             _documentHistoryServices = documentHistoryServices;
             _fileRepositoryApi = fileRepositoryApi;
             _functionFileRetriever = functionFileRetriever;
-            _documentNormalizedServices = documentNormalizedServices;
+            _stepToolExecutionRepository = stepToolExecutionRepository;
             _cache = cache;
             _questionnaireRepository = questionnaireRepository;
             _tenantCacheServices = tenantCacheServices;
@@ -102,6 +104,7 @@ namespace WoopiAiHub.Application.Services
             _publisher = publisher;
             _documentNotifier = documentNotifier;
             _automationServices = automationServices;
+            _stepToolOutputRepository = stepToolOutputRepository;
         }
 
         /// <summary>
@@ -360,20 +363,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<DocumentEmbeddingsDataDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
+        public async Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
         {
-            var keyAccess = _config[ConfigKeyAccessName];
-            if (string.IsNullOrEmpty(keyAccess))
-            {
-                throw new InvalidOperationException("KeyAccess is not configured in the application settings.");
-            }
-
-            var documentId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
-            if (documentId == 0)
-            {
-                throw new ArgumentException(FindingDocumentErrorMessage);
-            }
-
             var documentEmbeddingsAddDtoList = await ExtractDocumentEmbeddingsAddDto(processOcrResultDto);
 
             var normalizedContext = new StringBuilder();
@@ -382,18 +373,31 @@ namespace WoopiAiHub.Application.Services
                 normalizedContext.AppendLine(page.Text);
             }
 
-            _documentNormalizedServices.InsertOrUpdate(documentId, normalizedContext.ToString());
+            var resultData = JsonConvert.DeserializeObject<MetaDataAutomationDto>((processOcrResultDto.Data));
+            if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
 
+            var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(resultData.StepToolId,
+                                                                                              resultData.CardId);
+
+            if (execution == null) return resultData;
+
+            execution.UpdateStatusExecution(StatusExecution.Ready);
+            await _stepToolExecutionRepository.UpdateAsync(execution);
+
+            var output = new StepToolOutput(
+                0,
+                DateTime.Now,
+                execution.StepToolId,
+                execution.CardId,
+                normalizedContext.ToString()
+            );
+
+            await _stepToolOutputRepository.CreateAsync(output);
+
+            var documentId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
             await this.ChangeStatus(documentId, DocumentStatus.OCR, processOcrResultDto.Email);
 
-            var documentEmbeddingsDto = new DocumentEmbeddingsDataDto
-            {
-                ResponseQueue = _messageQueues.EmbeddingQueueAiHubResponse,
-                ReferenceFile = processOcrResultDto.ReferenceFile,
-                DocumentEmbeddings = documentEmbeddingsAddDtoList
-            };
-
-            return documentEmbeddingsDto;
+            return resultData;
         }
 
         /// <summary>
@@ -433,7 +437,8 @@ namespace WoopiAiHub.Application.Services
                 _documentRepository.Create(documentForDataBase);
 
                 var worflows = teams.Select(s => s.Workflow).ToList();
-                await _automationServices.PrepareExecution(worflows!);
+                _automationServices.PrepareExecutionAsync(worflows!);
+                await _automationServices.StartExecutionByWorkflowsAsync(worflows!);
 
                 return referenceFile;
             }
@@ -656,7 +661,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public async Task ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
+        public async Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
         {
             var resultRegisterConsumption = await RegisterConsumptionPages(documentEmbeddingsResultDto);
             if (!resultRegisterConsumption)
@@ -669,6 +674,11 @@ namespace WoopiAiHub.Application.Services
             }
 
             await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
+
+            var resultData = JsonConvert.DeserializeObject<MetaDataAutomationDto>((documentEmbeddingsResultDto.Data));
+            if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
+
+            return resultData;
         }
 
         /// <summary>
@@ -767,7 +777,7 @@ namespace WoopiAiHub.Application.Services
 
             return new DocumentPagedResultDto
             {
-                Content = query, 
+                Content = query,
                 CurrentPage = currentPage,
                 PageCount = pageCount,
                 RowCount = totalListCount

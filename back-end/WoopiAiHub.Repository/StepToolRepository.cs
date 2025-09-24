@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -71,7 +72,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public IQueryable<StepToolDto> FindByIds(ICollection<int> ids)
         {
-            var query =  _context.StepTools
+            var query = _context.StepTools
             .Select(q => new StepToolDto
             {
                 Id = q.Id,
@@ -92,7 +93,7 @@ namespace WoopiAiHub.Repository
             }).AsQueryable()
             .AsNoTracking();
 
-            return  query;
+            return query;
         }
 
         /// <summary>
@@ -149,7 +150,7 @@ namespace WoopiAiHub.Repository
                     Type = sp.StepTool.Tool.InputData.Name,
                     Value = sp.Value
                 }).ToList(),
-                
+
             })
             .AsQueryable()
             .AsNoTracking();
@@ -157,11 +158,37 @@ namespace WoopiAiHub.Repository
             return query;
         }
 
+        public async Task<List<StepTool>> FindStepToolsByStepIdsAsync(IEnumerable<int> stepIds)
+        {
+            if (stepIds == null || !stepIds.Any())
+                return new List<StepTool>();
+
+            return await _context.StepTools
+                .AsNoTracking()
+                .Where(st => stepIds.Contains(st.StepId))
+                .OrderBy(st => st.StepId)
+                .ThenBy(st => st.Order)
+                .ToListAsync();
+        }
+
+        public async Task<StepTool?> FindDependentAsync(int id)
+        {
+            return await _context.StepTools.FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
+        }
+
+        public async Task<StepTool?> FindByStepIdAndOrderAsync(int stepId, int order)
+        {
+            return await _context.StepTools.FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
+        }
+
         public ICollection<StepTool> FindStepToolsByStepId(int stepId)
         {
-            return _context.StepTools.Where(a => a.StepId == stepId)
+            return _context.StepTools
                 .AsNoTracking()
+                .Where(st => st.StepId == stepId)
+                .OrderBy(st => st.Order)
                 .ToList();
         }
     }
 }
+

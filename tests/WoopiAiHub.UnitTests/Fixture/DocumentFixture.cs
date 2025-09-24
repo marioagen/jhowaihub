@@ -333,6 +333,17 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static MetaDataAutomationDto FindValidProcessOcrDataAutomationDto()
+        {
+            var faker = new Faker("pt_BR");
+            var dto = new MetaDataAutomationDto
+            {
+                CardId = faker.Random.Int(1, 1000),
+                StepToolId = faker.Random.Int(1, 1000),
+            };
+            return dto;
+        }
+
         public static AnalyzeResultCustomDto FindValidAnalyzeResultCustomDto()
         {
             var faker = new Faker<AnalyzeResultCustomDto>("pt_BR")

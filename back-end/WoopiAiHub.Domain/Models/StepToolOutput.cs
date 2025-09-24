@@ -13,8 +13,8 @@ namespace WoopiAiHub.Domain.Models
         [Column("Value", TypeName = "nvarchar(max)")]
         public string Value { get; private set; }
 
-        public virtual required StepTool StepTool { get; set; }
-        public virtual required Card Card { get; set; }
+        public virtual StepTool StepTool { get; set; }
+        public virtual Card Card { get; set; }
 
         public StepToolOutput(int id, 
                               DateTime created,

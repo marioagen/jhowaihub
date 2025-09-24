@@ -2,14 +2,16 @@ import api from "@/services/api";
 
 export default {
     getStepToolsByStepId(stepId) {
-        // Replace with real API call
-        const stepTools = [
-            { id: 1, toolId: 201, label: "OCR", positionX: 100, positionY: 100 },
-            { id: 2, toolId: 202, label: "Validação", positionX: 200, positionY: 100 },
-            { id: 3, toolId: 203, label: "Exportação", positionX: 300, positionY: 200 },
-            { id: 4, toolId: 203, label: "Importação", positionX: 400, positionY: 300, input: {type: 'string', value:"sadlakdladk"} }
-        ];
-        return Promise.resolve(stepTools);
+            return api
+                .get("/StepId/", stepId)
+                .then(({ data }) => {
+                    return {
+                        permissions: data,
+                    };
+                })
+                .catch(function (e) {
+                    console.log(e);
+                });
     },
 
     getStepToolDependenciesByStepId(stepId) {
