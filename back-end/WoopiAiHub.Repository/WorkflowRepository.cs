@@ -180,7 +180,7 @@ namespace WoopiAiHub.Repository
                                     {
                                         Id = st.Tool!.Id,
                                         Name = st.Tool.Name,
-                                    }
+                                    },
                                 })
                                 .ToList()
                 }).ToList()

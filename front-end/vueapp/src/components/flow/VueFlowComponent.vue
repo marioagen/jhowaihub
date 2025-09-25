@@ -15,7 +15,7 @@
                     <div>
                         <button v-for="tool in toolsList" :key="tool.id"
                             class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item" draggable="true"
-                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name })">
+                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput })">
                             {{ tool.name }}
                         </button>
                     </div>
@@ -64,7 +64,7 @@ export default {
             type: Boolean,
             required: false,
             default: false
-        },
+        }
     },
     data() {
         return {
@@ -119,12 +119,13 @@ export default {
                     }
                 });
                 let stepTools = step ? step.stepTools : [];
-                const mappedNodes = stepTools.map(tool => ({
-                    id: tool.id.toString(),
-                    position: { x: tool.positionX, y: tool.positionY },
-                    label: tool.tool.name,
-                    toolId: tool.toolId,
-                    data: { icon: "Activity", color: "blue", input: tool.input || null },
+                console.log(stepTools);
+                const mappedNodes = stepTools.map(stepTool => ({
+                    id: stepTool.id.toString(),
+                    position: { x: stepTool.positionX, y: stepTool.positionY },
+                    label: stepTool.tool.name,
+                    toolId: stepTool.toolId,
+                    data: { icon: "Activity", color: "blue", input: stepTool.input || null, isEditableInput: stepTool.tool.isEditableInput },
                     sourcePosition: "right",
                     targetPosition: "left",
                     type: "hub"
@@ -161,9 +162,18 @@ export default {
             this.nodes = this.nodes.filter(node => node.id !== nodeId);
             this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
         },
-        updateNode(nodeFlow) {
-            const idx = this.nodes.findIndex(node => node.id === nodeFlow.id);
-            this.nodes[idx] = nodeFlow;
+        updateNodeInput(nodeId, newInput) {
+            const idx = this.nodes.findIndex(node => node.id === nodeId);
+            if (idx !== -1) {
+                this.nodes[idx] = {
+                    ...this.nodes[idx],
+                    data: {
+                        ...this.nodes[idx].data,
+                        input: newInput
+                    }
+                };
+            }
+            console.log(this.nodes);
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
@@ -179,6 +189,7 @@ export default {
             event.dataTransfer.dropEffect = 'move'
         },
         onDragStart(event, nodeData) {
+            console.log(nodeData);
             event.dataTransfer.setData('application/node-data', JSON.stringify(nodeData))
             event.dataTransfer.effectAllowed = 'move'
         },
@@ -190,13 +201,14 @@ export default {
                 x: event.clientX - reactFlowBounds.left,
                 y: event.clientY - reactFlowBounds.top,
             })
+            console.log(nodeData);
             const newNode = {
                 id: (this.nodes.length + 1).toString(),
                 type: 'hub',
                 position,
                 label: nodeData.name,
                 toolId: nodeData.id,
-                data: { icon: 'Activity', color: '#000', isStartNode: false }
+                data: { icon: 'Activity', color: '#000', isStartNode: false, isEditableInput: nodeData.isEditableInput }
             }
             this.vueFlowInstance?.addNodes([newNode])
         },
@@ -206,7 +218,7 @@ export default {
                 .map((node, index) => ({
                     id: parseInt(node.id, 10),
                     toolId: node.toolId,
-                    tool: {name: node.label},
+                    tool: { name: node.label, isEditableInput: node.data.isEditableInput },
                     positionX: parseFloat((node.position.x).toFixed(2)),
                     positionY: parseFloat((node.position.y).toFixed(2)),
                     order: index + 1,
