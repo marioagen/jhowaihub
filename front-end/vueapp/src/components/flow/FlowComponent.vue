@@ -31,6 +31,7 @@
             <VueFlowComponent 
                 :isEditMode="isEdit"
                 :stepId="id"
+                :stepOrder="stepOrder"
                 @openNodeConfig="openNodeConfig" 
                 ref="VueflowComponent"
             />
@@ -65,6 +66,11 @@
             stepId: {
                 type: Number,
                 required: true
+            },
+            stepTools: {
+                type: [Object, Array],
+                required: false,
+                default: () => [],
             },
             isEdit: {
                 type: Boolean,
@@ -166,6 +172,8 @@
             }
         },
         created() {
+            console.log(this.stepId)
+            console.log(this.stepOrder)
             this.setEdit();
         },
     };

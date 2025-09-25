@@ -59,7 +59,6 @@
 import { VueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import HubNode from '@/components/flow/HubNode.vue';
-import FlowService from '@/services/flow/FlowService';
 import SpecialEdge from '@/components/flow/SpecialEdge.vue';
 import LogService from '@/services/log/logService';
 import ToolsServices from '@/services/tools/ToolsServices';
@@ -73,11 +72,16 @@ export default {
             required: false,
             default: null
         },
+        stepOrder: {
+            type: Number,
+            required: false,
+            default: null
+        },
         isEditMode: {
             type: Boolean,
             required: false,
             default: false
-        }
+        },
     },
     data() {
         return {
@@ -120,9 +124,25 @@ export default {
         },
         async getFlow() {
             try {
-                const stepTools = await FlowService.getStepToolsByStepId(this.stepId);
-                const dependencies = await FlowService.getStepToolDependenciesByStepId(this.stepId);
-
+                console.log(this.stepId)
+                console.log(this.stepOrder)
+                console.log(this.$store.state.tempWorkflow.list)
+                let stepTools = this.$store.state.tempWorkflow.list.map(item => {
+                    if(this.isEdit) {
+                        //stepId
+                        if(item.id == this.stepId) {
+                            return item.stepTools;
+                        }
+                        return item;
+                    } else {
+                        //stepOrder
+                        if(item.order == this.stepOrder) {
+                            return item.stepTools;
+                        }
+                        return item;
+                    }
+                })[0];
+                console.log(stepTools);
                 const mappedNodes = stepTools.map(tool => ({
                     id: tool.id.toString(),
                     position: { x: tool.positionX, y: tool.positionY },
@@ -133,13 +153,14 @@ export default {
                     type: "hub"
                 }));
 
-                const mappedEdges = dependencies.map(dep => ({
-                    id: `${dep.StepToolIdFrom}-${dep.StepToolIdTo}`,
-                    source: dep.StepToolIdFrom.toString(),
-                    target: dep.StepToolIdTo.toString(),
+                const mappedEdges = stepTools.map(dep => ({
+                    id: `${dep.id}-${dep.dependsOnStepToolId}`,
+                    source: dep.id.toString(),
+                    target: dep.dependsOnStepToolId.toString(),
                     animated: true,
                     type: "special"
                 }));
+
                 const startNode = { ...this.createStartNode(), data: { ...this.createStartNode().data, isActive: true } };
                 if (stepTools.length > 0) {
                     const firstTool = stepTools[0];
@@ -155,6 +176,7 @@ export default {
                 this.edges = mappedEdges;
 
             } catch (e) {
+                console.log(e)
                 LogService.showMessage("Erro ao carregar fluxo");
             }
         },
@@ -205,14 +227,15 @@ export default {
             return this.nodes
                 .filter(node => node.id !== "start")
                 .map((node, index) => ({
-                    Id: parseInt(node.id, 10),
-                    ToolId: node.toolId || null,
-                    Label: node.label,
-                    PositionX: parseFloat((node.position.x).toFixed(2)),
-                    PositionY: parseFloat((node.position.y).toFixed(2)),
-                    Order: index + 1,
-                    Status: "Active",
-                    Input: node.data.input || null
+                    id: parseInt(node.id, 10),
+                    toolId: node.toolId || null,
+                    label: node.label,
+                    positionX: parseFloat((node.position.x).toFixed(2)),
+                    positionY: parseFloat((node.position.y).toFixed(2)),
+                    order: index + 1,
+                    status: "Active",
+                    input: node.data.input || null,
+                    dependsOnStepToolId: index,
                 }));
         },
         showCollapse() {
@@ -221,11 +244,7 @@ export default {
     },
     mounted() {
         this.getToolsList();
-        if (!this.isEditMode) {
-            this.newFlow();
-        } else {
-            this.getFlow();
-        }
+        this.getFlow();
     }
 };
 </script>
