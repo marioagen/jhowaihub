@@ -57,7 +57,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private const string ConfigKeyAccessName = "keyAccess";
-        private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
+        private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
 
         public DocumentServices(IDocumentRepository documentRepository,
