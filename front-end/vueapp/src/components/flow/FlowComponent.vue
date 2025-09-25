@@ -29,8 +29,8 @@
             </div>
             <hr/>            
             <VueFlowComponent 
-                :isEditMode="isEdit"
-                :stepId="id"
+                :isEdit="isEdit"
+                :stepId="stepId"
                 :stepOrder="stepOrder"
                 @openNodeConfig="openNodeConfig" 
                 ref="VueflowComponent"
@@ -106,9 +106,6 @@
             VueFlowComponent,
         },
         methods: {
-            setEdit() {
-                console.log("Gotcha")
-            },
             redirectToIndex() {
                 if(this.isEdit) {
                     return this.$router.push({ name: "EditWorkflow", params: { stepId: this.stepId, id: this.Id } });
@@ -120,7 +117,6 @@
             },
             openNodeConfig(node) {
                 this.nodeFlow = node;
-                console.log(this.nodeFlow);
                 const sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
                 sidebar.show();
             },
@@ -152,6 +148,7 @@
                     this.$store.commit('setFlowByStep', {
                         stepOrder: this.stepOrder,
                         flowData: nodesList,
+                        stepId: this.stepId
                     });
                     this.redirectToIndex();
                     return this.$notify({
@@ -170,11 +167,6 @@
                     });
                 }
             }
-        },
-        created() {
-            console.log(this.stepId)
-            console.log(this.stepOrder)
-            this.setEdit();
         },
     };
 </script>

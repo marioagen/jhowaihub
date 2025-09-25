@@ -1,14 +1,8 @@
 <template>
     <div class="row mb-2">
         <div class="col">
-            <button 
-                class="btn btn-primary btn-sm me-2" 
-                data-bs-toggle="collapse" 
-                data-bs-target="#toolsCollapse" 
-                aria-expanded="false" 
-                aria-controls="toolsCollapse"
-                @click="showCollapse"
-            >
+            <button class="btn btn-primary btn-sm me-2" data-bs-toggle="collapse" data-bs-target="#toolsCollapse"
+                aria-expanded="false" aria-controls="toolsCollapse" @click="showCollapse">
                 <LucideIcon icon="Plus" :size="15" />
                 {{ isActiveCollapse ? $t("flow.hideTools") : $t("flow.showTools") }}
             </button>
@@ -19,13 +13,9 @@
             <div class="card mb-3">
                 <div class="card-body palette">
                     <div>
-                        <button
-                            v-for="tool in toolsList"
-                            :key="tool.id"
-                            class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item"
-                            draggable="true"
-                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name })"
-                        >
+                        <button v-for="tool in toolsList" :key="tool.id"
+                            class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item" draggable="true"
+                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name })">
                             {{ tool.name }}
                         </button>
                     </div>
@@ -34,16 +24,9 @@
         </div>
     </div>
     <div class="card vue-flow-container p-0">
-        <VueFlow 
-            v-model:nodes="nodes" 
-            v-model:edges="edges" 
-            :style="{ width: '100%', height: '100%' }" 
-            @connect="onConnect"
-            @pane-ready="onPaneReady" 
-            @drop="onDrop" 
-            @dragover="onDragOver" 
-            @nodes-change="onNodesChange"
-        >
+        <VueFlow v-model:nodes="nodes" v-model:edges="edges" :style="{ width: '100%', height: '100%' }"
+            @connect="onConnect" @pane-ready="onPaneReady" @drop="onDrop" @dragover="onDragOver"
+            @nodes-change="onNodesChange">
             <Background patternColor="#BCD5F2" gap="10" variant="dots" size="1" />
             <template #node-hub="props">
                 <HubNode :node="props" @deleteNode="deleteNode" @openNodeConfig="openNodeConfig" />
@@ -77,7 +60,7 @@ export default {
             required: false,
             default: null
         },
-        isEditMode: {
+        isEdit: {
             type: Boolean,
             required: false,
             default: false
@@ -124,41 +107,35 @@ export default {
         },
         async getFlow() {
             try {
-                console.log(this.stepId)
-                console.log(this.stepOrder)
-                console.log(this.$store.state.tempWorkflow.list)
-                let stepTools = this.$store.state.tempWorkflow.list.map(item => {
-                    if(this.isEdit) {
-                        //stepId
-                        if(item.id == this.stepId) {
+                let step = this.$store.state.tempWorkflow.list.find(item => {
+                    if (this.isEdit) {
+                        if (item.id == this.stepId) {
                             return item.stepTools;
                         }
-                        return item;
                     } else {
-                        //stepOrder
-                        if(item.order == this.stepOrder) {
+                        if (item.order == this.stepOrder) {
                             return item.stepTools;
                         }
-                        return item;
                     }
-                })[0];
-                console.log(stepTools);
+                });
+                let stepTools = step ? step.stepTools : [];
                 const mappedNodes = stepTools.map(tool => ({
                     id: tool.id.toString(),
                     position: { x: tool.positionX, y: tool.positionY },
-                    label: tool.label,
-                    data: { icon: "MessageCircle", color: "blue", input: tool.input || null },
+                    label: tool.tool.name,
+                    toolId: tool.toolId,
+                    data: { icon: "Activity", color: "blue", input: tool.input || null },
                     sourcePosition: "right",
                     targetPosition: "left",
                     type: "hub"
                 }));
 
-                const mappedEdges = stepTools.map(dep => ({
-                    id: `${dep.id}-${dep.dependsOnStepToolId}`,
-                    source: dep.id.toString(),
-                    target: dep.dependsOnStepToolId.toString(),
-                    animated: true,
-                    type: "special"
+                const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
+                    id: `${tool.id}-${stepTools[index + 1].id}`,
+                    source: tool.id.toString(),
+                    target: stepTools[index + 1].id.toString(),
+                    animated: false,
+                    type: "special",
                 }));
 
                 const startNode = { ...this.createStartNode(), data: { ...this.createStartNode().data, isActive: true } };
@@ -228,8 +205,8 @@ export default {
                 .filter(node => node.id !== "start")
                 .map((node, index) => ({
                     id: parseInt(node.id, 10),
-                    toolId: node.toolId || null,
-                    label: node.label,
+                    toolId: node.toolId,
+                    tool: {name: node.label},
                     positionX: parseFloat((node.position.x).toFixed(2)),
                     positionY: parseFloat((node.position.y).toFixed(2)),
                     order: index + 1,

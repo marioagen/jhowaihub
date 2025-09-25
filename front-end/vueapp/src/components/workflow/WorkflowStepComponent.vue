@@ -243,10 +243,10 @@
                         params: {
                             id: this.workflowId,
                             stepId: this.step.id,
+                            stepOrder: this.step.order
                         },
                     });
                 }
-                console.log(this.step)
                 this.$router.push({ 
                     name: 'NewFlow',
                     params: {
