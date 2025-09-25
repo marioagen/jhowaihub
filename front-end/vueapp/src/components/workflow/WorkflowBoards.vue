@@ -89,13 +89,24 @@
                 </div>
                 <div v-else class="row">
                     <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
-                        <WorkflowStepComponent v-for="(step, index) in activeStepsList" :key="step.id || index"
-                            :step="step" :index="index + 1" :is-last="index === activeStepsList.length - 1"
-                            :profilesList="profilesList" :statusList="statusList" :isEdit="isEdit" :workflowId="id"
-                            @update-step="updateStep(index, $event)" @remove-step="removeStep(index, $event)"
-                            @saveWorkflow="saveWorkflowInStore" class="workflow-step-card" ref="stepRefs" />
-                        <div class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0"
-                            @click="addStep">
+                        <WorkflowStepComponent 
+                            v-for="(step, index) in activeStepsList" 
+                            :key="step.id || index"
+                            :step="step" :index="index + 1" 
+                            :is-last="index === activeStepsList.length - 1"
+                            :profilesList="profilesList" 
+                            :statusList="statusList" 
+                            :isEdit="isEdit" :workflowId="id"
+                            @update-step="updateStep(index, $event)" 
+                            @remove-step="removeStep(index, $event)"
+                            @saveWorkflow="saveWorkflowInStore" 
+                            class="workflow-step-card" 
+                            ref="stepRefs" 
+                        />
+                        <div 
+                            class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0"
+                            @click="addStep"
+                        >
                             <div class="icon-circle mb-2">
                                 <LucideIcon icon="Plus" :size="16" />
                             </div>
@@ -247,9 +258,10 @@ export default {
                 id: 0,
                 name: '',
                 status: '',
+                order: this.stepsList.length + 1,
                 profile: '',
                 isActive: true,
-                stepTools: []
+                stepTools: [],
             });
         },
         removeStep(index, deactivatedStep) {
