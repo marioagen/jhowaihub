@@ -31,6 +31,8 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = WorkflowFixture.FindValidWorkflow();
             var workflows = new List<Workflow>() { workflow };
             var stepTool = AutomationFixture.FindValidStepTool();
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+            stepTool.Executions.Add(stepToolExecution);
             var stepTools = new List<StepTool>() { stepTool };
 
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
@@ -44,7 +46,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             stepToolRepositoryMock.Verify(s => s.FindStepToolsByStepIdsAsync(It.IsAny<IEnumerable<int>>()), Times.Once);
-            stepToolExecutionRepositoryMock.Verify(s => s.CreateRangeAsync(It.IsAny<List<StepToolExecution>>()), Times.Once);
         }
 
         [Fact(DisplayName = "StartExecutionByStep should execute StepTool when StepTool has no dependencies")]

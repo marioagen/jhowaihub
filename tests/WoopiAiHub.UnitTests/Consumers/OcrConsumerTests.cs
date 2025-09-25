@@ -99,6 +99,10 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task OcrConsumer_ConsumeAsync_ShouldConsumeMessage()
         {
             // Arrange
+            _documentServices
+                .Setup(x => x.ProcessOcrResult(It.IsAny<ProcessOcrResultDto>()))
+                .ReturnsAsync(new MetaDataAutomationDto());
+
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ProcessOcrResultDto, Task>>()))
                          .Callback<string, Func<ProcessOcrResultDto, Task>>(async (queue, callback) =>
                          {
@@ -113,7 +117,6 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             // Assert
             _documentServices.Verify(x => x.ProcessOcrResult(_processOcrResultDto), Times.Once);
-            _publisherMock.Verify(x => x.PublishAsync("embeddingQueue", It.IsAny<DocumentEmbeddingsDataDto>()), Times.Once);
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]

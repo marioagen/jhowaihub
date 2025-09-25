@@ -126,6 +126,15 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static StepUpdateDto FindValidStepUpdateDto()
         {
+            var stepToolUpdateDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 1,
+                Order = 1,
+                PositionX = 2,
+                PositionY = 2,
+                Input = "Input example"
+            };
             var f = new Faker("pt_BR");
             return new StepUpdateDto
             {
@@ -133,19 +142,30 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Name = f.Lorem.Sentence(2),
                 Order = f.Random.Int(1, 10),
                 ProfileId = f.Random.Int(1, 100),
-                StatusId = f.Random.Int(1, 5)
+                StatusId = f.Random.Int(1, 5),
+                StepTools = new List<StepToolUpdateDto>() { stepToolUpdateDto }
             };
         }
 
         public static StepCreateDto FindValidStepCreateDto()
         {
+            var stepToolUpdateDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 1,
+                Order = 1,
+                PositionX = 2,
+                PositionY = 2,
+                Input = "Input example"
+            };
             var faker = new Faker("pt_BR");
             return new StepCreateDto
             {
                 Name = faker.Lorem.Sentence(2),
                 Order = faker.Random.Int(1, 10),
                 ProfileId = faker.Random.Int(1, 100),
-                StatusId = faker.Random.Int(1, 5)
+                StatusId = faker.Random.Int(1, 5),
+                StepTools = new List<StepToolUpdateDto>() { stepToolUpdateDto }
             };
         }
 

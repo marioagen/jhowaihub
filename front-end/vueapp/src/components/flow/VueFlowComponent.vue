@@ -108,7 +108,11 @@ export default {
         async getFlow() {
             try {
                 let step = this.$store.state.tempWorkflow.list.find(item => {
-                    if (this.isEdit) {
+                    if (this.isEdit && this.stepId == 0) {
+                        if (item.order == this.stepOrder) {
+                            return item.stepTools;
+                        }
+                    } else if(this.isEdit) {
                         if (item.id == this.stepId) {
                             return item.stepTools;
                         }
@@ -154,7 +158,6 @@ export default {
                 this.edges = mappedEdges;
 
             } catch (e) {
-                console.log(e)
                 LogService.showMessage("Erro ao carregar fluxo");
             }
         },

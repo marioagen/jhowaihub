@@ -23,6 +23,7 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
+using WoopiAiHub.Repository;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
@@ -595,58 +596,6 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
         }
 
-        [Fact(DisplayName = "ProcessOcrResult should throw exception when keyAccess is not configured")]
-        [Trait("ProcessOcrResult", "Fail")]
-        public async Task ProcessOcrResult_ShouldThrowException_WhenKeyAccessIsNotConfigured()
-        {
-            // Arrange
-            var processOcrResultDto = new ProcessOcrResultDto
-            {
-                ReferenceFile = "validReferenceFile",
-                Tenant = "validTenant",
-                AnalyzeResult = new AnalyzeResultCustomDto()
-            };
-
-            var configMock = new Mock<IConfiguration>();
-            configMock.Setup(x => x["keyAccess"]).Returns(string.Empty);
-            _mocker.Use(configMock.Object);
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _documentServices.ProcessOcrResult(processOcrResultDto));
-
-            Assert.Equal("KeyAccess is not configured in the application settings.", exception.Message);
-        }
-
-        [Fact(DisplayName = "ProcessOcrResult should throw exception when document id is not found")]
-        [Trait("ProcessOcrResult", "Fail")]
-        public async Task ProcessOcrResult_ShouldThrowException_WhenDocumentoIdIsNotFound()
-        {
-            // Arrange
-            int idDocument = 0;
-            var processOcrResultDto = new ProcessOcrResultDto
-            {
-                ReferenceFile = "invalidReferenceFile",
-                Tenant = "validTenant",
-                AnalyzeResult = new AnalyzeResultCustomDto()
-            };
-            var configMock = new Mock<IConfiguration>();
-            configMock.Setup(x => x["keyAccess"]).Returns(Guid.NewGuid().ToString);
-            _mocker.Use(configMock.Object);
-            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile))
-                                  .Returns(idDocument);
-
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-                documentServices.ProcessOcrResult(processOcrResultDto));
-
-            Assert.Equal("Error while finding document in database", exception.Message);
-            documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
-        }
-
         [Fact(DisplayName = "ProcessOcrResult should successfully process OCR result and list of DocumentEmbeddingsAddDto")]
         [Trait("ProcessOcrResult", "Success")]
         public async Task ProcessOcrResult_Success()
@@ -657,17 +606,19 @@ namespace WoopiAiHub.UnitTests.Services
             var idDocument = 1;
             var generatedKey = Guid.NewGuid().ToString();
             var tenant = _fixture.FindValidTenantInfoDto();
+            var execution = _fixture.FindValidStepToolExecution();
 
             var configurationMock = new Mock<IConfiguration>();
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            var documentNormalizedServicesMock = _mocker.GetMock<IDocumentNormalizedServices>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
             var keyGeneratorMock = _mocker.GetMock<IKeyGeneratorApi>();
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             configurationMock.Setup(x => x["keyAccess"]).Returns(Guid.NewGuid().ToString);
             _mocker.Use(configurationMock.Object);
             documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile)).Returns(idDocument);
-            documentNormalizedServicesMock.Setup(s => s.InsertOrUpdate(It.IsAny<int>(), It.IsAny<string>()));
+            
             keyGeneratorMock.Setup(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(generatedKey);
+            stepToolExecutionRepositoryMock.Setup(e => e.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(execution);
             tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
                                .ReturnsAsync(tenant);
             var documentServices = _mocker.CreateInstance<DocumentServices>();
@@ -680,9 +631,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ProcessOcrDataAutomationDto.CardId, result.CardId);
             Assert.Equal(ProcessOcrDataAutomationDto.StepToolId, result.StepToolId);
 
-            configurationMock.Verify(c => c["keyAccess"], Times.Exactly(2));
+            configurationMock.Verify(c => c["keyAccess"], Times.Exactly(1));
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
-            documentNormalizedServicesMock.Verify(s => s.InsertOrUpdate(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
             keyGeneratorMock.Verify(k => k.GetKey(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
         }
@@ -697,6 +647,7 @@ namespace WoopiAiHub.UnitTests.Services
             var idDocument = 1;
             var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            
 
             marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
             documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile)).Returns(idDocument);

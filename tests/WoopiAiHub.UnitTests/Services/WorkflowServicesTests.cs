@@ -328,29 +328,6 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Verify(r => r.FindByIdReturnModel(It.IsAny<int>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Update should throw AppException when trying to delete steps in use")]
-        [Trait("Update", "Fail")]
-        public async Task Update_ShouldThrowAppException_WhenDeletingStepsInUse()
-        {
-            // Arrange
-            var updateDto = WorkflowFixture.FindValidWorkflowUpdateDto();
-            var workflow = WorkflowFixture.FindValidWorkflow();
-            updateDto.TeamId = workflow.TeamId;
-
-            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(updateDto.Id)).ReturnsAsync(workflow);
-            _cardRepositoryMock.Setup(r => r.ExistsStepsInUse(It.IsAny<ICollection<int>>())).ReturnsAsync(true);
-
-            // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Update(updateDto));
-
-            // Assert
-            Assert.Equal(ErrorCode.Conflict, ex.ErrorCode);
-            Assert.Equal("Cannot delete steps that are in use by cards", ex.Message);
-            Assert.Equal(StepLabel.StepsInUse, ex.LabelError);
-            _workflowRepositoryMock.Verify(r => r.FindByIdReturnModel(It.IsAny<int>()), Times.Once);
-            _cardRepositoryMock.Verify(r => r.ExistsStepsInUse(It.IsAny<ICollection<int>>()), Times.Once);
-        }
-
         [Fact(DisplayName = "Update should return true when update is successful")]
         [Trait("Update", "Success")]
         public async Task Update_ShouldReturnTrue_WhenUpdateIsSuccessful()

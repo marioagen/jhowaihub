@@ -14,10 +14,12 @@ namespace WoopiAiHub.Application.Services
         private readonly IAutomationServices _automationServices;
 
         public CardServices(ICardRepository cardRepository,
-                            IStepRepository stepRepository)
+                            IStepRepository stepRepository,
+                            IAutomationServices automationServices)
         {
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
+            _automationServices = automationServices;
         }
 
         /// <summary>
