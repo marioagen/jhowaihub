@@ -59,13 +59,18 @@ export default new Vuex.Store({
         },
         setFlowByStep(state, payload) {
             const { stepId, flowData, stepOrder } = payload;
+            console.log(payload)
+            console.log(stepId)
+            console.log(flowData)
+            console.log(stepOrder)
             state.tempWorkflow.list = state.tempWorkflow.list.map(item => {
-                console.log(item)
-                // if(stepOrder === undefined) {
-                //     item.id == stepId ? { ...item, flow: flowData } : item
-                // } else {
-                //     item.stepOrder == stepOrder ? { ...item, flow: flowData } : item
-                // }
+                if (stepId !== undefined) {
+                    return item.id == stepId ? { ...item, stepTools: flowData } : item;
+                } 
+                if (stepOrder !== undefined) {
+                    return item.stepOrder == stepOrder ? { ...item, stepTools: flowData } : item;
+                }
+                return item;
             });
             console.log(state.tempWorkflow.list);
         },

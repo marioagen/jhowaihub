@@ -206,7 +206,6 @@
                 return this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle";
             },
             activeStepsList() {
-                console.log(this.stepsList);
                 return this.stepsList.filter(s => s.isActive !== false);
             },
         },
@@ -355,7 +354,6 @@
                 let params = {
                     name: this.workflowData.name,
                     teamId: this.workflowData.teamId,
-                    // steps: this.stepsList.filter(s => s.isActive !== false)
                     steps: this.$store.state.tempWorkflow.list,
                 };
 
@@ -363,7 +361,6 @@
                     .then((response) => {
                         if(response.error === undefined) {
                             this.redirectToIndex();
-                            this.$store.commit('cleanTempWorkflow');
                             return this.$notify({
                                 title: 'workflow.index',
                                 message: 'workflow.createSuccess',
@@ -414,6 +411,7 @@
                     });
             },
             redirectToIndex() {
+                this.$store.commit('cleanTempWorkflow');
                 return this.$router.push({ name: "WorkflowEditor" });
             },
             saveWorkflowInStore() {
