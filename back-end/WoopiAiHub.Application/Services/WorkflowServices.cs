@@ -249,78 +249,19 @@ namespace WoopiAiHub.Application.Services
             await _stepToolRepository.CreateRangeAsync(stepToolsInsert);
         }
 
-        ///// <summary>
-        ///// Creates a collection of Step entities from the provided DTOs and associates them with the given teamId.
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="stepsDto"></param>
-        ///// <param name="teamId"></param>
-        ///// <returns></returns>
-        //private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int teamId) where T : IStepDto
-        //{
-        //    var steps = new List<Step>();
-        //    StepTool? lastStepTool = null;
-
-
-        //    foreach (var stepDto in stepsDto)
-        //    {
-        //        var step = new Step(
-        //            0,
-        //            DateTime.UtcNow,
-        //            teamId,
-        //            stepDto.Name,
-        //            stepDto.Order,
-        //            stepDto.ProfileId,
-        //            stepDto.StatusId);
-
-        //        StepTool? previousStepToolInSameStep = null;
-
-        //        foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
-        //        {
-        //            var stepTool = new StepTool(
-        //                0,
-        //                DateTime.Now,
-        //                0,
-        //                stepToolDto.ToolId,
-        //                stepToolDto.Order,
-        //                stepToolDto.PositionX,
-        //                stepToolDto.PositionY);
-
-        //            if (!string.IsNullOrEmpty(stepToolDto.Input))
-        //            {
-        //                stepTool.Parameters.Add(
-        //                    new StepToolParameter(0, DateTime.Now, 0, stepToolDto.Input));
-        //            }
-
-        //            // 1) Se for o primeiro do step, e existir um "último do step anterior", ele depende dele
-        //            if (previousStepToolInSameStep == null && lastStepTool != null)
-        //            {
-        //                stepTool.DependsOnStepTool = lastStepTool;
-        //            }
-        //            // 2) Se não for o primeiro do step, depende do anterior dentro do mesmo step
-        //            else if (previousStepToolInSameStep != null)
-        //            {
-        //                stepTool.DependsOnStepTool = previousStepToolInSameStep;
-        //            }
-
-        //            step.AddStepTool(stepTool);
-
-        //            // Atualiza controles
-        //            previousStepToolInSameStep = stepTool;
-        //            lastStepTool = stepTool;
-        //        }
-
-        //        steps.Add(step);
-        //    }
-
-        //    foreach (var step in steps)
-        //    {
-        //        await ValidateProfileAndStatus(step);
-        //    }
-
-        //    return steps;
-        //}
-
+        /// <summary>
+        /// Creates a collection of steps from the provided step DTOs, validates their profiles and statuses,  and
+        /// establishes dependencies between step tools.
+        /// </summary>
+        /// <remarks>This method processes the provided step DTOs to create corresponding <see
+        /// cref="Step"/> objects.  Each step is populated with its associated step tools, and dependencies between step
+        /// tools are established  based on their order. After creation, the method validates the profile and status of
+        /// each step.</remarks>
+        /// <typeparam name="T">The type of the step DTO, which must implement <see cref="IStepDto"/>.</typeparam>
+        /// <param name="stepsDto">A collection of step DTOs used to create the steps.</param>
+        /// <param name="teamId">The identifier of the team to associate with the created steps.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of  <see
+        /// cref="Step"/> objects created and validated from the provided DTOs.</returns>
         private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int teamId) where T : IStepDto
         {
             var steps = new List<Step>();

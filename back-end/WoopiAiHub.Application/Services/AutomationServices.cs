@@ -187,8 +187,6 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
-
-
         /// <summary>
         /// Start step fisrt tool execution 
         /// </summary>

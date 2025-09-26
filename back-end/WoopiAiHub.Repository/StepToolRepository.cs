@@ -9,12 +9,13 @@ namespace WoopiAiHub.Repository
 {
     public class StepToolRepository : IStepToolRepository
     {
-
         private readonly ApplicationDbContext _context;
+
         public StepToolRepository(ApplicationDbContext context)
         {
             _context = context;
         }
+
         /// <summary>
         /// Delete steps by their IDs.
         /// </summary>
@@ -168,6 +169,17 @@ namespace WoopiAiHub.Repository
             return query;
         }
 
+        /// <summary>
+        /// Retrieves a list of <see cref="StepTool"/> objects associated with the specified step IDs.
+        /// </summary>
+        /// <remarks>This method performs a database query and uses no tracking to improve read
+        /// performance. Ensure that the provided <paramref name="stepIds"/> collection is not null or empty to avoid
+        /// unnecessary processing.</remarks>
+        /// <param name="stepIds">A collection of step IDs for which to retrieve the associated <see cref="StepTool"/> objects. The collection
+        /// must not be null or empty.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="StepTool"/>
+        /// objects associated with the specified step IDs, ordered by step ID and then by their defined order. If no
+        /// matching step tools are found, an empty list is returned.</returns>
         public async Task<List<StepTool>> FindStepToolsByStepIdsAsync(IEnumerable<int> stepIds)
         {
             if (stepIds == null || !stepIds.Any())
@@ -181,16 +193,38 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Asynchronously retrieves the first <see cref="StepTool"/> that depends on the specified step tool ID.
+        /// </summary>
+        /// <param name="id">The ID of the step tool to find dependents for.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the first  <see
+        /// cref="StepTool"/> that depends on the specified ID, or <see langword="null"/> if no such  dependent exists.</returns>
         public async Task<StepTool?> FindDependentAsync(int id)
         {
             return await _context.StepTools.FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
         }
 
+        /// <summary>
+        /// Retrieves a <see cref="StepTool"/> entity that matches the specified step ID and order.
+        /// </summary>
+        /// <remarks>This method performs an asynchronous query to locate a <see cref="StepTool"/> entity
+        /// in the database that matches the given <paramref name="stepId"/> and <paramref name="order"/>.</remarks>
+        /// <param name="stepId">The unique identifier of the step to search for.</param>
+        /// <param name="order">The order value associated with the step tool.</param>
+        /// <returns>A <see cref="StepTool"/> object if a matching entity is found; otherwise, <see langword="null"/>.</returns>
         public async Task<StepTool?> FindByStepIdAndOrderAsync(int stepId, int order)
         {
             return await _context.StepTools.FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
         }
 
+        /// <summary>
+        /// Retrieves a collection of step tools associated with the specified step ID.
+        /// </summary>
+        /// <remarks>The returned collection is retrieved without tracking changes in the database
+        /// context.</remarks>
+        /// <param name="stepId">The unique identifier of the step for which to retrieve the associated tools.</param>
+        /// <returns>A collection of <see cref="StepTool"/> objects associated with the specified step ID,  ordered by their
+        /// defined order. Returns an empty collection if no tools are associated with the step.</returns>
         public ICollection<StepTool> FindStepToolsByStepId(int stepId)
         {
             return _context.StepTools

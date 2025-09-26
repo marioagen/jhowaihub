@@ -61,11 +61,9 @@ export default new Vuex.Store({
             const { stepId, flowData, stepOrder } = payload;
             state.tempWorkflow.list = state.tempWorkflow.list.map(item => {
                 if (stepOrder !== undefined && (stepId === undefined || stepId == 0)) {
-                    console.log("step order isnot underfined && stepId is undefined")
                     return item.order == stepOrder ? { ...item, stepTools: flowData } : item;
                 }
                 if (stepId !== undefined && stepId != 0) {
-                    console.log("stepid is not undefined && stepid not zero")
                     return item.id == stepId ? { ...item, stepTools: flowData } : item;
                 }
                 return item;
