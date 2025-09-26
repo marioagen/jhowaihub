@@ -204,7 +204,7 @@
                 },
             },
             showEditFlow() {
-                return this.isEdit && this.step?.stepTool?.length > 0;
+                return this.isEdit && this.step?.stepTools?.length > 0;
             },
         },
         methods: {
