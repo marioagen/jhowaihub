@@ -176,6 +176,11 @@ namespace WoopiAiHub.Repository
                                         Id = p.Id,
                                         Value = p.Value,
                                     }).ToList(),
+                                    Tool = new ToolDto
+                                    {
+                                        Id = st.Tool!.Id,
+                                        Name = st.Tool.Name,
+                                    },
                                 })
                                 .ToList()
                 }).ToList()
