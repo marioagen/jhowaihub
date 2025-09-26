@@ -679,10 +679,7 @@ namespace WoopiAiHub.Application.Services
 
             await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
 
-            var resultData = JsonConvert.DeserializeObject<MetaDataAutomationDto>((documentEmbeddingsResultDto.Data));
-            if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
-
-            return resultData;
+            return documentEmbeddingsResultDto.Data;
         }
 
         /// <summary>
