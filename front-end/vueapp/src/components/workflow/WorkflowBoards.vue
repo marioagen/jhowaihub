@@ -279,8 +279,9 @@ export default {
                 }
             }
             setTimeout(() => {
+                this.saveTempWorkflow();
                 this.isLoadingSteps = false;
-            }, 3000);
+            }, 1500);
         },
         async save() {
             if (!this.stepsList || this.stepsList.length === 0) {
@@ -313,7 +314,6 @@ export default {
                 });
             }
 
-            this.reorderList();
             this.saveWorkflowInStore();
 
             this.isLoading = true;
@@ -393,11 +393,14 @@ export default {
             this.reorderList();
             const storeList = this.$store.state.tempWorkflow.list;
             if (!storeList || storeList.length === 0) {
-                this.$store.commit('setTempWorkflow', {
-                    list: this.activeStepsList,
-                    data: this.workflowData
-                });
+                this.saveTempWorkflow();
             }
+        },
+        saveTempWorkflow() {
+            this.$store.commit('setTempWorkflow', {
+                list: this.activeStepsList,
+                data: this.workflowData
+            });
         },
     },
     created() {
