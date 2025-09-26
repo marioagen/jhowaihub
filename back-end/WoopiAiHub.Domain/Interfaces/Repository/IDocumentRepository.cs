@@ -15,5 +15,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         int FindDocumentCount();
         IQueryable<string> FindHashById(List<int> ids);
         int FindDocumentIdByReferenceFile(string referenceFile);
+        Document? FindByReferenceFile(string referenceFile);
     }
 }

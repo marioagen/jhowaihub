@@ -96,7 +96,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                          .Returns(Task.CompletedTask);
 
             _documentServices.Setup(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto))
-                             .Returns(Task.CompletedTask);
+                             .ReturnsAsync(It.IsAny<MetaDataAutomationDto>());
 
             var consumer = _mocker.CreateInstance<DocumentEmbeddingsConsumer>();
 

@@ -217,7 +217,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow",
+        path: "/flow/:stepOrder",
         name: "NewFlow",
         component: NewFlow,
         meta: { 
@@ -226,7 +226,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow/:id",
+        path: "/flow/:id/:stepId/:stepOrder",
         name: "EditFlow",
         component: EditFlow,
         meta: { 

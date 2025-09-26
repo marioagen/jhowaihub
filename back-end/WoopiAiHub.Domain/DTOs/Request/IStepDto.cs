@@ -6,5 +6,6 @@
         int Order { get; }
         int ProfileId { get; }
         int StatusId { get; }
+        ICollection<StepToolUpdateDto> StepTools { get; set; }
     }
 }

@@ -94,7 +94,7 @@
                     </Field>
                 </div>
             </div>
-            <div v-if="isEdit" class="row mt-3">
+            <div v-if="showEditFlow" class="row mt-3">
                 <div class="col-12 d-flex align-items-center justify-content-between">
                     <p class="mb-0">Automação de Documentos</p>
                     <div class="d-flex">
@@ -163,6 +163,11 @@
                 required: false,
                 default: false,
             },
+            workflowId: {
+                type: Number,
+                required: false,
+                default: 0,
+            },
         },
         data() {
             return {
@@ -198,6 +203,9 @@
                     this.$emit("update-step", { ...this.step, profileId: String(val) });
                 },
             },
+            showEditFlow() {
+                return this.isEdit && this.step?.stepTool?.length > 0;
+            },
         },
         methods: {
             removeStep() {
@@ -228,15 +236,23 @@
                 return titleValid?.valid && statusValid?.valid && profileValid?.valid;
             },
             redirectToFlow() {
+                this.$emit("saveWorkflow");
                 if(this.isEdit) {
                     return this.$router.push({
                         name: 'EditFlow',
                         params: {
-                            id: 1,
+                            id: this.workflowId,
+                            stepId: this.step.id,
+                            stepOrder: this.step.order
                         },
                     });
                 }
-                this.$router.push({ name: 'NewFlow' });
+                this.$router.push({ 
+                    name: 'NewFlow',
+                    params: {
+                        stepOrder: this.step.order
+                    }
+                });
             },
             removeFlow() {
                 //remove the given flow endpoint

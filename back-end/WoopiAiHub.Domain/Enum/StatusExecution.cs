@@ -3,7 +3,8 @@
     public enum StatusExecution
     {
         Pending = 0,
-        Ready = 1,
-        Error = 2
+        Running = 1,
+        Ready = 2,
+        Error = 3
     }
 }
