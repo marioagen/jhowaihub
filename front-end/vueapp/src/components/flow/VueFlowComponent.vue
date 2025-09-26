@@ -123,7 +123,6 @@ export default {
                     }
                 });
                 let stepTools = step ? step.stepTools : [];
-                console.log(stepTools);
                 const mappedNodes = stepTools.map(stepTool => ({
                     id: stepTool.id.toString(),
                     position: { x: stepTool.positionX, y: stepTool.positionY },
@@ -176,7 +175,6 @@ export default {
                     }
                 };
             }
-            console.log(this.nodes);
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
@@ -192,7 +190,6 @@ export default {
             event.dataTransfer.dropEffect = 'move'
         },
         onDragStart(event, nodeData) {
-            console.log(nodeData);
             event.dataTransfer.setData('application/node-data', JSON.stringify(nodeData))
             event.dataTransfer.effectAllowed = 'move'
         },
@@ -204,7 +201,6 @@ export default {
                 x: event.clientX - reactFlowBounds.left,
                 y: event.clientY - reactFlowBounds.top,
             })
-            console.log(nodeData);
             const newNode = {
                 id: (this.nodes.length + 1).toString(),
                 type: 'hub',

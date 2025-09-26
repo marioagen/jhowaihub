@@ -61,7 +61,6 @@
                 }, notification.duration);
             },
             remove(id) {
-                console.log("Fechando ID:", id);
                 this.notifications = this.notifications.filter((n) => n.id !== id);
             },
         },

@@ -10,7 +10,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
-using static Google.Cloud.Vision.V1.ProductSearchResults.Types;
 
 namespace WoopiAiHub.Application.Messaging
 {
