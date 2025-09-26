@@ -99,7 +99,7 @@
                             :isEdit="isEdit" :workflowId="id"
                             @update-step="updateStep(index, $event)" 
                             @remove-step="removeStep(index, $event)"
-                            @saveWorkflow="saveWorkflowInStore" 
+                            @saveWorkflow="saveWorkflowInStore"
                             class="workflow-step-card" 
                             ref="stepRefs" 
                         />
@@ -314,6 +314,7 @@ export default {
             }
 
             this.reorderList();
+            this.saveWorkflowInStore();
 
             this.isLoading = true;
             if (this.isEdit) {
