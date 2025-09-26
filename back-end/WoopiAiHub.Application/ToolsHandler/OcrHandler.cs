@@ -29,7 +29,7 @@ public class OcrHandler : IToolHandler
         return new ExecutionMessageDto
         {
             Queue = _messageQueues.OcrQueue,
-            Message = JsonConvert.SerializeObject(new ProcessOcrDto
+            Message = new ProcessOcrDto
             {
                 Data = new MetaDataAutomationDto(cardId, stepToolId),
                 Tenant = tenant,
@@ -37,7 +37,7 @@ public class OcrHandler : IToolHandler
                 Model = tenantInfo.OcrModel,
                 Email = "",
                 ResponseQueue = _messageQueues.OcrQueueAiHubResponse
-            })
+            }
         };
     }
 

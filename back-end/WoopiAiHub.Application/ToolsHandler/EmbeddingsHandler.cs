@@ -28,7 +28,7 @@ public class EmbeddingsHandler : IToolHandler
         return new ExecutionMessageDto
         {
             Queue = _messageQueues.EmbeddingQueue,
-            Message = JsonConvert.SerializeObject(new ProcessOcrDto
+            Message = new ProcessOcrDto
             {
                 Data = new MetaDataAutomationDto(cardId, stepToolId),
                 Tenant = tenant,
@@ -36,7 +36,7 @@ public class EmbeddingsHandler : IToolHandler
                 Model = tenantInfo.EmbeddingModelName,
                 Email = "",
                 ResponseQueue = _messageQueues.EmbeddingQueueAiHubResponse
-            })
+            }
         };
     }
 }
