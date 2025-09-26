@@ -96,7 +96,7 @@
             </div>
             <div v-if="showEditFlow" class="row mt-3">
                 <div class="col-12 d-flex align-items-center justify-content-between">
-                    <p class="mb-0">Automação de Documentos</p>
+                    <p class="mb-0">{{ $t("workflow.stepFlow") }}</p>
                     <div class="d-flex">
                         <button 
                             type="button" 
@@ -122,7 +122,7 @@
                         @click="redirectToFlow"
                     >
                         <LucideIcon icon="Workflow" :size="15" />
-                        Automação de Documentos
+                        {{ $t("workflow.stepFlow") }}
                     </button>
                 </div>
             </div>
