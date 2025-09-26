@@ -64,13 +64,13 @@ namespace WoopiAiHub.UnitTests.Services
             var step = WorkflowFixture.FindValidStep();
             step.StepTools = stepTools;
             var payload = AutomationFixture.FindValidExecutionMessageDto();
-            var stepToolExecution = AutomationFixture.FindValidStepToolExecution;
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
             var input = "input";
 
             var toolOutputServicesMock = _mocker.GetMock<IToolOutputServices>();
             var toolFactoryHandlerServicesMock = _mocker.GetMock<IToolFactoryHandlerServices>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
-            var messagePublisherMock = _mocker.GetMock<IMessagePublisher<string>>();
+            var messagePublisherMock = _mocker.GetMock<IMessagePublisher<object>>();
             var handlerMock = _mocker.GetMock<IToolHandlerServices>();
 
             toolOutputServicesMock.Setup(s => s.GetInput(It.IsAny<int>())).Returns(input);
@@ -86,10 +86,10 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
-            messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             toolOutputServicesMock.Verify(o => o.GetInput(It.IsAny<int>()), Times.Once);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<ToolType>()), Times.Once);
             handlerMock.Verify(h => h.BuildPayload(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message), Times.Once);
 
         }
 
