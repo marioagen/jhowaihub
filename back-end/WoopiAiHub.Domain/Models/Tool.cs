@@ -20,6 +20,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual ToolType? ToolType { get; set; }
         public virtual ToolData? InputData { get; set; }
         public virtual ToolData? OutputData { get; set; }
+        public virtual ICollection<StepTool> StepTools { get; set; } = new List<StepTool>();
 
         public Tool(int id, DateTime created, string name, bool isActive, int toolTypeId, int inputDataId, int outputDataId, bool isEditableInput) 
             : base(id, created)

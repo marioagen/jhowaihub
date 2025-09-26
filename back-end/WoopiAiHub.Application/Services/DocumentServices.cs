@@ -28,6 +28,7 @@ using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -41,7 +42,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _config;
         private readonly IDocumentHistoryServices _documentHistoryServices;
-        private readonly IDocumentNormalizedServices _documentNormalizedServices;
+        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IFileRepositoryApi _fileRepositoryApi;
         private readonly IFunctionFileRetriever _functionFileRetriever;
         private readonly IMemoryCache _cache;
@@ -53,8 +54,10 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private readonly IDocumentNotifier _documentNotifier;
+        private readonly IAutomationServices _automationServices;
+        private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private const string ConfigKeyAccessName = "keyAccess";
-        private const string KeyMongoAccessNotFoundMessage = "Could not find emmbeddings api key";
+        private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
 
         public DocumentServices(IDocumentRepository documentRepository,
@@ -66,7 +69,7 @@ namespace WoopiAiHub.Application.Services
                                 IDocumentHistoryServices documentHistoryServices,
                                 IFileRepositoryApi fileRepositoryApi,
                                 IFunctionFileRetriever functionFileRetriever,
-                                IDocumentNormalizedServices documentNormalizedServices,
+                                IStepToolExecutionRepository stepToolExecutionRepository,
                                 IMemoryCache cache,
                                 IQuestionnaireRepository questionnaireRepository,
                                 ITenantCacheServices tenantCacheServices,
@@ -76,7 +79,9 @@ namespace WoopiAiHub.Application.Services
                                 IOptions<MessageQueues> messageQueues,
                                 IDocumentNotifier documentNotifier,
                                 IUnitOfWork unitOfWork,
-                                ICardRepository cardRepository)
+                                ICardRepository cardRepository,
+                                IAutomationServices automationServices,
+                                IStepToolOutputRepository stepToolOutputRepository)
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
@@ -89,7 +94,7 @@ namespace WoopiAiHub.Application.Services
             _documentHistoryServices = documentHistoryServices;
             _fileRepositoryApi = fileRepositoryApi;
             _functionFileRetriever = functionFileRetriever;
-            _documentNormalizedServices = documentNormalizedServices;
+            _stepToolExecutionRepository = stepToolExecutionRepository;
             _cache = cache;
             _questionnaireRepository = questionnaireRepository;
             _tenantCacheServices = tenantCacheServices;
@@ -98,6 +103,8 @@ namespace WoopiAiHub.Application.Services
             _messageQueues = messageQueues.Value;
             _publisher = publisher;
             _documentNotifier = documentNotifier;
+            _automationServices = automationServices;
+            _stepToolOutputRepository = stepToolOutputRepository;
         }
 
         /// <summary>
@@ -158,9 +165,6 @@ namespace WoopiAiHub.Application.Services
             {
                 var referenceFile = await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
                 _cache.Remove(requestCreateDocumentDto.Name);
-                await PublishOcrDto(tenant,
-                                    referenceFile,
-                                    requestCreateDocumentDto.EmailCreator);
             }
         }
 
@@ -359,20 +363,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<DocumentEmbeddingsDataDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
+        public async Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
         {
-            var keyAccess = _config[ConfigKeyAccessName];
-            if (string.IsNullOrEmpty(keyAccess))
-            {
-                throw new InvalidOperationException("KeyAccess is not configured in the application settings.");
-            }
-
-            var documentId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
-            if (documentId == 0)
-            {
-                throw new ArgumentException(FindingDocumentErrorMessage);
-            }
-
             var documentEmbeddingsAddDtoList = await ExtractDocumentEmbeddingsAddDto(processOcrResultDto);
 
             var normalizedContext = new StringBuilder();
@@ -381,48 +373,31 @@ namespace WoopiAiHub.Application.Services
                 normalizedContext.AppendLine(page.Text);
             }
 
-            _documentNormalizedServices.InsertOrUpdate(documentId, normalizedContext.ToString());
+            var resultData = JsonConvert.DeserializeObject<MetaDataAutomationDto>((processOcrResultDto.Data));
+            if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
 
+            var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(resultData.StepToolId,
+                                                                                              resultData.CardId);
+
+            if (execution == null) return resultData;
+
+            execution.UpdateStatusExecution(StatusExecution.Ready);
+            await _stepToolExecutionRepository.UpdateAsync(execution);
+
+            var output = new StepToolOutput(
+                0,
+                DateTime.Now,
+                execution.StepToolId,
+                execution.CardId,
+                normalizedContext.ToString()
+            );
+
+            await _stepToolOutputRepository.CreateAsync(output);
+
+            var documentId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
             await this.ChangeStatus(documentId, DocumentStatus.OCR, processOcrResultDto.Email);
 
-            var documentEmbeddingsDto = new DocumentEmbeddingsDataDto
-            {
-                ResponseQueue = _messageQueues.EmbeddingQueueAiHubResponse,
-                ReferenceFile = processOcrResultDto.ReferenceFile,
-                DocumentEmbeddings = documentEmbeddingsAddDtoList
-            };
-
-            return documentEmbeddingsDto;
-        }
-
-        /// <summary>
-        /// realize the publish in rabbitMq to ocr queue
-        /// </summary>
-        /// <param name="tenant"></param>
-        /// <param name="referenceFile"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        public async Task PublishOcrDto(string tenant,
-                                        string referenceFile,
-                                        string email)
-        {
-            var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenant,
-                                                                        ColTypeModule.WoopiAiHub);
-            if (string.IsNullOrEmpty(tenantInfo!.OcrModel))
-            {
-                throw new ArgumentException("Ocr not found");
-            }
-
-            var processOcrDto = new ProcessOcrDto
-            {
-                Tenant = tenant,
-                ReferenceFile = referenceFile,
-                Model = tenantInfo.OcrModel,
-                Email = email,
-                ResponseQueue = _messageQueues.OcrQueueAiHubResponse
-            };
-
-            await _publisher.PublishAsync(_messageQueues.OcrQueue, processOcrDto);
+            return resultData;
         }
 
         /// <summary>
@@ -436,28 +411,42 @@ namespace WoopiAiHub.Application.Services
                                                        Byte[] chunks,
                                                        string tenant)
         {
-            await _documentDtoValidator.ValidateAndThrowAsync(requestCreateDocumentDto);
-            var formFile = new FormFile(new MemoryStream(chunks),
-                                        0,
-                                        chunks.Length,
-                                        requestCreateDocumentDto.Filename,
-                                        requestCreateDocumentDto.Filename);
+            _unitOfWork.BeginTransaction();
 
-            var referenceFile = await this.UploadFileToRepositoryApi(formFile,
-                                                                     tenant);
-            var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto,
-                                                               referenceFile);
+            try
+            {
+                await _documentDtoValidator.ValidateAndThrowAsync(requestCreateDocumentDto);
+                var formFile = new FormFile(new MemoryStream(chunks),
+                                            0,
+                                            chunks.Length,
+                                            requestCreateDocumentDto.Filename,
+                                            requestCreateDocumentDto.Filename);
 
-            var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
-                                                       requestCreateDocumentDto.EmailCreator);
+                var referenceFile = await this.UploadFileToRepositoryApi(formFile,
+                                                                         tenant);
+                var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto,
+                                                                   referenceFile);
 
-            ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, teams);
+                var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
+                                                           requestCreateDocumentDto.EmailCreator);
 
-            documentForDataBase.Cards = cards;
-            documentForDataBase.Teams = teams;
-            _documentRepository.Create(documentForDataBase);
+                ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, teams);
 
-            return referenceFile;
+                documentForDataBase.Cards = cards;
+                documentForDataBase.Teams = teams;
+                _documentRepository.Create(documentForDataBase);
+
+                var worflows = teams.Select(s => s.Workflow).ToList();
+                _automationServices.PrepareExecutionAsync(worflows!);
+                await _automationServices.StartExecutionByWorkflowsAsync(worflows!);
+
+                return referenceFile;
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
         }
 
         /// <summary>
@@ -672,7 +661,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public async Task ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
+        public async Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
         {
             var resultRegisterConsumption = await RegisterConsumptionPages(documentEmbeddingsResultDto);
             if (!resultRegisterConsumption)
@@ -685,6 +674,11 @@ namespace WoopiAiHub.Application.Services
             }
 
             await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
+
+            var resultData = JsonConvert.DeserializeObject<MetaDataAutomationDto>((documentEmbeddingsResultDto.Data));
+            if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
+
+            return resultData;
         }
 
         /// <summary>
@@ -783,7 +777,7 @@ namespace WoopiAiHub.Application.Services
 
             return new DocumentPagedResultDto
             {
-                Content = query, 
+                Content = query,
                 CurrentPage = currentPage,
                 PageCount = pageCount,
                 RowCount = totalListCount

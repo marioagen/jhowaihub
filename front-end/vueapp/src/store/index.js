@@ -18,6 +18,14 @@ export default new Vuex.Store({
         },
         permissions: [],
         lastSelectedWorkflow: null,
+        tempWorkflow: {
+            status: false,
+            list: [],
+            data: {
+                name: "",
+                teamId: "",
+            },
+        },
     },
     mutations: {
         updateUserProfile(state, payload) {
@@ -43,6 +51,30 @@ export default new Vuex.Store({
         },
         setLastSelectedWorkflow(state, workflow) {
             state.lastSelectedWorkflow = workflow;
+        },
+        setTempWorkflow(state, payload) {
+            state.tempWorkflow.status = true;
+            state.tempWorkflow.list = payload.list;
+            state.tempWorkflow.data = payload.data;
+        },
+        setFlowByStep(state, payload) {
+            const { stepId, flowData, stepOrder } = payload;
+            state.tempWorkflow.list = state.tempWorkflow.list.map(item => {
+                if (stepOrder !== undefined && (stepId === undefined || stepId == 0)) {
+                    return item.order == stepOrder ? { ...item, stepTools: flowData } : item;
+                }
+                if (stepId !== undefined && stepId != 0) {
+                    return item.id == stepId ? { ...item, stepTools: flowData } : item;
+                }
+                return item;
+            });
+        },
+        cleanTempWorkflow(state) {
+            state.tempWorkflow = {
+                status: false,
+                list: [],
+                data: {},
+            };
         },
     },
     plugins: [

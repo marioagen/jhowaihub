@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Models;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Fixture
@@ -22,6 +23,17 @@ namespace WoopiAiHub.UnitTests.Fixture
                 FindValidToolTypeDto(),
                 FindValidToolTypeDto(),
             };
+        }
+
+        public static ToolType FindValidToolType()
+        {
+            var _faker = new Faker("pt_BR");
+            return new ToolType(
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+                _faker.Name.FullName(),
+                true
+            );
         }
     }
 

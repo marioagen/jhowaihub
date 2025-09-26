@@ -464,7 +464,7 @@
             subtitle: "Modifique as etapas e configurações do workflow",
         },
     },
-    card:{
+    card: {
         userAssigned: "Responsável",
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
@@ -513,7 +513,33 @@
         deleteSuccess: "Time deletado com sucesso",
         deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
         deleteError: "Erro ao deletar time"
-    }
+    },
+    flow: {
+        title: "Fluxo de Automação",
+        subtitle: "",
+        save: "Salvar",
+        downloadJson: "Baixar JSON",
+        upload: "Upload",
+        showTools: "Adicionar Ferramentas",
+        hideTools: "Ocultar Ferramentas",
+        flowListEnd: "Finalizar fluxo",
+        start: "Início",
+        formCreate: {
+            title: "Fluxo de Automação",
+            subtitle: "Crie uma nova ferramenta para processar documentos",
+        },
+        formEdit: {
+            title: "Fluxo de Automação:",
+            subtitle: "Atualize as informações da ferramenta selecionada",
+        },
+        sidebarTitle: "Configurar I/O:",
+        formFlow: {
+            progressFlowSuccess: "Fluxo inserido com sucesso",
+            progressFlowFail: "Não foi possível inserir fluxo",
+            editFlowNodeSuccess: "Nodo editado com sucesso",
+            editFlowNodeFail: "Falha ao editar o nodo",
+        }
+    },
 };
 
 export default portuguese;

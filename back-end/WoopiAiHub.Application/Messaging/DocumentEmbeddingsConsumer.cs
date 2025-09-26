@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
 
@@ -49,7 +50,10 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
                     var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
-                    await documentServices.ProcessEmbeddingsResult(message);
+                    var result = await documentServices.ProcessEmbeddingsResult(message);
+
+                    var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
+                    await automationServices.ContinueExecution(result.StepToolId, result.CardId);
                 }
                 catch (Exception ex)
                 {

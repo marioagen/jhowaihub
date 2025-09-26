@@ -1,4 +1,6 @@
-﻿namespace WoopiAiHub.Domain.DTOs.Response
+﻿using WoopiAiHub.Domain.DTOs.Request;
+
+namespace WoopiAiHub.Domain.DTOs.Response
 {
     public record class StepDto
     {
@@ -9,5 +11,6 @@
         public ProfileDto Profile { get; set; } = new();
         public StatusDto Status { get; set; } = new();
         public ICollection<CardDto> Cards { get; set; } = [];
+        public ICollection<StepToolDto> StepTools { get; set; } = [];
     }
 }

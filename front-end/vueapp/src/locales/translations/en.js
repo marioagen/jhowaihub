@@ -520,7 +520,33 @@
         deleteSuccess: "Team deleted successfully",
         deleteDocError: "Could not delete the team: there are related documents",
         deleteError: "Error while deleting team"
-    }
+    },
+    flow: {
+        title: "Automation Flow",
+        subtitle: "",
+        save: "Save",
+        downloadJson: "Download JSON",
+        upload: "Upload",
+        start: "Start",
+        showTools: "Add Tools",
+        hideTools: "Hide Tools",
+        flowListEnd: "Finish Flow",
+        formCreate: {
+            title: "Automation Flow",
+            subtitle: "Create a new tool to process documents",
+        },
+        formEdit: {
+            title: "Automation Flow:",
+            subtitle: "Update the information of the selected tool",
+        },
+        sidebarTitle: "Configure I/O:",
+        formFlow: {
+            progressFlowSuccess: "Flow inserted successfully",
+            progressFlowFail: "Failed to insert flow",
+            editFlowNodeSuccess: "Node edited successfully",
+            editFlowNodeFail: "Failed to edit node",
+        }
+    },
 };
 
 export default english;

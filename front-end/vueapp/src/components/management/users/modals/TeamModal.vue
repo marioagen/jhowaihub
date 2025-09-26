@@ -129,7 +129,6 @@
             },
         },
         created() {
-            console.log(this.teamId);
         },
     };
 </script>

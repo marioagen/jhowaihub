@@ -328,9 +328,36 @@ namespace WoopiAiHub.UnitTests.Fixture
                     ReferenceFile = f.Random.String(),
                     Tenant = f.Random.String(),
                     Email = f.Random.String(),
-                    AnalyzeResult = FindValidAnalyzeResultCustomDto()
+                    AnalyzeResult = FindValidAnalyzeResultCustomDto(),
+                    Data = @"{ ""CardId"": 361, ""StepToolId"": 456 }"
                 });
             return faker;
+        }
+
+        public static MetaDataAutomationDto FindValidProcessOcrDataAutomationDto()
+        {
+            var faker = new Faker("pt_BR");
+            var dto = new MetaDataAutomationDto
+            {
+                CardId = 361,
+                StepToolId = 456,
+
+            };
+            return dto;
+        }
+        public  StepToolExecution FindValidStepToolExecution()
+        {
+            var faker = new Faker("pt_BR");
+            var execution = new StepToolExecution
+            (
+                 1,
+                 DateTime.Now,
+                 456,
+                 StatusExecution.Running,
+                 361
+
+            );
+            return execution;
         }
 
         public static AnalyzeResultCustomDto FindValidAnalyzeResultCustomDto()
@@ -382,7 +409,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Tenant = f.Random.String(),
                     Email = f.Random.String(),
                     KeyMongoAccess = f.Random.String(),
-                    TotalPages = f.Random.Int(1, 100)
+                    TotalPages = f.Random.Int(1, 100),
+                    Data = @"{ ""CardId"": 123, ""StepToolId"": 456 }"
                 });
             return faker;
         }

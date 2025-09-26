@@ -27,6 +27,8 @@ namespace WoopiAiHub.Domain.Models
         public virtual Document? Document { get; set; }
         public virtual Status? Status { get; set; }
         public virtual User? AssignedUser { get; set; }
+        public virtual ICollection<StepToolExecution> Executions { get; private set; } = new List<StepToolExecution>();
+        public virtual ICollection<StepToolOutput> Outputs { get; private set; } = new List<StepToolOutput>();
 
         public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId, bool enable, Guid? assignedUserId)
             : base(id, created)
