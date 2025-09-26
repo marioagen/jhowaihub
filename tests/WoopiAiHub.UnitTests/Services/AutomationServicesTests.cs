@@ -1,16 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
-using Moq;
+﻿using Moq;
 using Moq.AutoMock;
-using System.Reflection.Metadata;
 using WoopiAiHub.Application.Services;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
-using static Google.Cloud.Vision.V1.ProductSearchResults.Types;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -328,5 +324,4 @@ namespace WoopiAiHub.UnitTests.Services
             await _service.ContinueExecution(1, 1); // Não deve lançar exceção
         }
     }
-
 }
