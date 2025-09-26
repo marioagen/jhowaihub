@@ -18,7 +18,12 @@ public class OcrHandler : IToolHandler
         _messageQueues = messageQueues.Value;
     }
 
-    public async Task<ExecutionMessageDto> BuildPayload(string tenant, string referenceFile, string input, int stepToolId, int cardId)
+    public async Task<ExecutionMessageDto> BuildPayload(string tenant, 
+                                                        string referenceFile, 
+                                                        string input, 
+                                                        int stepToolId, 
+                                                        int cardId,
+                                                        string email)
     {
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenant, ColTypeModule.WoopiAiHub);
         if (string.IsNullOrEmpty(tenantInfo!.OcrModel))
@@ -35,7 +40,7 @@ public class OcrHandler : IToolHandler
                 Tenant = tenant,
                 ReferenceFile = referenceFile,
                 Model = tenantInfo.OcrModel,
-                Email = "",
+                Email = email,
                 ResponseQueue = _messageQueues.OcrQueueAiHubResponse
             }
         };

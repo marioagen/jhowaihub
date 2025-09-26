@@ -18,6 +18,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<AutomationServices> _logger;
         private string _tenant = string.Empty;
         private string _referenceFile = string.Empty;
+        private string _email = string.Empty;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -51,7 +52,7 @@ namespace WoopiAiHub.Application.Services
 
                     foreach (var stepTool in stepTools)
                     {
-                        foreach (var card in workflow.Steps.Where(u => u.Order.Equals(1)).Select(u =>u.Cards))
+                        foreach (var card in workflow.Steps.Where(u => u.Order.Equals(1)).SelectMany(u => u.Cards))
                         {
                             executions.Add(new StepToolExecution(
                                 0,
@@ -65,7 +66,7 @@ namespace WoopiAiHub.Application.Services
 
             if (executions.Any())
             {
-                _stepToolExecutionRepository.CreateRangeAsync(executions);
+                await _stepToolExecutionRepository.CreateRangeAsync(executions);
                 return true;
             }
             return false;
@@ -76,7 +77,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="workflows"></param>
         /// <returns></returns>
-        public async Task StartExecutionByWorkflowsAsync(string tenant, string referenceFile, ICollection<Workflow> workflows)
+        public async Task StartExecutionByWorkflowsAsync(string tenant, string referenceFile, string email, ICollection<Workflow> workflows)
         {
             _tenant = tenant;
             _referenceFile = referenceFile;
@@ -152,7 +153,7 @@ namespace WoopiAiHub.Application.Services
 
             var input = _toolOutputServices.GetInput(stepTool.Id);
             var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!);
-            var payload = await handler.BuildPayload(_tenant, _referenceFile, input, stepTool.Id, cardId);
+            var payload = await handler.BuildPayload(_tenant, _referenceFile, input, stepTool.Id, cardId, _email);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
         }
@@ -166,8 +167,14 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepToolId">The identifier of the step tool whose dependent tool's execution should be continued.</param>
         /// <param name="cardId">The identifier of the card associated with the execution.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task ContinueExecution(int stepToolId, int cardId)
+        public async Task ContinueExecution(int stepToolId, 
+                                            int cardId,
+                                            string tenant,
+                                            string email,
+                                            string referenceFile)
         {
+            _tenant = tenant;
+            _referenceFile = referenceFile;
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(stepToolId);
 
             if (dependentStepTool != null)
@@ -181,7 +188,7 @@ namespace WoopiAiHub.Application.Services
 
                 var input = _toolOutputServices.GetInput(dependentStepTool.Id);
                 var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType);
-                var payload = await handler.BuildPayload(_tenant, _referenceFile, input, dependentStepTool.Id, cardId);
+                var payload = await handler.BuildPayload(_tenant, _referenceFile, input, dependentStepTool.Id, cardId, email);
 
                 await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
             }

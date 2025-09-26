@@ -53,7 +53,7 @@ namespace WoopiAiHub.Application.Messaging
                     var result = await documentServices.ProcessEmbeddingsResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
-                    await automationServices.ContinueExecution(result.StepToolId, result.CardId);
+                    await automationServices.ContinueExecution(result.StepToolId, result.CardId, message.Tenant, message.Email, message.ReferenceFile);
                 }
                 catch (Exception ex)
                 {

@@ -436,11 +436,11 @@ namespace WoopiAiHub.Application.Services
                 documentForDataBase.Teams = teams;
                 _documentRepository.Create(documentForDataBase);
 
-                var worflows = teams.Select(s => s.Workflow).ToList();                
+                var worflows = teams.Select(s => s.Workflow).ToList();
                 var hasExecutions = await _automationServices.PrepareExecutionAsync(worflows!);
                 if (hasExecutions)
                 {
-                    await _automationServices.StartExecutionByWorkflowsAsync(tenant, referenceFile, worflows!);
+                    await _automationServices.StartExecutionByWorkflowsAsync(tenant, referenceFile, requestCreateDocumentDto.EmailCreator, worflows!);
                 }
 
                 _unitOfWork.Commit();

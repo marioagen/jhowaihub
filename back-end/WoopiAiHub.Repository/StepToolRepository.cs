@@ -201,7 +201,9 @@ namespace WoopiAiHub.Repository
         /// cref="StepTool"/> that depends on the specified ID, or <see langword="null"/> if no such  dependent exists.</returns>
         public async Task<StepTool?> FindDependentAsync(int id)
         {
-            return await _context.StepTools.FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
+            return await _context.StepTools.Include(u => u.Tool)
+                                             .ThenInclude(t => t.ToolType)
+                                           .FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
         }
 
         /// <summary>
