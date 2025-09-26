@@ -329,7 +329,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Tenant = f.Random.String(),
                     Email = f.Random.String(),
                     AnalyzeResult = FindValidAnalyzeResultCustomDto(),
-                    Data = @"{ ""CardId"": 361, ""StepToolId"": 456 }"
+                    Data = new MetaDataAutomationDto(361, 456)
                 });
             return faker;
         }

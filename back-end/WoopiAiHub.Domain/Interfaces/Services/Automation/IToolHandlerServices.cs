@@ -1,5 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.DTOs.Request.Automation;
+﻿using WoopiAiHub.Domain.DTOs.Request.Automation;
 
 namespace WoopiAiHub.Domain.Interfaces.Services.Automation
 {

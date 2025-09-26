@@ -373,7 +373,7 @@ namespace WoopiAiHub.Application.Services
                 normalizedContext.AppendLine(page.Text);
             }
 
-            var resultData = JsonConvert.DeserializeObject<MetaDataAutomationDto>((processOcrResultDto.Data));
+            var resultData = processOcrResultDto.Data;
             if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
 
             var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(resultData.StepToolId,
@@ -437,9 +437,13 @@ namespace WoopiAiHub.Application.Services
                 _documentRepository.Create(documentForDataBase);
 
                 var worflows = teams.Select(s => s.Workflow).ToList();
-                _automationServices.PrepareExecutionAsync(worflows!);
-                await _automationServices.StartExecutionByWorkflowsAsync(worflows!);
+                var hasExecutions = _automationServices.PrepareExecutionAsync(worflows!);
+                if (hasExecutions)
+                {
+                    await _automationServices.StartExecutionByWorkflowsAsync(worflows!);
+                }
 
+                _unitOfWork.Commit();
                 return referenceFile;
             }
             catch (Exception ex)
