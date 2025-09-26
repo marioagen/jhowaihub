@@ -17,7 +17,7 @@ public class ToolFactoryHandler : IToolFactoryHandler
     public IToolHandler GetHandler(ToolType type)
     {
         string typeName = type.Name;
-        return typeName.ToLowerInvariant() switch
+        return typeName switch
         {
             HandlersTypes.Ocr => new OcrHandler(_tenantCacheServices, _messageQueues),
             HandlersTypes.Embeddings => new EmbeddingsHandler(_tenantCacheServices, _messageQueues),

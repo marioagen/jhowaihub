@@ -437,7 +437,7 @@ namespace WoopiAiHub.Application.Services
                 _documentRepository.Create(documentForDataBase);
 
                 var worflows = teams.Select(s => s.Workflow).ToList();                
-                var hasExecutions = _automationServices.PrepareExecutionAsync(worflows!);
+                var hasExecutions = await _automationServices.PrepareExecutionAsync(worflows!);
                 if (hasExecutions)
                 {
                     await _automationServices.StartExecutionByWorkflowsAsync(tenant, referenceFile, worflows!);

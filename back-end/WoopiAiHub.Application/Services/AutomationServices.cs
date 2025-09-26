@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
-using Microsoft.AspNetCore.Components.Forms;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -17,8 +16,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IToolOutputServices _toolOutputServices;
         private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
-        private string _tenant;
-        private string _referenceFile;
+        private string _tenant = string.Empty;
+        private string _referenceFile = string.Empty;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -40,22 +39,19 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="workflows"></param>
         /// <returns></returns>
-        public bool PrepareExecutionAsync(ICollection<Workflow> workflows)
+        public async Task<bool> PrepareExecutionAsync(ICollection<Workflow> workflows)
         {
             var executions = new List<StepToolExecution>();
             var stepIds = workflows.SelectMany(wf => wf.Steps.Select(s => s.Id)).ToList();
-            var allStepTools = _stepToolRepository.FindStepToolsByStepIdsAsync(stepIds).Result;
+            var allStepTools = await _stepToolRepository.FindStepToolsByStepIdsAsync(stepIds);
 
             foreach (var workflow in workflows)
             {
-                foreach (var step in workflow.Steps.OrderBy(s => s.Order))
-                {
-                    var stepTools = allStepTools.Where(st => st.StepId == step.Id)
-                                                .OrderBy(st => st.Order);
+                    var stepTools = allStepTools.OrderBy(st => st.Order);
 
                     foreach (var stepTool in stepTools)
                     {
-                        foreach (var card in step.Cards)
+                        foreach (var card in workflow.Steps.Where(u => u.Order.Equals(1)).Select(u =>u.Cards))
                         {
                             executions.Add(new StepToolExecution(
                                 0,
@@ -64,7 +60,6 @@ namespace WoopiAiHub.Application.Services
                                 StatusExecution.Pending,
                                 card.Id));
                         }
-                    }
                 }
             }
 
@@ -193,4 +188,4 @@ namespace WoopiAiHub.Application.Services
         }
     }
 }
-        
+
