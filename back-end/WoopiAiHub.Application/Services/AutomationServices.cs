@@ -1,13 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository.Migrations;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -17,14 +15,14 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IToolFactoryHandlerServices _toolFactoryHandlerServices;
         private readonly IToolOutputServices _toolOutputServices;
-        private readonly IMessagePublisher<string> _messagePublisher;
+        private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
                                   IToolFactoryHandlerServices toolFactoryHandlerServices,
                                   IToolOutputServices toolOutputServices,
-                                  IMessagePublisher<string> messagePublisher,
+                                  IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
@@ -40,7 +38,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="workflows"></param>
         /// <returns></returns>
-        public void PrepareExecutionAsync(ICollection<Workflow> workflows)
+        public bool PrepareExecutionAsync(ICollection<Workflow> workflows)
         {
             var executions = new List<StepToolExecution>();
             var stepIds = workflows.SelectMany(wf => wf.Steps.Select(s => s.Id)).ToList();
@@ -69,7 +67,11 @@ namespace WoopiAiHub.Application.Services
             }
 
             if (executions.Any())
+            {
                 _stepToolExecutionRepository.CreateRangeAsync(executions);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -185,89 +187,6 @@ namespace WoopiAiHub.Application.Services
 
                 await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
             }
-        }
-
-        /// <summary>
-        /// Start step fisrt tool execution 
-        /// </summary>
-        /// <param name="step"></param>
-        /// <returns></returns>
-        public ICollection<StepTool> FindStepToolsByStepId(int stepId)
-        {
-            return _stepToolRepository.FindStepToolsByStepId(stepId);
-        }
-
-        public ICollection<StepToolDto> FindAll()
-        {
-            return _stepToolRepository.FindAll().ToList();
-        }
-
-        /// <summary>
-        /// Find a question by id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<StepToolDto> FindById(int id)
-        {
-            return await _stepToolRepository.FindById(id);
-        }
-
-        /// <summary>
-        /// Delete questions by ids
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
-        public bool DeleteByIds(List<int> ids)
-        {
-            var idsSteps = _stepToolRepository.FindByIds(ids);
-            {
-                if (!idsSteps.Any())
-                {
-                    throw new Exception("No StepTools found with the provided IDs.");
-                }
-            }
-            var result = _stepToolRepository.DeleteByIds(ids);
-            return result;
-        }
-
-        /// <summary>
-        /// Update question by dto
-        /// </summary>
-        /// <param name="updatequestionDto"></param>
-        /// <returns></returns>
-        public async Task<bool> Update(int id,
-                                       string input)
-        {
-            var stepToolResult = await _stepToolRepository.FindById(id);
-            if (stepToolResult == null)
-            {
-                throw new Exception("StepTool not found");
-            }
-            stepToolResult.Parameters.First().Value = input;
-            var result = await _stepToolRepository.Update(stepToolResult);
-
-            return result;
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="stepToolCreateDto"></param>
-        /// <returns></returns>
-        public async Task<bool> CreateAsync(StepToolCreateDto stepToolCreateDto)
-        {
-            var stepTool = new StepTool(
-                0,
-                DateTime.UtcNow,
-                stepToolCreateDto.StepId,
-                stepToolCreateDto.ToolId,
-                stepToolCreateDto.Order,
-                stepToolCreateDto.PositionX,
-                stepToolCreateDto.PositionY
-             );
-
-            return await _stepToolRepository.Create(stepTool);
         }
     }
 }
