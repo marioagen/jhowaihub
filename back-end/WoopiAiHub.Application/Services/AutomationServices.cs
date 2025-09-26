@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -13,21 +13,23 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
-        private readonly IToolFactoryHandlerServices _toolFactoryHandlerServices;
+        private readonly IToolFactoryHandler _toolFactoryHandler;
         private readonly IToolOutputServices _toolOutputServices;
         private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
+        private string _tenant;
+        private string _referenceFile;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
-                                  IToolFactoryHandlerServices toolFactoryHandlerServices,
+                                  IToolFactoryHandler toolFactoryHandler,
                                   IToolOutputServices toolOutputServices,
                                   IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
-            _toolFactoryHandlerServices = toolFactoryHandlerServices;
+            _toolFactoryHandler = toolFactoryHandler;
             _toolOutputServices = toolOutputServices;
             _messagePublisher = messagePublisher;
             _logger = logger;
@@ -79,10 +81,11 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="workflows"></param>
         /// <returns></returns>
-        public async Task StartExecutionByWorkflowsAsync(ICollection<Workflow> workflows)
+        public async Task StartExecutionByWorkflowsAsync(string tenant, string referenceFile, ICollection<Workflow> workflows)
         {
+            _tenant = tenant;
+            _referenceFile = referenceFile;
             var firstSteps = workflows.SelectMany(wf => wf.Steps.Where(s => s.Order == 1)).ToList();
-
             await Parallel.ForEachAsync(firstSteps, async (step, ct) =>
             {
                 try
@@ -153,8 +156,8 @@ namespace WoopiAiHub.Application.Services
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
             var input = _toolOutputServices.GetInput(stepTool.Id);
-            var handler = _toolFactoryHandlerServices.GetHandler(stepTool.Tool!.ToolType!);
-            var payload = handler.BuildPayload(input, stepTool.Id, cardId);
+            var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!);
+            var payload = await handler.BuildPayload(_tenant, _referenceFile, input, stepTool.Id, cardId);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
         }
@@ -182,8 +185,8 @@ namespace WoopiAiHub.Application.Services
                 await _stepToolExecutionRepository.UpdateAsync(execution);
 
                 var input = _toolOutputServices.GetInput(dependentStepTool.Id);
-                var handler = _toolFactoryHandlerServices.GetHandler(dependentStepTool.Tool.ToolType);
-                var payload = handler.BuildPayload(input, dependentStepTool.Id, cardId);
+                var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType);
+                var payload = await handler.BuildPayload(_tenant, _referenceFile, input, dependentStepTool.Id, cardId);
 
                 await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
             }

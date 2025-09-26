@@ -423,7 +423,7 @@ namespace WoopiAiHub.Application.Services
                                             requestCreateDocumentDto.Filename);
 
                 var referenceFile = await this.UploadFileToRepositoryApi(formFile,
-                                                                         tenant);
+                                                                        tenant);
                 var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto,
                                                                    referenceFile);
 
@@ -438,7 +438,7 @@ namespace WoopiAiHub.Application.Services
 
                 var worflows = teams.Select(s => s.Workflow).ToList();
                 _automationServices.PrepareExecutionAsync(worflows!);
-                await _automationServices.StartExecutionByWorkflowsAsync(worflows!);
+                await _automationServices.StartExecutionByWorkflowsAsync(tenant, referenceFile, worflows!);
 
                 return referenceFile;
             }
