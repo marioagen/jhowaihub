@@ -294,6 +294,17 @@ namespace WoopiAiHub.Application.Services
             return steps;
         }
 
+        /// <summary>
+        /// Sets the dependency for the specified <paramref name="stepTool"/> based on the provided context.
+        /// </summary>
+        /// <remarks>This method determines the dependency for <paramref name="stepTool"/> based on the
+        /// provided parameters. If <paramref name="previousStepToolInSameStep"/> is provided, it takes precedence as
+        /// the dependency. Otherwise, <paramref name="lastStepTool"/> is used if it is not null.</remarks>
+        /// <param name="stepTool">The step tool for which the dependency is being set. This parameter cannot be null.</param>
+        /// <param name="previousStepToolInSameStep">The previous step tool within the same step. If not null, this will be set as the dependency for <paramref
+        /// name="stepTool"/>.</param>
+        /// <param name="lastStepTool">The last step tool from a previous step. If <paramref name="previousStepToolInSameStep"/> is null and this
+        /// parameter is not null, this will be set as the dependency for <paramref name="stepTool"/>.</param>
         private void SetDependencies(StepTool stepTool,
                                      StepTool? previousStepToolInSameStep,
                                      StepTool? lastStepTool)
@@ -308,6 +319,14 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Creates a new <see cref="StepTool"/> instance based on the provided update data.
+        /// </summary>
+        /// <remarks>If the <paramref name="stepToolDto"/> contains a non-empty <see
+        /// cref="StepToolUpdateDto.Input"/> value, a corresponding <see cref="StepToolParameter"/> is added to the <see
+        /// cref="StepTool.Parameters"/> collection.</remarks>
+        /// <param name="stepToolDto">The data transfer object containing the update information for the <see cref="StepTool"/>.</param>
+        /// <returns>A new <see cref="StepTool"/> instance initialized with the specified update data.</returns>
         private StepTool CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
         {
             var stepTool = new StepTool(
@@ -328,6 +347,13 @@ namespace WoopiAiHub.Application.Services
             return stepTool;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Step"/> instance with the specified details.
+        /// </summary>
+        /// <param name="stepDto">An object containing the data required to initialize the step, including its name, order, profile ID, and
+        /// status ID.</param>
+        /// <param name="teamId">The identifier of the team associated with the step.</param>
+        /// <returns>A new <see cref="Step"/> instance initialized with the provided data.</returns>
         private Step CreateStep(IStepDto stepDto, int teamId)
         {
             return new Step(
@@ -339,7 +365,6 @@ namespace WoopiAiHub.Application.Services
                 stepDto.ProfileId,
                 stepDto.StatusId);
         }
-
 
         /// <summary>
         /// Find all workflows associated with a user, based on their email.
