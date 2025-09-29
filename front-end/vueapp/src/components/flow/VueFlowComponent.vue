@@ -97,7 +97,11 @@ export default {
                 position: { x: 50, y: 50 },
                 sourcePosition: "right",
                 label: this.$t("flow.start"),
-                data: { icon: "CirclePlay", color: "green", isStartNode: true },
+                data: { 
+                    icon: "CirclePlay", 
+                    color: "green", 
+                    isStartNode: true 
+                },
                 type: "hub"
             };
         },
@@ -122,18 +126,23 @@ export default {
                         }
                     }
                 });
+
                 let stepTools = step ? step.stepTools : [];
                 const mappedNodes = stepTools.map(stepTool => ({
                     id: stepTool.id.toString(),
                     position: { x: stepTool.positionX, y: stepTool.positionY },
                     label: stepTool.tool.name,
                     toolId: stepTool.toolId,
-                    data: { icon: "Activity", color: "blue", input: stepTool.input || null, isEditableInput: stepTool.tool.isEditableInput },
+                    data: { 
+                        icon: "Activity", 
+                        color: "blue", 
+                        input: stepTool.input || null, 
+                        isEditableInput: stepTool.tool.isEditableInput
+                    },
                     sourcePosition: "right",
                     targetPosition: "left",
                     type: "hub"
                 }));
-
                 const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
                     id: `${tool.id}-${stepTools[index + 1].id}`,
                     source: tool.id.toString(),
@@ -207,7 +216,12 @@ export default {
                 position,
                 label: nodeData.name,
                 toolId: nodeData.id,
-                data: { icon: 'Activity', color: '#000', isStartNode: false, isEditableInput: nodeData.isEditableInput }
+                data: { 
+                    icon: 'Activity', 
+                    color: '#000', 
+                    isStartNode: false, 
+                    isEditableInput: nodeData.isEditableInput 
+                }
             }
             this.vueFlowInstance?.addNodes([newNode])
         },
