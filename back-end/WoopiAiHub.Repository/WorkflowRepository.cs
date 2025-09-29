@@ -180,6 +180,7 @@ namespace WoopiAiHub.Repository
                                     {
                                         Id = st.Tool!.Id,
                                         Name = st.Tool.Name,
+                                        IsEditableInput = st.Tool.IsEditableInput,
                                     },
                                 })
                                 .ToList()
