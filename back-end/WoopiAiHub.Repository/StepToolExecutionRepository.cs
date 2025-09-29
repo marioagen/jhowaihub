@@ -24,31 +24,7 @@ namespace WoopiAiHub.Repository
         /// operation completes successfully.</returns>
         public async Task<bool> CreateRangeAsync(List<StepToolExecution> stepToolExecutions)
         {
-            var activeCardIds = stepToolExecutions.Select(e => e.CardId)
-                                                  .Distinct()
-                                                  .ToList();
-
-            var activeCards = await _context.Cards.Where(c => activeCardIds.Contains(c.Id) && c.Step.Order == 1)
-                                                  .Select(c => c.Id)
-                                                  .ToListAsync();
-
-            if (!activeCards.Any())
-                return false;
-
-            var existing = await _context.StepToolExecutions
-                .Where(e => activeCards.Contains(e.CardId))
-                .Select(e => new { e.StepToolId, e.CardId })
-                .ToListAsync();
-
-            var filtered = stepToolExecutions
-                .Where(e => activeCards.Contains(e.CardId)
-                            && !existing.Any(ex => ex.CardId == e.CardId && ex.StepToolId == e.StepToolId))
-                .ToList();
-
-            if (!filtered.Any())
-                return false;
-
-            await _context.StepToolExecutions.AddRangeAsync(filtered);
+            await _context.StepToolExecutions.AddRangeAsync(stepToolExecutions);
             await _context.SaveChangesAsync();
             return true;
         }
@@ -101,6 +77,19 @@ namespace WoopiAiHub.Repository
         {
             _context.StepToolExecutions.Update(stepToolExecution);
             await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Finds existing step tool executions for the given collection of card IDs.
+        /// </summary>
+        /// <param name="cardIds"></param>
+        /// <returns></returns>
+        public async Task<ICollection<(int StepToolId, int CardId)>> FindExistingExecutionsAsync(IEnumerable<int> cardIds)
+        {
+            return await _context.StepToolExecutions
+                                 .Where(e => cardIds.Contains(e.CardId))
+                                 .Select(e => new ValueTuple<int, int>(e.StepToolId, e.CardId))
+                                 .ToListAsync();
         }
     }
 }

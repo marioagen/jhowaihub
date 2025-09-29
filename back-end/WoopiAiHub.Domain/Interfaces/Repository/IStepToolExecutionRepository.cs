@@ -8,5 +8,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task UpdateAsync(StepToolExecution stepToolExecution);
         Task<StepToolExecution?> FindByStepToolIdAndCardIdAsync(int stepToolId, int cardId);
         Task<StepToolExecution?> FindRunningOcrByCardIdAsync(int cardId);
+        Task<ICollection<(int StepToolId, int CardId)>> FindExistingExecutionsAsync(IEnumerable<int> cardIds);
     }
 }

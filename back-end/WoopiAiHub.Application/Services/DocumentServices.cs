@@ -458,9 +458,18 @@ namespace WoopiAiHub.Application.Services
 
                 var worflows = teams.Select(s => s.Workflow).ToList();
                 var hasExecutions = await _automationServices.PrepareExecutionAsync(worflows!);
+                var automationServicesDto = new AutomationServicesDto
+                (
+                    0,
+                    0,
+                    tenant,
+                    requestCreateDocumentDto.EmailCreator,
+                    referenceFile,
+                    0
+                );
                 if (hasExecutions)
                 {
-                    await _automationServices.StartExecutionByWorkflowsAsync(tenant, referenceFile, requestCreateDocumentDto.EmailCreator, worflows!);
+                    await _automationServices.StartExecutionByWorkflowsAsync(automationServicesDto, worflows!);
                 }
 
                 _unitOfWork.Commit();

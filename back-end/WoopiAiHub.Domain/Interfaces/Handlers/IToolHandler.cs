@@ -1,8 +1,11 @@
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
 namespace WoopiAiHub.Domain.Interfaces.Handlers
 {
     public interface IToolHandler
     {
-        Task<ExecutionMessageDto> BuildPayload(string tenant, string referenceFile, string input, int stepToolId, int cardId, string email, string output);
+        Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
+                                               string input,
+                                               string output);
     }
 }
