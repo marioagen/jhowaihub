@@ -112,7 +112,7 @@
                 numDocs: 0,
                 isLoaded: false,
                 isLoadedUsers: false,
-                signalrEventStatusChanged: "StatusChanged",
+                signalrEventExecutionChanged: "CardExecutionChanged",
                 filters: {
                     input: "",
                     isAllUsers: false,
@@ -226,7 +226,7 @@
         async mounted() {
             await signalRService.startConnection();
 
-            signalRService.on(this.signalrEventStatusChanged, (message) => {
+            signalRService.on(this.signalrEventExecutionChanged, (message) => {
                 const step = this.kanbanCards.steps.find(s => s.order === 1);
                 if (!step?.cards) return;
 
@@ -237,7 +237,7 @@
             });
         },
         beforeUnmount() {
-            signalRService.off(this.signalrEventStatusChanged);
+            signalRService.off(this.signalrEventExecutionChanged);
             signalRService.stopConnection();
             GlobalEventService.off("all-uploads-complete", this.reloadKanban);
             GlobalEventService.off("refresh-once", this.reloadKanban);

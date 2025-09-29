@@ -43,6 +43,10 @@ namespace WoopiAiHub.Domain.Models
         public void UpdateStatusExecution(StatusExecution status)
         {
             Status = status;
+            if (status.Equals(StatusExecution.Ready))
+            {
+                Completed = DateTime.Now;
+            }
         }
     }
 }

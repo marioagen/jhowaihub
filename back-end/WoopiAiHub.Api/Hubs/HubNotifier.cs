@@ -1,19 +1,33 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 
 namespace WoopiAiHub.Api.Hubs
 {
-    public class DocumentNotifier : IDocumentNotifier
+    public class HubNotifier : IHubNotifier
     {
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly IConnectionMappingService _connectionMapping;
 
-        public DocumentNotifier(IHubContext<NotificationHub> hubContext,
-                                IConnectionMappingService connectionMapping)
+        public HubNotifier(IHubContext<NotificationHub> hubContext,
+                           IConnectionMappingService connectionMapping)
         {
             _hubContext = hubContext;
             _connectionMapping = connectionMapping;
+        }
+
+        public async Task CardProgessAsync(string userEmail, int cardId, double percentage)
+        {
+            var connections = _connectionMapping.GetConnections(userEmail);
+            foreach (var connectionId in connections)
+            {
+                await _hubContext.Clients.Client(connectionId).SendAsync("CardExecutionChanged", new
+                {
+                    CardId = cardId,
+                    Percentage = percentage
+                });
+            }
         }
 
         /// <summary>
@@ -23,7 +37,7 @@ namespace WoopiAiHub.Api.Hubs
         /// <param name="documentId"></param>
         /// <param name="newStatus"></param>
         /// <returns></returns>
-        public async Task NotifyStatusChangedAsync(string userEmail, int documentId, DocumentStatus newStatus)
+        public async Task DocumentStatusChangedAsync(string userEmail, int documentId, DocumentStatus newStatus)
         {
             var connections = _connectionMapping.GetConnections(userEmail);
             foreach (var connectionId in connections)

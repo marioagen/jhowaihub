@@ -80,7 +80,7 @@ builder.Services.AddInfrastructure(config);
 builder.Services.AddApplication();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddScoped<IDocumentNotifier, DocumentNotifier>();
+builder.Services.AddScoped<IHubNotifier, HubNotifier>();
 builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
 builder.Services.AddSignalR();
 

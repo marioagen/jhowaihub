@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
@@ -147,13 +148,25 @@ namespace WoopiAiHub.Repository
                         Id = c.Id,
                         Name = c.Name,
                         Created = c.Created,
-                        Description = c.Document.Description,
+                        Description = c.Document!.Description,
                         Owner = c.Document.EmailCreator,
                         DocumentId = c.Document.Id,
                         StatusDocument = c.Document.Status,
+                        Percentage = c.Step.StepTools
+                                  .Where(s => s.StepId == s.Id)
+                                  .Count() > 0 ? (
+                            c.Step!.StepTools
+                                   .Where(s => s.StepId == s.Id)
+                                   .SelectMany(st => st.Executions)
+                                   .Count(c => c.Status.Equals(StatusExecution.Ready))
+                            /
+                            c.Step.StepTools
+                                  .Where(s => s.StepId == s.Id)
+                                  .Count()
+                        ) * 100: 100,
                         AssignedUser = c.AssignedUser != null ?
-                        new UserDto 
-                        { 
+                        new UserDto
+                        {
                             Name = c.AssignedUser.Name,
                             Email = c.AssignedUser.Email,
                             Created = c.AssignedUser.Created,

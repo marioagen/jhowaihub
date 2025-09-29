@@ -249,7 +249,7 @@
         },
         computed: {
             showLoading() {
-                return this.dataCard.statusDocument === 2 || this.dataCard.statusDocument === 0 || this.dataCard.statusDocument === 4;
+                return this.dataCard.percentage < 100;
             },
             isAdmin() {
                 return this.$store.state.userProfile.isAdmin;
