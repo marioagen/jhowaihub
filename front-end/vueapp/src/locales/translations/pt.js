@@ -455,6 +455,7 @@
         editError: "Erro ao editar workflow",
         removeSuccess: "Workflow removido com sucesso",
         removeError: "Erro ao remover workflow",
+        stepFlow: "Automação de documentos",
         formCreate: {
             title: "Novo Workflow",
             subtitle: "Configure as etapas do processo de análise de documentos",

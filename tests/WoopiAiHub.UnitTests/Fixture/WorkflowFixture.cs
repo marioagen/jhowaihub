@@ -215,8 +215,9 @@ namespace WoopiAiHub.UnitTests.Fixture
                 f.Random.Int(1, 5),
                 f.Random.Int(1, 5),
                 f.Random.Int(1, 5))
-            { 
-                Cards = new List<Card> { FindValidCard() } 
+            {
+                Cards = new List<Card> { FindValidCard() },
+                StepTools = new List<StepTool> { FindValidStepTool() }
             };
         }
 
@@ -232,6 +233,20 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 true,
                 Guid.NewGuid()
+             );
+        }
+
+        public static StepTool FindValidStepTool()
+        {
+            var _faker = new Faker("pt_BR");
+            return new StepTool(
+                _faker.Random.Int(1, 1000),
+                 DateTime.UtcNow,
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Decimal(1, 1000),
+                _faker.Random.Decimal(1, 1000)
              );
         }
     }

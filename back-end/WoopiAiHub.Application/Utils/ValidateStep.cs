@@ -33,7 +33,6 @@ namespace WoopiAiHub.Application.Utils
             var steps = stepsCreateDto.Select(s => new Step(0, DateTime.UtcNow, 0, s.Name, s.Order, s.ProfileId, s.StatusId)).ToList();
 
             ValidateNames(steps);
-
             ValidateOrder(steps);
         }
 
