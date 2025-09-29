@@ -84,7 +84,6 @@ namespace WoopiAiHub.Application.Services
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
 
                 DeleteSteps(workflowUpdateDto, workflow);
-
                 ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.ToList(),
                                                                           workflow.TeamId);
 
@@ -264,6 +263,7 @@ namespace WoopiAiHub.Application.Services
         {
             var steps = new List<Step>();
             StepTool? lastStepTool = null;
+
 
             foreach (var stepDto in stepsDto)
             {

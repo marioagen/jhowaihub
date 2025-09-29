@@ -458,6 +458,7 @@
         editError: "Error editing workflow",
         removeSuccess: "Workflow removed successfully",
         removeError: "Error removing workflow",
+        stepFlow: "Document Automation",
         formCreate: {
             title: "New Workflow",
             subtitle: "Set up the steps of the document analysis process",
