@@ -24,7 +24,31 @@ namespace WoopiAiHub.Repository
         /// operation completes successfully.</returns>
         public async Task<bool> CreateRangeAsync(List<StepToolExecution> stepToolExecutions)
         {
-            await _context.StepToolExecutions.AddRangeAsync(stepToolExecutions);
+            var activeCardIds = stepToolExecutions.Select(e => e.CardId)
+                                                  .Distinct()
+                                                  .ToList();
+
+            var activeCards = await _context.Cards.Where(c => activeCardIds.Contains(c.Id) && c.Step.Order == 1)
+                                                  .Select(c => c.Id)
+                                                  .ToListAsync();
+
+            if (!activeCards.Any())
+                return false;
+
+            var existing = await _context.StepToolExecutions
+                .Where(e => activeCards.Contains(e.CardId))
+                .Select(e => new { e.StepToolId, e.CardId })
+                .ToListAsync();
+
+            var filtered = stepToolExecutions
+                .Where(e => activeCards.Contains(e.CardId)
+                            && !existing.Any(ex => ex.CardId == e.CardId && ex.StepToolId == e.StepToolId))
+                .ToList();
+
+            if (!filtered.Any())
+                return false;
+
+            await _context.StepToolExecutions.AddRangeAsync(filtered);
             await _context.SaveChangesAsync();
             return true;
         }

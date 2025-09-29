@@ -72,7 +72,8 @@ namespace WoopiAiHub.Application.Services
                 throw new InvalidOperationException("KeyAccess is not configured in the application settings.");
             }
 
-            string result = await _keyGeneratorApi.GetKey(keyAccess, tenant);
+            //string result = await _keyGeneratorApi.GetKey(keyAccess, tenant);
+            string result = "YhI2fEXWmu4UKIW48UR5UXdXhLWoJ6Sq7Gr6FLGWvzo=";
 
             await ApplyMigrations(keyAccess,
                                   tenant,

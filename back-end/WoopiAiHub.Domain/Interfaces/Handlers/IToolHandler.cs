@@ -3,6 +3,6 @@ namespace WoopiAiHub.Domain.Interfaces.Handlers
 {
     public interface IToolHandler
     {
-        Task<ExecutionMessageDto> BuildPayload(string tenant, string referenceFile, string input, int stepToolId, int cardId, string email);
+        Task<ExecutionMessageDto> BuildPayload(string tenant, string referenceFile, string input, int stepToolId, int cardId, string email, string output);
     }
 }

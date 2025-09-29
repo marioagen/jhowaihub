@@ -77,7 +77,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="updateCardStepStatusDto"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<bool> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto)
+        public async Task<bool> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto,
+                                                    string tenant,
+                                                    string email)
         {
             var card = await _cardRepository.FindById(updateCardStepStatusDto.CardId);
             if (card == null)
@@ -95,7 +97,7 @@ namespace WoopiAiHub.Application.Services
             var result = _cardRepository.Update(card);
 
             if (result)
-                await _automationServices.StartExecutionByCardAsync(step.Id, card.Id);
+                await _automationServices.StartExecutionByCardAsync(step.Id, card.Id, tenant, card.Document.ReferenceFile, email);
 
             return true;
         }

@@ -23,12 +23,12 @@ using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
-using WoopiAiHub.Domain.Interfaces.Utils;
-using WoopiAiHub.Domain.Interfaces.Services.Automation;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -56,6 +56,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IDocumentNotifier _documentNotifier;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
+        private readonly IStepToolRepository _stepToolRepository;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
@@ -81,7 +82,8 @@ namespace WoopiAiHub.Application.Services
                                 IUnitOfWork unitOfWork,
                                 ICardRepository cardRepository,
                                 IAutomationServices automationServices,
-                                IStepToolOutputRepository stepToolOutputRepository)
+                                IStepToolOutputRepository stepToolOutputRepository,
+                                IStepToolRepository stepToolRepository)
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
@@ -105,6 +107,7 @@ namespace WoopiAiHub.Application.Services
             _documentNotifier = documentNotifier;
             _automationServices = automationServices;
             _stepToolOutputRepository = stepToolOutputRepository;
+            _stepToolRepository = stepToolRepository;
         }
 
         /// <summary>
@@ -363,41 +366,58 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto)
+        public async Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto dto)
         {
-            var documentEmbeddingsAddDtoList = await ExtractDocumentEmbeddingsAddDto(processOcrResultDto);
+            if (dto.Data.Equals(default(MetaDataAutomationDto)))
+                return new MetaDataAutomationDto();
 
-            var normalizedContext = new StringBuilder();
-            foreach (var page in documentEmbeddingsAddDtoList)
+            var documentEmbeddings = await ExtractDocumentEmbeddingsAddDto(dto);
+
+            var execution = await _stepToolExecutionRepository
+                .FindByStepToolIdAndCardIdAsync(dto.Data.StepToolId, dto.Data.CardId);
+
+            if (execution is null)
+                return dto.Data;
+
+            await UpdateExecutionAsync(execution);
+            var dependentStepTool = await _stepToolRepository.FindDependentAsync(dto.Data.StepToolId);
+            string embeddingsJson = JsonConvert.SerializeObject(new DocumentEmbeddingsDataDto
             {
-                normalizedContext.AppendLine(page.Text);
-            }
+                ResponseQueue = _messageQueues.EmbeddingQueueAiHubResponse,
+                ReferenceFile = dto.ReferenceFile,
+                DocumentEmbeddings = documentEmbeddings,
+                Data = new MetaDataAutomationDto { CardId = dto.Data.CardId, StepToolId = dependentStepTool.Id },
+            });
 
-            var resultData = processOcrResultDto.Data;
-            if (resultData.Equals(default(MetaDataAutomationDto))) return new MetaDataAutomationDto();
+            await SaveStepToolOutputAsync(execution, embeddingsJson);
+            await UpdateDocumentStatusAsync(dto.ReferenceFile, dto.Email);
 
-            var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(resultData.StepToolId,
-                                                                                              resultData.CardId);
+            return dto.Data;
+        }
 
-            if (execution == null) return resultData;
-
+        private async Task UpdateExecutionAsync(StepToolExecution execution)
+        {
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
+        }
 
+        private async Task SaveStepToolOutputAsync(StepToolExecution execution, string outputStepTool)
+        {
             var output = new StepToolOutput(
                 0,
                 DateTime.Now,
                 execution.StepToolId,
                 execution.CardId,
-                normalizedContext.ToString()
+                outputStepTool
             );
 
             await _stepToolOutputRepository.CreateAsync(output);
+        }
 
-            var documentId = _documentRepository.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile);
-            await this.ChangeStatus(documentId, DocumentStatus.OCR, processOcrResultDto.Email);
-
-            return resultData;
+        private async Task UpdateDocumentStatusAsync(string referenceFile, string email)
+        {
+            var documentId = _documentRepository.FindDocumentIdByReferenceFile(referenceFile);
+            await ChangeStatus(documentId, DocumentStatus.OCR, email);
         }
 
         /// <summary>
@@ -677,6 +697,10 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException(FindingDocumentErrorMessage);
             }
 
+            var execution = await _stepToolExecutionRepository
+                .FindByStepToolIdAndCardIdAsync(documentEmbeddingsResultDto.Data.StepToolId, documentEmbeddingsResultDto.Data.CardId);
+            await UpdateExecutionAsync(execution);
+            await SaveStepToolOutputAsync(execution, documentEmbeddingsResultDto.ReferenceFile);
             await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
 
             return documentEmbeddingsResultDto.Data;
@@ -907,7 +931,7 @@ namespace WoopiAiHub.Application.Services
             return new DocumentEmbeddingsAddDto
             {
                 ReferenceFile = processOcrResultDto.ReferenceFile,
-                KeyMongoAccess = keyMongoAccess,
+                KeyMongoAccess = string.Empty,
                 Text = text,
                 Metadata = new { PageNumber = page.PageNumber },
                 Tenant = processOcrResultDto.Tenant,

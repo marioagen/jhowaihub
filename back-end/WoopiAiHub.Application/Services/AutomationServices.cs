@@ -5,6 +5,7 @@ using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -13,7 +14,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IToolFactoryHandler _toolFactoryHandler;
-        private readonly IToolOutputServices _toolOutputServices;
+        private readonly IStepToolOutputRepository _stepToolOutputRepository;
+        private readonly IStepToolParameterRepository _stepToolParameterRepository;
         private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
         private string _tenant = string.Empty;
@@ -23,14 +25,16 @@ namespace WoopiAiHub.Application.Services
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
                                   IToolFactoryHandler toolFactoryHandler,
-                                  IToolOutputServices toolOutputServices,
+                                  IStepToolOutputRepository stepToolOutputRepository,
+                                  IStepToolParameterRepository stepToolParameterRepository,
                                   IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
             _toolFactoryHandler = toolFactoryHandler;
-            _toolOutputServices = toolOutputServices;
+            _stepToolOutputRepository = stepToolOutputRepository;
+            _stepToolParameterRepository = stepToolParameterRepository;
             _messagePublisher = messagePublisher;
             _logger = logger;
         }
@@ -86,7 +90,7 @@ namespace WoopiAiHub.Application.Services
             {
                 try
                 {
-                    await StartExecutionByStepAsync(step);
+                    await StartExecutionByStepAsync(step, tenant, referenceFile, email);
                 }
                 catch (Exception ex)
                 {
@@ -103,12 +107,12 @@ namespace WoopiAiHub.Application.Services
         /// performed asynchronously  and in parallel for all eligible tools and cards.</remarks>
         /// <param name="step">The step containing the tools and cards to execute. Cannot be <see langword="null"/>.</param>
         /// <returns></returns>
-        public async Task StartExecutionByStepAsync(Step step)
+        public async Task StartExecutionByStepAsync(Step step, string tenant, string referenceFile, string email)
         {
             var tasks = step.StepTools
                             .Where(st => !st.DependsOnStepToolId.HasValue)
                             .OrderBy(st => st.Order)
-                            .SelectMany(st => step.Cards.Select(card => RunStepToolExecutionAsync(st, card.Id)));
+                            .SelectMany(st => step.Cards.Select(card => RunStepToolExecutionAsync(st, card.Id, tenant, referenceFile, email)));
 
             await Task.WhenAll(tasks);
         }
@@ -122,11 +126,11 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepId">The identifier of the step to execute.</param>
         /// <param name="cardId">The identifier of the card associated with the execution.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task StartExecutionByCardAsync(int stepId, int cardId)
+        public async Task StartExecutionByCardAsync(int stepId, int cardId, string tenant, string referenceFile, string email)
         {
             var stepTool = await _stepToolRepository.FindByStepIdAndOrderAsync(stepId, 1);
             if (stepTool != null)
-                await RunStepToolExecutionAsync(stepTool, cardId);
+                await RunStepToolExecutionAsync(stepTool, cardId, tenant, referenceFile, email);
         }
 
         /// <summary>
@@ -140,8 +144,11 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepTool">The step tool to be executed. This parameter cannot be null.</param>
         /// <param name="cardId">The identifier of the card associated with the step tool execution.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        private async Task RunStepToolExecutionAsync(StepTool stepTool, int cardId)
+        private async Task RunStepToolExecutionAsync(StepTool stepTool, int cardId, string tenant, string referenceFile, string email)
         {
+            _tenant = tenant;
+            _referenceFile = referenceFile;
+            _email = email;
             var execution = await _stepToolExecutionRepository
                                   .FindByStepToolIdAndCardIdAsync(stepTool.Id, cardId);
 
@@ -151,9 +158,14 @@ namespace WoopiAiHub.Application.Services
             execution.UpdateStatusExecution(StatusExecution.Running);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            var input = _toolOutputServices.GetInput(stepTool.Id);
+            var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
+
+            string output = string.Empty;
+            if (stepTool.DependsOnStepTool != null)
+                output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id);
+
             var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!);
-            var payload = await handler.BuildPayload(_tenant, _referenceFile, input, stepTool.Id, cardId, _email);
+            var payload = await handler.BuildPayload(_tenant, _referenceFile, input, stepTool.Id, cardId, _email, output);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
         }
@@ -167,7 +179,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepToolId">The identifier of the step tool whose dependent tool's execution should be continued.</param>
         /// <param name="cardId">The identifier of the card associated with the execution.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task ContinueExecution(int stepToolId, 
+        public async Task ContinueExecution(int stepToolId,
                                             int cardId,
                                             string tenant,
                                             string email,
@@ -175,24 +187,35 @@ namespace WoopiAiHub.Application.Services
         {
             _tenant = tenant;
             _referenceFile = referenceFile;
+            _email = email;
+
+            var stepTool = await _stepToolRepository.FindById(stepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(stepToolId);
 
-            if (dependentStepTool != null)
-            {
-                var execution = await _stepToolExecutionRepository
-                    .FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, cardId);
-                if (execution == null) return;
+            if (dependentStepTool == null)
+                return;
 
-                execution.UpdateStatusExecution(StatusExecution.Running);
-                await _stepToolExecutionRepository.UpdateAsync(execution);
+            if (stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
+                return;
 
-                var input = _toolOutputServices.GetInput(dependentStepTool.Id);
-                var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType);
-                var payload = await handler.BuildPayload(_tenant, _referenceFile, input, dependentStepTool.Id, cardId, email);
+            var execution = await _stepToolExecutionRepository
+                .FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, cardId);
+            if (execution == null)
+                return;
 
-                await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
-            }
+            execution.UpdateStatusExecution(StatusExecution.Running);
+            await _stepToolExecutionRepository.UpdateAsync(execution);
+            var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
+
+            string output =await _stepToolOutputRepository.FindByStepToolId(dependentStepTool.DependsOnStepTool.Id);
+
+            var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType);
+            var payload = await handler.BuildPayload(
+                _tenant, _referenceFile, input, dependentStepTool.Id, cardId, email, output);
+
+            await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
         }
+
     }
 }
 

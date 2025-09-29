@@ -25,5 +25,13 @@ namespace WoopiAiHub.Repository
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<string> FindByStepToolId(int stepToolId)
+        {
+            var output = await _context.StepToolOutputs.Where(u => u.StepToolId.Equals(stepToolId))
+                                                       .Select(v => v.Value)
+                                                       .FirstOrDefaultAsync();
+            return output;
+        }
     }
 }

@@ -23,7 +23,8 @@ public class OcrHandler : IToolHandler
                                                         string input, 
                                                         int stepToolId, 
                                                         int cardId,
-                                                        string email)
+                                                        string email,
+                                                        string output)
     {
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenant, ColTypeModule.WoopiAiHub);
         if (string.IsNullOrEmpty(tenantInfo!.OcrModel))

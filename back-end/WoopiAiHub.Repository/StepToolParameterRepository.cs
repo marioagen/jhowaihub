@@ -1,4 +1,5 @@
 ﻿using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -48,6 +49,15 @@ namespace WoopiAiHub.Repository
             }
 
             return false;
+        }
+
+        public string FindByStepToolId(int stepToolId)
+        {
+            var input = _context.StepToolParameters.Where(u => u.StepToolId.Equals(stepToolId) && u.StepTool.Tool.IsEditableInput)
+                                                   .Select(v => v.Value)
+                                                   .FirstOrDefault();
+
+            return input;
         }
     }
 }
