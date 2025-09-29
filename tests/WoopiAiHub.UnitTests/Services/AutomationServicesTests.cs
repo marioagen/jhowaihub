@@ -61,7 +61,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             stepToolRepositoryMock.Verify(s => s.FindStepToolsByStepIdsAsync(It.IsAny<IEnumerable<int>>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.CreateRangeAsync(It.IsAny<List<StepToolExecution>>()), Times.Once);
-
         }
 
         [Fact(DisplayName = "PrepareExecution should return false ")]
@@ -70,19 +69,19 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var workflows = new List<Workflow>
-        {
-            new Workflow(1, DateTime.UtcNow, 1, "WF")
             {
-                Steps = new List<Step>
+                new Workflow(1, DateTime.UtcNow, 1, "WF")
                 {
-                    new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
+                    Steps = new List<Step>
                     {
-                        Cards = new List<Card>(),
-                        StepTools = new List<StepTool>()
+                        new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
+                        {
+                            Cards = new List<Card>(),
+                            StepTools = new List<StepTool>()
+                        }
                     }
                 }
-            }
-        };
+            };
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
 
@@ -140,7 +139,6 @@ namespace WoopiAiHub.UnitTests.Services
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<ToolType>()), Times.Once);
             handlerMock.Verify(h => h.BuildPayload(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once);
             messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message), Times.Once);
-
         }
 
         [Fact(DisplayName = "StartExecutionByStep should execute StepTool when StepTool has dependencies")]
