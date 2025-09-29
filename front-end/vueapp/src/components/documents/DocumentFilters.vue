@@ -57,7 +57,10 @@
     export default {
         name: "DocumentFilters",
         props: {
-            teamsList: { type: Array, required: true } 
+            teamsList: { 
+                type: [Object, Array], 
+                required: true 
+            } 
         },
         data() {
             return {
