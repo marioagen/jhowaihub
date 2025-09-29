@@ -81,8 +81,9 @@
                 data: [],
                 pagination: {
                     currentPage: 1,
-                    totalPages: 100,
-                    totalItems: 2000,
+                    totalPages: 0,
+                    itemsPerPage: 10,
+                    totalItems: 0,
                 },
                 selectedRows: [],
             },
