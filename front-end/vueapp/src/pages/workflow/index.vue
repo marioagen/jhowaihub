@@ -232,7 +232,7 @@
 
                 const item = step.cards.find(card => card.documentId === message.documentId);
                 if (item) {
-                    item.statusDocument = message.status;
+                    item.percentage = message.percentage;
                 }
             });
         },
