@@ -30,7 +30,9 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto,
                                                              [FromHeader] HeadersDto headersDto)
         {
-            var result = await _cardServices.UpdateStepAndStatus(updateCardStepStatusDto, headersDto.Tenant, headersDto.EmailCreator);
+            var result = await _cardServices.UpdateStepAndStatus(updateCardStepStatusDto, 
+                                                                 headersDto.Tenant, 
+                                                                 headersDto.EmailCreator);
             return Ok(result);
         }
 

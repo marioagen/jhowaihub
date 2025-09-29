@@ -85,8 +85,6 @@ namespace WoopiAiHub.Application.Services
 
                 DeleteSteps(workflowUpdateDto, workflow);
 
-                // await UpdateSteps(workflowUpdateDto);
-
                 ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.ToList(),
                                                                           workflow.TeamId);
 

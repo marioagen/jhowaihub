@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.Enum;
@@ -29,22 +30,18 @@ public class EmbeddingsHandler : IToolHandler
         _config = config;
     }
 
-    public async Task<ExecutionMessageDto> BuildPayload(string tenant,
-                                                        string referenceFile,
+    public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                         string input,
-                                                        int stepToolId,
-                                                        int cardId,
-                                                        string email,
                                                         string output)
     {
-        var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenant, ColTypeModule.WoopiAiHub);
+        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
         if (string.IsNullOrEmpty(tenantInfo!.EmbeddingModelName))
         {
             throw new ArgumentException("Embeddings not found");
         }
 
         var keyAccess = _config[ConfigKeyAccessName]!;
-        var keyMongoAcces = await _keyGeneratorApi.GetKey(keyAccess, tenant);
+        var keyMongoAcces = await _keyGeneratorApi.GetKey(keyAccess, automationServicesDto.Tenant);
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
 
         foreach (var item in documents.DocumentEmbeddings)
