@@ -230,7 +230,7 @@
                 const step = this.kanbanCards.steps.find(s => s.order === 1);
                 if (!step?.cards) return;
 
-                const item = step.cards.find(card => card.documentId === message.documentId);
+                const item = step.cards.find(card => card.id === message.cardId);
                 if (item) {
                     item.percentage = message.percentage;
                 }

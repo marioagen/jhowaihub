@@ -89,25 +89,25 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Workflow?> FindByIdReturnModel(int id)
         {
-           return await _context.Workflows
-                .Include(w => w.Steps)
-                    .ThenInclude(s => s.Profile)
-                .Include(w => w.Steps)
-                    .ThenInclude(s => s.Status)
-                .Include(w => w.Steps)
-                    .ThenInclude(s => s.Cards)
-                .Include(w => w.Steps)
-                    .ThenInclude(s => s.StepTools)
-                        .ThenInclude(p => p.Parameters)
-                .FirstOrDefaultAsync(w => w.Id == id);
+            return await _context.Workflows
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Profile)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Status)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Cards)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.StepTools)
+                         .ThenInclude(p => p.Parameters)
+                 .FirstOrDefaultAsync(w => w.Id == id);
         }
 
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>
         /// <returns></returns>
-        private static Expression<Func<Workflow, WorkflowDto>> GetWorkflowProjection(String? input = null, 
-                Boolean? allUsers = true, 
+        private static Expression<Func<Workflow, WorkflowDto>> GetWorkflowProjection(String? input = null,
+                Boolean? allUsers = true,
                 String? login = null
             )
         {
@@ -152,18 +152,20 @@ namespace WoopiAiHub.Repository
                         Owner = c.Document.EmailCreator,
                         DocumentId = c.Document.Id,
                         StatusDocument = c.Document.Status,
-                        Percentage = c.Step.StepTools
-                                  .Where(s => s.StepId == s.Id)
-                                  .Count() > 0 ? (
-                            c.Step!.StepTools
-                                   .Where(s => s.StepId == s.Id)
-                                   .SelectMany(st => st.Executions)
-                                   .Count(c => c.Status.Equals(StatusExecution.Ready))
+                        Percentage = c.Step!.StepTools.Count() > 0
+                        ? (
+                            (c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready)) * 100)
                             /
-                            c.Step.StepTools
-                                  .Where(s => s.StepId == s.Id)
-                                  .Count()
-                        ) * 100: 100,
+                            (
+                                (c.Step.StepTools.Count() -
+                                 c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready)))
+                                 == 0
+                                    ? 1 
+                                    : (c.Step.StepTools.Count() -
+                                       c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready)))
+                            )
+                          )
+                        : 100,
                         AssignedUser = c.AssignedUser != null ?
                         new UserDto
                         {
