@@ -410,7 +410,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Email = f.Random.String(),
                     KeyMongoAccess = f.Random.String(),
                     TotalPages = f.Random.Int(1, 100),
-                    Data = @"{ ""CardId"": 123, ""StepToolId"": 456 }"
+                    Data  = new MetaDataAutomationDto(361, 456)
                 });
             return faker;
         }

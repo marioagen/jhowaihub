@@ -45,7 +45,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync((Card?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto, It.IsAny<string>(), It.IsAny<string>()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(CardLabel.NotFound, exception.LabelError);
         }
@@ -62,7 +62,7 @@ namespace WoopiAiHub.UnitTests.Services
                                                                             updateDto.WorkflowId)).ReturnsAsync((Step?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto, It.IsAny<string>(), It.IsAny<string>()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(StepLabel.NotFound, exception.LabelError);
         }
@@ -77,7 +77,7 @@ namespace WoopiAiHub.UnitTests.Services
             var step = CardFixture.FindValidStep();
             var status = CardFixture.FindValidStatus();
             _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync(card);
-            _automationServices.Setup(s => s.StartExecutionByCardAsync(It.IsAny<int>(), It.IsAny<int>())).Returns(Task.CompletedTask);
+            _automationServices.Setup(s => s.StartExecutionByCardAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())).Returns(Task.CompletedTask);
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
                                                                             updateDto.WorkflowId)).ReturnsAsync(step);
 
@@ -88,7 +88,7 @@ namespace WoopiAiHub.UnitTests.Services
             _stepToolRepositoryMock.Setup(repo=> repo.FindByStepIdAndOrderAsync(1,1)).ReturnsAsync(It.IsAny<StepTool>());
 
             // Act
-            var result = await _cardServices.UpdateStepAndStatus(updateDto);
+            var result = await _cardServices.UpdateStepAndStatus(updateDto, It.IsAny<string>(), It.IsAny<string>());
 
             // Assert
             Assert.True(result);
