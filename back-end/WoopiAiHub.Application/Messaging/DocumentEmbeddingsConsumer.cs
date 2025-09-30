@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
@@ -53,7 +54,16 @@ namespace WoopiAiHub.Application.Messaging
                     var result = await documentServices.ProcessEmbeddingsResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
-                    await automationServices.ContinueExecution(result.StepToolId, result.CardId);
+                    var continueExecutionDto = new AutomationServicesDto
+                    (
+                        result.StepToolId,
+                        result.CardId,
+                        message.Tenant!,
+                        message.Email!,
+                        message.ReferenceFile!,
+                        null
+                    );
+                    await automationServices.ContinueExecution(continueExecutionDto);
                 }
                 catch (Exception ex)
                 {

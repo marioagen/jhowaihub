@@ -60,7 +60,7 @@ export default {
     props: {
         stepId: {
             type: Number,
-            required: true
+            required: false,
         },
         stepTools: {
             type: [Object, Array],
@@ -96,9 +96,9 @@ export default {
     methods: {
         redirectToIndex() {
             if (this.isEdit) {
-                return this.$router.push({ name: "EditWorkflow", params: { stepId: this.stepId, id: this.Id } });
+                return this.$router.push({ name: "EditWorkflow" });
             }
-            return this.$router.push({ name: "NewWorkflow", params: { stepOrder: this.stepOrder } });
+            return this.$router.push({ name: "NewWorkflow" });
         },
         showCollapse() {
             this.isActiveCollapse = !this.isActiveCollapse;
@@ -159,6 +159,7 @@ export default {
     },
 };
 </script>
+
 
 <style>
 /* import the necessary styles for Vue Flow to work */

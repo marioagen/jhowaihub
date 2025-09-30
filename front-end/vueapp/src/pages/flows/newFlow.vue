@@ -1,5 +1,7 @@
 <template>
-    <FlowComponent :stepOrder="$route.params.stepOrder"/>
+    <FlowComponent 
+        :stepOrder="routeStepOrder"
+    />
 </template>
 
 <script>
@@ -8,6 +10,11 @@
         name: "EditFlow",
         components: {
             FlowComponent
+        },
+        computed: {
+            routeStepOrder() {
+                return parseInt(this.$route.params.stepOrder);
+            },
         },
     }
 </script>

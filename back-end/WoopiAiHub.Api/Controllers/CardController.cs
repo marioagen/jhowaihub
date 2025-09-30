@@ -27,9 +27,12 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut]
         [SwaggerOperation("EndPoint that update a step and status of card")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto)
+        public async Task<IActionResult> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto,
+                                                             [FromHeader] HeadersDto headersDto)
         {
-            var result = await _cardServices.UpdateStepAndStatus(updateCardStepStatusDto);
+            var result = await _cardServices.UpdateStepAndStatus(updateCardStepStatusDto, 
+                                                                 headersDto.Tenant, 
+                                                                 headersDto.EmailCreator);
             return Ok(result);
         }
 
