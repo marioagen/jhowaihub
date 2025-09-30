@@ -26,7 +26,9 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static Card FindValidCard()
         {
-            return new Card(1, DateTime.Now, 1, 1, "Card", 1, true, null);
+            var card = new Card(1, DateTime.Now, 1, 1, "Card", 1, true, null);
+            card.Document = new Document("Doc", "Ref", "Link", Domain.Enum.DocumentStatus.ReadyForAnalysis, true,"email",1, DateTime.Now);
+            return card;
         }
 
         public static Step FindValidStep()

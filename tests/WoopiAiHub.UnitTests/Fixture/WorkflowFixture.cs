@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using Microsoft.VisualBasic;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
@@ -204,6 +205,26 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
+        public static ICollection<Workflow> FindValidWorkflows()
+        {
+            var f = new Faker("pt_BR");
+            ICollection<Workflow> workflow = new Faker<Workflow>("pt_BR")
+           .CustomInstantiator(f => new Workflow
+           (
+               f.IndexFaker,
+               f.Date.Past(),
+               f.Random.Int(1, 5),
+               f.Person.FirstName
+
+           )
+           {
+               Steps = new List<Step> { FindValidStep() }
+           }
+           ).Generate(2);
+
+            return workflow;
+        }
+
         public static Step FindValidStep()
         {
             var f = new Faker("pt_BR");
@@ -212,7 +233,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 f.Date.Past(),
                 f.Random.Int(1, 5),
                 f.Person.FirstName,
-                f.Random.Int(1, 5),
+                1,
                 f.Random.Int(1, 5),
                 f.Random.Int(1, 5))
             {
@@ -225,7 +246,7 @@ namespace WoopiAiHub.UnitTests.Fixture
         {
             var _faker = new Faker("pt_BR");
             return new Card(
-                _faker.Random.Int(1, 1000),
+                10,
                 DateTime.UtcNow,
                 _faker.Random.Int(1, 1000),
                 _faker.Random.Int(1, 1000),

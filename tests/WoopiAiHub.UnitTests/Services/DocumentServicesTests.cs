@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Humanizer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -607,10 +608,12 @@ namespace WoopiAiHub.UnitTests.Services
             var generatedKey = Guid.NewGuid().ToString();
             var tenant = _fixture.FindValidTenantInfoDto();
             var execution = _fixture.FindValidStepToolExecution();
+            var stepTool =  WorkflowFixture.FindValidStepTool();
 
             var configurationMock = new Mock<IConfiguration>();
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             var keyGeneratorMock = _mocker.GetMock<IKeyGeneratorApi>();
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             configurationMock.Setup(x => x["keyAccess"]).Returns(Guid.NewGuid().ToString);
@@ -622,6 +625,7 @@ namespace WoopiAiHub.UnitTests.Services
             tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
                                .ReturnsAsync(tenant);
             var documentServices = _mocker.CreateInstance<DocumentServices>();
+            stepToolRepositoryMock.Setup(s=> s.FindDependentAsync(processOcrResultDto.Data.StepToolId)).ReturnsAsync(stepTool);
 
             // Act
             var result = await documentServices.ProcessOcrResult(processOcrResultDto);
@@ -647,12 +651,15 @@ namespace WoopiAiHub.UnitTests.Services
             var idDocument = 1;
             var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolExecution = _fixture.FindValidStepToolExecution();
+
 
             marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
             documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile)).Returns(idDocument);
+            stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(documentEmbeddingsResultDto.Data.StepToolId, documentEmbeddingsResultDto.Data.CardId)).ReturnsAsync(stepToolExecution);
 
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
+             var documentServices = _mocker.CreateInstance<DocumentServices>();
 
             // Act
             await documentServices.ProcessEmbeddingsResult(documentEmbeddingsResultDto);
