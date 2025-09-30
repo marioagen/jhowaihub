@@ -53,7 +53,7 @@ namespace WoopiAiHub.Application.Services
         private readonly MessageQueues _messageQueues;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessagePublisher<ProcessOcrDto> _publisher;
-        private readonly IDocumentNotifier _documentNotifier;
+        private readonly IHubNotifier _hubNotifier;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IStepToolRepository _stepToolRepository;
@@ -78,7 +78,7 @@ namespace WoopiAiHub.Application.Services
                                 IKeyGeneratorApi keyGeneratorApi,
                                 IMessagePublisher<ProcessOcrDto> publisher,
                                 IOptions<MessageQueues> messageQueues,
-                                IDocumentNotifier documentNotifier,
+                                IHubNotifier documentNotifier,
                                 IUnitOfWork unitOfWork,
                                 ICardRepository cardRepository,
                                 IAutomationServices automationServices,
@@ -104,7 +104,7 @@ namespace WoopiAiHub.Application.Services
             _keyGeneratorApi = keyGeneratorApi;
             _messageQueues = messageQueues.Value;
             _publisher = publisher;
-            _documentNotifier = documentNotifier;
+            _hubNotifier = documentNotifier;
             _automationServices = automationServices;
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolRepository = stepToolRepository;
@@ -306,8 +306,6 @@ namespace WoopiAiHub.Application.Services
         {
             var result = _documentRepository.ChangeStatus(id, status);
 
-            await _documentNotifier.NotifyStatusChangedAsync(emailCreator, id, status);
-
             return result;
         }
 
@@ -379,7 +377,7 @@ namespace WoopiAiHub.Application.Services
             if (execution is null)
                 return dto.Data;
 
-            await UpdateExecutionAsync(execution);
+            await UpdateExecutionAsync(execution, dto.Email);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(dto.Data.StepToolId);
             string embeddingsJson = JsonConvert.SerializeObject(new DocumentEmbeddingsDataDto
             {
@@ -395,12 +393,30 @@ namespace WoopiAiHub.Application.Services
             return dto.Data;
         }
 
-        private async Task UpdateExecutionAsync(StepToolExecution execution)
+
+        /// <summary>
+        /// Updates StepToolExecution status and send notification 
+        /// </summary>
+        /// <param name="execution"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
         {
+            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId);            
+            var percent = (count / execution.StepTool.Order) * 100;
+        
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
+
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent);
         }
 
+        /// <summary>
+        /// Updates StepToolExecution output
+        /// </summary>
+        /// <param name="execution"></param>
+        /// <param name="outputStepTool"></param>
+        /// <returns></returns>
         private async Task SaveStepToolOutputAsync(StepToolExecution execution, string outputStepTool)
         {
             var output = new StepToolOutput(
@@ -414,6 +430,13 @@ namespace WoopiAiHub.Application.Services
             await _stepToolOutputRepository.CreateAsync(output);
         }
 
+
+        /// <summary>
+        /// Updates document status
+        /// </summary>
+        /// <param name="referenceFile"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
         private async Task UpdateDocumentStatusAsync(string referenceFile, string email)
         {
             var documentId = _documentRepository.FindDocumentIdByReferenceFile(referenceFile);
@@ -708,8 +731,8 @@ namespace WoopiAiHub.Application.Services
 
             var execution = await _stepToolExecutionRepository
                 .FindByStepToolIdAndCardIdAsync(documentEmbeddingsResultDto.Data.StepToolId, documentEmbeddingsResultDto.Data.CardId);
-            await UpdateExecutionAsync(execution);
-            await SaveStepToolOutputAsync(execution, documentEmbeddingsResultDto.ReferenceFile);
+            await UpdateExecutionAsync(execution!, documentEmbeddingsResultDto.Email);
+            await SaveStepToolOutputAsync(execution!, documentEmbeddingsResultDto.ReferenceFile);
             await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
 
             return documentEmbeddingsResultDto.Data;
