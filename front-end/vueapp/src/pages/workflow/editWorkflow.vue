@@ -1,7 +1,7 @@
 <template>
     <WorkflowBoards 
         :isEdit="true"
-        :id="$route.params.id"
+        :id="routeId"
     />
 </template>
 
@@ -11,6 +11,11 @@
         name: "EditWorkflow",
         components: {
             WorkflowBoards,
+        },
+        computed: {
+            routeId() {
+                return parseInt(this.$route.params.id);
+            },
         },
     }
 </script>

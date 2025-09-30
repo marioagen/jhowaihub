@@ -1,7 +1,7 @@
 <template>
     <QuizzesForm 
         :isEdit="true"
-        :id="$route.params.id"
+        :id="routeId"
     />
 </template>
 
@@ -11,6 +11,11 @@
         name: "EditQuizz",
         components: {
             QuizzesForm
+        },
+        computed: {
+            routeId() {
+                return parseInt(this.$route.params.id);
+            },
         },
     }
 </script>

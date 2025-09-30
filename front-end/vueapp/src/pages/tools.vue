@@ -1,5 +1,5 @@
 <template>
-    <main :key="changeLanguage">
+    <main>
         <div class="container-fluid scroll-area mx-2">
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
