@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 
 namespace WoopiAiHub.Application.Services
 {
     public class ToolOutputServices : IToolOutputServices
     {
-        public string GetInput(int stepToolIdTo)
+        private readonly IStepToolOutputRepository _stepToolOutputRepository;
+
+        public ToolOutputServices(IStepToolOutputRepository stepToolOutputRepository)
         {
-            return string.Empty;
+            _stepToolOutputRepository = stepToolOutputRepository;
         }
     }
 }

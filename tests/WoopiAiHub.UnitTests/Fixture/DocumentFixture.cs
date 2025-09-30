@@ -1,6 +1,7 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
 using Microsoft.AspNetCore.Http;
+using PdfSharp.Pdf.IO;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Dto;
@@ -329,7 +330,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Tenant = f.Random.String(),
                     Email = f.Random.String(),
                     AnalyzeResult = FindValidAnalyzeResultCustomDto(),
-                    Data = @"{ ""CardId"": 361, ""StepToolId"": 456 }"
+                    Data = new MetaDataAutomationDto(361, 456)
                 });
             return faker;
         }
@@ -345,9 +346,12 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
             return dto;
         }
-        public  StepToolExecution FindValidStepToolExecution()
+        public StepToolExecution FindValidStepToolExecution()
         {
+            var guid = Guid.NewGuid();
             var faker = new Faker("pt_BR");
+            var card = new Card(1, DateTime.Now, 456, 1, "name", 1, true, guid);
+            var stepTool = new StepTool(1, DateTime.Now, 456, 456, 456, 1, 1);
             var execution = new StepToolExecution
             (
                  1,
@@ -355,8 +359,11 @@ namespace WoopiAiHub.UnitTests.Fixture
                  456,
                  StatusExecution.Running,
                  361
-
-            );
+            )
+            {
+                Card = card,
+                StepTool = stepTool 
+            };
             return execution;
         }
 
@@ -410,10 +417,10 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Email = f.Random.String(),
                     KeyMongoAccess = f.Random.String(),
                     TotalPages = f.Random.Int(1, 100),
-                    Data = @"{ ""CardId"": 123, ""StepToolId"": 456 }"
+                    Data  = new MetaDataAutomationDto(361, 456)
                 });
             return faker;
-        }
+        }  
     }
 
     [CollectionDefinition(nameof(DocumentCollection))]

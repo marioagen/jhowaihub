@@ -61,6 +61,7 @@ namespace WoopiAiHub.Repository
         public async Task<StepToolExecution?> FindByStepToolIdAndCardIdAsync(int stepToolId, int cardId)
         {
             return await _context.StepToolExecutions
+                                 .Include(s => s.StepTool)
                                  .FirstOrDefaultAsync(s => s.StepToolId.Equals(stepToolId) &&
                                                            s.CardId.Equals(cardId));
         }
@@ -77,6 +78,31 @@ namespace WoopiAiHub.Repository
         {
             _context.StepToolExecutions.Update(stepToolExecution);
             await _context.SaveChangesAsync();
+        }
+        
+        /// <summary>
+        /// Cont step executions 
+        /// </summary>
+        /// <param name="stepId"></param>
+        /// <returns></returns>
+        public async Task<int> ExecutionsByStepIdCountAsync(int stepId)
+        {
+            return await _context.StepToolExecutions
+                                 .Include(e => e.StepTool)
+                                 .CountAsync(e => e.StepTool!.StepId == stepId);
+        }
+
+        /// <summary>
+        /// Finds existing step tool executions for the given collection of card IDs.
+        /// </summary>
+        /// <param name="cardIds"></param>
+        /// <returns></returns>
+        public async Task<ICollection<(int StepToolId, int CardId)>> FindExistingExecutionsAsync(IEnumerable<int> cardIds)
+        {
+            return await _context.StepToolExecutions
+                                 .Where(e => cardIds.Contains(e.CardId))
+                                 .Select(e => new ValueTuple<int, int>(e.StepToolId, e.CardId))
+                                 .ToListAsync();
         }
     }
 }

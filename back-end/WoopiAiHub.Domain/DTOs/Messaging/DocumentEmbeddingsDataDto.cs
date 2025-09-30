@@ -4,6 +4,7 @@
     {
         public string ResponseQueue { get; set; } = string.Empty;
         public string ReferenceFile { get; set; } = string.Empty;
+        public MetaDataAutomationDto Data { get; set; }
         public ICollection<DocumentEmbeddingsAddDto> DocumentEmbeddings { get; set; } = [];
     }
 }

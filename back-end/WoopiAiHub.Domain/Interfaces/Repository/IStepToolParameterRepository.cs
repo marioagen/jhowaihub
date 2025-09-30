@@ -4,5 +4,6 @@
     {
         bool DeleteByIds(ICollection<int> ids);
         bool DeleteByStepToolsIds(ICollection<int> ids);
+        string FindByStepToolId(int stepToolId);
     }
 }

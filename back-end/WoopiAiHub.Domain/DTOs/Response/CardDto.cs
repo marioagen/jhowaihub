@@ -10,6 +10,7 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public int StepId { get; set; }
         public int Order { get; set; }
         public int DocumentId { get; set; }
+        public double Percentage { get; set; }
         public UserDto? AssignedUser { get; set; }
         public ProfileDto Profile { get; set; } = new();
         public DocumentStatus StatusDocument { get; set; } = new();
