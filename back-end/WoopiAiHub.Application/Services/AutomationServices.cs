@@ -220,6 +220,18 @@ namespace WoopiAiHub.Application.Services
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
         }
 
+        /// <summary>
+        /// Updates the specified <see cref="AutomationServicesDto"/> instance with execution data  based on the
+        /// provided step tool ID and card ID.
+        /// </summary>
+        /// <param name="dto">The <see cref="AutomationServicesDto"/> instance to be enriched.  If the <c>StepToolId</c> or <c>CardId</c>
+        /// properties are greater than zero, their values remain unchanged. Otherwise, they are updated with the
+        /// provided <paramref name="stepToolId"/> or <paramref name="cardId"/>.</param>
+        /// <param name="stepToolId">The step tool ID to use if the <c>StepToolId</c> property of <paramref name="dto"/> is not set (i.e., less
+        /// than or equal to zero).</param>
+        /// <param name="cardId">The card ID to use if the <c>CardId</c> property of <paramref name="dto"/> is not set (i.e., less than or
+        /// equal to zero).</param>
+        /// <returns>A new <see cref="AutomationServicesDto"/> instance with updated <c>StepToolId</c> and <c>CardId</c> values.</returns>
         private AutomationServicesDto EnrichDtoWithExecutionData(AutomationServicesDto dto, int stepToolId, int cardId)
         {
             return dto with

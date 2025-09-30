@@ -17,6 +17,16 @@ namespace WoopiAiHub.Api.Hubs
             _connectionMapping = connectionMapping;
         }
 
+        /// <summary>
+        /// Notifies all active connections for the specified user about the progress of a card execution.
+        /// </summary>
+        /// <remarks>This method retrieves all active connections associated with the specified user and
+        /// sends a notification to each connection. The notification includes the card ID and the updated progress
+        /// percentage.</remarks>
+        /// <param name="userEmail">The email address of the user whose connections will be notified. Cannot be <see langword="null"/> or empty.</param>
+        /// <param name="cardId">The unique identifier of the card whose progress has changed.</param>
+        /// <param name="percentage">The progress percentage of the card execution. Must be a value between 0.0 and 100.0.</param>
+        /// <returns></returns>
         public async Task CardProgessAsync(string userEmail, int cardId, double percentage)
         {
             var connections = _connectionMapping.GetConnections(userEmail);

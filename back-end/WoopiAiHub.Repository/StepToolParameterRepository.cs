@@ -51,6 +51,14 @@ namespace WoopiAiHub.Repository
             return false;
         }
 
+        /// <summary>
+        /// Retrieves the value associated with the specified step tool identifier.
+        /// </summary>
+        /// <remarks>This method searches for a step tool with the given identifier where the associated
+        /// tool  is marked as editable input. If multiple matches exist, the first value is returned.</remarks>
+        /// <param name="stepToolId">The identifier of the step tool to search for.</param>
+        /// <returns>The value associated with the specified step tool identifier, or <see langword="null"/>  if no matching step
+        /// tool is found.</returns>
         public string FindByStepToolId(int stepToolId)
         {
             var input = _context.StepToolParameters.Where(u => u.StepToolId.Equals(stepToolId) && u.StepTool.Tool.IsEditableInput)
