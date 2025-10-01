@@ -22,18 +22,16 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(ICollection<int> ids)
+        public bool DeleteByIds(IEnumerable<int> ids)
         {
-            var stepTools = _context.StepTools.Where(a => ids.Contains(a.Id));
+            if (!ids?.Any() ?? true)
+                return false;
 
-            if (stepTools.Any())
-            {
-                _context.StepTools.RemoveRange(stepTools);
-                _context.SaveChanges();
-                return true;
-            }
+            var deletedCount = _context.StepTools
+                .Where(a => ids.Contains(a.Id))
+                .ExecuteDelete();
 
-            return false;
+            return deletedCount > 0;
         }
 
         /// <summary>

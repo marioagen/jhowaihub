@@ -153,7 +153,7 @@
                     teamName: workflow.team.name,
                     teamId: workflow.team.id,
                 });
-
+                this.$store.commit('cleanTempWorkflow');
                 this.getWorkflowbyTeam(workflow.team.id);
             },
             getWorkflowbyTeam(id) {
