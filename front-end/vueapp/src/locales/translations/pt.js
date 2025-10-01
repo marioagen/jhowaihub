@@ -464,6 +464,10 @@
             title: "Edição de Workflow",
             subtitle: "Modifique as etapas e configurações do workflow",
         },
+        sidebar: {
+            index: "Workflow de documentos",
+            management: "Gestão de Workflows",
+        },
     },
     card: {
         userAssigned: "Responsável",

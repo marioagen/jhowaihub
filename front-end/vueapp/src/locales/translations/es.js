@@ -475,6 +475,10 @@
         labelWorkflowDocs: "Workflow de documentos",
         labelWorkflowBoard: "Tablero de procesamiento de documentos",
         labelWorkflowSubTitle: "Visualice el flujo de documentos a través de los pasos de procesamiento",
+        sidebar: {
+            index: "Flujo de trabajo de documentos",
+            management: "Gestión de flujos de trabajo",
+        },
     },
     card:{
         userAssigned: "Responsable",

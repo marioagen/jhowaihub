@@ -471,6 +471,10 @@
         labelWorkflowDocs: "Documents Workflow",
         labelWorkflowBoard: "Document Processing Board",
         labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
+        sidebar: {
+            index: "Document Workflow",
+            management: "Workflow Management",
+        },
     },
     card:{
         userAssigned: "Assigned",
