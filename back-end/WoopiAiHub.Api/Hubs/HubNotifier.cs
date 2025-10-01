@@ -27,7 +27,10 @@ namespace WoopiAiHub.Api.Hubs
         /// <param name="cardId">The unique identifier of the card whose progress has changed.</param>
         /// <param name="percentage">The progress percentage of the card execution. Must be a value between 0.0 and 100.0.</param>
         /// <returns></returns>
-        public async Task CardProgessAsync(string userEmail, int cardId, double percentage)
+        public async Task CardProgessAsync(string userEmail, 
+                                           int cardId, 
+                                           double percentage,
+                                           int stepId)
         {
             var connections = _connectionMapping.GetConnections(userEmail);
             foreach (var connectionId in connections)
@@ -35,7 +38,8 @@ namespace WoopiAiHub.Api.Hubs
                 await _hubContext.Clients.Client(connectionId).SendAsync("CardExecutionChanged", new
                 {
                     CardId = cardId,
-                    Percentage = percentage
+                    Percentage = percentage,
+                    StepId = stepId
                 });
             }
         }

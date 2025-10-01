@@ -211,7 +211,7 @@ namespace WoopiAiHub.Application.Services
 
             string output = string.Empty;
             if (stepTool.DependsOnStepTool != null)
-                output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id);
+                output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id, resolvedCardId);
 
             var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!);
             var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
@@ -270,7 +270,7 @@ namespace WoopiAiHub.Application.Services
             await _stepToolExecutionRepository.UpdateAsync(execution);
             var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
 
-            string output = await _stepToolOutputRepository.FindByStepToolId(dependentStepTool.DependsOnStepTool.Id);
+            string output = await _stepToolOutputRepository.FindByStepToolId(dependentStepTool.DependsOnStepTool.Id, execution.CardId);
 
             var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType);
             var payload = await handler.BuildPayload(automationServicesDto, input, output);

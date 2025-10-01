@@ -227,7 +227,7 @@
             await signalRService.startConnection();
 
             signalRService.on(this.signalrEventExecutionChanged, (message) => {
-                const step = this.kanbanCards.steps.find(s => s.order === 1);
+                const step = this.kanbanCards.steps.find(s => s.id === message.stepId);
                 if (!step?.cards) return;
 
                 const item = step.cards.find(card => card.id === message.cardId);
