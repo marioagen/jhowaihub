@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Domain.Interfaces.Repository;
+﻿using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 
@@ -18,18 +19,16 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(ICollection<int> ids)
+        public bool DeleteByIds(IEnumerable<int> ids)
         {
-            var parameters = _context.StepToolParameters.Where(a => ids.Contains(a.Id));
+            if (!ids?.Any() ?? true)
+                return false;
 
-            if (parameters.Any())
-            {
-                _context.StepToolParameters.RemoveRange(parameters);
-                _context.SaveChanges();
-                return true;
-            }
+            var deletedCount = _context.StepToolParameters
+                .Where(a => ids.Contains(a.Id))
+                .ExecuteDelete();
 
-            return false;
+            return deletedCount > 0;
         }
 
         /// <summary>

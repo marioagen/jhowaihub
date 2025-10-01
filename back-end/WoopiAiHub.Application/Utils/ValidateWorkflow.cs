@@ -1,4 +1,5 @@
 ﻿using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -51,7 +52,7 @@ namespace WoopiAiHub.Application.Utils
         /// <param name="workflowUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<Workflow> ValidateUpdateWorkflow(WorkflowUpdateDto workflowUpdateDto)
+        public async Task<WorkflowDto> ValidateUpdateWorkflow(WorkflowUpdateDto workflowUpdateDto)
         {
             if (string.IsNullOrEmpty(workflowUpdateDto.Name))
             {

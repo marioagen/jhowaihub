@@ -2,7 +2,7 @@
 {
     public interface IStepToolParameterRepository
     {
-        bool DeleteByIds(ICollection<int> ids);
+        bool DeleteByIds(IEnumerable<int> ids);
         bool DeleteByStepToolsIds(ICollection<int> ids);
         string FindByStepToolId(int stepToolId);
     }

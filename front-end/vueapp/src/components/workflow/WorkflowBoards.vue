@@ -53,8 +53,11 @@
 
                                 <Field name="teamId" rules="required" v-slot="{ field, errors }"
                                     v-model="workflowData.teamId" ref="teamField">
-                                    <select id="typeDocId" class="form-select form-select-sm border-start-0"
-                                        v-bind="field">
+                                   <select id="typeDocId" 
+                                            class="form-select form-select-sm border-start-0"
+                                            v-bind="field" 
+                                            :class="{ 'bg-light text-muted': isEdit }"
+                                            :disabled="isEdit">
                                         <option value="" disabled>{{ $t("workflow.responsableTeam") }}</option>
                                         <option v-for="(item, index) in teamsList" :key="index" :value="item.id">
                                             {{ item.id }} - {{ item.text }}
