@@ -1,17 +1,11 @@
 ﻿using WoopiAiHub.Domain.DTOs.Request;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface IStepToolRepository
     {
-        bool DeleteByIds(ICollection<int> ids);
+        bool DeleteByIds(IEnumerable<int> ids);
         bool DeleteByStepId(int stepId);
         Task<StepToolDto?> FindById(int id);
         IQueryable<StepToolDto> FindByIds(ICollection<int> ids);

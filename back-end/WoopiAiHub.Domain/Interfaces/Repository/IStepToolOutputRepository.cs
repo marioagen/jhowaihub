@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> CreateAsync(StepToolOutput stepToolOutput);
         Task<string> FindByStepToolId(int stepToolId,
                                       int cardId);
+        bool DeleteByIds(IEnumerable<int> ids);
     }
 }

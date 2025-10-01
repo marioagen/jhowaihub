@@ -9,6 +9,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -22,7 +23,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
         private readonly IStepToolRepository _stepToolRepository;
+        private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IStepToolParameterRepository _stepParameterRepository;
+        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
@@ -34,7 +37,8 @@ namespace WoopiAiHub.Application.Services
                                 IValidateWorkflow validateWorkflow,
                                 IStepToolRepository stepToolRepository,
                                 IStepToolOutputRepository stepToolOutputRepository,
-                                IStepToolParameterRepository stepToolParameterRepository)
+                                IStepToolParameterRepository stepToolParameterRepository,
+                                IStepToolExecutionRepository stepToolExecutionRepository)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -44,7 +48,10 @@ namespace WoopiAiHub.Application.Services
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
             _stepToolRepository = stepToolRepository;
+            _stepToolOutputRepository = stepToolOutputRepository;
             _stepParameterRepository = stepToolParameterRepository;
+            _stepToolExecutionRepository = stepToolExecutionRepository;
+
         }
 
         /// <summary>
@@ -83,13 +90,14 @@ namespace WoopiAiHub.Application.Services
 
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
 
-                DeleteSteps(workflowUpdateDto, workflow);
+                DeleteStepsAndDependencies(workflowUpdateDto, workflow);
                 ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.ToList(),
                                                                           workflow.TeamId);
 
-                workflow.AddSteps(stepsAdd);
+                var workflowUpdate = new Workflow(workflow.Id, workflow.Created, workflow.TeamId, workflowUpdateDto.Name);
+                workflowUpdate.AddSteps(stepsAdd);
 
-                await _workflowRepository.Update(workflow);
+                await _workflowRepository.Update(workflowUpdate);
 
                 _unitOfWork.Commit();
                 return true;
@@ -199,13 +207,27 @@ namespace WoopiAiHub.Application.Services
         /// <param name="workflow"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private void DeleteSteps(WorkflowUpdateDto workflowUpdateDto, Workflow workflow)
+        private void DeleteStepsAndDependencies(WorkflowUpdateDto workflowUpdateDto, WorkflowDto workflow)
         {
             var stepIds = workflow.Steps.Select(s => s.Id).ToList();
             var stepToolIds = workflow.Steps.SelectMany(s => s.StepTools).Select(st => st.Id).ToList();
-            var parameterIds = workflow.Steps.SelectMany(s => s.StepTools).SelectMany(st => st.Parameters).Select(p => p.Id).ToList();
+            var stepToolExecutionIds = workflow.Steps
+                                               .SelectMany(s => s.StepTools)
+                                               .SelectMany(st => st.Executions)
+                                               .Select(e => e.Id)
+                                               .ToList();
+            var parameterIds = workflow.Steps.SelectMany(s => s.StepTools)
+                                             .SelectMany(st => st.Parameters)
+                                             .Select(p => p.Id)
+                                             .ToList();
+            var outputIds = workflow.Steps.SelectMany(s => s.StepTools)
+                                          .SelectMany(st => st.Outputs)
+                                          .Select(o => o.Id)
+                                          .ToList();
 
+            _stepToolExecutionRepository.DeleteByIds(stepToolExecutionIds);
             _stepParameterRepository.DeleteByIds(parameterIds);
+            _stepToolOutputRepository.DeleteByIds(outputIds);
             _stepToolRepository.DeleteByIds(stepToolIds);
             _stepRepository.DeleteByIds(stepIds);
         }

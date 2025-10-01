@@ -44,5 +44,25 @@ namespace WoopiAiHub.Repository
                                                        .FirstOrDefaultAsync();
             return output;
         }
+
+        /// <summary>
+        /// Deletes the entities with the specified IDs from the data source.
+        /// </summary>
+        /// <remarks>If the specified collection of IDs is empty or none of the IDs match existing
+        /// entities, no changes are made, and the method returns <see langword="false"/>.</remarks>
+        /// <param name="ids">A collection of IDs representing the entities to delete. Cannot be null.</param>
+        /// <returns><see langword="true"/> if one or more entities were successfully deleted; otherwise, <see
+        /// langword="false"/>.</returns>
+        public bool DeleteByIds(IEnumerable<int> ids)
+        {
+            if (!ids?.Any() ?? true)
+                return false;
+
+            var deletedCount = _context.StepToolOutputs
+                .Where(a => ids.Contains(a.Id))
+                .ExecuteDelete();
+
+            return deletedCount > 0;
+        }
     }
 }

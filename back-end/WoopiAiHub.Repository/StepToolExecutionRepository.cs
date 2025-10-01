@@ -106,5 +106,24 @@ namespace WoopiAiHub.Repository
                                  .Select(e => new ValueTuple<int, int>(e.StepToolId, e.CardId))
                                  .ToListAsync();
         }
+
+        /// <summary>
+        /// Deletes the records with the specified IDs from the data store.
+        /// </summary>
+        /// <remarks>If the specified collection of IDs is empty or none of the IDs match existing
+        /// records, no changes are made, and the method returns <see langword="false"/>.</remarks>
+        /// <param name="ids">A collection of IDs representing the records to delete. Cannot be null.</param>
+        /// <returns><see langword="true"/> if one or more records were successfully deleted; otherwise, <see langword="false"/>.</returns>
+        public bool DeleteByIds(IEnumerable<int> ids)
+        {
+            if (!ids?.Any() ?? true)
+                return false;
+
+            var deletedCount = _context.StepToolExecutions
+                .Where(a => ids.Contains(a.Id))
+                .ExecuteDelete();
+
+            return deletedCount > 0;
+        }
     }
 }

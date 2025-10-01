@@ -297,7 +297,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var updateDto = WorkflowFixture.FindValidWorkflowUpdateDto();
-            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync((Workflow?)null);
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync((WorkflowDto?)null);
 
             // Act
             var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Update(updateDto));
@@ -315,7 +315,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var updateDto = WorkflowFixture.FindValidWorkflowUpdateDto();
-            var workflow = WorkflowFixture.FindValidWorkflow();
+            var workflow = WorkflowFixture.FindValidWorkflowDto();
             _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync(workflow);
 
             // Act
@@ -334,7 +334,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var updateDto = WorkflowFixture.FindValidWorkflowUpdateDto();
-            var workflow = WorkflowFixture.FindValidWorkflow();
+            var workflow = WorkflowFixture.FindValidWorkflowDto();
             updateDto.TeamId = workflow.TeamId;
             var step = WorkflowFixture.FindValidStep();
             updateDto.Steps.Clear();
@@ -350,9 +350,14 @@ namespace WoopiAiHub.UnitTests.Services
             workflow.Steps.Clear();
             foreach (var stepDto in updateDto.Steps)
             {
-                workflow.Steps.Add(new Step(stepDto.Id, DateTime.UtcNow, workflow.TeamId, stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId));
+                workflow.Steps.Add(new StepDto
+                {
+                    Id = stepDto.Id,
+                    WorkflowId = workflow.TeamId,
+                    Name = stepDto.Name,
+                    Order = stepDto.Order,
+                });
             }
-
             _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(updateDto.Id)).ReturnsAsync(workflow);
             _cardRepositoryMock.Setup(r => r.ExistsStepsInUse(It.IsAny<ICollection<int>>())).ReturnsAsync(false);
             int callCount = 0;
@@ -388,7 +393,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteById_ShouldDeleteWorkflowAndSteps()
         {
             // Arrange
-            var workflow = WorkflowFixture.FindValidWorkflow();
+            var workflow = WorkflowFixture.FindValidWorkflowDto();
 
             _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync(workflow);
             _cardRepositoryMock.Setup(repo => repo.ExistsStepsInUse(It.IsAny<List<int>>())).ReturnsAsync(false);
@@ -409,7 +414,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteById_ShouldThrowException_WhenWorkflowNotFound()
         {
             // Arrange
-            _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync((Workflow?)null);
+            _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync((WorkflowDto?)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.DeleteById(1));
