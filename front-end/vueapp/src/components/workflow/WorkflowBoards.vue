@@ -212,7 +212,6 @@ export default {
         },
         setEdit() {
             let hasInStore = this.$store.state.tempWorkflow.status;
-            console.log(this.$store.state.tempWorkflow);
             if (hasInStore && !this.isEdit) {
                 this.setWorkflowFromStore();
             }
@@ -361,7 +360,6 @@ export default {
                 });
         },
         editWorkflow() {
-            console.log(this.$store.state.tempWorkflow.status)
             let params = {
                 id: this.workflowData.id,
                 name: this.workflowData.name,
