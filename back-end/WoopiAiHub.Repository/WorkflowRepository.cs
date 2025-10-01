@@ -197,16 +197,16 @@ namespace WoopiAiHub.Repository
                                         e.Started,
                                         e.Completed,
                                         e.Status,
-                                        null, // StepTool já está no contexto, evita carregar tudo
-                                        null  // Card também
+                                        null, 
+                                        null  
                                     )).ToList(),
                                     Outputs = st.Outputs.Select(o => new StepToolOutputDto(
                                         o.Id,
                                         o.StepToolId,
                                         o.CardId,
                                         o.Value,
-                                        null, // StepTool
-                                        null  // Card
+                                        null, 
+                                        null 
                                     )).ToList()
                                 })
                                 .ToList()
