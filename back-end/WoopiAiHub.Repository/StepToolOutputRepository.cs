@@ -35,9 +35,11 @@ namespace WoopiAiHub.Repository
         /// <param name="stepToolId">The identifier of the step tool whose value is to be retrieved.</param>
         /// <returns>A string representing the value associated with the specified step tool identifier,  or <see
         /// langword="null"/> if no matching record is found.</returns>
-        public async Task<string> FindByStepToolId(int stepToolId)
+        public async Task<string> FindByStepToolId(int stepToolId, 
+                                                   int cardId)
         {
-            var output = await _context.StepToolOutputs.Where(u => u.StepToolId.Equals(stepToolId))
+            var output = await _context.StepToolOutputs.Where(u => u.StepToolId.Equals(stepToolId) &&
+                                                                   u.CardId.Equals(cardId))
                                                        .Select(v => v.Value)
                                                        .FirstOrDefaultAsync();
             return output;

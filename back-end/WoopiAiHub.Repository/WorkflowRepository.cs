@@ -154,15 +154,15 @@ namespace WoopiAiHub.Repository
                         StatusDocument = c.Document.Status,
                         Percentage = c.Step!.StepTools.Count() > 0
                         ? (
-                            (c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready)) * 100)
+                            (c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100)
                             /
                             (
                                 (c.Step.StepTools.Count() -
-                                 c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready)))
+                                 c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)))
                                  == 0
                                     ? 1 
                                     : (c.Step.StepTools.Count() -
-                                       c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready)))
+                                       c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)))
                             )
                           )
                         : 100,

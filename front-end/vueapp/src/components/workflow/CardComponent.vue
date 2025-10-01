@@ -209,11 +209,7 @@
                this.isLoadingAnalysis = true;
                     try {
                         await this.updateStatus();
-                        if (this.isFirstStep) {
-                            this.redirectToAnalyzer();
-                        } else {
-                            this.reloadList();
-                        }                        
+                        this.reloadList();                     
                     } catch (e) {
                         this.$notify({
                             title: 'Error',

@@ -85,11 +85,13 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="stepId"></param>
         /// <returns></returns>
-        public async Task<int> ExecutionsByStepIdCountAsync(int stepId)
+        public async Task<int> ExecutionsByStepIdCountAsync(int stepId,
+                                                            int cardId)
         {
             return await _context.StepToolExecutions
                                  .Include(e => e.StepTool)
-                                 .CountAsync(e => e.StepTool!.StepId == stepId);
+                                 .CountAsync(e => e.StepTool!.StepId == stepId &&
+                                                  e.CardId == cardId);
         }
 
         /// <summary>
