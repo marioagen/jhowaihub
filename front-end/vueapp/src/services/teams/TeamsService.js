@@ -20,6 +20,7 @@ export default {
             });
     },
     getTeamList() {
+        console.log("oi");
         return api.get("/Team")
             .then(({ data }) => {
                 return data;

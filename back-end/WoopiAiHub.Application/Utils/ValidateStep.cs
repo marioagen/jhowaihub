@@ -43,12 +43,19 @@ namespace WoopiAiHub.Application.Utils
         /// <param name="workflow"></param>
         /// <param name="stepsUpdateDto"></param>
         /// <exception cref="AppException"></exception>
-        public void ValidateUpdateStep(WorkflowDto workflow, ICollection<StepUpdateDto> stepsUpdateDto)
+        public void ValidateUpdateStep(Workflow workflow, ICollection<StepUpdateDto> stepsUpdateDto)
         {
             if (stepsUpdateDto == null || stepsUpdateDto.Count == 0)
             {
                 throw new AppException(ErrorCode.RequiredField, "Workflow must have at least one step", StepLabel.Required);
             }
+
+            if (workflow is null)
+                throw new AppException(
+                    ErrorCode.NotFound,
+                    "Workflow not found",
+                    WorkflowLabel.NotFound
+                );
 
             var steps = stepsUpdateDto.Select(s => new Step(s.Id, DateTime.UtcNow, workflow.Id, s.Name, s.Order, s.ProfileId, s.StatusId)).ToList();
 

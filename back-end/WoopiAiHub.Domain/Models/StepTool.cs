@@ -63,5 +63,21 @@ namespace WoopiAiHub.Domain.Models
         {
             DependsOnStepToolId = stepToolId;
         }
+
+        public void Update(int toolId, int order, decimal positionX, decimal positionY, int? dependsOnStepToolId)
+        {
+            ToolId = toolId;
+            Order = order;
+            PositionX = positionX;
+            PositionY = positionY;
+            if (dependsOnStepToolId.HasValue)
+                DependsOnStepToolId = dependsOnStepToolId;
+        }
+
+        public void RemoveDependency()
+        {
+            DependsOnStepToolId = null;
+            DependsOnStepTool = null;
+        }
     }
 }
