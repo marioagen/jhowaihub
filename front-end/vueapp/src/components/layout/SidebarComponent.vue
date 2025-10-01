@@ -104,7 +104,7 @@
                             name: 'Workflow', 
                             color: '#615FFF' 
                         },
-                        labelKey: 'workflow.index'
+                        labelKey: 'workflow.sidebar.index'
                     },
                     {
                         permission: 'Workflow',
@@ -114,7 +114,7 @@
                             name: 'Workflow', 
                             color: '#00bba7' 
                         },
-                        labelKey: 'workflow.editTitle'
+                        labelKey: 'workflow.sidebar.management'
                     },
                     {
                         permission: 'Types',
