@@ -402,13 +402,14 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
         {
-            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId);            
+            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId,
+                                                                                        execution.CardId);            
             var percent = (count / execution.StepTool.Order) * 100;
         
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent);
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId);
         }
 
         /// <summary>
