@@ -1,12 +1,4 @@
 <template>
-    <button 
-        v-if="showMultiDelete" 
-        class="btn btn-outline-danger btn-sm mb-2 ms-2" 
-        @click="openConfirmationMultiple"
-    >
-        <LucideIcon icon="Trash2" :size="15" />
-        {{ $t("labelDelete") }}
-    </button>
     <div>
         <TableComponent
             modalName="workflow.index"
@@ -16,9 +8,11 @@
             :isLoading="table.isLoading"
             :pagination="table.pagination"
             :hasSelection="false"
-            @selectedRows="selectedRows"
             @change-page="changePage"
         >
+            <template #cell-team="{ data }">
+                {{ data.row.team.name }}
+            </template>
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
@@ -60,11 +54,10 @@
 </template>
 
 <script>
-    import QuizzesService from "@/services/quizzes/QuizzesService";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import DropdownComponent from "@/components/global/DropdownComponent.vue";
-
+    import WorkflowService from "@/services/workflow/WorkflowService";
     export default {
         name: "WorkflowTable",
         components: {
@@ -78,7 +71,7 @@
                 columns: [
                     { key: "id", label: "id" },
                     { key: "name", label: "workflow.name" },
-                    { key: "teams", label: "workflow.teams" },
+                    { key: "team", label: "workflow.teams" },
                     { key: "actions", label: "workflow.actions" },
                 ],
                 data: [],
@@ -90,19 +83,32 @@
                 },
                 selectedRows: [],
             },
-            selectedQuizz: {},
-            queryPage: 1,
-            selectedOption: 10,
-            isAscending: false,
-            colType: 2,
-            searchInput: "",
+            filters: {
+                input: "",
+                isAsc: true,
+                isAllUsers: false,
+            },
             isDeleting: false,
         }),
         methods: {
-            getWorkflows() {
-            },
-            selectedRows(selectedRows) {
-                this.table.selectedRows = selectedRows;
+            getWorkflowList() {
+                this.table.isLoading = true;
+                var email = this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email)
+                    .then((response) => {
+                        if(response.error !== undefined) {
+                            this.$notify({
+                                title: 'Error',
+                                message: 'Dados salvos com erro com sucesso!',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        this.table.data = response;
+                    })
+                    .finally(() => {
+                        this.table.isLoading = false;
+                    });
             },
             redirectToIndex(workflow) {
                 this.$router.push({
@@ -120,45 +126,19 @@
                     },
                 });
             },
-            openConfirmation(quizz) {
-                this.selectedQuizz = [quizz.id];
+            openConfirmation(workflow) {
+                this.selectedWorkflow = [workflow.id];
                 this.$refs.DeleteDialog.open();
             },
             deleteWorkflow() {
-                this.isDeleting = true;
-                QuizzesService.deleteQuizzById(this.selectedQuizz)
-                    .then((success) => {
-                        if (success) {
-                            this.$refs.DeleteDialog.close();
-                            this.getQuizzes({ search: "", page: 1, type: null });
-                            this.$notify({
-                                title: "quizzes.title",
-                                message: "quizzes.removeSuccess",
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
-                            });
-                        } else {
-                            this.$notify({
-                                title: "quizzes.title",
-                                message: "quizzes.removeError",
-                                variant: 'danger',
-                                icon: 'CircleX',
-                            });
-                        }
-                    })
-                    .finally(() => {
-                        this.listIds = [];
-                        this.table.selectedRows = [];
-                        this.isDeleting = false;
-                    })
             },
             changePage(page) {
-                this.getQuizzes({ search: "", page: page, type: null });
+                console.log("Change page" + page)
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getWorkflows();
+            this.getWorkflowList();
         },
         computed: {
             showMultiDelete() {
