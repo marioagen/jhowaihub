@@ -88,6 +88,8 @@ namespace WoopiAiHub.Application.Services
             {
                 var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
+
+                // Atualiza o nome do workflow
                 workflow.Update(workflowUpdateDto.Name);
 
                 StepTool? lastStepToolGlobal = null;
@@ -95,12 +97,14 @@ namespace WoopiAiHub.Application.Services
                 foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
                 {
                     Step? stepEntity = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id);
-
                     StepTool? previousStepToolInSameStep = null;
 
                     if (stepEntity != null)
                     {
+                        // Atualiza o step existente
                         stepEntity.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
+
+                        // Remove StepTools que não existem mais no DTO
                         var stepToolIdsDto = stepDto.StepTools.Select(st => st.Id).ToHashSet();
                         var stepToolsToRemove = stepEntity.StepTools
                                                          .Where(st => !stepToolIdsDto.Contains(st.Id))
@@ -113,21 +117,23 @@ namespace WoopiAiHub.Application.Services
                                                            .ToList();
                             foreach (var dependent in dependents)
                                 dependent.RemoveDependency();
+                            stToRemove.RemoveDependency();
+
                             stepEntity.RemoveStepTool(stToRemove);
                         }
+
                         foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                         {
                             var stepTool = stepEntity.StepTools.FirstOrDefault(st => st.Id == stepToolDto.Id)
                                            ?? CreateStepToolUpdate(stepToolDto);
-
-                            stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, stepTool.DependsOnStepToolId);
+                            stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
                             stepTool.DependsOnStepTool = previousStepToolInSameStep ?? lastStepToolGlobal;
 
                             if (!stepEntity.StepTools.Contains(stepTool))
-                                stepEntity.AddStepTool(stepTool); 
+                                stepEntity.AddStepTool(stepTool);
 
                             previousStepToolInSameStep = stepTool;
-                            lastStepToolGlobal = stepTool; 
+                            lastStepToolGlobal = stepTool;
                         }
                     }
                     else
@@ -141,12 +147,13 @@ namespace WoopiAiHub.Application.Services
 
                             newStep.AddStepTool(stepTool);
                             previousStepToolInSameStep = stepTool;
-                            lastStepToolGlobal = stepTool; 
+                            lastStepToolGlobal = stepTool;
                         }
 
                         workflow.AddStep(newStep);
                     }
                 }
+
                 await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
 
@@ -158,6 +165,7 @@ namespace WoopiAiHub.Application.Services
                 throw;
             }
         }
+
 
         /// <summary>
         /// Retrieves a workflow by its ID.
