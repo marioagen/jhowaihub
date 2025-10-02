@@ -50,28 +50,23 @@
                 <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
-                <div class="dropdown">
-                    <a class="btn p-0 border-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <LucideIcon icon="Ellipsis" />
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2" @click="editUser(data.row)">
-                                <LucideIcon icon="SquarePen" />
-                                {{ $t("labelEdit") }}
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                class="dropdown-item d-flex align-items-center gap-2"
-                                @click="openConfirmation(data.row)"
-                            >
-                                <LucideIcon icon="Trash2" />
-                                {{ $t("labelDelete") }}
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <DropdownComponent>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="editUser(data.row)">
+                            <LucideIcon icon="SquarePen" />
+                            {{ $t("labelEdit") }}
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="openConfirmation(data.row)"
+                        >
+                            <LucideIcon icon="Trash2" />
+                            {{ $t("labelDelete") }}
+                        </a>
+                    </li>
+                </DropdownComponent>
             </template>
         </TableComponent>
     </div>
@@ -102,11 +97,13 @@
     import ModalUser from "@/components/management/users/modals/UserModal.vue";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent.vue";
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
+    import DropdownComponent from "@/components/global/DropdownComponent.vue";
 
     export default {
         name: "UsersTable",
         emits: ["setFilter"],
         components: {
+            DropdownComponent,
             BadgeOutlinedComponent,
             AvatarComponent,
             BadgeComponent,
@@ -126,9 +123,9 @@
                 data: [],
                 pagination: {
                     currentPage: 1,
-                    totalPages: 100,
+                    totalPages: 0,
                     itemsPerPage: 10,
-                    totalItems: 2000,
+                    totalItems: 0,
                 },
             },
             queryPage: 1,
@@ -184,6 +181,12 @@
                         if (status) {
                             this.$refs.DeleteDialog.close();
                             this.getUsers({ search: "", page: 1, type: null });
+                            this.$notify({
+                                title: "users.title",
+                                message: "users.removeSuccess",
+                                variant: "success",
+                                icon: "CircleX",
+                            });
                         }
                     })
                     .finally(() => {

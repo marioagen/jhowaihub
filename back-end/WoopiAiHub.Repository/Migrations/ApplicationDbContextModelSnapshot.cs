@@ -501,6 +501,162 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Steps", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepTool", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int?>("DependsOnStepToolId")
+                        .HasColumnType("int")
+                        .HasColumnName("DependsOnStepToolId");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int")
+                        .HasColumnName("StepOrder");
+
+                    b.Property<decimal>("PositionX")
+                        .HasColumnType("decimal(9,2)")
+                        .HasColumnName("PositionX");
+
+                    b.Property<decimal>("PositionY")
+                        .HasColumnType("decimal(9,2)")
+                        .HasColumnName("PositionY");
+
+                    b.Property<int>("StepId")
+                        .HasColumnType("int")
+                        .HasColumnName("StepId");
+
+                    b.Property<int>("ToolId")
+                        .HasColumnType("int")
+                        .HasColumnName("ToolId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DependsOnStepToolId")
+                        .IsUnique()
+                        .HasFilter("[DependsOnStepToolId] IS NOT NULL");
+
+                    b.HasIndex("StepId");
+
+                    b.HasIndex("ToolId");
+
+                    b.ToTable("StepTools", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolExecution", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("int")
+                        .HasColumnName("CardId");
+
+                    b.Property<DateTime?>("Completed")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Completed");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<DateTime>("Started")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Started");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("Status");
+
+                    b.Property<int>("StepToolId")
+                        .HasColumnType("int")
+                        .HasColumnName("StepToolId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CardId");
+
+                    b.HasIndex("StepToolId");
+
+                    b.ToTable("StepToolExecutions", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolOutput", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("int")
+                        .HasColumnName("CardId");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int>("StepToolId")
+                        .HasColumnType("int")
+                        .HasColumnName("StepToolId");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CardId");
+
+                    b.HasIndex("StepToolId");
+
+                    b.ToTable("StepToolOutputs", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolParameter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int>("StepToolId")
+                        .HasColumnType("int")
+                        .HasColumnName("StepToolId");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StepToolId");
+
+                    b.ToTable("StepToolParameters", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
                     b.Property<int>("Id")
@@ -522,6 +678,109 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Teams", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int>("InputDataId")
+                        .HasColumnType("int")
+                        .HasColumnName("InputDataId");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<bool>("IsEditableInput")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsEditableInput");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Name");
+
+                    b.Property<int>("OutputDataId")
+                        .HasColumnType("int")
+                        .HasColumnName("OutputDataId");
+
+                    b.Property<int>("ToolTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("ToolTypeId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InputDataId");
+
+                    b.HasIndex("OutputDataId");
+
+                    b.HasIndex("ToolTypeId");
+
+                    b.ToTable("Tools", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolData", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ToolDatas", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ToolTypes", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.TypeDoc", b =>
@@ -811,6 +1070,108 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Workflow");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepTool", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.StepTool", "DependsOnStepTool")
+                        .WithOne()
+                        .HasForeignKey("WoopiAiHub.Domain.Models.StepTool", "DependsOnStepToolId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Step", "Step")
+                        .WithMany("StepTools")
+                        .HasForeignKey("StepId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Tool", "Tool")
+                        .WithMany("StepTools")
+                        .HasForeignKey("ToolId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DependsOnStepTool");
+
+                    b.Navigation("Step");
+
+                    b.Navigation("Tool");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolExecution", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Card", "Card")
+                        .WithMany("Executions")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
+                        .WithMany("Executions")
+                        .HasForeignKey("StepToolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
+                    b.Navigation("StepTool");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolOutput", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Card", "Card")
+                        .WithMany("Outputs")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
+                        .WithMany("Outputs")
+                        .HasForeignKey("StepToolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
+                    b.Navigation("StepTool");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepToolParameter", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
+                        .WithMany("Parameters")
+                        .HasForeignKey("StepToolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StepTool");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.ToolData", "InputData")
+                        .WithMany("InputTools")
+                        .HasForeignKey("InputDataId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.ToolData", "OutputData")
+                        .WithMany("OutputTools")
+                        .HasForeignKey("OutputDataId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.ToolType", "ToolType")
+                        .WithMany("Tools")
+                        .HasForeignKey("ToolTypeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("InputData");
+
+                    b.Navigation("OutputData");
+
+                    b.Navigation("ToolType");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Team", "Team")
@@ -820,6 +1181,13 @@ namespace WoopiAiHub.Repository.Migrations
                         .IsRequired();
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
+                {
+                    b.Navigation("Executions");
+
+                    b.Navigation("Outputs");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Document", b =>
@@ -856,11 +1224,39 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Step", b =>
                 {
                     b.Navigation("Cards");
+
+                    b.Navigation("StepTools");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.StepTool", b =>
+                {
+                    b.Navigation("Executions");
+
+                    b.Navigation("Outputs");
+
+                    b.Navigation("Parameters");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
                     b.Navigation("Workflow");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
+                {
+                    b.Navigation("StepTools");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolData", b =>
+                {
+                    b.Navigation("InputTools");
+
+                    b.Navigation("OutputTools");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ToolType", b =>
+                {
+                    b.Navigation("Tools");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.TypeDoc", b =>

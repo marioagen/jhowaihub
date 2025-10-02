@@ -275,9 +275,14 @@
     filters: {
         documentInput: "Search by document, description or user, ...",
         workflowInput: "Search by document",
+        toolInput: "Search by tool name",
         teamsSelect: {
             all: "All teams",
             none: "Select a team",
+        },
+        typesSelect: {
+            all: "All types",
+            none: "Select a type",
         },
         assignment: {
             currentUser: "My documents",
@@ -422,6 +427,7 @@
         title: "Users",
         saveSuccess: "User saved successfully",
         saveError: "Error while saving user",
+        removeSuccess: "User removed successfully"
     },
     workflow: {
         index: "Workflow",
@@ -452,6 +458,7 @@
         editError: "Error editing workflow",
         removeSuccess: "Workflow removed successfully",
         removeError: "Error removing workflow",
+        stepFlow: "Document Automation",
         formCreate: {
             title: "New Workflow",
             subtitle: "Set up the steps of the document analysis process",
@@ -471,12 +478,76 @@
         assignBtn: "Assign",
         unassignInfo: "Unassign document"
     },
+    tools: {
+        index: "Tools",
+        title: "Tools",
+        subtitle: "Manage and configure your document processing tools",
+        notFound: "No tools registered",
+        createBtn: "New Tool",
+        editBtn: "Save changes",
+        type: "Type",
+        entry: "Input",
+        output: "Output",
+        created: "Created on",
+        createSuccess: "Tool created successfully",
+        createError: "Error creating tool",
+        editSuccess: "Tool updated successfully",
+        editError: "Error updating tool",
+        removeSuccess: "Tool removed successfully",
+        removeError: "Error removing tool",
+        removeTitle: "You are about to delete a tool from the system",
+        form: {
+            name: "Tool Name",
+            types: "Tool Type",
+            typesSelect: "Select tool type",
+            entries: "Input",
+            entriesSelect: "Select input type",
+            entriesEditable: "Editable input",
+            output: "Output",
+            outputSelect: "Select output type",
+        },
+        formCreate: {
+            title: "New Tool",
+            subtitle: "Create a new tool to process documents",
+        },
+        formEdit: {
+            title: "Edit Tool",
+            subtitle: "Update the selected tool’s information",
+        },
+        validationError: "Error validating fields",
+    },
     team: {
         title: "Teams",
         deleteSuccess: "Team deleted successfully",
         deleteDocError: "Could not delete the team: there are related documents",
         deleteError: "Error while deleting team"
-    }
+    },
+    flow: {
+        title: "Automation Flow",
+        subtitle: "",
+        save: "Save",
+        downloadJson: "Download JSON",
+        upload: "Upload",
+        start: "Start",
+        showTools: "Add Tools",
+        hideTools: "Hide Tools",
+        flowListEnd: "Finish Flow",
+        formCreate: {
+            title: "Automation Flow",
+            subtitle: "Create a new tool to process documents",
+        },
+        formEdit: {
+            title: "Automation Flow:",
+            subtitle: "Update the information of the selected tool",
+        },
+        sidebarTitle: "Configure I/O:",
+        formFlow: {
+            progressFlowSuccess: "Flow inserted successfully",
+            progressFlowFail: "Failed to insert flow",
+            editFlowNodeSuccess: "Node edited successfully",
+            editFlowNodeFail: "Failed to edit node",
+        }
+    },
 };
 
 export default english;

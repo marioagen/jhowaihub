@@ -17,6 +17,9 @@ import WorkflowPage from "@/pages/workflow/index.vue";
 import WorkflowEditor from "@/pages/workflow/editorIndex.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
+import ToolsPage from "@/pages/tools.vue";
+import NewFlow from "@/pages/flows/newFlow.vue";
+import EditFlow from "@/pages/flows/editFlow.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -175,7 +178,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/workflow/editor",
@@ -184,7 +187,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/workflow/new",
@@ -193,7 +196,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
     },
     {
         path: "/workflow/edit/:id",
@@ -202,7 +205,34 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        // beforeEnter: authenticate,
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/tools",
+        name: "Tools",
+        component: ToolsPage,
+        meta: { 
+            layout: "default",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/flow/:stepOrder",
+        name: "NewFlow",
+        component: NewFlow,
+        meta: { 
+            layout: "default",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/flow/:id/:stepId/:stepOrder",
+        name: "EditFlow",
+        component: EditFlow,
+        meta: { 
+            layout: "default",
+        },
+        beforeEnter: authenticate,
     },
 ];
 

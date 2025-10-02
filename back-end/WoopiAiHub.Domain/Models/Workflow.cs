@@ -41,6 +41,11 @@ namespace WoopiAiHub.Domain.Models
             {
                 AddStep(step);
             }
-        }        
+        }      
+        
+        public void Update(string name)
+        {
+            Name = name;
+        }   
     }
 }

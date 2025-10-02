@@ -1,9 +1,12 @@
-﻿using WoopiAiHub.Application.Services;
-using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Utils;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
+using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.ToolsHandler;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.Interfaces.Handlers;
+using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Interfaces.Utils;
 
 namespace WoopiAiHub.Application.DependencyInjection
 {
@@ -36,6 +39,12 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IValidateStep, ValidateStep>();
             services.AddScoped<IValidateWorkflow, ValidateWorkflow>();
             services.AddScoped<ICardServices, CardServices>();
+            services.AddScoped<IToolServices, ToolServices>();
+            services.AddScoped<IToolTypeServices, ToolTypeServices>();
+            services.AddScoped<IToolDataServices, ToolDataServices>();
+            services.AddScoped<IToolFactoryHandler, ToolFactoryHandler>();
+            services.AddScoped<IToolOutputServices, ToolOutputServices>();
+            services.AddScoped<IAutomationServices, AutomationServices>();
 
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();

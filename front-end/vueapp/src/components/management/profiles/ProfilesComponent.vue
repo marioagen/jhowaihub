@@ -48,10 +48,6 @@
             searchInput: function (val) {
                 this.searching = false;
             },
-            "$store.state.userProfile.language": function () {
-                this.setMenuActions();
-                this.setEntitySearch();
-            },
             "$store.state.userProfile.keyMongoAccess"(newValue) {
                 if (newValue) {
                     this.$refs.ProfilesTable.getProfiles({ search: "", page: this.queryPage, type: null });

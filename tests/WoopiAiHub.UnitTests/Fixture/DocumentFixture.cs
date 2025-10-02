@@ -1,6 +1,7 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
 using Microsoft.AspNetCore.Http;
+using PdfSharp.Pdf.IO;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Dto;
@@ -328,9 +329,42 @@ namespace WoopiAiHub.UnitTests.Fixture
                     ReferenceFile = f.Random.String(),
                     Tenant = f.Random.String(),
                     Email = f.Random.String(),
-                    AnalyzeResult = FindValidAnalyzeResultCustomDto()
+                    AnalyzeResult = FindValidAnalyzeResultCustomDto(),
+                    Data = new MetaDataAutomationDto(361, 456)
                 });
             return faker;
+        }
+
+        public static MetaDataAutomationDto FindValidProcessOcrDataAutomationDto()
+        {
+            var faker = new Faker("pt_BR");
+            var dto = new MetaDataAutomationDto
+            {
+                CardId = 361,
+                StepToolId = 456,
+
+            };
+            return dto;
+        }
+        public StepToolExecution FindValidStepToolExecution()
+        {
+            var guid = Guid.NewGuid();
+            var faker = new Faker("pt_BR");
+            var card = new Card(1, DateTime.Now, 456, 1, "name", 1, true, guid);
+            var stepTool = new StepTool(1, DateTime.Now, 456, 456, 456, 1, 1);
+            var execution = new StepToolExecution
+            (
+                 1,
+                 DateTime.Now,
+                 456,
+                 StatusExecution.Running,
+                 361
+            )
+            {
+                Card = card,
+                StepTool = stepTool 
+            };
+            return execution;
         }
 
         public static AnalyzeResultCustomDto FindValidAnalyzeResultCustomDto()
@@ -382,10 +416,11 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Tenant = f.Random.String(),
                     Email = f.Random.String(),
                     KeyMongoAccess = f.Random.String(),
-                    TotalPages = f.Random.Int(1, 100)
+                    TotalPages = f.Random.Int(1, 100),
+                    Data  = new MetaDataAutomationDto(361, 456)
                 });
             return faker;
-        }
+        }  
     }
 
     [CollectionDefinition(nameof(DocumentCollection))]

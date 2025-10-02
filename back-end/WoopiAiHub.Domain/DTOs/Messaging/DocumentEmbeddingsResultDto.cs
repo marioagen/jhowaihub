@@ -1,4 +1,6 @@
-﻿namespace WoopiAiHub.Domain.DTOs.Messaging
+﻿using Newtonsoft.Json.Linq;
+
+namespace WoopiAiHub.Domain.DTOs.Messaging
 {
     public class DocumentEmbeddingsResultDto
     {
@@ -7,5 +9,6 @@
         public string Tenant { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public int TotalPages { get; set; }
+        public MetaDataAutomationDto Data { get; set; }
     }
 }

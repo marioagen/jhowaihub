@@ -88,11 +88,6 @@
             ToastAlert,
             NormalizeIndex,
         },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.setCrumbsData();
-            },
-        },
         methods: {
             normalize: function (dataView, isReprocessing) {
                 this.dataView = dataView;

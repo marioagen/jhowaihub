@@ -23,6 +23,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual Profile? Profile { get; set; }
         public virtual Status? Status { get; set; }
         public virtual ICollection<Card> Cards { get; set; } = [];
+        public virtual ICollection<StepTool> StepTools { get; set; } = new List<StepTool>();
 
         public Step(int id, DateTime created, int workflowId, string name, int order, int profileId, int statusId)
             : base(id, created)
@@ -52,6 +53,17 @@ namespace WoopiAiHub.Domain.Models
             if (Cards.Any(c => c.Id == card.Id))
                 return;
             Cards.Add(card);
+        }
+
+        public void AddStepTool(StepTool stepTool)
+        {
+            StepTools.Add(stepTool);
+        }
+
+        public void RemoveStepTool(StepTool stepTool)
+        {
+            ArgumentNullException.ThrowIfNull(stepTool);
+            StepTools.Remove(stepTool);
         }
     }
 }

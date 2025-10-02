@@ -5,16 +5,29 @@
                 <div class="spinner-cover">
                     <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
                 </div>
-                <div class="progress-content" v-if="showLoading">
-                    <div class="mb-2">{{ $t("labelProcessing") }} <span class="float-end">{{ getProgressPercentage(dataCard.statusDocument) || 0 }}%</span></div>
+                <div 
+                    v-if="showLoading"
+                    class="progress-content" 
+                >
+                    <div 
+                        class="mb-2"
+                    >
+                        {{ $t("labelProcessing") }}
+                        <span 
+                            class="float-end"
+                        >
+                            {{ dataCard.percentage || 0 }}%
+                        </span>
+                    </div>
                     <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated"
-                             role="progressbar"
-                             :aria-valuenow="getProgressPercentage(dataCard.statusDocument) || 0"
-                             aria-valuemin="0"
-                             aria-valuemax="100"
-                             :style="{ width: (getProgressPercentage(dataCard.statusDocument) || 0) + '%' }">
-                        </div>
+                        <div 
+                            class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            :aria-valuenow="dataCard.percentage || 0"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            :style="{ width: (dataCard.percentage || 0) + '%' }"
+                        ></div>
                     </div>
                 </div>
             </div>
@@ -45,7 +58,7 @@
             </div>
             <div class="card-footer pt-0">
                 <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap" v-if="!showLoading">
-                    <div class="badge flex-shrink-1" :style="badgeStyle(dataStep.status.color)">
+                    <div class="badge flex-shrink-1 mb-1" :style="badgeStyle(dataStep.status.color)">
                         {{ dataStep.status.name }}
                     </div>
                     <div v-if="!isLastStep">
@@ -196,11 +209,7 @@
                this.isLoadingAnalysis = true;
                     try {
                         await this.updateStatus();
-                        if (this.isFirstStep) {
-                            this.redirectToAnalyzer();
-                        } else {
-                            this.reloadList();
-                        }                        
+                        this.reloadList();                     
                     } catch (e) {
                         this.$notify({
                             title: 'Error',
@@ -211,18 +220,6 @@
                     } finally {
                         this.isLoadingAnalysis = false;
                     }
-                },
-            getProgressPercentage(status) {
-                switch (status) {
-                    case 0:
-                        return 0;
-                    case 2:
-                        return 50;
-                    case 3:
-                        return 100; 
-                    default:
-                        return 0; 
-                }
             },
             redirectToAnalyzer() {
                 if (!this.showLoading) {
@@ -248,7 +245,7 @@
         },
         computed: {
             showLoading() {
-                return this.dataCard.statusDocument === 2 || this.dataCard.statusDocument === 0 || this.dataCard.statusDocument === 4;
+                return this.dataCard.percentage < 100;
             },
             isAdmin() {
                 return this.$store.state.userProfile.isAdmin;
@@ -357,10 +354,10 @@
         white-space: normal;
     }
 
-    .card-body small.user {
-        overflow-wrap: normal;
-        white-space: nowrap;
-    }
+        .card-body small.user {
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
 
     .card-body .badge {
         max-width: 60%;

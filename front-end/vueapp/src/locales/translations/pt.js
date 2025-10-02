@@ -276,9 +276,14 @@
     filters: {
         documentInput: "Buscar por documento, descrição ou usuário, ...",
         workflowInput: "Buscar por documento",
+        toolInput: "Buscar por name da ferramenta",
         teamsSelect: {
             all: "Todos os times",
             none: "Selecione um time",
+        },
+        typesSelect: {
+            all: "Todos os tipos",
+            none: "Selecione um tipo",
         },
         assignment: {
             currentUser: "Meus documentos",
@@ -419,6 +424,7 @@
         title: "Usuários",
         saveSuccess: "Usuário salvo com sucesso",
         saveError: "Erro ao salvar usuário",
+        removeSuccess: "Usuário removido com sucesso"
     },
     workflow: {
         index: "Workflow",
@@ -449,6 +455,7 @@
         editError: "Erro ao editar workflow",
         removeSuccess: "Workflow removido com sucesso",
         removeError: "Erro ao remover workflow",
+        stepFlow: "Automação de documentos",
         formCreate: {
             title: "Novo Workflow",
             subtitle: "Configure as etapas do processo de análise de documentos",
@@ -458,18 +465,82 @@
             subtitle: "Modifique as etapas e configurações do workflow",
         },
     },
-    card:{
+    card: {
         userAssigned: "Responsável",
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
         unassignInfo: "Desatribuir documento"
+    },
+    tools: {
+        index: "Ferramentas",
+        title: "Ferramentas",
+        subtitle: "Gerencie e configure suas ferramentas de processamento de documentos",
+        notFound: "Não há ferramentas cadastradas",
+        createBtn: "Nova Ferramenta",
+        editBtn: "Salvar alterações",
+        type: "Tipo",
+        entry: "Entrada",
+        output: "Saida",
+        created: "Criado em",
+        createSuccess: "Ferramenta criada com sucesso",
+        createError: "Erro ao criar Ferramenta",
+        editSuccess: "Ferramenta editada com sucesso",
+        editError: "Erro ao editar Ferramenta",
+        removeSuccess: "Ferramenta removida com sucesso",
+        removeError: "Erro ao remover Ferramenta",
+        removeTitle: "Você está prestes a deletar uma ferramenta do sistema",
+        form: {
+            name: "Nome da Ferramenta",
+            types: "Tipo da Ferramenta",
+            typesSelect: "Selecione tipo da Ferramenta",
+            entries: "Entrada (Input)",
+            entriesSelect: "Selecione o tipo de entrada",
+            entriesEditable: "Entrada editável",
+            output: "Saida (Output)",
+            outputSelect: "Selecione o tipo de saida",
+        },
+        formCreate: {
+            title: "Nova Ferramenta",
+            subtitle: "Crie uma nova ferramenta para processar documentos",
+        },
+        formEdit: {
+            title: "Editar Ferramenta",
+            subtitle: "Atualize as informações da ferramenta selecionada",
+        },
+        validationError: "Erro ao validar campos",
     },
     team: {
         title: "Times",
         deleteSuccess: "Time deletado com sucesso",
         deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
         deleteError: "Erro ao deletar time"
-    }
+    },
+    flow: {
+        title: "Fluxo de Automação",
+        subtitle: "",
+        save: "Salvar",
+        downloadJson: "Baixar JSON",
+        upload: "Upload",
+        showTools: "Adicionar Ferramentas",
+        hideTools: "Ocultar Ferramentas",
+        flowListEnd: "Finalizar fluxo",
+        start: "Início",
+        formCreate: {
+            title: "Fluxo de Automação",
+            subtitle: "Crie uma nova ferramenta para processar documentos",
+        },
+        formEdit: {
+            title: "Fluxo de Automação:",
+            subtitle: "Atualize as informações da ferramenta selecionada",
+        },
+        sidebarTitle: "Configurar I/O:",
+        formFlow: {
+            progressFlowSuccess: "Fluxo inserido com sucesso",
+            progressFlowFail: "Não foi possível inserir fluxo",
+            editFlowNodeSuccess: "Nodo editado com sucesso",
+            editFlowNodeFail: "Falha ao editar o nodo",
+        }
+    },
 };
 
 export default portuguese;

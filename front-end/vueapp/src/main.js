@@ -23,7 +23,6 @@ import '@vueform/multiselect/themes/default.css'
 localStorage.removeItem("theme");
 document.documentElement.className = "css-theme-light";
 
-
 const app = createApp(App);
 app.use(FloatingVue)
 app.use(router);

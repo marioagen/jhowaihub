@@ -75,8 +75,10 @@ namespace WoopiAiHub.Repository
         public bool DeactivateRange(List<Guid> ids)
         {
             var usersInDb = _context.Users
-                .Where(u => ids.Contains(u.Id))
-                .ToList();
+                                    .Where(u => ids.Contains(u.Id))
+                                    .Include(u => u.Profiles)
+                                    .Include(u => u.Teams)
+                                    .ToList();
 
             foreach (var user in usersInDb)
             {
@@ -84,7 +86,7 @@ namespace WoopiAiHub.Repository
             }
 
             _context.Users.UpdateRange(usersInDb);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
 
             return true;
         }

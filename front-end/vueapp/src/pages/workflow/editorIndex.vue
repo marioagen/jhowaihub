@@ -1,5 +1,5 @@
 <template>
-    <main :key="changeLanguage">
+    <main>
         <div class="container-fluid scroll-area mx-2">
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -85,6 +85,10 @@
 
     export default {
         name: "WorkflorEditorIndex",
+        components: {
+            FullscreenLoadingComponent,
+            WorkflowCards,
+        },
         data() {
             return {
                 isLoaded: false,
@@ -99,15 +103,6 @@
                 board: [],
                 changeLanguage: false,
             };
-        },
-        components: {
-            FullscreenLoadingComponent,
-            WorkflowCards,
-        },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.changeLanguage = !this.changeLanguage;
-            },
         },
         methods: {
             getWorkflowList() {
@@ -158,7 +153,7 @@
                     teamName: workflow.team.name,
                     teamId: workflow.team.id,
                 });
-
+                this.$store.commit('cleanTempWorkflow');
                 this.getWorkflowbyTeam(workflow.team.id);
             },
             getWorkflowbyTeam(id) {

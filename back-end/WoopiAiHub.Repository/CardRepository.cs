@@ -32,6 +32,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Cards
                                  .Where(c => c.Id == id)
+                                 .Include(d => d.Document)
                                  .Include(s => s.Step)
                                  .ThenInclude(w => w!.Workflow)
                                  .ThenInclude(t => t!.Team)
@@ -67,6 +68,23 @@ namespace WoopiAiHub.Repository
                 return await _context.SaveChangesAsync() > 0;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves the IDs of cards that are active in the first step.
+        /// </summary>
+        /// <remarks>A card is considered active in the first step if its associated step has an order
+        /// value of 1.</remarks>
+        /// <param name="cardIds">A collection of card IDs to filter. Only the IDs present in this collection and associated with cards in the
+        /// first step will be returned.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of integers
+        /// representing the IDs of the cards that are active in the first step.</returns>
+        public async Task<ICollection<int>> FindActiveCardIdsInFirstStepAsync(IEnumerable<int> cardIds)
+        {
+            return await _context.Cards
+                .Where(c => cardIds.Contains(c.Id) && c.Step.Order == 1)
+                .Select(c => c.Id)
+                .ToListAsync();
         }
     }
 }

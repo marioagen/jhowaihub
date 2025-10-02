@@ -112,7 +112,7 @@
                 numDocs: 0,
                 isLoaded: false,
                 isLoadedUsers: false,
-                signalrEventStatusChanged: "StatusChanged",
+                signalrEventExecutionChanged: "CardExecutionChanged",
                 filters: {
                     input: "",
                     isAllUsers: false,
@@ -123,11 +123,6 @@
         components: {
             WorkflowFilters,
             WorkflowCards,
-        },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.setEntitySearch();
-            },
         },
         methods: {
             getWorkflowByUser() {
@@ -231,18 +226,18 @@
         async mounted() {
             await signalRService.startConnection();
 
-            signalRService.on(this.signalrEventStatusChanged, (message) => {
-                const step = this.kanbanCards.steps.find(s => s.order === 1);
+            signalRService.on(this.signalrEventExecutionChanged, (message) => {
+                const step = this.kanbanCards.steps.find(s => s.id === message.stepId);
                 if (!step?.cards) return;
 
-                const item = step.cards.find(card => card.documentId === message.documentId);
+                const item = step.cards.find(card => card.id === message.cardId);
                 if (item) {
-                    item.statusDocument = message.status;
+                    item.percentage = message.percentage;
                 }
             });
         },
         beforeUnmount() {
-            signalRService.off(this.signalrEventStatusChanged);
+            signalRService.off(this.signalrEventExecutionChanged);
             signalRService.stopConnection();
             GlobalEventService.off("all-uploads-complete", this.reloadKanban);
             GlobalEventService.off("refresh-once", this.reloadKanban);

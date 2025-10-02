@@ -52,11 +52,6 @@
             SearchComponent,
             QuizzesTable
         },
-        watch: {
-            "$store.state.userProfile.language": function () {
-                this.setEntitySearch();
-            },
-        },
         methods: {
             setEntitySearch() {
                 this.entitySearch = {

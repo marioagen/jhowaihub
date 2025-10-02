@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -49,7 +50,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Workflows
                 .Where(w => w.TeamId == teamId)
-                .Select(GetWorkflowProjection(workflowFilterDto?.Input, workflowFilterDto?.IsAllUsers, workflowFilterDto?.Login))
+                .Select(FindWorkflowProjection(workflowFilterDto?.Input, workflowFilterDto?.IsAllUsers, workflowFilterDto?.Login))
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
@@ -63,7 +64,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Workflows
                 .Where(w => w.Id == id)
-                .Select(GetWorkflowProjection())
+                .Select(FindWorkflowProjection())
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
@@ -87,22 +88,30 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Workflow?> FindByIdReturnModel(int id)
         {
-           return await _context.Workflows
-                .Include(w => w.Steps)
-                    .ThenInclude(s => s.Profile)
-                .Include(w => w.Steps)
-                    .ThenInclude(s => s.Status)
-                .Include(w => w.Steps)
-                    .ThenInclude(s => s.Cards)
-                .FirstOrDefaultAsync(w => w.Id == id);
+            return await _context.Workflows
+                 .AsSplitQuery()
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Profile)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Status)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Cards)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.StepTools)
+                         .ThenInclude(p => p.Parameters)
+                 .Include(w => w.Steps)
+                   .ThenInclude(s => s.StepTools)
+                       .ThenInclude(p => p.Outputs)
+                 .FirstOrDefaultAsync(w => w.Id == id);
         }
+
 
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>
         /// <returns></returns>
-        private static Expression<Func<Workflow, WorkflowDto>> GetWorkflowProjection(String? input = null, 
-                Boolean? allUsers = true, 
+        private static Expression<Func<Workflow, WorkflowDto>> FindWorkflowProjection(String? input = null,
+                Boolean? allUsers = true,
                 String? login = null
             )
         {
@@ -111,6 +120,7 @@ namespace WoopiAiHub.Repository
                 Id = w.Id,
                 Name = w.Name,
                 TeamId = w.TeamId,
+                Created = w.Created,
                 Steps = w.Steps.Select(s => new StepDto
                 {
                     Id = s.Id,
@@ -143,13 +153,27 @@ namespace WoopiAiHub.Repository
                         Id = c.Id,
                         Name = c.Name,
                         Created = c.Created,
-                        Description = c.Document.Description,
+                        Description = c.Document!.Description,
                         Owner = c.Document.EmailCreator,
                         DocumentId = c.Document.Id,
                         StatusDocument = c.Document.Status,
+                        Percentage = c.Step!.StepTools.Count() > 0
+                        ? (
+                            (c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100)
+                            /
+                            (
+                                (c.Step.StepTools.Count() -
+                                 c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)))
+                                 == 0
+                                    ? 1
+                                    : (c.Step.StepTools.Count() -
+                                       c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)))
+                            )
+                          )
+                        : 100,
                         AssignedUser = c.AssignedUser != null ?
-                        new UserDto 
-                        { 
+                        new UserDto
+                        {
                             Name = c.AssignedUser.Name,
                             Email = c.AssignedUser.Email,
                             Created = c.AssignedUser.Created,
@@ -157,7 +181,47 @@ namespace WoopiAiHub.Repository
                         }
                         : null
                     }).ToList(),
-                    WorkflowId = s.WorkflowId
+                    WorkflowId = s.WorkflowId,
+                    StepTools = s.StepTools
+                                .Select(st => new StepToolDto
+                                {
+                                    Id = st.Id,
+                                    ToolId = st.ToolId,
+                                    Order = st.Order,
+                                    PositionX = st.PositionX,
+                                    PositionY = st.PositionY,
+                                    DependsOnStepToolId = st.DependsOnStepToolId,
+                                    Parameters = st.Parameters.Select(p => new StepToolParameterDto
+                                    {
+                                        Id = p.Id,
+                                        Value = p.Value,
+                                    }).ToList(),
+                                    Tool = new ToolDto
+                                    {
+                                        Id = st.Tool!.Id,
+                                        Name = st.Tool.Name,
+                                        IsEditableInput = st.Tool.IsEditableInput,
+                                    },
+                                    Executions = st.Executions.Select(e => new StepToolExecutionDto(
+                                        e.Id,
+                                        e.StepToolId,
+                                        e.CardId,
+                                        e.Started,
+                                        e.Completed,
+                                        e.Status,
+                                        null, 
+                                        null  
+                                    )).ToList(),
+                                    Outputs = st.Outputs.Select(o => new StepToolOutputDto(
+                                        o.Id,
+                                        o.StepToolId,
+                                        o.CardId,
+                                        o.Value,
+                                        null, 
+                                        null 
+                                    )).ToList()
+                                })
+                                .ToList()
                 }).ToList()
             };
         }

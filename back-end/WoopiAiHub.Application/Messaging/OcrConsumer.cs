@@ -3,10 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
 
@@ -54,7 +56,17 @@ namespace WoopiAiHub.Application.Messaging
                     var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
                     var result = await documentServices.ProcessOcrResult(message);
 
-                    await _publisher.PublishAsync(_queues.EmbeddingQueue, result);
+                    var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
+                    var automationServicesDto = new AutomationServicesDto
+                    (
+                        result.StepToolId,
+                        result.CardId,
+                        message.Tenant,
+                        message.Email,
+                        message.ReferenceFile,
+                        0
+                    );
+                    await automationServices.ContinueExecution(automationServicesDto);
                 }
                 catch (Exception ex)
                 {
