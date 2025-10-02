@@ -16,7 +16,7 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
+                        <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
                             <div>
                                 <LucideIcon icon="Clock" :size="14" class="me-2" />
                                 <span>{{$t("workflow.boardView")}}</span>
@@ -52,7 +52,7 @@
                     <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
-                                <WorkflowCards 
+                                <KanbanBoard 
                                     :kanbanData="kanbanCards"
                                     :users="users"
                                     @reload="reloadKanban"
@@ -88,7 +88,7 @@
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
     import WorkflowService from "@/services/workflow/WorkflowService.js";
-    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
+    import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
     import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
     import UserService from "@/services/users/UserService";
 
@@ -122,7 +122,7 @@
         },
         components: {
             WorkflowFilters,
-            WorkflowCards,
+            KanbanBoard,
         },
         methods: {
             getWorkflowByUser() {
