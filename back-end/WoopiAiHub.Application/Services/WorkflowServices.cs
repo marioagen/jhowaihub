@@ -91,7 +91,6 @@ namespace WoopiAiHub.Application.Services
             {
                 var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
-
                 workflow.Update(workflowUpdateDto.Name);
 
                 StepTool? lastGlobalStepTool = null;
