@@ -23,9 +23,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
         private readonly IStepToolRepository _stepToolRepository;
-        private readonly IStepToolOutputRepository _stepToolOutputRepository;
-        private readonly IStepToolParameterRepository _stepParameterRepository;
-        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
@@ -35,10 +32,7 @@ namespace WoopiAiHub.Application.Services
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
                                 IValidateWorkflow validateWorkflow,
-                                IStepToolRepository stepToolRepository,
-                                IStepToolOutputRepository stepToolOutputRepository,
-                                IStepToolParameterRepository stepToolParameterRepository,
-                                IStepToolExecutionRepository stepToolExecutionRepository)
+                                IStepToolRepository stepToolRepository)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -48,9 +42,6 @@ namespace WoopiAiHub.Application.Services
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
             _stepToolRepository = stepToolRepository;
-            _stepToolOutputRepository = stepToolOutputRepository;
-            _stepParameterRepository = stepToolParameterRepository;
-            _stepToolExecutionRepository = stepToolExecutionRepository;
 
         }
 
@@ -93,7 +84,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="workflowUpdateDto">The DTO containing the workflow updates, including steps and step tools.</param>
         /// <returns>Returns true if the update is successful; otherwise, the transaction is rolled back and an exception is thrown.</returns>
-        public async Task<bool> UpdateWorkflowAsync(WorkflowUpdateDto workflowUpdateDto)
+        public async Task<bool> Update(WorkflowUpdateDto workflowUpdateDto)
         {
             _unitOfWork.BeginTransaction();
             try
