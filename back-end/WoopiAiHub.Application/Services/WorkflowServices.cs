@@ -112,29 +112,21 @@ namespace WoopiAiHub.Application.Services
 
                         foreach (var stToRemove in stepToolsToRemove)
                         {
-                            // Limpa dependências de outras StepTools que dependem desta
                             var dependents = workflow.Steps.SelectMany(s => s.StepTools)
                                                            .Where(st => st.DependsOnStepToolId == stToRemove.Id)
                                                            .ToList();
                             foreach (var dependent in dependents)
                                 dependent.RemoveDependency();
-
-                            // Limpa dependência da própria StepTool antes de remover
                             stToRemove.RemoveDependency();
 
                             stepEntity.RemoveStepTool(stToRemove);
                         }
 
-                        // Atualiza ou adiciona StepTools restantes
                         foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                         {
                             var stepTool = stepEntity.StepTools.FirstOrDefault(st => st.Id == stepToolDto.Id)
                                            ?? CreateStepToolUpdate(stepToolDto);
-
-                            // Reset de dependência para evitar duplicação de chave
                             stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
-
-                            // Define a dependência corretamente (uma única dependência)
                             stepTool.DependsOnStepTool = previousStepToolInSameStep ?? lastStepToolGlobal;
 
                             if (!stepEntity.StepTools.Contains(stepTool))
@@ -146,7 +138,6 @@ namespace WoopiAiHub.Application.Services
                     }
                     else
                     {
-                        // Cria um step novo
                         var newStep = CreateStep(stepDto, workflow.TeamId);
 
                         foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
