@@ -404,7 +404,7 @@ namespace WoopiAiHub.Application.Services
         {
             var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId,
                                                                                         execution.CardId);            
-            var percent = (count / execution.StepTool.Order) * 100;
+            var percent = ((double)execution.StepTool.Order / count) * 100;
         
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
