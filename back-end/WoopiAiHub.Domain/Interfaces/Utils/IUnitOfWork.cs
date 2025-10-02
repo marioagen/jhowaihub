@@ -18,5 +18,6 @@ namespace WoopiAiHub.Domain.Interfaces.Utils
 
         void Rollback();
 
+        Task<int> SaveChangesAsync();
     }
 }

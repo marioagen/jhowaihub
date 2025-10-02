@@ -24,6 +24,11 @@ namespace WoopiAiHub.Repository
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public async Task CreateRange(ICollection<Step> steps)
+        {
+            await _context.Steps.AddRangeAsync(steps);
+        }
+
         /// <summary>
         /// Updates an existing step in the database.
         /// </summary>

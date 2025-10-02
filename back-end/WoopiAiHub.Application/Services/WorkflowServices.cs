@@ -86,20 +86,70 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                var workflow = await _validateWorkflow.ValidateUpdateWorkflow(workflowUpdateDto);
-
+                var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
+                workflow.Update(workflowUpdateDto.Name);
 
-                DeleteStepsAndDependencies(workflowUpdateDto, workflow);
-                ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.ToList(),
-                                                                          workflow.TeamId);
+                StepTool? lastStepToolGlobal = null;
 
-                var workflowUpdate = new Workflow(workflow.Id, workflow.Created, workflow.TeamId, workflowUpdateDto.Name);
-                workflowUpdate.AddSteps(stepsAdd);
+                foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
+                {
+                    Step? stepEntity = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id);
 
-                await _workflowRepository.Update(workflowUpdate);
+                    StepTool? previousStepToolInSameStep = null;
 
+                    if (stepEntity != null)
+                    {
+                        stepEntity.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
+                        var stepToolIdsDto = stepDto.StepTools.Select(st => st.Id).ToHashSet();
+                        var stepToolsToRemove = stepEntity.StepTools
+                                                         .Where(st => !stepToolIdsDto.Contains(st.Id))
+                                                         .ToList();
+
+                        foreach (var stToRemove in stepToolsToRemove)
+                        {
+                            var dependents = workflow.Steps.SelectMany(s => s.StepTools)
+                                                           .Where(st => st.DependsOnStepToolId == stToRemove.Id)
+                                                           .ToList();
+                            foreach (var dependent in dependents)
+                                dependent.RemoveDependency();
+                            stepEntity.RemoveStepTool(stToRemove);
+                        }
+                        foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                        {
+                            var stepTool = stepEntity.StepTools.FirstOrDefault(st => st.Id == stepToolDto.Id)
+                                           ?? CreateStepToolUpdate(stepToolDto);
+
+                            stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, stepTool.DependsOnStepToolId);
+                            stepTool.DependsOnStepTool = previousStepToolInSameStep ?? lastStepToolGlobal;
+
+                            if (!stepEntity.StepTools.Contains(stepTool))
+                                stepEntity.AddStepTool(stepTool); 
+
+                            previousStepToolInSameStep = stepTool;
+                            lastStepToolGlobal = stepTool; 
+                        }
+                    }
+                    else
+                    {
+                        var newStep = CreateStep(stepDto, workflow.TeamId);
+
+                        foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                        {
+                            var stepTool = CreateStepToolUpdate(stepToolDto);
+                            stepTool.DependsOnStepTool = previousStepToolInSameStep ?? lastStepToolGlobal;
+
+                            newStep.AddStepTool(stepTool);
+                            previousStepToolInSameStep = stepTool;
+                            lastStepToolGlobal = stepTool; 
+                        }
+
+                        workflow.AddStep(newStep);
+                    }
+                }
+                await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
+
                 return true;
             }
             catch
@@ -198,38 +248,6 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
             }
             return true;
-        }
-
-        /// <summary>
-        /// Deletes steps that are no longer present in the updated workflow DTO.
-        /// </summary>
-        /// <param name="workflowUpdateDto"></param>
-        /// <param name="workflow"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        private void DeleteStepsAndDependencies(WorkflowUpdateDto workflowUpdateDto, WorkflowDto workflow)
-        {
-            var stepIds = workflow.Steps.Select(s => s.Id).ToList();
-            var stepToolIds = workflow.Steps.SelectMany(s => s.StepTools).Select(st => st.Id).ToList();
-            var stepToolExecutionIds = workflow.Steps
-                                               .SelectMany(s => s.StepTools)
-                                               .SelectMany(st => st.Executions)
-                                               .Select(e => e.Id)
-                                               .ToList();
-            var parameterIds = workflow.Steps.SelectMany(s => s.StepTools)
-                                             .SelectMany(st => st.Parameters)
-                                             .Select(p => p.Id)
-                                             .ToList();
-            var outputIds = workflow.Steps.SelectMany(s => s.StepTools)
-                                          .SelectMany(st => st.Outputs)
-                                          .Select(o => o.Id)
-                                          .ToList();
-
-            _stepToolExecutionRepository.DeleteByIds(stepToolExecutionIds);
-            _stepParameterRepository.DeleteByIds(parameterIds);
-            _stepToolOutputRepository.DeleteByIds(outputIds);
-            _stepToolRepository.DeleteByIds(stepToolIds);
-            _stepRepository.DeleteByIds(stepIds);
         }
 
         /// <summary>

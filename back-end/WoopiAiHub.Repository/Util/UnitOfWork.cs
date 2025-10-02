@@ -24,4 +24,9 @@ public class UnitOfWork : IUnitOfWork
     {
         _context.Database.RollbackTransaction();
     }
+
+    public async Task<int> SaveChangesAsync()
+    {
+        return await _context.SaveChangesAsync();
+    }
 }
