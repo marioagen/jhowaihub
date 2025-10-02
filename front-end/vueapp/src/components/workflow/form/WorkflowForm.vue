@@ -92,7 +92,7 @@
                 </div>
                 <div v-else class="row">
                     <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
-                        <WorkflowStepComponent 
+                        <WorkflowStep 
                             v-for="(step, index) in activeStepsList" 
                             :key="step.id || index"
                             :step="step" :index="index + 1" 
@@ -125,7 +125,7 @@
 
 <script>
 import { Field, useForm } from "vee-validate";
-import WorkflowStepComponent from "@/components/workflow/WorkflowStepComponent.vue";
+import WorkflowStep from "@/components/workflow/form/WorkflowStep.vue";
 import TeamsService from "@/services/teams/TeamsService";
 import StatusService from "@/services/status/StatusService";
 import ProfilesService from "@/services/profiles/ProfilesService";
@@ -136,7 +136,7 @@ export default {
     name: "WorkflowBoards",
     components: {
         FullscreenLoadingComponent,
-        WorkflowStepComponent,
+        WorkflowStep,
         Field,
     },
     props: {
