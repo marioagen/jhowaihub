@@ -46,7 +46,7 @@
                     <LucideIcon icon="User" size="12" class="me-1" />
                     <small class="user">{{ $t("card.userApplicant") }}: {{dataCard.owner}}</small>
                 </div>
-                <div v-if="!isLastStep && dataCard.assignedUser" class="mb-2">
+                <div v-if="!isLastStep && dataCard.assignedUser && !showLoading" class="mb-2">
                     <LucideIcon icon="User" size="12" class="me-1" />
                     <small class="user">{{ $t("card.userApplicant") }}: {{dataCard.assignedUser.name}}</small>
                     <button type="button" @click.stop="unassignUser" class="btn btn-sm btn-unlink ms-1 px-1"  
@@ -67,7 +67,7 @@
                             <LucideIcon icon="ChevronRight" :size="16" class="me-1" v-if="!isLoadingAnalysis" />
                             <div class="spinner-grow text-light" role="status"  v-if="isLoadingAnalysis"></div>
                         </button>
-                        <div v-else-if="!dataCard.assignedUser">
+                        <div v-else-if="!dataCard.assignedUser && !showLoading">
                             <div v-if="isAdmin"  class="btn-group">
                                 <button type="button" class="btn btn-sm  btn-primary assing-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" @click.stop="">
                                     <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />

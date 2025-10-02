@@ -76,12 +76,24 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Updates an existing workflow.
+        /// Updates an existing workflow and its steps and step tools based on the provided data transfer object (DTO).
+        /// <para>
+        /// For each step in the DTO:
+        /// - If the step exists, updates its properties and removes any step tools that are no longer present.
+        /// - Updates existing step tools or creates new ones, maintaining correct order and dependencies.
+        /// - If the step does not exist, creates it along with its step tools.
+        /// </para>
+        /// <para>
+        /// Dependencies are handled so that the first step tool in a step depends on the last global step tool,
+        /// and subsequent step tools in the same step depend on the previous step tool in the same step.
+        /// </para>
+        /// <para>
+        /// All changes are wrapped in a transaction. If an exception occurs, the transaction is rolled back.
+        /// </para>
         /// </summary>
-        /// <param name="workflowUpdateDto"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        public async Task<bool> Update(WorkflowUpdateDto workflowUpdateDto)
+        /// <param name="workflowUpdateDto">The DTO containing the workflow updates, including steps and step tools.</param>
+        /// <returns>Returns true if the update is successful; otherwise, the transaction is rolled back and an exception is thrown.</returns>
+        public async Task<bool> UpdateWorkflowAsync(WorkflowUpdateDto workflowUpdateDto)
         {
             _unitOfWork.BeginTransaction();
             try
@@ -89,65 +101,63 @@ namespace WoopiAiHub.Application.Services
                 var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
 
-                // Atualiza o nome do workflow
                 workflow.Update(workflowUpdateDto.Name);
 
-                StepTool? lastStepToolGlobal = null;
+                StepTool? lastGlobalStepTool = null;
 
                 foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
                 {
-                    Step? stepEntity = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id);
-                    StepTool? previousStepToolInSameStep = null;
+                    Step? existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id);
+                    StepTool? previousStepToolInStep = null;
 
-                    if (stepEntity != null)
+                    if (existingStep != null)
                     {
-                        // Atualiza o step existente
-                        stepEntity.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
+                        existingStep.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
 
-                        // Remove StepTools que não existem mais no DTO
-                        var stepToolIdsDto = stepDto.StepTools.Select(st => st.Id).ToHashSet();
-                        var stepToolsToRemove = stepEntity.StepTools
-                                                         .Where(st => !stepToolIdsDto.Contains(st.Id))
-                                                         .ToList();
-
-                        foreach (var stToRemove in stepToolsToRemove)
+                        var stepToolIdsFromDto = stepDto.StepTools.Select(st => st.Id).ToHashSet();
+                        var stepToolsToRemove = existingStep.StepTools
+                                                            .Where(st => !stepToolIdsFromDto.Contains(st.Id))
+                                                            .ToList();
+                        foreach (var stepToolToRemove in stepToolsToRemove)
                         {
                             var dependents = workflow.Steps.SelectMany(s => s.StepTools)
-                                                           .Where(st => st.DependsOnStepToolId == stToRemove.Id)
+                                                           .Where(st => st.DependsOnStepToolId == stepToolToRemove.Id)
                                                            .ToList();
+
                             foreach (var dependent in dependents)
                                 dependent.RemoveDependency();
-                            stToRemove.RemoveDependency();
 
-                            stepEntity.RemoveStepTool(stToRemove);
+                            stepToolToRemove.RemoveDependency();
+                            existingStep.RemoveStepTool(stepToolToRemove);
                         }
+                        await _unitOfWork.SaveChangesAsync();
 
                         foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                         {
-                            var stepTool = stepEntity.StepTools.FirstOrDefault(st => st.Id == stepToolDto.Id)
+                            var stepTool = existingStep.StepTools.FirstOrDefault(st => st.Id == stepToolDto.Id)
                                            ?? CreateStepToolUpdate(stepToolDto);
+
                             stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
-                            stepTool.DependsOnStepTool = previousStepToolInSameStep ?? lastStepToolGlobal;
+                            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
 
-                            if (!stepEntity.StepTools.Contains(stepTool))
-                                stepEntity.AddStepTool(stepTool);
+                            if (!existingStep.StepTools.Contains(stepTool))
+                                existingStep.AddStepTool(stepTool);
 
-                            previousStepToolInSameStep = stepTool;
-                            lastStepToolGlobal = stepTool;
+                            previousStepToolInStep = stepTool;
+                            lastGlobalStepTool = stepTool;
                         }
                     }
                     else
                     {
                         var newStep = CreateStep(stepDto, workflow.TeamId);
-
                         foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                         {
                             var stepTool = CreateStepToolUpdate(stepToolDto);
-                            stepTool.DependsOnStepTool = previousStepToolInSameStep ?? lastStepToolGlobal;
+                            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
 
                             newStep.AddStepTool(stepTool);
-                            previousStepToolInSameStep = stepTool;
-                            lastStepToolGlobal = stepTool;
+                            previousStepToolInStep = stepTool;
+                            lastGlobalStepTool = stepTool;
                         }
 
                         workflow.AddStep(newStep);
@@ -165,7 +175,6 @@ namespace WoopiAiHub.Application.Services
                 throw;
             }
         }
-
 
         /// <summary>
         /// Retrieves a workflow by its ID.
