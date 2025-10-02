@@ -86,11 +86,23 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<WorkflowDto?> FindByIdReturnModel(int id)
+        public async Task<Workflow?> FindByIdReturnModel(int id)
         {
             return await _context.Workflows
-                .Select(FindWorkflowProjection())
-                .FirstOrDefaultAsync(w => w.Id == id);
+                 .AsSplitQuery()
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Profile)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Status)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Cards)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.StepTools)
+                         .ThenInclude(p => p.Parameters)
+                 .Include(w => w.Steps)
+                   .ThenInclude(s => s.StepTools)
+                       .ThenInclude(p => p.Outputs)
+                 .FirstOrDefaultAsync(w => w.Id == id);
         }
 
 

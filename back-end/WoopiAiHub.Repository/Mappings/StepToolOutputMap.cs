@@ -15,7 +15,7 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasOne(e => e.StepTool)
                    .WithMany(u => u.Outputs) 
                    .HasForeignKey(o => o.StepToolId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.Card)
                    .WithMany(u => u.Outputs) 

@@ -7,6 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     public interface IValidateWorkflow
     {
         Task ValidateCreateWorkflow(WorkflowCreateDto workflowCreateDto);
-        Task<WorkflowDto> ValidateUpdateWorkflow(WorkflowUpdateDto workflowUpdateDto);
+        Task<Workflow> ValidateUpdateWorkflow(WorkflowUpdateDto workflowUpdateDto);
     }
 }
