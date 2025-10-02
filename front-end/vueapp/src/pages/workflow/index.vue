@@ -219,6 +219,7 @@
             },
         },
         created() {
+            console.log(this.$route.query)
             this.getWorkflowByUser();
             GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
             GlobalEventService.on("refresh-once", this.getWorkflowByUser);

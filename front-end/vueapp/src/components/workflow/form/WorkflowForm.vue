@@ -390,7 +390,7 @@ export default {
         },
         redirectToIndex() {
             this.$store.commit('cleanTempWorkflow');
-            return this.$router.push({ name: "WorkflowEditor" });
+            return this.$router.push({ name: "WorkflowManagement" });
         },
         saveWorkflowInStore() {
             this.reorderList();

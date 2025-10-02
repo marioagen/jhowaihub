@@ -112,18 +112,18 @@
             },
             redirectToIndex(workflow) {
                 this.$router.push({
-                    name: 'EditQuizz',
-                    params: {
+                    name: 'Workflow',
+                    query: {
                         id: workflow.id,
                     },
                 });
             },
-            redirectToEdit(quizz) {
-                this.$router.push({
-                    name: 'EditQuizz',
+            redirectToEdit(workflow) {
+                this.$router.push({ 
+                    name: "EditWorkflow",
                     params: {
-                        id: quizz.id,
-                    },
+                        id: workflow.id,
+                    }, 
                 });
             },
             openConfirmation(workflow) {
