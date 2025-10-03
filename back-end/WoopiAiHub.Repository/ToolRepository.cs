@@ -165,7 +165,8 @@ namespace WoopiAiHub.Repository
                 InputDataId = t.InputData!.Id,
                 OutputData = t.OutputData!.Name,
                 OutputDataId = t.OutputData!.Id,
-                IsEditableInput = t.IsEditableInput
+                IsEditableInput = t.IsEditableInput,
+                ConnectorUrl = t.ConnectorUrl
             };
         }
     }

@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WoopiAiHub.Application.Utils;
+﻿using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
@@ -13,10 +13,16 @@ namespace WoopiAiHub.Application.Services
     public class ToolServices : IToolServices
     {
         private readonly IToolRepository _toolRepository;
+        private readonly IToolTypeRepository _toolTypeRepository;
+        private readonly IApiClientFactory _apiClientFactory;
 
-        public ToolServices(IToolRepository toolRepository)
+        public ToolServices(IToolRepository toolRepository,
+                            IToolTypeRepository toolTypeRepository,
+                            IApiClientFactory apiClientFactory)
         {
             _toolRepository = toolRepository;
+            _toolTypeRepository = toolTypeRepository;
+            _apiClientFactory = apiClientFactory;
         }
 
         /// <summary>
@@ -30,6 +36,19 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if a tool with the same unique properties already exists.</exception>
         public async Task<bool> CreateAsync(ToolCreateDto toolCreateDto)
         {
+            var toolType = await _toolTypeRepository.FindByAsync(toolCreateDto.ToolTypeId);
+            if (!toolType.HasValue) {
+                throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
+            }
+
+            if (toolType.Value.Name.Contains("n8n"))
+            {
+                if (string.IsNullOrEmpty(toolCreateDto.ConnectorUrl) || string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
+                }
+            }
+
             var tool = new Tool(
                 0,
                 DateTime.UtcNow,
@@ -40,6 +59,11 @@ namespace WoopiAiHub.Application.Services
                 toolCreateDto.OutputDataId,
                 toolCreateDto.IsEditableInput
              );
+
+            if (toolType.Value.Name.Contains("n8n"))
+            {
+                tool.UpdateConnector(toolCreateDto.ConnectorUrl, toolCreateDto.ConnectorApiKey);
+            }
 
             var result = await _toolRepository.CreateUniqueAsync(tool);
             if (!result)
@@ -120,11 +144,35 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "Tool not found", null);
             }
 
+            var toolType = await _toolTypeRepository.FindByAsync(toolUpdateDto.ToolTypeId);
+            if (!toolType.HasValue)
+            {
+                throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
+            }
+
+            if (toolType.Value.Name.Contains("n8n"))
+            {
+                if (string.IsNullOrEmpty(toolUpdateDto.ConnectorUrl))
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Coonector Url is required", null);
+                }
+
+                if (string.IsNullOrEmpty(tool.ConnectorApiKey) && string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Coonector Api Key is required", null);
+                }
+            }            
+
             tool.Update(toolUpdateDto.Name, 
                         toolUpdateDto.ToolTypeId, 
                         toolUpdateDto.InputDataId, 
                         toolUpdateDto.OutputDataId,
                         toolUpdateDto.IsEditableInput);
+
+            if (toolType.Value.Name.Contains("n8n"))
+            {
+                tool.UpdateConnector(toolUpdateDto.ConnectorUrl, toolUpdateDto.ConnectorApiKey);
+            }
 
             var result = await _toolRepository.UpdateAsync(tool);
             if (!result)
@@ -183,6 +231,26 @@ namespace WoopiAiHub.Application.Services
                 TotalPages = pageCount,
                 TotalCount = totalListCount,
             };
+        }
+
+        /// <summary>
+        /// Validate connector
+        /// </summary>
+        /// <param name="toolConnectorDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<bool> ValidateConnector(ToolConnectorDto toolConnectorDto)
+        {
+            if (string.IsNullOrEmpty(toolConnectorDto.ConnectorUrl) || string.IsNullOrEmpty(toolConnectorDto.ConnectorApiKey))
+            {
+                throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
+            }
+            
+            var api = _apiClientFactory.Create(toolConnectorDto.ConnectorUrl);
+
+            var response = await api.GetWorkflows(toolConnectorDto.ConnectorApiKey);
+
+            return response.IsSuccessStatusCode;
         }
     }
 }

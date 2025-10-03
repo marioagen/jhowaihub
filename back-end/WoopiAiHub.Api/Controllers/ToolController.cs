@@ -89,5 +89,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = _toolServices.Delete(ids);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Endpoint that receives the request to validate connector
+        /// </summary>
+        /// <param name="toolCreateDto"></param>
+        /// <returns></returns>
+        [HttpPost("ValidateConnector")]
+        [SwaggerOperation("Endpoint that receives the request to validate connector")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ValidateConnector([FromBody] ToolConnectorDto toolConnectorDto)
+        {
+            var result = await _toolServices.ValidateConnector(toolConnectorDto);
+            return Ok(result);
+        }
     }
 }
