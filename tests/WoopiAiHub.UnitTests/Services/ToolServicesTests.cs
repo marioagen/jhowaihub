@@ -148,7 +148,6 @@ namespace WoopiAiHub.UnitTests.Services
             _toolTypeRepositoryMock.Verify(tt => tt.FindByAsync(It.IsAny<int>()), Times.Once);
         }
 
-
         [Fact(DisplayName = "CreateAsync should return true when Tool is created successfully")]
         [Trait("CreateAsync", "Success")]
         public async Task CreateAsync_ShouldReturnTrue_WhenToolIsCreatedSuccessfully()
