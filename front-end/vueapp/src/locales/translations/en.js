@@ -546,8 +546,14 @@
             progressFlowFail: "Failed to insert flow",
             editFlowNodeSuccess: "Node edited successfully",
             editFlowNodeFail: "Failed to edit node",
-        }
+        },
     },
+    prompts: {
+        title: "Prompts",
+        createPrompt: "Create prompt",
+        subtitle: "Manage system prompts",
+        myPromptsBadge: "My prompts"
+    }
 };
 
 export default english;

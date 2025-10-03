@@ -550,8 +550,14 @@
             progressFlowFail: "No se pudo insertar el flujo",
             editFlowNodeSuccess: "Nodo editado exitosamente",
             editFlowNodeFail: "No se pudo editar el nodo",
-        }
+        },
     },
+    prompts: {
+        title: "Prompts",
+        createPrompt: "Crear prompt",
+        subtitle: "Gestiona los prompts del sistema",
+        myPromptsBadge: "Mi prompts"
+    }
 };
 
 export default spanish;
