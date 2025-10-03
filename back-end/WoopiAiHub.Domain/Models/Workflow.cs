@@ -11,6 +11,7 @@ namespace WoopiAiHub.Domain.Models
         public string Name { get; private set; } = string.Empty;
 
         public virtual ICollection<Step> Steps { get; set; } = [];
+        public virtual ICollection<Team> Teams { get; set; } = [];
         public virtual Team? Team { get; set; }
 
         public Workflow(int id, DateTime created, int teamId, string name)
@@ -19,6 +20,7 @@ namespace WoopiAiHub.Domain.Models
             TeamId = teamId;
             Name = name;
             Steps = new List<Step>();
+            Teams = new List<Team>();
         }
 
         /// <summary>
@@ -34,6 +36,14 @@ namespace WoopiAiHub.Domain.Models
                 return;
             Steps.Add(step);
         }
+        public void AddTeam(Team team)
+        {
+            ArgumentNullException.ThrowIfNull(team);
+
+            if (Teams.Any(s => s.Id != 0 && s.Id == team.Id))
+                return;
+            Teams.Add(team);
+        }
 
         public void AddSteps(ICollection<Step> steps)
         {
@@ -41,6 +51,14 @@ namespace WoopiAiHub.Domain.Models
             {
                 AddStep(step);
             }
-        }        
+        }
+
+        public void AddTeam(ICollection<Team> teams)
+        {
+            foreach (var team in teams)
+            {
+                AddTeam(team);
+            }
+        }
     }
 }
