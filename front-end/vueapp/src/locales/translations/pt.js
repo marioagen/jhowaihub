@@ -545,6 +545,17 @@
             editFlowNodeFail: "Falha ao editar o nodo",
         }
     },
+    management: {
+        users: {
+
+        },
+        teams: {
+
+        },
+        profiles: {
+
+        },
+    }
 };
 
 export default portuguese;
