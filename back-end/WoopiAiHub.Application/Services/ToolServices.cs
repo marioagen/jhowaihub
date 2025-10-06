@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -41,7 +42,7 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
             }
 
-            if (toolType.Value.Name.Contains("n8n"))
+            if (toolType.Value.Name.Contains(ConnectorNames.N8N))
             {
                 if (string.IsNullOrEmpty(toolCreateDto.ConnectorUrl) || string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
                 {
@@ -60,10 +61,7 @@ namespace WoopiAiHub.Application.Services
                 toolCreateDto.IsEditableInput
              );
 
-            if (toolType.Value.Name.Contains("n8n"))
-            {
-                tool.UpdateConnector(toolCreateDto.ConnectorUrl, toolCreateDto.ConnectorApiKey);
-            }
+             tool.UpdateConnector(toolCreateDto.ConnectorUrl, toolCreateDto.ConnectorApiKey);
 
             var result = await _toolRepository.CreateUniqueAsync(tool);
             if (!result)
@@ -150,7 +148,7 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
             }
 
-            if (toolType.Value.Name.Contains("n8n"))
+            if (toolType.Value.Name.Contains(ConnectorNames.N8N))
             {
                 if (string.IsNullOrEmpty(toolUpdateDto.ConnectorUrl))
                 {
@@ -169,10 +167,7 @@ namespace WoopiAiHub.Application.Services
                         toolUpdateDto.OutputDataId,
                         toolUpdateDto.IsEditableInput);
 
-            if (toolType.Value.Name.Contains("n8n"))
-            {
-                tool.UpdateConnector(toolUpdateDto.ConnectorUrl, toolUpdateDto.ConnectorApiKey);
-            }
+            tool.UpdateConnector(toolUpdateDto.ConnectorUrl, toolUpdateDto.ConnectorApiKey);
 
             var result = await _toolRepository.UpdateAsync(tool);
             if (!result)
@@ -234,7 +229,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Validate connector
+        /// Validate connector if connects using url and api key 
         /// </summary>
         /// <param name="toolConnectorDto"></param>
         /// <returns></returns>
