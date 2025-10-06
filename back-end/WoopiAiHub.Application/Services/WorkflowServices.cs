@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using WoopiAiHub.Application.Utils;
+﻿using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -9,7 +7,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -124,10 +121,10 @@ namespace WoopiAiHub.Application.Services
                             stepTool.DependsOnStepTool = previousStepToolInSameStep ?? lastStepToolGlobal;
 
                             if (!stepEntity.StepTools.Contains(stepTool))
-                                stepEntity.AddStepTool(stepTool); 
+                                stepEntity.AddStepTool(stepTool);
 
                             previousStepToolInSameStep = stepTool;
-                            lastStepToolGlobal = stepTool; 
+                            lastStepToolGlobal = stepTool;
                         }
                     }
                     else
@@ -141,7 +138,7 @@ namespace WoopiAiHub.Application.Services
 
                             newStep.AddStepTool(stepTool);
                             previousStepToolInSameStep = stepTool;
-                            lastStepToolGlobal = stepTool; 
+                            lastStepToolGlobal = stepTool;
                         }
 
                         workflow.AddStep(newStep);
@@ -251,42 +248,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Process StepTools deletion or inclusion 
-        /// </summary>
-        /// <param name="step"></param>
-        /// <param name="stepToolUpdateDtos"></param>
-        /// <returns></returns>
-        public async Task ProcessStepTools(Step step, ICollection<StepToolUpdateDto> stepToolUpdateDtos)
-        {
-            var stepToolsInsert = new List<StepTool>();
-            foreach (var stepToolUpdate in stepToolUpdateDtos)
-            {
-                var stepTool = new StepTool(
-                                            0,
-                                            DateTime.Now,
-                                            step.Id,
-                                            stepToolUpdate.ToolId,
-                                            stepToolUpdate.Order,
-                                            stepToolUpdate.PositionX,
-                                            stepToolUpdate.PositionY
-                                        );
-                if (stepToolUpdate.DependsOnStepToolId.HasValue)
-                {
-                    stepTool.UpdateDependencyStepToolId(stepToolUpdate.DependsOnStepToolId.Value);
-                }
-
-                if (!string.IsNullOrEmpty(stepToolUpdate.Input))
-                {
-                    stepTool.Parameters.Add(new StepToolParameter(0, DateTime.Now, 0, stepToolUpdate.Input));
-                }
-
-                stepToolsInsert.Add(stepTool);
-            }
-
-            await _stepToolRepository.CreateRangeAsync(stepToolsInsert);
-        }
-
-        /// <summary>
         /// Creates a collection of steps from the provided step DTOs, validates their profiles and statuses,  and
         /// establishes dependencies between step tools.
         /// </summary>
@@ -379,7 +340,7 @@ namespace WoopiAiHub.Application.Services
             if (!string.IsNullOrEmpty(stepToolDto.Input))
             {
                 stepTool.Parameters.Add(
-                    new StepToolParameter(0, DateTime.Now, 0, stepToolDto.Input));
+                    new StepToolParameter(0, DateTime.Now, 0, stepToolDto.RequiredFile, stepToolDto.WorkspaceId, stepToolDto.Input));
             }
 
             return stepTool;
