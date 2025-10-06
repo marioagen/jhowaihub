@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection.Metadata;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -16,6 +17,10 @@ namespace WoopiAiHub.Domain.Models
         public int OutputDataId { get; private set; }
         [Column("IsEditableInput", TypeName = "bit")]
         public bool IsEditableInput { get; private set; }
+        [Column("ConnectorUrl", TypeName = "varchar(255)")]
+        public string? ConnectorUrl { get; private set; }
+        [Column("ConnectorApiKey", TypeName = "varchar(255)")]
+        public string? ConnectorApiKey { get; private set; }
 
         public virtual ToolType? ToolType { get; set; }
         public virtual ToolData? InputData { get; set; }
@@ -41,6 +46,12 @@ namespace WoopiAiHub.Domain.Models
             InputDataId = inputDataId;
             OutputDataId = outputDataId;
             IsEditableInput = isEditableInput;
+        }
+
+        public void UpdateConnector(string? conectorUrl, string? connectorApiKey)
+        {
+            ConnectorUrl = conectorUrl;
+            ConnectorApiKey = connectorApiKey;
         }
     }
 }

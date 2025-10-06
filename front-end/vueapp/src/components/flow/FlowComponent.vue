@@ -27,6 +27,7 @@
             <hr />
             <VueFlowComponent :isEdit="isEdit" :stepId="stepId" :stepOrder="stepOrder" @openNodeConfig="openNodeConfig"
                 ref="VueflowComponent" />
+                
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
                 ref="sidebar">
                 <div class="offcanvas-header">

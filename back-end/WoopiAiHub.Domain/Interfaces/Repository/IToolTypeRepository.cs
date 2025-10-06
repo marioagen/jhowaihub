@@ -5,5 +5,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     public interface IToolTypeRepository
     {
         Task<IEnumerable<ToolTypeDto>> FindAllAsync();
+        Task<ToolTypeDto?> FindByAsync(int id);
     }
 }

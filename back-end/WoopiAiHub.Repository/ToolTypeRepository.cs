@@ -30,5 +30,24 @@ namespace WoopiAiHub.Repository
                 })
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Find ToolType by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<ToolTypeDto?> FindByAsync(int id)
+        {
+            return await _context.ToolTypes
+                .AsNoTracking()
+                .Where(tt =>  tt.IsActive && tt.Id == id)
+                .Select(tt => new ToolTypeDto
+                {
+                    Id = tt.Id,
+                    Name = tt.Name,
+                })
+                .FirstOrDefaultAsync();
+        }
     }
 }
