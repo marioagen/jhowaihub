@@ -13,8 +13,8 @@ namespace WoopiAiHub.Domain.Models
         [Column("RequiredFile", TypeName = "bit")]
         public bool RequiredFile { get; private set; }
 
-        [Column("WorkspaceId", TypeName = "uniqueidentifier")]
-        public Guid? WorkspaceId { get; private set; }
+        [Column("WebhookId", TypeName = "uniqueidentifier")]
+        public Guid? WebhookId { get; private set; }
 
         public virtual StepTool? StepTool { get; set; }
 
@@ -22,13 +22,13 @@ namespace WoopiAiHub.Domain.Models
                                  DateTime created, 
                                  int stepToolId, 
                                  bool requiredFile,
-                                 Guid? workspaceId,
+                                 Guid? webhookId,
                                  string value) : base(id, created)
         {
             StepToolId = stepToolId;
             Value = value;
             RequiredFile = requiredFile;
-            WorkspaceId = workspaceId;
+            WebhookId = webhookId;
         }
 
         /// <summary>

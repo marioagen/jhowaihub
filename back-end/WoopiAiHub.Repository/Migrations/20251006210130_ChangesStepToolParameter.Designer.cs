@@ -12,7 +12,7 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251006204740_ChangesStepToolParameter")]
+    [Migration("20251006210130_ChangesStepToolParameter")]
     partial class ChangesStepToolParameter
     {
         /// <inheritdoc />
@@ -657,9 +657,9 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Value");
 
-                    b.Property<Guid?>("WorkspaceId")
+                    b.Property<Guid?>("WebhookId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("WorkspaceId");
+                        .HasColumnName("WebhookId");
 
                     b.HasKey("Id");
 

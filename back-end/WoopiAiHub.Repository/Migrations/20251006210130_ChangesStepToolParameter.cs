@@ -19,7 +19,7 @@ namespace WoopiAiHub.Repository.Migrations
                 defaultValue: false);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "WorkspaceId",
+                name: "WebhookId",
                 table: "StepToolParameters",
                 type: "uniqueidentifier",
                 nullable: true);
@@ -33,7 +33,7 @@ namespace WoopiAiHub.Repository.Migrations
                 table: "StepToolParameters");
 
             migrationBuilder.DropColumn(
-                name: "WorkspaceId",
+                name: "WebhookId",
                 table: "StepToolParameters");
         }
     }

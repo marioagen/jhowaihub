@@ -654,9 +654,9 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Value");
 
-                    b.Property<Guid?>("WorkspaceId")
+                    b.Property<Guid?>("WebhookId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("WorkspaceId");
+                        .HasColumnName("WebhookId");
 
                     b.HasKey("Id");
 

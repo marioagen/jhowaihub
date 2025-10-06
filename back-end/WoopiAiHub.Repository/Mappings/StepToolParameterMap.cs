@@ -25,7 +25,7 @@ namespace WoopiAiHub.Repository.Mappings
                    .IsRequired();
 
 
-            builder.Property(p => p.WorkspaceId)
+            builder.Property(p => p.WebhookId)
                    .IsRequired(false);
 
             builder.Property(p => p.Created)
