@@ -416,7 +416,7 @@
     .dot {
         height: 10px;
         width: 10px;
-        background-color: #0073ea;
+        background-color: #ff6900;
         border-radius: 50%;
         display: inline-block;
     }

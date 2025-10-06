@@ -552,7 +552,13 @@
         title: "Prompts",
         createPrompt: "Create prompt",
         subtitle: "Manage system prompts",
-        myPromptsBadge: "My prompts"
+        myPromptsBadge: "My prompts",
+        newPrompt: "New prompt",
+        namePrompt: "Prompt name",
+        information: "Basic information",
+        subtitleNew: "Create a new AI prompt",
+        promptContent: "Prompt content",
+        placeholderNamePrompt: "Enter the prompt name"
     }
 };
 

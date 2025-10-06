@@ -548,7 +548,13 @@
         title: "Prompts",
         createPrompt: "Criar prompt",
         subtitle: "Gerencia prompts do sistema",
-        myPromptsBadge: "Meus prompts"
+        myPromptsBadge: "Meus prompts",
+        newPrompt: "Novo prompt",
+        namePrompt: "Nome do prompt",
+        information: "Informações básicas",
+        subtitleNew: "Criar um novo prompt de IA",
+        promptContent: "Conteúdo do prompt",
+        placeholderNamePrompt: "Insira o nome do prompt"
     }
 };
 
