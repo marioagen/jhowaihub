@@ -1,3 +1,3 @@
 <template>
-    <h1>User</h1>
+    <h1>Team</h1>
 </template>

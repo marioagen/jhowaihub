@@ -10,7 +10,7 @@ import UnauthorizedPage from "@/pages/unauthorized.vue";
 import TypesPage from "@/pages/types.vue";
 import QuestionsPage from "@/pages/questions.vue";
 import ManagementPage from "@/pages/management.vue";
-import ManagementPage from "@/pages/management/index.vue";
+// import ManagementPage from "@/pages/management/index.vue";
 import NewUser from "@/pages/management/users/newUser.vue";
 import EditUser from "@/pages/management/users/editUser.vue";
 import NewTeam from "@/pages/management/teams/newTeam.vue";
