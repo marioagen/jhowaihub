@@ -223,17 +223,17 @@ namespace WoopiAiHub.Repository
         {
             return _context.Workflows
                            .AsNoTracking()
-                           .Where(w => w.Team.Users.Any(u => u.Email == userEmail))
+                           .Where(w => w.Teams.Any(t => t.Users.Any(u => u.Email == userEmail)))
                            .Select(t => new WorkflowDto
                            {
                                Id = t.Id,
                                Name = t.Name,
                                Created = t.Created,
-                               Team = new TeamDto
+                               Teams = t.Teams.Select(t => new TeamDto
                                {
-                                   Id = t.Team.Id,
-                                   Name = t.Team.Name,
-                               },
+                                   Id = t.Id,
+                                   Name = t.Name,
+                               }).ToList()
                            })
                            .ToList();
         }

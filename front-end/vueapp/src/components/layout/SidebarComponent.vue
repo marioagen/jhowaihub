@@ -108,8 +108,8 @@
                     },
                     {
                         permission: 'Workflow',
-                        activeKey: 'WorkflowEditor',
-                        to: '/workflow/editor',
+                        activeKey: 'WorkflowManagement',
+                        to: '/workflow/management',
                         icon: { 
                             name: 'Workflow', 
                             color: '#00bba7' 

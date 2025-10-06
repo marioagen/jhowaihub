@@ -63,7 +63,7 @@
                 <div v-if="isLoaded" class="card mb-3 h-100">
                     <div class="card-body d-flex flex-column p-2 card-container">
                         <div class="kanban-wrapper">
-                            <WorkflowCards 
+                            <KanbanBoard 
                                 :kanbanData="board"
                                 :isEditor="true"
                             />
@@ -81,13 +81,13 @@
 <script>
     import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingComponent.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
-    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
+    import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
 
     export default {
         name: "WorkflorEditorIndex",
         components: {
             FullscreenLoadingComponent,
-            WorkflowCards,
+            KanbanBoard,
         },
         data() {
             return {

@@ -21,7 +21,7 @@ import QuizzesPage from "@/pages/quizzes/index.vue";
 import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import WorkflowPage from "@/pages/workflow/index.vue";
-import WorkflowEditor from "@/pages/workflow/editorIndex.vue";
+import WorkflowManagement from "@/pages/workflow/management.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
 import ToolsPage from "@/pages/tools.vue";
@@ -254,9 +254,9 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/workflow/editor",
-        name: "WorkflowEditor",
-        component: WorkflowEditor,
+        path: "/workflow/management",
+        name: "WorkflowManagement",
+        component: WorkflowManagement,
         meta: { 
             layout: "default",
         },

@@ -26,11 +26,6 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasForeignKey(s => s.WorkflowId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(w => w.Team)
-                .WithOne(t => t.Workflow)
-                .HasForeignKey<Workflow>(w => w.TeamId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.HasIndex(w => w.TeamId);
             builder.HasIndex(w => w.Created);
         }
