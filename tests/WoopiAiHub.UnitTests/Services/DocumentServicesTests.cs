@@ -145,7 +145,6 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = DocumentFixture.FindValidWorkflow();
             var step = DocumentFixture.FindValidStep();
             workflow.Steps.Add(step);
-            team.Workflow = workflow;
             List<Team> teams = new List<Team> { team };
 
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();

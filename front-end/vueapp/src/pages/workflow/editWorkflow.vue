@@ -1,16 +1,16 @@
 <template>
-    <WorkflowBoards 
+    <WorkflowForm
         :isEdit="true"
         :id="routeId"
     />
 </template>
 
 <script>
-    import WorkflowBoards from "@/components/workflow/WorkflowBoards.vue";
+    import WorkflowForm from "@/components/workflow/form/WorkflowForm.vue";
     export default {
         name: "EditWorkflow",
         components: {
-            WorkflowBoards,
+            WorkflowForm,
         },
         computed: {
             routeId() {

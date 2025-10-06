@@ -270,7 +270,6 @@ namespace WoopiAiHub.UnitTests.Services
             var ids = new List<int> { 999 };
             var team = new Team("Team with Docs", 999, DateTime.Now);
             var document = new Document("Doc1", "Content", "Reference", DocumentStatus.Analyzed, true, "email", 1, DateTime.Now);
-            team.Documents = new List<Document> {document};
             var teams = new List<Team> {team};
 
             _teamRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(teams);

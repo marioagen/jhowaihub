@@ -42,7 +42,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var isValidTeamUser = card.Step?.Workflow?.Team?.Users.Any(a => a.Id.Equals(updateAssingnedUserDto.UserId));
+            var isValidTeamUser = card.Step?.Workflow?.Teams?.Any(t => t.Users.Any(u => u.Id.Equals(updateAssingnedUserDto.UserId)));
             if (!isValidTeamUser.HasValue || !isValidTeamUser.Value)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found", CardLabel.UserCannotBeAssigned);

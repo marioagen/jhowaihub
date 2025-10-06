@@ -48,19 +48,6 @@ namespace WoopiAiHub.Repository.Mappings
                    .WithOne(s => s.Document)
                    .HasForeignKey(c => c.DocumentId);
 
-            builder.HasMany(p => p.Teams)
-                   .WithMany(pr => pr.Documents)
-                   .UsingEntity<Dictionary<string, object>>(
-                       "DocumentTeams",
-                       r => r.HasOne<Team>().WithMany().HasForeignKey(TeamIdColumn),
-                       l => l.HasOne<Document>().WithMany().HasForeignKey(DocumentIdColumn),
-                       je =>
-                       {
-                           je.HasKey(TeamIdColumn, DocumentIdColumn);
-                           je.ToTable("DocumentTeams");
-                           je.Property<int>(DocumentIdColumn).HasColumnName(DocumentIdColumn);
-                           je.Property<int>(TeamIdColumn).HasColumnName(TeamIdColumn);
-                       });
         }
     }
 }

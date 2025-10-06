@@ -134,7 +134,7 @@
 <script>
     import { Field } from "vee-validate";
     export default {
-        name: "WorkflowStepComponent",
+        name: "WorkflowStep",
         components: {
             Field,
         },
