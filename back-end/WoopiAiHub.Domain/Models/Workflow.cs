@@ -12,7 +12,6 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual ICollection<Step> Steps { get; set; } = [];
         public virtual ICollection<Team> Teams { get; set; } = [];
-        public virtual Team? Team { get; set; }
 
         public Workflow(int id, DateTime created, int teamId, string name)
             : base(id, created)

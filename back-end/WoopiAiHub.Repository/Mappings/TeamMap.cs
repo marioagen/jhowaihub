@@ -6,6 +6,8 @@ namespace WoopiAiHub.Repository.Mappings
 {
     public class TeamMap : IEntityTypeConfiguration<Team>
     {
+        private const string WorkflowIdColumn = "WorkflowId";
+        private const string TeamIdColumn = "TeamId";
         public void Configure(EntityTypeBuilder<Team> builder)
         {
             builder.ToTable("Teams");
@@ -21,12 +23,14 @@ namespace WoopiAiHub.Repository.Mappings
                    .WithMany(w => w.Teams)
                    .UsingEntity<Dictionary<string, object>>(
                         "WorkflowTeams",
-                        j => j.HasOne<Workflow>().WithMany().HasForeignKey("WorkflowId"),
-                        j => j.HasOne<Team>().WithMany().HasForeignKey("TeamId"),
+                        j => j.HasOne<Workflow>().WithMany().HasForeignKey(WorkflowIdColumn),
+                        j => j.HasOne<Team>().WithMany().HasForeignKey(TeamIdColumn),
                         j =>
                         {
-                            j.HasKey("WorkflowId", "TeamId");
+                            j.HasKey(WorkflowIdColumn, TeamIdColumn);
                             j.ToTable("WorkflowTeams");
+                            j.Property<int>(WorkflowIdColumn).HasColumnName(WorkflowIdColumn);
+                            j.Property<int>(TeamIdColumn).HasColumnName(TeamIdColumn);
                         }
                    );
         }

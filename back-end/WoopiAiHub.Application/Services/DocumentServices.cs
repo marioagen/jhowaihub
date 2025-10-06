@@ -480,7 +480,7 @@ namespace WoopiAiHub.Application.Services
                 documentForDataBase.Teams = teams;
                 _documentRepository.Create(documentForDataBase);
 
-                var worflows = teams.Select(s => s.Workflow).ToList();
+                var worflows = teams.SelectMany(w => w.Workflows).ToList();
                 var hasExecutions = await _automationServices.PrepareExecutionAsync(worflows!);
                 var automationServicesDto = new AutomationServicesDto
                 (
@@ -491,6 +491,7 @@ namespace WoopiAiHub.Application.Services
                     referenceFile,
                     0
                 );
+
                 if (hasExecutions)
                 {
                     await _automationServices.StartExecutionByWorkflowsAsync(automationServicesDto, worflows!);
@@ -851,8 +852,9 @@ namespace WoopiAiHub.Application.Services
         private static List<Card> CreateDocumentCard(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Team> teams)
         {
             return teams
-                .Where(t => t.Workflow != null)
-                .Select(t => t.Workflow!.Steps.OrderBy(o => o.Order).FirstOrDefault())
+                .Where(t => t.Workflows != null && t.Workflows.Any())
+                .SelectMany(t => t.Workflows)
+                .Select(w => w.Steps.OrderBy(s => s.Order).FirstOrDefault())
                 .Where(step => step != null)
                 .Select(step => new Card
                     (

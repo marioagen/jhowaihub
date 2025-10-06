@@ -176,8 +176,6 @@ namespace WoopiAiHub.UnitTests.Services
             var card = CardFixture.FindValidCard();
             card.Step = new Step(1,DateTime.Now, 1, "Step", 1, 1, 1);
             card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
-            card.Step.Workflow.Team = new Team("Team", 1, DateTime.Now);
-            card.Step.Workflow.Team.Users = new List<User>();
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
 
             _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
@@ -199,8 +197,6 @@ namespace WoopiAiHub.UnitTests.Services
             card.UpdateAssignedUser(userId);
             card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1);
             card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
-            card.Step.Workflow.Team = new Team("Team", 1, DateTime.Now);
-            card.Step.Workflow.Team.Users = new List<User>() { new User(userId, "User","user@user.com", true, DateTime.Now) };
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
             updateAssignedUserDto.UserId = userId;
 
