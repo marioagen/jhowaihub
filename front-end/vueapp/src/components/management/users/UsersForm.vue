@@ -103,6 +103,7 @@
                                 v-model:selectedItems="selectedProfiles"
                             />
                             <SelectionListComponent
+                                v-if="showTeams"
                                 :id="'teams'"
                                 :labelPanel="'labelTeams'"
                                 :labelSelectedQuantity="'labelSelectedTeams'"
@@ -177,6 +178,7 @@
                 profilesList: [],
                 showPassword: false,
                 showConfirmedPassword: false,
+                showTeams: false,
             };
         },
         computed: {
@@ -298,7 +300,7 @@
                 });
             },
             openTeamSection() {
-                
+                this.showTeams = !this.showTeams;
             },
             saveUser() {
                 let response;
