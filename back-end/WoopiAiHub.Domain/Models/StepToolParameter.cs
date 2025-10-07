@@ -10,15 +10,25 @@ namespace WoopiAiHub.Domain.Models
         [Column("Value", TypeName = "nvarchar(max)")]
         public string Value { get; private set; }
 
+        [Column("RequiredFile", TypeName = "bit")]
+        public bool RequiredFile { get; private set; }
+
+        [Column("WebhookId", TypeName = "uniqueidentifier")]
+        public Guid? WebhookId { get; private set; }
+
         public virtual StepTool? StepTool { get; set; }
 
         public StepToolParameter(int id, 
                                  DateTime created, 
                                  int stepToolId, 
+                                 bool requiredFile,
+                                 Guid? webhookId,
                                  string value) : base(id, created)
         {
             StepToolId = stepToolId;
             Value = value;
+            RequiredFile = requiredFile;
+            WebhookId = webhookId;
         }
 
         /// <summary>
