@@ -1,3 +1,13 @@
 <template>
-    <h1>Profile</h1>
+    <ProfilesForm />
 </template>
+
+<script>
+    import ProfilesForm from '@/components/management/profiles/ProfilesForm.vue';
+    export default {
+        name: "NewProfile",
+        components: {
+            ProfilesForm
+        },
+    }
+</script>
