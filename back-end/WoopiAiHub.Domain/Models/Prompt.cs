@@ -15,23 +15,21 @@ namespace WoopiAiHub.Domain.Models
         [Column("Description", TypeName = "varchar(95)")]
         public string Description { get; private set; } = string.Empty;
 
-        [Column("Text", TypeName = "varchar(max)")]
+        [Column("Text", TypeName = "nvarchar(max)")]
         public string Text { get; private set; } = string.Empty;
 
-        [Column("EmailCreator", TypeName = "varchar(100)")]
-        public string EmailCreator { get; private set; } = string.Empty;
+        [Column("IdUser", TypeName = "uniqueIdentifier")]
+        public Guid IdUser { get; private set; } = Guid.Empty;
 
-        public virtual ICollection<PromptVariable> Variables { get; set; }
+        public virtual User User { get; set; }
 
-        public virtual ICollection<Document> Documents { get; set; }
-
-        public Prompt(int id, DateTime created, string name, string description, string text, string emailCreator)
+        public Prompt(int id, DateTime created, string name, string description, string text, Guid idUser)
             : base(id, created)
         {
             Name = name;
             Description = description;
             Text = text;
-            EmailCreator = emailCreator;
+            IdUser = idUser;
         }
 
         /// <summary>

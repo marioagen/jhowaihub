@@ -1,8 +1,8 @@
 ﻿using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain;
 using WoopiAiHub.Repository.Context;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace WoopiAiHub.Repository
 {
@@ -22,7 +22,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool CreateUniquePrompt(Prompt prompt)
         {
-            var existPrompt = _context.Prompts.Any(p => p.Name == prompt.Name && p.EmailCreator == prompt.EmailCreator);
+            var existPrompt = _context.Prompts.Any(p => p.Name == prompt.Name && p.IdUser == prompt.IdUser);
             if (!existPrompt)
             {
                 _context.Prompts.Add(prompt);
@@ -57,29 +57,20 @@ namespace WoopiAiHub.Repository
         /// Find all prompts
         /// </summary>
         /// <returns></returns>
-        public IQueryable<PromptDto> FindAllWithOwnerStatus(string emailCreator)
+        public IQueryable<PromptDto> FindAllWithOwnerStatus(Guid idUser)
         {
             var query = _context.Prompts
-                .AsNoTracking()
                 .Select(p => new PromptDto
                 {
                     Id = p.Id,
                     Name = p.Name,
                     Description = p.Description,
                     Text = p.Text,
-                    EmailCreator = p.EmailCreator,
                     Created = p.Created,
-                    IsOwner = p.EmailCreator.Equals(emailCreator),
-                    Variables = p.Variables.Select(v => new PromptVariableDto
-                    {
-                        Id = v.Id,
-                        Variable = v.Variable,
-                        Description = v.Description,
-                        Label = v.Label,
-                        Order = v.Order,
-                    })
-                    .ToList()
-                });
+                    IsOwner = p.IdUser.Equals(idUser),
+                    IdUser = p.IdUser
+                    
+                }).AsNoTracking();
 
             return query;
         }
@@ -89,29 +80,21 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="emailCreator"></param>
         /// <returns></returns>
-        public IQueryable<PromptDto> FindByEmail(string emailCreator)
+        public IQueryable<PromptDto> FindByIdUser(Guid idUser)
         {
             var query = _context.Prompts
                 .AsNoTracking()
-                .Where(p => p.EmailCreator.Equals(emailCreator))
+                .Where(p => p.IdUser.Equals(idUser))
                 .Select(p => new PromptDto
                 {
                     Id = p.Id,
                     Name = p.Name,
                     Description = p.Description,
                     Text = p.Text,
-                    EmailCreator = p.EmailCreator,
                     Created = p.Created,
                     IsOwner = true,
-                    Variables = p.Variables.Select(v => new PromptVariableDto
-                    {
-                        Id = v.Id,
-                        Variable = v.Variable,
-                        Description = v.Description,
-                        Label = v.Label,
-                        Order = v.Order,
-                    })
-                    .ToList()
+                    IdUser = p.IdUser
+
                 });
 
             return query;
@@ -131,16 +114,7 @@ namespace WoopiAiHub.Repository
                     Name = p.Name,
                     Description = p.Description,
                     Text = p.Text,
-                    EmailCreator = p.EmailCreator,
-                    Created = p.Created,
-                    Variables = p.Variables.Select(v => new PromptVariableDto
-                    {
-                        Id = v.Id,
-                        Variable = v.Variable,
-                        Description = v.Description,
-                        Label = v.Label,
-                        Order = v.Order,
-                    }).ToList()
+                    Created = p.Created
                 }).FirstOrDefault(p => p.Id == id);
         }
 
@@ -151,7 +125,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Update(Prompt prompt)
         {
-            var existPrompt = _context.Prompts.Any(p => p.Name == prompt.Name && p.Id != prompt.Id && p.EmailCreator == prompt.EmailCreator);
+            var existPrompt = _context.Prompts.Any(p => p.Name == prompt.Name && p.Id != prompt.Id && p.IdUser == prompt.IdUser);
 
             if (!existPrompt)
             {

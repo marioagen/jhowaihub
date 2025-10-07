@@ -10,8 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     public interface IValidatePrompt
     {
         void ValidateOwnership(int promptId,
-                              string userEmail);
+                               Guid idUser);
         void ValidatePromptFields(Prompt prompt);
-        void ValidatePromptVariables(Prompt prompt);
     }
 }

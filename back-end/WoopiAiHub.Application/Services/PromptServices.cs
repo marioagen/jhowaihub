@@ -1,10 +1,6 @@
-﻿using Microsoft.Identity.Client;
-using System.Linq.Dynamic.Core;
-using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain;
+﻿using System.Linq.Dynamic.Core;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -16,17 +12,14 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPromptRepository _promptRepository;
-        private readonly IPromptVariableRepository _promptVariableRepository;
         private readonly IValidatePrompt _validatePrompt;
 
         public PromptServices(IUnitOfWork unitOfWork,
                               IPromptRepository promptRepository,
-                              IPromptVariableRepository promptVariableRepository,
                               IValidatePrompt validatePrompt)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
-            _promptVariableRepository = promptVariableRepository;
             _validatePrompt = validatePrompt;
         }
 
@@ -37,12 +30,11 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public bool CreateUniquePrompt(PromptCreateDto promptCreateDto, string emailCreator)
+        public bool CreateUniquePrompt(PromptCreateDto promptCreateDto)
         {
-            var prompt = GeneratePromptToCreate(promptCreateDto, emailCreator);
+            var prompt = GeneratePromptToCreate(promptCreateDto);
 
             _validatePrompt.ValidatePromptFields(prompt);
-            _validatePrompt.ValidatePromptVariables(prompt);
 
             var createPromptResult = _promptRepository.CreateUniquePrompt(prompt);
             if (!createPromptResult)
@@ -59,11 +51,10 @@ namespace WoopiAiHub.Application.Services
         /// <param name="promptUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public bool Update(PromptUpdateDto promptUpdateDto,
-                           string emailCreator)
+        public bool Update(PromptUpdateDto promptUpdateDto)
         {
             _validatePrompt.ValidateOwnership(promptUpdateDto.Id,
-                                              emailCreator);
+                                              promptUpdateDto.IdUser);
 
             var promptDto = _promptRepository.FindById(promptUpdateDto.Id);
             if (promptDto == null)
@@ -74,13 +65,10 @@ namespace WoopiAiHub.Application.Services
             var prompt = GeneratePromptToUpdate(promptDto, promptUpdateDto);
 
             _validatePrompt.ValidatePromptFields(prompt);
-            _validatePrompt.ValidatePromptVariables(prompt);
 
             _unitOfWork.BeginTransaction();
             try
             {
-                _promptVariableRepository.DeleteByPromptId(promptUpdateDto.Id);
-
                 var promptUpdateResult = _promptRepository.Update(prompt);
 
                 if (!promptUpdateResult)
@@ -105,10 +93,10 @@ namespace WoopiAiHub.Application.Services
         /// <param name="pagedDataDto"></param>
         /// <param name="emailCreator"></param>
         /// <returns></returns>
-        public PagedResultDto<PromptDto> FindByEmailPaged(PagedDataDto pagedDataDto,
-                                                          string emailCreator)
+        public PagedResultDto<PromptDto> FindByIdUserPaged(PagedDataDto pagedDataDto,
+                                                           Guid idUser)
         {
-            var query = _promptRepository.FindByEmail(emailCreator);
+            var query = _promptRepository.FindByIdUser(idUser);
 
             query = pagedDataDto.IsAscending ?
                 query.OrderBy(nameof(Domain.Models.Prompt.Name)) :
@@ -126,11 +114,11 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         public PagedResultDto<PromptDto> FindAllPaged(PagedDataDto pagedDataDto,
-                                                      string emailCreator)
+                                                      Guid idUser)
         {
             if (pagedDataDto.Page > 0)
             {
-                var query = _promptRepository.FindAllWithOwnerStatus(emailCreator);
+                var query = _promptRepository.FindAllWithOwnerStatus(idUser);
 
                 query = pagedDataDto.IsAscending ?
                     query.OrderBy(nameof(Domain.Models.Prompt.Name)) :
@@ -220,9 +208,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="emailCreator"></param>
         /// <returns></returns>
-        public IQueryable<PromptDto> FindAll(string emailCreator)
+        public IQueryable<PromptDto> FindAll(Guid idUser)
         {
-            var query = _promptRepository.FindAllWithOwnerStatus(emailCreator);
+            var query = _promptRepository.FindAllWithOwnerStatus(idUser);
 
             return query;
         }
@@ -232,7 +220,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="promptCreateDto"></param>
         /// <param name="emailCreator"></param>
-        private static Domain.Models.Prompt GeneratePromptToCreate(PromptCreateDto promptCreateDto, string emailCreator)
+        private static Domain.Models.Prompt GeneratePromptToCreate(PromptCreateDto promptCreateDto)
         {
             var prompt = new Domain.Models.Prompt(
                 0,
@@ -240,21 +228,7 @@ namespace WoopiAiHub.Application.Services
                 promptCreateDto.Name,
                 promptCreateDto.Description,
                 promptCreateDto.Text,
-                emailCreator);
-
-            prompt.Variables = new List<PromptVariable>();
-
-            foreach (var promptVariable in promptCreateDto.Variables)
-            {
-                prompt.Variables.Add(new PromptVariable(
-                    0,
-                    DateTime.Now,
-                    promptVariable.Label,
-                    promptVariable.Variable,
-                    promptVariable.Description,
-                    promptVariable.Order,
-                    0));
-            }
+                promptCreateDto.IdUser);
 
             return prompt;
         }
@@ -272,21 +246,7 @@ namespace WoopiAiHub.Application.Services
                 promptUpdateDto.Name,
                 promptUpdateDto.Description,
                 promptUpdateDto.Text,
-                promptDto.EmailCreator);
-
-            prompt.Variables = new List<PromptVariable>();
-
-            foreach (var promptVariable in promptUpdateDto.Variables)
-            {
-                prompt.Variables.Add(new PromptVariable(
-                    0,
-                    DateTime.Now,
-                    promptVariable.Label,
-                    promptVariable.Variable,
-                    promptVariable.Description,
-                    promptVariable.Order,
-                    promptDto.Id));
-            }
+                promptDto.IdUser);
 
             return prompt;
         }

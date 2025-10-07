@@ -33,10 +33,9 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives the request to create a Prompt in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
 
-        public IActionResult Create([FromBody] PromptCreateDto promptCreateDto,
-                                     HeadersDto headersDto)
+        public IActionResult Create([FromBody] PromptCreateDto promptCreateDto)
         {
-            var result = _promptServices.CreateUniquePrompt(promptCreateDto, headersDto.EmailCreator);
+            var result = _promptServices.CreateUniquePrompt(promptCreateDto);
             return Ok(result);
         }
 
@@ -48,11 +47,9 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [HttpPut]
         [SwaggerOperation("Endpoint that receives the request to update a Prompt in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Update([FromBody] PromptUpdateDto promptUpdateDto,
-                                     HeadersDto headersDto)
+        public IActionResult Update([FromBody] PromptUpdateDto promptUpdateDto)
         {
-            var result = _promptServices.Update(promptUpdateDto,
-                                                headersDto.EmailCreator);
+            var result = _promptServices.Update(promptUpdateDto);
             return Ok(result);
         }
 
@@ -66,11 +63,11 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [Route("PagedByUser")]
         [SwaggerOperation("Endpoint that receives an email and returns its prompts paginated")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
-        public IActionResult FindByEmailPaged([FromQuery] PagedDataDto pagedDataDto,
-                                               HeadersDto headersDto)
+        public IActionResult FindByIdUserPaged([FromQuery] PagedDataDto pagedDataDto,
+                                               Guid idUser)
         {
-            var result = _promptServices.FindByEmailPaged(pagedDataDto,
-                                                          headersDto.EmailCreator);
+            var result = _promptServices.FindByIdUserPaged(pagedDataDto,
+                                                           idUser);
             return Ok(result);
         }
 
@@ -100,10 +97,10 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives the request to return all prompts paginated")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
         public IActionResult FindAllPaged([FromQuery] PagedDataDto pagedDataDto,
-                                           HeadersDto headersDto)
+                                           Guid idUser)
         {
             var result = _promptServices.FindAllPaged(pagedDataDto,
-                                                      headersDto.EmailCreator);
+                                                      idUser);
             return Ok(result);
         }
 
@@ -132,10 +129,10 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public IActionResult ValidateOwnership(int id,
-                                               HeadersDto headersDto)
+                                               Guid idUser)
         {
             _validatePrompt.ValidateOwnership(id,
-                                              headersDto.EmailCreator);
+                                              idUser);
             return NoContent();
         }
 
@@ -147,9 +144,9 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [HttpGet]
         [SwaggerOperation("Endpoint that receives the request to return all prompts")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
-        public IActionResult FindAll(HeadersDto headersDto)
+        public IActionResult FindAll(Guid idUser)
         {
-            var result = _promptServices.FindAll(headersDto.EmailCreator);
+            var result = _promptServices.FindAll(idUser);
             return Ok(result);
         }
     }

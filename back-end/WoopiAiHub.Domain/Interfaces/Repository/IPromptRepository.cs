@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
@@ -13,7 +14,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         bool Delete(List<int> ids);
         bool Update(Prompt prompt);
         PromptDto? FindById(int id);
-        IQueryable<PromptDto> FindAllWithOwnerStatus(string emailCreator);
-        IQueryable<PromptDto> FindByEmail(string emailCreator);
+        IQueryable<PromptDto> FindAllWithOwnerStatus(Guid idUser);
+        IQueryable<PromptDto> FindByIdUser(Guid idUser);
     }
 }

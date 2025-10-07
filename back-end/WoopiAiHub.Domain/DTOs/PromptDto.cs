@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class PromptVariableDto
+    public class PromptDto
     {
         public int Id { get; set; }
-        public string Label { get; set; } = string.Empty;
-        public string Variable { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public int Order { get; set; }
+        public string Text { get; set; } = string.Empty;
+        public Guid IdUser { get; set; } = Guid.Empty;
+        public bool IsOwner { get; set; }
         public DateTime Created { get; set; }
-        public int PromptId { get; set; }
     }
 }

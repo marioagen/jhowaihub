@@ -12,6 +12,6 @@ namespace WoopiAiHub.Domain.DTOs
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
-        public ICollection<PromptVariableUpdateDto> Variables { get; set; } = new List<PromptVariableUpdateDto>();
+        public Guid IdUser { get; set; } = Guid.Empty;
     }
 }

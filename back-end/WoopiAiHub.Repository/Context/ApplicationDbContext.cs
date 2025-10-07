@@ -44,6 +44,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<StepToolExecution> StepToolExecutions { get; set; }
         public DbSet<StepToolOutput> StepToolOutputs { get; set; }
         public DbSet<StepToolParameter> StepToolParameters { get; set; }
+        public DbSet<Prompt> Prompts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
