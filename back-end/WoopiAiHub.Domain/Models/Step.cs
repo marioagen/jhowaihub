@@ -59,5 +59,11 @@ namespace WoopiAiHub.Domain.Models
         {
             StepTools.Add(stepTool);
         }
+
+        public void RemoveStepTool(StepTool stepTool)
+        {
+            ArgumentNullException.ThrowIfNull(stepTool);
+            StepTools.Remove(stepTool);
+        }
     }
 }

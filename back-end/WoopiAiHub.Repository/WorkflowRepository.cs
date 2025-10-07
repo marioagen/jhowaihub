@@ -86,11 +86,23 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<WorkflowDto?> FindByIdReturnModel(int id)
+        public async Task<Workflow?> FindByIdReturnModel(int id)
         {
             return await _context.Workflows
-                .Select(FindWorkflowProjection())
-                .FirstOrDefaultAsync(w => w.Id == id);
+                 .AsSplitQuery()
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Profile)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Status)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.Cards)
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.StepTools)
+                         .ThenInclude(p => p.Parameters)
+                 .Include(w => w.Steps)
+                   .ThenInclude(s => s.StepTools)
+                       .ThenInclude(p => p.Outputs)
+                 .FirstOrDefaultAsync(w => w.Id == id);
         }
 
 
@@ -145,18 +157,11 @@ namespace WoopiAiHub.Repository
                         Owner = c.Document.EmailCreator,
                         DocumentId = c.Document.Id,
                         StatusDocument = c.Document.Status,
-                        Percentage = c.Step!.StepTools.Count() > 0
+                        Percentage = c.Step!.StepTools.Any(st => st.Executions.Any(e => e.CardId == c.Id))
                         ? (
-                            (c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100)
+                            c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100
                             /
-                            (
-                                (c.Step.StepTools.Count() -
-                                 c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)))
-                                 == 0
-                                    ? 1
-                                    : (c.Step.StepTools.Count() -
-                                       c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)))
-                            )
+                            c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
                           )
                         : 100,
                         AssignedUser = c.AssignedUser != null ?
@@ -197,16 +202,16 @@ namespace WoopiAiHub.Repository
                                         e.Started,
                                         e.Completed,
                                         e.Status,
-                                        null, 
-                                        null  
+                                        null,
+                                        null
                                     )).ToList(),
                                     Outputs = st.Outputs.Select(o => new StepToolOutputDto(
                                         o.Id,
                                         o.StepToolId,
                                         o.CardId,
                                         o.Value,
-                                        null, 
-                                        null 
+                                        null,
+                                        null
                                     )).ToList()
                                 })
                                 .ToList()

@@ -23,9 +23,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
         private readonly IStepToolRepository _stepToolRepository;
-        private readonly IStepToolOutputRepository _stepToolOutputRepository;
-        private readonly IStepToolParameterRepository _stepParameterRepository;
-        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
@@ -35,10 +32,7 @@ namespace WoopiAiHub.Application.Services
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
                                 IValidateWorkflow validateWorkflow,
-                                IStepToolRepository stepToolRepository,
-                                IStepToolOutputRepository stepToolOutputRepository,
-                                IStepToolParameterRepository stepToolParameterRepository,
-                                IStepToolExecutionRepository stepToolExecutionRepository)
+                                IStepToolRepository stepToolRepository)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -48,9 +42,6 @@ namespace WoopiAiHub.Application.Services
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
             _stepToolRepository = stepToolRepository;
-            _stepToolOutputRepository = stepToolOutputRepository;
-            _stepParameterRepository = stepToolParameterRepository;
-            _stepToolExecutionRepository = stepToolExecutionRepository;
 
         }
 
@@ -76,30 +67,96 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Updates an existing workflow.
+        /// Updates an existing workflow and its steps and step tools based on the provided data transfer object (DTO).
+        /// <para>
+        /// For each step in the DTO:
+        /// - If the step exists, updates its properties and removes any step tools that are no longer present.
+        /// - Updates existing step tools or creates new ones, maintaining correct order and dependencies.
+        /// - If the step does not exist, creates it along with its step tools.
+        /// </para>
+        /// <para>
+        /// Dependencies are handled so that the first step tool in a step depends on the last global step tool,
+        /// and subsequent step tools in the same step depend on the previous step tool in the same step.
+        /// </para>
+        /// <para>
+        /// All changes are wrapped in a transaction. If an exception occurs, the transaction is rolled back.
+        /// </para>
         /// </summary>
-        /// <param name="workflowUpdateDto"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
+        /// <param name="workflowUpdateDto">The DTO containing the workflow updates, including steps and step tools.</param>
+        /// <returns>Returns true if the update is successful; otherwise, the transaction is rolled back and an exception is thrown.</returns>
         public async Task<bool> Update(WorkflowUpdateDto workflowUpdateDto)
         {
             _unitOfWork.BeginTransaction();
             try
             {
-                var workflow = await _validateWorkflow.ValidateUpdateWorkflow(workflowUpdateDto);
-
+                var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
+                workflow.Update(workflowUpdateDto.Name);
 
-                DeleteStepsAndDependencies(workflowUpdateDto, workflow);
-                ICollection<Step> stepsAdd = await CreateStepsAndValidate(workflowUpdateDto.Steps.ToList(),
-                                                                          workflow.TeamId);
+                StepTool? lastGlobalStepTool = null;
 
-                var workflowUpdate = new Workflow(workflow.Id, workflow.Created, workflow.TeamId, workflowUpdateDto.Name);
-                workflowUpdate.AddSteps(stepsAdd);
+                foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
+                {
+                    Step? existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id);
+                    StepTool? previousStepToolInStep = null;
 
-                await _workflowRepository.Update(workflowUpdate);
+                    if (existingStep != null)
+                    {
+                        existingStep.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
 
+                        var stepToolIdsFromDto = stepDto.StepTools.Select(st => st.Id).ToHashSet();
+                        var stepToolsToRemove = existingStep.StepTools
+                                                            .Where(st => !stepToolIdsFromDto.Contains(st.Id))
+                                                            .ToList();
+                        foreach (var stepToolToRemove in stepToolsToRemove)
+                        {
+                            var dependents = workflow.Steps.SelectMany(s => s.StepTools)
+                                                           .Where(st => st.DependsOnStepToolId == stepToolToRemove.Id)
+                                                           .ToList();
+
+                            foreach (var dependent in dependents)
+                                dependent.RemoveDependency();
+
+                            stepToolToRemove.RemoveDependency();
+                            existingStep.RemoveStepTool(stepToolToRemove);
+                        }
+                        await _unitOfWork.SaveChangesAsync();
+
+                        foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                        {
+                            var stepTool = existingStep.StepTools.FirstOrDefault(st => st.Id == stepToolDto.Id)
+                                           ?? CreateStepToolUpdate(stepToolDto);
+
+                            stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
+                            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+
+                            if (!existingStep.StepTools.Contains(stepTool))
+                                existingStep.AddStepTool(stepTool);
+
+                            previousStepToolInStep = stepTool;
+                            lastGlobalStepTool = stepTool;
+                        }
+                    }
+                    else
+                    {
+                        var newStep = CreateStep(stepDto, workflow.TeamId);
+                        foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                        {
+                            var stepTool = CreateStepToolUpdate(stepToolDto);
+                            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+
+                            newStep.AddStepTool(stepTool);
+                            previousStepToolInStep = stepTool;
+                            lastGlobalStepTool = stepTool;
+                        }
+
+                        workflow.AddStep(newStep);
+                    }
+                }
+
+                await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
+
                 return true;
             }
             catch
@@ -198,38 +255,6 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
             }
             return true;
-        }
-
-        /// <summary>
-        /// Deletes steps that are no longer present in the updated workflow DTO.
-        /// </summary>
-        /// <param name="workflowUpdateDto"></param>
-        /// <param name="workflow"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        private void DeleteStepsAndDependencies(WorkflowUpdateDto workflowUpdateDto, WorkflowDto workflow)
-        {
-            var stepIds = workflow.Steps.Select(s => s.Id).ToList();
-            var stepToolIds = workflow.Steps.SelectMany(s => s.StepTools).Select(st => st.Id).ToList();
-            var stepToolExecutionIds = workflow.Steps
-                                               .SelectMany(s => s.StepTools)
-                                               .SelectMany(st => st.Executions)
-                                               .Select(e => e.Id)
-                                               .ToList();
-            var parameterIds = workflow.Steps.SelectMany(s => s.StepTools)
-                                             .SelectMany(st => st.Parameters)
-                                             .Select(p => p.Id)
-                                             .ToList();
-            var outputIds = workflow.Steps.SelectMany(s => s.StepTools)
-                                          .SelectMany(st => st.Outputs)
-                                          .Select(o => o.Id)
-                                          .ToList();
-
-            _stepToolExecutionRepository.DeleteByIds(stepToolExecutionIds);
-            _stepParameterRepository.DeleteByIds(parameterIds);
-            _stepToolOutputRepository.DeleteByIds(outputIds);
-            _stepToolRepository.DeleteByIds(stepToolIds);
-            _stepRepository.DeleteByIds(stepIds);
         }
 
         /// <summary>

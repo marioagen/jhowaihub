@@ -53,11 +53,8 @@
 
                                 <Field name="teamId" rules="required" v-slot="{ field, errors }"
                                     v-model="workflowData.teamId" ref="teamField">
-                                   <select id="typeDocId" 
-                                            class="form-select form-select-sm border-start-0"
-                                            v-bind="field" 
-                                            :class="{ 'bg-light text-muted': isEdit }"
-                                            :disabled="isEdit">
+                                    <select id="typeDocId" class="form-select form-select-sm border-start-0"
+                                        v-bind="field" :class="{ 'bg-light text-muted': isEdit }" :disabled="isEdit">
                                         <option value="" disabled>{{ $t("workflow.responsableTeam") }}</option>
                                         <option v-for="(item, index) in teamsList" :key="index" :value="item.id">
                                             {{ item.id }} - {{ item.text }}
@@ -95,11 +92,13 @@
                         <WorkflowStep 
                             v-for="(step, index) in activeStepsList" 
                             :key="step.id || index"
-                            :step="step" :index="index + 1" 
+                            :step="step" 
+                            :index="index + 1" 
                             :is-last="index === activeStepsList.length - 1"
                             :profilesList="profilesList" 
                             :statusList="statusList" 
-                            :isEdit="isEdit" :workflowId="id"
+                            :isEdit="isEdit" 
+                            :workflowId="id"
                             @update-step="updateStep(index, $event)" 
                             @remove-step="removeStep(index, $event)"
                             @saveWorkflow="saveWorkflowInStore"
@@ -172,6 +171,7 @@ export default {
             isLoading: false,
             isLoadingSteps: false,
             workflowStepRefs: [],
+            tempStepCounter: 1,
         };
     },
     computed: {
@@ -259,6 +259,7 @@ export default {
         addStep() {
             this.stepsList.push({
                 id: 0,
+                tempId: this.tempStepCounter++, // gera ID único local
                 name: '',
                 status: '',
                 order: this.stepsList.length + 1,
@@ -267,24 +268,21 @@ export default {
                 stepTools: [],
             });
         },
-        removeStep(index, deactivatedStep) {
-            this.isLoadingSteps = true;
-            if (this.isEdit) {
-                const i = this.stepsList.findIndex(s => s.id === deactivatedStep.id);
-                if (i !== -1) {
-                    this.stepsList.splice(i, 1, { ...this.stepsList[i], ...deactivatedStep });
-                }
-            } else {
-                const active = this.activeStepsList[index];
-                const i = this.stepsList.findIndex(s => s === active);
-                if (i !== -1) {
-                    this.stepsList.splice(i, 1, { ...this.stepsList[i], ...deactivatedStep });
-                }
+        removeStep(order2, step) {
+            const i = this.stepsList.findIndex(s =>
+                (s.id !== 0 && s.id === step.id) ||
+                (s.id === 0 && s.tempId === step.tempId)
+            );
+            if (i !== -1) {
+                if (step.id === 0) this.stepsList.splice(i, 1);
+                else this.stepsList[i].isActive = false;
+
+                let order = 1;
+                this.stepsList.forEach(s => {
+                    if (s.isActive) s.order = order++;
+                });
             }
-            setTimeout(() => {
-                this.saveTempWorkflow();
-                this.isLoadingSteps = false;
-            }, 1500);
+            this.saveTempWorkflow();
         },
         async save() {
             if (!this.stepsList || this.stepsList.length === 0) {
@@ -401,7 +399,7 @@ export default {
         },
         saveTempWorkflow() {
             this.$store.commit('setTempWorkflow', {
-                list: this.activeStepsList,
+                list: this.stepsList, 
                 data: this.workflowData
             });
         },

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WoopiAiHub.Repository.Context;
 
@@ -11,9 +12,11 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251001213244_DeleteCascadeStepTools")]
+    partial class DeleteCascadeStepTools
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,23 @@ namespace WoopiAiHub.Repository.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DocumentTeams", b =>
+                {
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int")
+                        .HasColumnName("TeamId");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int")
+                        .HasColumnName("DocumentId");
+
+                    b.HasKey("TeamId", "DocumentId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("DocumentTeams", (string)null);
+                });
 
             modelBuilder.Entity("ProfilePermissions", b =>
                 {
@@ -653,17 +673,12 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("varchar(100)")
                         .HasColumnName("Name");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DocumentId");
 
                     b.ToTable("Teams", (string)null);
                 });
@@ -865,26 +880,25 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("Created");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("TeamId")
+                        .IsUnique();
 
                     b.ToTable("Workflows", (string)null);
                 });
 
-            modelBuilder.Entity("WorkflowTeams", b =>
+            modelBuilder.Entity("DocumentTeams", b =>
                 {
-                    b.Property<int>("WorkflowId")
-                        .HasColumnType("int")
-                        .HasColumnName("WorkflowId");
+                    b.HasOne("WoopiAiHub.Domain.Models.Document", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("TeamId")
-                        .HasColumnType("int")
-                        .HasColumnName("TeamId");
-
-                    b.HasKey("WorkflowId", "TeamId");
-
-                    b.HasIndex("TeamId");
-
-                    b.ToTable("WorkflowTeams", (string)null);
+                    b.HasOne("WoopiAiHub.Domain.Models.Team", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProfilePermissions", b =>
@@ -1134,13 +1148,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("StepTool");
                 });
 
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
-                {
-                    b.HasOne("WoopiAiHub.Domain.Models.Document", null)
-                        .WithMany("Teams")
-                        .HasForeignKey("DocumentId");
-                });
-
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.ToolData", "InputData")
@@ -1168,19 +1175,15 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("ToolType");
                 });
 
-            modelBuilder.Entity("WorkflowTeams", b =>
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>
                 {
-                    b.HasOne("WoopiAiHub.Domain.Models.Team", null)
-                        .WithMany()
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("WoopiAiHub.Domain.Models.Team", "Team")
+                        .WithOne("Workflow")
+                        .HasForeignKey("WoopiAiHub.Domain.Models.Workflow", "TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WoopiAiHub.Domain.Models.Workflow", null)
-                        .WithMany()
-                        .HasForeignKey("WorkflowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
@@ -1197,8 +1200,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("DocumentHistories");
 
                     b.Navigation("DocumentNormalized");
-
-                    b.Navigation("Teams");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Profile", b =>
@@ -1237,6 +1238,11 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Outputs");
 
                     b.Navigation("Parameters");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
+                {
+                    b.Navigation("Workflow");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>

@@ -262,7 +262,7 @@ namespace WoopiAiHub.Application.Services
                 return;
 
             var execution = await _stepToolExecutionRepository
-                .FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, automationServicesDto.StepToolId);
+                .FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, automationServicesDto.CardId);
             if (execution == null)
                 return;
 

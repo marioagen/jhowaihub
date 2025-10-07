@@ -59,5 +59,10 @@ namespace WoopiAiHub.Domain.Models
                 AddTeam(team);
             }
         }
+        
+        public void Update(string name)
+        {
+            Name = name;
+        }   
     }
 }

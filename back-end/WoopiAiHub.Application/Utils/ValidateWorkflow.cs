@@ -52,7 +52,7 @@ namespace WoopiAiHub.Application.Utils
         /// <param name="workflowUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<WorkflowDto> ValidateUpdateWorkflow(WorkflowUpdateDto workflowUpdateDto)
+        public async Task<Workflow> ValidateUpdateWorkflow(WorkflowUpdateDto workflowUpdateDto)
         {
             if (string.IsNullOrEmpty(workflowUpdateDto.Name))
             {
