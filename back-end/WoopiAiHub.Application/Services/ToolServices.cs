@@ -247,5 +247,25 @@ namespace WoopiAiHub.Application.Services
 
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<ICollection<ConnectorWorkflowDto>> Workflows(int id)
+        {
+            var tool = await _toolRepository.FindModelByIdAsync(id);
+            if (tool == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Tool not found", null);
+            }
+
+            if (tool.ToolType.Name.Contains(ConnectorNames.N8N))
+            {
+
+                var api = _apiClientFactory.Create(tool.ConnectorUrl!);
+
+                var response = await api.GetWorkflows(tool.ConnectorApiKey!);
+
+
+            }
+            throw new AppException(ErrorCode.InvalidValue, "Tool isn't a connector", null);
+        }
     }
 }

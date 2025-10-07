@@ -103,5 +103,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _toolServices.ValidateConnector(toolConnectorDto);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Endpoint that receives the request to validate connector
+        /// </summary>
+        /// <param name="toolCreateDto"></param>
+        /// <returns></returns>
+        [HttpPost("Workflows/{id}")]
+        [SwaggerOperation("Endpoint that receives the request to return connector workflows")]
+        [ProducesResponseType(typeof(ICollection<ConnectorWorkflowDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Workflows(int id)
+        {
+            var result = await _toolServices.Workflows(id);
+            return Ok(result);
+        }
     }
 }
