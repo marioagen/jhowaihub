@@ -420,12 +420,6 @@
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
     unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
-    users: {
-        title: "Usuários",
-        saveSuccess: "Usuário salvo com sucesso",
-        saveError: "Erro ao salvar usuário",
-        removeSuccess: "Usuário removido com sucesso"
-    },
     workflow: {
         index: "Workflow",
         title: "Board de Processamento de Documentos",
@@ -552,14 +546,31 @@
         }
     },
     management: {
+        title: "Gestão de Usuários e Times",
+        subtitle: "Gerencie usuários, times e permissões do sistema",
         users: {
-
+            title: "Usuários",
+            subtitle: "Gerencie os usuários do sistema",
+            createBtn: "Novo Usuário",
+            createTitle: "Novo Usuário",
+            createSubtitle: "Crie um novo usuário para o sistema",
+            editTitle: "Editar Usuário",
+            editSubtitle: "Atualize as informações do usuário selecionado",
+            invalid: "Usuário inválido",
+            saveSuccess: "Usuário salvo com sucesso",
+            saveError: "Erro ao salvar usuário",
+            removeSuccess: "Usuário removido com sucesso",
         },
         teams: {
-
+            title: "Times",
+            subtitle: "Gerencie os times do sistema",
+            createBtn: "Novo Time",
         },
         profiles: {
-
+            index: "Perfis",
+            title: "Perfis e Permissões",
+            subtitle: "Gerencie os perfis e permissões do sistema",
+            createBtn: "Novo Perfil",
         },
     }
 };
