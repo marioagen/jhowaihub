@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
@@ -21,18 +22,16 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(ICollection<int> ids)
+        public bool DeleteByIds(IEnumerable<int> ids)
         {
-            var stepTools = _context.StepTools.Where(a => ids.Contains(a.Id));
+            if (!ids?.Any() ?? true)
+                return false;
 
-            if (stepTools.Any())
-            {
-                _context.StepTools.RemoveRange(stepTools);
-                _context.SaveChanges();
-                return true;
-            }
+            var deletedCount = _context.StepTools
+                .Where(a => ids.Contains(a.Id))
+                .ExecuteDelete();
 
-            return false;
+            return deletedCount > 0;
         }
 
         /// <summary>
@@ -60,6 +59,11 @@ namespace WoopiAiHub.Repository
                     Type = sp.StepTool.Tool.InputData.Name,
                     Value = sp.Value
                 }).ToList(),
+                Step = new StepDto
+                {
+                    Name = q.Step.Name,
+                    Order = q.Step.Order,
+                }
 
             }).FirstOrDefaultAsync(s => s.Id == id);
         }
@@ -201,7 +205,11 @@ namespace WoopiAiHub.Repository
         /// cref="StepTool"/> that depends on the specified ID, or <see langword="null"/> if no such  dependent exists.</returns>
         public async Task<StepTool?> FindDependentAsync(int id)
         {
-            return await _context.StepTools.FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
+            return await _context.StepTools.Include(u => u.Tool)
+                                             .ThenInclude(t => t.ToolType)
+                                           .Include(s => s.Step)
+                                           .Include(d => d.DependsOnStepTool)
+                                           .FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
         }
 
         /// <summary>
@@ -214,7 +222,10 @@ namespace WoopiAiHub.Repository
         /// <returns>A <see cref="StepTool"/> object if a matching entity is found; otherwise, <see langword="null"/>.</returns>
         public async Task<StepTool?> FindByStepIdAndOrderAsync(int stepId, int order)
         {
-            return await _context.StepTools.FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
+            return await _context.StepTools.Include(u => u.DependsOnStepTool)
+                                           .Include(t => t.Tool)
+                                            .ThenInclude(s => s.ToolType)
+                                           .FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
         }
 
         /// <summary>

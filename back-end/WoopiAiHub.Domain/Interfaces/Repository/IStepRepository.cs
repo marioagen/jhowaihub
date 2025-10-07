@@ -8,8 +8,9 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> Update(Step step);
         Task<Step?> FindById(int id);
         ICollection<Step> FindByIds(IEnumerable<int> ids);
-        bool DeleteByIds(ICollection<int> ids);
+        bool DeleteByIds(IEnumerable<int> ids);
         Task<Step?> FindByOrderAndWorkflowId(int order,
                                              int workflowId);
+        Task CreateRange(ICollection<Step> steps);
     }
 }

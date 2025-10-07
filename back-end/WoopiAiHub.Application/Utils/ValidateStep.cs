@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -48,6 +49,13 @@ namespace WoopiAiHub.Application.Utils
             {
                 throw new AppException(ErrorCode.RequiredField, "Workflow must have at least one step", StepLabel.Required);
             }
+
+            if (workflow is null)
+                throw new AppException(
+                    ErrorCode.NotFound,
+                    "Workflow not found",
+                    WorkflowLabel.NotFound
+                );
 
             var steps = stepsUpdateDto.Select(s => new Step(s.Id, DateTime.UtcNow, workflow.Id, s.Name, s.Order, s.ProfileId, s.StatusId)).ToList();
 

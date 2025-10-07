@@ -39,6 +39,7 @@
                 </div>
             </div>
             <button 
+                v-if="showCloseButton"
                 type="button" 
                 class="btn btn-link btn-sm"
                 @click="removeStep"
@@ -206,6 +207,9 @@
             showEditFlow() {
                 return this.isEdit && this.step?.stepTools?.length > 0;
             },
+            showCloseButton() {
+                return this.step.id == 0
+            }
         },
         methods: {
             removeStep() {

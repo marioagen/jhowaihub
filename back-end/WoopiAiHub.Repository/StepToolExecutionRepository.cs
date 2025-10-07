@@ -61,6 +61,7 @@ namespace WoopiAiHub.Repository
         public async Task<StepToolExecution?> FindByStepToolIdAndCardIdAsync(int stepToolId, int cardId)
         {
             return await _context.StepToolExecutions
+                                 .Include(s => s.StepTool)
                                  .FirstOrDefaultAsync(s => s.StepToolId.Equals(stepToolId) &&
                                                            s.CardId.Equals(cardId));
         }
@@ -77,6 +78,52 @@ namespace WoopiAiHub.Repository
         {
             _context.StepToolExecutions.Update(stepToolExecution);
             await _context.SaveChangesAsync();
+        }
+        
+        /// <summary>
+        /// Cont step executions 
+        /// </summary>
+        /// <param name="stepId"></param>
+        /// <returns></returns>
+        public async Task<int> ExecutionsByStepIdCountAsync(int stepId,
+                                                            int cardId)
+        {
+            return await _context.StepToolExecutions
+                                 .Include(e => e.StepTool)
+                                 .CountAsync(e => e.StepTool!.StepId == stepId &&
+                                                  e.CardId == cardId);
+        }
+
+        /// <summary>
+        /// Finds existing step tool executions for the given collection of card IDs.
+        /// </summary>
+        /// <param name="cardIds"></param>
+        /// <returns></returns>
+        public async Task<ICollection<(int StepToolId, int CardId)>> FindExistingExecutionsAsync(IEnumerable<int> cardIds)
+        {
+            return await _context.StepToolExecutions
+                                 .Where(e => cardIds.Contains(e.CardId))
+                                 .Select(e => new ValueTuple<int, int>(e.StepToolId, e.CardId))
+                                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Deletes the records with the specified IDs from the data store.
+        /// </summary>
+        /// <remarks>If the specified collection of IDs is empty or none of the IDs match existing
+        /// records, no changes are made, and the method returns <see langword="false"/>.</remarks>
+        /// <param name="ids">A collection of IDs representing the records to delete. Cannot be null.</param>
+        /// <returns><see langword="true"/> if one or more records were successfully deleted; otherwise, <see langword="false"/>.</returns>
+        public bool DeleteByIds(IEnumerable<int> ids)
+        {
+            if (!ids?.Any() ?? true)
+                return false;
+
+            var deletedCount = _context.StepToolExecutions
+                .Where(a => ids.Contains(a.Id))
+                .ExecuteDelete();
+
+            return deletedCount > 0;
         }
     }
 }

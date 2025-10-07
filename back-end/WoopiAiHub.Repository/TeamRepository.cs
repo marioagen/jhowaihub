@@ -202,6 +202,9 @@ namespace WoopiAiHub.Repository
             return _context.Teams
                            .Include(t => t.Workflow)
                            .ThenInclude(w => w!.Steps)
+                           .ThenInclude(s => s.StepTools)
+                           .ThenInclude(st => st.Tool)
+                           .ThenInclude(t => t!.ToolType)
                            .Where(t => ids.Contains(t.Id) &&
                                        t.Users.Any(s => s.Email.Equals(emailUser)))
                            .ToList();

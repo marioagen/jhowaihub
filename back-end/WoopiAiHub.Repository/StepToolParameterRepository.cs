@@ -1,4 +1,6 @@
-﻿using WoopiAiHub.Domain.Interfaces.Repository;
+﻿using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -17,18 +19,16 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(ICollection<int> ids)
+        public bool DeleteByIds(IEnumerable<int> ids)
         {
-            var parameters = _context.StepToolParameters.Where(a => ids.Contains(a.Id));
+            if (!ids?.Any() ?? true)
+                return false;
 
-            if (parameters.Any())
-            {
-                _context.StepToolParameters.RemoveRange(parameters);
-                _context.SaveChanges();
-                return true;
-            }
+            var deletedCount = _context.StepToolParameters
+                .Where(a => ids.Contains(a.Id))
+                .ExecuteDelete();
 
-            return false;
+            return deletedCount > 0;
         }
 
         /// <summary>
@@ -48,6 +48,23 @@ namespace WoopiAiHub.Repository
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Retrieves the value associated with the specified step tool identifier.
+        /// </summary>
+        /// <remarks>This method searches for a step tool with the given identifier where the associated
+        /// tool  is marked as editable input. If multiple matches exist, the first value is returned.</remarks>
+        /// <param name="stepToolId">The identifier of the step tool to search for.</param>
+        /// <returns>The value associated with the specified step tool identifier, or <see langword="null"/>  if no matching step
+        /// tool is found.</returns>
+        public string FindByStepToolId(int stepToolId)
+        {
+            var input = _context.StepToolParameters.Where(u => u.StepToolId.Equals(stepToolId) && u.StepTool.Tool.IsEditableInput)
+                                                   .Select(v => v.Value)
+                                                   .FirstOrDefault();
+
+            return input;
         }
     }
 }

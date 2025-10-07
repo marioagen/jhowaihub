@@ -1130,7 +1130,7 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasOne("WoopiAiHub.Domain.Models.Step", "Step")
                         .WithMany("StepTools")
                         .HasForeignKey("StepId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("WoopiAiHub.Domain.Models.Tool", "Tool")
@@ -1157,7 +1157,7 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
                         .WithMany("Executions")
                         .HasForeignKey("StepToolId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Card");
@@ -1176,7 +1176,7 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
                         .WithMany("Outputs")
                         .HasForeignKey("StepToolId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Card");
@@ -1189,7 +1189,7 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasOne("WoopiAiHub.Domain.Models.StepTool", "StepTool")
                         .WithMany("Parameters")
                         .HasForeignKey("StepToolId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("StepTool");
