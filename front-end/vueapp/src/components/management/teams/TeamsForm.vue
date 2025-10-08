@@ -139,7 +139,7 @@
             returnToTable() {
                 this.$router.push({
                     name: "Management",
-                    query: "teams",
+                    query: { tab: "teams" },
                 });
             },
             getUsers() {

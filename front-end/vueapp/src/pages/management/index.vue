@@ -5,7 +5,11 @@
                 <div class="col-12">
                     <h5 class="mb-0 fw-bold">{{ $t("management.title") }}</h5>
                     <p>{{ $t("management.subtitle") }}</p>
-                    <TabsComponent :tabs="tabsList" color="custom">
+                    <TabsComponent 
+                        :tabs="tabsList" 
+                        color="custom"
+                        ref="TabsComponent"
+                    >
                         <template #users>
                             <UsersComponent />
                         </template>
@@ -43,6 +47,12 @@
                 { name: "profiles", label: "management.profiles.title", icon: "Shield" },
             ],
         }),
+        mounted() {
+            let activeTab = this.$route.query.tab;
+            if(activeTab !== undefined) {
+                this.$refs.TabsComponent.setActiveTab(activeTab);
+            }
+        },
     };
 </script>
 

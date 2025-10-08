@@ -92,18 +92,12 @@
 </template>
 
 <script>
-    import { Form, Field, ErrorMessage } from "vee-validate";
-    import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ProfilesService from "@/services/profiles/ProfilesService";
 
     export default {
         name: "ProfilesForm",
         components: {
-            Form,
-            Field,
-            ErrorMessage,
-            SelectionListComponent,
         },
         props: {
             isEdit: {
@@ -153,7 +147,7 @@
             returnToTable() {
                 this.$router.push({
                     name: "Management",
-                    query: "profiles",
+                    query: { tab: "profiles" },
                 });
             },
             getPermissions() {
