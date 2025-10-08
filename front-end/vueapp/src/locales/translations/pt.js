@@ -513,12 +513,6 @@
         },
         validationError: "Erro ao validar campos",
     },
-    team: {
-        title: "Times",
-        deleteSuccess: "Time deletado com sucesso",
-        deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
-        deleteError: "Erro ao deletar time"
-    },
     flow: {
         title: "Fluxo de Automação",
         subtitle: "",
@@ -559,18 +553,36 @@
             invalid: "Usuário inválido",
             saveSuccess: "Usuário salvo com sucesso",
             saveError: "Erro ao salvar usuário",
-            removeSuccess: "Usuário removido com sucesso",
+            deleteSuccess: "Usuário removido com sucesso",
         },
         teams: {
             title: "Times",
             subtitle: "Gerencie os times do sistema",
             createBtn: "Novo Time",
+            createTitle: "Novo Time",
+            createSubtitle: "Crie um novo time para o sistema",
+            editTitle: "Editar Perfil",
+            editSubtitle: "Atualize as informações do time selecionado",
+            invalid: "Time inválido",
+            saveSuccess: "Time salvo com sucesso",
+            saveError: "Erro ao salvar time",
+            deleteSuccess: "Time deletado com sucesso",
+            deleteError: "Erro ao deletar time"
         },
         profiles: {
             index: "Perfis",
             title: "Perfis e Permissões",
             subtitle: "Gerencie os perfis e permissões do sistema",
             createBtn: "Novo Perfil",
+            createTitle: "Novo Perfil",
+            createSubtitle: "Crie um novo perfil para o sistema",
+            editTitle: "Editar Perfil",
+            editSubtitle: "Atualize as informações do perfil selecionado",
+            invalid: "Perfil inválido",
+            saveSuccess: "Perfil salvo com sucesso",
+            saveError: "Erro ao salvar perfil",
+            deleteSuccess: "Perfil deletado com sucesso",
+            deleteError: "Erro ao deletar perfil"
         },
     }
 };
