@@ -18,7 +18,6 @@
                 </a>
             </li>
         </ul>
-
         <div class="tab-content mt-3">
             <div
                 v-if="activeTab"

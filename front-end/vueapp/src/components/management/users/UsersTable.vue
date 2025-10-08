@@ -52,7 +52,7 @@
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="editUser(data.row)">
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToForm(data.row)">
                             <LucideIcon icon="SquarePen" />
                             {{ $t("labelEdit") }}
                         </a>
@@ -70,12 +70,6 @@
             </template>
         </TableComponent>
     </div>
-    <modal-user
-        v-if="modalUserShow"
-        :userEditing="selectedUser"
-        @userCreated="handleUserCreated"
-        @close="closeModalUser"
-    />
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteUser"
@@ -94,7 +88,6 @@
     import UserService from "@/services/users/UserService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalUser from "@/components/management/users/modals/UserModal.vue";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent.vue";
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import DropdownComponent from "@/components/global/DropdownComponent.vue";
@@ -109,7 +102,6 @@
             BadgeComponent,
             TableComponent,
             ConfirmModal,
-            ModalUser,
         },
         data: () => ({
             table: {
@@ -133,8 +125,6 @@
             selectedOption: 10,
             isAscending: false,
             colType: 2,
-            modalUserShow: false,
-            modalAlertShow: false,
             selectedUser: {},
             isDeleting: false,
         }),
@@ -197,22 +187,6 @@
                 this.searchInput = input;
                 this.getUsers({ search: input, page: this.queryPage, type: null });
             },
-            handleUserCreated: function () {
-                this.getUsers({ search: "", page: this.queryPage, type: null });
-                this.closeModalUser();
-            },
-            openModalUser: function () {
-                this.modalUserShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            closeModalUser: function () {
-                this.modalUserShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
             changePage(page) {
                 this.getUsers({ search: "", page: page, type: null });
             },
@@ -221,6 +195,14 @@
             },
             filterByProfile(profile) {
                 this.$emit("setFilter", profile.name);
+            },
+            redirectToForm(user) {
+                this.$router.push({
+                    name: 'EditUser',
+                    params: {
+                        id: user.id,
+                    }
+                });
             },
         },
         created() {

@@ -27,7 +27,6 @@
                             />
                             <ErrorMessage name="teamName" class="invalid-feedback d-block" />
                         </div>
-
                         <SelectionListComponent
                             :id="'users'"
                             :labelPanel="'labelTeamMembers'"
@@ -100,7 +99,6 @@
                 default: {},
             },
         },
-
         data() {
             return {
                 teamData: {

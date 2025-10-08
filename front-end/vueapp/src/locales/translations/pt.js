@@ -420,12 +420,6 @@
     transferListTitle: "Lista para selecionar",
     transferListPlaceholder: "Busque na lista",
     unexpectedError: "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
-    users: {
-        title: "Usuários",
-        saveSuccess: "Usuário salvo com sucesso",
-        saveError: "Erro ao salvar usuário",
-        removeSuccess: "Usuário removido com sucesso"
-    },
     workflow: {
         index: "Workflow",
         title: "Board de Processamento de Documentos",
@@ -519,12 +513,6 @@
         },
         validationError: "Erro ao validar campos",
     },
-    team: {
-        title: "Times",
-        deleteSuccess: "Time deletado com sucesso",
-        deleteDocError: "Não foi possível deletar time: possui documentos relacionados",
-        deleteError: "Erro ao deletar time"
-    },
     flow: {
         title: "Fluxo de Automação",
         subtitle: "",
@@ -551,6 +539,52 @@
             editFlowNodeFail: "Falha ao editar o nodo",
         }
     },
+    management: {
+        title: "Gestão de Usuários e Times",
+        subtitle: "Gerencie usuários, times e permissões do sistema",
+        users: {
+            title: "Usuários",
+            subtitle: "Gerencie os usuários do sistema",
+            createBtn: "Novo Usuário",
+            createTitle: "Novo Usuário",
+            createSubtitle: "Crie um novo usuário para o sistema",
+            editTitle: "Editar Usuário",
+            editSubtitle: "Atualize as informações do usuário selecionado",
+            invalid: "Usuário inválido",
+            saveSuccess: "Usuário salvo com sucesso",
+            saveError: "Erro ao salvar usuário",
+            deleteSuccess: "Usuário removido com sucesso",
+        },
+        teams: {
+            title: "Times",
+            subtitle: "Gerencie os times do sistema",
+            createBtn: "Novo Time",
+            createTitle: "Novo Time",
+            createSubtitle: "Crie um novo time para o sistema",
+            editTitle: "Editar Perfil",
+            editSubtitle: "Atualize as informações do time selecionado",
+            invalid: "Time inválido",
+            saveSuccess: "Time salvo com sucesso",
+            saveError: "Erro ao salvar time",
+            deleteSuccess: "Time deletado com sucesso",
+            deleteError: "Erro ao deletar time"
+        },
+        profiles: {
+            index: "Perfis",
+            title: "Perfis e Permissões",
+            subtitle: "Gerencie os perfis e permissões do sistema",
+            createBtn: "Novo Perfil",
+            createTitle: "Novo Perfil",
+            createSubtitle: "Crie um novo perfil para o sistema",
+            editTitle: "Editar Perfil",
+            editSubtitle: "Atualize as informações do perfil selecionado",
+            invalid: "Perfil inválido",
+            saveSuccess: "Perfil salvo com sucesso",
+            saveError: "Erro ao salvar perfil",
+            deleteSuccess: "Perfil deletado com sucesso",
+            deleteError: "Erro ao deletar perfil"
+        },
+    }
 };
 
 export default portuguese;

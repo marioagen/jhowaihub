@@ -7,7 +7,13 @@
                     <small class="text-muted">{{ $t("labelTeamsMessage") }}</small>
                 </p>
             </div>
-            <button class="btn btn-primary btn-sm" @click="openModalTeam">+ {{ $t("labelNewTeam") }}</button>
+            <button 
+                class="btn btn-primary btn-sm" 
+                @click="redirectToForm"
+            >
+                <LucideIcon icon="Plus" />
+                {{ $t("management.teams.createBtn") }}
+            </button>
         </div>
         <div class="card mb-3">
             <div class="card-body">
@@ -69,6 +75,11 @@
             SearchComponent,
         },
         methods: {
+            redirectToForm() {
+                this.$router.push({
+                    name: 'NewTeam',
+                });
+            },
             setMenuActions: function () {
                 this.menuActions = {
                     options: [
