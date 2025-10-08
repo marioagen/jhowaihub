@@ -296,7 +296,8 @@
             },
             returnToTable() {
                 this.$router.push({
-                    name: 'Management',
+                    name: "Management",
+                    query: "teams",
                 });
             },
             openTeamSection() {

@@ -80,15 +80,8 @@
     import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
 
     export default {
-        name: "UserForm",
+        name: "TeamForm",
         components: {
-            Form,
-            Field,
-            ErrorMessage,
-            SelectionListComponent,
-            PasswordInputComponent,
-            ModalTeamUser,
-            ToastAlert,
             Form,
             Field,
             ErrorMessage,
@@ -114,7 +107,8 @@
                     name: "",
                     users: [],
                 },
-                selectedUsers: this.teamEditing.users ? this.teamEditing.users.map((u) => u.id) : [],
+                selectedUsers: [],
+                // selectedUsers: this.teamEditing.users ? this.teamEditing.users.map((u) => u.id) : [],
                 searchTerm: "",
                 usersList: [],
                 showTeams: false,
@@ -142,6 +136,12 @@
             this.getUsers();
         },
         methods: {
+            returnToTable() {
+                this.$router.push({
+                    name: "Management",
+                    query: "teams",
+                });
+            },
             getUsers() {
                 var paramsReq = {
                     search: "",
@@ -185,16 +185,16 @@
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
 
-                        if (errorCode && errorCode !== ErrorCode.DefaultError) {
-                            if (errorCode === ErrorCode.Duplicated) {
-                                this.$refs.formRef.setFieldError("teamName", this.$t("labelErrorTeamAlreadyExists"));
-                                this.alertToast(this.$t("labelTeamError"), "toast-warning");
-                            } else {
-                                this.alertToast(this.$t("labelTeamError"), "toast-warning");
-                            }
-                        } else {
-                            this.alertToast(this.$t("labelTeamError"), "toast-warning");
-                        }
+                        // if (errorCode && errorCode !== ErrorCode.DefaultError) {
+                        //     if (errorCode === ErrorCode.Duplicated) {
+                        //         this.$refs.formRef.setFieldError("teamName", this.$t("labelErrorTeamAlreadyExists"));
+                        //         this.alertToast(this.$t("labelTeamError"), "toast-warning");
+                        //     } else {
+                        //         this.alertToast(this.$t("labelTeamError"), "toast-warning");
+                        //     }
+                        // } else {
+                        //     this.alertToast(this.$t("labelTeamError"), "toast-warning");
+                        // }
                     });
             },
             resetForm() {

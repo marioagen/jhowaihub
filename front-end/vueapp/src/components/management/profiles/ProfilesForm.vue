@@ -2,9 +2,9 @@
     <main>
         <div class="container-fluid scroll-area mx-4 mt-4">
             <div class="row align-items-center">
-                <div class="col-auto">
+                <div class="col-6">
                     <div class="row">
-                        <div class="col-2">
+                        <div class="col-1">
                             <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="returnToTable">
                                 <LucideIcon icon="ArrowLeft" />
                             </button>
@@ -16,99 +16,95 @@
                             </div>
                         </div>
                     </div>
-                </div>                
+                </div>            
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="save">
                         <LucideIcon icon="Save" :size="15" />
-                        {{ $t("quizzes.formSave") }}
+                        {{ $t("labelSave") }}
                     </button>
                 </div>
             </div>
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
-                     <div>
-                        <h6 class="mb-0">{{ $t("quizzes.basicInfo") }}</h6>
-                        <p>
-                            <small class="text-muted">{{ $t("quizzes.basicInfoSubtitle") }}</small>
-                        </p>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <label>{{ $t("quizzes.formName") }}</label>
-                            <input 
-                                class="form-control form-control-sm"
-                                :placeholder="$t('quizzes.formNamePlaceholder')"
-                                v-model="form.title"
-                            />
+                    <label>{{ $t("labelName") }}</label>
+                    <input
+                        v-model="profileData.name"
+                        class="form-control form-control-sm"
+                        @blur="nameError = profileData.name ? '' : $t('labelRequiredField')"
+                        @input="nameError = ''"
+                    />
+                    <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">{{ $t("labelPermissions") }}</label>
+                            <span class="text-muted">{{ selectedPermissions.length }} {{ $t("labelSelectedWithO") }}</span>
                         </div>
-                        <div class="col">
-                            <label>{{ $t("quizzes.type") }}</label>
-                            <select
-                                id="typeDocId"
-                                class="form-select form-select-sm"
-                                v-model="form.typeDocId"
-                            >
-                                <option value="">{{ $t("quizzes.formSelect") }}</option>
-                                <option 
-                                    v-for="(item, index) in docTypesList" 
-                                    :key="index"
-                                    :value="item.id" 
-                                >
-                                    {{ item.id }} - {{ item.name }}
-                                </option>
-                            </select>
+
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
+                                <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    :placeholder="$t('labelSearchPermissions')"
+                                    v-model="searchTerm"
+                                />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-primary btn-sm me-2" @click="selectAll">
+                                <i class="bi bi-check-all"></i>
+                                {{ $t("labelSelectAll") }}
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" @click="clearSelection">
+                                <i class="bi bi-x-circle"></i>
+                                {{ $t("labelClearSelection") }}
+                            </button>
+                        </div>
+
+                        <div class="border rounded p-1 user-list">
+                            <div v-for="permission in filteredPermissions" :key="permission.id" class="p-1">
+                                <div class="form-check d-flex align-items-center">
+                                    <input
+                                        class="form-check-input me-3"
+                                        type="checkbox"
+                                        :id="`permission-${permission.id}`"
+                                        :value="permission.id"
+                                        v-model="selectedPermissions"
+                                    />
+                                    <label
+                                        class="form-check-label d-flex align-items-center w-100"
+                                        :for="`permission-${permission.id}`"
+                                    >
+                                        <div>
+                                            <div class="fw-semibold">{{ permission.description }}</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div v-if="permissionError" class="invalid-feedback d-block">{{ permissionError }}</div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="row mt-4">
-                <div class="main-div shadow-sm">
-                    <div>
-                        <h6 class="mb-0">{{ $t("quizzes.questionsSection.title") }}</h6>
-                        <p>
-                            <small class="text-muted">{{ $t("quizzes.questionsSection.subtitle") }}</small>
-                        </p>
-                    </div>
-                    <div class="row">
-                        <div v-if="isLoadingQuestions" class="d-flex justify-content-center">
-                            <div class="spinner-border" role="status"></div>
-                        </div>
-                        <TransferListComponent
-                            v-else
-                            v-model="form.questions"
-                            :available="questionsList"
-                            transferListTitle="questions.availableList"
-                            transferListPlaceholder="questions.filters.input"
-                        />    
-                    </div>
-                    <button 
-                        class="btn btn-outline-primary btn-sm table-btn mt-4"
-                        @click="openModalQuestion"
-                    >
-                        <LucideIcon icon="Plus" :size="17" />
-                        {{ $t("questions.createBtn") }}
-                    </button>
-                </div>
-            </div>        
-            <QuestionsModal
-                :isEdit="false"
-                @reload="getQuestions()"
-                ref="QuestionsModal"
-            />
         </div>
     </main>
 </template>
 
 <script>
-    import TransferListComponent from "@/components/global/TransferListComponent.vue";
-    import QuestionsModal from "@/components/questions/QuestionsModal.vue";
-    import TypesService from "@/services/types/TypesService";
-    import QuestionsService from "@/services/questions/QuestionsService";
-    import QuizzesService from "@/services/quizzes/QuizzesService";
+    import { Form, Field, ErrorMessage } from "vee-validate";
+    import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
+    import PermissionsService from "@/services/permissions/PermissionsService";
+    import ProfilesService from "@/services/profiles/ProfilesService";
 
     export default {
-        name: "QuizFormNew",
+        name: "ProfilesForm",
+        components: {
+            Form,
+            Field,
+            ErrorMessage,
+            SelectionListComponent,
+        },
         props: {
             isEdit: {
                 type: Boolean,
@@ -118,168 +114,149 @@
             id: {
                 type: Number,
                 required: false,
+                default: null,
             }
         },
-        components: {
-            TransferListComponent,
-            QuestionsModal,
+        data: () => ({
+            profileData: {
+                id: "",
+                name: "",
+                permissions: [],
+            },
+            isLoading: false,
+            permissionsList: [],
+            selectedPermissions: [],
+            nameError: "",
+            permissionError: "",
+            searchTerm: "",
+        }),
+        computed: {
+            formTitle() {
+                return this.isEdit ? "management.profiles.editTitle" : "management.profiles.createTitle";
+            },
+            formSubtitle() {
+                return this.isEdit ? "management.profiles.editSubtitle" : "management.profiles.createSubtitle";
+            },
+            filteredPermissions() {
+                if (!this.searchTerm) {
+                    return this.permissionsList;
+                }
+                return this.permissionsList.filter((permission) =>
+                    permission.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+                );
+            },
         },
-        data() {
-            return {
-                isLoadingQuestions: true,
-                docTypesList: [],
-                questionsList: [],
-                form: {
-                    title: "",
-                    typeDocId: "",
-                    questions: [],
-                },
-                myInterval: null,
-            };
+        mounted() {
+            this.getPermissions();
         },
         methods: {
-            getDocTypes() {
-                TypesService.getTypesList()
+            returnToTable() {
+                this.$router.push({
+                    name: "Management",
+                    query: "profiles",
+                });
+            },
+            getPermissions() {
+                PermissionsService.getPermissions()
                     .then((response) => {
-                        if(response.error === undefined) {
-                            return this.docTypesList = response;
-                        }
+                        this.permissionsList = response.permissions;
                     });
             },
-            getQuestions() {
-                this.isLoadingQuestions = true;
-                this.questionsList = [];
-                QuestionsService.getQuestionsList()
-                    .then((response) => {
-                        for (let i = 0; i < response.length; i++) {
-                            var item = {
-                                id: response[i].id,
-                                text: response[i].id + " - " + response[i].description,
-                            };
-                            this.questionsList.push(item);
+            validateForm() {
+                let valid = true;
+                if (!this.profileData.name || this.profileData.name.length < 2) {
+                    this.nameError = this.$t("labelRequiredField");
+                    valid = false;
+                } else if (this.selectedPermissions.length == 0) {
+                    this.permissionError = this.$t("labelRequiredField");
+                    valid = false;
+                }
+                return valid;
+            },
+            selectAll() {
+                this.selectedPermissions = this.filteredPermissions.map((user) => user.id);
+            },
+            clearSelection() {
+                this.selectedPermissions = [];
+            },
+            save() {
+                if (this.isEdit) {
+                    return this.editProfile();
+                }
+                return this.createProfile();
+            },
+            createProfile() {
+                this.isLoading = true;
+                if (!this.validateForm()) return;
+                var paramsReq = {
+                    name: this.profileData.name,
+                    permissionsIds: this.selectedPermissions,
+                };
+                ProfilesService.addProfile(paramsReq)
+                    .then((result) => {
+                        if (result.success) {
+                            this.resetData();
+                            return this.$notify({
+                                title: "Profiles",
+                                message: this.$t("labelProfileAddSuccess"),
+                                variant: "success",
+                                icon: "CircleCheckBig",
+                            });
+                        } else {
+                            this.$notify({
+                                title: "Profiles",
+                                message: this.$t("labelProfileAddError"),
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
                         }
                     })
                     .finally(() => {
-                        this.isLoadingQuestions = false;
+                        this.isLoading = false;
                     });
             },
-            setForm() {
-                if(!this.isEdit) return;
-                QuizzesService.getQuizzById(this.id)
-                    .then((response) => {
-                        this.form = {
-                            title: response.title,
-                            typeDocId: response.typeDoc.id,
-                            questions: response.questions,
-                        }
-                    });
-            },
-            save() {
-                if(this.isEdit) {
-                    return this.editQuizz();
-                }
-                return this.createQuizz();
-            },
-            createQuizz() {
-                var paramsData = {
-                    title: this.form.title,
-                    typeDocId: this.form.typeDocId,
-                    questionsId: this.form.questions.map((obj) => obj.id),
+            editProfile() {
+                this.isLoading = true;
+                if (!this.validateForm()) return;
+                var paramsReq = {
+                    id: this.profileData.id,
+                    name: this.profileData.name,
+                    permissionsIds: this.selectedPermissions,
                 };
-
-                QuizzesService.createQuizz(paramsData)
-                    .then((response) => {
-                        if(response.error === undefined) {
-                            this.$notify({
-                                title: 'quizzes.title',
-                                message: 'quizzes.createSuccess',
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                ProfilesService.updateProfile(paramsReq)
+                    .then((result) => {
+                        if (result.success) {
+                            return this.$notify({
+                                title: "Profiles",
+                                message: this.$t("labelProfileEditSuccess"),
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
-                            return this.returnToTable();
-                        }
-                        this.$notify({
-                            title: 'quizzes.title',
-                            message: response.error,
-                            variant: 'danger',
-                            icon: 'CircleX',
-                        });
-                    });
-            },
-            editQuizz() {
-                var paramsData = {
-                    id: parseInt(this.id),
-                    title: this.form.title,
-                    typeDocId: this.form.typeDocId,
-                    questionsId: this.form.questions.map((obj) => obj.id),
-                };
-
-                QuizzesService.editQuizz(paramsData)
-                    .then((response) => {
-                        if(response.error === undefined) {
+                        } else {
                             this.$notify({
-                                title: 'quizzes.title',
-                                message: 'quizzes.editSuccess',
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                title: "Profiles",
+                                message: this.$t("labelProfileEditError"),
+                                variant: "danger",
+                                icon: "CircleX",
                             });
-                            return this.returnToTable();
                         }
-                        this.$notify({
-                            title: 'quizzes.title',
-                            message: response.error,
-                            variant: 'danger',
-                            icon: 'CircleX',
-                        });
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
                     });
             },
             resetForm() {
-                this.form = {
-                    title: "",
-                    typeDocId: "",
-                    questions: [],
+                this.profileData = { 
+                    id: "", 
+                    name: "", 
+                    permissions: [] 
                 };
             },
-            openModalQuestion() {
-                this.$refs.QuestionsModal.open();
-            },
-            returnToTable() {
-                return this.$router.push({ name: "Quiz" });
-            },
-        },
-        computed: {
-            formTitle() {
-                return this.isEdit ? "quizzes.formEdit.title" : "quizzes.formCreate.title";
-            },
-            formSubtitle() {
-                return this.isEdit ? "quizzes.formEdit.subtitle" : "quizzes.formCreate.subtitle";
-            },
-        },
-        created() {
-            this.getDocTypes();
-            this.getQuestions();
-            this.setForm();
         },
     };
 </script>
 
 <style scoped>
-    @import "@vueform/multiselect/themes/default.css";
-
-    .multiselect-dropdown {
-        max-height: var(--ms-max-height) !important;
-    }
-
-    .form-save {
-        padding-top: 20px !important;
-    }
-
-    .btn-custom-cancel {
-        font-weight: inherit !important;
-        padding: 8px 12px !important;
-        border: 0 !important;
-    }
-
     .container-fluid {
         padding: 0 13px;
     }
