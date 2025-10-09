@@ -316,7 +316,6 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var updateDto = WorkflowFixture.FindValidWorkflowUpdateDto();
             var workflow = WorkflowFixture.FindValidWorkflow();
-            updateDto.TeamId = workflow.TeamId;
             var step = WorkflowFixture.FindValidStep();
             updateDto.Steps.Clear();
             var stepUpdateDto = WorkflowFixture.FindValidStepUpdateDto();
