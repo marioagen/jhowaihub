@@ -1,5 +1,9 @@
-﻿using WoopiAiHub.Application.Utils;
+﻿using Microsoft.AspNetCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Schema;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -38,7 +42,8 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> CreateAsync(ToolCreateDto toolCreateDto)
         {
             var toolType = await _toolTypeRepository.FindByAsync(toolCreateDto.ToolTypeId);
-            if (!toolType.HasValue) {
+            if (!toolType.HasValue)
+            {
                 throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
             }
 
@@ -61,7 +66,7 @@ namespace WoopiAiHub.Application.Services
                 toolCreateDto.IsEditableInput
              );
 
-             tool.UpdateConnector(toolCreateDto.ConnectorUrl, toolCreateDto.ConnectorApiKey);
+            tool.UpdateConnector(toolCreateDto.ConnectorUrl, toolCreateDto.ConnectorApiKey);
 
             var result = await _toolRepository.CreateUniqueAsync(tool);
             if (!result)
@@ -159,11 +164,11 @@ namespace WoopiAiHub.Application.Services
                 {
                     throw new AppException(ErrorCode.RequiredField, "Coonector Api Key is required", null);
                 }
-            }            
+            }
 
-            tool.Update(toolUpdateDto.Name, 
-                        toolUpdateDto.ToolTypeId, 
-                        toolUpdateDto.InputDataId, 
+            tool.Update(toolUpdateDto.Name,
+                        toolUpdateDto.ToolTypeId,
+                        toolUpdateDto.InputDataId,
                         toolUpdateDto.OutputDataId,
                         toolUpdateDto.IsEditableInput);
 
@@ -240,10 +245,10 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
             }
-            
+
             var api = _apiClientFactory.Create(toolConnectorDto.ConnectorUrl);
 
-            var response = await api.GetWorkflows(toolConnectorDto.ConnectorApiKey);
+            var response = await api.FindWorkflows(toolConnectorDto.ConnectorApiKey);
 
             return response.IsSuccessStatusCode;
         }

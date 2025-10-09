@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -195,12 +196,15 @@ namespace WoopiAiHub.Repository
                                     {
                                         Id = p.Id,
                                         Value = p.Value,
+                                        WebhookId = p.WebhookId,
+                                        RequiredFile = p.RequiredFile
                                     }).ToList(),
                                     Tool = new ToolDto
                                     {
                                         Id = st.Tool!.Id,
                                         Name = st.Tool.Name,
                                         IsEditableInput = st.Tool.IsEditableInput,
+                                        IsConnector = st.Tool.ToolType!.Name.Contains(ConnectorNames.N8N)
                                     },
                                     Executions = st.Executions.Select(e => new StepToolExecutionDto(
                                         e.Id,

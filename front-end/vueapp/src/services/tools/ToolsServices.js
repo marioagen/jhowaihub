@@ -80,5 +80,5 @@ export default {
             .catch(() => {
                 return false; 
             });
-    },
+    }
 };
