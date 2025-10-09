@@ -1,12 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Connector;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -20,6 +25,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
         private readonly ICardRepository _cardRepository;
+        private readonly IToolRepository _toolRepository;
+        private readonly IApiClientFactory _apiClientFactory;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -28,7 +35,9 @@ namespace WoopiAiHub.Application.Services
                                   IStepToolParameterRepository stepToolParameterRepository,
                                   IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger,
-                                  ICardRepository cardRepository)
+                                  ICardRepository cardRepository,
+                                  IToolRepository toolRepository,
+                                  IApiClientFactory apiClientFactory)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -38,6 +47,8 @@ namespace WoopiAiHub.Application.Services
             _messagePublisher = messagePublisher;
             _logger = logger;
             _cardRepository = cardRepository;
+            _toolRepository = toolRepository;
+            _apiClientFactory = apiClientFactory;
         }
 
         /// <summary>
@@ -276,6 +287,87 @@ namespace WoopiAiHub.Application.Services
             var payload = await handler.BuildPayload(automationServicesDto, input, output);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
+        }
+
+        /// <summary>
+        /// Returns n8n Workflows list by tool id if is an connector
+        /// </summary>
+        /// <param name="toolId"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<ICollection<ConnectorDto>> FindN8nWorkflowsByToolId(int toolId)
+        {
+            var tool = await _toolRepository.FindModelByIdAsync(toolId)
+                ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
+
+            if (!IsN8nTool(tool))
+                throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
+
+            var api = _apiClientFactory.Create(tool.ConnectorUrl!);
+            var response = await api.FindWorkflows(tool.ConnectorApiKey!);
+
+            if (!response.IsSuccessStatusCode)
+                throw new AppException(ErrorCode.RefitApiError, "N8n connector fails listing workflows", null);
+
+            var root = JsonConvert.DeserializeObject<WebhookDataDto>(response.Content!);
+
+            return MapToConnectorDtos(root);
+        }
+
+        /// <summary>
+        /// Returns n8n Workflow webhook input list by tool id if is an connector
+        /// </summary>
+        /// <param name="webhookInputDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<ICollection<FormFieldDto>> FindN8nWebhookInputs(WebhookInputDto webhookInputDto)
+        {
+            var tool = await _toolRepository.FindModelByIdAsync(webhookInputDto.ToolId)
+                ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
+
+            if (!IsN8nTool(tool))
+                throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
+
+            var api = _apiClientFactory.Create(tool.ConnectorUrl!);
+            var response = await api.FindWorkflowInputs(webhookInputDto.workflowId.ToString());
+
+            if (!response.IsSuccessStatusCode)
+                throw new AppException(ErrorCode.RefitApiError, "Coonector fails listing workflows", null);
+            
+            return JsonSchemaToFormMapper.MapToFormFields(response.Content!);
+        }
+
+        /// <summary>
+        /// Validate n8n tool
+        /// </summary>
+        /// <param name="tool"></param>
+        /// <returns></returns>
+        private static bool IsN8nTool(Tool tool)
+            => tool.ToolType?.Name?.Contains(ConnectorNames.N8N, StringComparison.OrdinalIgnoreCase) == true;
+
+        /// <summary>
+        /// Maps connectors
+        /// </summary>
+        /// <param name="root"></param>
+        /// <returns></returns>
+        private static ICollection<ConnectorDto> MapToConnectorDtos(WebhookDataDto? root)
+        {
+            if (root?.Data == null) return Array.Empty<ConnectorDto>();
+
+            return root.Data
+                .Select(w => new
+                {
+                    Workflow = w,
+                    PostNode = w.Nodes?.FirstOrDefault(n => n.Parameters?.HttpMethod == "POST")
+                })
+                .Where(x => x.PostNode != null)
+                .Select(x => new ConnectorDto
+                {
+                    Id = x.Workflow.Id,
+                    Name = x.Workflow.Name,
+                    WebhookId = x.PostNode!.WebhookId
+                })
+                .ToList();
         }
     }
 }

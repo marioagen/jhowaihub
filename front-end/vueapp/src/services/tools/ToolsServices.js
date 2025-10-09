@@ -80,25 +80,5 @@ export default {
             .catch(() => {
                 return false; 
             });
-    },
-    getConnectorWorkflows(toolId) {
-        return api
-            .post(`/Tool/Workflows/${toolId}`)
-            .then((response) => {
-                return response.data;
-            })
-            .catch(() => {
-                return false; 
-            });
-    },
-    getConnectorWorkflowInputs(params) {
-        return api
-            .post(`/Tool/Workflow/Inputs`, params)
-            .then((response) => {
-                return response.data;
-            })
-            .catch(() => {
-                return false; 
-            });
-    },
+    }
 };
