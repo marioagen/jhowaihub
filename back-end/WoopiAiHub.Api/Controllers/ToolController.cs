@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -101,6 +102,34 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> ValidateConnector([FromBody] ToolConnectorDto toolConnectorDto)
         {
             var result = await _toolServices.ValidateConnector(toolConnectorDto);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to list tool webhooks
+        /// </summary>
+        /// <param name="toolCreateDto"></param>
+        /// <returns></returns>
+        [HttpPost("Workflows/{id}")]
+        [SwaggerOperation("Endpoint that receives the request to return connector workflows")]
+        [ProducesResponseType(typeof(ICollection<ConnectorDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Workflows(int id)
+        {
+            var result = await _toolServices.Workflows(id);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to list tool webhook inputs
+        /// </summary>
+        /// <param name="toolCreateDto"></param>
+        /// <returns></returns>
+        [HttpPost("Workflow/Inputs")]
+        [SwaggerOperation("Endpoint that receives the request to return connector workflows")]
+        [ProducesResponseType(typeof(ICollection<ConnectorDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> WorkflowsInputs([FromBody] WebhookInputDto webhookInputDto)
+        {
+            var result = await _toolServices.WorkflowsInputs(webhookInputDto);
             return Ok(result);
         }
     }

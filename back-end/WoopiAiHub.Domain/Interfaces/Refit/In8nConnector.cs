@@ -8,5 +8,9 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<ApiResponse<string>> GetWorkflows([Header("X-N8N-API-KEY")] string apiKey,
                                   [Query] string active = "true",
                                   [Query] string excludePinnedData = "true");
+        [Get("/webhook/{webhookId}")]
+        [Headers("Content-Type: application/json")] 
+        Task<ApiResponse<string>> GetWorkflowInputs([AliasAs("webhookId")] string webhookId);
+
     }
 }
