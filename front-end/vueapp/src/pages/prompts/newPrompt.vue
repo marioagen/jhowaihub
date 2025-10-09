@@ -1,7 +1,7 @@
 <template>
     <main>
         <div class="container-fluid scroll-area mx-2">
-            <form>
+            <form @submit="save">
                 <div class="row align-items-center mt-3">
                     <div class="col-md-8 d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
@@ -26,11 +26,11 @@
                                 <h6 class="card-title mb-3">{{$t('prompts.information')}}</h6>
                                 <div class="mb-3">
                                     <label for="inputNamePrompt" class="form-label">{{$t('prompts.namePrompt')}}</label>
-                                    <input type="text" class="form-control" id="inputNamePrompt" aria-describedby="" :placeholder="$t('prompts.placeholderNamePrompt')">
+                                    <input type="text" class="form-control" id="inputNamePrompt" aria-describedby="" :placeholder="$t('prompts.placeholderNamePrompt')" v-model="form.name" >
                                 </div>
                                 <div class="mb-3">
                                     <label for="FormControlTextarea1" class="form-label">{{$t('labelDescription')}}</label>
-                                    <textarea class="form-control" id="FormControlTextarea1" rows="3"></textarea>
+                                    <textarea class="form-control" id="FormControlTextarea1" v-model="form.description" rows="3"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="FormControlTextarea2" class="form-label">{{$t('prompts.promptContent')}}</label>
-                                        <textarea class="form-control" id="FormControlTextarea2" rows="3"></textarea>
+                                        <textarea class="form-control" id="FormControlTextarea2" v-model="form.text" rows="3"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -64,11 +64,16 @@
    </main>
 </template>
 <script>
+    import PromptService from "@/services/prompts/PromptsService";
     export default {
         name: "PromptComponent",
         data() {
             return {
-                
+                form: {
+                    name:  '',
+                    description: '',
+                    text: '',
+                },
             }
         },
         components: {
@@ -76,6 +81,32 @@
         methods: {
             redirectToPromptList: function () {
                 this.$router.push({ name: "Prompt" });
+            },
+            save: function (e) {
+                var paramsData = {
+                    name: this.form.name,
+                    description: this.form.description,
+                    text: this.form.text,
+                };
+                console.log(paramsData);
+                PromptService.createPrompt(paramsData)
+                    .then((response) => {
+                        if (response.error !== undefined) {
+                            return this.$notify({
+                                title: 'prompt.title',
+                                message: 'prompt.createSuccess',
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
+                        }
+                        this.$notify({
+                            title: 'prompt.title',
+                            message: 'prompt.createErrorError',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    });
+               // this.redirectToPromptList();
             },
         },
         computed: {},

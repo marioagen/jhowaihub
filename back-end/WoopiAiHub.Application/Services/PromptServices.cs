@@ -13,14 +13,17 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPromptRepository _promptRepository;
         private readonly IValidatePrompt _validatePrompt;
+        private readonly IUserServices _userServices;
 
         public PromptServices(IUnitOfWork unitOfWork,
                               IPromptRepository promptRepository,
-                              IValidatePrompt validatePrompt)
+                              IValidatePrompt validatePrompt,
+                              IUserServices userServices)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
             _validatePrompt = validatePrompt;
+            _userServices = userServices;
         }
 
         /// <summary>
@@ -30,9 +33,10 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public bool CreateUniquePrompt(PromptCreateDto promptCreateDto)
+        public bool CreateUniquePrompt(PromptCreateDto promptCreateDto, string email)
         {
-            var prompt = GeneratePromptToCreate(promptCreateDto);
+            var idUser = _userServices.FindIdByEmail(email);
+            var prompt = GeneratePromptToCreate(promptCreateDto,idUser);
 
             _validatePrompt.ValidatePromptFields(prompt);
 
@@ -51,10 +55,10 @@ namespace WoopiAiHub.Application.Services
         /// <param name="promptUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public bool Update(PromptUpdateDto promptUpdateDto)
+        public bool Update(PromptUpdateDto promptUpdateDto, string emailCreator)
         {
             _validatePrompt.ValidateOwnership(promptUpdateDto.Id,
-                                              promptUpdateDto.IdUser);
+                                              emailCreator);
 
             var promptDto = _promptRepository.FindById(promptUpdateDto.Id);
             if (promptDto == null)
@@ -94,8 +98,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         public PagedResultDto<PromptDto> FindByIdUserPaged(PagedDataDto pagedDataDto,
-                                                           Guid idUser)
+                                                           string emailCreator)
         {
+            var idUser = _userServices.FindIdByEmail(emailCreator);
             var query = _promptRepository.FindByIdUser(idUser);
 
             query = pagedDataDto.IsAscending ?
@@ -114,8 +119,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         public PagedResultDto<PromptDto> FindAllPaged(PagedDataDto pagedDataDto,
-                                                      Guid idUser)
+                                                      string emailCreator)
         {
+            var idUser = _userServices.FindIdByEmail(emailCreator);
             if (pagedDataDto.Page > 0)
             {
                 var query = _promptRepository.FindAllWithOwnerStatus(idUser);
@@ -208,8 +214,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="emailCreator"></param>
         /// <returns></returns>
-        public IQueryable<PromptDto> FindAll(Guid idUser)
+        public IQueryable<PromptDto> FindAll(string emailCreator)
         {
+            var idUser = _userServices.FindIdByEmail(emailCreator);
             var query = _promptRepository.FindAllWithOwnerStatus(idUser);
 
             return query;
@@ -220,7 +227,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="promptCreateDto"></param>
         /// <param name="emailCreator"></param>
-        private static Domain.Models.Prompt GeneratePromptToCreate(PromptCreateDto promptCreateDto)
+        private static Domain.Models.Prompt GeneratePromptToCreate(PromptCreateDto promptCreateDto, Guid idUser)
         {
             var prompt = new Domain.Models.Prompt(
                 0,
@@ -228,7 +235,7 @@ namespace WoopiAiHub.Application.Services
                 promptCreateDto.Name,
                 promptCreateDto.Description,
                 promptCreateDto.Text,
-                promptCreateDto.IdUser);
+                idUser);
 
             return prompt;
         }

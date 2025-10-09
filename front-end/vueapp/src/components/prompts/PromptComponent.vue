@@ -70,6 +70,7 @@
     </div>
 </template>
 <script>
+    import PromptService from "@/services/prompts/PromptsService";
     export default {
         name: "PromptComponent",
         emits: ['showAlertToast'],
@@ -90,9 +91,6 @@
                 dataModal: {},
                 colType: 2,
                 selectedOption: 9,
-                toastShow: false,
-                toastColor: "",
-                toastMessage: "",
                 listIds: [],
                 loadAllPrompts: true,
             }
@@ -147,56 +145,36 @@
                 this.$refs.QuestionsTable.filterList(obj.search);
             },
             getList: function (obj, url) { // obj = { search, page, type }
-                //let urlRequest = url ? url : '/Prompt/Paged/';
-                //this.dataPrompt = [];
-                //this.listIds = [];
-                //this.searchInput = obj.search;
-                //this.loading = true;
-                //this.searching = false;
-                //this.dataType = [];
-                //var paramsReq = {
-                //    search: this.searchInput.trim() ? this.searchInput.trim() : '',
-                //    page: obj.page,
-                //    pageSize: this.selectedOption,
-                //    isAscending: this.isAscending,
-                //    colType: this.colType
-                //}
-                //let self = this;
-                //api.get(urlRequest, { params: paramsReq })
-                //    .then(function (response) { // Handle success
-                //        self.dataPrompt = response.data.items;
-                //        self.pagination = {
-                //            currentPage: response.data.currentPage,
-                //            count: response.data.count,
-                //            totalPages: response.data.totalPages,
-                //        };
-                //        self.loading = false;
-                //        if (obj.type === "search") self.searching = true;
-                //    }).catch(function (e) { // Handle error
-                //        console.log(e);
-                //        self.loading = false;
-                //        if (obj.type === "search") self.searching = true;
-                //    }).finally(function () { // Always executed
-                //        console.log("Finished request.");
-                //    });
-                this.pagination = {
-                    currentPage: 1,
-                    count: 10,
-                    totalPages: 1,
-                };
-                var items = [
-                    { id: 1, name: "Item 1", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 2, name: "Item 2", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 3, name: "Item 3", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 4, name: "Item 4", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 5, name: "Item 5", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 6, name: "Item 6", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 7, name: "Item 7", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 8, name: "Item 8", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 9, name: "Item 9", description: "Lorem", created: new Date(), isOwner: true },
-                    { id: 10, name: "Item 10", description: "Lorem", created: new Date(), isOwner: true }
-                ]
-                this.dataPrompt = items;
+                this.dataPrompt = [];
+                this.listIds = [];
+                this.searchInput = obj.search;
+                this.loading = true;
+                this.searching = false;
+                var paramsReq = {
+                    search: this.searchInput.trim() ? this.searchInput.trim() : '',
+                    page: obj.page,
+                    pageSize: this.selectedOption,
+                    isAscending: this.isAscending,
+                    colType: this.colType
+                }
+                PromptService.getPromptList(paramsReq)
+                    .then((response) => {
+                        if (response.error !== undefined) {
+                            return this.$notify({
+                                title: 'prompt.title',
+                                message: response.error,
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        this.dataPrompt = response.data.items;
+                        this.pagination = {
+                            currentPage: response.data.currentPage,
+                            count: response.data.count,
+                            totalPages: response.data.totalPages,
+                        };
+                        this.loading = false;
+                    });
             },
             confirmationDialog: function (item) {
                 this.modalEntity = item;
@@ -205,14 +183,23 @@
             },
             deleteItem: function () {
                 let self = this;
-                api.delete('/Prompt/DeleteByIds', { data: this.listIds })
-                    .then(function (response) { // Handle success
-                        self.closeModal();
-                        self.getList({ search: '', page: 1, type: null });
-                    }).catch(function (e) { // Handle error
-                        console.log(e);
-                    }).finally(function () { // Always executed
-                        console.log("Finished request.");
+                PromptService.deletePrompts(this.listIds)
+                    .then((response) => {
+                        if (response.error !== undefined) {
+                            return this.$notify({
+                                title: 'prompt.title',
+                                message: 'prompt.deleteSuccess',
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
+                        }
+                        this.getList({ search: '', page: this.queryPage, type: null });
+                        this.$notify({
+                            title: 'prompt.title',
+                            message: 'prompt.deleteErrorError',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
                     });
             },
             orderList: function (col) {
@@ -225,26 +212,6 @@
                 this.colType = col;
                 this.getList({ search: '', page: this.queryPage, type: null });
             },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
-            },
             formatDate: function (dataObj) {
                 const date = new Date(dataObj);
                 let formattedDate = `${String(date.getDate()).padStart(2, '0')}/` +
@@ -256,21 +223,42 @@
                 this.selectedOption = this.selectedOption * 2
                 this.getList({ search: '', page: this.queryPage, type: null });
             },
-            closeModal: function () {
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
             getAllPrompts: function () {
                 this.loadAllPrompts = true;
                 this.getList({ search: '', page: this.queryPage, type: null });
             },
             getUserPrompts: function () {
-                this.loadAllPrompts = false;
-                let url = '/Prompt/PagedByUser/';
-                this.getList({ search: '', page: this.queryPage, type: null }, url);
-            },
-            handleShowToast({ msg, color }) {
-                this.alertToast(msg, color);
+                var userId;
+                this.dataPrompt = [];
+                this.listIds = [];
+                this.searchInput = obj.search;
+                this.loading = true;
+                this.searching = false;
+                var paramsReq = {
+                    search: this.searchInput.trim() ? this.searchInput.trim() : '',
+                    page: obj.page,
+                    pageSize: this.selectedOption,
+                    isAscending: this.isAscending,
+                    colType: this.colType
+                }
+                PromptService.getPromptByUserId(paramsReq, userId)
+                    .then((response) => {
+                        if (response.error !== undefined) {
+                            return this.$notify({
+                                title: 'prompt.title',
+                                message: response.error,
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        this.dataPrompt = response.data.items;
+                        this.pagination = {
+                            currentPage: response.data.currentPage,
+                            count: response.data.count,
+                            totalPages: response.data.totalPages,
+                        };
+                        this.loading = false;
+                    });
             },
         },
         computed: {},

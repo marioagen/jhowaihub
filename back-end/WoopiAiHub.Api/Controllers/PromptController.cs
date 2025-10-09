@@ -33,9 +33,10 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives the request to create a Prompt in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
 
-        public IActionResult Create([FromBody] PromptCreateDto promptCreateDto)
+        public IActionResult Create([FromBody] PromptCreateDto promptCreateDto,
+                                    [FromHeader] HeadersDto headersDto)
         {
-            var result = _promptServices.CreateUniquePrompt(promptCreateDto);
+            var result = _promptServices.CreateUniquePrompt(promptCreateDto, headersDto.EmailCreator);
             return Ok(result);
         }
 
@@ -47,9 +48,11 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [HttpPut]
         [SwaggerOperation("Endpoint that receives the request to update a Prompt in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Update([FromBody] PromptUpdateDto promptUpdateDto)
+        public IActionResult Update([FromBody] PromptUpdateDto promptUpdateDto,
+                                    [FromHeader] HeadersDto headersDto)
         {
-            var result = _promptServices.Update(promptUpdateDto);
+            var result = _promptServices.Update(promptUpdateDto,
+                                                headersDto.EmailCreator);
             return Ok(result);
         }
 
@@ -64,10 +67,10 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives an email and returns its prompts paginated")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
         public IActionResult FindByIdUserPaged([FromQuery] PagedDataDto pagedDataDto,
-                                               Guid idUser)
+                                               [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.FindByIdUserPaged(pagedDataDto,
-                                                           idUser);
+                                                           headersDto.EmailCreator);
             return Ok(result);
         }
 
@@ -79,8 +82,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [HttpGet("{id}")]
         [SwaggerOperation("Endpoint that receive an id and return a valid prompt")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
-        public IActionResult FindById(int id,
-                                      HeadersDto headersDto)
+        public IActionResult FindById(int id)
         {
             var result = _promptServices.FindById(id);
             return Ok(result);
@@ -97,10 +99,10 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives the request to return all prompts paginated")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
         public IActionResult FindAllPaged([FromQuery] PagedDataDto pagedDataDto,
-                                           Guid idUser)
+                                          [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.FindAllPaged(pagedDataDto,
-                                                      idUser);
+                                                      headersDto.EmailCreator);
             return Ok(result);
         }
 
@@ -129,10 +131,10 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public IActionResult ValidateOwnership(int id,
-                                               Guid idUser)
+                                               [FromHeader] HeadersDto headersDto)
         {
             _validatePrompt.ValidateOwnership(id,
-                                              idUser);
+                                              headersDto.EmailCreator);
             return NoContent();
         }
 
@@ -144,9 +146,9 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [HttpGet]
         [SwaggerOperation("Endpoint that receives the request to return all prompts")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
-        public IActionResult FindAll(Guid idUser)
+        public IActionResult FindAllByEmail([FromHeader] HeadersDto headersDto)
         {
-            var result = _promptServices.FindAll(idUser);
+            var result = _promptServices.FindAll(headersDto.EmailCreator);
             return Ok(result);
         }
     }

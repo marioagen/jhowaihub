@@ -5,17 +5,18 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface IPromptServices
     {
-        public bool CreateUniquePrompt(PromptCreateDto promptCreateDto);
-        bool Update(PromptUpdateDto promptUpdateDto);
+        public bool CreateUniquePrompt(PromptCreateDto promptCreateDto, string email);
+        public bool Update(PromptUpdateDto promptUpdateDto,
+                          string emailCreator);
 
         PagedResultDto<PromptDto> FindAllPaged(PagedDataDto pagedDataDto,
-                                                Guid idUser);
+                                                 string emailCreator);
         PagedResultDto<PromptDto> FindByIdUserPaged(PagedDataDto pagedDataDto,
-                                                    Guid idUser);
+                                                    string emailCreator);
 
         bool DeleteByIds(List<int> ids);
 
         PromptDto? FindById(int id);
-        IQueryable<PromptDto> FindAll(Guid idUser);
+        IQueryable<PromptDto> FindAll(string emailCreator);
     }
 }

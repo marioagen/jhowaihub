@@ -15,7 +15,7 @@
                     <div>
                         <button v-for="tool in toolsList" :key="tool.id"
                             class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item" draggable="true"
-                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput })">
+                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput, toolType: tool.toolType })">
                             {{ tool.name }}
                         </button>
                     </div>
@@ -156,7 +156,8 @@ export default {
                         icon: "Activity", 
                         color: "blue", 
                         input: stepTool.input || null, 
-                        isEditableInput: stepTool.tool.isEditableInput
+                        isEditableInput: stepTool.tool.isEditableInput,
+                        toolType: stepTool.tool.toolType,
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -239,7 +240,8 @@ export default {
                     icon: 'Activity', 
                     color: '#000', 
                     isStartNode: false, 
-                    isEditableInput: nodeData.isEditableInput 
+                    isEditableInput: nodeData.isEditableInput,
+                    toolType: nodeData.toolType
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])

@@ -26,25 +26,42 @@
             </div>
             <hr />
             <VueFlowComponent :isEdit="isEdit" :stepId="stepId" :stepOrder="stepOrder" @openNodeConfig="openNodeConfig"
-                ref="VueflowComponent" />
+                              ref="VueflowComponent" />
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
-                ref="sidebar">
+                 ref="sidebar">
                 <div class="offcanvas-header">
                     <h5 id="offcanvasRightLabel">{{ $t("flow.sidebarTitle") }} {{ nodeFlow.label }}</h5>
                     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"
-                        @click="closeSidebar"></button>
+                            @click="closeSidebar"></button>
                 </div>
                 <div class="offcanvas-body">
-                    <div class="mb-3">
-                        <h6>Inputs</h6>
-                        <hr>
-                        <div class="background-div">
-                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
-                                v-model="valueInput"></textarea>
-                        </div>
-                        <div class="mt-4">
-                            <button type="button" class="btn btn-primary"
-                                @click="updateNode">{{ $t("labelSave") }}</button>
+                    <div>
+                        <div class="mb-3">
+                            <div v-if="toolTypeSelected == 'Prompt'">
+                                <h6>Prompts</h6>
+                                <hr>
+                                <div class="background-div">
+                                    <select class="form-select" v-model="selected">
+                                        <option v-for="item in promptlist" :key="item" :value="item">
+                                            {{ item.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div v-else>
+                                <h6>Inputs</h6>
+                                <hr>
+                                <div class="background-div">
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
+                                              v-model="valueInput"></textarea>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button type="button" class="btn btn-primary"
+                                        @click="updateNode">
+                                    {{ $t("labelSave") }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -54,18 +71,15 @@
 </template>
 
 <script>
-import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
+    import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
+    import PromptService from "@/services/prompts/PromptsService";
+    import ToolsServices from '@/services/tools/ToolsServices';
 export default {
     name: "FlowPage",
     props: {
         stepId: {
             type: Number,
             required: false,
-        },
-        stepTools: {
-            type: [Object, Array],
-            required: false,
-            default: () => [],
         },
         isEdit: {
             type: Boolean,
@@ -87,7 +101,9 @@ export default {
         return {
             isActiveCollapse: false,
             nodeFlow: {},
-            valueInput: ""
+            valueInput: "",
+            promptlist: [],
+            toolTypeSelected: "",
         };
     },
     components: {
@@ -104,7 +120,9 @@ export default {
             this.isActiveCollapse = !this.isActiveCollapse;
         },
         openNodeConfig(node) {
+            this.findAllPrompts();
             this.valueInput = node.data.input;
+            this.toolTypeSelected = node.data.toolType;
             this.nodeFlow = node;
             const sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
             sidebar.show();
@@ -131,6 +149,19 @@ export default {
                 });
             }
         },
+        findAllPrompts() {
+            PromptService.getPrompts()
+                .then((response) => {
+                    this.promptlist = response;
+                    console.log(response);
+                });
+        },
+        getToolsList() {
+            ToolsServices.getToolsList()
+                .then((response) => {
+                    this.toolsList = response;
+                });
+        },
         save() {
             try {
                 let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
@@ -155,7 +186,7 @@ export default {
                     icon: 'CircleX',
                 });
             }
-        }
+        },
     },
 };
 </script>

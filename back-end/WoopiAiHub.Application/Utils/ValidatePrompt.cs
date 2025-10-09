@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -14,10 +15,13 @@ namespace WoopiAiHub.Application.Utils
     public class ValidatePrompt : IValidatePrompt
     {
         private readonly IPromptRepository _promptRepository;
+        private readonly IUserServices _userServices;
 
-        public ValidatePrompt(IPromptRepository promptRepository)
+        public ValidatePrompt(IPromptRepository promptRepository,
+                              IUserServices userServices)
         {
             _promptRepository = promptRepository;
+            _userServices = userServices;
         }
 
         /// <summary>
@@ -26,8 +30,10 @@ namespace WoopiAiHub.Application.Utils
         /// <exception cref="PromptNotFoundException">Thrown when the prompt does not exist.</exception>
         /// <exception cref="UnauthorizedAccessException">Thrown when the user is not the owner.</exception>
         public void ValidateOwnership(int promptId,
-                                      Guid idUser)
+                                      string emailCreator)
         {
+            var idUser = _userServices.FindIdByEmail(emailCreator);
+
             if (idUser == Guid.Empty)
                 throw new ArgumentException("User id cannot be empty.", nameof(idUser));
 
