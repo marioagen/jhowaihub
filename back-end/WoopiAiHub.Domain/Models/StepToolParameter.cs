@@ -35,12 +35,5 @@ namespace WoopiAiHub.Domain.Models
         /// Use to EF context
         /// </summary>
         private StepToolParameter(int id, DateTime created) : base(id, created) { }
-
-        public void Update(bool requiredFile, Guid? webhookId, string value)
-        {
-            Value = value;
-            RequiredFile = requiredFile;
-            WebhookId = webhookId;
-        }
     }
 }

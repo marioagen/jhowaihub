@@ -120,25 +120,6 @@ namespace WoopiAiHub.Application.Services
                             stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, stepTool.DependsOnStepToolId);
                             stepTool.DependsOnStepTool = previousStepToolInSameStep ?? lastStepToolGlobal;
 
-                            if (stepToolDto.Parameters.Count > 0)
-                            {
-                                var parameterDto = stepToolDto.Parameters.First();
-                                var parameter = stepTool.Parameters.FirstOrDefault();
-                                if (parameter != null)
-                                {                                    
-                                    parameter.Update(parameterDto.RequiredFile, parameterDto.WebhookId, parameterDto.Value);
-                                }
-                                else
-                                {
-                                    parameter = new StepToolParameter(0, DateTime.Now, 0, parameterDto.RequiredFile, parameterDto.WebhookId, parameterDto.Value);
-                                    stepTool.Parameters.Add(parameter);
-                                }
-                            }
-                            else
-                            {
-                                stepTool.Parameters.Clear();
-                            }
-
                             if (!stepEntity.StepTools.Contains(stepTool))
                                 stepEntity.AddStepTool(stepTool);
 
@@ -356,10 +337,10 @@ namespace WoopiAiHub.Application.Services
                 stepToolDto.PositionX,
                 stepToolDto.PositionY);
 
-            foreach (var parameter in stepToolDto.Parameters)
+            if (!string.IsNullOrEmpty(stepToolDto.Input))
             {
                 stepTool.Parameters.Add(
-                    new StepToolParameter(0, DateTime.Now, 0, parameter.RequiredFile, parameter.WebhookId, parameter.Value));
+                    new StepToolParameter(0, DateTime.Now, 0, stepToolDto.RequiredFile, stepToolDto.WorkspaceId, stepToolDto.Input));
             }
 
             return stepTool;
