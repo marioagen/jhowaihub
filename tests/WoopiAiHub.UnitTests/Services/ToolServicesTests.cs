@@ -397,7 +397,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.OK), string.Empty, new RefitSettings());
 
-            _in8nConnectorMock.Setup(x => x.GetWorkflows(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            _in8nConnectorMock.Setup(x => x.FindWorkflows(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                               .ReturnsAsync(response);
 
             _apiClientFactoryMock.Setup(x => x.Create(It.IsAny<string>()))
@@ -419,7 +419,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.BadRequest), string.Empty, new RefitSettings());
 
-            _in8nConnectorMock.Setup(x => x.GetWorkflows(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            _in8nConnectorMock.Setup(x => x.FindWorkflows(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                               .ReturnsAsync(response);
 
             _apiClientFactoryMock.Setup(x => x.Create(It.IsAny<string>()))

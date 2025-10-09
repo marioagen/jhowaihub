@@ -14,7 +14,5 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         bool Delete(List<int> ids);
         PagedResponseDto<ToolDto> FindAllPaged(ToolPagedDataDto toolPagedDataDto);
         Task<bool> ValidateConnector(ToolConnectorDto toolConnectorDto);
-        Task<ICollection<ConnectorDto>> Workflows(int id);
-        Task<ICollection<FormFieldDto>> WorkflowsInputs(WebhookInputDto webhookInputDto);
     }
 }

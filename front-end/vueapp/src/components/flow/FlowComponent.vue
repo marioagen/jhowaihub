@@ -105,7 +105,7 @@
 
 <script>
 import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
-import ToolsServices from '@/services/tools/ToolsServices';
+import AutomationServices from '@/services/automation/AutomationServices';
 
 export default {
     name: "FlowPage",
@@ -171,7 +171,7 @@ export default {
                 toolId: this.nodeFlow.data.toolId,
                 workflowId: this.connector
             }
-            ToolsServices.getConnectorWorkflowInputs(params)
+            AutomationServices.getWorkflowWebhookInputs(params)
                          .then((response) => {      
                             this.formFields = response;                         
                             this.formData = [];
@@ -229,7 +229,7 @@ export default {
             if (node.data.isConnector){
                 this.loadingWebhooks = true
                 this.connector = "";
-                ToolsServices.getConnectorWorkflows(node.data.toolId)
+                AutomationServices.getWorkflows(node.data.toolId)
                              .then((response) => {
                                 this.connectors = response;
                              })
@@ -285,7 +285,7 @@ export default {
 
             this.$refs.VueflowComponent.updateNodeInput(this.nodeFlow.id, this.parameters);
             this.closeSidebar();
-             this.showMessage();
+            this.showMessage();
         },
         save() {
             try {

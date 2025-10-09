@@ -248,83 +248,9 @@ namespace WoopiAiHub.Application.Services
 
             var api = _apiClientFactory.Create(toolConnectorDto.ConnectorUrl);
 
-            var response = await api.GetWorkflows(toolConnectorDto.ConnectorApiKey);
+            var response = await api.FindWorkflows(toolConnectorDto.ConnectorApiKey);
 
             return response.IsSuccessStatusCode;
-        }
-
-        /// <summary>
-        /// Retorns Workflow list by tool id if is an connector
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        public async Task<ICollection<ConnectorDto>> Workflows(int id)
-        {
-            var tool = await _toolRepository.FindModelByIdAsync(id);
-            if (tool == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Tool not found", null);
-            }
-
-            if (tool.ToolType!.Name.Contains(ConnectorNames.N8N))
-            {
-                var api = _apiClientFactory.Create(tool.ConnectorUrl!);
-
-                var response = await api.GetWorkflows(tool.ConnectorApiKey!);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var root = JsonConvert.DeserializeObject<WebhookDataDto>(response.Content!);
-
-                    var result = new List<ConnectorDto>();
-
-                    if (root?.Data != null)
-                    {
-                        foreach (var webhookDto in root.Data)
-                        {
-                            var postNode = webhookDto.Nodes?
-                                .FirstOrDefault(n => n.Parameters?.HttpMethod == "POST");
-
-                            if (postNode != null)
-                            {
-                                result.Add(new ConnectorDto
-                                {
-                                    Id = webhookDto.Id,
-                                    Name = webhookDto.Name,
-                                    WebhookId = postNode.WebhookId
-                                });
-                            }
-                        }
-                    }
-                    return result;
-                }
-                throw new AppException(ErrorCode.RefitApiError, "Coonector fails listing workflows", null);
-            }
-            throw new AppException(ErrorCode.InvalidValue, "Tool isn't a connector", null);
-        }
-
-        public async Task<ICollection<FormFieldDto>> WorkflowsInputs(WebhookInputDto webhookInputDto)
-        {
-            var tool = await _toolRepository.FindModelByIdAsync(webhookInputDto.ToolId);
-            if (tool == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Tool not found", null);
-            }
-
-            if (tool.ToolType!.Name.Contains(ConnectorNames.N8N))
-            {
-                var api = _apiClientFactory.Create(tool.ConnectorUrl!);
-
-                var response = await api.GetWorkflowInputs(webhookInputDto.workflowId.ToString());
-                if (response.IsSuccessStatusCode)
-                {
-
-                    return JsonSchemaToFormMapper.MapToFormFields(response.Content!);
-                }
-                throw new AppException(ErrorCode.RefitApiError, "Coonector fails listing workflows", null);
-            }
-            throw new AppException(ErrorCode.InvalidValue, "Tool isn't a connector", null);
         }
     }
 }

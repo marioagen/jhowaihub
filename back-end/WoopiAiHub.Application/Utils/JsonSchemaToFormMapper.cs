@@ -5,6 +5,11 @@ namespace WoopiAiHub.Application.Utils
 {
     public static class JsonSchemaToFormMapper
     {
+        /// <summary>
+        /// Return FormFieldDto list from json string 
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
         public static List<FormFieldDto> MapToFormFields(string json)
         {
             var schema = JsonNode.Parse(json);
@@ -21,12 +26,20 @@ namespace WoopiAiHub.Application.Utils
             return result;
         }
 
+
+        /// <summary>
+        /// Map FormFieldDto from json node
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="node"></param>
+        /// <param name="required"></param>
+        /// <returns></returns>
         private static FormFieldDto MapField(string name, JsonNode? node, List<string> required)
         {
             var type = node?["type"]?.ToString() ?? "object";
-            var max = node?["maxLength"]?.GetValue<int>() ?? null;
-            var min = node?["minLength"]?.GetValue<int>() ?? null;
-            var description = node?["description"]?.ToString() ?? "";
+            var max = ((int?)node?["maxLength"]);
+            var min = ((int?)node?["minLength"]);
+            var description = ((string?)node?["description"]) ?? "";
             var isRequired = required.Contains(name);
 
             var field = new FormFieldDto
