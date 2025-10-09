@@ -15,7 +15,7 @@
                     <div>
                         <button v-for="tool in toolsList" :key="tool.id"
                             class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item" draggable="true"
-                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput, isConnector: tool.isConnector })">
+                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput })">
                             {{ tool.name }}
                         </button>
                     </div>
@@ -155,10 +155,8 @@ export default {
                     data: { 
                         icon: "Activity", 
                         color: "blue", 
-                        parameters: stepTool.parameters, 
-                        isEditableInput: stepTool.tool.isEditableInput,
-                        isConnector: stepTool.tool.isConnector,
-                        toolId: stepTool.toolId,
+                        input: stepTool.input || null, 
+                        isEditableInput: stepTool.tool.isEditableInput
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -194,18 +192,17 @@ export default {
             this.nodes = this.nodes.filter(node => node.id !== nodeId);
             this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
         },
-        updateNodeInput(nodeId, parameters) {
+        updateNodeInput(nodeId, newInput) {
             const idx = this.nodes.findIndex(node => node.id === nodeId);
             if (idx !== -1) {
                 this.nodes[idx] = {
                     ...this.nodes[idx],
                     data: {
                         ...this.nodes[idx].data,
-                        parameters: parameters
+                        input: newInput
                     }
                 };
             }
-            console.log(this.nodes);
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
@@ -242,9 +239,7 @@ export default {
                     icon: 'Activity', 
                     color: '#000', 
                     isStartNode: false, 
-                    isEditableInput: nodeData.isEditableInput,
-                    isConnector: nodeData.isConnector,
-                    parameters: []
+                    isEditableInput: nodeData.isEditableInput 
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
@@ -255,13 +250,13 @@ export default {
                 .map((node, index) => ({
                     id: parseInt(node.id, 10),
                     toolId: node.toolId,
-                    tool: { name: node.label, isEditableInput: node.data.isEditableInput, isConnector: node.data.isConnector },
+                    tool: { name: node.label, isEditableInput: node.data.isEditableInput },
                     positionX: parseFloat((node.position.x).toFixed(2)),
                     positionY: parseFloat((node.position.y).toFixed(2)),
                     order: index + 1,
                     status: "Active",
-                    parameters: node.data.parameters,
-                    dependsOnStepToolId: index,                    
+                    input: node.data.input || null,
+                    dependsOnStepToolId: index,
                 }));
         },
         showCollapse() {

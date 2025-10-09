@@ -546,9 +546,6 @@
             subtitle: "Update the information of the selected tool",
         },
         sidebarTitle: "Configure I/O:",
-        sidebar:{
-            filter: "Select webhook"
-        },
         formFlow: {
             progressFlowSuccess: "Flow inserted successfully",
             progressFlowFail: "Failed to insert flow",

@@ -133,7 +133,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                 ToolId = 1,
                 Order = 1,
                 PositionX = 2,
-                PositionY = 2                
+                PositionY = 2,
+                Input = "Input example"
             };
             var f = new Faker("pt_BR");
             return new StepUpdateDto
@@ -155,7 +156,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                 ToolId = 1,
                 Order = 1,
                 PositionX = 2,
-                PositionY = 2
+                PositionY = 2,
+                Input = "Input example"
             };
             var faker = new Faker("pt_BR");
             return new StepCreateDto

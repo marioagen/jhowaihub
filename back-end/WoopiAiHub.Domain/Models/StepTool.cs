@@ -74,12 +74,6 @@ namespace WoopiAiHub.Domain.Models
                 DependsOnStepToolId = dependsOnStepToolId;
         }
 
-        private void UpdateParameter(StepToolParameter stepToolParameter)
-        {
-            this.Parameters.Clear();
-            this.Parameters.Add(stepToolParameter);
-        }
-
         public void RemoveDependency()
         {
             DependsOnStepToolId = null;

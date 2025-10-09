@@ -46,7 +46,7 @@ namespace WoopiAiHub.Repository
             .Select(q => new StepToolDto
             {
                 Id = q.Id,
-                Name = q.Tool!.Name,
+                Name = q.Tool.Name,
                 StepId = q.StepId,
                 ToolId = q.ToolId,
                 Order = q.Order,
@@ -56,10 +56,8 @@ namespace WoopiAiHub.Repository
                 Parameters = q.Parameters.Select(sp => new StepToolParameterDto
                 {
                     Id = sp.Id,
-                    Type = sp.StepTool!.Tool!.InputData!.Name,
-                    Value = sp.Value,
-                    RequiredFile = sp.RequiredFile,
-                    WebhookId = sp.WebhookId
+                    Type = sp.StepTool.Tool.InputData.Name,
+                    Value = sp.Value
                 }).ToList(),
                 Step = new StepDto
                 {
@@ -82,7 +80,7 @@ namespace WoopiAiHub.Repository
             .Select(q => new StepToolDto
             {
                 Id = q.Id,
-                Name = q.Tool!.Name,
+                Name = q.Tool.Name,
                 StepId = q.StepId,
                 ToolId = q.ToolId,
                 Order = q.Order,
@@ -92,10 +90,8 @@ namespace WoopiAiHub.Repository
                 Parameters = q.Parameters.Select(sp => new StepToolParameterDto
                 {
                     Id = sp.Id,
-                    Type = sp.StepTool!.Tool!.InputData!.Name,
-                    Value = sp.Value,
-                    RequiredFile = sp.RequiredFile,
-                    WebhookId = sp.WebhookId
+                    Type = sp.StepTool.Tool.InputData.Name,
+                    Value = sp.Value
                 }).ToList(),
 
             }).AsQueryable()
@@ -156,7 +152,7 @@ namespace WoopiAiHub.Repository
             .Select(q => new StepToolDto
             {
                 Id = q.Id,
-                Name = q.Tool!.Name,
+                Name = q.Tool.Name,
                 StepId = q.StepId,
                 ToolId = q.ToolId,
                 Order = q.Order,
@@ -166,10 +162,8 @@ namespace WoopiAiHub.Repository
                 Parameters = q.Parameters.Select(sp => new StepToolParameterDto
                 {
                     Id = sp.Id,
-                    Type = sp.StepTool!.Tool!.InputData!.Name,
-                    Value = sp.Value,
-                    RequiredFile = sp.RequiredFile,
-                    WebhookId = sp.WebhookId                    
+                    Type = sp.StepTool.Tool.InputData.Name,
+                    Value = sp.Value
                 }).ToList(),
 
             })
