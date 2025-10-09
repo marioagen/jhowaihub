@@ -65,10 +65,10 @@ namespace WoopiAiHub.Application.Utils
                 throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
             }
 
-            if (workflow.TeamId != workflowUpdateDto.TeamId)
-            {
-                throw new AppException(ErrorCode.Conflict, "Workflow team ID does not match", WorkflowLabel.TeamIdMismatch);
-            }
+            //if (workflow.TeamId != workflowUpdateDto.TeamId)
+            //{
+            //    throw new AppException(ErrorCode.Conflict, "Workflow team ID does not match", WorkflowLabel.TeamIdMismatch);
+            //}
 
             return workflow;
         }

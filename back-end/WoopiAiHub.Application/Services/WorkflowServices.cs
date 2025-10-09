@@ -59,7 +59,7 @@ namespace WoopiAiHub.Application.Services
 
             var workflow = new Workflow(0, DateTime.UtcNow, workflowCreateDto.TeamId, workflowCreateDto.Name);
 
-            ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, workflow.TeamId);
+            ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, workflowCreateDto.TeamId);
 
             workflow.AddSteps(steps);
 
@@ -139,7 +139,7 @@ namespace WoopiAiHub.Application.Services
                     }
                     else
                     {
-                        var newStep = CreateStep(stepDto, workflow.TeamId);
+                        var newStep = CreateStep(stepDto, workflowUpdateDto.TeamId);
                         foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                         {
                             var stepTool = CreateStepToolUpdate(stepToolDto);
