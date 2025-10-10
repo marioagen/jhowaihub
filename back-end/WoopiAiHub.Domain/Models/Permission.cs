@@ -15,6 +15,8 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual ICollection<User> Users { get; set; }
         public virtual ICollection<Profile> Profiles { get; set; }
+        public virtual ICollection<StepProfilePermission> StepProfilePermissions { get; set; }
+
 
         public Permission(string description,
                           string name,

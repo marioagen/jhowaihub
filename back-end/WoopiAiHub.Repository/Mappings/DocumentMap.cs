@@ -47,6 +47,8 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasMany(u => u.Cards)
                    .WithOne(s => s.Document)
                    .HasForeignKey(c => c.DocumentId);
+            
+            
 
         }
     }

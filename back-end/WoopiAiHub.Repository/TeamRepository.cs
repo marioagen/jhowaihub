@@ -63,7 +63,6 @@ namespace WoopiAiHub.Repository
                                     {
                                         Id = w.Id,
                                         Name = w.Name,
-                                        TeamId = w.TeamId,
                                         Created = w.Created
                                     }).ToList()
                                     : new List<WorkflowDto>()

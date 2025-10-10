@@ -40,6 +40,7 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasForeignKey(s => s.ProfileId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
             builder.HasOne(s => s.Status)
                 .WithMany(s => s.Steps)
                 .HasForeignKey(s => s.StatusId)

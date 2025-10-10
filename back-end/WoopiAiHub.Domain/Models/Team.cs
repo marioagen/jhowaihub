@@ -9,6 +9,7 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual ICollection<User> Users { get; set; } = [];
         public virtual ICollection<Workflow> Workflows { get; set; } = [];
+        public virtual ICollection<Profile> Profiles { get; set; } = [];
 
         public Team(string name,
                     int id,

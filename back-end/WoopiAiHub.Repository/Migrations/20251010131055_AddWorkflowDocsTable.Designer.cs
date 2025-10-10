@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WoopiAiHub.Repository.Context;
 
@@ -11,9 +12,11 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251010131055_AddWorkflowDocsTable")]
+    partial class AddWorkflowDocsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -901,6 +904,23 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Workflows", (string)null);
                 });
 
+            modelBuilder.Entity("WorkflowDocuments", b =>
+                {
+                    b.Property<int>("WorkflowId")
+                        .HasColumnType("int")
+                        .HasColumnName("WorkflowId");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int")
+                        .HasColumnName("DocumentId");
+
+                    b.HasKey("WorkflowId", "DocumentId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("WorkflowDocuments", (string)null);
+                });
+
             modelBuilder.Entity("WorkflowTeams", b =>
                 {
                     b.Property<int>("WorkflowId")
@@ -1239,6 +1259,21 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("OutputData");
 
                     b.Navigation("ToolType");
+                });
+
+            modelBuilder.Entity("WorkflowDocuments", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Document", null)
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Workflow", null)
+                        .WithMany()
+                        .HasForeignKey("WorkflowId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WorkflowTeams", b =>
