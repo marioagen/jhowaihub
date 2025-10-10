@@ -206,7 +206,7 @@
                 }
             },
             changeToolType(){
-                this.isN8NConnectorToolType = (this.values.toolTypeId && this.typesList.find(t => t.id === this.values.toolTypeId)?.name?.includes("n8n")) || false;
+                this.isN8NConnectorToolType = (this.values.toolTypeId && this.typesList.find(t => t.id === this.values.toolTypeId)?.name?.includes("N8N")) || false;
             },
             getToolTypes() {
                 ToolsTypesService.getToolTypes()

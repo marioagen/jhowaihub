@@ -8,6 +8,7 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 namespace WoopiAiHub.Application.ToolsHandler;
 
@@ -31,7 +32,7 @@ public class EmbeddingsHandler : IToolHandler
     }
 
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
-                                                        string input,
+                                                        StepToolParameter? input,
                                                         string output)
     {
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);

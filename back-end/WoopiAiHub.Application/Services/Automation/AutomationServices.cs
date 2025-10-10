@@ -13,7 +13,7 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 
-namespace WoopiAiHub.Application.Services
+namespace WoopiAiHub.Application.Services.Automation
 {
     public class AutomationServices : IAutomationServices
     {
@@ -329,7 +329,7 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
 
             var api = _apiClientFactory.Create(tool.ConnectorUrl!);
-            var response = await api.FindWorkflowInputs(webhookInputDto.workflowId.ToString());
+            var response = await api.FindWorkflowInputs(webhookInputDto.WorkflowId.ToString());
 
             if (!response.IsSuccessStatusCode)
                 throw new AppException(ErrorCode.RefitApiError, "Coonector fails listing workflows", null);
