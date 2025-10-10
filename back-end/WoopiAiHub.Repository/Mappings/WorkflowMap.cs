@@ -26,6 +26,30 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasForeignKey(s => s.WorkflowId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasMany(w => w.Documents)
+                .WithMany(d => d.Workflow)
+                .UsingEntity<Dictionary<string, object>>(
+                    "WorkflowDocuments",
+                    j => j.HasOne<Document>()
+                          .WithMany()
+                          .HasForeignKey("DocumentId")
+                          .OnDelete(DeleteBehavior.Restrict),
+
+                    j => j.HasOne<Workflow>()
+                          .WithMany()
+                          .HasForeignKey("WorkflowId")
+                          .OnDelete(DeleteBehavior.Restrict),
+
+                    j =>
+                    {
+                        j.HasKey("WorkflowId", "DocumentId");
+                        j.ToTable("WorkflowDocuments");
+
+                        j.Property<int>("WorkflowId").HasColumnName("WorkflowId");
+                        j.Property<int>("DocumentId").HasColumnName("DocumentId");
+                    }
+                );
+
             builder.HasIndex(w => w.Created);
         }
     }
