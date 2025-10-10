@@ -4,7 +4,7 @@
     {
         public string OcrQueue { get; set; } = string.Empty;
         public string EmbeddingQueue { get; set; } = string.Empty;
-        public string ChatCompletion { get; set; } = string.Empty;
+        public string ChatCompletionQueue { get; set; } = string.Empty;
         public string AnswerQueue { get; set; } = string.Empty;
         public string OcrQueueAiHubResponse { get; set; } = string.Empty;
         public string EmbeddingQueueAiHubResponse { get; set; } = string.Empty;

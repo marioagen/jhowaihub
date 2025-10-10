@@ -35,8 +35,6 @@ public class PromptHandler : IToolHandler
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                         string input,
                                                         string output)
-    // converter input para inteiro e buscar prompt
-    // montar o objeto para enviar para integrationServices (chatCompletionDto)
     {
         var promptId = int.Parse(input);
         var promptDto =  _promptServices.FindById(promptId);
@@ -44,9 +42,11 @@ public class PromptHandler : IToolHandler
         
         return new ExecutionMessageDto
         {
-            Queue = _messageQueues.OcrQueue,
+            Queue = _messageQueues.ChatCompletionQueue,
             Message = new ChatCompletionQueryDto
             {
+                ResponseQueue = _messageQueues.ChatCompletionQueueResponse,
+                Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
                 ReferenceFile = automationServicesDto.ReferenceFile,
                 Tenant = automationServicesDto.Tenant,
                 Model = _chatCompletionSettings.Model,
@@ -54,12 +54,12 @@ public class PromptHandler : IToolHandler
                 ChatCompletion = new ChatCompletionDto
                 {
                     Temperature = _chatCompletionSettings.Temperature,
-                    MaxTokens = _chatCompletionSettings.MaxTokens,//colocar no appsettings
+                    MaxTokens = _chatCompletionSettings.MaxTokens,
                     Messages = new List<ChatMessageDto>
                         {
                             new ChatMessageDto
                             {
-                                Role = "system",                             //texto do ocr retornado
+                                Role = "system",                            
                                 Content = string.Concat("Baseado no: \"", output, "\" e seguindo as orientações a seguir: ", promptDto.Text)
                             }
                         }
