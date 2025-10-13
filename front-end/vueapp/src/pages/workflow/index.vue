@@ -34,7 +34,7 @@
                                 <ul class="dropdown-menu">
                                     <li v-for="item in workflowList" :key="item.id">
                                         <a class="dropdown-item" @click="selectOption(item)">
-                                            <div class="fw-bold">{{ item.team.name }}</div>
+                                            <div class="fw-bold">{{ item.teams.name }}</div>
                                             <div class="text-muted small">{{ item.name }}</div>
                                         </a>
                                     </li>
@@ -140,14 +140,17 @@
                             });
                         }
                         this.workflowList = response;
+                        console.log(this.workflowList)
                         if(this.workflowList.length > 0) {
                             const lastSelected = this.$store.state.lastSelectedWorkflow;
+                            console.log(lastSelected)
                             let workflowToSelect = this.workflowList[0];
 
                             if (lastSelected) {
                                 const foundWorkflow = this.workflowList.find(w => 
-                                    w.team.id === lastSelected.teamId && w.id === lastSelected.id
+                                    w.teams.id === lastSelected.teamId && w.id === lastSelected.id
                                 );
+                                console.log(foundWorkflow)
                                 if (foundWorkflow) {
                                     workflowToSelect = foundWorkflow;
                                 }
@@ -159,9 +162,11 @@
                     });
             },
             getWorkflowbyTeam(id) {
+                console.log(id)
                 this.isLoaded = false;
                 WorkflowService.getWorkflowByTeamId(id, this.filters)
                     .then((response) => {
+                        console.log(response);
                         this.kanbanCards = response;
                     })
                     .finally(() => {
@@ -174,23 +179,24 @@
                 );
             },
             selectOption(workflow) {
+                //what to do? 1 workflow with millions of teams
+                console.log(workflow)
                 this.isLoaded = false;
                 this.isLoadedUsers = false;
                 this.selectedOption = {
                     id: workflow.id,
                     name: workflow.name,
-                    teamName: workflow.team.name,
-                    teamId: workflow.team.id,
+                    teamName: workflow.teams[0].name,
+                    teamId: workflow.teams[0].id,
                 }
-                
                 this.$store.commit('setLastSelectedWorkflow', {
                     id: workflow.id,
                     name: workflow.name,
-                    teamName: workflow.team.name,
-                    teamId: workflow.team.id,
+                    teamName: workflow.teams[0].name,
+                    teamId: workflow.teams[0].id,
                 });
-                this.getUsersByTeamId(workflow.team.id);
-                this.getWorkflowbyTeam(workflow.team.id);
+                this.getUsersByTeamId(workflow.teams[0].id);
+                this.getWorkflowbyTeam(workflow.teams[0].id);
             },
             reloadKanban() {
                 this.getWorkflowbyTeam(this.selectedOption.teamId);

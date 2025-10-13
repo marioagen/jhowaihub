@@ -191,7 +191,6 @@ namespace WoopiAiHub.Application.Services
         public async Task<WorkflowDto> FindByTeamId(int teamId, WorkflowFilterDto workflowFilterDto)
         {
             var workflow = await _workflowRepository.FindByTeamId(teamId, workflowFilterDto);
-
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
@@ -418,7 +417,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public ICollection<WorkflowDto> FindAllByUser(string email)
         {
-
             var workflow = _workflowRepository.FindAllByUser(email);
             return workflow;
         }
