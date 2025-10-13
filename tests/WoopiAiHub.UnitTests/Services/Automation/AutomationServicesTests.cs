@@ -12,14 +12,13 @@ using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
-namespace WoopiAiHub.UnitTests.Services
+namespace WoopiAiHub.UnitTests.Services.Automation
 {
     [Collection(nameof(AutomationCollection))]
     public class AutomationServicesTests

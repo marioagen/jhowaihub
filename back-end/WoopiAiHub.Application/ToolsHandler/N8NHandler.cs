@@ -14,6 +14,7 @@ namespace WoopiAiHub.Application.ToolsHandler
 {
     public class N8NHandler : IToolHandler
     {
+        public string Type => HandlersTypes.N8N;
         private readonly MessageQueues _messageQueues;
         private readonly IToolRepository _toolRepository;
 
@@ -24,6 +25,14 @@ namespace WoopiAiHub.Application.ToolsHandler
             _toolRepository = toolRepository;
         }
 
+        /// <summary>
+        /// Builds an execution payload for processing OCR tasks based on the provided automation service details.
+        /// </summary>
+        /// <param name="automationServicesDto"></param>
+        /// <param name="input"></param>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
         public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                             StepToolParameter? input,
                                                             string output)

@@ -48,6 +48,10 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IApiClientFactory, ApiClientFactory>();
             services.AddScoped<IN8NServices, N8NServices>();
 
+            services.AddScoped<IToolHandler, EmbeddingsHandler>();
+            services.AddScoped<IToolHandler, OcrHandler>();
+            services.AddScoped<IToolHandler, N8NHandler>();
+
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();

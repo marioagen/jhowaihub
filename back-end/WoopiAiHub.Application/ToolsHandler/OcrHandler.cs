@@ -6,11 +6,13 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 namespace WoopiAiHub.Application.ToolsHandler;
 
 public class OcrHandler : IToolHandler
 {
+    public string Type => HandlersTypes.Ocr;
     private readonly MessageQueues _messageQueues;
     private readonly ITenantCacheServices _tenantCacheServices;
 
@@ -56,5 +58,4 @@ public class OcrHandler : IToolHandler
             }
         };
     }
-
 }

@@ -1,6 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs.Messaging;
-using WoopiAiHub.Domain.DTOs.Request.Automation;
-using WoopiAiHub.Domain.DTOs.Response.Automation;
+﻿using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
