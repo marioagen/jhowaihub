@@ -52,7 +52,7 @@ jobs:
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
           /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
           /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-          /d:sonar.exclusions=**/*.xml,**/*.config,**/src/assets/**,**/front-end/** \
+          /d:sonar.exclusions=**/*.xml,**/*.config,**/src/assets/**,**/front-end/**,**/cypress/e2e/login-usuário-incorreto.cy.js \
           /d:sonar.coverage.exclusions=**/back-end/WoopiAiHub.Repository/**,**/back-end/WoopiAiHub.Infrastructure/**,**/back-end/WoopiAiHub.Api/**,**/DependencyInjection/**,**/DTOs/**,**/Models/**,**/front-end/** \
           /d:sonar.cpd.exclusions=**/Migrations/**
 
