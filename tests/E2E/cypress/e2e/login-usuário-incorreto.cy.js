@@ -9,7 +9,8 @@ describe('Login incorreto no sistema', () => {
     cy.get('input[name="email"]').type('lf@latam.stefanini.com')
 
     // Preenche senha incorreta
-    cy.get('input[name="password"]').type('Lfm06233104', { log: false }) // { log: false } evita expor senha no log
+    cy.get('input[name="password"]').type('Lfm06233104')
+    // cy.get('input[name="password"]').type('Lfm06233104', { log: false }) // { log: false } evita expor senha no log
 
     // Clica no botão de login
     cy.get('button[type="button"]').click()
