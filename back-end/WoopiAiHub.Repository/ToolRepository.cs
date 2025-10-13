@@ -111,7 +111,6 @@ namespace WoopiAiHub.Repository
                             .FirstOrDefaultAsync();
         }
 
-
         /// <summary>
         /// Asynchronously retrieves a tool model by stepToolId
         /// </summary>
