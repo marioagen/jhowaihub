@@ -567,7 +567,8 @@
             saveSuccess: "Time salvo com sucesso",
             saveError: "Erro ao salvar time",
             deleteSuccess: "Time deletado com sucesso",
-            deleteError: "Erro ao deletar time"
+            deleteError: "Erro ao deletar time",
+            duplicated: "Time já cadastrado",
         },
         profiles: {
             index: "Perfis",
