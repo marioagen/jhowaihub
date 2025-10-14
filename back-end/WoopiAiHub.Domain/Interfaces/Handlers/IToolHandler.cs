@@ -8,6 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Handlers
         string Type { get; }
         Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                StepToolParameter? input,
-                                               string output);
+                                               string output,
+                                               StepToolExecution? execution = null);
     }
 }

@@ -77,7 +77,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Equal(input.RequiredFile, message.RequiredFile);
             Assert.Equal(automationServicesDto.Tenant, message.Tenant);
             Assert.Equal(automationServicesDto.Email, message.Email);
-            Assert.Equal(automationServicesDto.ReferenceFile, message.ReferenceFile);
             Assert.Equal(_messageQueues.AutomationQueueResponse, message.ResponseQueue);
             Assert.Equal(ConnectorNames.N8N, message.Type);
             Assert.Equal(automationServicesDto.CardId, message.Data.CardId);

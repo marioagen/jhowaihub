@@ -36,7 +36,8 @@ public class OcrHandler : IToolHandler
     /// <exception cref="ArgumentException">Thrown if the OCR model for the specified tenant cannot be found.</exception>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                         StepToolParameter? input,
-                                                        string output)
+                                                        string output,
+                                                        StepToolExecution? execution = null)
     {
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
         if (string.IsNullOrEmpty(tenantInfo!.OcrModel))

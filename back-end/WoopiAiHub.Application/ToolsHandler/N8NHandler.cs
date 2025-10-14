@@ -35,7 +35,8 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// <exception cref="AppException"></exception>
         public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                             StepToolParameter? input,
-                                                            string output)
+                                                            string output,
+                                                            StepToolExecution? execution = null)
         {        
             var tool = await _toolRepository.FindModelByStepToolIdAsync(automationServicesDto.StepToolId)
                 ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
@@ -50,11 +51,11 @@ namespace WoopiAiHub.Application.ToolsHandler
                     RequiredFile = input.RequiredFile,
                     Tenant = automationServicesDto.Tenant,
                     Email = automationServicesDto.Email,
-                    ReferenceFile = automationServicesDto.ReferenceFile!,
                     ResponseQueue = _messageQueues.AutomationQueueResponse,
                     Type = ConnectorNames.N8N,
                     Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
-                    Content = input.Value.ToString()
+                    Content = input.Value.ToString(),
+                    ExecutionId = execution.Id
                 }
             };
         }

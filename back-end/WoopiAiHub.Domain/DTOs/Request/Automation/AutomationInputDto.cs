@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.DTOs.Request.Automation
         public bool RequiredFile { get; set; }
         public string? Tenant { get; set; }
         public string? Email { get; set; }
-        public string ReferenceFile { get; set; } = string.Empty;
+        public int ExecutionId { get; set; }
         public string ResponseQueue { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
         public MetaDataAutomationDto Data { get; set; }
