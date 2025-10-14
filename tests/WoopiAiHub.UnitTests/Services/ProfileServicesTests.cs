@@ -191,5 +191,52 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(profiles, result);
             _profileRepoMock.Verify(repo => repo.FindAll(), Times.Once);
         }
+
+        [Fact(DisplayName = "Test FindAll excludes AI profile from results")]
+        [Trait("FindAll", "Success")]
+        public async Task FindAll_ShouldExcludeAiProfileFromResults()
+        {
+            // Arrange
+            var profiles = new List<ProfileDto>
+            {
+                new ProfileDto { Id = 1, Name = "Profile1" },
+                new ProfileDto { Id = 2, Name = "Profile2" }
+                // Note: AI profile is not included in the expected result from repository
+                // because it should be filtered out at the repository level
+            };
+            _profileRepoMock.Setup(repo => repo.FindAll()).ReturnsAsync(profiles);
+
+            // Act
+            var result = await _profileServices.FindAll();
+
+            // Assert
+            Assert.Equal(profiles, result);
+            Assert.DoesNotContain(result, p => p.Name == "IA");
+            _profileRepoMock.Verify(repo => repo.FindAll(), Times.Once);
+        }
+
+        [Fact(DisplayName = "Test FindAllPaged excludes AI profile from paged results")]
+        [Trait("FindAllPaged", "Success")]
+        public void FindAllPaged_ShouldExcludeAiProfileFromPagedResults()
+        {
+            // Arrange
+            var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true, Search = "" };
+            var profiles = new List<ProfileDto>
+            {
+                new ProfileDto { Id = 1, Name = "Profile1" },
+                new ProfileDto { Id = 2, Name = "Profile2" }
+                // Note: AI profile is not included because it should be filtered out at the repository level
+            }.AsQueryable();
+
+            _profileRepoMock.Setup(r => r.FindAllPaged(pagedData)).Returns(profiles);
+
+            // Act
+            var result = _profileServices.FindAllPaged(pagedData);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.Content.Any());
+            Assert.DoesNotContain(result.Content, p => p.Name == "IA");
+        }
     }
 }
