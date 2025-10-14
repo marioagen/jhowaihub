@@ -40,6 +40,8 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Profiles
                 .AsNoTracking()
+                // Filtra o perfil de IA para que não seja exibido na listagem de perfis
+                .Where(p => p.Name != "IA")
                 .Select(t => new ProfileDto
                 {
                     Id = t.Id,
@@ -127,6 +129,8 @@ namespace WoopiAiHub.Repository
         {
             var query = _context.Profiles
                 .Include(t => t.Permissions)
+                // Filtra o perfil de IA para que não seja exibido na listagem paginada de perfis
+                .Where(p => p.Name != "IA")
                 .Select(t => new ProfileDto
                 {
                     Id = t.Id,

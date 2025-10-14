@@ -20,6 +20,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
         private readonly ICardRepository _cardRepository;
+        private readonly IStepRepository _stepRepository;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -28,7 +29,8 @@ namespace WoopiAiHub.Application.Services
                                   IStepToolParameterRepository stepToolParameterRepository,
                                   IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger,
-                                  ICardRepository cardRepository)
+                                  ICardRepository cardRepository,
+                                  IStepRepository stepRepository)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -38,6 +40,7 @@ namespace WoopiAiHub.Application.Services
             _messagePublisher = messagePublisher;
             _logger = logger;
             _cardRepository = cardRepository;
+            _stepRepository = stepRepository;
         }
 
         /// <summary>
@@ -276,6 +279,69 @@ namespace WoopiAiHub.Application.Services
             var payload = await handler.BuildPayload(automationServicesDto, input, output);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
+
+            // Verifica se o perfil responsável pelo step é o perfil de IA.
+            // Se for, avança automaticamente o card para o próximo step
+            // após a execução das step tools.
+            await AdvanceStepIfAiProfileAsync(automationServicesDto);
+        }
+
+        /// <summary>
+        /// Verifica se o card está em um step cujo perfil responsável é o perfil de IA.
+        /// Se for, avança automaticamente o card para o próximo step do workflow.
+        /// </summary>
+        /// <param name="automationServicesDto">DTO contendo informações do card e step</param>
+        /// <returns>Task que representa a operação assíncrona</returns>
+        private async Task AdvanceStepIfAiProfileAsync(AutomationServicesDto automationServicesDto)
+        {
+            try
+            {
+                // Busca o card para obter informações do step atual
+                var card = await _cardRepository.FindById(automationServicesDto.CardId);
+                if (card?.Step?.Profile == null)
+                    return;
+
+                // Verifica se o perfil responsável pelo step atual é o perfil de IA
+                if (card.Step.Profile.Name != "IA")
+                    return;
+
+                _logger.LogInformation("Card {CardId} está no perfil IA. Avançando automaticamente para o próximo step.", automationServicesDto.CardId);
+
+                // Busca o próximo step no workflow
+                var nextStepOrder = card.Step.Order + 1;
+                var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
+                
+                if (nextStep == null)
+                {
+                    _logger.LogInformation("Não há próximo step para o card {CardId}. Workflow finalizado.", automationServicesDto.CardId);
+                    return;
+                }
+
+                // Atualiza o card para o próximo step
+                card.UpdateStepAndSatus(nextStep.Id, nextStep.StatusId);
+                var updated = _cardRepository.Update(card);
+
+                if (updated)
+                {
+                    _logger.LogInformation("Card {CardId} avançado automaticamente do step {CurrentStep} para o step {NextStep}", 
+                        automationServicesDto.CardId, card.Step.Order, nextStep.Order);
+
+                    // Inicia as execuções do próximo step
+                    var nextStepDto = automationServicesDto with
+                    {
+                        StepId = nextStep.Id
+                    };
+                    await StartExecutionByCardAsync(nextStepDto);
+                }
+                else
+                {
+                    _logger.LogError("Falha ao atualizar o card {CardId} para o próximo step", automationServicesDto.CardId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao tentar avançar automaticamente o step do card {CardId}", automationServicesDto.CardId);
+            }
         }
     }
 }
