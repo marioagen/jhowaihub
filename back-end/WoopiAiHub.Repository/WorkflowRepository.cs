@@ -49,6 +49,8 @@ namespace WoopiAiHub.Repository
         public async Task<WorkflowDto?> FindByTeamId(int teamId, WorkflowFilterDto? workflowFilterDto)
         {
             return await _context.Workflows
+                .Include(w => w.Teams)
+                .Include(w => w.Steps)
                 .Where(s => s.Teams.Any(t => t.Id == teamId))
                 .Select(FindWorkflowProjection(workflowFilterDto?.Input, workflowFilterDto?.IsAllUsers, workflowFilterDto?.Login))
                 .AsNoTracking()
@@ -119,6 +121,11 @@ namespace WoopiAiHub.Repository
                 Id = w.Id,
                 Name = w.Name,
                 Created = w.Created,
+                Teams = w.Teams.Select(t => new TeamDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                }).ToList(),
                 Steps = w.Steps.Select(s => new StepDto
                 {
                     Id = s.Id,

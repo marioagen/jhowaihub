@@ -16,6 +16,7 @@ namespace WoopiAiHub.Application.Services
     public class WorkflowServices : IWorkflowServices
     {
         private readonly IWorkflowRepository _workflowRepository;
+        private readonly ITeamRepository _teamRepository;
         private readonly IStepRepository _stepRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
@@ -27,6 +28,7 @@ namespace WoopiAiHub.Application.Services
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
                                 IProfileRepository profileRepository,
+                                ITeamRepository teamRepository,
                                 IStatusRepository statusRepository,
                                 IStepRepository stepRepository,
                                 IUnitOfWork unitOfWork,
@@ -42,6 +44,7 @@ namespace WoopiAiHub.Application.Services
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
             _stepToolRepository = stepToolRepository;
+            _teamRepository = teamRepository;
 
         }
 
@@ -57,7 +60,9 @@ namespace WoopiAiHub.Application.Services
 
             _validateStep.ValidateCreateStep(workflowCreateDto.Steps);
 
-            var workflow = new Workflow(0, DateTime.UtcNow, workflowCreateDto.TeamId, workflowCreateDto.Name);
+            var teamsList = _teamRepository.FindByIds(workflowCreateDto.Teams);
+
+            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowCreateDto.Name);
 
             ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, workflowCreateDto.TeamId);
 
