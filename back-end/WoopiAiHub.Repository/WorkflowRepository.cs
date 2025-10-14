@@ -194,6 +194,7 @@ namespace WoopiAiHub.Repository
                                         Id = st.Tool!.Id,
                                         Name = st.Tool.Name,
                                         IsEditableInput = st.Tool.IsEditableInput,
+                                        ToolType = st.Tool.ToolType.Name,
                                     },
                                     Executions = st.Executions.Select(e => new StepToolExecutionDto(
                                         e.Id,

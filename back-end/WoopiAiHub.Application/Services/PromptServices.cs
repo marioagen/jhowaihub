@@ -1,10 +1,14 @@
 ﻿using System.Linq.Dynamic.Core;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -14,16 +18,24 @@ namespace WoopiAiHub.Application.Services
         private readonly IPromptRepository _promptRepository;
         private readonly IValidatePrompt _validatePrompt;
         private readonly IUserServices _userServices;
-
+        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
+        private readonly IStepToolOutputRepository _stepToolOutputRepository;
+        private readonly IHubNotifier _hubNotifier;
         public PromptServices(IUnitOfWork unitOfWork,
                               IPromptRepository promptRepository,
                               IValidatePrompt validatePrompt,
-                              IUserServices userServices)
+                              IUserServices userServices,
+                              IStepToolExecutionRepository stepToolExecutionRepository,
+                              IStepToolOutputRepository stepToolOutputRepository,
+                              IHubNotifier hubNotifier)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
             _validatePrompt = validatePrompt;
             _userServices = userServices;
+            _stepToolExecutionRepository = stepToolExecutionRepository;
+            _stepToolOutputRepository = stepToolOutputRepository;
+            _hubNotifier = hubNotifier;
         }
 
         /// <summary>
@@ -256,6 +268,56 @@ namespace WoopiAiHub.Application.Services
                 promptDto.IdUser);
 
             return prompt;
+        }
+
+        /// <summary>
+        /// Process the chat completion result and create a DocumentAnswer.
+        /// </summary>
+        /// <param name="chatCompletionResponseDto"></param>
+        /// <returns></returns>
+        public async Task ProcessChatCompletionResult(ChatCompletionResponseDto chatCompletionResponseDto)
+        {
+            var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(chatCompletionResponseDto.Data.StepToolId,
+                                                                                              chatCompletionResponseDto.Data.CardId);
+            await UpdateExecutionAsync(execution!, chatCompletionResponseDto.Email);
+            await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.ReferenceFile);
+        }
+
+        /// <summary>
+        /// Updates StepToolExecution status and send notification 
+        /// </summary>
+        /// <param name="execution"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
+        {
+            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId,
+                                                                                        execution.CardId);
+            var percent = ((double)execution.StepTool.Order / count) * 100;
+
+            execution.UpdateStatusExecution(StatusExecution.Ready);
+            await _stepToolExecutionRepository.UpdateAsync(execution);
+
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId);
+        }
+
+        /// <summary>
+        /// Updates StepToolExecution output
+        /// </summary>
+        /// <param name="execution"></param>
+        /// <param name="outputStepTool"></param>
+        /// <returns></returns>
+        private async Task SaveStepToolOutputAsync(StepToolExecution execution, string outputStepTool)
+        {
+            var output = new StepToolOutput(
+                0,
+                DateTime.Now,
+                execution.StepToolId,
+                execution.CardId,
+                outputStepTool
+            );
+
+            await _stepToolOutputRepository.CreateAsync(output);
         }
     }
 }

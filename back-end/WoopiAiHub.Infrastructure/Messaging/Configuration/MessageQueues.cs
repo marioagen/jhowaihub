@@ -9,7 +9,7 @@
         public string OcrQueueAiHubResponse { get; set; } = string.Empty;
         public string EmbeddingQueueAiHubResponse { get; set; } = string.Empty;
         public string AnswerQueueAiHubResponse { get; set; } = string.Empty;
-        public string ChatCompletionQueueResponse { get; set; } = string.Empty;
+        public string ChatCompletionQueueAiHubResponse { get; set; } = string.Empty;
 
         public IEnumerable<string> Queues()
         {
@@ -17,12 +17,12 @@
             [
               OcrQueue,
               EmbeddingQueue,
-              ChatCompletion,
+              ChatCompletionQueue,
               AnswerQueue,
               OcrQueueAiHubResponse,
               EmbeddingQueueAiHubResponse,
               AnswerQueueAiHubResponse,
-              ChatCompletionQueueResponse
+              ChatCompletionQueueAiHubResponse
 
             ];
         }

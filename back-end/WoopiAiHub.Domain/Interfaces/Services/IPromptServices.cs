@@ -18,5 +18,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         PromptDto? FindById(int id);
         IQueryable<PromptDto> FindAll(string emailCreator);
+
+        Task ProcessChatCompletionResult(ChatCompletionResponseDto chatCompletionResponseDto);
     }
 }

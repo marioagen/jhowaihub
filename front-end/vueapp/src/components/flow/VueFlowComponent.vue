@@ -147,6 +147,7 @@ export default {
                 });
 
                 let stepTools = step ? step.stepTools : [];
+                console.log(stepTools,"Steps");
                 const mappedNodes = stepTools.map(stepTool => ({
                     id: stepTool.id.toString(),
                     position: { x: stepTool.positionX, y: stepTool.positionY },
@@ -163,6 +164,7 @@ export default {
                     targetPosition: "left",
                     type: "hub"
                 }));
+                console.log(mappedNodes, "Mapped");
                 const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
                     id: `${tool.id}-${stepTools[index + 1].id}`,
                     source: tool.id.toString(),
@@ -194,6 +196,7 @@ export default {
             this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
         },
         updateNodeInput(nodeId, newInput) {
+            console.log(newInput);
             const idx = this.nodes.findIndex(node => node.id === nodeId);
             if (idx !== -1) {
                 this.nodes[idx] = {
@@ -247,17 +250,18 @@ export default {
             this.vueFlowInstance?.addNodes([newNode])
         },
         buildFlowPayload() {
+            console.log(this.nodes);
             return this.nodes
                 .filter(node => node.id !== "start")
                 .map((node, index) => ({
                     id: parseInt(node.id, 10),
                     toolId: node.toolId,
-                    tool: { name: node.label, isEditableInput: node.data.isEditableInput },
+                    tool: { name: node.label, isEditableInput: node.data.isEditableInput, toolType: node.data.toolType },
                     positionX: parseFloat((node.position.x).toFixed(2)),
                     positionY: parseFloat((node.position.y).toFixed(2)),
                     order: index + 1,
                     status: "Active",
-                    input: node.data.input || null,
+                    input: node.data.input.toString() || null,
                     dependsOnStepToolId: index,
                 }));
         },

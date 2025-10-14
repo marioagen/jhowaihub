@@ -34,15 +34,15 @@
                     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"
                             @click="closeSidebar"></button>
                 </div>
-                <div class="offcanvas-body">
+                <div :key="toolTypeSelected" class="offcanvas-body">
                     <div>
                         <div class="mb-3">
                             <div v-if="toolTypeSelected == 'Prompt'">
                                 <h6>Prompts</h6>
                                 <hr>
                                 <div class="background-div">
-                                    <select class="form-select" v-model="selected">
-                                        <option v-for="item in promptlist" :key="item" :value="item">
+                                    <select class="form-select" v-model="idSelected">
+                                        <option v-for="item in promptlist" :key="item.id" :value="item.id">
                                             {{ item.name }}
                                         </option>
                                     </select>
@@ -74,121 +74,142 @@
     import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
     import PromptService from "@/services/prompts/PromptsService";
     import ToolsServices from '@/services/tools/ToolsServices';
-export default {
-    name: "FlowPage",
-    props: {
-        stepId: {
-            type: Number,
-            required: false,
-        },
-        isEdit: {
-            type: Boolean,
-            required: false,
-            default: false,
-        },
-        id: {
-            type: Number,
-            required: false,
-            default: null,
-        },
-        stepOrder: {
-            type: Number,
-            required: false,
-            default: 0,
-        }
-    },
-    data() {
-        return {
-            isActiveCollapse: false,
-            nodeFlow: {},
-            valueInput: "",
-            promptlist: [],
-            toolTypeSelected: "",
-        };
-    },
-    components: {
-        VueFlowComponent,
-    },
-    methods: {
-        redirectToIndex() {
-            if (this.isEdit) {
-                return this.$router.push({ name: "EditWorkflow" });
-            }
-            return this.$router.push({ name: "NewWorkflow" });
-        },
-        showCollapse() {
-            this.isActiveCollapse = !this.isActiveCollapse;
-        },
-        openNodeConfig(node) {
-            this.findAllPrompts();
-            this.valueInput = node.data.input;
-            this.toolTypeSelected = node.data.toolType;
-            this.nodeFlow = node;
-            const sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
-            sidebar.show();
-        },
-        closeSidebar() {
-            sidebar.hide();
-        },
-        updateNode() {
-            this.$refs.VueflowComponent.updateNodeInput(this.nodeFlow.id, this.valueInput);
-            try {
-                return this.$notify({
-                    title: 'flow.title',
-                    message: 'flow.formFlow.editFlowNodeSuccess',
-                    variant: 'success',
-                    icon: 'CircleCheckBig',
-                });
-            }
-            catch (e) {
-                this.$notify({
-                    title: 'flow.title',
-                    message: 'flow.formFlow.editFlowNodeFail',
-                    variant: 'danger',
-                    icon: 'CircleX',
-                });
+    export default {
+        name: "FlowPage",
+        props: {
+            stepId: {
+                type: Number,
+                required: false,
+            },
+            isEdit: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            id: {
+                type: Number,
+                required: false,
+                default: null,
+            },
+            stepOrder: {
+                type: Number,
+                required: false,
+                default: 0,
             }
         },
-        findAllPrompts() {
-            PromptService.getPrompts()
-                .then((response) => {
-                    this.promptlist = response;
-                    console.log(response);
-                });
+        data() {
+            return {
+                isActiveCollapse: false,
+                nodeFlow: {},
+                valueInput: "",
+                idSelected: 0,
+                promptlist: [],
+                toolTypeSelected: "",
+            };
         },
-        getToolsList() {
-            ToolsServices.getToolsList()
-                .then((response) => {
-                    this.toolsList = response;
-                });
+        components: {
+            VueFlowComponent,
         },
-        save() {
-            try {
-                let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
-                this.$store.commit('setFlowByStep', {
-                    stepOrder: this.stepOrder,
-                    flowData: nodesList,
-                    stepId: this.stepId
-                });
-                this.redirectToIndex();
-                return this.$notify({
-                    title: 'flow.title',
-                    message: 'flow.formFlow.progressFlowSuccess',
-                    variant: 'success',
-                    icon: 'CircleCheckBig',
-                });
-            }
-            catch (e) {
-                this.$notify({
-                    title: 'flow.title',
-                    message: 'flow.formFlow.progressFlowFail',
-                    variant: 'danger',
-                    icon: 'CircleX',
-                });
-            }
+        methods: {
+            redirectToIndex() {
+                if (this.isEdit) {
+                    return this.$router.push({ name: "EditWorkflow" });
+                }
+                return this.$router.push({ name: "NewWorkflow" });
+            },
+            showCollapse() {
+                this.isActiveCollapse = !this.isActiveCollapse;
+            },
+            openNodeConfig(node) {
+                this.findAllPrompts();
+                this.toolTypeSelected = node.data.toolType;
+                if (this.toolTypeSelected == "Prompt") {
+                    this.idSelected = node.data.input;
+                }
+                else {
+                    this.valueInput = node.data.input;
+                }
+                this.nodeFlow = node;
+                const sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
+                sidebar.show();
+            },
+            closeSidebar() {
+                sidebar.hide();
+            },
+            updateNode() {
+                let valueUpdate = "";
+                if (this.valueInput != "") {
+                    valueUpdate = this.valueInput;
+                }
+                else {
+                    valueUpdate = this.idSelected.toString();
+                }
+                console.log(valueUpdate);
+                this.$refs.VueflowComponent.updateNodeInput(this.nodeFlow.id, valueUpdate);
+                try {
+                    return this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.editFlowNodeSuccess',
+                        variant: 'success',
+                        icon: 'CircleCheckBig',
+                    });
+                }
+                catch (e) {
+                    this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.editFlowNodeFail',
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                }
+            },
+            findAllPrompts() {
+                PromptService.getPrompts()
+                    .then((response) => {
+                        this.promptlist = response;
+                        console.log(response);
+                    });
+            },
+            getToolsList() {
+                ToolsServices.getToolsList()
+                    .then((response) => {
+                        this.toolsList = response;
+                    });
+            },
+            save() {
+                console.log(this.stepOrder, this.stepId, "DADOS")
+                try {
+                    let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
+                    this.$store.commit('setFlowByStep', {
+                        stepOrder: this.stepOrder,
+                        flowData: nodesList,
+                        stepId: this.stepId
+                    });
+                    this.redirectToIndex();
+                    return this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.progressFlowSuccess',
+                        variant: 'success',
+                        icon: 'CircleCheckBig',
+                    });
+                }
+                catch (e) {
+                    this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.progressFlowFail',
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                }
+            },
         },
-    },
-};
+        computed: {
+            selectedItem() {
+                if (!this.idSelected != 0)
+                    return this.promptlist.find(item => item.id === this.idSelected)
+            },
+        },
+    };
 </script>
 
 

@@ -45,7 +45,7 @@ public class PromptHandler : IToolHandler
             Queue = _messageQueues.ChatCompletionQueue,
             Message = new ChatCompletionQueryDto
             {
-                ResponseQueue = _messageQueues.ChatCompletionQueueResponse,
+                ResponseQueue = _messageQueues.ChatCompletionQueueAiHubResponse,
                 Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
                 ReferenceFile = automationServicesDto.ReferenceFile,
                 Tenant = automationServicesDto.Tenant,
