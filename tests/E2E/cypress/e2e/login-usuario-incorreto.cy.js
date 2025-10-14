@@ -6,7 +6,7 @@ describe('Login incorreto no sistema', () => {
 
   it('Não deve logar com senhas inválidas', () => {
     // Preenche usuário
-    cy.get('input[name="email"]').type('lfmarques@latam.stefanini.com')
+    cy.get('input[name="email"]').type('lf@latam.stefanini.com')
 
     // Preenche senha incorreta
     cy.get('input[name="password"]').type('Lfm06233104', { log: false }) // { log: false } evita expor senha no log
@@ -15,6 +15,6 @@ describe('Login incorreto no sistema', () => {
     cy.get('button[type="button"]').click()
 
     // Valida que o login não foi bem-sucedido
-    cy.contains('Error: A senha informada está incorreta.').should('be.visible')
+    cy.contains('Error: Usuário sem permissão de acesso.').should('be.visible')
   })
   })
