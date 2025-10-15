@@ -272,6 +272,7 @@
         password_confirmed: "A confirmação da senha não confere.",
         hasInvalid: "Campos inválidos",
         oneStep: "Ao menos um step é necessário para salvar",
+        oneElementArray: "Selecione ao menos uma opção",
     },
     filters: {
         documentInput: "Buscar por documento, descrição ou usuário, ...",

@@ -271,6 +271,7 @@
         password_confirmed: "Password confirmation does not match.",
         hasInvalid: "Invalid fields",
         oneStep: "At least one step is required to save",
+        oneElementArray: "Select at least one option",
     },
     filters: {
         documentInput: "Search by document, description or user, ...",
@@ -558,6 +559,53 @@
             editFlowNodeFail: "Failed to edit node",
         }
     },
+    management: {
+        title: "User and Team Management",
+        subtitle: "Manage system users, teams, and permissions",
+        users: {
+            title: "Users",
+            subtitle: "Manage system users",
+            createBtn: "New User",
+            createTitle: "New User",
+            createSubtitle: "Create a new user for the system",
+            editTitle: "Edit User",
+            editSubtitle: "Update information for the selected user",
+            invalid: "Invalid user",
+            saveSuccess: "User saved successfully",
+            saveError: "Error saving user",
+            deleteSuccess: "User removed successfully",
+        },
+        teams: {
+            title: "Teams",
+            subtitle: "Manage system teams",
+            createBtn: "New Team",
+            createTitle: "New Team",
+            createSubtitle: "Create a new team for the system",
+            editTitle: "Edit Team",
+            editSubtitle: "Update information for the selected team",
+            invalid: "Invalid team",
+            saveSuccess: "Team saved successfully",
+            saveError: "Error saving team",
+            deleteSuccess: "Team deleted successfully",
+            deleteError: "Error deleting team",
+            duplicated: "Team already registered",
+        },
+        profiles: {
+            index: "Profiles",
+            title: "Profiles and Permissions",
+            subtitle: "Manage system profiles and permissions",
+            createBtn: "New Profile",
+            createTitle: "New Profile",
+            createSubtitle: "Create a new profile for the system",
+            editTitle: "Edit Profile",
+            editSubtitle: "Update information for the selected profile",
+            invalid: "Invalid profile",
+            saveSuccess: "Profile saved successfully",
+            saveError: "Error saving profile",
+            deleteSuccess: "Profile deleted successfully",
+            deleteError: "Error deleting profile"
+        },
+    }
 };
 
 export default english;
