@@ -78,6 +78,7 @@
     import { Form, Field, ErrorMessage } from "vee-validate";
     import api from "@/services/api";
     import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
+    import ErrorCode from "@/constants/Errorcode";
 
     export default {
         name: "TeamForm",
@@ -178,23 +179,27 @@
                 };
                 const request = team.id === 0 ? api.post("Team", team) : api.put("Team", team);
                 request.then(() => {
-                        this.$emit("teamCreated", team);
-                        this.resetForm();
-                        this.close();
+                        this.$notify({
+                            title: 'management.teams.title',
+                            message: 'management.teams.saveSuccess',
+                            variant: 'success',
+                            icon: 'CircleCheckBig',
+                        });
+                        this.returnToTable();
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-
-                        // if (errorCode && errorCode !== ErrorCode.DefaultError) {
-                        //     if (errorCode === ErrorCode.Duplicated) {
-                        //         this.$refs.formRef.setFieldError("teamName", this.$t("labelErrorTeamAlreadyExists"));
-                        //         this.alertToast(this.$t("labelTeamError"), "toast-warning");
-                        //     } else {
-                        //         this.alertToast(this.$t("labelTeamError"), "toast-warning");
-                        //     }
-                        // } else {
-                        //     this.alertToast(this.$t("labelTeamError"), "toast-warning");
-                        // }
+                        let errorMessage = "management.teams.invalid";
+                        if (errorCode && errorCode === ErrorCode.Duplicated) {
+                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.duplicated"));
+                            errorMessage = "management.teams.duplicated";
+                        } 
+                        this.$notify({
+                            title: 'management.teams.title',
+                            message: errorMessage,
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
                     });
             },
             resetForm() {

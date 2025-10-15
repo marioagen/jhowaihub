@@ -272,6 +272,7 @@
         password_confirmed: "A confirmação da senha não confere.",
         hasInvalid: "Campos inválidos",
         oneStep: "Ao menos um step é necessário para salvar",
+        oneElementArray: "Selecione ao menos uma opção",
     },
     filters: {
         documentInput: "Buscar por documento, descrição ou usuário, ...",
@@ -567,7 +568,8 @@
             saveSuccess: "Time salvo com sucesso",
             saveError: "Erro ao salvar time",
             deleteSuccess: "Time deletado com sucesso",
-            deleteError: "Erro ao deletar time"
+            deleteError: "Erro ao deletar time",
+            duplicated: "Time já cadastrado",
         },
         profiles: {
             index: "Perfis",

@@ -11,12 +11,12 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<Team> Teams { get; set; } = [];
         public virtual ICollection<Document> Documents { get; set; }
 
-        public Workflow(int id, DateTime created, int teamId, string name)
+        public Workflow(int id, DateTime created, List<Team> teams, string name)
             : base(id, created)
         {
             Name = name;
             Steps = new List<Step>();
-            Teams = new List<Team>();
+            Teams = teams;
         }
 
         /// <summary>
@@ -48,15 +48,7 @@ namespace WoopiAiHub.Domain.Models
                 AddStep(step);
             }
         }
-
-        public void AddTeam(ICollection<Team> teams)
-        {
-            foreach (var team in teams)
-            {
-                AddTeam(team);
-            }
-        }
-        
+                
         public void Update(string name)
         {
             Name = name;

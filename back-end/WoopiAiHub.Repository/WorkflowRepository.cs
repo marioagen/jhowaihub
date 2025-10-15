@@ -49,6 +49,8 @@ namespace WoopiAiHub.Repository
         public async Task<WorkflowDto?> FindByTeamId(int teamId, WorkflowFilterDto? workflowFilterDto)
         {
             return await _context.Workflows
+                .Include(w => w.Teams)
+                .Include(w => w.Steps)
                 .Where(s => s.Teams.Any(t => t.Id == teamId))
                 .Select(FindWorkflowProjection(workflowFilterDto?.Input, workflowFilterDto?.IsAllUsers, workflowFilterDto?.Login))
                 .AsNoTracking()
@@ -90,6 +92,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Workflows
                  .AsSplitQuery()
+                 .Include(w => w.Teams)
                  .Include(w => w.Steps)
                      .ThenInclude(s => s.Profile)
                  .Include(w => w.Steps)
@@ -105,7 +108,6 @@ namespace WoopiAiHub.Repository
                  .FirstOrDefaultAsync(w => w.Id == id);
         }
 
-
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>
@@ -120,11 +122,17 @@ namespace WoopiAiHub.Repository
                 Id = w.Id,
                 Name = w.Name,
                 Created = w.Created,
+                Teams = w.Teams.Select(t => new TeamDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                }).ToList(),
                 Steps = w.Steps.Select(s => new StepDto
                 {
                     Id = s.Id,
                     Name = s.Name,
                     Order = s.Order,
+                    WorkflowId = s.WorkflowId,
                     Profile = new ProfileDto
                     {
                         Id = s.Profile!.Id,
@@ -137,7 +145,7 @@ namespace WoopiAiHub.Repository
                         Color = s.Status.Color,
                     },
                     Cards = s.Cards
-                    .Where(c => c.Enable &&
+                        .Where(c => c.Enable &&
                             (
                                 (string.IsNullOrWhiteSpace(input) || c.Name.Contains(input)) ||
                                 (string.IsNullOrWhiteSpace(input) ||
@@ -147,7 +155,7 @@ namespace WoopiAiHub.Repository
                                 allUsers == false ||
                                 (c.AssignedUser != null && c.AssignedUser.Email == login)
                             ))
-                    .Select(c => new CardDto
+                        .Select(c => new CardDto
                     {
                         Id = c.Id,
                         Name = c.Name,
@@ -172,48 +180,47 @@ namespace WoopiAiHub.Repository
                             Id = c.AssignedUser.Id
                         }
                         : null
-                    }).ToList(),
-                    WorkflowId = s.WorkflowId,
+                    }).ToList(),                    
                     StepTools = s.StepTools
-                                .Select(st => new StepToolDto
-                                {
-                                    Id = st.Id,
-                                    ToolId = st.ToolId,
-                                    Order = st.Order,
-                                    PositionX = st.PositionX,
-                                    PositionY = st.PositionY,
-                                    DependsOnStepToolId = st.DependsOnStepToolId,
-                                    Parameters = st.Parameters.Select(p => new StepToolParameterDto
-                                    {
-                                        Id = p.Id,
-                                        Value = p.Value,
-                                    }).ToList(),
-                                    Tool = new ToolDto
-                                    {
-                                        Id = st.Tool!.Id,
-                                        Name = st.Tool.Name,
-                                        IsEditableInput = st.Tool.IsEditableInput,
-                                    },
-                                    Executions = st.Executions.Select(e => new StepToolExecutionDto(
-                                        e.Id,
-                                        e.StepToolId,
-                                        e.CardId,
-                                        e.Started,
-                                        e.Completed,
-                                        e.Status,
-                                        null,
-                                        null
-                                    )).ToList(),
-                                    Outputs = st.Outputs.Select(o => new StepToolOutputDto(
-                                        o.Id,
-                                        o.StepToolId,
-                                        o.CardId,
-                                        o.Value,
-                                        null,
-                                        null
-                                    )).ToList()
-                                })
-                                .ToList()
+                        .Select(st => new StepToolDto
+                        {
+                            Id = st.Id,
+                            ToolId = st.ToolId,
+                            Order = st.Order,
+                            PositionX = st.PositionX,
+                            PositionY = st.PositionY,
+                            DependsOnStepToolId = st.DependsOnStepToolId,
+                            Parameters = st.Parameters.Select(p => new StepToolParameterDto
+                            {
+                                Id = p.Id,
+                                Value = p.Value,
+                            }).ToList(),
+                            Tool = new ToolDto
+                            {
+                                Id = st.Tool!.Id,
+                                Name = st.Tool.Name,
+                                IsEditableInput = st.Tool.IsEditableInput,
+                            },
+                            Executions = st.Executions.Select(e => new StepToolExecutionDto(
+                                e.Id,
+                                e.StepToolId,
+                                e.CardId,
+                                e.Started,
+                                e.Completed,
+                                e.Status,
+                                null,
+                                null
+                            )).ToList(),
+                            Outputs = st.Outputs.Select(o => new StepToolOutputDto(
+                                o.Id,
+                                o.StepToolId,
+                                o.CardId,
+                                o.Value,
+                                null,
+                                null
+                            )).ToList()
+                        })
+                        .ToList()
                 }).ToList()
             };
         }

@@ -34,7 +34,7 @@
                                 <ul class="dropdown-menu">
                                     <li v-for="item in workflowList" :key="item.id">
                                         <a class="dropdown-item" @click="selectOption(item)">
-                                            <div class="fw-bold">{{ item.team.name }}</div>
+                                            <div class="fw-bold">{{ item.teams.name }}</div>
                                             <div class="text-muted small">{{ item.name }}</div>
                                         </a>
                                     </li>
@@ -143,10 +143,9 @@
                         if(this.workflowList.length > 0) {
                             const lastSelected = this.$store.state.lastSelectedWorkflow;
                             let workflowToSelect = this.workflowList[0];
-
                             if (lastSelected) {
                                 const foundWorkflow = this.workflowList.find(w => 
-                                    w.team.id === lastSelected.teamId && w.id === lastSelected.id
+                                    w.teams.id === lastSelected.teamId && w.id === lastSelected.id
                                 );
                                 if (foundWorkflow) {
                                     workflowToSelect = foundWorkflow;
@@ -174,23 +173,23 @@
                 );
             },
             selectOption(workflow) {
+                if(workflow.teams.length < 1) return;
                 this.isLoaded = false;
                 this.isLoadedUsers = false;
                 this.selectedOption = {
                     id: workflow.id,
                     name: workflow.name,
-                    teamName: workflow.team.name,
-                    teamId: workflow.team.id,
+                    teamName: workflow.teams[0].name,
+                    teamId: workflow.teams[0].id,
                 }
-                
                 this.$store.commit('setLastSelectedWorkflow', {
                     id: workflow.id,
                     name: workflow.name,
-                    teamName: workflow.team.name,
-                    teamId: workflow.team.id,
+                    teamName: workflow.teams[0].name,
+                    teamId: workflow.teams[0].id,
                 });
-                this.getUsersByTeamId(workflow.team.id);
-                this.getWorkflowbyTeam(workflow.team.id);
+                this.getUsersByTeamId(workflow.teams[0].id);
+                this.getWorkflowbyTeam(workflow.teams[0].id);
             },
             reloadKanban() {
                 this.getWorkflowbyTeam(this.selectedOption.teamId);
@@ -219,7 +218,6 @@
             },
         },
         created() {
-            console.log(this.$route.query)
             this.getWorkflowByUser();
             GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
             GlobalEventService.on("refresh-once", this.getWorkflowByUser);

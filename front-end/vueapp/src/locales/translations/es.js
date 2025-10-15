@@ -275,6 +275,7 @@
         password_confirmed: "La confirmación de la contraseña no coincide.",
         hasInvalid: "Campos inválidos",
         oneStep: "Se requiere al menos un paso para guardar",
+        oneElementArray: "Selecciona al menos una opción",
     },
     filters: {
         documentInput: "Buscar por documento, descripción o usuario, ...",
@@ -562,6 +563,53 @@
             editFlowNodeFail: "No se pudo editar el nodo",
         }
     },
+    management: {
+        title: "Gestión de Usuarios y Equipos",
+        subtitle: "Administra usuarios, equipos y permisos del sistema",
+        users: {
+            title: "Usuarios",
+            subtitle: "Administra los usuarios del sistema",
+            createBtn: "Nuevo Usuario",
+            createTitle: "Nuevo Usuario",
+            createSubtitle: "Crea un nuevo usuario para el sistema",
+            editTitle: "Editar Usuario",
+            editSubtitle: "Actualiza la información del usuario seleccionado",
+            invalid: "Usuario inválido",
+            saveSuccess: "Usuario guardado con éxito",
+            saveError: "Error al guardar el usuario",
+            deleteSuccess: "Usuario eliminado con éxito",
+        },
+        teams: {
+            title: "Equipos",
+            subtitle: "Administra los equipos del sistema",
+            createBtn: "Nuevo Equipo",
+            createTitle: "Nuevo Equipo",
+            createSubtitle: "Crea un nuevo equipo para el sistema",
+            editTitle: "Editar Equipo",
+            editSubtitle: "Actualiza la información del equipo seleccionado",
+            invalid: "Equipo inválido",
+            saveSuccess: "Equipo guardado con éxito",
+            saveError: "Error al guardar el equipo",
+            deleteSuccess: "Equipo eliminado con éxito",
+            deleteError: "Error al eliminar el equipo",
+            duplicated: "Equipo ya registrado",
+        },
+        profiles: {
+            index: "Perfiles",
+            title: "Perfiles y Permisos",
+            subtitle: "Administra los perfiles y permisos del sistema",
+            createBtn: "Nuevo Perfil",
+            createTitle: "Nuevo Perfil",
+            createSubtitle: "Crea un nuevo perfil para el sistema",
+            editTitle: "Editar Perfil",
+            editSubtitle: "Actualiza la información del perfil seleccionado",
+            invalid: "Perfil inválido",
+            saveSuccess: "Perfil guardado con éxito",
+            saveError: "Error al guardar el perfil",
+            deleteSuccess: "Perfil eliminado con éxito",
+            deleteError: "Error al eliminar el perfil"
+        },
+    }
 };
 
 export default spanish;

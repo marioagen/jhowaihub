@@ -10,8 +10,18 @@
             :hasSelection="false"
             @change-page="changePage"
         >
-            <template #cell-team="{ data }">
-                {{ data.row.team.name }}
+            <template #cell-teams="{ data }">
+                <div v-if="data.row.teams.length > 0">
+                    <BadgeOutlinedComponent
+                        v-for="team in data.row.teams"
+                        :key="team.id"
+                        :text="team.name"
+                        :clickable="false"
+                        class="ms-2"
+                        variant="primary"
+                    />
+                </div>
+                <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
                 <DropdownComponent>
@@ -58,9 +68,11 @@
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import DropdownComponent from "@/components/global/DropdownComponent.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent.vue";
     export default {
         name: "WorkflowTable",
         components: {
+            BadgeOutlinedComponent,
             DropdownComponent,
             TableComponent,
             ConfirmModal,
@@ -71,7 +83,7 @@
                 columns: [
                     { key: "id", label: "id" },
                     { key: "name", label: "workflow.name" },
-                    { key: "team", label: "workflow.teams" },
+                    { key: "teams", label: "workflow.teams" },
                     { key: "actions", label: "workflow.actions" },
                 ],
                 data: [],
@@ -98,8 +110,8 @@
                     .then((response) => {
                         if(response.error !== undefined) {
                             this.$notify({
-                                title: 'Error',
-                                message: 'Dados salvos com erro com sucesso!',
+                                title: 'workflow.index',
+                                message: 'workflow.error',
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
@@ -131,6 +143,30 @@
                 this.$refs.DeleteDialog.open();
             },
             deleteWorkflow() {
+                this.isDeleting = true;
+                WorkflowService.deleteWorkflowById(this.selectedWorkflow)
+                    .then((success) => {
+                        if (success) {
+                            this.$refs.DeleteDialog.close();
+                            this.getWorkflowList();
+                            this.$notify({
+                                title: "workflow.index",
+                                message: "workflow.removeSuccess",
+                                variant: "success",
+                                icon: "CircleCheckBig",
+                            });
+                        } else {
+                            this.$notify({
+                                title: "workflow.index",
+                                message: "workflow.removeError",
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        }
+                    })
+                    .finally(() => {
+                        this.isDeleting = false;
+                    });
             },
             changePage(page) {
                 console.log("Change page" + page)
