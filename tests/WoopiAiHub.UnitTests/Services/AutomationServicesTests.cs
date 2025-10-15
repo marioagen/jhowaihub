@@ -388,6 +388,14 @@ namespace WoopiAiHub.UnitTests.Services
             cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
             stepRepositoryMock.Setup(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId)).ReturnsAsync(nextStep);
             cardRepositoryMock.Setup(r => r.Update(It.IsAny<Domain.Models.Card>())).Returns(true);
+            
+            // Mock StepTools validation - simulate that all StepTools are completed
+            var completedStepTool = AutomationFixture.FindValidStepTool();
+            var completedExecution = AutomationFixture.FindValidStepToolExecution();
+            completedExecution.UpdateStatusExecution(Domain.Enum.StatusExecution.Ready);
+            
+            stepToolRepositoryMock.Setup(r => r.FindStepToolsByStepId(currentStep.Id)).Returns(new List<Domain.Models.StepTool> { completedStepTool });
+            stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(completedStepTool.Id, automationDto.CardId)).ReturnsAsync(completedExecution);
 
             // Act
             await _service.ContinueExecution(automationDto);

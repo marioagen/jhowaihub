@@ -280,19 +280,61 @@ namespace WoopiAiHub.Application.Services
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
 
-            // Verifica se o perfil responsável pelo step é o perfil de IA.
-            // Se for, avança automaticamente o card para o próximo step
-            // após a execução das step tools.
-            await AdvanceStepIfAiProfileAsync(automationServicesDto);
+            // Verifica se o perfil responsável pelo step é o perfil de IA
+            // e se todas as StepTools do step atual foram executadas.
+            // Só então avança automaticamente o card para o próximo step.
+            await CheckAndAdvanceAiProfileStepAsync(automationServicesDto);
         }
 
         /// <summary>
-        /// Verifica se o card está em um step cujo perfil responsável é o perfil de IA.
-        /// Se for, avança automaticamente o card para o próximo step do workflow.
+        /// Verifica se todas as StepTools de um step foram executadas com sucesso para um card específico.
+        /// </summary>
+        /// <param name="stepId">ID do step a ser verificado</param>
+        /// <param name="cardId">ID do card</param>
+        /// <returns>True se todas as StepTools foram executadas com status Ready, false caso contrário</returns>
+        private async Task<bool> AreAllStepToolsCompletedAsync(int stepId, int cardId)
+        {
+            try
+            {
+                // Busca todas as StepTools do step
+                var stepTools = _stepToolRepository.FindStepToolsByStepId(stepId);
+                if (!stepTools.Any())
+                {
+                    _logger.LogWarning("Nenhuma StepTool encontrada para o step {StepId}", stepId);
+                    return true; // Se não há StepTools, considera como completado
+                }
+
+                // Para cada StepTool, verifica se existe uma execução com status Ready
+                foreach (var stepTool in stepTools)
+                {
+                    var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(stepTool.Id, cardId);
+                    
+                    // Se não existe execução ou o status não é Ready, ainda não está completo
+                    if (execution == null || execution.Status != Domain.Enum.StatusExecution.Ready)
+                    {
+                        _logger.LogDebug("StepTool {StepToolId} para card {CardId} ainda não foi executada ou não está com status Ready", stepTool.Id, cardId);
+                        return false;
+                    }
+                }
+
+                _logger.LogInformation("Todas as StepTools do step {StepId} para o card {CardId} foram executadas com sucesso", stepId, cardId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao verificar se todas as StepTools do step {StepId} foram executadas para o card {CardId}", stepId, cardId);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Verifica se o card está em um step cujo perfil responsável é o perfil de IA
+        /// e se todas as StepTools do step atual foram executadas (status Ready).
+        /// Só então avança automaticamente o card para o próximo step do workflow.
         /// </summary>
         /// <param name="automationServicesDto">DTO contendo informações do card e step</param>
         /// <returns>Task que representa a operação assíncrona</returns>
-        private async Task AdvanceStepIfAiProfileAsync(AutomationServicesDto automationServicesDto)
+        private async Task CheckAndAdvanceAiProfileStepAsync(AutomationServicesDto automationServicesDto)
         {
             try
             {
@@ -305,7 +347,15 @@ namespace WoopiAiHub.Application.Services
                 if (card.Step.Profile.Name != "IA")
                     return;
 
-                _logger.LogInformation("Card {CardId} está no perfil IA. Avançando automaticamente para o próximo step.", automationServicesDto.CardId);
+                // Valida se todas as StepTools do step atual foram executadas
+                var allStepToolsCompleted = await AreAllStepToolsCompletedAsync(card.StepId, automationServicesDto.CardId);
+                if (!allStepToolsCompleted)
+                {
+                    _logger.LogInformation("Card {CardId} está no perfil IA, mas nem todas as StepTools foram executadas ainda.", automationServicesDto.CardId);
+                    return;
+                }
+
+                _logger.LogInformation("Card {CardId} está no perfil IA e todas as StepTools foram executadas. Avançando automaticamente para o próximo step.", automationServicesDto.CardId);
 
                 // Busca o próximo step no workflow
                 var nextStepOrder = card.Step.Order + 1;
