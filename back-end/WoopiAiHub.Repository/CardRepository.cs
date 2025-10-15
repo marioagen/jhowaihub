@@ -34,6 +34,8 @@ namespace WoopiAiHub.Repository
                                  .Where(c => c.Id == id)
                                  .Include(d => d.Document)
                                  .Include(s => s.Step)
+                                 .ThenInclude(p => p!.Profile)
+                                 .Include(s => s.Step)
                                  .ThenInclude(w => w!.Workflow)
                                  .ThenInclude(t => t!.Team)
                                  .ThenInclude(u => u!.Users)
