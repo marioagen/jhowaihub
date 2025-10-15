@@ -91,6 +91,7 @@
     import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
     import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
     import UserService from "@/services/users/UserService";
+    import logService from '@/services/log/logService.js';
 
     export default {
         name: "WorkflowPage",
@@ -227,12 +228,53 @@
             await signalRService.startConnection();
 
             signalRService.on(this.signalrEventExecutionChanged, (message) => {
-                const step = this.kanbanCards.steps.find(s => s.id === message.stepId);
-                if (!step?.cards) return;
+                if (!this.kanbanCards.steps) return;
 
-                const item = step.cards.find(card => card.id === message.cardId);
-                if (item) {
-                    item.percentage = message.percentage;
+                // Procura o card em todos os steps
+                let foundCard = null;
+                let currentStepIndex = -1;
+
+                for (let i = 0; i < this.kanbanCards.steps.length; i++) {
+                    const step = this.kanbanCards.steps[i];
+                    if (step.cards) {
+                        const cardIndex = step.cards.findIndex(card => card.id === message.cardId);
+                        if (cardIndex !== -1) {
+                            foundCard = step.cards[cardIndex];
+                            currentStepIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (!foundCard) return;
+
+                // Verifica se o card precisa ser movido para um novo step
+                const targetStep = this.kanbanCards.steps.find(s => s.id === message.stepId);
+                if (!targetStep) return;
+
+                // Se o card está em um step diferente do message.stepId, move o card
+                if (foundCard.stepId !== message.stepId) {
+                    // Remove o card do step atual
+                    const currentStep = this.kanbanCards.steps[currentStepIndex];
+                    const cardIndex = currentStep.cards.findIndex(card => card.id === message.cardId);
+                    if (cardIndex !== -1) {
+                        const [movedCard] = currentStep.cards.splice(cardIndex, 1);
+                        
+                        // Atualiza o stepId do card
+                        movedCard.stepId = message.stepId;
+                        movedCard.percentage = message.percentage;
+                        
+                        // Adiciona o card ao step de destino
+                        if (!targetStep.cards) {
+                            targetStep.cards = [];
+                        }
+                        targetStep.cards.push(movedCard);
+                        
+                        logService.showMessage(`Card ${message.cardId} movido automaticamente para o step ${message.stepId}`);
+                    }
+                } else {
+                    // Se o card já está no step correto, apenas atualiza a porcentagem
+                    foundCard.percentage = message.percentage;
                 }
             });
         },
