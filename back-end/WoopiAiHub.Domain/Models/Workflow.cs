@@ -48,15 +48,7 @@ namespace WoopiAiHub.Domain.Models
                 AddStep(step);
             }
         }
-
-        public void AddTeam(ICollection<Team> teams)
-        {
-            foreach (var team in teams)
-            {
-                AddTeam(team);
-            }
-        }
-        
+                
         public void Update(string name)
         {
             Name = name;

@@ -92,6 +92,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Workflows
                  .AsSplitQuery()
+                 .Include(w => w.Teams)
                  .Include(w => w.Steps)
                      .ThenInclude(s => s.Profile)
                  .Include(w => w.Steps)

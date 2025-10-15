@@ -33,8 +33,8 @@ namespace WoopiAiHub.Application.Utils
                 throw new AppException(ErrorCode.RequiredField, "Workflow name cannot be empty", WorkflowLabel.NameRequired);
             }
 
-            var team = _teamRepository.FindById(workflowCreateDto.TeamId);
-            if (team == null)
+            var teamsList = _teamRepository.FindByIds(workflowCreateDto.Teams);
+            if (teamsList.Count < 1)
             {
                 throw new AppException(ErrorCode.NotFound, "Team not found", TeamLabel.NotFound);
             }
