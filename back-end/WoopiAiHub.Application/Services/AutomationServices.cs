@@ -321,13 +321,22 @@ namespace WoopiAiHub.Application.Services
                 }
 
                 // Atualiza o card para o próximo step
+                var previousStepId = card.StepId;
                 card.UpdateStepAndSatus(nextStep.Id, nextStep.StatusId);
                 var updated = _cardRepository.Update(card);
 
                 if (updated)
                 {
-                    _logger.LogInformation("Card {CardId} avançado automaticamente do step {CurrentStep} para o step {NextStep}", 
-                        automationServicesDto.CardId, card.Step.Order, nextStep.Order);
+                    _logger.LogInformation("Card {CardId} avançado automaticamente do step {CurrentStep} (ID: {CurrentStepId}) para o step {NextStep} (ID: {NextStepId})", 
+                        automationServicesDto.CardId, card.Step.Order, previousStepId, nextStep.Order, nextStep.Id);
+
+                    // Verifica se o card foi realmente atualizado no banco consultando novamente
+                    var updatedCard = await _cardRepository.FindById(automationServicesDto.CardId);
+                    if (updatedCard != null)
+                    {
+                        _logger.LogInformation("Confirmação: Card {CardId} agora está no step {StepId} no banco de dados", 
+                            automationServicesDto.CardId, updatedCard.StepId);
+                    }
 
                     // Inicia as execuções do próximo step
                     var nextStepDto = automationServicesDto with
@@ -337,10 +346,11 @@ namespace WoopiAiHub.Application.Services
                     await StartExecutionByCardAsync(nextStepDto);
 
                     // Notifica o front-end sobre a mudança do step via SignalR
-                    await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 0.0, nextStep.Id);
+                    // Envia 100% para indicar que o step atual foi completado antes de mover para o próximo
+                    await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id);
                     
-                    _logger.LogInformation("Notificação enviada para o usuário {Email} sobre avanço do card {CardId} para o step {StepId}", 
-                        automationServicesDto.Email, automationServicesDto.CardId, nextStep.Id);
+                    _logger.LogInformation("Notificação SignalR enviada: CardId={CardId}, Email={Email}, Percentage=100%, StepId={StepId}", 
+                        automationServicesDto.CardId, automationServicesDto.Email, nextStep.Id);
                 }
                 else
                 {

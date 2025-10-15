@@ -228,7 +228,12 @@
             await signalRService.startConnection();
 
             signalRService.on(this.signalrEventExecutionChanged, (message) => {
-                if (!this.kanbanCards.steps) return;
+                console.log('SignalR CardExecutionChanged recebido:', message);
+                
+                if (!this.kanbanCards.steps) {
+                    console.log('Kanban steps não disponível');
+                    return;
+                }
 
                 // Procura o card em todos os steps
                 let foundCard = null;
@@ -241,28 +246,39 @@
                         if (cardIndex !== -1) {
                             foundCard = step.cards[cardIndex];
                             currentStepIndex = i;
+                            console.log(`Card ${message.cardId} encontrado no step ${step.id} (index ${i})`);
                             break;
                         }
                     }
                 }
 
-                if (!foundCard) return;
+                if (!foundCard) {
+                    console.log(`Card ${message.cardId} não encontrado em nenhum step`);
+                    return;
+                }
 
                 // Verifica se o card precisa ser movido para um novo step
                 const targetStep = this.kanbanCards.steps.find(s => s.id === message.stepId);
-                if (!targetStep) return;
+                if (!targetStep) {
+                    console.log(`Step de destino ${message.stepId} não encontrado`);
+                    return;
+                }
 
-                // Se o card está em um step diferente do message.stepId, move o card
-                if (foundCard.stepId !== message.stepId) {
+                console.log(`Card atual stepId: ${foundCard.stepId}, Message stepId: ${message.stepId}, Percentage: ${message.percentage}`);
+
+                // Se o card está em um step diferente do message.stepId E tem 100%, move o card
+                if (foundCard.stepId !== message.stepId && message.percentage === 100.0) {
+                    console.log(`Movendo card ${message.cardId} do step ${foundCard.stepId} para o step ${message.stepId}`);
+                    
                     // Remove o card do step atual
                     const currentStep = this.kanbanCards.steps[currentStepIndex];
                     const cardIndex = currentStep.cards.findIndex(card => card.id === message.cardId);
                     if (cardIndex !== -1) {
                         const [movedCard] = currentStep.cards.splice(cardIndex, 1);
                         
-                        // Atualiza o stepId do card
+                        // Atualiza o stepId do card e define como 0% no novo step
                         movedCard.stepId = message.stepId;
-                        movedCard.percentage = message.percentage;
+                        movedCard.percentage = 0.0; // Reseta para 0% no novo step
                         
                         // Adiciona o card ao step de destino
                         if (!targetStep.cards) {
@@ -270,10 +286,12 @@
                         }
                         targetStep.cards.push(movedCard);
                         
-                        logService.showMessage(`Card ${message.cardId} movido automaticamente para o step ${message.stepId}`);
+                        console.log(`Card ${message.cardId} movido com sucesso para o step ${message.stepId}`);
+                        logService.showMessage(`Card ${message.cardId} movido automaticamente para o step ${message.stepId} (100% completo)`);
                     }
                 } else {
-                    // Se o card já está no step correto, apenas atualiza a porcentagem
+                    // Se o card está no step correto, apenas atualiza a porcentagem
+                    console.log(`Atualizando percentage do card ${message.cardId} para ${message.percentage}%`);
                     foundCard.percentage = message.percentage;
                 }
             });
