@@ -262,11 +262,17 @@ namespace WoopiAiHub.Application.Services
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
 
-            if (dependentStepTool == null || stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
+            if (dependentStepTool == null)
             {
-                // Se não há StepTool dependente ou os steps são diferentes, significa que é a última StepTool
+                // Se não há StepTool dependente, significa que é a última StepTool do step atual
                 // Verifica se precisa avançar o step para perfis de IA
                 await CheckAndAdvanceAiProfileStepAsync(automationServicesDto);
+                return;
+            }
+            
+            if (stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
+            {
+                // Se os steps são diferentes, não há continuação no mesmo step
                 return;
             }
 

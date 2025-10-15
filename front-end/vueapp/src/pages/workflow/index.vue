@@ -257,7 +257,7 @@
                         if (cardIndex !== -1) {
                             const [movedCard] = currentStep.cards.splice(cardIndex, 1);
                             movedCard.stepId = message.stepId;
-                            movedCard.percentage = 0.0; // Reseta para 0% no novo step
+                            movedCard.percentage = message.percentage; // Mantém a porcentagem atual
                             
                             if (!targetStep.cards) {
                                 targetStep.cards = [];
