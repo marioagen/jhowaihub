@@ -232,15 +232,13 @@
 
                 // Procura o card em todos os steps
                 let foundCard = null;
-                let currentStepIndex = -1;
 
                 for (let i = 0; i < this.kanbanCards.steps.length; i++) {
                     const step = this.kanbanCards.steps[i];
                     if (step.cards) {
-                        const cardIndex = step.cards.findIndex(card => card.id === message.cardId);
-                        if (cardIndex !== -1) {
-                            foundCard = step.cards[cardIndex];
-                            currentStepIndex = i;
+                        const card = step.cards.find(c => c.id === message.cardId);
+                        if (card) {
+                            foundCard = card;
                             break;
                         }
                     }
@@ -248,28 +246,15 @@
 
                 if (!foundCard) return;
 
-                // Se o card está em um step diferente E tem 100%, move o card (perfil IA)
-                if (foundCard.stepId !== message.stepId && message.percentage === 100.0) {
-                    const targetStep = this.kanbanCards.steps.find(s => s.id === message.stepId);
-                    if (targetStep) {
-                        const currentStep = this.kanbanCards.steps[currentStepIndex];
-                        const cardIndex = currentStep.cards.findIndex(card => card.id === message.cardId);
-                        if (cardIndex !== -1) {
-                            const [movedCard] = currentStep.cards.splice(cardIndex, 1);
-                            movedCard.stepId = message.stepId;
-                            movedCard.percentage = message.percentage; // Mantém a porcentagem atual
-                            
-                            if (!targetStep.cards) {
-                                targetStep.cards = [];
-                            }
-                            targetStep.cards.push(movedCard);
-                            
-                            logService.showMessage(`Card movido automaticamente para o próximo step`);
-                        }
-                    }
-                } else {
-                    // Atualiza apenas a porcentagem
-                    foundCard.percentage = message.percentage;
+                // Atualiza a porcentagem do card
+                foundCard.percentage = message.percentage;
+
+                // Se atingiu 100%, recarrega os dados do kanban para refletir mudanças do backend
+                // (incluindo mudanças de step feitas pelo backend para perfis IA)
+                if (message.percentage === 100.0) {
+                    setTimeout(() => {
+                        this.getWorkflowByUser();
+                    }, 500); // Pequeno delay para garantir que o backend finalizou o processamento
                 }
             });
         beforeUnmount() {
