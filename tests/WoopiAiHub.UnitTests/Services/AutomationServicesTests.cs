@@ -339,15 +339,8 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ContinueExecution_ShouldAdvanceToNextStep_WhenCardHasAiProfile()
         {
             // Arrange
-            var dependentStepTool = AutomationFixture.FindValidStepTool();
             var stepToolDto = AutomationFixture.FindValidStepToolDto();
-            var tool = ToolFixture.FindValidToolModel();
-            tool.ToolType = ToolTypeFixture.FindValidToolType();
-            dependentStepTool.Tool = tool;
-            
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
-            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
-            var payload = AutomationFixture.FindValidExecutionMessageDto();
 
             // Create AI profile
             var aiProfile = new Domain.Models.Profile("IA", 1, DateTime.UtcNow);
@@ -364,47 +357,23 @@ namespace WoopiAiHub.UnitTests.Services
             card.Step = currentStep;
             
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
-            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
-            var stepToolParameterRepositoryMock = _mocker.GetMock<IStepToolParameterRepository>();
-            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
-            var toolFactoryHandlerMock = _mocker.GetMock<IToolFactoryHandler>();
-            var handlerMock = new Mock<IToolHandler>();
-            var messagePublisherMock = _mocker.GetMock<IMessagePublisher<object>>();
             var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             var stepRepositoryMock = _mocker.GetMock<IStepRepository>();
 
-            // Setup mocks
+            // Setup mocks - No dependent step tool to trigger AI advancement
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
-            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync(dependentStepTool);
-            stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
-            stepToolExecutionRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<Domain.Models.StepToolExecution>())).Returns(Task.CompletedTask);
-            stepToolParameterRepositoryMock.Setup(r => r.FindByStepToolId(It.IsAny<int>())).Returns("input");
-            stepToolOutputRepositoryMock.Setup(r => r.FindByStepToolId(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync("output");
-            toolFactoryHandlerMock.Setup(s => s.GetHandler(It.IsAny<Domain.Models.ToolType>())).Returns(handlerMock.Object);
-            handlerMock.Setup(h => h.BuildPayload(automationDto, It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(payload);
-            messagePublisherMock.Setup(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>())).Returns(Task.CompletedTask);
+            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((Domain.Models.StepTool)null);
             
             // Setup for AI profile advancement
             cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
             stepRepositoryMock.Setup(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId)).ReturnsAsync(nextStep);
             cardRepositoryMock.Setup(r => r.Update(It.IsAny<Domain.Models.Card>())).Returns(true);
-            
-            // Mock StepTools validation - simulate that all StepTools are completed
-            var completedStepTool = AutomationFixture.FindValidStepTool();
-            var completedExecution = AutomationFixture.FindValidStepToolExecution();
-            completedExecution.UpdateStatusExecution(Domain.Enum.StatusExecution.Ready);
-            
-            stepToolRepositoryMock.Setup(r => r.FindStepToolsByStepId(currentStep.Id)).Returns(new List<Domain.Models.StepTool> { completedStepTool });
-            stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(completedStepTool.Id, automationDto.CardId)).ReturnsAsync(completedExecution);
 
             // Act
             await _service.ContinueExecution(automationDto);
 
             // Assert
             stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
-            stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, It.IsAny<int>()), Times.Once);
-            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Domain.Models.StepToolExecution>()), Times.Once);
-            messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>()), Times.AtLeastOnce);
             
             // Verify AI profile advancement logic was called
             cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
@@ -417,15 +386,8 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ContinueExecution_ShouldNotAdvanceStep_WhenCardHasNonAiProfile()
         {
             // Arrange
-            var dependentStepTool = AutomationFixture.FindValidStepTool();
             var stepToolDto = AutomationFixture.FindValidStepToolDto();
-            var tool = ToolFixture.FindValidToolModel();
-            tool.ToolType = ToolTypeFixture.FindValidToolType();
-            dependentStepTool.Tool = tool;
-            
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
-            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
-            var payload = AutomationFixture.FindValidExecutionMessageDto();
 
             // Create normal (non-AI) profile
             var normalProfile = new Domain.Models.Profile("Normal Profile", 2, DateTime.UtcNow);
@@ -439,25 +401,12 @@ namespace WoopiAiHub.UnitTests.Services
             card.Step = currentStep;
             
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
-            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
-            var stepToolParameterRepositoryMock = _mocker.GetMock<IStepToolParameterRepository>();
-            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
-            var toolFactoryHandlerMock = _mocker.GetMock<IToolFactoryHandler>();
-            var handlerMock = new Mock<IToolHandler>();
-            var messagePublisherMock = _mocker.GetMock<IMessagePublisher<object>>();
             var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             var stepRepositoryMock = _mocker.GetMock<IStepRepository>();
 
-            // Setup mocks
+            // Setup mocks - No dependent step tool to trigger advancement check
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
-            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync(dependentStepTool);
-            stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
-            stepToolExecutionRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<Domain.Models.StepToolExecution>())).Returns(Task.CompletedTask);
-            stepToolParameterRepositoryMock.Setup(r => r.FindByStepToolId(It.IsAny<int>())).Returns("input");
-            stepToolOutputRepositoryMock.Setup(r => r.FindByStepToolId(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync("output");
-            toolFactoryHandlerMock.Setup(s => s.GetHandler(It.IsAny<Domain.Models.ToolType>())).Returns(handlerMock.Object);
-            handlerMock.Setup(h => h.BuildPayload(automationDto, It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(payload);
-            messagePublisherMock.Setup(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>())).Returns(Task.CompletedTask);
+            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((Domain.Models.StepTool)null);
             
             // Setup for non-AI profile (should not advance)
             cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
@@ -467,11 +416,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
-            stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, It.IsAny<int>()), Times.Once);
-            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<Domain.Models.StepToolExecution>()), Times.Once);
-            messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
             
-            // Verify AI profile advancement logic was not triggered (no step update)
+            // Verify AI profile advancement logic was called but didn't advance because it's not AI profile
             cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Never);

@@ -2,6 +2,7 @@
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
@@ -21,6 +22,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<AutomationServices> _logger;
         private readonly ICardRepository _cardRepository;
         private readonly IStepRepository _stepRepository;
+        private readonly IHubNotifier _hubNotifier;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -30,7 +32,8 @@ namespace WoopiAiHub.Application.Services
                                   IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger,
                                   ICardRepository cardRepository,
-                                  IStepRepository stepRepository)
+                                  IStepRepository stepRepository,
+                                  IHubNotifier hubNotifier)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -41,6 +44,7 @@ namespace WoopiAiHub.Application.Services
             _logger = logger;
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
+            _hubNotifier = hubNotifier;
         }
 
         /// <summary>
@@ -258,11 +262,13 @@ namespace WoopiAiHub.Application.Services
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
 
-            if (dependentStepTool == null)
+            if (dependentStepTool == null || stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
+            {
+                // Se não há StepTool dependente ou os steps são diferentes, significa que é a última StepTool
+                // Verifica se precisa avançar o step para perfis de IA
+                await CheckAndAdvanceAiProfileStepAsync(automationServicesDto);
                 return;
-
-            if (stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
-                return;
+            }
 
             var execution = await _stepToolExecutionRepository
                 .FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, automationServicesDto.CardId);
@@ -279,58 +285,13 @@ namespace WoopiAiHub.Application.Services
             var payload = await handler.BuildPayload(automationServicesDto, input, output);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
-
-            // Verifica se o perfil responsável pelo step é o perfil de IA
-            // e se todas as StepTools do step atual foram executadas.
-            // Só então avança automaticamente o card para o próximo step.
-            await CheckAndAdvanceAiProfileStepAsync(automationServicesDto);
         }
 
-        /// <summary>
-        /// Verifica se todas as StepTools de um step foram executadas com sucesso para um card específico.
-        /// </summary>
-        /// <param name="stepId">ID do step a ser verificado</param>
-        /// <param name="cardId">ID do card</param>
-        /// <returns>True se todas as StepTools foram executadas com status Ready, false caso contrário</returns>
-        private async Task<bool> AreAllStepToolsCompletedAsync(int stepId, int cardId)
-        {
-            try
-            {
-                // Busca todas as StepTools do step
-                var stepTools = _stepToolRepository.FindStepToolsByStepId(stepId);
-                if (!stepTools.Any())
-                {
-                    _logger.LogWarning("Nenhuma StepTool encontrada para o step {StepId}", stepId);
-                    return true; // Se não há StepTools, considera como completado
-                }
 
-                // Para cada StepTool, verifica se existe uma execução com status Ready
-                foreach (var stepTool in stepTools)
-                {
-                    var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(stepTool.Id, cardId);
-                    
-                    // Se não existe execução ou o status não é Ready, ainda não está completo
-                    if (execution == null || execution.Status != Domain.Enum.StatusExecution.Ready)
-                    {
-                        _logger.LogDebug("StepTool {StepToolId} para card {CardId} ainda não foi executada ou não está com status Ready", stepTool.Id, cardId);
-                        return false;
-                    }
-                }
-
-                _logger.LogInformation("Todas as StepTools do step {StepId} para o card {CardId} foram executadas com sucesso", stepId, cardId);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Erro ao verificar se todas as StepTools do step {StepId} foram executadas para o card {CardId}", stepId, cardId);
-                return false;
-            }
-        }
 
         /// <summary>
         /// Verifica se o card está em um step cujo perfil responsável é o perfil de IA
-        /// e se todas as StepTools do step atual foram executadas (status Ready).
-        /// Só então avança automaticamente o card para o próximo step do workflow.
+        /// e avança automaticamente o card para o próximo step do workflow.
         /// </summary>
         /// <param name="automationServicesDto">DTO contendo informações do card e step</param>
         /// <returns>Task que representa a operação assíncrona</returns>
@@ -347,15 +308,7 @@ namespace WoopiAiHub.Application.Services
                 if (card.Step.Profile.Name != "IA")
                     return;
 
-                // Valida se todas as StepTools do step atual foram executadas
-                var allStepToolsCompleted = await AreAllStepToolsCompletedAsync(card.StepId, automationServicesDto.CardId);
-                if (!allStepToolsCompleted)
-                {
-                    _logger.LogInformation("Card {CardId} está no perfil IA, mas nem todas as StepTools foram executadas ainda.", automationServicesDto.CardId);
-                    return;
-                }
-
-                _logger.LogInformation("Card {CardId} está no perfil IA e todas as StepTools foram executadas. Avançando automaticamente para o próximo step.", automationServicesDto.CardId);
+                _logger.LogInformation("Card {CardId} está no perfil IA. Avançando automaticamente para o próximo step.", automationServicesDto.CardId);
 
                 // Busca o próximo step no workflow
                 var nextStepOrder = card.Step.Order + 1;
@@ -382,6 +335,12 @@ namespace WoopiAiHub.Application.Services
                         StepId = nextStep.Id
                     };
                     await StartExecutionByCardAsync(nextStepDto);
+
+                    // Notifica o front-end sobre a mudança do step via SignalR
+                    await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 0.0, nextStep.Id);
+                    
+                    _logger.LogInformation("Notificação enviada para o usuário {Email} sobre avanço do card {CardId} para o step {StepId}", 
+                        automationServicesDto.Email, automationServicesDto.CardId, nextStep.Id);
                 }
                 else
                 {
