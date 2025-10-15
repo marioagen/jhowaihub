@@ -7,9 +7,7 @@ namespace WoopiAiHub.Domain.DTOs.Response.Automation
     {
         public string? Tenant { get; set; }
         public string? Email { get; set; }
-        public string ReferenceFile { get; set; } = string.Empty;
-        public string ResponseQueue { get; set; } = string.Empty;
-        public MetaDataAutomationDto Data { get; set; } = new MetaDataAutomationDto();
+        public int ExecutionId { get; set; }
         public object? Content { get; set; }
     }
 }

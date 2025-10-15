@@ -93,10 +93,11 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task N8NConsumer_ConsumeAsync_ShouldConsumeMessage()
         {
             // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
             var automationOutputDto = MessagingFixture.FindValidAutomationOutputDto();
             _n8NServices
                 .Setup(x => x.ProcessMessage(It.IsAny<AutomationOutputDto>()))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(automationServicesDto);
 
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<AutomationOutputDto, Task>>()))
                          .Callback<string, Func<AutomationOutputDto, Task>>(async (queue, callback) =>

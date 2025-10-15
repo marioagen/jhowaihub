@@ -46,27 +46,14 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
                     var n8nServices = scope.ServiceProvider.GetRequiredService<IN8NServices>();
-                    await n8nServices.ProcessMessage(message);
+                    var automationServicesDto = await n8nServices.ProcessMessage(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
-                    var automationServicesDto = new AutomationServicesDto
-                    (
-                        message.Data.StepToolId,
-                        message.Data.CardId,
-                        message.Tenant,
-                        message.Email,
-                        message.ReferenceFile,
-                        0
-                    );
+
                     await automationServices.ContinueExecution(automationServicesDto);
                 }
                 catch (Exception ex)
                 {
-                    var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
-                    await documentServices.ChangeStatusByReferenceFile(message.ReferenceFile,
-                                                                       message.Email,
-                                                                       DocumentStatus.Failure);
-
                     _logger.LogError(ex, "Failed to process the answer response.");
                 }
             });

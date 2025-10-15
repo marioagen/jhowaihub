@@ -90,11 +90,9 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<AutomationOutputDto>("pt_BR")
               .CustomInstantiator(f => new AutomationOutputDto
               {
-                  ReferenceFile = f.Random.Guid().ToString(),
                   Tenant = f.Random.String(),
                   Email = f.Random.String(),
-                  ResponseQueue = f.Name.FindName(),
-                  Data = new MetaDataAutomationDto(f.Random.Int(1, 10), f.Random.Int(1, 10)),
+                  ExecutionId = f.Random.Int(1, 10),
                   Content = f.Random.ToString()
               });
             return faker;

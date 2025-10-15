@@ -56,6 +56,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
 
             var input = ToolHandlerFixture.FindValidStepToolParameter();
 
@@ -66,7 +67,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .ReturnsAsync(tool);
 
             // Act
-            var result = await _handler.BuildPayload(automationServicesDto, input, "");
+            var result = await _handler.BuildPayload(automationServicesDto, input, "", stepToolExecution);
 
             // Assert
             Assert.Equal(_messageQueues.AutomationQueueConsumer, result.Queue);

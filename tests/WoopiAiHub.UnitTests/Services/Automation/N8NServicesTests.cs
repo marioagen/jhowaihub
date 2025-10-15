@@ -36,7 +36,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var mockHubNotifier = _mocker.GetMock<IHubNotifier>();
 
             mockStepToolExecutionRepository
-                .Setup(repo => repo.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()))
+                .Setup(repo => repo.FindByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(stepToolExecution);
             mockStepToolExecutionRepository
                 .Setup(repo => repo.ExecutionsByStepIdCountAsync(It.IsAny<int>(), It.IsAny<int>()))
@@ -51,7 +51,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             mockStepToolOutputRepository.Verify(repo => repo.CreateAsync(It.IsAny<StepToolOutput>()), Times.Once);
-            mockStepToolExecutionRepository.Verify(repo => repo.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
             mockStepToolExecutionRepository.Verify(repo => repo.ExecutionsByStepIdCountAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
             mockStepToolExecutionRepository.Verify(repo => repo.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             mockHubNotifier.Verify(notifier => notifier.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>()), Times.Once);

@@ -125,5 +125,15 @@ namespace WoopiAiHub.Repository
 
             return deletedCount > 0;
         }
+
+        /// <summary>
+        /// Return StepToolExecution by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<StepToolExecution?> FindByIdAsync(int id)
+        {
+            return await _context.StepToolExecutions.Include(e => e.StepTool).FirstOrDefaultAsync(u => u.Id == id);
+        }
     }
 }

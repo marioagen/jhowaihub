@@ -237,9 +237,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             {
                 Tenant = _faker.Internet.Email(),
                 Email = _faker.Internet.Email(),
-                ReferenceFile = _faker.Random.Guid().ToString(),
-                ResponseQueue = _faker.Name.FirstName(),
-                Data = new MetaDataAutomationDto(_faker.Random.Int(1, 10), _faker.Random.Int(1, 10)),
+                ExecutionId = _faker.Random.Int(1, 10),
                 Content = _faker.Random.Guid().ToString(),
             };
         }

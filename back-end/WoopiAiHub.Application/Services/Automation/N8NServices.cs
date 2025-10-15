@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Domain.DTOs.Response.Automation;
+﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -27,22 +28,33 @@ namespace WoopiAiHub.Application.Services.Automation
         /// </summary>
         /// <param name="automationInputDto"></param>
         /// <returns></returns>
-        public async Task ProcessMessage(AutomationOutputDto automationOutputDto)
+        public async Task<AutomationServicesDto> ProcessMessage(AutomationOutputDto automationOutputDto)
         {
+            var execution = await _stepToolExecutionRepository.FindByIdAsync(automationOutputDto.ExecutionId);
+
+            var automationServicesDto = new AutomationServicesDto
+                (
+                    execution.StepToolId,
+                    execution.CardId,
+                    automationOutputDto.Tenant,
+                    automationOutputDto.Email,
+                    null,
+                    0
+                );
+
             var content = automationOutputDto.Content?.ToString() ?? "";
             var stepToolOutput = new StepToolOutput(
                 0, 
                 DateTime.Now,
-                automationOutputDto.Data.StepToolId,
-                automationOutputDto.Data.CardId,
+                execution.StepToolId,
+                execution.CardId,
                 content);
 
             await _stepToolOutputRepository.CreateAsync(stepToolOutput);
 
-            var execution = await _stepToolExecutionRepository
-                .FindByStepToolIdAndCardIdAsync(automationOutputDto.Data.StepToolId, automationOutputDto.Data.CardId);
-
             await UpdateExecutionAsync(execution!, automationOutputDto.Email!);
+
+            return automationServicesDto;
         }
 
         /// <summary>
