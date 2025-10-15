@@ -105,7 +105,6 @@
         methods: {
             getWorkflowList() {
                 this.table.isLoading = true;
-
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
@@ -144,6 +143,30 @@
                 this.$refs.DeleteDialog.open();
             },
             deleteWorkflow() {
+                this.isDeleting = true;
+                WorkflowService.deleteWorkflowById(this.selectedWorkflow)
+                    .then((success) => {
+                        if (success) {
+                            this.$refs.DeleteDialog.close();
+                            this.getWorkflowList();
+                            this.$notify({
+                                title: "workflow.index",
+                                message: "workflow.removeSuccess",
+                                variant: "success",
+                                icon: "CircleCheckBig",
+                            });
+                        } else {
+                            this.$notify({
+                                title: "workflow.index",
+                                message: "workflow.removeError",
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        }
+                    })
+                    .finally(() => {
+                        this.isDeleting = false;
+                    });
             },
             changePage(page) {
                 console.log("Change page" + page)

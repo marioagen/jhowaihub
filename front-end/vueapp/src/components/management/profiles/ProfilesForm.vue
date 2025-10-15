@@ -61,7 +61,6 @@
                                 {{ $t("labelClearSelection") }}
                             </button>
                         </div>
-
                         <div class="border rounded p-1 user-list">
                             <div v-for="permission in filteredPermissions" :key="permission.id" class="p-1">
                                 <div class="form-check d-flex align-items-center">
