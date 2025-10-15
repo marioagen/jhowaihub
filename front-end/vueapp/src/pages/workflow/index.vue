@@ -140,17 +140,13 @@
                             });
                         }
                         this.workflowList = response;
-                        console.log(this.workflowList)
                         if(this.workflowList.length > 0) {
                             const lastSelected = this.$store.state.lastSelectedWorkflow;
-                            console.log(lastSelected)
                             let workflowToSelect = this.workflowList[0];
-
                             if (lastSelected) {
                                 const foundWorkflow = this.workflowList.find(w => 
                                     w.teams.id === lastSelected.teamId && w.id === lastSelected.id
                                 );
-                                console.log(foundWorkflow)
                                 if (foundWorkflow) {
                                     workflowToSelect = foundWorkflow;
                                 }
@@ -162,11 +158,9 @@
                     });
             },
             getWorkflowbyTeam(id) {
-                console.log(id)
                 this.isLoaded = false;
                 WorkflowService.getWorkflowByTeamId(id, this.filters)
                     .then((response) => {
-                        console.log(response);
                         this.kanbanCards = response;
                     })
                     .finally(() => {
@@ -179,8 +173,7 @@
                 );
             },
             selectOption(workflow) {
-                //what to do? 1 workflow with millions of teams
-                console.log(workflow)
+                if(workflow.teams.length < 1) return;
                 this.isLoaded = false;
                 this.isLoadedUsers = false;
                 this.selectedOption = {
@@ -225,7 +218,6 @@
             },
         },
         created() {
-            console.log(this.$route.query)
             this.getWorkflowByUser();
             GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
             GlobalEventService.on("refresh-once", this.getWorkflowByUser);
