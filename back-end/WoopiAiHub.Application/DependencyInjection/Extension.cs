@@ -46,6 +46,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IToolOutputServices, ToolOutputServices>();
             services.AddScoped<IAutomationServices, AutomationServices>();
             services.AddScoped<IApiClientFactory, ApiClientFactory>();
+            services.AddScoped<IKeyVaultServices, AzureKeyVaultServices>();
 
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();

@@ -24,16 +24,16 @@ namespace WoopiAiHub.Repository
         /// new tool to ensure uniqueness.</remarks>
         /// <param name="tool">The tool to be added. The <see cref="Tool.Name"/> property must be unique.</param>
         /// <returns></returns>
-        public async Task<bool> CreateUniqueAsync(Tool tool)
+        public async Task<int?> CreateUniqueAsync(Tool tool)
         {
             var exists = await _context.Tools.AnyAsync(t => t.Name == tool.Name);
             if (!exists)
             {
                 _context.Tools.Add(tool);
                 await _context.SaveChangesAsync();
-                return true;
+                return tool.Id;
             }
-            return false;
+            return null;
         }
 
         /// <summary>

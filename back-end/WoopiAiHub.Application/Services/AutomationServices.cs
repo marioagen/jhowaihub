@@ -27,6 +27,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ICardRepository _cardRepository;
         private readonly IToolRepository _toolRepository;
         private readonly IApiClientFactory _apiClientFactory;
+        private readonly IKeyVaultServices _keyVaultServices;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -37,7 +38,8 @@ namespace WoopiAiHub.Application.Services
                                   ILogger<AutomationServices> logger,
                                   ICardRepository cardRepository,
                                   IToolRepository toolRepository,
-                                  IApiClientFactory apiClientFactory)
+                                  IApiClientFactory apiClientFactory,
+                                  IKeyVaultServices keyVaultServices)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -49,6 +51,7 @@ namespace WoopiAiHub.Application.Services
             _cardRepository = cardRepository;
             _toolRepository = toolRepository;
             _apiClientFactory = apiClientFactory;
+            _keyVaultServices = keyVaultServices;
         }
 
         /// <summary>
@@ -303,7 +306,14 @@ namespace WoopiAiHub.Application.Services
             if (!IsN8nTool(tool))
                 throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
 
-            var api = _apiClientFactory.Create(tool.ConnectorUrl!);
+            var apiKey = await _keyVaultServices.GetSecretAsync($"ai-hub-tool-{tool.Id}");
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                throw new AppException(ErrorCode.NotFound, "Tool connector api-key not found", null);
+            }
+
+
+            var api = _apiClientFactory.Create(tool.ConnectorUrl!);            
             var response = await api.FindWorkflows(tool.ConnectorApiKey!);
 
             if (!response.IsSuccessStatusCode)

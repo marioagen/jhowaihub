@@ -20,14 +20,17 @@ namespace WoopiAiHub.Application.Services
         private readonly IToolRepository _toolRepository;
         private readonly IToolTypeRepository _toolTypeRepository;
         private readonly IApiClientFactory _apiClientFactory;
+        private readonly IKeyVaultServices _keyVaultServices;
 
         public ToolServices(IToolRepository toolRepository,
                             IToolTypeRepository toolTypeRepository,
-                            IApiClientFactory apiClientFactory)
+                            IApiClientFactory apiClientFactory,
+                            IKeyVaultServices keyVaultServices)
         {
             _toolRepository = toolRepository;
             _toolTypeRepository = toolTypeRepository;
             _apiClientFactory = apiClientFactory;
+            _keyVaultServices = keyVaultServices;
         }
 
         /// <summary>
@@ -63,17 +66,22 @@ namespace WoopiAiHub.Application.Services
                 toolCreateDto.ToolTypeId,
                 toolCreateDto.InputDataId,
                 toolCreateDto.OutputDataId,
-                toolCreateDto.IsEditableInput
+                toolCreateDto.IsEditableInput,
+                toolCreateDto.ConnectorUrl
              );
 
-            tool.UpdateConnector(toolCreateDto.ConnectorUrl, toolCreateDto.ConnectorApiKey);
-
             var result = await _toolRepository.CreateUniqueAsync(tool);
-            if (!result)
+            if (!result.HasValue)
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
             }
-            return result;
+
+            if (!string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
+            {
+                await _keyVaultServices.SetSecretAsync($"ai-hub-tool-{result.Value}", toolCreateDto.ConnectorApiKey);
+            }
+
+            return result.HasValue;
         }
 
         /// <summary>
@@ -170,15 +178,20 @@ namespace WoopiAiHub.Application.Services
                         toolUpdateDto.ToolTypeId,
                         toolUpdateDto.InputDataId,
                         toolUpdateDto.OutputDataId,
-                        toolUpdateDto.IsEditableInput);
-
-            tool.UpdateConnector(toolUpdateDto.ConnectorUrl, toolUpdateDto.ConnectorApiKey);
+                        toolUpdateDto.IsEditableInput,
+                        toolUpdateDto.ConnectorUrl);
 
             var result = await _toolRepository.UpdateAsync(tool);
             if (!result)
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
             }
+
+            if (!string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
+            {
+                await _keyVaultServices.SetSecretAsync($"ai-hub-tool-{tool.Id}", toolUpdateDto.ConnectorApiKey);
+            }
+
             return result;
         }
 
