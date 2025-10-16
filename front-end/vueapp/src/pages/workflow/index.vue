@@ -257,6 +257,7 @@
                     }, 500); // Pequeno delay para garantir que o backend finalizou o processamento
                 }
             });
+        },
         beforeUnmount() {
             signalRService.off(this.signalrEventExecutionChanged);
             signalRService.stopConnection();
