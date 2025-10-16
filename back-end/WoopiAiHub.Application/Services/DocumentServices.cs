@@ -477,7 +477,7 @@ namespace WoopiAiHub.Application.Services
                 ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, teams);
 
                 documentForDataBase.Cards = cards;
-                documentForDataBase.Teams = teams;
+                //documentForDataBase.Teams = teams;
                 _documentRepository.Create(documentForDataBase);
 
                 var worflows = teams.SelectMany(w => w.Workflows).ToList();
@@ -816,9 +816,7 @@ namespace WoopiAiHub.Application.Services
                                                           DocumentPagedDataDto dto)
         {
             int pageCount, currentPage;
-
             var totalListCount = query.Count();
-
             if (dto.PageSize == 0)
             {
                 pageCount = 1;
