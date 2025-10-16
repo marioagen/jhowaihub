@@ -50,6 +50,7 @@ namespace WoopiAiHub.Application.DependencyInjection
 
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
+            services.AddHostedService<PromptConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

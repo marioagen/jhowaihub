@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WoopiAiHub.Application.Services;
+using System.Text.Json;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -13,7 +13,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
-using static Google.Cloud.Vision.V1.ProductSearchResults.Types;
 
 namespace WoopiAiHub.Application.Messaging
 {
@@ -57,10 +56,11 @@ namespace WoopiAiHub.Application.Messaging
                     await promptServices.ProcessChatCompletionResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
+                    var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto
                     (
-                        message.Data.StepToolId,
-                        message.Data.CardId,
+                        dataDto.StepToolId,
+                        dataDto.CardId,
                         message.Tenant,
                         message.Email,
                         message.ReferenceFile,
@@ -78,7 +78,7 @@ namespace WoopiAiHub.Application.Messaging
                     _logger.LogError(ex, "Failed to process the answer response.");
                 }
             });
-            
+
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Dynamic.Core;
+using System.Text.Json;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -277,10 +278,11 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task ProcessChatCompletionResult(ChatCompletionResponseDto chatCompletionResponseDto)
         {
-            var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(chatCompletionResponseDto.Data.StepToolId,
-                                                                                              chatCompletionResponseDto.Data.CardId);
+            var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(chatCompletionResponseDto.Data.ToString());
+            var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
+                                                                                              dataDto.CardId);
             await UpdateExecutionAsync(execution!, chatCompletionResponseDto.Email);
-            await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.ReferenceFile);
+            await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.Choices[0].Message.Content);
         }
 
         /// <summary>

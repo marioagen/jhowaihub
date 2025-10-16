@@ -39,7 +39,9 @@ public class PromptHandler : IToolHandler
         var promptId = int.Parse(input);
         var promptDto =  _promptServices.FindById(promptId);
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
-        
+        var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
+        var fullText = string.Join("\n", documents.DocumentEmbeddings.Select(d => d.Text));
+
         return new ExecutionMessageDto
         {
             Queue = _messageQueues.ChatCompletionQueue,
@@ -60,7 +62,7 @@ public class PromptHandler : IToolHandler
                             new ChatMessageDto
                             {
                                 Role = "system",                            
-                                Content = string.Concat("Baseado no: \"", output, "\" e seguindo as orientações a seguir: ", promptDto.Text)
+                                Content = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptDto.Text)
                             }
                         }
                 },

@@ -156,7 +156,7 @@ export default {
                     data: { 
                         icon: "Activity", 
                         color: "blue", 
-                        input: stepTool.input || null, 
+                        input: stepTool.parameters[0].value || null, 
                         isEditableInput: stepTool.tool.isEditableInput,
                         toolType: stepTool.tool.toolType,
                     },
@@ -164,7 +164,7 @@ export default {
                     targetPosition: "left",
                     type: "hub"
                 }));
-                console.log(mappedNodes, "Mapped");
+ 
                 const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
                     id: `${tool.id}-${stepTools[index + 1].id}`,
                     source: tool.id.toString(),
@@ -244,7 +244,8 @@ export default {
                     color: '#000', 
                     isStartNode: false, 
                     isEditableInput: nodeData.isEditableInput,
-                    toolType: nodeData.toolType
+                    toolType: nodeData.toolType,
+                    input: nodeData.input || null
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
@@ -261,7 +262,7 @@ export default {
                     positionY: parseFloat((node.position.y).toFixed(2)),
                     order: index + 1,
                     status: "Active",
-                    input: node.data.input.toString() || null,
+                    input: node.data.input|| null,
                     dependsOnStepToolId: index,
                 }));
         },

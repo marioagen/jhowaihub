@@ -177,9 +177,9 @@
                     });
             },
             save() {
-                console.log(this.stepOrder, this.stepId, "DADOS")
                 try {
                     let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
+                    console.log(nodesList)
                     this.$store.commit('setFlowByStep', {
                         stepOrder: this.stepOrder,
                         flowData: nodesList,

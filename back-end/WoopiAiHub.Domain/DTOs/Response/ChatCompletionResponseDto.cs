@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public string Email { get; set; } = string.Empty;
         public List<ChatChoiceDto> Choices { get; set; } = new();
         public ChatUsageDto Usage { get; set; } = new();
-        public MetaDataAutomationDto Data { get; set; }
+        public JObject Data { get; set; }
     }
 }
