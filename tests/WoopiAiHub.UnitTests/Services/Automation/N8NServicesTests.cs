@@ -24,6 +24,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         }
 
         [Fact(DisplayName = "ProcessMessage should create StepToolOutput and call UpdateExecution")]
+        [Trait("ProcessMessage", "Success")]
         public async Task ProcessMessage_ShouldCreateStepToolOutputAndCallUpdateExecution()
         {
             // Arrange

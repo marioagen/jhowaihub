@@ -33,6 +33,11 @@ namespace WoopiAiHub.Application.Messaging
             _logger = logger;
         }
 
+        /// <summary>
+        /// Execute the n8n consumer's message
+        /// </summary>
+        /// <param name="stoppingToken"></param>
+        /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _consumer.ConsumerAsync(_queues.AutomationQueueResponse, async message =>
@@ -54,7 +59,7 @@ namespace WoopiAiHub.Application.Messaging
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to process the answer response.");
+                    _logger.LogError(ex, $"Failed to process message from {_queues.AutomationQueueResponse}. Execution id: {message.ExecutionId}");
                 }
             });
         }

@@ -32,8 +32,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             _service = _mocker.CreateInstance<AutomationServices>();
         }
 
-        [Fact(DisplayName = "PrepareExecutionAsync deve retornar true e criar execuções quando há cards e step tools válidos")]
-        public async Task PrepareExecutionAsync_Sucesso_DeveCriarExecucoes()
+        [Fact(DisplayName = "PrepareExecutionAsync should return true and create executions when there are valid cards and step tools")]
+        [Trait("PrepareExecutionAsync", "Success")]
+        public async Task PrepareExecutionAsync_Success_ShouldCreateExecutions()
         {
             // Arrange
             var workflows = WorkflowFixture.FindValidWorkflows(); ; // Crie um fixture que retorna workflows válidos
@@ -62,8 +63,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.CreateRangeAsync(It.IsAny<List<StepToolExecution>>()), Times.Once);
         }
 
-        [Fact(DisplayName = "PrepareExecutionAsync deve retornar false quando não há cards ativos")]
-        public async Task PrepareExecutionAsync_Falha_SemCardsAtivos()
+        [Fact(DisplayName = "PrepareExecutionAsync should return false when there are no active cards.")]
+        [Trait("PrepareExecutionAsync", "Fail")]
+        public async Task PrepareExecutionAsync_Failure_NoActiveCards()
         {
             // Arrange
             var workflows = WorkflowFixture.FindValidWorkflows(); 
@@ -84,8 +86,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.False(result);
         }
 
-        [Fact(DisplayName = "PrepareExecutionAsync deve retornar false quando não há novas execuções para criar")]
-        public async Task PrepareExecutionAsync_Falha_SemNovasExecucoes()
+        [Fact(DisplayName = "PrepareExecutionAsync should return false when there are no new executions to create")]
+        [Trait("PrepareExecutionAsync", "Fail")]
+        public async Task PrepareExecutionAsync_Failure_NoNewExecutions()
         {
             // Arrange
             var workflows = WorkflowFixture.FindValidWorkflows();
@@ -114,7 +117,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.CreateRangeAsync(It.IsAny<List<StepToolExecution>>()), Times.Never);
         }
 
-
         [Fact(DisplayName = "StartExecutionByStep should execute StepTool when StepTool has no dependencies")]
         [Trait("StartExecutionByStep", "Success")]
         public async Task StartExecutionByStep_ShouldExecuteStepTool_WhenStepToolHasNoDependencies()
@@ -133,7 +135,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             step.StepTools = stepTools;
             var payload = AutomationFixture.FindValidExecutionMessageDto();
             var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
-            var input = "input";
 
             var toolFactoryHandlerServicesMock = _mocker.GetMock<IToolFactoryHandler>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
@@ -154,7 +155,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<ToolType>()), Times.Once);
             handlerMock.Verify(h => h.BuildPayload(automationDto,It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Once);
-            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message), Times.Once);
+            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message!), Times.Once);
         }
 
         [Fact(DisplayName = "StartExecutionByStep should execute StepTool when StepTool has dependencies")]
@@ -261,9 +262,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(tool.ToolType), Times.Once);
             handlerMock.Verify(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Once);
-            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message), Times.Once);
+            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message!), Times.Once);
         }
-
 
         [Fact(DisplayName = "StartExecutionByCardAsync should fail when there is no StepTool")]
         [Trait("StartExecutionByCardAsync", "Fail")]
@@ -275,7 +275,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             stepToolRepositoryMock
                 .Setup(r => r.FindByStepIdAndOrderAsync(It.IsAny<int>(), 1))
-                .ReturnsAsync((StepTool)null);
+                .ReturnsAsync((StepTool?)null);
 
             // Act & Assert
             await _service.StartExecutionByCardAsync(automationDto);
@@ -295,7 +295,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             var payload = AutomationFixture.FindValidExecutionMessageDto();
             var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
-            var input = "input";
 
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
@@ -320,7 +319,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             toolFactoryHandlerMock.Verify(s => s.GetHandler(tool.ToolType), Times.Once);
             handlerMock.Verify(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Once);
-            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message), Times.Once);
+            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message!), Times.Once);
         }
 
 
@@ -339,7 +338,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             await _service.ContinueExecution(automationDto); // Não deve lançar exceção
         }
 
-        [Fact]
+        [Fact(DisplayName = "FindN8nWorkflowsByToolId should throw an AppException when the tool is not found")]
+        [Trait("FindN8nWorkflowsByToolId", "Fail")]
         public async Task FindN8nWorkflowsByToolId_ToolNotFound_ThrowsAppException()
         {
             // Arrange
@@ -352,7 +352,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
         }
 
-        [Fact]
+        [Fact(DisplayName = "FindN8nWorkflowsByToolId should throw an AppException when the tool is not an N8N tool.")]
+        [Trait("FindN8nWorkflowsByToolId", "Fail")]
         public async Task FindN8nWorkflowsByToolId_ToolIsNotN8n_ThrowsAppException()
         {
             // Arrange
@@ -366,7 +367,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
         }
 
-        [Fact]
+        [Fact(DisplayName = "FindN8nWorkflowsByToolId should throw an AppException when the API call fails.")]
+        [Trait("FindN8nWorkflowsByToolId", "Fail")]
         public async Task FindN8nWorkflowsByToolId_ApiCallFails_ThrowsAppException()
         {
             // Arrange
@@ -393,7 +395,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.Equal(ErrorCode.RefitApiError, exception.ErrorCode);
         }
 
-        [Fact]
+        [Fact(DisplayName = "FindN8nWorkflowsByToolId succeeds and returns connector DTOs.")]
+        [Trait("FindN8nWorkflowsByToolId", "Success")]
         public async Task FindN8nWorkflowsByToolId_Success_ReturnsConnectorDtos()
         {
             // Arrange
@@ -424,7 +427,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.IsType<List<ConnectorDto>>(result);
         }
 
-        [Fact]
+        [Fact(DisplayName = "FindN8nWebhookInputs should throw an AppException when the tool is not found")]
+        [Trait("FindN8nWebhookInputs", "Fail")]
         public async Task FindN8nWebhookInputs_ToolNotFound_ThrowsAppException()
         {
             // Arrange
@@ -439,7 +443,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
         }
 
-        [Fact]
+        [Fact(DisplayName = "FindN8nWebhookInputs should throw an AppException when the tool is not an N8N tool")]
+        [Trait("FindN8nWebhookInputs", "Fail")]
         public async Task FindN8nWebhookInputs_ToolIsNotN8n_ThrowsAppException()
         {
             // Arrange
@@ -456,7 +461,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
         }
 
-        [Fact]
+        [Fact(DisplayName = "FindN8nWebhookInputs should throw an AppException when the API call fails")]
+        [Trait("FindN8nWebhookInputs", "Fail")]
         public async Task FindN8nWebhookInputs_ApiCallFails_ThrowsAppException()
         {
             // Arrange
@@ -483,7 +489,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.Equal(ErrorCode.RefitApiError, exception.ErrorCode);
         }
 
-        [Fact]
+        [Fact(DisplayName = "FindN8nWebhookInputs succeeds and returns form field DTOs.")]
+        [Trait("FindN8nWebhookInputs", "Success")]
         public async Task FindN8nWebhookInputs_Success_ReturnsFormFieldDtos()
         {
             // Arrange
