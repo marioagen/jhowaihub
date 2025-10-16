@@ -336,6 +336,7 @@
         status: "Estado",
         owner: "Propietario",
         teams: "Equipo",
+        workflows: "Workflows",
         statusList: {
             analyzed: "Analizado",
             notAnalyzed: "En espera de análisis",
@@ -345,8 +346,17 @@
             consult: "Consultar",
         },
         upload: {
-            warningTeamsNotListed: "¿El equipo no apareció en la lista? Es porque aún no tiene un workflow asociado.",
-        }
+            title: "Nuevo Documento",
+            subtitle: "Sube nuevos documentos para su análisis",
+            cardTitle: "Cargar Documento",
+            dropZone: "Arrastra y suelta tus archivos PDF abajo para comenzar o haz clic en el área para explorarlos",
+            removeAllDropzone: "Eliminar archivos del área de carga",
+            linkWorkflow: "Asociar a un flujo de trabajo",
+            linkSubtitle: "Selecciona al menos un flujo de trabajo para asociar al documento.",
+            noWorkflowFound: "No se encontró ningún flujo de trabajo vinculado a los equipos del usuario",
+            selectionList: "Lista de selección",
+            warningWorkflowNotListed: "¿El flujo de trabajo no aparece en la lista? Es porque tus equipos no tienen uno asociado.",
+        },
     },
     questions: {
         title: "Preguntas",
@@ -593,6 +603,7 @@
             deleteSuccess: "Equipo eliminado con éxito",
             deleteError: "Error al eliminar el equipo",
             duplicated: "Equipo ya registrado",
+            error: "Error al buscar equipos",
         },
         profiles: {
             index: "Perfiles",
