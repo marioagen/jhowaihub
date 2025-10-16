@@ -1,6 +1,5 @@
 ﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Utils;
@@ -27,7 +26,6 @@ namespace WoopiAiHub.Application.Utils
                 _client = new SecretClient(new Uri(_settings.VaultUrl), new ClientSecretCredential(_settings.TenantId, _settings.ClientId, _settings.ClientSecret));
         }
 
-
         /// <summary>
         /// Set a key in Azure vault
         /// </summary>
@@ -49,7 +47,6 @@ namespace WoopiAiHub.Application.Utils
             var secret = await _client.GetSecretAsync(key);
             return secret.Value.Value;
         }
-
 
         /// <summary>
         /// Delete a key in Azure vault 

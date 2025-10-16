@@ -303,17 +303,17 @@ namespace WoopiAiHub.Application.Services
             var tool = await _toolRepository.FindModelByIdAsync(toolId)
                 ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
 
-            if (!IsN8nTool(tool))
+            if (!tool.ToolType!.IsN8nTool())
                 throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
 
-            var apiKey = await _keyVaultServices.GetSecretAsync($"ai-hub-tool-{tool.Id}");
+            var apiKey = await _keyVaultServices.GetSecretAsync(tool.ConnectorApiKey!);
             if (string.IsNullOrEmpty(apiKey))
             {
                 throw new AppException(ErrorCode.NotFound, "Tool connector api-key not found", null);
             }
 
-
-            var api = _apiClientFactory.Create(tool.ConnectorUrl!);            
+            var api = _apiClientFactory.Create(tool.ConnectorUrl!);    
+            
             var response = await api.FindWorkflows(tool.ConnectorApiKey!);
 
             if (!response.IsSuccessStatusCode)
@@ -335,7 +335,7 @@ namespace WoopiAiHub.Application.Services
             var tool = await _toolRepository.FindModelByIdAsync(webhookInputDto.ToolId)
                 ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
 
-            if (!IsN8nTool(tool))
+            if (!tool.ToolType!.IsN8nTool())
                 throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
 
             var api = _apiClientFactory.Create(tool.ConnectorUrl!);
@@ -346,14 +346,6 @@ namespace WoopiAiHub.Application.Services
             
             return JsonSchemaToFormMapper.MapToFormFields(response.Content!);
         }
-
-        /// <summary>
-        /// Validate n8n tool
-        /// </summary>
-        /// <param name="tool"></param>
-        /// <returns></returns>
-        private static bool IsN8nTool(Tool tool)
-            => tool.ToolType?.Name?.Contains(ConnectorNames.N8N, StringComparison.OrdinalIgnoreCase) == true;
 
         /// <summary>
         /// Maps connectors

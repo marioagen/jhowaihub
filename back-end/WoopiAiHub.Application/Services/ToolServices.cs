@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
-using WoopiAiHub.Application.Utils;
+﻿using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -44,18 +40,18 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if a tool with the same unique properties already exists.</exception>
         public async Task<bool> CreateAsync(ToolCreateDto toolCreateDto)
         {
-            var toolType = await _toolTypeRepository.FindByAsync(toolCreateDto.ToolTypeId);
-            if (!toolType.HasValue)
-            {
-                throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
-            }
+            var toolType = await _toolTypeRepository.FindModelByIdAsync(toolCreateDto.ToolTypeId)
+                ?? throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
+            
 
-            if (toolType.Value.Name.Contains(ConnectorNames.N8N))
+            string keyVaultId = string.Empty;
+            if (toolType.IsN8nTool())
             {
                 if (string.IsNullOrEmpty(toolCreateDto.ConnectorUrl) || string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
                 {
                     throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
                 }
+                keyVaultId = Guid.NewGuid().ToString();
             }
 
             var tool = new Tool(
@@ -67,7 +63,8 @@ namespace WoopiAiHub.Application.Services
                 toolCreateDto.InputDataId,
                 toolCreateDto.OutputDataId,
                 toolCreateDto.IsEditableInput,
-                toolCreateDto.ConnectorUrl
+                toolCreateDto.ConnectorUrl,
+                keyVaultId
              );
 
             var result = await _toolRepository.CreateUniqueAsync(tool);
@@ -78,7 +75,7 @@ namespace WoopiAiHub.Application.Services
 
             if (!string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
             {
-                await _keyVaultServices.SetSecretAsync($"ai-hub-tool-{result.Value}", toolCreateDto.ConnectorApiKey);
+                await _keyVaultServices.SetSecretAsync(keyVaultId, toolCreateDto.ConnectorApiKey);
             }
 
             return result.HasValue;
@@ -149,19 +146,14 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UpdateAsync(ToolUpdateDto toolUpdateDto)
         {
-            var tool = await _toolRepository.FindModelByIdAsync(toolUpdateDto.Id);
-            if (tool == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Tool not found", null);
-            }
+            var tool = await _toolRepository.FindModelByIdAsync(toolUpdateDto.Id)
+                ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);            
 
-            var toolType = await _toolTypeRepository.FindByAsync(toolUpdateDto.ToolTypeId);
-            if (!toolType.HasValue)
-            {
-                throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
-            }
+            var toolType = await _toolTypeRepository.FindModelByIdAsync(toolUpdateDto.ToolTypeId)
+                ?? throw new AppException(ErrorCode.NotFound, "ToolType not found", null);            
 
-            if (toolType.Value.Name.Contains(ConnectorNames.N8N))
+            string keyVaultId = string.Empty;
+            if (toolType!.IsN8nTool())
             {
                 if (string.IsNullOrEmpty(toolUpdateDto.ConnectorUrl))
                 {
@@ -172,6 +164,14 @@ namespace WoopiAiHub.Application.Services
                 {
                     throw new AppException(ErrorCode.RequiredField, "Coonector Api Key is required", null);
                 }
+
+                if (string.IsNullOrEmpty(tool.ConnectorApiKey))
+                {
+                    keyVaultId = Guid.NewGuid().ToString();
+                }
+                else {
+                    keyVaultId = tool.ConnectorApiKey;                   
+                }
             }
 
             tool.Update(toolUpdateDto.Name,
@@ -179,7 +179,8 @@ namespace WoopiAiHub.Application.Services
                         toolUpdateDto.InputDataId,
                         toolUpdateDto.OutputDataId,
                         toolUpdateDto.IsEditableInput,
-                        toolUpdateDto.ConnectorUrl);
+                        toolUpdateDto.ConnectorUrl,
+                        keyVaultId);
 
             var result = await _toolRepository.UpdateAsync(tool);
             if (!result)
@@ -189,7 +190,7 @@ namespace WoopiAiHub.Application.Services
 
             if (!string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
             {
-                await _keyVaultServices.SetSecretAsync($"ai-hub-tool-{tool.Id}", toolUpdateDto.ConnectorApiKey);
+                await _keyVaultServices.SetSecretAsync(keyVaultId, toolUpdateDto.ConnectorApiKey);
             }
 
             return result;

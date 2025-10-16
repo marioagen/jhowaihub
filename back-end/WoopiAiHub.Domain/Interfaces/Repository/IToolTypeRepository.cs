@@ -1,4 +1,5 @@
 ﻿using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
 {
@@ -6,5 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<IEnumerable<ToolTypeDto>> FindAllAsync();
         Task<ToolTypeDto?> FindByAsync(int id);
+        Task<ToolType?> FindModelByIdAsync(int id);
     }
 }
