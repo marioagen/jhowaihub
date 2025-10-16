@@ -145,32 +145,14 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> UpdateAsync(ToolUpdateDto toolUpdateDto)
         {
             var tool = await _toolRepository.FindModelByIdAsync(toolUpdateDto.Id)
-                ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);            
+                ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
 
             var toolType = await _toolTypeRepository.FindModelByIdAsync(toolUpdateDto.ToolTypeId)
-                ?? throw new AppException(ErrorCode.NotFound, "ToolType not found", null);            
+                ?? throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
 
-            string keyVaultName = string.Empty;
-            if (toolType!.IsN8nTool())
-            {
-                if (string.IsNullOrEmpty(toolUpdateDto.ConnectorUrl))
-                {
-                    throw new AppException(ErrorCode.RequiredField, "Coonector Url is required", null);
-                }
+            ValidateConnector(toolUpdateDto, tool, toolType);
 
-                if (string.IsNullOrEmpty(tool.ConnectorApiKey) && string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
-                {
-                    throw new AppException(ErrorCode.RequiredField, "Coonector Api Key is required", null);
-                }
-
-                if (string.IsNullOrEmpty(tool.ConnectorApiKey))
-                {
-                    keyVaultName = _keyVaultServices.CreateKeyName();
-                }
-                else {
-                    keyVaultName = tool.ConnectorApiKey;                   
-                }
-            }
+            string keyVaultName = FindOrCreateKeyName(tool, toolType);
 
             tool.Update(toolUpdateDto.Name,
                         toolUpdateDto.ToolTypeId,
@@ -192,6 +174,47 @@ namespace WoopiAiHub.Application.Services
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Validadte connetor url and conenctor api key
+        /// </summary>
+        /// <param name="toolUpdateDto"></param>
+        /// <param name="tool"></param>
+        /// <param name="toolType"></param>
+        /// <exception cref="AppException"></exception>
+        private static void ValidateConnector(ToolUpdateDto toolUpdateDto, Tool tool, ToolType toolType)
+        {
+            if (toolType!.IsN8nTool())
+            {
+                if (string.IsNullOrEmpty(toolUpdateDto.ConnectorUrl))
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Coonector Url is required", null);
+                }
+
+                if (string.IsNullOrEmpty(tool.ConnectorApiKey) && string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Coonector Api Key is required", null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find or create key name
+        /// </summary>
+        /// <param name="tool"></param>
+        /// <param name="toolType"></param>
+        /// <returns></returns>
+        private string FindOrCreateKeyName(Tool tool, ToolType toolType)
+        {
+            if (toolType!.IsN8nTool())
+            {
+                if (string.IsNullOrEmpty(tool.ConnectorApiKey))
+                {
+                    return _keyVaultServices.CreateKeyName();
+                }
+            }
+            return tool.ConnectorApiKey ?? string.Empty;
         }
 
         /// <summary>
