@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -14,17 +14,17 @@ using WoopiAiHub.Infrastructure.Messaging.Consumers;
 
 namespace WoopiAiHub.Application.Messaging
 {
-    public class OcrConsumer : BaseConsumer
+    public class N8NConsumer : BaseConsumer
     {
-        private readonly IMessageConsumer<ProcessOcrResultDto> _consumer;
+        private readonly IMessageConsumer<AutomationOutputDto> _consumer;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger<OcrConsumer> _logger;
+        private readonly ILogger<N8NConsumer> _logger;
         private readonly MessageQueues _queues;
 
-        public OcrConsumer(IServiceScopeFactory scopeFactory,
+        public N8NConsumer(IServiceScopeFactory scopeFactory,
                            IConfiguration configuration,
-                           IMessageConsumer<ProcessOcrResultDto> consumer,
-                           ILogger<OcrConsumer> logger,
+                           IMessageConsumer<AutomationOutputDto> consumer,
+                           ILogger<N8NConsumer> logger,
                            IOptions<MessageQueues> queues) : base(configuration)
         {
             _scopeFactory = scopeFactory;
@@ -34,14 +34,14 @@ namespace WoopiAiHub.Application.Messaging
         }
 
         /// <summary>
-        /// Execute the background service to consume messages from the OCR queue.
+        /// Execute the n8n consumer's message
         /// </summary>
         /// <param name="stoppingToken"></param>
         /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _consumer.ConsumerAsync(_queues.OcrQueueAiHubResponse, async message =>
-            {                
+            await _consumer.ConsumerAsync(_queues.AutomationQueueResponse, async message =>
+            {
                 using var scope = _scopeFactory.CreateScope();
                 try
                 {
@@ -50,29 +50,16 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext ??= new DefaultHttpContext();
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
-                    var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
-                    var result = await documentServices.ProcessOcrResult(message);
+                    var n8nServices = scope.ServiceProvider.GetRequiredService<IN8NServices>();
+                    var automationServicesDto = await n8nServices.ProcessMessage(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
-                    var automationServicesDto = new AutomationServicesDto
-                    (
-                        result.StepToolId,
-                        result.CardId,
-                        message.Tenant,
-                        message.Email,
-                        message.ReferenceFile,
-                        0
-                    );
+
                     await automationServices.ContinueExecution(automationServicesDto);
                 }
                 catch (Exception ex)
                 {
-                    var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
-                    await documentServices.ChangeStatusByReferenceFile(message.ReferenceFile,
-                                                                       message.Email,
-                                                                       DocumentStatus.Failure);
-
-                    _logger.LogError(ex, "Failed to process the answer response.");
+                    _logger.LogError(ex, $"Failed to process message from {_queues.AutomationQueueResponse}. Execution id: {message.ExecutionId}");
                 }
             });
         }
