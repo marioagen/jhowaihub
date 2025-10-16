@@ -4,6 +4,6 @@ namespace WoopiAiHub.Domain.Interfaces.Handlers
 {
     public interface IToolFactoryHandler
     {
-        IToolHandler GetHandler(ToolType toolType);
+        IToolHandler GetHandler(string type);
     }
 }

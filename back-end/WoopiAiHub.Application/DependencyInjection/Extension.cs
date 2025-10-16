@@ -47,6 +47,9 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IAutomationServices, AutomationServices>();
             services.AddScoped<IPromptServices, PromptServices>();
             services.AddScoped<IValidatePrompt, ValidatePrompt>();
+            services.AddScoped<IToolHandler, EmbeddingsHandler>();
+            services.AddScoped<IToolHandler, OcrHandler>();
+            services.AddScoped<IToolHandler, PromptHandler>();
 
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
