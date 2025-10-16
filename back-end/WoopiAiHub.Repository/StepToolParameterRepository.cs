@@ -58,10 +58,9 @@ namespace WoopiAiHub.Repository
         /// <param name="stepToolId">The identifier of the step tool to search for.</param>
         /// <returns>The value associated with the specified step tool identifier, or <see langword="null"/>  if no matching step
         /// tool is found.</returns>
-        public string FindByStepToolId(int stepToolId)
+        public StepToolParameter? FindByStepToolId(int stepToolId)
         {
             var input = _context.StepToolParameters.Where(u => u.StepToolId.Equals(stepToolId) && u.StepTool.Tool.IsEditableInput)
-                                                   .Select(v => v.Value)
                                                    .FirstOrDefault();
 
             return input;

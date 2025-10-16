@@ -125,6 +125,7 @@
     import ToolsService from "@/services/tools/ToolsServices";
     import ToolsTypesService from '@/services/tools/ToolsTypesService';
     import ToolsDataService from '@/services/tools/ToolsDataService';
+    import ToolType from '@/constants/ToolType';
 
     export default {
         components: {
@@ -206,7 +207,12 @@
                 }
             },
             changeToolType(){
-                this.isN8NConnectorToolType = (this.values.toolTypeId && this.typesList.find(t => t.id === this.values.toolTypeId)?.name?.includes("N8N")) || false;
+                this.isN8NConnectorToolType =
+                    (this.values.toolTypeId &&
+                        this.typesList
+                        .find(t => t.id === this.values.toolTypeId)
+                        ?.name?.toLowerCase()
+                        ?.includes(ToolType.N8N.toLowerCase())) || false;
             },
             getToolTypes() {
                 ToolsTypesService.getToolTypes()

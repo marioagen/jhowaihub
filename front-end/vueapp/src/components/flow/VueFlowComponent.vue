@@ -244,7 +244,8 @@ export default {
                     isStartNode: false, 
                     isEditableInput: nodeData.isEditableInput,
                     isConnector: nodeData.isConnector,
-                    parameters: []
+                    parameters: [],
+                    toolId: nodeData.id,
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
