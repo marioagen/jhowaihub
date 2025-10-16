@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -48,6 +49,16 @@ namespace WoopiAiHub.Repository
                     Name = tt.Name,
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a tool type model by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the tool to retrieve. Must be a positive integer.</param>
+        /// <returns></returns>
+        public async Task<ToolType?> FindModelByIdAsync(int id)
+        {
+            return await _context.ToolTypes.FirstOrDefaultAsync(t => t.Id == id);
         }
     }
 }

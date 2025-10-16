@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Metadata;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -27,7 +28,19 @@ namespace WoopiAiHub.Domain.Models
         public virtual ToolData? OutputData { get; set; }
         public virtual ICollection<StepTool> StepTools { get; set; } = new List<StepTool>();
 
-        public Tool(int id, DateTime created, string name, bool isActive, int toolTypeId, int inputDataId, int outputDataId, bool isEditableInput) 
+        public Tool
+        (
+            int id, 
+            DateTime created, 
+            string name, 
+            bool isActive, 
+            int toolTypeId, 
+            int inputDataId, 
+            int outputDataId, 
+            bool isEditableInput, 
+            string? connectorUrl,
+            string? connectorApiKey
+        ) 
             : base(id, created)
         {
             Name = name;
@@ -36,21 +49,19 @@ namespace WoopiAiHub.Domain.Models
             InputDataId = inputDataId;
             OutputDataId = outputDataId;
             IsEditableInput = isEditableInput;
+            ConnectorUrl = connectorUrl;
+            ConnectorApiKey = connectorApiKey;
         }
         public Tool(int id, DateTime created) : base(id, created) { }
 
-        public void Update(string name, int toolTypeId, int inputDataId, int outputDataId, bool isEditableInput)
+        public void Update(string name, int toolTypeId, int inputDataId, int outputDataId, bool isEditableInput, string? connectorUrl, string? connectorApiKey)
         {
             Name = name;
             ToolTypeId = toolTypeId;
             InputDataId = inputDataId;
             OutputDataId = outputDataId;
             IsEditableInput = isEditableInput;
-        }
-
-        public void UpdateConnector(string? conectorUrl, string? connectorApiKey)
-        {
-            ConnectorUrl = conectorUrl;
+            ConnectorUrl = connectorUrl;
             ConnectorApiKey = connectorApiKey;
         }
     }

@@ -27,6 +27,7 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly ICardRepository _cardRepository;
         private readonly IToolRepository _toolRepository;
         private readonly IApiClientFactory _apiClientFactory;
+        private readonly IKeyVaultServices _keyVaultServices;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -37,7 +38,8 @@ namespace WoopiAiHub.Application.Services.Automation
                                   ILogger<AutomationServices> logger,
                                   ICardRepository cardRepository,
                                   IToolRepository toolRepository,
-                                  IApiClientFactory apiClientFactory)
+                                  IApiClientFactory apiClientFactory,
+                                  IKeyVaultServices keyVaultServices)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -49,6 +51,7 @@ namespace WoopiAiHub.Application.Services.Automation
             _cardRepository = cardRepository;
             _toolRepository = toolRepository;
             _apiClientFactory = apiClientFactory;
+            _keyVaultServices = keyVaultServices;
         }
 
         /// <summary>
@@ -300,10 +303,17 @@ namespace WoopiAiHub.Application.Services.Automation
             var tool = await _toolRepository.FindModelByIdAsync(toolId)
                 ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
 
-            if (!IsN8nTool(tool))
+            if (!tool.ToolType!.IsN8nTool())
                 throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
 
-            var api = _apiClientFactory.Create(tool.ConnectorUrl!);
+            var apiKey = await _keyVaultServices.GetSecretAsync(tool.ConnectorApiKey!);
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                throw new AppException(ErrorCode.NotFound, "Tool connector api-key not found", null);
+            }
+
+            var api = _apiClientFactory.Create(tool.ConnectorUrl!);    
+            
             var response = await api.FindWorkflows(tool.ConnectorApiKey!);
 
             if (!response.IsSuccessStatusCode)
@@ -325,7 +335,7 @@ namespace WoopiAiHub.Application.Services.Automation
             var tool = await _toolRepository.FindModelByIdAsync(webhookInputDto.ToolId)
                 ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
 
-            if (!IsN8nTool(tool))
+            if (!tool.ToolType!.IsN8nTool())
                 throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
 
             var api = _apiClientFactory.Create(tool.ConnectorUrl!);
@@ -336,14 +346,6 @@ namespace WoopiAiHub.Application.Services.Automation
             
             return JsonSchemaToFormMapper.MapToFormFields(response.Content!);
         }
-
-        /// <summary>
-        /// Validate n8n tool
-        /// </summary>
-        /// <param name="tool"></param>
-        /// <returns></returns>
-        private static bool IsN8nTool(Tool tool)
-            => tool.ToolType?.Name?.Contains(ConnectorNames.N8N, StringComparison.OrdinalIgnoreCase) == true;
 
         /// <summary>
         /// Maps connectors

@@ -51,6 +51,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IToolHandler, EmbeddingsHandler>();
             services.AddScoped<IToolHandler, OcrHandler>();
             services.AddScoped<IToolHandler, N8NHandler>();
+            services.AddScoped<IKeyVaultServices, AzureKeyVaultServices>();
 
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
