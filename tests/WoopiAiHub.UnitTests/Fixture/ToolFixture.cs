@@ -71,7 +71,26 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 _faker.Random.Int(1, 1000),
                 _faker.Random.Int(1, 1000),
-                true
+                true,
+                _faker.Name.FullName(),
+                _faker.Random.Guid().ToString()
+            );
+        }
+        public static Tool FindValidToolModelWithEmptyConnector()
+        {
+            var _faker = new Faker("pt_BR");
+            return new Tool
+            (
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+                _faker.Name.FullName(),
+                true,
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                true,
+                string.Empty,
+                string.Empty
             );
         }
 

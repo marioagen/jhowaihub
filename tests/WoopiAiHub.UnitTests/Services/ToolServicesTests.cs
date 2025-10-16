@@ -111,10 +111,10 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var toolCreateDto = ToolFixture.FindValidToolCreateDto();
-            var toolTypeDto = ToolTypeFixture.FindValidToolTypeDto();
+            var toolType = ToolTypeFixture.FindValidToolType();
 
-            _toolTypeRepositoryMock.Setup(tt => tt.FindByAsync(It.IsAny<int>()))
-                                   .ReturnsAsync(toolTypeDto);
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()))
                 .ReturnsAsync(false);
 
@@ -123,7 +123,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.Duplicated, exception.ErrorCode);
             Assert.Equal("Duplicated Tool", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()), Times.Once);
-            _toolTypeRepositoryMock.Verify(tt => tt.FindByAsync(It.IsAny<int>()), Times.Once);
+            _toolTypeRepositoryMock.Verify(tt => tt.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
         }
 
         [Fact(DisplayName = "CreateAsync should throw AppException when connector is required")]
@@ -133,10 +133,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var toolCreateDto = ToolFixture.FindValidToolCreateDto();
             toolCreateDto.ConnectorUrl = string.Empty;
-            var toolTypeDto = ToolTypeFixture.FindValidToolTypeDto();
-            toolTypeDto.Name = "n8n";
+            var toolType = ToolTypeFixture.FindValidToolTypeWithName("n8n");          
 
-            _toolTypeRepositoryMock.Setup(tt => tt.FindByAsync(It.IsAny<int>())).ReturnsAsync(toolTypeDto);
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>())).ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()))
                 .ReturnsAsync(false);
 
@@ -145,7 +144,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal("Coonector Url and Connector Api Key are required", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()), Times.Never);
-            _toolTypeRepositoryMock.Verify(tt => tt.FindByAsync(It.IsAny<int>()), Times.Once);
+            _toolTypeRepositoryMock.Verify(tt => tt.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
         }
 
         [Fact(DisplayName = "CreateAsync should return true when Tool is created successfully")]
@@ -154,10 +153,9 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var toolCreateDto = ToolFixture.FindValidToolCreateDto();
-            var toolTypeDto = ToolTypeFixture.FindValidToolTypeDto();
-            toolTypeDto.Name = "n8n";
+            var toolType = ToolTypeFixture.FindValidToolTypeWithName("n8n");
 
-            _toolTypeRepositoryMock.Setup(tt => tt.FindByAsync(It.IsAny<int>())).ReturnsAsync(toolTypeDto);
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>())).ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()))
                 .ReturnsAsync(true);
 
@@ -167,7 +165,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             _toolRepositoryMock.Verify(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()), Times.Once);
-            _toolTypeRepositoryMock.Verify(tt => tt.FindByAsync(It.IsAny<int>()), Times.Once);
+            _toolTypeRepositoryMock.Verify(tt => tt.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
         }
 
         [Fact(DisplayName = "UpdateAsync should throw AppException when Tool not found")]
@@ -216,11 +214,10 @@ namespace WoopiAiHub.UnitTests.Services
             var tool = ToolFixture.FindValidToolModel();
             var toolUpdateDto = ToolFixture.FindValidToolUpdateDto();
             toolUpdateDto.ConnectorUrl = string.Empty;
-            var toolTypeDto = ToolTypeFixture.FindValidToolTypeDto();
-            toolTypeDto.Name = "n8n";
+            var toolType = ToolTypeFixture.FindValidToolTypeWithName("n8n");            
 
-            _toolTypeRepositoryMock.Setup(tt => tt.FindByAsync(It.IsAny<int>()))
-                                   .ReturnsAsync(toolTypeDto);
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
                                .ReturnsAsync(tool);
 
@@ -238,13 +235,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var tool = ToolFixture.FindValidToolModel();
+            tool.Update(tool.Name, tool.ToolTypeId, tool.InputDataId, tool.OutputDataId, tool.IsEditableInput, tool.ConnectorUrl, string.Empty);
+
             var toolUpdateDto = ToolFixture.FindValidToolUpdateDto();
             toolUpdateDto.ConnectorApiKey = string.Empty;
-            var toolTypeDto = ToolTypeFixture.FindValidToolTypeDto();
-            toolTypeDto.Name = "n8n";
+            var toolType = ToolTypeFixture.FindValidToolTypeWithName("n8n");            
 
-            _toolTypeRepositoryMock.Setup(tt => tt.FindByAsync(It.IsAny<int>()))
-                                   .ReturnsAsync(toolTypeDto);
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
                                .ReturnsAsync(tool);
 
@@ -263,10 +261,10 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var toolUpdateDto = ToolFixture.FindValidToolUpdateDto();
             var tool = ToolFixture.FindValidToolModel();
-            var toolTypeDto = ToolTypeFixture.FindValidToolTypeDto();
+            var toolType = ToolTypeFixture.FindValidToolType();
 
-            _toolTypeRepositoryMock.Setup(tt => tt.FindByAsync(It.IsAny<int>()))
-                                   .ReturnsAsync(toolTypeDto);
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(toolUpdateDto.Id))
                                .ReturnsAsync(tool);
             _toolRepositoryMock.Setup(repo => repo.UpdateAsync(tool))
@@ -278,7 +276,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Duplicated Tool", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(toolUpdateDto.Id), Times.Once);
             _toolRepositoryMock.Verify(repo => repo.UpdateAsync(tool), Times.Once);
-            _toolTypeRepositoryMock.Verify(tt => tt.FindByAsync(It.IsAny<int>()), Times.Once);
+            _toolTypeRepositoryMock.Verify(tt => tt.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
         }
 
         [Fact(DisplayName = "CreateAsync should return true when Tool is updated successfully")]
@@ -288,10 +286,10 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var toolUpdateDto = ToolFixture.FindValidToolUpdateDto();
             var tool = ToolFixture.FindValidToolModel();
-            var toolTypeDto = ToolTypeFixture.FindValidToolTypeDto();
+            var toolType = ToolTypeFixture.FindValidToolType();
 
-            _toolTypeRepositoryMock.Setup(tt => tt.FindByAsync(It.IsAny<int>()))
-                                   .ReturnsAsync(toolTypeDto);
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(toolUpdateDto.Id))
                                .ReturnsAsync(tool);
             _toolRepositoryMock.Setup(repo => repo.UpdateAsync(tool))
@@ -302,6 +300,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
+            _toolTypeRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
             _toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(toolUpdateDto.Id), Times.Once);
             _toolRepositoryMock.Verify(repo => repo.UpdateAsync(tool), Times.Once);
         }

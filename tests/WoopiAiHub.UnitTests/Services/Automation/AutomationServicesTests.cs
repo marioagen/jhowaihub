@@ -28,7 +28,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
         public AutomationServicesTests()
         {
-            _mocker = new AutoMocker();
+            _mocker = new AutoMocker();            
             _service = _mocker.CreateInstance<AutomationServices>();
         }
 
@@ -358,6 +358,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         {
             // Arrange
             var tool = ToolFixture.FindValidToolModel();
+            tool.ToolType = new ToolType(1, DateTime.Now, "tool", true);
+
             var _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(tool);
@@ -372,14 +374,13 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         public async Task FindN8nWorkflowsByToolId_ApiCallFails_ThrowsAppException()
         {
             // Arrange
-            var tool = ToolFixture.FindValidToolModel();
+            var keyVaultValue = Guid.NewGuid().ToString();
+            var tool = ToolFixture.FindValidToolModelWithEmptyConnector();
             tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, true);
-            tool.UpdateConnector(string.Empty, string.Empty);
-
-            var _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.BadRequest), string.Empty, new RefitSettings());
 
-            _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
+            var toolRepositoryMock = _mocker.GetMock<IToolRepository>();
+            toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(tool);
 
             var apiClientMock = _mocker.GetMock<In8nConnector>();
@@ -389,6 +390,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var apiClientFactoryMock = _mocker.GetMock<IApiClientFactory>();
             apiClientFactoryMock.Setup(factory => factory.Create(It.IsAny<string>()))
                 .Returns(apiClientMock.Object);
+
+            var keyVaultServices = _mocker.GetMock<IKeyVaultServices>();
+            keyVaultServices.Setup(k => k.GetSecretAsync(It.IsAny<string>()))
+                .ReturnsAsync(keyVaultValue);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _service.FindN8nWorkflowsByToolId(1));
@@ -400,9 +405,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         public async Task FindN8nWorkflowsByToolId_Success_ReturnsConnectorDtos()
         {
             // Arrange
-            var tool = ToolFixture.FindValidToolModel();
+            var keyVaultValue = Guid.NewGuid().ToString();
+            var tool = ToolFixture.FindValidToolModelWithEmptyConnector();
             tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, true);
-            tool.UpdateConnector(string.Empty, string.Empty);
+
             var webhookDataDtoList = AutomationFixture.FindValidWebhookDataDto();
             var responseContent = JsonConvert.SerializeObject(webhookDataDtoList);
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.OK), responseContent, new RefitSettings());
@@ -418,6 +424,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var apiClientFactoryMock = _mocker.GetMock<IApiClientFactory>();
             apiClientFactoryMock.Setup(factory => factory.Create(It.IsAny<string>()))
                 .Returns(apiClientMock.Object);
+
+            var keyVaultServices = _mocker.GetMock<IKeyVaultServices>();
+            keyVaultServices.Setup(k => k.GetSecretAsync(It.IsAny<string>()))
+                .ReturnsAsync(keyVaultValue);
 
             // Act
             var result = await _service.FindN8nWorkflowsByToolId(1);
@@ -469,7 +479,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var webhookInputDto = new WebhookInputDto { ToolId = 1, WorkflowId = Guid.NewGuid() };
             var tool = ToolFixture.FindValidToolModel();
             tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, true);
-            tool.UpdateConnector(string.Empty, string.Empty);
+
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.BadRequest), string.Empty, new RefitSettings());
 
             var toolRepositoryMock = _mocker.GetMock<IToolRepository>();
@@ -497,7 +507,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var webhookInputDto = new WebhookInputDto { ToolId = 1, WorkflowId = Guid.NewGuid() };
             var tool = ToolFixture.FindValidToolModel();
             tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, true);
-            tool.UpdateConnector(string.Empty, string.Empty);
+
             var content = AutomationFixture.FindValidJson();
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.OK), content, new RefitSettings());
 

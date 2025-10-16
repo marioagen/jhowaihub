@@ -57,5 +57,15 @@ namespace WoopiAiHub.Application.Utils
         {
             await _client.StartDeleteSecretAsync(key);
         }
+
+        /// <summary>
+        /// Create a name for key
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public string CreateKeyName()
+        {
+            return $"{_settings.VaultKeyPrefix}{Guid.NewGuid}";
+        }
     }
 }
