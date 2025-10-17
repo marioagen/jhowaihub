@@ -83,7 +83,8 @@ builder.Services.AddApplication();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IHubNotifier, HubNotifier>();
 builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
-builder.Services.Configure<ChatCompletionSettings>(config.GetSection("ChatCompletionSettings"));
+builder.Services.Configure<ChatCompletionSettings>(
+    builder.Configuration.GetSection("ChatCompletionSettings"));
 builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

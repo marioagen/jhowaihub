@@ -213,7 +213,7 @@ namespace WoopiAiHub.Application.Services
             if (stepTool.DependsOnStepTool != null)
                 output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id, resolvedCardId);
 
-            var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!);
+            var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
             var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
             var payload = await handler.BuildPayload(enrichedDto, input, output);
 
@@ -268,12 +268,13 @@ namespace WoopiAiHub.Application.Services
 
             execution.UpdateStatusExecution(StatusExecution.Running);
             await _stepToolExecutionRepository.UpdateAsync(execution);
-            var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
+            var input = _stepToolParameterRepository.FindByStepToolId(dependentStepTool.Id);
 
             string output = await _stepToolOutputRepository.FindByStepToolId(dependentStepTool.DependsOnStepTool.Id, execution.CardId);
 
-            var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType);
-            var payload = await handler.BuildPayload(automationServicesDto, input, output);
+            var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType!.Name);
+            var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
+            var payload = await handler.BuildPayload(nextAutomationDto, input, output);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
         }

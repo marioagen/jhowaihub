@@ -147,7 +147,7 @@ export default {
                 });
 
                 let stepTools = step ? step.stepTools : [];
-                console.log(stepTools,"Steps");
+                console.log(stepTools);
                 const mappedNodes = stepTools.map(stepTool => ({
                     id: stepTool.id.toString(),
                     position: { x: stepTool.positionX, y: stepTool.positionY },
@@ -156,7 +156,7 @@ export default {
                     data: { 
                         icon: "Activity", 
                         color: "blue", 
-                        input: stepTool?.input|| null, 
+                        input: stepTool?.input || null, 
                         isEditableInput: stepTool.tool.isEditableInput,
                         toolType: stepTool.tool.toolType,
                     },
@@ -188,6 +188,7 @@ export default {
                 this.edges = mappedEdges;
 
             } catch (e) {
+            console.log(e);
                 LogService.showMessage("Erro ao carregar fluxo");
             }
         },
