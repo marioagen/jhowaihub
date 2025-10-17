@@ -1,7 +1,7 @@
 <template>
     <UsersForm 
         :isEdit="true"
-        :id="routeId"
+        :id="$route.params.id"
     />
 </template>
 
@@ -11,11 +11,6 @@
         name: "EditQuizz",
         components: {
             UsersForm
-        },
-        computed: {
-            routeId() {
-                return parseInt(this.$route.params.id);
-            },
         },
     }
 </script>
