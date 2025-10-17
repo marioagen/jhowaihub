@@ -65,7 +65,7 @@ namespace WoopiAiHub.Application.Utils
         /// <exception cref="NotImplementedException"></exception>
         public string CreateKeyName()
         {
-            return $"{_settings.VaultKeyPrefix}{Guid.NewGuid()}";
+            return $"{_settings.VaultKeyPrefix}-{Guid.NewGuid()}";
         }
     }
 }

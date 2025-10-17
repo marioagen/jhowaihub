@@ -325,7 +325,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             var api = _apiClientFactory.Create(tool.ConnectorUrl!);    
             
-            var response = await api.FindWorkflows(tool.ConnectorApiKey!);
+            var response = await api.FindWorkflows(apiKey);
 
             if (!response.IsSuccessStatusCode)
                 throw new AppException(ErrorCode.RefitApiError, "N8n connector fails listing workflows", null);
