@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
@@ -28,6 +29,8 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IToolRepository _toolRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IKeyVaultServices _keyVaultServices;
+        private readonly IStepRepository _stepRepository;
+        private readonly IHubNotifier _hubNotifier;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -39,7 +42,9 @@ namespace WoopiAiHub.Application.Services.Automation
                                   ICardRepository cardRepository,
                                   IToolRepository toolRepository,
                                   IApiClientFactory apiClientFactory,
-                                  IKeyVaultServices keyVaultServices)
+                                  IKeyVaultServices keyVaultServices,
+                                  IStepRepository stepRepository,
+                                  IHubNotifier hubNotifier)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -52,6 +57,8 @@ namespace WoopiAiHub.Application.Services.Automation
             _toolRepository = toolRepository;
             _apiClientFactory = apiClientFactory;
             _keyVaultServices = keyVaultServices;
+            _stepRepository = stepRepository;
+            _hubNotifier = hubNotifier;
         }
 
         /// <summary>
@@ -272,11 +279,12 @@ namespace WoopiAiHub.Application.Services.Automation
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
 
-            if (dependentStepTool == null)
+            if (dependentStepTool == null ||
+                stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
+            {
+                await CheckAndAdvanceAiProfileStepAsync(automationServicesDto);
                 return;
-
-            if (stepTool!.Step!.Order.Equals(dependentStepTool!.Step!.Order) is false)
-                return;
+            }
 
             var execution = await _stepToolExecutionRepository
                 .FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, automationServicesDto.CardId);
@@ -373,6 +381,44 @@ namespace WoopiAiHub.Application.Services.Automation
                     WebhookId = x.PostNode!.WebhookId
                 })
                 .ToList();
+        }
+
+        /// <summary>
+        /// Verifica se o card está em um step cujo perfil responsável é o perfil de IA
+        /// e avança automaticamente o card para o próximo step do workflow.
+        /// </summary>
+        /// <param name="automationServicesDto">DTO contendo informações do card e step</param>
+        /// <returns>Task que representa a operação assíncrona</returns>
+        private async Task CheckAndAdvanceAiProfileStepAsync(AutomationServicesDto automationServicesDto)
+        {
+            var card = await _cardRepository.FindById(automationServicesDto.CardId);
+            if (card?.Step?.Profile == null)
+                return;
+
+            if (card.Step.Profile.Name != Profile.IAFileName)
+                return;
+
+            var nextStepOrder = card.Step.Order + 1;
+            var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
+
+            if (nextStep == null)
+            {
+                return;
+            }
+
+            card.UpdateStepAndSatus(nextStep.Id, nextStep.StatusId);
+            var updated = _cardRepository.Update(card);
+
+            if (updated)
+            {
+                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id);
+                
+                var nextStepDto = automationServicesDto with
+                {
+                    StepId = nextStep.Id
+                };
+                await StartExecutionByCardAsync(nextStepDto);
+            }
         }
     }
 }

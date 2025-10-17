@@ -9,6 +9,7 @@ using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -539,6 +540,84 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Assert
             Assert.NotNull(result);
             Assert.IsType<List<FormFieldDto>>(result);
+        }
+
+        [Fact(DisplayName = "ContinueExecution should advance to next step when card has AI profile")]
+        [Trait("ContinueExecution", "AI Profile Advancement")]
+        public async Task ContinueExecution_ShouldAdvanceToNextStep_WhenCardHasAiProfile()
+        {
+            // Arrange
+            var stepToolDto = AutomationFixture.FindValidStepToolDto();
+            var automationDto = AutomationFixture.FindValidautomationServicesDto();
+
+            var aiProfile = new Domain.Models.Profile("IA", 1, DateTime.UtcNow);
+
+            var currentStep = new Domain.Models.Step(1, DateTime.UtcNow, 1, "Current Step", 1, aiProfile.Id, 1);
+            currentStep.Profile = aiProfile;
+
+            var nextStep = new Domain.Models.Step(2, DateTime.UtcNow, 1, "Next Step", 2, 2, 1);
+
+            var card = new Domain.Models.Card(1, DateTime.UtcNow, currentStep.Id, 1, "Test Card", 1, true, null);
+            card.Step = currentStep;
+            
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
+            var stepRepositoryMock = _mocker.GetMock<IStepRepository>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
+            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((Domain.Models.StepTool)null);
+
+            cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
+            stepRepositoryMock.Setup(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId)).ReturnsAsync(nextStep);
+            cardRepositoryMock.Setup(r => r.Update(It.IsAny<Domain.Models.Card>())).Returns(true);
+            hubNotifierMock.Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>())).Returns(Task.CompletedTask);
+
+            // Act
+            await _service.ContinueExecution(automationDto);
+
+            // Assert
+            stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
+            
+            cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
+            stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId), Times.Once);
+            cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Once);
+            hubNotifierMock.Verify(h => h.CardProgessAsync(automationDto.Email, automationDto.CardId, 100.0, nextStep.Id), Times.Once);
+        }
+
+        [Fact(DisplayName = "ContinueExecution should not advance step when card has non-AI profile")]
+        [Trait("ContinueExecution", "Non-AI Profile")]
+        public async Task ContinueExecution_ShouldNotAdvanceStep_WhenCardHasNonAiProfile()
+        {
+            // Arrange
+            var stepToolDto = AutomationFixture.FindValidStepToolDto();
+            var automationDto = AutomationFixture.FindValidautomationServicesDto();
+
+            var normalProfile = new Domain.Models.Profile("Normal Profile", 2, DateTime.UtcNow);
+
+            var currentStep = new Domain.Models.Step(1, DateTime.UtcNow, 1, "Current Step", 1, normalProfile.Id, 1);
+            currentStep.Profile = normalProfile;
+
+            var card = new Domain.Models.Card(1, DateTime.UtcNow, currentStep.Id, 1, "Test Card", 1, true, null);
+            card.Step = currentStep;
+            
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
+            var stepRepositoryMock = _mocker.GetMock<IStepRepository>();
+            stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
+            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((Domain.Models.StepTool)null);
+           
+            cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
+
+            // Act
+            await _service.ContinueExecution(automationDto);
+
+            // Assert
+            stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
+            
+            cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
+            stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Never);
         }
     }
 }
