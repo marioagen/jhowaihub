@@ -1,6 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using WoopiAiHub.Application.Utils;
+﻿using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -9,7 +7,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -22,7 +19,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
-        private readonly IStepToolRepository _stepToolRepository;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
@@ -31,8 +27,7 @@ namespace WoopiAiHub.Application.Services
                                 IStepRepository stepRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
-                                IValidateWorkflow validateWorkflow,
-                                IStepToolRepository stepToolRepository)
+                                IValidateWorkflow validateWorkflow)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -41,8 +36,6 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
-            _stepToolRepository = stepToolRepository;
-
         }
 
         /// <summary>
@@ -129,6 +122,25 @@ namespace WoopiAiHub.Application.Services
 
                             stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
                             stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+
+                            if (stepToolDto.Parameters.Count > 0)
+                            {
+                                var parameterDto = stepToolDto.Parameters.First();
+                                var parameter = stepTool.Parameters.FirstOrDefault();
+                                if (parameter != null)
+                                {                                    
+                                    parameter.Update(parameterDto.RequiredFile, parameterDto.WebhookId, parameterDto.Value);
+                                }
+                                else
+                                {
+                                    parameter = new StepToolParameter(0, DateTime.Now, 0, parameterDto.RequiredFile, parameterDto.WebhookId, parameterDto.Value);
+                                    stepTool.Parameters.Add(parameter);
+                                }
+                            }
+                            else
+                            {
+                                stepTool.Parameters.Clear();
+                            }
 
                             if (!existingStep.StepTools.Contains(stepTool))
                                 existingStep.AddStepTool(stepTool);
@@ -258,42 +270,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Process StepTools deletion or inclusion 
-        /// </summary>
-        /// <param name="step"></param>
-        /// <param name="stepToolUpdateDtos"></param>
-        /// <returns></returns>
-        public async Task ProcessStepTools(Step step, ICollection<StepToolUpdateDto> stepToolUpdateDtos)
-        {
-            var stepToolsInsert = new List<StepTool>();
-            foreach (var stepToolUpdate in stepToolUpdateDtos)
-            {
-                var stepTool = new StepTool(
-                                            0,
-                                            DateTime.Now,
-                                            step.Id,
-                                            stepToolUpdate.ToolId,
-                                            stepToolUpdate.Order,
-                                            stepToolUpdate.PositionX,
-                                            stepToolUpdate.PositionY
-                                        );
-                if (stepToolUpdate.DependsOnStepToolId.HasValue)
-                {
-                    stepTool.UpdateDependencyStepToolId(stepToolUpdate.DependsOnStepToolId.Value);
-                }
-
-                if (!string.IsNullOrEmpty(stepToolUpdate.Input))
-                {
-                    stepTool.Parameters.Add(new StepToolParameter(0, DateTime.Now, 0, stepToolUpdate.Input));
-                }
-
-                stepToolsInsert.Add(stepTool);
-            }
-
-            await _stepToolRepository.CreateRangeAsync(stepToolsInsert);
-        }
-
-        /// <summary>
         /// Creates a collection of steps from the provided step DTOs, validates their profiles and statuses,  and
         /// establishes dependencies between step tools.
         /// </summary>
@@ -350,7 +326,7 @@ namespace WoopiAiHub.Application.Services
         /// name="stepTool"/>.</param>
         /// <param name="lastStepTool">The last step tool from a previous step. If <paramref name="previousStepToolInSameStep"/> is null and this
         /// parameter is not null, this will be set as the dependency for <paramref name="stepTool"/>.</param>
-        private void SetDependencies(StepTool stepTool,
+        private static void SetDependencies(StepTool stepTool,
                                      StepTool? previousStepToolInSameStep,
                                      StepTool? lastStepTool)
         {
@@ -372,7 +348,7 @@ namespace WoopiAiHub.Application.Services
         /// cref="StepTool.Parameters"/> collection.</remarks>
         /// <param name="stepToolDto">The data transfer object containing the update information for the <see cref="StepTool"/>.</param>
         /// <returns>A new <see cref="StepTool"/> instance initialized with the specified update data.</returns>
-        private StepTool CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
+        private static StepTool CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
         {
             var stepTool = new StepTool(
                 0,
@@ -383,10 +359,10 @@ namespace WoopiAiHub.Application.Services
                 stepToolDto.PositionX,
                 stepToolDto.PositionY);
 
-            if (!string.IsNullOrEmpty(stepToolDto.Input))
+            foreach (var parameter in stepToolDto.Parameters)
             {
                 stepTool.Parameters.Add(
-                    new StepToolParameter(0, DateTime.Now, 0, stepToolDto.Input));
+                    new StepToolParameter(0, DateTime.Now, 0, parameter.RequiredFile, parameter.WebhookId, parameter.Value));
             }
 
             return stepTool;
@@ -399,7 +375,7 @@ namespace WoopiAiHub.Application.Services
         /// status ID.</param>
         /// <param name="teamId">The identifier of the team associated with the step.</param>
         /// <returns>A new <see cref="Step"/> instance initialized with the provided data.</returns>
-        private Step CreateStep(IStepDto stepDto, int teamId)
+        private static Step CreateStep(IStepDto stepDto, int teamId)
         {
             return new Step(
                 0,

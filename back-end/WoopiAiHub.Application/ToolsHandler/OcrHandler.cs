@@ -5,11 +5,14 @@ using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 namespace WoopiAiHub.Application.ToolsHandler;
 
 public class OcrHandler : IToolHandler
 {
+    public string Type => HandlersTypes.Ocr;
     private readonly MessageQueues _messageQueues;
     private readonly ITenantCacheServices _tenantCacheServices;
 
@@ -32,8 +35,9 @@ public class OcrHandler : IToolHandler
     /// tenant information, and queue details.</returns>
     /// <exception cref="ArgumentException">Thrown if the OCR model for the specified tenant cannot be found.</exception>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
-                                                        string input,
-                                                        string output)
+                                                        StepToolParameter? input,
+                                                        string output,
+                                                        StepToolExecution? execution = null)
     {
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
         if (string.IsNullOrEmpty(tenantInfo!.OcrModel))
@@ -48,12 +52,11 @@ public class OcrHandler : IToolHandler
             {
                 Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
                 Tenant = automationServicesDto.Tenant,
-                ReferenceFile = automationServicesDto.ReferenceFile,
+                ReferenceFile = automationServicesDto.ReferenceFile!,
                 Model = tenantInfo.OcrModel,
                 Email = automationServicesDto.Email,
                 ResponseQueue = _messageQueues.OcrQueueAiHubResponse
             }
         };
     }
-
 }

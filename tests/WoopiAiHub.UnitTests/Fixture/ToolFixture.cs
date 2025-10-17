@@ -39,6 +39,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                 InputDataId = _faker.Random.Int(1, 1000),
                 OutputDataId = _faker.Random.Int(1, 1000),
                 ToolTypeId = _faker.Random.Int(1, 1000),
+                ConnectorUrl = _faker.Internet.Url(),
+                ConnectorApiKey = Guid.NewGuid().ToString(),
             };
         }
 
@@ -52,6 +54,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                 InputDataId = _faker.Random.Int(1, 1000),
                 OutputDataId = _faker.Random.Int(1, 1000),
                 ToolTypeId = _faker.Random.Int(1, 1000),
+                ConnectorUrl = _faker.Internet.Url(),
+                ConnectorApiKey = Guid.NewGuid().ToString(),
             };
         }
 
@@ -67,7 +71,26 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 _faker.Random.Int(1, 1000),
                 _faker.Random.Int(1, 1000),
-                true
+                true,
+                _faker.Name.FullName(),
+                _faker.Random.Guid().ToString()
+            );
+        }
+        public static Tool FindValidToolModelWithEmptyConnector()
+        {
+            var _faker = new Faker("pt_BR");
+            return new Tool
+            (
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+                _faker.Name.FullName(),
+                true,
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                true,
+                string.Empty,
+                string.Empty
             );
         }
 
@@ -79,6 +102,16 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Page = _faker.Random.Int(1, 100),
                 PageSize = _faker.Random.Int(1, 100),
                 IsAscending = _faker.Random.Bool()
+            };
+        }
+
+        public static ToolConnectorDto FindValidToolConnectorDto()
+        {
+            var _faker = new Faker("pt_BR");
+            return new ToolConnectorDto
+            {
+                ConnectorUrl = _faker.Internet.Url(),
+                ConnectorApiKey = Guid.NewGuid().ToString(),
             };
         }
     }

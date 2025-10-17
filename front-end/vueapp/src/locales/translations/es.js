@@ -509,6 +509,11 @@
             entriesEditable: "Entrada editable",
             output: "Salida",
             outputSelect: "Selecciona el tipo de salida",
+            connectorUrl: "n8n URL",
+            connectorApiKey: "Clave Key",
+            validatingConnector: "Validando la URL del conector",
+            invalidConnector: "El conector no respondió. URL o clave no válidas.",
+            validConnector: "El conector está activo"
         },
         formCreate: {
             title: "Nueva Herramienta",
@@ -545,6 +550,9 @@
             subtitle: "Actualiza la información de la herramienta seleccionada",
         },
         sidebarTitle: "Configurar I/O:",
+        sidebar:{
+            filter: "Selecciona un webhook"
+        },
         formFlow: {
             progressFlowSuccess: "Flujo insertado exitosamente",
             progressFlowFail: "No se pudo insertar el flujo",
