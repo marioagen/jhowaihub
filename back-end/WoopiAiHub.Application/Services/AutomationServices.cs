@@ -314,6 +314,10 @@ namespace WoopiAiHub.Application.Services
 
             if (updated)
             {
+                // Notifica o front-end sobre a mudança de step via SignalR
+                // Usa percentage 100.0 para indicar conclusão do step anterior antes de mover para o próximo
+                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id);
+                
                 var nextStepDto = automationServicesDto with
                 {
                     StepId = nextStep.Id
