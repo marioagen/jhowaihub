@@ -133,7 +133,11 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<StepToolExecution?> FindByIdAsync(int id)
         {
-            return await _context.StepToolExecutions.Include(e => e.StepTool).FirstOrDefaultAsync(u => u.Id == id);
+            return await _context.StepToolExecutions
+                .Include(e => e.StepTool)
+                .Include(e => e.Card)
+                    .ThenInclude(e => e!.Document)
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
     }
 }
