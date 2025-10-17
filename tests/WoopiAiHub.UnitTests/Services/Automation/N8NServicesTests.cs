@@ -30,11 +30,13 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var automationOutputDto = AutomationFixture.FindValidAutomationOutputDto();
             var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+            stepToolExecution.Card = CardFixture.FindValidCard();
             stepToolExecution.StepTool = AutomationFixture.FindValidStepTool();
 
             var mockStepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
             var mockStepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             var mockHubNotifier = _mocker.GetMock<IHubNotifier>();
+            var mockDocumentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
 
             mockStepToolExecutionRepository
                 .Setup(repo => repo.FindByIdAsync(It.IsAny<int>()))
@@ -46,6 +48,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Returns(Task.CompletedTask);
             mockHubNotifier.Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>()))
                 .Returns(Task.CompletedTask);
+            mockDocumentHistoryRepository.Setup(d => d.Create(It.IsAny<DocumentHistory>()))
+                .Returns(true);
 
             // Act
             await _service.ProcessMessage(automationOutputDto);
@@ -55,6 +59,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             mockStepToolExecutionRepository.Verify(repo => repo.ExecutionsByStepIdCountAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
             mockStepToolExecutionRepository.Verify(repo => repo.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             mockHubNotifier.Verify(notifier => notifier.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>()), Times.Once);
+            mockDocumentHistoryRepository.Verify(d => d.Create(It.IsAny<DocumentHistory>()), Times.Once);
         }
     }
 }

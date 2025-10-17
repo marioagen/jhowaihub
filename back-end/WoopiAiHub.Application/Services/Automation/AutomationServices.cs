@@ -293,12 +293,14 @@ namespace WoopiAiHub.Application.Services.Automation
 
             execution.UpdateStatusExecution(StatusExecution.Running);
             await _stepToolExecutionRepository.UpdateAsync(execution);
-            var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
+            var input = _stepToolParameterRepository.FindByStepToolId(dependentStepTool.Id);
 
             string output = await _stepToolOutputRepository.FindByStepToolId(dependentStepTool!.DependsOnStepTool!.Id, execution.CardId);
 
             var handler = _toolFactoryHandler.GetHandler(dependentStepTool!.Tool!.ToolType!);
-            var payload = await handler.BuildPayload(automationServicesDto, input, output, execution);
+
+            var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
+            var payload = await handler.BuildPayload(nextAutomationDto, input, output, execution);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
         }
