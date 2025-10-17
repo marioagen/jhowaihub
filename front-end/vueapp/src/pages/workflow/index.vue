@@ -32,8 +32,14 @@
                                     <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li v-for="item in workflowList" :key="item.id">
-                                        <a class="dropdown-item" @click="selectOption(item)">
+                                    <li 
+                                        v-for="item in workflowList" 
+                                        :key="item.id"
+                                    >
+                                        <a 
+                                            class="dropdown-item" 
+                                            @click="selectOption(item)"
+                                        >
                                             <div class="fw-bold">{{ item.teams.name }}</div>
                                             <div class="text-muted small">{{ item.name }}</div>
                                         </a>
@@ -48,11 +54,11 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="isWorkflowSelected && isLoaded && isLoadedUsers">
-                    <div class="card mb-3 h-100">
+                <div v-if="isWorkflowSelected">
+                    <div v-if="isLoaded && isLoadedUsers" class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
-                                <KanbanBoard 
+                                <KanbanBoard
                                     :kanbanData="kanbanCards"
                                     :users="users"
                                     @reload="reloadKanban"
@@ -141,21 +147,41 @@
                         }
                         this.workflowList = response;
                         if(this.workflowList.length > 0) {
-                            const lastSelected = this.$store.state.lastSelectedWorkflow;
-                            let workflowToSelect = this.workflowList[0];
-                            if (lastSelected) {
-                                const foundWorkflow = this.workflowList.find(w => 
-                                    w.teams.id === lastSelected.teamId && w.id === lastSelected.id
-                                );
-                                if (foundWorkflow) {
-                                    workflowToSelect = foundWorkflow;
-                                }
-                            }
-
-                            this.selectOption(workflowToSelect);
-                            this.filteredworkflows();
+                            this.setSelectedWorkflow();
                         }
                     });
+            },
+            setSelectedWorkflow() {
+                let workflowToSelect = this.workflowList[0];
+                const redicteWorkflowId = this.$route.query.id;
+                if(redicteWorkflowId !== undefined) {
+                    const foundWorkflow = this.workflowList.find(w => 
+                        w.id == redicteWorkflowId
+                    );
+                    if (foundWorkflow) {
+                        workflowToSelect = foundWorkflow;
+                    } else {
+                        return this.$notify({
+                            title: 'workflow.index',
+                            message: 'workflow.error',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    }
+                }
+
+                const lastSelected = this.$store.state.lastSelectedWorkflow;
+                if (lastSelected && redicteWorkflowId === undefined) {
+                    const foundWorkflow = this.workflowList.find(w =>
+                        w.teams.id === lastSelected.teamId && w.id === lastSelected.id
+                    );
+                    if (foundWorkflow) {
+                        workflowToSelect = foundWorkflow;
+                    }
+                }
+
+                this.selectOption(workflowToSelect);
+                this.filteredworkflows();
             },
             getWorkflowbyTeam(id) {
                 this.isLoaded = false;
@@ -188,10 +214,11 @@
                     teamName: workflow.teams[0].name,
                     teamId: workflow.teams[0].id,
                 });
+
                 this.getUsersByTeamId(workflow.teams[0].id);
                 this.getWorkflowbyTeam(workflow.teams[0].id);
             },
-            reloadKanban() {
+            reloadKanban() {                
                 this.getWorkflowbyTeam(this.selectedOption.teamId);
             },
             filterData(filters) {
