@@ -59,8 +59,7 @@
     labelFailedToNormalize: "Falha ao normalizar",
     labelFailedNoResponse: "Falha, sem resposta do servidor.",
     labelFailedToLoadHistory: "Falha ao carregar histórico.",
-    labelFailedToApplyQuestionnaire: "Falha ao aplicar questionário.",
-    labelGeneralInformation: "Carregar Documento",
+    labelFailedToApplyQuestionnaire: "Falha ao aplicar questionário.",    
     labelGoHome: "Ir para Home",
     labelHistoric: "Registro de respostas",
     labelInclusionDate: "Data de inclusão",
@@ -159,7 +158,6 @@
     labelTypeDocAlreadyExists: "Tipo duplicado",
     labelTypeDocError: "Tipo inválido",
     labelUpload: "Carregar",
-    labelUploadPdf: "Arraste e solte seus arquivos PDF abaixo para começar ou clique na área para navegar",
     labelUploadFailure: "Falha de carregamento",
     labelUploadedFiles: "Todos os arquivos carregados",
     labelUploadedFilesError: "Falha ao carregar arquivos!",
@@ -171,8 +169,7 @@
     labelYouAreAboutToDeleteDocumentType: "Você está prestes a deletar <br/> um tipo de documento do sistema",
     labelYouAreAboutToDeleteDocumentQuery: "Você está prestes a deletar <br/> o histórico de consulta do sistema",
     labelYouAreAboutToDeleteQuestion: "Você está prestes a deletar <br/> uma pergunta do sistema",
-    labelYouAreAboutToDeleteQuestionnaire: "Você está prestes a deletar <br/> um questionário do sistema",
-    labelRemoveAllDropzone: "Remover arquivos do dropzone",
+    labelYouAreAboutToDeleteQuestionnaire: "Você está prestes a deletar <br/> um questionário do sistema",    
     labelRemoveAllFilesDropzone: "Remover todos os arquivos da fila?",
     labelThisActionRemoveAllFiles: "Essa ação removerá todos os arquivos selecionados para upload",
     labelCaution: "Atenção!",
@@ -277,6 +274,7 @@
     filters: {
         documentInput: "Buscar por documento, descrição ou usuário, ...",
         workflowInput: "Buscar por documento",
+        searchWorkflow: "Buscar workflow",
         toolInput: "Buscar por name da ferramenta",
         teamsSelect: {
             all: "Todos os times",
@@ -291,11 +289,7 @@
             allUsers: "Todos os usuários",
         }
     },
-    labelBackToListDocuments: "Voltar para documentos",
-    pageTitleDocumentsForm: "Novo Documento",
-    pageSubtitleDocumentsForm: "Faça upload de novos documentos para análise",
-    labelTeamsTitleDocuments: "Associar a times",
-    labelTeamsSubtextDocuments: "Selecione pelo menos um time para associar ao documento.",
+    labelBackToListDocuments: "Voltar para documentos",    
     labelNoTeamsFound: "Nenhum time vinculado ao seu usuário",
     labelNoPermissionChosen: "Nenhuma permissão selecionada",
     labelDocumentsMessage: "Gerencie documentos e extraia informações",
@@ -330,6 +324,7 @@
         status: "Status",
         owner: "Proprietário",
         teams: "Time",
+        workflows: "Workflows",
         statusList: {
             analyzed: "Analisado",
             notAnalyzed: "Esperando análise",
@@ -339,7 +334,16 @@
             consult: "Consultar",
         },
         upload: {
-            warningTeamsNotListed: "O time não apareceu na lista? É porque ele ainda não tem um workflow associado a ele.",
+            title: "Novo Documento",
+            subtitle: "Faça upload de novos documentos para análise",
+            cardTitle: "Carregar Documento",
+            dropZone: "Arraste e solte seus arquivos PDF abaixo para começar ou clique na área para navegar",
+            removeAllDropzone: "Remover arquivos do dropzone",
+            linkWorkflow: "Associar a workflow",
+            linkSubtitle: "Selecione pelo menos um workflow para associar ao documento.",
+            noWorkflowFound: "Nenhum workflow vinculado ao seus times do usuário",
+            selectionList: "Lista de seleção",
+            warningWorkflowNotListed: "O workflow não apareceu na lista? É porque seus times não tem um workflow associado a eles.",
         }
     },
     questions: {
@@ -570,6 +574,7 @@
             deleteSuccess: "Time deletado com sucesso",
             deleteError: "Erro ao deletar time",
             duplicated: "Time já cadastrado",
+            error: "Error ao buscar times",
         },
         profiles: {
             index: "Perfis",

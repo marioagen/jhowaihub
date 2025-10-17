@@ -332,6 +332,7 @@
         status: "Status",
         owner: "Owner",
         teams: "Team",
+        workflows: "Workflows",
         statusList: {
             analyzed: "Analyzed",
             notAnalyzed: "Waiting for analysis",
@@ -341,8 +342,17 @@
             consult: "Consult",
         },
         upload: {
-            warningTeamsNotListed: "The team did not appear in the list? It's because it doesn't have a workflow associated with it yet.",
-        }
+            title: "New Document",
+            subtitle: "Upload new documents for analysis",
+            cardTitle: "Upload Document",
+            dropZone: "Drag and drop your PDF files below to start, or click the area to browse",
+            removeAllDropzone: "Remove files from dropzone",
+            linkWorkflow: "Link to workflow",
+            linkSubtitle: "Select at least one workflow to associate with the document.",
+            noWorkflowFound: "No workflow linked to your user teams",
+            selectionList: "Selection list",
+            warningWorkflowNotListed: "Workflow not listed? That’s because your teams don’t have one associated.",
+        },
     },
     questions: {
         title: "Questions",
@@ -589,6 +599,7 @@
             deleteSuccess: "Team deleted successfully",
             deleteError: "Error deleting team",
             duplicated: "Team already registered",
+            error: "Error fetching teams",
         },
         profiles: {
             index: "Profiles",

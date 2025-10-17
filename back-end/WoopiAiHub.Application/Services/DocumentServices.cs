@@ -57,6 +57,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IStepToolRepository _stepToolRepository;
+        private readonly IWorkflowRepository _workflowRepository;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
@@ -82,6 +83,7 @@ namespace WoopiAiHub.Application.Services
                                 IUnitOfWork unitOfWork,
                                 ICardRepository cardRepository,
                                 IAutomationServices automationServices,
+                                IWorkflowRepository workflowRepository,
                                 IStepToolOutputRepository stepToolOutputRepository,
                                 IStepToolRepository stepToolRepository)
         {
@@ -106,6 +108,7 @@ namespace WoopiAiHub.Application.Services
             _publisher = publisher;
             _hubNotifier = documentNotifier;
             _automationServices = automationServices;
+            _workflowRepository = workflowRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolRepository = stepToolRepository;
         }
@@ -460,6 +463,7 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 await _documentDtoValidator.ValidateAndThrowAsync(requestCreateDocumentDto);
+                //check workflows
                 var formFile = new FormFile(new MemoryStream(chunks),
                                             0,
                                             chunks.Length,
@@ -468,20 +472,15 @@ namespace WoopiAiHub.Application.Services
 
                 var referenceFile = await this.UploadFileToRepositoryApi(formFile,
                                                                         tenant);
-                var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto,
-                                                                   referenceFile);
+                var workflows = await _workflowRepository.FindByIdsAsync(requestCreateDocumentDto.Workflows);
+                var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto, workflows, referenceFile);
 
-                var teams = _teamServices.FindByIdsAndUser(requestCreateDocumentDto.TeamsIds,
-                                                           requestCreateDocumentDto.EmailCreator);
-
-                ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, teams);
+                ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, workflows);
 
                 documentForDataBase.Cards = cards;
-                documentForDataBase.Teams = teams;
                 _documentRepository.Create(documentForDataBase);
 
-                var worflows = teams.SelectMany(w => w.Workflows).ToList();
-                var hasExecutions = await _automationServices.PrepareExecutionAsync(worflows!);
+                var hasExecutions = await _automationServices.PrepareExecutionAsync(workflows!);
                 var automationServicesDto = new AutomationServicesDto
                 (
                     0,
@@ -494,7 +493,7 @@ namespace WoopiAiHub.Application.Services
 
                 if (hasExecutions)
                 {
-                    await _automationServices.StartExecutionByWorkflowsAsync(automationServicesDto, worflows!);
+                    await _automationServices.StartExecutionByWorkflowsAsync(automationServicesDto, workflows!);
                 }
 
                 _unitOfWork.Commit();
@@ -620,8 +619,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="requestCreateDocumentDto"></param>
         /// <param name="referenceFile"></param>
         /// <returns></returns>
-        private static Document CreateDocumentForDb(RequestCreateDocumentDto requestCreateDocumentDto,
-                                             string referenceFile)
+        private static Document CreateDocumentForDb(RequestCreateDocumentDto requestCreateDocumentDto, List<Workflow> workflow, string referenceFile)
         {
             return new Document
             (
@@ -632,6 +630,7 @@ namespace WoopiAiHub.Application.Services
                 true,
                 requestCreateDocumentDto.EmailCreator,
                 0,
+                workflow,
                 DateTime.Now
             );
         }
@@ -816,9 +815,7 @@ namespace WoopiAiHub.Application.Services
                                                           DocumentPagedDataDto dto)
         {
             int pageCount, currentPage;
-
             var totalListCount = query.Count();
-
             if (dto.PageSize == 0)
             {
                 pageCount = 1;
@@ -849,11 +846,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="requestCreateDocumentDto"></param>
         /// <param name="teams"></param>
         /// <returns></returns>
-        private static List<Card> CreateDocumentCard(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Team> teams)
+        private static List<Card> CreateDocumentCard(RequestCreateDocumentDto requestCreateDocumentDto, ICollection<Workflow> workflow)
         {
-            return teams
-                .Where(t => t.Workflows != null && t.Workflows.Any())
-                .SelectMany(t => t.Workflows)
+            return workflow
                 .Select(w => w.Steps.OrderBy(s => s.Order).FirstOrDefault())
                 .Where(step => step != null)
                 .Select(step => new Card

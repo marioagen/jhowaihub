@@ -9,15 +9,15 @@ namespace WoopiAiHub.Domain.Profiles
     {
         public DocumentProfile()
         {
-            CreateMap<RequestCreateDocumentDto, Document>().ConstructUsing(i => new Document(
-                i.Name,
-                i.Description,
-                Guid.NewGuid().ToString("N"),
-                Enum.DocumentStatus.NotAnalyzed,
-                true,
-                i.EmailCreator,
-                0,
-                DateTime.Now));
+            //CreateMap<RequestCreateDocumentDto, Document>().ConstructUsing(i => new Document(
+            //    i.Name,
+            //    i.Description,
+            //    Guid.NewGuid().ToString("N"),
+            //    Enum.DocumentStatus.NotAnalyzed,
+            //    true,
+            //    i.EmailCreator,
+            //    0,
+            //    DateTime.Now));
         }
     }
 }

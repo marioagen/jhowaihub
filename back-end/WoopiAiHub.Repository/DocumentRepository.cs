@@ -30,23 +30,16 @@ namespace WoopiAiHub.Repository
             var search = documentPagedDataDto.Search?.ToLower();
             var login = documentPagedDataDto.Login?.ToLower();
             var query = _context.Documents
-                                .Include(t => t.Teams)
+                                .Include(t => t.Workflow)
                                 .AsNoTracking()
                                 .Where(i => i.Enable);
-
-            if (documentPagedDataDto.TeamIds != null &&
-                documentPagedDataDto.TeamIds.Any())
-            {
-                query = query.Where(d => d.Teams.Any(t => documentPagedDataDto.TeamIds.Contains(t.Id)));
-            }
 
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(i =>
                              EF.Functions.Like(i.Name, $"%{search}%") ||
                              EF.Functions.Like(i.Description, $"%{search}%") ||
-                             i.Id.ToString().Contains(search) ||
-                             i.Teams.Any(t => EF.Functions.Like(t.Name, $"%{search}%")));
+                             i.Id.ToString().Contains(search));
             }
 
             if (!documentPagedDataDto.IsAllUsers)
@@ -58,7 +51,7 @@ namespace WoopiAiHub.Repository
             }
 
             query = documentPagedDataDto.IsAscending ? 
-                    query.OrderByDynamic(documentPagedDataDto.ColType.ToString()) : 
+                    query.OrderByDynamic(documentPagedDataDto.ColType.ToString()) :
                     query.OrderByDynamic(documentPagedDataDto.ColType + " descending");
 
             return query;

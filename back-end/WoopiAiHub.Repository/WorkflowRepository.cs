@@ -57,6 +57,15 @@ namespace WoopiAiHub.Repository
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<List<Workflow>> FindByIdsAsync(ICollection<int> ids)
+        {
+            return await _context.Workflows
+                .Include(w => w.Steps)
+                .Include(w => w.Teams)
+                .Where(w => ids.Contains(w.Id))
+                .ToListAsync();
+        }
+
         /// <summary>
         /// Retrieves a workflow by its ID.
         /// </summary>
