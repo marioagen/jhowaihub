@@ -146,8 +146,8 @@ namespace WoopiAiHub.Application.Services
                                 stepTool.Parameters.Clear();
                             }
 
-                            if (!stepEntity.StepTools.Contains(stepTool))
-                                stepEntity.AddStepTool(stepTool);
+                            if (!existingStep.StepTools.Contains(stepTool))
+                                existingStep.AddStepTool(stepTool);
 
                             previousStepToolInStep = stepTool;
                             lastGlobalStepTool = stepTool;
