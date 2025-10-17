@@ -12,14 +12,17 @@ namespace WoopiAiHub.Application.Services.Automation
     {
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
+        private readonly IDocumentHistoryRepository _documentHistoryRepository;
         private readonly IHubNotifier _hubNotifier;
 
         public N8NServices(IStepToolOutputRepository stepToolOutputRepository,
                            IStepToolExecutionRepository stepToolExecutionRepository,
+                           IDocumentHistoryRepository documentHistoryRepository,
                            IHubNotifier hubNotifier)
         {
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolExecutionRepository = stepToolExecutionRepository;
+            _documentHistoryRepository = documentHistoryRepository;
             _hubNotifier = hubNotifier;
         }
 
@@ -51,6 +54,9 @@ namespace WoopiAiHub.Application.Services.Automation
                 content);
 
             await _stepToolOutputRepository.CreateAsync(stepToolOutput);
+
+            var documentHistory = new DocumentHistory(execution.Card!.DocumentId, "N8N", content, 0, DateTime.Now);
+            _documentHistoryRepository.Create(documentHistory);
 
             await UpdateExecutionAsync(execution!, automationOutputDto.Email!);
 
