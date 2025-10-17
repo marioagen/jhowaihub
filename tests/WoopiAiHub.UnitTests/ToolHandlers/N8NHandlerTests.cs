@@ -74,7 +74,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as AutomationInputDto;
             Assert.NotNull(message);
             Assert.Equal(tool.ConnectorUrl, message.Url);
-            Assert.Equal(input.WebhookId.Value.ToString(), message.WebhookId);
+            Assert.Equal(input.WebhookId!.Value.ToString(), message.WebhookId);
             Assert.Equal(input.RequiredFile, message.RequiredFile);
             Assert.Equal(automationServicesDto.Tenant, message.Tenant);
             Assert.Equal(automationServicesDto.Email, message.Email);
