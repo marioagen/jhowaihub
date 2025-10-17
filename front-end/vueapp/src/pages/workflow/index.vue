@@ -245,8 +245,6 @@
 
                 if (!foundCard) return;
                 foundCard.percentage = message.percentage;
-                // Quando o backend envia 100% com um novo stepId, significa que o step foi avançado
-                // Recarrega os dados para mostrar o card no novo step
                 if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
                     this.getWorkflowByUser();
                 }
