@@ -41,7 +41,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddRefitClient<IMarketPlaceApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.MarketPlaceBaseAddress));
             services.AddRefitClient<IKeyGeneratorApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.KeyGeneratorApiBaseAddress));
 
-            services.Configure<KeyVaultSettings>(configuration.GetSection("Azure"));
+            services.Configure<KeyVaultSettings>(configuration.GetSection("KeyVaultSettings"));
 
             return services;
         }
