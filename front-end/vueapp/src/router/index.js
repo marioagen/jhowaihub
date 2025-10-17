@@ -253,6 +253,7 @@ const routes = [
             layout: "default",
         },
         beforeEnter: authenticate,
+        props: true,
     },
 ];
 

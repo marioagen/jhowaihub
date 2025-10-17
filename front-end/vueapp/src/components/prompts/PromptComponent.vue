@@ -131,7 +131,8 @@
                 this.$router.push({ name: 'PromptNew', query: { name: prompt } });
             },
             redirectToEditPrompt: function (id) {
-                this.$router.push({ name: 'PromptEdit', params: { id: id } });
+                console.log(id);
+                this.$router.push({ name: 'PromptNew', query: { id: id } });
             },
             setEntitySearch: function () {
                 this.entitySearch = {

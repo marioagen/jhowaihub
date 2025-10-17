@@ -67,6 +67,12 @@
     import PromptService from "@/services/prompts/PromptsService";
     export default {
         name: "PromptComponent",
+        props: {
+            id: {
+                type: Number,
+                required: false
+            }
+        },
         data() {
             return {
                 form: {
@@ -88,7 +94,6 @@
                     description: this.form.description,
                     text: this.form.text,
                 };
-                console.log(paramsData);
                 PromptService.createPrompt(paramsData)
                     .then((response) => {
                         if (response.error !== undefined) {
@@ -113,7 +118,9 @@
         created() {
            
         },
-        mounted() { },
+        mounted() {
+            console.log(this.$route.query.id);
+        },
         unmounted() { }
     }
 

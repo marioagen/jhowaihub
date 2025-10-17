@@ -156,7 +156,7 @@ export default {
                     data: { 
                         icon: "Activity", 
                         color: "blue", 
-                        input: stepTool.parameters[0].value || null, 
+                        input: stepTool?.input|| null, 
                         isEditableInput: stepTool.tool.isEditableInput,
                         toolType: stepTool.tool.toolType,
                     },
