@@ -207,12 +207,9 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private string FindOrCreateKeyName(Tool tool, ToolType toolType)
         {
-            if (toolType!.IsN8nTool())
+            if (toolType!.IsN8nTool() && string.IsNullOrEmpty(tool.ConnectorApiKey))
             {
-                if (string.IsNullOrEmpty(tool.ConnectorApiKey))
-                {
-                    return _keyVaultServices.CreateKeyName();
-                }
+                return _keyVaultServices.CreateKeyName();
             }
             return tool.ConnectorApiKey ?? string.Empty;
         }

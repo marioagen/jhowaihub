@@ -45,7 +45,7 @@ namespace WoopiAiHub.Application.Messaging
                 using var scope = _scopeFactory.CreateScope();
                 try
                 {
-                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant, ColTypeModule.WoopiAiHub);
+                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant!, ColTypeModule.WoopiAiHub);
                     var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
                     httpAccessor.HttpContext ??= new DefaultHttpContext();
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
@@ -59,7 +59,10 @@ namespace WoopiAiHub.Application.Messaging
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Failed to process message from {_queues.AutomationQueueResponse}. Execution id: {message.ExecutionId}");
+                    _logger.LogError(ex,
+                        "Failed to process message from {QueueName}. Execution id: {ExecutionId}",
+                        _queues.AutomationQueueResponse,
+                        message.ExecutionId);
                 }
             });
         }

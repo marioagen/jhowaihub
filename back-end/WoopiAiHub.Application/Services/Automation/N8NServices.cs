@@ -34,10 +34,10 @@ namespace WoopiAiHub.Application.Services.Automation
 
             var automationServicesDto = new AutomationServicesDto
                 (
-                    execution.StepToolId,
+                    execution!.StepToolId,
                     execution.CardId,
-                    automationOutputDto.Tenant,
-                    automationOutputDto.Email,
+                    automationOutputDto.Tenant!,
+                    automationOutputDto.Email!,
                     null,
                     0
                 );

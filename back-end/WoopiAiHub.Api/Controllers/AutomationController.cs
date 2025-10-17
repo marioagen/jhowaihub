@@ -11,7 +11,7 @@ namespace WoopiAiHub.Api.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
-    public class AutomationController : Controller
+    public class AutomationController : ControllerBase
     {
         private readonly IAutomationServices _automationServices;
 

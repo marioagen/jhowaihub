@@ -13,7 +13,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services.Automation
         Task StartExecutionByStepAsync(Step step, AutomationServicesDto automationServicesDto);
         Task StartExecutionByCardAsync(AutomationServicesDto automationServicesDto);
         Task ContinueExecution(AutomationServicesDto automationServicesDto);
-        Task<ICollection<ConnectorDto>> FindN8nWorkflowsByToolId(int id);
+        Task<ICollection<ConnectorDto>> FindN8nWorkflowsByToolId(int toolId);
         Task<ICollection<FormFieldDto>> FindN8nWebhookInputs(WebhookInputDto webhookInputDto);
     }
 }

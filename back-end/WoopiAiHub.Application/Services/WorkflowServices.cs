@@ -19,7 +19,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
-        private readonly IStepToolRepository _stepToolRepository;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
@@ -28,8 +27,7 @@ namespace WoopiAiHub.Application.Services
                                 IStepRepository stepRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
-                                IValidateWorkflow validateWorkflow,
-                                IStepToolRepository stepToolRepository)
+                                IValidateWorkflow validateWorkflow)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -38,8 +36,6 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
-            _stepToolRepository = stepToolRepository;
-
         }
 
         /// <summary>
@@ -330,7 +326,7 @@ namespace WoopiAiHub.Application.Services
         /// name="stepTool"/>.</param>
         /// <param name="lastStepTool">The last step tool from a previous step. If <paramref name="previousStepToolInSameStep"/> is null and this
         /// parameter is not null, this will be set as the dependency for <paramref name="stepTool"/>.</param>
-        private void SetDependencies(StepTool stepTool,
+        private static void SetDependencies(StepTool stepTool,
                                      StepTool? previousStepToolInSameStep,
                                      StepTool? lastStepTool)
         {
@@ -352,7 +348,7 @@ namespace WoopiAiHub.Application.Services
         /// cref="StepTool.Parameters"/> collection.</remarks>
         /// <param name="stepToolDto">The data transfer object containing the update information for the <see cref="StepTool"/>.</param>
         /// <returns>A new <see cref="StepTool"/> instance initialized with the specified update data.</returns>
-        private StepTool CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
+        private static StepTool CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
         {
             var stepTool = new StepTool(
                 0,
