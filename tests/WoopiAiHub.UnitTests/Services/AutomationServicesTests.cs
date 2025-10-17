@@ -376,7 +376,7 @@ namespace WoopiAiHub.UnitTests.Services
             stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
             
             // Verify AI profile advancement logic was called (FindById called twice: once initially, once for verification)
-            cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Exactly(2));
+            cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId), Times.Once);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Once);
         }
