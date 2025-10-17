@@ -38,6 +38,7 @@
                     :key="index"
                     :text="workflowData.name"
                     :clickable="false"
+                    class="ms-1"
                 />
             </template>
             <template #cell-actions="{ data }">
