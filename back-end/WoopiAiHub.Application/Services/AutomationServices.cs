@@ -262,17 +262,10 @@ namespace WoopiAiHub.Application.Services
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
 
-            if (dependentStepTool == null)
+            if (dependentStepTool == null ||
+                stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
             {
-                // Se não há StepTool dependente, significa que é a última StepTool do step atual
-                // Verifica se precisa avançar o step para perfis de IA
                 await CheckAndAdvanceAiProfileStepAsync(automationServicesDto);
-                return;
-            }
-            
-            if (stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
-            {
-                // Se os steps são diferentes, não há continuação no mesmo step
                 return;
             }
 
@@ -303,69 +296,31 @@ namespace WoopiAiHub.Application.Services
         /// <returns>Task que representa a operação assíncrona</returns>
         private async Task CheckAndAdvanceAiProfileStepAsync(AutomationServicesDto automationServicesDto)
         {
-            try
+            var card = await _cardRepository.FindById(automationServicesDto.CardId);
+            if (card?.Step?.Profile == null)
+                return;
+
+            if (card.Step.Profile.Name != "IA")
+                return;
+
+            var nextStepOrder = card.Step.Order + 1;
+            var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
+
+            if (nextStep == null)
             {
-                // Busca o card para obter informações do step atual
-                var card = await _cardRepository.FindById(automationServicesDto.CardId);
-                if (card?.Step?.Profile == null)
-                    return;
-
-                // Verifica se o perfil responsável pelo step atual é o perfil de IA
-                if (card.Step.Profile.Name != "IA")
-                    return;
-
-                _logger.LogInformation("Card {CardId} está no perfil IA. Avançando automaticamente para o próximo step.", automationServicesDto.CardId);
-
-                // Busca o próximo step no workflow
-                var nextStepOrder = card.Step.Order + 1;
-                var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
-                
-                if (nextStep == null)
-                {
-                    _logger.LogInformation("Não há próximo step para o card {CardId}. Workflow finalizado.", automationServicesDto.CardId);
-                    return;
-                }
-
-                // Atualiza o card para o próximo step
-                var previousStepId = card.StepId;
-                card.UpdateStepAndSatus(nextStep.Id, nextStep.StatusId);
-                var updated = _cardRepository.Update(card);
-
-                if (updated)
-                {
-                    _logger.LogInformation("Card {CardId} avançado automaticamente do step {CurrentStep} (ID: {CurrentStepId}) para o step {NextStep} (ID: {NextStepId})", 
-                        automationServicesDto.CardId, card.Step.Order, previousStepId, nextStep.Order, nextStep.Id);
-
-                    // Verifica se o card foi realmente atualizado no banco consultando novamente
-                    var updatedCard = await _cardRepository.FindById(automationServicesDto.CardId);
-                    if (updatedCard != null)
-                    {
-                        _logger.LogInformation("Confirmação: Card {CardId} agora está no step {StepId} no banco de dados", 
-                            automationServicesDto.CardId, updatedCard.StepId);
-                    }
-
-                    // Inicia as execuções do próximo step
-                    var nextStepDto = automationServicesDto with
-                    {
-                        StepId = nextStep.Id
-                    };
-                    await StartExecutionByCardAsync(nextStepDto);
-
-                    // Notifica o front-end sobre a mudança do step via SignalR
-                    // Envia 100% para indicar que o step atual foi completado antes de mover para o próximo
-                    await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id);
-                    
-                    _logger.LogInformation("Notificação SignalR enviada: CardId={CardId}, Email={Email}, Percentage=100%, StepId={StepId}", 
-                        automationServicesDto.CardId, automationServicesDto.Email, nextStep.Id);
-                }
-                else
-                {
-                    _logger.LogError("Falha ao atualizar o card {CardId} para o próximo step", automationServicesDto.CardId);
-                }
+                return;
             }
-            catch (Exception ex)
+
+            card.UpdateStepAndSatus(nextStep.Id, nextStep.StatusId);
+            var updated = _cardRepository.Update(card);
+
+            if (updated)
             {
-                _logger.LogError(ex, "Erro ao tentar avançar automaticamente o step do card {CardId}", automationServicesDto.CardId);
+                var nextStepDto = automationServicesDto with
+                {
+                    StepId = nextStep.Id
+                };
+                await StartExecutionByCardAsync(nextStepDto);
             }
         }
     }
