@@ -275,7 +275,7 @@ namespace WoopiAiHub.Application.Services.Automation
             if (dependentStepTool == null)
                 return;
 
-            if (stepTool!.Step.Order.Equals(dependentStepTool!.Step!.Order) is false)
+            if (stepTool!.Step!.Order.Equals(dependentStepTool!.Step!.Order) is false)
                 return;
 
             var execution = await _stepToolExecutionRepository
