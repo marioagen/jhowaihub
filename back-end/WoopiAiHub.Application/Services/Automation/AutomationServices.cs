@@ -65,13 +65,13 @@ namespace WoopiAiHub.Application.Services.Automation
             var allStepTools = await _stepToolRepository.FindStepToolsByStepIdsAsync(stepIds);
 
             var activeCardIds = await FindActiveCardIdsAsync(workflows);
-            if (activeCardIds.Count() == 0)
+            if (activeCardIds.Count == 0)
                 return false;
 
             var existing = await _stepToolExecutionRepository.FindExistingExecutionsAsync(activeCardIds);
 
             var newExecutions = BuildNewExecutions(workflows, allStepTools, activeCardIds, existing);
-            if (newExecutions.Count() == 0)
+            if (newExecutions.Count == 0)
                 return false;
 
             await _stepToolExecutionRepository.CreateRangeAsync(newExecutions);
