@@ -13,5 +13,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<Workflow?> FindByIdReturnModel(int id);
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string userEmail);
+        Task<List<Workflow>> FindByIdsAsync(ICollection<int> ids);
     }
 }

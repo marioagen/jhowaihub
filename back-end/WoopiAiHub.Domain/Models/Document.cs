@@ -25,7 +25,6 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual ICollection<DocumentHistory> DocumentHistories { get; set; }
         public virtual DocumentNormalized? DocumentNormalized { get; set; }
-        //public virtual ICollection<Team> Teams { get; set; }
         public virtual ICollection<Card> Cards { get; set; }
         public virtual ICollection<Workflow> Workflow { get; set; }
 
@@ -36,14 +35,16 @@ namespace WoopiAiHub.Domain.Models
                        bool enable,
                        string emailCreator,
                        int id,
+                       List<Workflow> workflow,
                        DateTime created) : base(id, created)
         {
-            this.Name = name;
-            this.Description = description;
-            this.ReferenceFile = referenceFile;
-            this.Status = status;
-            this.Enable = enable;
-            this.EmailCreator = emailCreator;
+            Name = name;
+            Description = description;
+            ReferenceFile = referenceFile;
+            Status = status;
+            Enable = enable;
+            Workflow = workflow;
+            EmailCreator = emailCreator;
         }
 
         /// <summary>
