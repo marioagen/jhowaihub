@@ -11,5 +11,7 @@
         public int OutputDataId { get; set; }
         public string OutputData { get; set; } = string.Empty;
         public bool IsEditableInput { get; set; }
+        public string? ConnectorUrl { get; set; }
+        public bool IsConnector {  get; set; }
     }
 }

@@ -76,7 +76,7 @@ namespace WoopiAiHub.Repository
                 return false;
 
             var deletedCount = _context.Steps
-                .Where(a => ids.Contains(a.Id))
+                .Where(a => ids!.Contains(a.Id))
                 .ExecuteDelete();
 
             return deletedCount > 0;

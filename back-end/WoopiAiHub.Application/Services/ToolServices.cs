@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WoopiAiHub.Application.Utils;
+﻿using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
@@ -13,10 +13,19 @@ namespace WoopiAiHub.Application.Services
     public class ToolServices : IToolServices
     {
         private readonly IToolRepository _toolRepository;
+        private readonly IToolTypeRepository _toolTypeRepository;
+        private readonly IApiClientFactory _apiClientFactory;
+        private readonly IKeyVaultServices _keyVaultServices;
 
-        public ToolServices(IToolRepository toolRepository)
+        public ToolServices(IToolRepository toolRepository,
+                            IToolTypeRepository toolTypeRepository,
+                            IApiClientFactory apiClientFactory,
+                            IKeyVaultServices keyVaultServices)
         {
             _toolRepository = toolRepository;
+            _toolTypeRepository = toolTypeRepository;
+            _apiClientFactory = apiClientFactory;
+            _keyVaultServices = keyVaultServices;
         }
 
         /// <summary>
@@ -30,6 +39,19 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if a tool with the same unique properties already exists.</exception>
         public async Task<bool> CreateAsync(ToolCreateDto toolCreateDto)
         {
+            var toolType = await _toolTypeRepository.FindModelByIdAsync(toolCreateDto.ToolTypeId)
+                ?? throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
+            
+            string keyVaultName = string.Empty;
+            if (toolType.IsN8nTool())
+            {
+                if (string.IsNullOrEmpty(toolCreateDto.ConnectorUrl) || string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
+                }
+                keyVaultName = _keyVaultServices.CreateKeyName();
+            }
+
             var tool = new Tool(
                 0,
                 DateTime.UtcNow,
@@ -38,7 +60,9 @@ namespace WoopiAiHub.Application.Services
                 toolCreateDto.ToolTypeId,
                 toolCreateDto.InputDataId,
                 toolCreateDto.OutputDataId,
-                toolCreateDto.IsEditableInput
+                toolCreateDto.IsEditableInput,
+                toolCreateDto.ConnectorUrl,
+                keyVaultName
              );
 
             var result = await _toolRepository.CreateUniqueAsync(tool);
@@ -46,6 +70,12 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
             }
+
+            if (!string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
+            {
+                await _keyVaultServices.SetSecretAsync(keyVaultName, toolCreateDto.ConnectorApiKey);
+            }
+
             return result;
         }
 
@@ -114,24 +144,74 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UpdateAsync(ToolUpdateDto toolUpdateDto)
         {
-            var tool = await _toolRepository.FindModelByIdAsync(toolUpdateDto.Id);
-            if (tool == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Tool not found", null);
-            }
+            var tool = await _toolRepository.FindModelByIdAsync(toolUpdateDto.Id)
+                ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
 
-            tool.Update(toolUpdateDto.Name, 
-                        toolUpdateDto.ToolTypeId, 
-                        toolUpdateDto.InputDataId, 
+            var toolType = await _toolTypeRepository.FindModelByIdAsync(toolUpdateDto.ToolTypeId)
+                ?? throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
+
+            ValidateConnector(toolUpdateDto, tool, toolType);
+
+            string keyVaultName = FindOrCreateKeyName(tool, toolType);
+
+            tool.Update(toolUpdateDto.Name,
+                        toolUpdateDto.ToolTypeId,
+                        toolUpdateDto.InputDataId,
                         toolUpdateDto.OutputDataId,
-                        toolUpdateDto.IsEditableInput);
+                        toolUpdateDto.IsEditableInput,
+                        toolUpdateDto.ConnectorUrl,
+                        keyVaultName);
 
             var result = await _toolRepository.UpdateAsync(tool);
             if (!result)
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
             }
+
+            if (!string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
+            {
+                await _keyVaultServices.SetSecretAsync(keyVaultName, toolUpdateDto.ConnectorApiKey);
+            }
+
             return result;
+        }
+
+        /// <summary>
+        /// Validadte connetor url and conenctor api key
+        /// </summary>
+        /// <param name="toolUpdateDto"></param>
+        /// <param name="tool"></param>
+        /// <param name="toolType"></param>
+        /// <exception cref="AppException"></exception>
+        private static void ValidateConnector(ToolUpdateDto toolUpdateDto, Tool tool, ToolType toolType)
+        {
+            if (toolType!.IsN8nTool())
+            {
+                if (string.IsNullOrEmpty(toolUpdateDto.ConnectorUrl))
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Coonector Url is required", null);
+                }
+
+                if (string.IsNullOrEmpty(tool.ConnectorApiKey) && string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Coonector Api Key is required", null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Find or create key name
+        /// </summary>
+        /// <param name="tool"></param>
+        /// <param name="toolType"></param>
+        /// <returns></returns>
+        private string FindOrCreateKeyName(Tool tool, ToolType toolType)
+        {
+            if (toolType!.IsN8nTool() && string.IsNullOrEmpty(tool.ConnectorApiKey))
+            {
+                return _keyVaultServices.CreateKeyName();
+            }
+            return tool.ConnectorApiKey ?? string.Empty;
         }
 
         /// <summary>
@@ -183,6 +263,26 @@ namespace WoopiAiHub.Application.Services
                 TotalPages = pageCount,
                 TotalCount = totalListCount,
             };
+        }
+
+        /// <summary>
+        /// Validate connector if connects using url and api key 
+        /// </summary>
+        /// <param name="toolConnectorDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<bool> ValidateConnector(ToolConnectorDto toolConnectorDto)
+        {
+            if (string.IsNullOrEmpty(toolConnectorDto.ConnectorUrl) || string.IsNullOrEmpty(toolConnectorDto.ConnectorApiKey))
+            {
+                throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
+            }
+
+            var api = _apiClientFactory.Create(toolConnectorDto.ConnectorUrl);
+
+            var response = await api.FindWorkflows(toolConnectorDto.ConnectorApiKey);
+
+            return response.IsSuccessStatusCode;
         }
     }
 }

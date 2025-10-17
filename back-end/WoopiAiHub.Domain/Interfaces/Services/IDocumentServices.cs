@@ -43,7 +43,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
                                                string emailCreator,
                                                DocumentStatus status);
 
-        Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto processOcrResultDto);
+        Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto dto);
         Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto);
     };
 }

@@ -42,7 +42,7 @@ namespace WoopiAiHub.Repository
                                                                    u.CardId.Equals(cardId))
                                                        .Select(v => v.Value)
                                                        .FirstOrDefaultAsync();
-            return output;
+            return output ?? string.Empty;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace WoopiAiHub.Repository
                 return false;
 
             var deletedCount = _context.StepToolOutputs
-                .Where(a => ids.Contains(a.Id))
+                .Where(a => ids!.Contains(a.Id))
                 .ExecuteDelete();
 
             return deletedCount > 0;

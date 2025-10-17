@@ -17,7 +17,6 @@ namespace WoopiAiHub.Application.Messaging
     public class OcrConsumer : BaseConsumer
     {
         private readonly IMessageConsumer<ProcessOcrResultDto> _consumer;
-        private readonly IMessagePublisher<DocumentEmbeddingsDataDto> _publisher;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<OcrConsumer> _logger;
         private readonly MessageQueues _queues;
@@ -25,14 +24,12 @@ namespace WoopiAiHub.Application.Messaging
         public OcrConsumer(IServiceScopeFactory scopeFactory,
                            IConfiguration configuration,
                            IMessageConsumer<ProcessOcrResultDto> consumer,
-                           IMessagePublisher<DocumentEmbeddingsDataDto> publisher,
                            ILogger<OcrConsumer> logger,
                            IOptions<MessageQueues> queues) : base(configuration)
         {
             _scopeFactory = scopeFactory;
             _queues = queues.Value;
             _consumer = consumer;
-            _publisher = publisher;
             _logger = logger;
         }
 

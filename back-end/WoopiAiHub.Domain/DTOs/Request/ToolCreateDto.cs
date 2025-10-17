@@ -7,5 +7,7 @@
         public int InputDataId { get; set; }
         public int OutputDataId { get; set; }
         public bool IsEditableInput { get; set; }
+        public string? ConnectorUrl { get; set; }
+        public string? ConnectorApiKey { get; set; }
     }
 }

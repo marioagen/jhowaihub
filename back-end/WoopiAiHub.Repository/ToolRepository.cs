@@ -4,6 +4,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -111,6 +112,20 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Asynchronously retrieves a tool model by stepToolId
+        /// </summary>
+        /// <param name="stepToolId"></param>
+        /// <returns></returns>
+        public async Task<Tool?> FindModelByStepToolIdAsync(int stepToolId)
+        {
+            return await _context.Tools.Where(t => t.StepTools.Any(st => st.Id == stepToolId))
+                .Include(t => t.InputData)
+                .Include(t => t.OutputData)
+                .Include(t => t.ToolType)
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
         /// Updates the specified tool in the database if no other tool with the same name exists.
         /// </summary>
         /// <remarks>This method checks for name uniqueness among tools before performing the update. If a
@@ -165,7 +180,9 @@ namespace WoopiAiHub.Repository
                 InputDataId = t.InputData!.Id,
                 OutputData = t.OutputData!.Name,
                 OutputDataId = t.OutputData!.Id,
-                IsEditableInput = t.IsEditableInput
+                IsEditableInput = t.IsEditableInput,
+                ConnectorUrl = t.ConnectorUrl,
+                IsConnector = t.ToolType!.Name.Contains(ConnectorNames.N8N)
             };
         }
     }
