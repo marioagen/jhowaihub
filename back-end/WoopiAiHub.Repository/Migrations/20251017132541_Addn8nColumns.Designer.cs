@@ -12,8 +12,8 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251006210130_ChangesStepToolParameter")]
-    partial class ChangesStepToolParameter
+    [Migration("20251017132541_Addn8nColumns")]
+    partial class Addn8nColumns
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

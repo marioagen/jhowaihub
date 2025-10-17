@@ -28,7 +28,6 @@ namespace WoopiAiHub.Application.Utils
             return result;
         }
 
-
         /// <summary>
         /// Map FormFieldDto from json node
         /// </summary>

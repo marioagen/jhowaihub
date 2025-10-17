@@ -3,7 +3,7 @@ using WoopiAiHub.Domain.DTOs.Messaging;
 
 namespace WoopiAiHub.Domain.DTOs.Request.Automation
 {
-    public class AutomationInputDto
+    public record class AutomationInputDto
     {
         public string Url { get; set; } = string.Empty;
         public string WebhookId { get; set; } = string.Empty;
