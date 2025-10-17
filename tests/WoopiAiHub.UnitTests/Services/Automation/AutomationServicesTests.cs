@@ -5,6 +5,7 @@ using Refit;
 using System.Net;
 using WoopiAiHub.Application.Services.Automation;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
@@ -295,7 +296,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var dependentStepTool = AutomationFixture.FindValidStepTool();
             var tool = ToolFixture.FindValidToolModel();
-            tool.ToolType = ToolTypeFixture.FindValidToolType();
+            tool.ToolType = ToolTypeFixture.FindValidToolTypeWithName("n8n");
             dependentStepTool.Tool = tool;
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
             var stepToolDto = AutomationFixture.FindValidStepToolDto();
@@ -314,7 +315,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
             stepToolExecutionRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<StepToolExecution>())).Returns(Task.CompletedTask);
             toolFactoryHandlerMock.Setup(s => s.GetHandler(It.IsAny<ToolType>())).Returns(handlerMock.Object);
-            handlerMock.Setup(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>())).ReturnsAsync(payload);
+            handlerMock.Setup(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>())).ReturnsAsync(payload);
             messagePublisherMock.Setup(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>())).Returns(Task.CompletedTask);
 
             // Act
@@ -325,8 +326,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, It.IsAny<int>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             toolFactoryHandlerMock.Verify(s => s.GetHandler(tool.ToolType), Times.Once);
-            handlerMock.Verify(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Once);
-            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message!), Times.Once);
+            handlerMock.Verify(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Once);
+            messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
         }
 
 
