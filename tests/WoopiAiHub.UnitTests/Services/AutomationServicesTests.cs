@@ -389,26 +389,20 @@ namespace WoopiAiHub.UnitTests.Services
             var stepToolDto = AutomationFixture.FindValidStepToolDto();
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
 
-            // Create normal (non-AI) profile
             var normalProfile = new Domain.Models.Profile("Normal Profile", 2, DateTime.UtcNow);
-            
-            // Create current step with normal profile
+
             var currentStep = new Domain.Models.Step(1, DateTime.UtcNow, 1, "Current Step", 1, normalProfile.Id, 1);
             currentStep.Profile = normalProfile;
-            
-            // Create card with normal step
+
             var card = new Domain.Models.Card(1, DateTime.UtcNow, currentStep.Id, 1, "Test Card", 1, true, null);
             card.Step = currentStep;
             
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             var stepRepositoryMock = _mocker.GetMock<IStepRepository>();
-
-            // Setup mocks - No dependent step tool to trigger advancement check
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
             stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((Domain.Models.StepTool)null);
-            
-            // Setup for non-AI profile (should not advance)
+           
             cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
 
             // Act
@@ -417,7 +411,6 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
             
-            // Verify AI profile advancement logic was called but didn't advance because it's not AI profile
             cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Never);

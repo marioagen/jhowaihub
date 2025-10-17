@@ -286,8 +286,6 @@ namespace WoopiAiHub.Application.Services
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message);
         }
 
-
-
         /// <summary>
         /// Verifica se o card está em um step cujo perfil responsável é o perfil de IA
         /// e avança automaticamente o card para o próximo step do workflow.
@@ -300,7 +298,7 @@ namespace WoopiAiHub.Application.Services
             if (card?.Step?.Profile == null)
                 return;
 
-            if (card.Step.Profile.Name != "IA")
+            if (card.Step.Profile.Name != Profile.IAFileName)
                 return;
 
             var nextStepOrder = card.Step.Order + 1;

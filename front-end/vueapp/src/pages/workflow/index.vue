@@ -230,7 +230,6 @@
             signalRService.on(this.signalrEventExecutionChanged, (message) => {
                 if (!this.kanbanCards.steps) return;
 
-                // Procura o card em todos os steps
                 let foundCard = null;
 
                 for (let i = 0; i < this.kanbanCards.steps.length; i++) {
@@ -245,12 +244,7 @@
                 }
 
                 if (!foundCard) return;
-
-                // Atualiza a porcentagem do card
                 foundCard.percentage = message.percentage;
-
-                // Se atingiu 100%, recarrega os dados do kanban para refletir mudanças do backend
-                // (incluindo mudanças de step feitas pelo backend para perfis IA)
                 if (message.percentage === 100.0) {
                     setTimeout(() => {
                         this.getWorkflowByUser();

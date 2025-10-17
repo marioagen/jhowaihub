@@ -201,8 +201,6 @@ namespace WoopiAiHub.UnitTests.Services
             {
                 new ProfileDto { Id = 1, Name = "Profile1" },
                 new ProfileDto { Id = 2, Name = "Profile2" }
-                // Note: AI profile is not included in the expected result from repository
-                // because it should be filtered out at the repository level
             };
             _profileRepoMock.Setup(repo => repo.FindAll()).ReturnsAsync(profiles);
 
@@ -211,7 +209,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.Equal(profiles, result);
-            Assert.DoesNotContain(result, p => p.Name == "IA");
+            Assert.DoesNotContain(result, p => p.Name == Profile.IAFileName);
             _profileRepoMock.Verify(repo => repo.FindAll(), Times.Once);
         }
 
@@ -225,7 +223,6 @@ namespace WoopiAiHub.UnitTests.Services
             {
                 new ProfileDto { Id = 1, Name = "Profile1" },
                 new ProfileDto { Id = 2, Name = "Profile2" }
-                // Note: AI profile is not included because it should be filtered out at the repository level
             }.AsQueryable();
 
             _profileRepoMock.Setup(r => r.FindAllPaged(pagedData)).Returns(profiles);
@@ -236,7 +233,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.NotNull(result);
             Assert.True(result.Content.Any());
-            Assert.DoesNotContain(result.Content, p => p.Name == "IA");
+            Assert.DoesNotContain(result.Content, p => p.Name == Profile.IAFileName);
         }
     }
 }
