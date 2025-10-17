@@ -34,7 +34,16 @@ export default {
     getUsersByTeamId(teamId){
         return api
             .get(`/User/Team/${teamId}`)
-            .then(({data}) => {
+            .then(({ data }) => {
+                return data;
+            })
+            .catch(function (e) {
+                logService.showMessage(e);
+            });
+    },
+    getUserById(userId) {
+        return api.post('/User/FindById', userId)
+            .then(({ data }) => {
                 return data;
             })
             .catch(function (e) {
