@@ -5,6 +5,8 @@ namespace WoopiAiHub.Application.Utils
 {
     public static class JsonSchemaToFormMapper
     {
+        private const string PropertiesName = "properties";
+
         /// <summary>
         /// Return FormFieldDto list from json string 
         /// </summary>
@@ -13,8 +15,8 @@ namespace WoopiAiHub.Application.Utils
         public static List<FormFieldDto> MapToFormFields(string json)
         {
             var schema = JsonNode.Parse(json);
-            var properties = schema?["properties"]?.AsObject();
-            var required = schema?["required"]?.AsArray()?.Select(x => x.ToString()).ToList() ?? new();
+            var properties = schema?[PropertiesName]?.AsObject();
+            var required = schema?["required"]?.AsArray()?.Select(x => x!.ToString()).ToList() ?? new();
 
             var result = new List<FormFieldDto>();
             if (properties != null)
@@ -53,17 +55,17 @@ namespace WoopiAiHub.Application.Utils
                 Children = new()
             };
 
-            if (node?["properties"] != null)
+            if (node?[PropertiesName] != null)
             {
-                var subRequired = node?["required"]?.AsArray()?.Select(x => x.ToString()).ToList() ?? new();
-                foreach (var sub in node["properties"]!.AsObject())
+                var subRequired = node["required"]?.AsArray()?.Select(x => x!.ToString()).ToList() ?? new();
+                foreach (var sub in node![PropertiesName]!.AsObject())
                     field.Children!.Add(MapField(sub.Key, sub.Value, subRequired));
             }
 
-            if (type == "array" && node?["items"]?["properties"] != null)
+            if (type == "array" && node?["items"]?[PropertiesName] != null)
             {
-                var subRequired = node["items"]?["required"]?.AsArray()?.Select(x => x.ToString()).ToList() ?? new();
-                foreach (var sub in node["items"]!["properties"]!.AsObject())
+                var subRequired = node["items"]?["required"]?.AsArray()?.Select(x => x!.ToString()).ToList() ?? new();
+                foreach (var sub in node["items"]![PropertiesName]!.AsObject())
                     field.Children!.Add(MapField(sub.Key, sub.Value, subRequired));
             }
 

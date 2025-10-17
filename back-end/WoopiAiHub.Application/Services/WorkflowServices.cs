@@ -375,7 +375,7 @@ namespace WoopiAiHub.Application.Services
         /// status ID.</param>
         /// <param name="teamId">The identifier of the team associated with the step.</param>
         /// <returns>A new <see cref="Step"/> instance initialized with the provided data.</returns>
-        private Step CreateStep(IStepDto stepDto, int teamId)
+        private static Step CreateStep(IStepDto stepDto, int teamId)
         {
             return new Step(
                 0,

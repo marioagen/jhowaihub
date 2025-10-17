@@ -2,7 +2,7 @@
 
 namespace WoopiAiHub.Domain.Interfaces.Refit
 {
-    public interface In8nConnector
+    public interface In8NConnector
     {
         [Get("/api/v1/workflows")]
         Task<ApiResponse<string>> FindWorkflows([Header("X-N8N-API-KEY")] string apiKey,

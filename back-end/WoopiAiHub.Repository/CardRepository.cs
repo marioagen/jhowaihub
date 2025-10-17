@@ -82,7 +82,7 @@ namespace WoopiAiHub.Repository
         public async Task<ICollection<int>> FindActiveCardIdsInFirstStepAsync(IEnumerable<int> cardIds)
         {
             return await _context.Cards
-                .Where(c => cardIds.Contains(c.Id) && c.Step.Order == 1)
+                .Where(c => cardIds.Contains(c.Id) && c.Step!.Order == 1)
                 .Select(c => c.Id)
                 .ToListAsync();
         }

@@ -118,7 +118,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                             StepTools = new List<StepToolDto>()
                         },
                         Tool = null,
-                        Parameters = new List<StepToolParameterDto>()
+                        Parameters = []
                     }
                 }
 

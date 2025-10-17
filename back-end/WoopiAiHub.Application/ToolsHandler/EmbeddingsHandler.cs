@@ -56,7 +56,7 @@ public class EmbeddingsHandler : IToolHandler
         var keyMongoAcces = await _keyGeneratorApi.GetKey(keyAccess, automationServicesDto.Tenant);
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
 
-        foreach (var item in documents.DocumentEmbeddings)
+        foreach (var item in documents!.DocumentEmbeddings)
         {
             item.KeyMongoAccess = keyMongoAcces;
         }

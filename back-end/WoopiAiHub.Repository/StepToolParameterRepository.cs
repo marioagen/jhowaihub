@@ -25,7 +25,7 @@ namespace WoopiAiHub.Repository
                 return false;
 
             var deletedCount = _context.StepToolParameters
-                .Where(a => ids.Contains(a.Id))
+                .Where(a => ids!.Contains(a.Id))
                 .ExecuteDelete();
 
             return deletedCount > 0;
@@ -60,7 +60,7 @@ namespace WoopiAiHub.Repository
         /// tool is found.</returns>
         public StepToolParameter? FindByStepToolId(int stepToolId)
         {
-            var input = _context.StepToolParameters.Where(u => u.StepToolId.Equals(stepToolId) && u.StepTool.Tool.IsEditableInput)
+            var input = _context.StepToolParameters.Where(u => u.StepToolId.Equals(stepToolId) && u.StepTool!.Tool!.IsEditableInput)
                                                    .FirstOrDefault();
 
             return input;

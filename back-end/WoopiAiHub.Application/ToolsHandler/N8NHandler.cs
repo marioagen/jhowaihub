@@ -55,7 +55,7 @@ namespace WoopiAiHub.Application.ToolsHandler
                     Type = ConnectorNames.N8N,
                     Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
                     Content = input.Value.ToString(),
-                    ExecutionId = execution.Id
+                    ExecutionId = execution!.Id
                 }
             };
         }

@@ -17,7 +17,7 @@ namespace WoopiAiHub.Application.Utils
 
             if (string.IsNullOrEmpty(_settings.VaultUrl))
             {
-                throw new ArgumentNullException(nameof(_settings.VaultUrl));
+                throw new ArgumentException("VaultUrl cannot be null or empty.", nameof(options));
             }
 
             if (string.IsNullOrWhiteSpace(_settings.ClientSecret))

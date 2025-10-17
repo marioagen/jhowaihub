@@ -25,14 +25,14 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IToolRepository> _toolRepositoryMock;
         private readonly Mock<IToolTypeRepository> _toolTypeRepositoryMock;
         private readonly Mock<IApiClientFactory> _apiClientFactoryMock;
-        private readonly Mock<In8nConnector> _in8nConnectorMock;
+        private readonly Mock<In8NConnector> _in8nConnectorMock;
 
         public ToolServicesTests()
         {
             _mocker = new AutoMocker();
 
             _apiClientFactoryMock = _mocker.GetMock<IApiClientFactory>();
-            _in8nConnectorMock = _mocker.GetMock<In8nConnector>();
+            _in8nConnectorMock = _mocker.GetMock<In8NConnector>();
             _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             _toolTypeRepositoryMock = _mocker.GetMock<IToolTypeRepository>();
 

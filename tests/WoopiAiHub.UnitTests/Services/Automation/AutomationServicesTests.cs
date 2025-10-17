@@ -191,12 +191,15 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
             {
                 Cards = new List<Card> { new Card(1, DateTime.UtcNow,2,1,"name",1,true, guid) },
-                StepTools = new List<StepTool>() // Sem tools
+                StepTools = new List<StepTool>()
             };
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
 
-            // Act & Assert
-            await _service.StartExecutionByStepAsync(step,automationDto); // Não deve lançar exceção
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.StartExecutionByStepAsync(step, automationDto));
+
+            // Assert
+            Assert.Null(exception);
         }
 
         [Fact(DisplayName = "StartExecutionByWorkflows should call StartExecutionByStep for steps with order 1")]
@@ -277,8 +280,11 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(r => r.FindByStepIdAndOrderAsync(It.IsAny<int>(), 1))
                 .ReturnsAsync((StepTool?)null);
 
-            // Act & Assert
-            await _service.StartExecutionByCardAsync(automationDto);
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.StartExecutionByCardAsync(automationDto));
+
+            // Assert
+            Assert.Null(exception);
         }
 
         [Fact(DisplayName = "ContinueExecution should execute dependent StepTool for valid StepTool and Card")]
@@ -334,8 +340,11 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(r => r.FindDependentAsync(It.IsAny<int>()))
                 .ReturnsAsync((StepTool?)null);
 
-            // Act & Assert
-            await _service.ContinueExecution(automationDto); // Não deve lançar exceção
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.ContinueExecution(automationDto));
+
+            // Assert
+            Assert.Null(exception);
         }
 
         [Fact(DisplayName = "FindN8nWorkflowsByToolId should throw an AppException when the tool is not found")]
@@ -383,7 +392,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(tool);
 
-            var apiClientMock = _mocker.GetMock<In8nConnector>();
+            var apiClientMock = _mocker.GetMock<In8NConnector>();
             apiClientMock.Setup(x => x.FindWorkflows(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                          .ReturnsAsync(response);
 
@@ -417,7 +426,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(tool);
 
-            var apiClientMock = _mocker.GetMock<In8nConnector>();            
+            var apiClientMock = _mocker.GetMock<In8NConnector>();            
             apiClientMock.Setup(api => api.FindWorkflows(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(response);
 
@@ -486,7 +495,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
                               .ReturnsAsync(tool);
 
-            var apiClientMock = _mocker.GetMock<In8nConnector>();
+            var apiClientMock = _mocker.GetMock<In8NConnector>();
             apiClientMock.Setup(api => api.FindWorkflowInputs(It.IsAny<string>()))
                          .ReturnsAsync(response);
 
@@ -515,7 +524,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
                               .ReturnsAsync(tool);
 
-            var apiClientMock = _mocker.GetMock<In8nConnector>();
+            var apiClientMock = _mocker.GetMock<In8NConnector>();
 
             apiClientMock.Setup(api => api.FindWorkflowInputs(It.IsAny<string>()))
                          .ReturnsAsync(response);

@@ -43,7 +43,7 @@ namespace WoopiAiHub.Repository
             return await _context.StepToolExecutions
                                  .FirstOrDefaultAsync(s => s.CardId == cardId &&
                                                            s.Status == Domain.Enum.StatusExecution.Running &&
-                                                           s.StepTool.Tool.ToolType.Equals("Ocr"));
+                                                           s.StepTool!.Tool!.ToolType!.Equals("Ocr"));
         }
 
        /// <summary>
@@ -120,7 +120,7 @@ namespace WoopiAiHub.Repository
                 return false;
 
             var deletedCount = _context.StepToolExecutions
-                .Where(a => ids.Contains(a.Id))
+                .Where(a => ids!.Contains(a.Id))
                 .ExecuteDelete();
 
             return deletedCount > 0;

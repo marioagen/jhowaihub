@@ -52,7 +52,7 @@ public class OcrHandler : IToolHandler
             {
                 Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
                 Tenant = automationServicesDto.Tenant,
-                ReferenceFile = automationServicesDto.ReferenceFile,
+                ReferenceFile = automationServicesDto.ReferenceFile!,
                 Model = tenantInfo.OcrModel,
                 Email = automationServicesDto.Email,
                 ResponseQueue = _messageQueues.OcrQueueAiHubResponse
