@@ -34,6 +34,8 @@ namespace WoopiAiHub.Repository
                                  .Where(c => c.Id == id)
                                  .Include(d => d.Document)
                                  .Include(s => s.Step)
+                                 .ThenInclude(p => p!.Profile)
+                                 .Include(s => s.Step)
                                  .ThenInclude(w => w!.Workflow)
                                  .ThenInclude(t => t!.Team)
                                  .ThenInclude(u => u!.Users)
@@ -82,7 +84,7 @@ namespace WoopiAiHub.Repository
         public async Task<ICollection<int>> FindActiveCardIdsInFirstStepAsync(IEnumerable<int> cardIds)
         {
             return await _context.Cards
-                .Where(c => cardIds.Contains(c.Id) && c.Step.Order == 1)
+                .Where(c => cardIds.Contains(c.Id) && c.Step!.Order == 1)
                 .Select(c => c.Id)
                 .ToListAsync();
         }

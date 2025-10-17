@@ -103,7 +103,7 @@ namespace WoopiAiHub.Application.Services
                 card.Id,
                 tenant,
                 email,
-                card.Document.ReferenceFile,
+                card.Document!.ReferenceFile,
                 step.Id
             );
             if (result)

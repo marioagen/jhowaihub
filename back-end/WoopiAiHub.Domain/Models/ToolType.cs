@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -18,5 +19,8 @@ namespace WoopiAiHub.Domain.Models
         }
 
         public ToolType(int id, DateTime created) : base(id, created) { }
+
+        public bool IsN8nTool()
+            => Name?.Contains(ConnectorNames.N8N, StringComparison.OrdinalIgnoreCase) == true;
     }
 }

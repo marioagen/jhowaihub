@@ -641,6 +641,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
+                    b.Property<bool>("RequiredFile")
+                        .HasColumnType("bit")
+                        .HasColumnName("RequiredFile");
+
                     b.Property<int>("StepToolId")
                         .HasColumnType("int")
                         .HasColumnName("StepToolId");
@@ -649,6 +653,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Value");
+
+                    b.Property<Guid?>("WebhookId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("WebhookId");
 
                     b.HasKey("Id");
 
@@ -688,6 +696,14 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnName("Id");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConnectorApiKey")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("ConnectorApiKey");
+
+                    b.Property<string>("ConnectorUrl")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("ConnectorUrl");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime")

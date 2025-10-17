@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Refit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Utils;
-using Refit;
+using WoopiAiHub.Infrastructure.Messaging.Configuration;
 
 namespace WoopiAiHub.Application.DependencyInjection
 {
@@ -39,6 +40,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddRefitClient<IGraphApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.GraphApiBaseAddress));
             services.AddRefitClient<IMarketPlaceApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.MarketPlaceBaseAddress));
             services.AddRefitClient<IKeyGeneratorApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.KeyGeneratorApiBaseAddress));
+
+            services.Configure<KeyVaultSettings>(configuration.GetSection("KeyVaultSettings"));
 
             return services;
         }

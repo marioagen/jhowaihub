@@ -91,6 +91,7 @@
     import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
     import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
     import UserService from "@/services/users/UserService";
+    import logService from '@/services/log/logService.js';
 
     export default {
         name: "WorkflowPage",
@@ -227,12 +228,25 @@
             await signalRService.startConnection();
 
             signalRService.on(this.signalrEventExecutionChanged, (message) => {
-                const step = this.kanbanCards.steps.find(s => s.id === message.stepId);
-                if (!step?.cards) return;
+                if (!this.kanbanCards.steps) return;
 
-                const item = step.cards.find(card => card.id === message.cardId);
-                if (item) {
-                    item.percentage = message.percentage;
+                let foundCard = null;
+
+                for (let i = 0; i < this.kanbanCards.steps.length; i++) {
+                    const step = this.kanbanCards.steps[i];
+                    if (step.cards) {
+                        const card = step.cards.find(c => c.id === message.cardId);
+                        if (card) {
+                            foundCard = card;
+                            break;
+                        }
+                    }
+                }
+
+                if (!foundCard) return;
+                foundCard.percentage = message.percentage;
+                if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
+                    this.getWorkflowByUser();
                 }
             });
         },

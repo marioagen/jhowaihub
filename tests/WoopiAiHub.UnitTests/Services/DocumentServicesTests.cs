@@ -607,7 +607,7 @@ namespace WoopiAiHub.UnitTests.Services
             var idDocument = 1;
             var generatedKey = Guid.NewGuid().ToString();
             var tenant = _fixture.FindValidTenantInfoDto();
-            var execution = _fixture.FindValidStepToolExecution();
+            var execution = DocumentFixture.FindValidStepToolExecution();
             var stepTool =  WorkflowFixture.FindValidStepTool();
 
             var configurationMock = new Mock<IConfiguration>();
@@ -652,7 +652,7 @@ namespace WoopiAiHub.UnitTests.Services
             var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
-            var stepToolExecution = _fixture.FindValidStepToolExecution();
+            var stepToolExecution = DocumentFixture.FindValidStepToolExecution();
 
 
             marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
