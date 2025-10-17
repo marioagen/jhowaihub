@@ -343,17 +343,13 @@ namespace WoopiAiHub.UnitTests.Services
             var stepToolDto = AutomationFixture.FindValidStepToolDto();
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
 
-            // Create AI profile
             var aiProfile = new Domain.Models.Profile("IA", 1, DateTime.UtcNow);
-            
-            // Create current step with AI profile
+
             var currentStep = new Domain.Models.Step(1, DateTime.UtcNow, 1, "Current Step", 1, aiProfile.Id, 1);
             currentStep.Profile = aiProfile;
-            
-            // Create next step
+
             var nextStep = new Domain.Models.Step(2, DateTime.UtcNow, 1, "Next Step", 2, 2, 1);
-            
-            // Create card with AI step
+
             var card = new Domain.Models.Card(1, DateTime.UtcNow, currentStep.Id, 1, "Test Card", 1, true, null);
             card.Step = currentStep;
             
@@ -362,11 +358,9 @@ namespace WoopiAiHub.UnitTests.Services
             var stepRepositoryMock = _mocker.GetMock<IStepRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
 
-            // Setup mocks - No dependent step tool to trigger AI advancement
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
             stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((Domain.Models.StepTool)null);
-            
-            // Setup for AI profile advancement
+
             cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
             stepRepositoryMock.Setup(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId)).ReturnsAsync(nextStep);
             cardRepositoryMock.Setup(r => r.Update(It.IsAny<Domain.Models.Card>())).Returns(true);
@@ -381,7 +375,6 @@ namespace WoopiAiHub.UnitTests.Services
             cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId), Times.Once);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Once);
-            // Verify SignalR notification was sent with 100% completion
             hubNotifierMock.Verify(h => h.CardProgessAsync(automationDto.Email, automationDto.CardId, 100.0, nextStep.Id), Times.Once);
         }
 
