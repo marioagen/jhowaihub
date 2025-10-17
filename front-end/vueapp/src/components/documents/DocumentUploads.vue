@@ -322,8 +322,8 @@
                 this.dropzoneInstance.on("removedfile", this.onFileRemove);
             },
             getName(id) {
-                const team = this.workflowsList.find((t) => t.id === id);
-                return team ? team.name : "Desconhecido";
+                const workflow = this.workflowsList.find((t) => t.id === id);
+                return workflow ? workflow.name : "Desconhecido";
             },
             selectAll(event) {
                 event.target.blur();
@@ -412,6 +412,7 @@
                 };
                 this.message = this.$t("labelSendingTheDocument");
                 this.isLoading = true;
+
                 const apiHeaders = {
                     "X-Email": this.$store.state.userProfile.login,
                     "X-Tenant": this.$store.state.userProfile.tenant,
@@ -428,7 +429,7 @@
                         description: this.form.description,
                         emailCreator: this.$store.state.userProfile.login,
                         filesNames: filesNames,
-                        teamsIds: this.selectedWorkflows.slice(),
+                        workflows: this.selectedWorkflows.slice(),
                     };
 
                     return this.readFileAsArrayBuffer(file).then((arrayBuffer) => {
@@ -462,8 +463,10 @@
                                 uploadFileWorker.send({ message: chunkData });
                             });
                         });
-                    localStorage.setItem("showToast", "true");
-                    this.$router.push({ name: "Workflow" });
+                    localStorage.setItem("showToast", "true");                 
+                })
+                .finally(() => {
+                    this.$router.push({ name: "Documents" });
                 });
             },
             backToListDocuments() {
@@ -528,7 +531,6 @@
                                 icon: 'CircleX',
                             });
                         }
-                        console.log(response)
                         this.workflowsList = response.filter(t => t.name);
                     })
                     .finally(() => {
