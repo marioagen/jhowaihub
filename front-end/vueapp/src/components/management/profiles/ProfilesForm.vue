@@ -39,7 +39,6 @@
                             <label class="form-label mb-0">{{ $t("labelPermissions") }}</label>
                             <span class="text-muted">{{ selectedPermissions.length }} {{ $t("labelSelectedWithO") }}</span>
                         </div>
-
                         <div class="mb-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
@@ -53,35 +52,41 @@
                         </div>
                         <div class="mb-3">
                             <button type="button" class="btn btn-outline-primary btn-sm me-2" @click="selectAll">
-                                <i class="bi bi-check-all"></i>
+                                <LucideIcon icon="CheckCheck" :size="15" />
                                 {{ $t("labelSelectAll") }}
                             </button>
                             <button type="button" class="btn btn-outline-secondary btn-sm" @click="clearSelection">
-                                <i class="bi bi-x-circle"></i>
+                                <LucideIcon icon="CircleX" :size="15" />
                                 {{ $t("labelClearSelection") }}
                             </button>
                         </div>
-                        <div class="border rounded p-1 user-list">
-                            <div v-for="permission in filteredPermissions" :key="permission.id" class="p-1">
+                        <div class="border rounded p-2 user-list">
+                            <div class="row ms-2">
+                                <div
+                                v-for="permission in filteredPermissions"
+                                :key="permission.id"
+                                class="col-md-3 p-1"
+                                >
                                 <div class="form-check d-flex align-items-center">
                                     <input
-                                        class="form-check-input me-3"
-                                        type="checkbox"
-                                        :id="`permission-${permission.id}`"
-                                        :value="permission.id"
-                                        v-model="selectedPermissions"
+                                    class="form-check-input me-2"
+                                    type="checkbox"
+                                    :id="`permission-${permission.id}`"
+                                    :value="permission.id"
+                                    v-model="selectedPermissions"
                                     />
                                     <label
-                                        class="form-check-label d-flex align-items-center w-100"
-                                        :for="`permission-${permission.id}`"
+                                    class="form-check-label fw-semibold"
+                                    :for="`permission-${permission.id}`"
                                     >
-                                        <div>
-                                            <div class="fw-semibold">{{ permission.description }}</div>
-                                        </div>
+                                    {{ permission.description }}
                                     </label>
                                 </div>
+                                </div>
                             </div>
-                            <div v-if="permissionError" class="invalid-feedback d-block">{{ permissionError }}</div>
+                            <div v-if="permissionError" class="invalid-feedback d-block">
+                                {{ permissionError }}
+                            </div>
                         </div>
                     </div>
                 </div>
