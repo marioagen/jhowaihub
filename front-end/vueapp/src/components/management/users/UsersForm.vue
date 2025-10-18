@@ -26,7 +26,7 @@
             </div>
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
-                     <Form ref="formRef">
+                    <Form ref="formRef">
                         <div >
                             <div class="row">
                                 <div class="col-6">

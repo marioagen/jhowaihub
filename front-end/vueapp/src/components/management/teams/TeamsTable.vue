@@ -138,8 +138,12 @@
                 return date.formatDate(str);
             },
             editTeam(team) {
-                this.selectedTeam = team;
-                this.openModalTeam();
+                this.$router.push({
+                    name: 'EditTeam',
+                    params: {
+                        id: team.id,
+                    }
+                });
             },
             openConfirmation(team) {
                 this.selectedTeam = team;
