@@ -49,5 +49,5 @@ export default {
             .catch(function (e) {
                 logService.showMessage(e);
             });
-    }
+    },
 };
