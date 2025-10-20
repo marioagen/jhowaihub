@@ -12,7 +12,7 @@
                        v-model="filters.input"
                        @keydown.enter="filterData"
                        @keydown.delete="filterData"
-                       :placeholder="$t('filters.promptInput')"
+                       :placeholder="$t('prompts.searchPrompts')"
                        ref="searchInpt" />
                 <span v-if="showCleanBtn" class="input-group-text border-start-0 bg-white" @click="cleanInput">
                     <LucideIcon icon="X" :size="16" />

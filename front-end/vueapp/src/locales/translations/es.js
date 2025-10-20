@@ -245,6 +245,7 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
     labelProcessing: "Procesando",
+    labelCreated: "Creado em:",
     Admin: "Admin",
      login: {
         index: "Login",
@@ -562,7 +563,10 @@
         information: "Informacion basica",
         subtitleNew: "Crear un nuevo prompt de IA",
         promptContent: "Contenido del prompt",
-        placeholderNamePrompt: "Introduzca el nombre del prompt"
+        placeholderNamePrompt: "Introduzca el nombre del prompt",
+        labelLoadMore: "Cargar más",
+        searchPrompts: "Buscar prompts",
+        noPromptsListWereFound: "No se encontraron prompts",
     }
 };
 

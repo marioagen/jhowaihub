@@ -26,7 +26,7 @@
         </button>
     </div>
     <div class="row loading-container" v-if="dataPrompt.length === 0 && !loading">
-        <div class="data-load"><i class="fas fa-exclamation-circle text-secondary"></i>&nbsp;{{ $t('labelNoPromptsListWereFound') }}.</div>
+        <div class="data-load"><i class="fas fa-exclamation-circle text-secondary"></i>&nbsp;{{ $t('prompts.noPromptsListWereFound') }}.</div>
     </div>
     <div class="row loading-container" v-if="loading">
         <div class="data-load"><i class="fas fa-sync-alt fa-spin text-secondary"></i>&nbsp;{{ $t('labelLoading') }}..</div>
@@ -64,7 +64,7 @@
     <div class="row mt-1" v-if="!loading && this.dataPrompt.length < this.pagination.count">
         <div class="col">
             <div class="pagination justify-content-center">
-                <button type="button" class="btn btn-primary" @click="loadMore">{{$t('labelLoadMore')}}</button>
+                <button type="button" class="btn btn-primary" @click="loadMore">{{$t('prompts.labelLoadMore')}}</button>
             </div>
         </div>
     </div>

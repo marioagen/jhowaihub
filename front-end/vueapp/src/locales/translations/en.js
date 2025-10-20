@@ -309,6 +309,7 @@
     labelSelectedTeams: "Selected teams",
     labelProfiles: "Profiles",
     labelSelectedProfiles: "Selected profiles",
+    labelCreated: "Created at:",
     unauthorized: {
         title: "You do not have permission to access this screen.",
         returnToHome: "Return",
@@ -558,7 +559,11 @@
         information: "Basic information",
         subtitleNew: "Create a new AI prompt",
         promptContent: "Prompt content",
-        placeholderNamePrompt: "Enter the prompt name"
+        placeholderNamePrompt: "Enter the prompt name",
+        searchPrompt: "Search prompt",
+        labelLoadMore: "Load more",
+        searchPrompts: "Search prompts",
+        noPromptsListWereFound: "No prompts were found",
     }
 };
 
