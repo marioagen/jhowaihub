@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Domain.DTOs;
+﻿using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
@@ -55,7 +56,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             await _stepToolOutputRepository.CreateAsync(stepToolOutput);
 
-            var documentHistory = new DocumentHistory(execution.Card!.DocumentId, "N8N", content, 0, DateTime.Now);
+            var documentHistory = new DocumentHistory(execution.Card!.DocumentId, "N8N", content.JsonToHumanReadable(), 0, DateTime.Now);
             _documentHistoryRepository.Create(documentHistory);
 
             await UpdateExecutionAsync(execution!, automationOutputDto.Email!);
