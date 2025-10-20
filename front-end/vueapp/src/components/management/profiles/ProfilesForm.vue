@@ -63,30 +63,76 @@
                         <div class="border rounded p-2 user-list">
                             <div class="row ms-2">
                                 <div
-                                v-for="permission in filteredPermissions"
-                                :key="permission.id"
-                                class="col-md-3 p-1"
+                                    v-for="permission in filteredPermissions"
+                                    :key="permission.id"
+                                    class="col-md-3 p-1"
                                 >
-                                <div class="form-check d-flex align-items-center">
-                                    <input
-                                    class="form-check-input me-2"
-                                    type="checkbox"
-                                    :id="`permission-${permission.id}`"
-                                    :value="permission.id"
-                                    v-model="selectedPermissions"
-                                    />
-                                    <label
-                                    class="form-check-label fw-semibold"
-                                    :for="`permission-${permission.id}`"
-                                    >
-                                    {{ permission.description }}
-                                    </label>
-                                </div>
+                                    <div class="form-check d-flex align-items-center">
+                                        <input
+                                            class="form-check-input me-2"
+                                            type="checkbox"
+                                            :id="`permission-${permission.id}`"
+                                            :value="permission.id"
+                                            v-model="selectedPermissions"
+                                        />
+                                        <label
+                                            class="form-check-label fw-semibold"
+                                            :for="`permission-${permission.id}`"
+                                        >
+                                            {{ permission.description }}
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                             <div v-if="permissionError" class="invalid-feedback d-block">
                                 {{ permissionError }}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-1">
+                <div class="main-div shadow-sm mt-2">
+                    <div class="row align-items-center mb-3">
+                        <div class="col-6">
+                            <div class="row">
+                                <div class="col-1">
+                                    <LucideIcon icon="Lock" :size="15" />
+                                </div>
+                                <div class="col-10">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ $t("management.profiles.permissionsWorkflow") }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border rounded p-2 user-list">
+                        <div class="row ms-2">
+                            <div
+                                v-for="permission in filteredPermissions"
+                                :key="permission.id"
+                                class="col-md-3 p-1"
+                            >
+                                <div class="form-check d-flex align-items-center">
+                                    <input
+                                        class="form-check-input me-2"
+                                        type="checkbox"
+                                        :id="`permission-${permission.id}`"
+                                        :value="permission.id"
+                                        v-model="selectedPermissions"
+                                    />
+                                    <label
+                                        class="form-check-label fw-semibold"
+                                        :for="`permission-${permission.id}`"
+                                    >
+                                        {{ permission.description }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="permissionError" class="invalid-feedback d-block">
+                            {{ permissionError }}
                         </div>
                     </div>
                 </div>

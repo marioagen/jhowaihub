@@ -27,103 +27,101 @@
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
                     <Form ref="formRef">
-                        <div >
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="userName" class="form-label fw-semibold mb-0">
-                                            {{ $t("labelName") }}
-                                        </label>
-                                        <Field
-                                            type="text"
-                                            class="form-control form-control-sm"
-                                            id="userName"
-                                            ref="userNameInput"
-                                            autocomplete="off"
-                                            name="userName"
-                                            :rules="'required|min:3|max:150'"
-                                            v-model="userData.name"
-                                            :placeholder="$t('labelTypeUserName')"
-                                        />
-                                        <ErrorMessage name="userName" class="invalid-feedback d-block" />
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="userEmail" class="form-label fw-semibold mb-0">
-                                            {{ $t("labelEmail") }}
-                                        </label>
-                                        <Field
-                                            type="text"
-                                            class="form-control form-control-sm"
-                                            id="userEmail"
-                                            ref="userEmailInput"
-                                            autocomplete="off"
-                                            name="userEmail"
-                                            :rules="'required|min:5|max:100|email'"
-                                            v-model="userData.email"
-                                            :placeholder="$t('labelTypeUserEmail')"
-                                            @blur="validateEmailBackend"
-                                        />
-                                        <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
-                                    </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="userName" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelName") }}
+                                    </label>
+                                    <Field
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        id="userName"
+                                        ref="userNameInput"
+                                        autocomplete="off"
+                                        name="userName"
+                                        :rules="'required|min:3|max:150'"
+                                        v-model="userData.name"
+                                        :placeholder="$t('labelTypeUserName')"
+                                    />
+                                    <ErrorMessage name="userName" class="invalid-feedback d-block" />
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <label for="userPassword" class="form-label fw-semibold mb-0">
-                                        {{ $t("labelPassword") }}
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="userEmail" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelEmail") }}
                                     </label>
-                                    <PasswordInputComponent
-                                        :placeholder="$t('labelTypePassword')"
-                                        :rules="passwordRules"
-                                        name="userPassword"
-                                        v-model="userData.password"
+                                    <Field
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        id="userEmail"
+                                        ref="userEmailInput"
+                                        autocomplete="off"
+                                        name="userEmail"
+                                        :rules="'required|min:5|max:100|email'"
+                                        v-model="userData.email"
+                                        :placeholder="$t('labelTypeUserEmail')"
+                                        @blur="validateEmailBackend"
                                     />
-                                </div>
-                                <div class="col-6">
-                                    <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
-                                        {{ $t("labelConfirmedPassword") }}
-                                    </label>
-                                    <PasswordInputComponent
-                                        :placeholder="$t('labelTypeConfirmedPassword')"
-                                        :rules="confirmedPasswordRules"
-                                        name="userConfirmedPassword"
-                                        v-model="userData.confirmedPassword"
-                                    />
+                                    <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
                                 </div>
                             </div>
-                            <SelectionListComponent
-                                :id="'profiles'"
-                                :labelPanel="'labelProfiles'"
-                                :labelSelectedQuantity="'labelSelectedProfiles'"
-                                :labelSearch="'labelSearchProfiles'"
-                                :items="profilesList"
-                                :loading="isLoading"
-                                v-model:selectedItems="selectedProfiles"
-                            />
-                            <SelectionListComponent
-                                :id="'teams'"
-                                :labelPanel="'labelTeams'"
-                                :labelSelectedQuantity="'labelSelectedTeams'"
-                                :labelSearch="'labelSearchTeams'"
-                                :items="teamsList"
-                                :loading="isLoading"
-                                v-model:selectedItems="selectedTeams"
-                            >
-                                <template #footer>
-                                    <div class="border-top mt-2 pt-2">
-                                        <button
-                                            type="button"
-                                            class="btn btn-sm btn-outline-secondary fw-semibold"
-                                            @click="openTeamSection"
-                                        >
-                                            + {{ $t("labelNewTeam") }}
-                                        </button>
-                                    </div>
-                                </template>
-                            </SelectionListComponent>
                         </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="userPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelPassword") }}
+                                </label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypePassword')"
+                                    :rules="passwordRules"
+                                    name="userPassword"
+                                    v-model="userData.password"
+                                />
+                            </div>
+                            <div class="col-6">
+                                <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelConfirmedPassword") }}
+                                </label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypeConfirmedPassword')"
+                                    :rules="confirmedPasswordRules"
+                                    name="userConfirmedPassword"
+                                    v-model="userData.confirmedPassword"
+                                />
+                            </div>
+                        </div>
+                        <SelectionListComponent
+                            :id="'profiles'"
+                            :labelPanel="'labelProfiles'"
+                            :labelSelectedQuantity="'labelSelectedProfiles'"
+                            :labelSearch="'labelSearchProfiles'"
+                            :items="profilesList"
+                            :loading="isLoading"
+                            v-model:selectedItems="selectedProfiles"
+                        />
+                        <SelectionListComponent
+                            :id="'teams'"
+                            :labelPanel="'labelTeams'"
+                            :labelSelectedQuantity="'labelSelectedTeams'"
+                            :labelSearch="'labelSearchTeams'"
+                            :items="teamsList"
+                            :loading="isLoading"
+                            v-model:selectedItems="selectedTeams"
+                        >
+                            <template #footer>
+                                <div class="border-top mt-2 pt-2">
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-secondary fw-semibold"
+                                        @click="openTeamSection"
+                                    >
+                                        + {{ $t("labelNewTeam") }}
+                                    </button>
+                                </div>
+                            </template>
+                        </SelectionListComponent>
                     </Form>
                 </div>
                 <div v-if="showTeams" class="main-div shadow-sm mt-2">

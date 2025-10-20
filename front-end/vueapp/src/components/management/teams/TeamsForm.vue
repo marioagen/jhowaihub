@@ -111,12 +111,36 @@
                                     <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
                                 </div>
                             </div>
-                            <div class="col-auto ms-auto">
-                                <button class="btn btn-primary btn-sm">
-                                    <LucideIcon icon="Save" :size="15" />
-                                    {{ $t("labelSave") }}
-                                </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="userPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelPassword") }}
+                                </label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypePassword')"
+                                    :rules="passwordRules"
+                                    name="userPassword"
+                                    v-model="userData.password"
+                                />
                             </div>
+                            <div class="col-6">
+                                <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelConfirmedPassword") }}
+                                </label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypeConfirmedPassword')"
+                                    :rules="confirmedPasswordRules"
+                                    name="userConfirmedPassword"
+                                    v-model="userData.confirmedPassword"
+                                />
+                            </div>
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <button class="btn btn-primary btn-sm mt-2">
+                                <LucideIcon icon="Save" :size="15" />
+                                {{ $t("labelSave") }}
+                            </button>
                         </div>
                     </Form>
                 </div>
@@ -129,6 +153,7 @@
     import { Form, Field, ErrorMessage } from "vee-validate";
     import api from "@/services/api";
     import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
+    import PasswordInputComponent from "@/components/global/PasswordInputComponent.vue";
     import ErrorCode from "@/constants/Errorcode";
     import TeamsService from "@/services/teams/TeamsService";
 
@@ -138,6 +163,7 @@
             Form,
             Field,
             ErrorMessage,
+            PasswordInputComponent,
             SelectionListComponent,
         },
         props: {
