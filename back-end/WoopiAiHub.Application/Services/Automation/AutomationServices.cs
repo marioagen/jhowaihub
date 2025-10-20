@@ -279,11 +279,11 @@ namespace WoopiAiHub.Application.Services.Automation
         {
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
-
+            
             if (dependentStepTool == null ||
                 stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
             {
-                await CheckAndAdvanceAiProfileStepAsync(automationServicesDto);
+                await CheckAndAdvanceAiProfileStepAsync(automationServicesDto, dependentStepTool);
                 return;
             }
 
@@ -392,7 +392,7 @@ namespace WoopiAiHub.Application.Services.Automation
         /// </summary>
         /// <param name="automationServicesDto">DTO contendo informações do card e step</param>
         /// <returns>Task que representa a operação assíncrona</returns>
-        private async Task CheckAndAdvanceAiProfileStepAsync(AutomationServicesDto automationServicesDto)
+        private async Task CheckAndAdvanceAiProfileStepAsync(AutomationServicesDto automationServicesDto, StepTool dependentStepTool)
         {
             var card = await _cardRepository.FindById(automationServicesDto.CardId);
             if (card?.Step?.Profile == null)
@@ -418,7 +418,8 @@ namespace WoopiAiHub.Application.Services.Automation
                 
                 var nextStepDto = automationServicesDto with
                 {
-                    StepId = nextStep.Id
+                    StepId = nextStep.Id,
+                    StepToolId = dependentStepTool.Id
                 };
                 await StartExecutionByCardAsync(nextStepDto);
             }
