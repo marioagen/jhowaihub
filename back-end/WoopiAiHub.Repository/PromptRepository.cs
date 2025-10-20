@@ -114,7 +114,8 @@ namespace WoopiAiHub.Repository
                     Name = p.Name,
                     Description = p.Description,
                     Text = p.Text,
-                    Created = p.Created
+                    Created = p.Created,
+                    IdUser = p.IdUser,
                 }).FirstOrDefault(p => p.Id == id);
         }
 
@@ -125,16 +126,14 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Update(Prompt prompt)
         {
-            var existPrompt = _context.Prompts.Any(p => p.Name == prompt.Name && p.Id != prompt.Id && p.IdUser == prompt.IdUser);
-
-            if (!existPrompt)
+            var existPrompt = _context.Prompts.Any(p => p.Id == prompt.Id);
+            if (existPrompt)
             {
                 _context.Prompts.Update(prompt);
                 _context.SaveChanges();
 
                 return true;
             }
-
             return false;
         }
     }

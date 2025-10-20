@@ -12,7 +12,7 @@
             <a class="pill-link"
                href="#"
                :class="{ selected: loadAllPrompts }"
-               @click.prevent="loadAllPrompts ? getUserPrompts() : null">
+               @click.prevent="loadAllPrompts ? getOnlyUserPrompts() : null">
                 <span class="badge rounded-pill" :class="{ border: !loadAllPrompts }">{{$t('prompts.myPromptsBadge')}}</span>
             </a>
         </div>
@@ -34,7 +34,7 @@
     <div>
     </div>
     <div class="row card-list scroll-area pb-3" v-if="!loading">
-        <div v-for="item in dataPrompt" :key="item.id" class="card">
+        <div v-for="item in filteredPrompts" :key="item.id" class="card">
             <div class="card-body mt-2">
                 <div class="row">
                     <div class="col-12 icons-card">
@@ -68,8 +68,17 @@
             </div>
         </div>
     </div>
+    <modal-alert v-if="modalAlertShow"
+                 :type="'Confirm'"
+                 :alertTitle="$t('labelRemoveAllPrompts')"
+                 :alertMessage="$t('labelRemoveAllPromptsAction')"
+                 :okLabel="$t('labelConfirm')"
+                 :cancelLabel="$t('labelCancel')"
+                 @open="deletePrompts"
+                 @close="closeModal" />
 </template>
 <script>
+    import ModalAlert from "@/components/common/modal-alert";
     import PromptService from "@/services/prompts/PromptsService";
     export default {
         name: "PromptComponent",
@@ -93,9 +102,17 @@
                 selectedOption: 9,
                 listIds: [],
                 loadAllPrompts: true,
+                filters: {
+                    input: "",
+                    name: "",
+                    desc: "",
+                    created: "",
+
+                },
             }
         },
         components: {
+            ModalAlert
         },
         methods: {
             checkAll: function (event) {
@@ -131,28 +148,16 @@
                 this.$router.push({ name: 'PromptNew', query: { name: prompt } });
             },
             redirectToEditPrompt: function (id) {
-                console.log(id);
                 this.$router.push({ name: 'PromptNew', query: { id: id } });
             },
-            setEntitySearch: function () {
-                this.entitySearch = {
-                    screen: "prompts",
-                    labelInput: /*this.$t('labelSearchPrompts')*/"Prompt",
-                    placeholderInput: /*this.$t('labelPromptNameOrDescription')*/ "Insira o nome do prompt",
-                    labelButton: /*this.$t('labelNewPrompt')*/ "Criar Prompt",
-                };
-            },
-            filterList(obj) {
-                this.$refs.QuestionsTable.filterList(obj.search);
-            },
-            getList: function (obj, url) { // obj = { search, page, type }
+            getList: function (obj) { // obj = { search, page, type }
                 this.dataPrompt = [];
                 this.listIds = [];
                 this.searchInput = obj.search;
                 this.loading = true;
                 this.searching = false;
                 var paramsReq = {
-                    search: this.searchInput.trim() ? this.searchInput.trim() : '',
+                    search: this.filters.input,
                     page: obj.page,
                     pageSize: this.selectedOption,
                     isAscending: this.isAscending,
@@ -182,11 +187,14 @@
                 this.modalAlertShow = true;
                 document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
-            deleteItem: function () {
-                let self = this;
+            closeModal: function () {
+                this.modalAlertShow = false;
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+            },
+            deletePrompts: function () {
                 PromptService.deletePrompts(this.listIds)
                     .then((response) => {
-                        if (response.error !== undefined) {
+                        try {
                             return this.$notify({
                                 title: 'prompt.title',
                                 message: 'prompt.deleteSuccess',
@@ -194,24 +202,19 @@
                                 icon: 'CircleCheckBig',
                             });
                         }
-                        this.getList({ search: '', page: this.queryPage, type: null });
-                        this.$notify({
-                            title: 'prompt.title',
-                            message: 'prompt.deleteErrorError',
-                            variant: 'danger',
-                            icon: 'CircleX',
-                        });
+                        catch {
+                            this.$notify({
+                                title: 'prompt.title',
+                                message: 'prompt.deleteErrorError',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        finally {
+                            this.getList({ search: '', page: this.queryPage, type: null });
+                            this.closeModal();
+                        }
                     });
-            },
-            orderList: function (col) {
-                if (this.isAscending) {
-                    this.isAscending = false;
-                }
-                else {
-                    this.isAscending = true;
-                }
-                this.colType = col;
-                this.getList({ search: '', page: this.queryPage, type: null });
             },
             formatDate: function (dataObj) {
                 const date = new Date(dataObj);
@@ -228,7 +231,11 @@
                 this.loadAllPrompts = true;
                 this.getList({ search: '', page: this.queryPage, type: null });
             },
-            getUserPrompts: function () {
+            getOnlyUserPrompts: function () {
+                this.loadAllPrompts = false;
+                this.getUserPrompts({ search: '', page: this.queryPage, type: null });
+            },
+            getUserPrompts: function (obj) {
                 var userId;
                 this.dataPrompt = [];
                 this.listIds = [];
@@ -252,6 +259,7 @@
                                 icon: 'CircleX',
                             });
                         }
+                        console.log(response);
                         this.dataPrompt = response.data.items;
                         this.pagination = {
                             currentPage: response.data.currentPage,
@@ -262,9 +270,28 @@
                     });
             },
         },
-        computed: {},
         created() {
             this.getList({ search: '', page: this.queryPage, type: null });
+        },
+        computed: {
+            filteredPrompts() {
+                const search = (this.filters.input || "").toLowerCase();
+                return this.dataPrompt.filter(item => {
+                    // Filtra por nome
+                    const nameMatch = item.name && item.name.toLowerCase().includes(search);
+                    // Filtra por descrição
+                    const descMatch = item.description && item.description.toLowerCase().includes(search);
+                    // Filtra por data de criação (formato dd/mm/yyyy ou yyyy-mm-dd)
+                    const createdStr = item.created
+                        ? new Date(item.created).toLocaleDateString('pt-BR')
+                        : "";
+                    const createdMatch = createdStr.includes(search) || (item.created && item.created.toLowerCase().includes(search));
+                    // Se o campo de busca estiver vazio, retorna todos
+                    if (!search) return true;
+                    // Retorna se algum campo bate
+                    return nameMatch || descMatch || createdMatch;
+                });
+            }
         },
         mounted() { },
         unmounted() { }

@@ -2,6 +2,7 @@
 using Bogus;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.DTOs.Response;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Fixture
@@ -80,6 +81,33 @@ namespace WoopiAiHub.UnitTests.Fixture
                   Tenant = f.Random.String(),
                   Email = f.Random.String(),
                   TotalPages = f.Random.Int(1, 10)
+              });
+            return faker;
+        }
+
+        public static ChatCompletionResponseDto FindValidChatCompletionResponseDto()
+        {
+            var faker = new Faker<ChatCompletionResponseDto>("pt_BR")
+              .CustomInstantiator(f => new ChatCompletionResponseDto
+              {
+                  ReferenceFile = f.Random.Guid().ToString(),
+                  Tenant = f.Random.String(),
+                  Email = f.Random.String(),
+                  Choices = new[] {
+                        new ChatChoiceDto {
+                            Message = new ChatMessageResponseDto {
+                                Role = "assistant",
+                                Content = f.Lorem.Paragraph()
+                            },
+                        }
+                    }.ToList(),
+                  Usage = new ChatUsageDto
+                  {
+                      PromptTokens = f.Random.Int(1, 1000),
+                      CompletionTokens = f.Random.Int(1, 1000),
+                      TotalTokens = f.Random.Int(1, 2000)
+                  },
+                  Data = new Newtonsoft.Json.Linq.JObject()
               });
             return faker;
         }

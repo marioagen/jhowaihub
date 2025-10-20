@@ -16,12 +16,12 @@
                     </div>
                     <div class="card mb-3">
                         <div class="card-body">
-                            <SearchComponent :entity="entitySearch" :resetInput="resetInputSearch" @search="filterList" />
+                            <PromptFilters  @filter="filterData"></PromptFilters>
                         </div>
                     </div>
                 </div>
                    <div>
-                       <PromptComponent/>
+                       <PromptComponent ref="PromptComponent"/>
                    </div>
             </div>
     </main>
@@ -33,6 +33,7 @@
     import TruncateText from "@/components/common/truncate-text.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import PromptComponent from "@/components/prompts/PromptComponent.vue";
+    import PromptFilters from "@/components/prompts/PromptFilter"
     export default {
         name: "PromptPage",
         emits: ['showAlertToast'],
@@ -65,34 +66,31 @@
             Pagination,
             TruncateText,
             SearchComponent,
-            PromptComponent
+            PromptComponent,
+            PromptFilters,
         },
         watch: {
-            searchInput: function (val) {
-                this.searching = false;
-            },
-            '$store.state.userProfile.language': function () {
-                this.setEntitySearch();
+            filters: {
+                handler(newFilters) {
+                    this.$emit('filterData', newFilters);
+                },
+                deep: true
             },
         },
         methods: {
-            setEntitySearch: function () {
-                this.entitySearch = {
-                    screen: "prompts",
-                    labelInput: /*this.$t('labelSearchPrompts')*/"Prompt",
-                    placeholderInput: /*this.$t('labelPromptNameOrDescription')*/ "Insira o nome do prompt",
-                    labelButton: /*this.$t('labelNewPrompt')*/ "Criar Prompt",
-                };
-            },
-
             redirectToNewPrompt: function () {
                 this.$router.push({ name: "PromptNew" });
-            }
-          
+            },
+            reloadData() {
+                this.$refs.PromptComponent.getList({ search: '', page: this.queryPage, type: null });
+            },
+            filterData(filters) {
+                this.$refs.PromptComponent.filters = filters;
+                this.reloadData();
+            },
         },
         computed: {},
         created() {
-            this.setEntitySearch();
         },
         mounted() { },
         unmounted() { },

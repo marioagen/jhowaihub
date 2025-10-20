@@ -1,5 +1,6 @@
 ﻿using System.Linq.Dynamic.Core;
 using System.Text.Json;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -56,7 +57,7 @@ namespace WoopiAiHub.Application.Services
             var createPromptResult = _promptRepository.CreateUniquePrompt(prompt);
             if (!createPromptResult)
             {
-                //throw new AppException(ErrorCode.DuplicatedPrompt, "Duplicated Prompt");
+                throw new AppException(ErrorCode.Duplicated, "Duplicated Prompt", null);
             }
 
             return createPromptResult;
@@ -90,7 +91,7 @@ namespace WoopiAiHub.Application.Services
 
                 if (!promptUpdateResult)
                 {
-                    //throw new AppException(ErrorCode.DuplicatedPrompt, "Duplicated Prompt");
+                    throw new ArgumentException("Update prompt Failed");
                 }
 
                 _unitOfWork.Commit();
@@ -115,6 +116,12 @@ namespace WoopiAiHub.Application.Services
         {
             var idUser = _userServices.FindIdByEmail(emailCreator);
             var query = _promptRepository.FindByIdUser(idUser);
+
+            if (query == null)
+                throw new ArgumentException("Prompt not found");
+
+            if(idUser == Guid.Empty)
+                throw new ArgumentException("Invalid user id");
 
             query = pagedDataDto.IsAscending ?
                 query.OrderBy(nameof(Domain.Models.Prompt.Name)) :
@@ -159,6 +166,11 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
+            var result = _promptRepository.Delete(ids);
+            if(!result)
+            {
+                throw new ArgumentException("Delete prompt failed");
+            }
             return _promptRepository.Delete(ids);
         }
 
@@ -232,6 +244,12 @@ namespace WoopiAiHub.Application.Services
             var idUser = _userServices.FindIdByEmail(emailCreator);
             var query = _promptRepository.FindAllWithOwnerStatus(idUser);
 
+            if(query == null)
+                throw new ArgumentException("Prompt not found");
+            if(idUser == Guid.Empty)
+                throw new ArgumentException("Invalid user id");
+
+
             return query;
         }
 
@@ -281,6 +299,11 @@ namespace WoopiAiHub.Application.Services
             var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(chatCompletionResponseDto.Data.ToString());
             var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
                                                                                               dataDto.CardId);
+            if (execution == null) {
+
+                throw new ArgumentException("StepToolExecution not found");
+            }
+
             await UpdateExecutionAsync(execution!, chatCompletionResponseDto.Email);
             await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.Choices[0].Message.Content);
         }

@@ -162,6 +162,9 @@
                         icon: 'CircleX',
                     });
                 }
+                finally {
+                    this.closeSidebar();
+                }
             },
             findAllPrompts() {
                 PromptService.getPrompts()
@@ -205,7 +208,7 @@
         },
         computed: {
             selectedItem() {
-                if (!this.idSelected != 0)
+                if (this.idSelected != 0)
                     return this.promptlist.find(item => item.id === this.idSelected)
             },
         },

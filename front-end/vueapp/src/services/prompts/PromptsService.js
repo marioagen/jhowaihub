@@ -24,10 +24,9 @@ export default {
     },
     getPromptByUserId(paramsReq) {
         return api.get('/Prompt/PagedByUser/', { params: paramsReq })
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((e) => {
+            .then(function (response) {
+                return response
+            }).catch((e) => {
                 return {
                     error: e,
                 }
@@ -56,7 +55,7 @@ export default {
             });
     },
     deletePrompts(ids) {
-        return api.delete(`/Prompt/DeleteByIds`,ids)
+        return api.delete('/Prompt/DeleteByIds', { data: ids })
             .then(({ data }) => {
                 return data;
             })

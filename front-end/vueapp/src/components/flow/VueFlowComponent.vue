@@ -147,7 +147,6 @@ export default {
                 });
 
                 let stepTools = step ? step.stepTools : [];
-                console.log(stepTools);
                 const mappedNodes = stepTools.map(stepTool => ({
                     id: stepTool.id.toString(),
                     position: { x: stepTool.positionX, y: stepTool.positionY },
@@ -164,7 +163,7 @@ export default {
                     targetPosition: "left",
                     type: "hub"
                 }));
- 
+                console.log(mappedNodes, "mapped");
                 const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
                     id: `${tool.id}-${stepTools[index + 1].id}`,
                     source: tool.id.toString(),

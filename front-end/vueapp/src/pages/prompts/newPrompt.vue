@@ -80,6 +80,7 @@
                     description: '',
                     text: '',
                 },
+                idEdit : 0,
             }
         },
         components: {
@@ -89,14 +90,33 @@
                 this.$router.push({ name: "Prompt" });
             },
             save: function (e) {
+                if (this.idEdit !== undefined) {
+                    this.updatePrompt();
+                }
+                else {
+                    this.createPrompt();
+                }
+            },
+            findById: function (id) {
+                PromptService.getPromptById(id)
+                    .then((response) => {
+                        this.form = {
+                            name: response.name,
+                            description: response.description,
+                            text: response.text,
+                        }
+                    });
+            },
+            updatePrompt: function () {
                 var paramsData = {
+                    id: this.idEdit,
                     name: this.form.name,
                     description: this.form.description,
                     text: this.form.text,
                 };
-                PromptService.createPrompt(paramsData)
+                PromptService.updatePrompt(paramsData)
                     .then((response) => {
-                        if (response.error !== undefined) {
+                        try {
                             return this.$notify({
                                 title: 'prompt.title',
                                 message: 'prompt.createSuccess',
@@ -104,22 +124,54 @@
                                 icon: 'CircleCheckBig',
                             });
                         }
-                        this.$notify({
-                            title: 'prompt.title',
-                            message: 'prompt.createErrorError',
-                            variant: 'danger',
-                            icon: 'CircleX',
-                        });
+                        catch (e) {
+                            this.$notify({
+                                title: 'prompt.title',
+                                message: 'prompt.createErrorError',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        finally{
+                            this.redirectToPromptList();
+                        }
                     });
-               // this.redirectToPromptList();
             },
-        },
-        computed: {},
-        created() {
-           
+            createPrompt: function () {
+                var paramsData = {
+                    name: this.form.name,
+                    description: this.form.description,
+                    text: this.form.text,
+                };
+                PromptService.createPrompt(paramsData)
+                    .then((response) => {
+                        try {
+                            return this.$notify({
+                                title: 'prompt.title',
+                                message: 'prompt.createSuccess',
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
+                        }
+                        catch (e) {
+                            this.$notify({
+                                title: 'prompt.title',
+                                message: 'prompt.createErrorError',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        finally{
+                            this.redirectToPromptList();
+                        }
+                    });
+            }
         },
         mounted() {
-            console.log(this.$route.query.id);
+            this.idEdit = this.$route.query.id
+            if (this.idEdit !== undefined) {
+                this.findById(this.idEdit);
+            }
         },
         unmounted() { }
     }
