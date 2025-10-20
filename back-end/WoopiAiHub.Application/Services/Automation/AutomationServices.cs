@@ -303,8 +303,6 @@ namespace WoopiAiHub.Application.Services.Automation
             var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
             var payload = await handler.BuildPayload(nextAutomationDto, input, output, execution);
 
-
-
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
         }
 
