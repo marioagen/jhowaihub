@@ -19,15 +19,12 @@ namespace WoopiAiHub.Application.ToolsHandler
         public string Type => HandlersTypes.N8N;
         private readonly MessageQueues _messageQueues;
         private readonly IToolRepository _toolRepository;
-        private readonly ILogger<N8NHandler> _logger;
 
         public N8NHandler(IOptions<MessageQueues> messageQueues,
-                          IToolRepository toolRepository,
-                          ILogger<N8NHandler> logger)
+                          IToolRepository toolRepository)
         {
             _messageQueues = messageQueues.Value;
             _toolRepository = toolRepository;
-            _logger = logger;
         }
 
         /// <summary>
@@ -43,7 +40,7 @@ namespace WoopiAiHub.Application.ToolsHandler
                                                             string output,
                                                             StepToolExecution? execution = null)
         {        
-            var tool = await _toolRepository.FindModelByStepToolIdAsync(automationServicesDto.StepToolId)
+            var tool = await _toolRepository.FindModelByStepToolIdAsync(automationServicesDto!.StepToolId)
                 ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
 
             var automationInputDto = new AutomationInputDto
@@ -59,21 +56,6 @@ namespace WoopiAiHub.Application.ToolsHandler
                 Content = input.Value.ToString(),
                 ExecutionId = execution!.Id
             };
-
-            if (automationInputDto == null)
-            {
-                _logger.LogError("automationInputDto is null in HandleAsync");
-                return null;
-            }
-
-            // Loga a URL e o DTO completo para rastrear
-            _logger.LogInformation("Handling automation input. Url: {Url}, DTO: {@Dto}", automationInputDto.Url, JsonSerializer.Serialize(automationInputDto));
-
-            if (string.IsNullOrWhiteSpace(automationInputDto.Url))
-            {
-                _logger.LogError("AutomationInputDto.Url is null or empty! DTO content: {@Dto}", JsonSerializer.Serialize(automationInputDto));
-                throw new ArgumentException("Url is required to create N8N connector.");
-            }
 
             return new ExecutionMessageDto
             {
