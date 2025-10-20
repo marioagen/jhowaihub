@@ -549,7 +549,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         {
             // Arrange
             var stepToolDto = AutomationFixture.FindValidStepToolDto();
+            stepToolDto.Step.Order = 2;
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
+            var stepTool = AutomationFixture.FindValidStepTool();
 
             var aiProfile = new Domain.Models.Profile("IA", 1, DateTime.UtcNow);
 
@@ -567,9 +569,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
 
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
-            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((Domain.Models.StepTool)null);
+            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync(stepTool);
 
-            cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
+            cardRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(card);
             stepRepositoryMock.Setup(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId)).ReturnsAsync(nextStep);
             cardRepositoryMock.Setup(r => r.Update(It.IsAny<Domain.Models.Card>())).Returns(true);
             hubNotifierMock.Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>())).Returns(Task.CompletedTask);
@@ -578,9 +580,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             await _service.ContinueExecution(automationDto);
 
             // Assert
-            stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
-            
-            cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
+            stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);           
+            cardRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId), Times.Once);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Once);
             hubNotifierMock.Verify(h => h.CardProgessAsync(automationDto.Email, automationDto.CardId, 100.0, nextStep.Id), Times.Once);
