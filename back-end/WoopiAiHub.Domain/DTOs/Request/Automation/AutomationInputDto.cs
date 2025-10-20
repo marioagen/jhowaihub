@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Text.Json.Serialization;
 using WoopiAiHub.Domain.DTOs.Messaging;
 
 namespace WoopiAiHub.Domain.DTOs.Request.Automation
 {
     public record class AutomationInputDto
     {
+        [JsonPropertyName("url")]
         public string Url { get; set; } = string.Empty;
         public string WebhookId { get; set; } = string.Empty;
         public bool RequiredFile { get; set; }
