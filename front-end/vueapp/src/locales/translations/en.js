@@ -614,7 +614,8 @@
             saveSuccess: "Profile saved successfully",
             saveError: "Error saving profile",
             deleteSuccess: "Profile deleted successfully",
-            deleteError: "Error deleting profile"
+            deleteError: "Error deleting profile",
+            permissionsWorkflow: "Workflow Permissions",
         },
     }
 };

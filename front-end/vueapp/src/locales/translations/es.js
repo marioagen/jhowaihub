@@ -618,7 +618,8 @@
             saveSuccess: "Perfil guardado con éxito",
             saveError: "Error al guardar el perfil",
             deleteSuccess: "Perfil eliminado con éxito",
-            deleteError: "Error al eliminar el perfil"
+            deleteError: "Error al eliminar el perfil",
+            permissionsWorkflow: "Permisos de Flujo de Trabajo",
         },
     }
 };

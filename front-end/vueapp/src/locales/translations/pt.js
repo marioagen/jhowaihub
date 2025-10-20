@@ -589,7 +589,8 @@
             saveSuccess: "Perfil salvo com sucesso",
             saveError: "Erro ao salvar perfil",
             deleteSuccess: "Perfil deletado com sucesso",
-            deleteError: "Erro ao deletar perfil"
+            deleteError: "Erro ao deletar perfil",
+            permissionsWorkflow: "Permissões de Workflow",
         },
     }
 };
