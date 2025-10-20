@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Hubs;
@@ -12,7 +14,6 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services.Automation
 {

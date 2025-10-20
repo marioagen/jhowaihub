@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
@@ -17,12 +19,15 @@ namespace WoopiAiHub.Application.ToolsHandler
         public string Type => HandlersTypes.N8N;
         private readonly MessageQueues _messageQueues;
         private readonly IToolRepository _toolRepository;
+        private readonly ILogger<N8NHandler> _logger;
 
         public N8NHandler(IOptions<MessageQueues> messageQueues,
-                          IToolRepository toolRepository)
+                          IToolRepository toolRepository,
+                          ILogger<N8NHandler> logger)
         {
             _messageQueues = messageQueues.Value;
             _toolRepository = toolRepository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -41,22 +46,39 @@ namespace WoopiAiHub.Application.ToolsHandler
             var tool = await _toolRepository.FindModelByStepToolIdAsync(automationServicesDto.StepToolId)
                 ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
 
+            var automationInputDto = new AutomationInputDto
+            {
+                Url = tool.ConnectorUrl!,
+                WebhookId = input!.WebhookId!.Value.ToString(),
+                RequiredFile = input.RequiredFile,
+                Tenant = automationServicesDto.Tenant,
+                Email = automationServicesDto.Email,
+                ResponseQueue = _messageQueues.AutomationQueueResponse,
+                Type = ConnectorNames.N8N,
+                Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
+                Content = input.Value.ToString(),
+                ExecutionId = execution!.Id
+            };
+
+            if (automationInputDto == null)
+            {
+                _logger.LogError("automationInputDto is null in HandleAsync");
+                return null;
+            }
+
+            // Loga a URL e o DTO completo para rastrear
+            _logger.LogInformation("Handling automation input. Url: {Url}, DTO: {@Dto}", automationInputDto.Url, JsonSerializer.Serialize(automationInputDto));
+
+            if (string.IsNullOrWhiteSpace(automationInputDto.Url))
+            {
+                _logger.LogError("AutomationInputDto.Url is null or empty! DTO content: {@Dto}", JsonSerializer.Serialize(automationInputDto));
+                throw new ArgumentException("Url is required to create N8N connector.");
+            }
+
             return new ExecutionMessageDto
             {
                 Queue = _messageQueues.AutomationQueueConsumer,
-                Message = new AutomationInputDto
-                {
-                    Url = tool.ConnectorUrl!,
-                    WebhookId = input!.WebhookId!.Value.ToString(),
-                    RequiredFile = input.RequiredFile,
-                    Tenant = automationServicesDto.Tenant,
-                    Email = automationServicesDto.Email,
-                    ResponseQueue = _messageQueues.AutomationQueueResponse,
-                    Type = ConnectorNames.N8N,
-                    Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
-                    Content = input.Value.ToString(),
-                    ExecutionId = execution!.Id
-                }
+                Message = automationInputDto
             };
         }
     }
