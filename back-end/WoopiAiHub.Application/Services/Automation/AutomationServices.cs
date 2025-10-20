@@ -280,10 +280,11 @@ namespace WoopiAiHub.Application.Services.Automation
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
 
+            var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
             if (dependentStepTool == null ||
                 stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
             {
-                await CheckAndAdvanceAiProfileStepAsync(automationServicesDto);
+                await CheckAndAdvanceAiProfileStepAsync(nextAutomationDto);
                 return;
             }
 
@@ -300,7 +301,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             var handler = _toolFactoryHandler.GetHandler(dependentStepTool!.Tool!.ToolType!);
 
-            var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
+           
             var payload = await handler.BuildPayload(nextAutomationDto, input, output, execution);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
