@@ -280,6 +280,11 @@ export default {
             }
         },
         updateNodeWithForm () {
+            this.parameters[0].requiredFile = false;
+            if (Object.prototype.hasOwnProperty.call(this.formData, 'requiredFile')) {
+                this.parameters[0].requiredFile = this.formData['requiredFile'];
+            }
+
             this.parameters[0].value = JSON.stringify(this.formData);
             this.parameters[0].webhookId = this.connector;
 
