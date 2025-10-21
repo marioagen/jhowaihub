@@ -549,7 +549,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         {
             // Arrange
             var stepToolDto = AutomationFixture.FindValidStepToolDto();
-            stepToolDto.Step.Order = 2;
+            stepToolDto.Step!.Order = 2;
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
             var stepTool = AutomationFixture.FindValidStepTool();
 
@@ -607,7 +607,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             var stepRepositoryMock = _mocker.GetMock<IStepRepository>();
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
-            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((Domain.Models.StepTool)null);
+            stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((StepTool?)null);
            
             cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
 
