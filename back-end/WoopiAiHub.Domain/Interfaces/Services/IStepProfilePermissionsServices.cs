@@ -1,0 +1,13 @@
+using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Models;
+
+namespace WoopiAiHub.Domain.Interfaces.Services
+{
+    public interface IStepProfilePermissionsServices
+    {
+        Task<bool> Create(int StepId, List<WorkflowPermissionDto> PermissionsWorkflow);
+        Task<bool> Delete(int ProfileId);
+    }
+}

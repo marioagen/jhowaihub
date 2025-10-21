@@ -52,7 +52,6 @@
             keyMongoAccess: {
                 handler: async function (newValue) {
                     if (newValue) {
-                        this.reloadData();
                         this.reloadTeams();
                     }
                 },

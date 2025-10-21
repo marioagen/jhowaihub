@@ -18,7 +18,7 @@
                     </div>
                 </div>            
                 <div class="col-auto ms-auto">
-                    <button class="btn btn-primary btn-sm" @click="save">
+                    <button class="btn btn-primary btn-sm" @click="saveUser">
                         <LucideIcon icon="Save" :size="15" />
                         {{ $t("labelSave") }}
                     </button>
@@ -26,104 +26,128 @@
             </div>
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
-                     <Form ref="formRef" @submit="saveUser">
-                        <div >
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="userName" class="form-label fw-semibold mb-0">
-                                            {{ $t("labelName") }}
-                                        </label>
-                                        <Field
-                                            type="text"
-                                            class="form-control form-control-sm"
-                                            id="userName"
-                                            ref="userNameInput"
-                                            autocomplete="off"
-                                            name="userName"
-                                            :rules="'required|min:3|max:150'"
-                                            v-model="userData.name"
-                                            :placeholder="$t('labelTypeUserName')"
-                                        />
-                                        <ErrorMessage name="userName" class="invalid-feedback d-block" />
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label for="userEmail" class="form-label fw-semibold mb-0">
-                                            {{ $t("labelEmail") }}
-                                        </label>
-                                        <Field
-                                            type="text"
-                                            class="form-control form-control-sm"
-                                            id="userEmail"
-                                            ref="userEmailInput"
-                                            autocomplete="off"
-                                            name="userEmail"
-                                            :rules="'required|min:5|max:100|email'"
-                                            v-model="userData.email"
-                                            :placeholder="$t('labelTypeUserEmail')"
-                                            @blur="validateEmailBackend"
-                                        />
-                                        <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
-                                    </div>
+                    <Form ref="formRef">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="userName" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelName") }}
+                                    </label>
+                                    <Field
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        id="userName"
+                                        ref="userNameInput"
+                                        autocomplete="off"
+                                        name="userName"
+                                        :rules="'required|min:3|max:150'"
+                                        v-model="userData.name"
+                                        :placeholder="$t('labelTypeUserName')"
+                                    />
+                                    <ErrorMessage name="userName" class="invalid-feedback d-block" />
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-6">
-                                    <label for="userPassword" class="form-label fw-semibold mb-0">
-                                        {{ $t("labelPassword") }}
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="userEmail" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelEmail") }}
                                     </label>
-                                    <PasswordInputComponent
-                                        :placeholder="$t('labelTypePassword')"
-                                        :rules="passwordRules"
-                                        name="userPassword"
-                                        v-model="userData.password"
+                                    <Field
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        id="userEmail"
+                                        ref="userEmailInput"
+                                        autocomplete="off"
+                                        name="userEmail"
+                                        :rules="'required|min:5|max:100|email'"
+                                        v-model="userData.email"
+                                        :placeholder="$t('labelTypeUserEmail')"
+                                        @blur="validateEmailBackend"
                                     />
-                                </div>
-                                <div class="col-6">
-                                    <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
-                                        {{ $t("labelConfirmedPassword") }}
-                                    </label>
-                                    <PasswordInputComponent
-                                        :placeholder="$t('labelTypeConfirmedPassword')"
-                                        :rules="confirmedPasswordRules"
-                                        name="userConfirmedPassword"
-                                        v-model="userData.confirmedPassword"
-                                    />
+                                    <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
                                 </div>
                             </div>
-                            <SelectionListComponent
-                                :id="'profiles'"
-                                :labelPanel="'labelProfiles'"
-                                :labelSelectedQuantity="'labelSelectedProfiles'"
-                                :labelSearch="'labelSearchProfiles'"
-                                :items="profilesList"
-                                :loading="isLoading"
-                                v-model:selectedItems="selectedProfiles"
-                            />
-                            <SelectionListComponent
-                                v-if="showTeams"
-                                :id="'teams'"
-                                :labelPanel="'labelTeams'"
-                                :labelSelectedQuantity="'labelSelectedTeams'"
-                                :labelSearch="'labelSearchTeams'"
-                                :items="teamsList"
-                                :loading="isLoading"
-                                v-model:selectedItems="selectedTeams"
-                            >
-                                <template #footer>
-                                    <div class="border-top mt-2 pt-2">
-                                        <button
-                                            type="button"
-                                            class="btn btn-sm btn-outline-secondary fw-semibold"
-                                            @click="openTeamSection"
-                                        >
-                                            + {{ $t("labelNewTeam") }}
-                                        </button>
-                                    </div>
-                                </template>
-                            </SelectionListComponent>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="userPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelPassword") }}
+                                </label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypePassword')"
+                                    :rules="passwordRules"
+                                    name="userPassword"
+                                    v-model="userData.password"
+                                />
+                            </div>
+                            <div class="col-6">
+                                <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelConfirmedPassword") }}
+                                </label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypeConfirmedPassword')"
+                                    :rules="confirmedPasswordRules"
+                                    name="userConfirmedPassword"
+                                    v-model="userData.confirmedPassword"
+                                />
+                            </div>
+                        </div>
+                        <SelectionListComponent
+                            :id="'profiles'"
+                            :labelPanel="'labelProfiles'"
+                            :labelSelectedQuantity="'labelSelectedProfiles'"
+                            :labelSearch="'labelSearchProfiles'"
+                            :items="profilesList"
+                            :loading="isLoading"
+                            v-model:selectedItems="selectedProfiles"
+                        />
+                        <SelectionListComponent
+                            :id="'teams'"
+                            :labelPanel="'labelTeams'"
+                            :labelSelectedQuantity="'labelSelectedTeams'"
+                            :labelSearch="'labelSearchTeams'"
+                            :items="teamsList"
+                            :loading="isLoading"
+                            v-model:selectedItems="selectedTeams"
+                        >
+                            <template #footer>
+                                <div class="border-top mt-2 pt-2">
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-secondary fw-semibold"
+                                        @click="openTeamSection"
+                                    >
+                                        + {{ $t("labelNewTeam") }}
+                                    </button>
+                                </div>
+                            </template>
+                        </SelectionListComponent>
+                    </Form>
+                </div>
+                <div v-if="showTeams" class="main-div shadow-sm mt-2">
+                    <Form @submit="createTeam" ref="formRefTeam">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="teamName" class="form-label fw-semibold mb-0">{{ $t("labelTeamName") }}</label>
+                                <Field
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    id="teamName"
+                                    ref="teamNameInput"
+                                    autocomplete="off"
+                                    name="teamName"
+                                    v-model="teamData.name"
+                                    :placeholder="$t('labelTypeTeamName')"
+                                    :rules="'required|min:3|max:100'"
+                                />
+                                <ErrorMessage name="teamName" class="invalid-feedback d-block" />
+                            </div>
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <button class="btn btn-primary btn-sm">
+                                <LucideIcon icon="Save" :size="15" />
+                                {{ $t("labelSave") }}
+                            </button>
                         </div>
                     </Form>
                 </div>
@@ -137,6 +161,8 @@
     import { Form, Field, ErrorMessage } from "vee-validate";
     import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
     import PasswordInputComponent from "@/components/global/PasswordInputComponent.vue";
+    import UserService from "@/services/users/UserService";
+    import ErrorCode from "@/constants/Errorcode";
 
     export default {
         name: "UserForm",
@@ -154,7 +180,7 @@
                 default: false,
             },
             id: {
-                type: Number,
+                type: String,
                 required: false,
                 default: null,
             }
@@ -170,6 +196,7 @@
                     profiles: [],
                     password: "",
                 },
+                teamData: {},
                 selectedTeams: [],
                 selectedProfiles: [],
                 searchTeams: "",
@@ -214,6 +241,7 @@
         mounted() {
             this.getTeams();
             this.getProfiles();
+            this.setupEdit();
         },
         methods: {
             async validateEmailBackend() {
@@ -228,7 +256,7 @@
 
                 this.isLoading = true;
                 api.post("User/IsEmailInUse", paramsReq)
-                    .then(function (response) {
+                    .then((response) => {
                         if (response && response.data && response.data === true) {
                             this.$refs.formRef.setFieldError("userEmail", this.$t("labelErrorEmailAlreadyExists"));
 
@@ -236,7 +264,7 @@
                             this.$refs.formRef.setFieldError("userEmail", "");
                         }
                     })
-                    .catch(function (e) {
+                    .catch((e) => {
                         this.$notify({
                             title: 'management.users.title',
                             message: "management.users.invalid",
@@ -303,10 +331,13 @@
             openTeamSection() {
                 this.showTeams = !this.showTeams;
             },
+            closeTeamSection() {
+                this.showTeams = false;
+                this.teamData.name = "";
+            },
             saveUser() {
                 let response;
-
-                if (this.userData.id == null) {
+                if (!this.isEdit) {
                     const user = {
                         name: this.userData.name,
                         email: this.userData.email,
@@ -327,8 +358,6 @@
                     response = api.put("User", userEdit);
                 }
                 response.then((response) => {
-                        this.$emit("userCreated");
-                        this.close();
                         this.$notify({
                             title: "users.title",
                             message: "users.saveSuccess",
@@ -354,6 +383,44 @@
                 if (this.$refs.formRef) {
                     this.$refs.formRef.resetForm();
                 }
+            },
+            setupEdit() {
+                if(!this.isEdit) return;
+                UserService.getUserById(this.id)
+                    .then((response) => {
+                        this.userData = response;
+                        this.selectedProfiles = response.profiles.map(p => p.id);
+                        this.selectedTeams = response.teams.map(t => t.id);
+                    });
+            },
+            createTeam() {
+                const team = {
+                    name: this.teamData.name,
+                };
+                api.post("Team", team).then(() => {
+                        this.$notify({
+                            title: 'management.teams.title',
+                            message: 'management.teams.saveSuccess',
+                            variant: 'success',
+                            icon: 'CircleCheckBig',
+                        });
+                        this.closeTeamSection();
+                        this.getTeams();
+                    })
+                    .catch((err) => {
+                        const errorCode = err?.response?.data?.errorCode;
+                        let errorMessage = "management.teams.invalid";
+                        if (errorCode && errorCode === ErrorCode.Duplicated) {
+                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.duplicated"));
+                            errorMessage = "management.teams.duplicated";
+                        } 
+                        this.$notify({
+                            title: 'management.teams.title',
+                            message: errorMessage,
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    });
             },
         },
     };

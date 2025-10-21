@@ -139,7 +139,7 @@
                 this.table.isLoading = true;
                 const params = {
                     search: this.filters.input,
-                    pageSize: this.table.pagination.itemsPerPage,
+                    pageSize: 10,
                     page: this.table.pagination.currentPage,
                     isAscending: this.filters.isAsc,
                     isAllUsers: this.filters.isAllUsers,

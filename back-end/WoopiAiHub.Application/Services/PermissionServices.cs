@@ -27,5 +27,23 @@ namespace WoopiAiHub.Application.Services
         {
             return _permissionRepository.FindAll();
         }
+
+        /// <summary>
+        /// Find all permissions
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<PermissionDto> FindWorkflowPermissions()
+        {
+            return _permissionRepository.FindAll()
+                .Where(p => p.Group == "Workflow-Step")
+                .Select(p => new PermissionDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Group = p.Group,
+                    Description = p.Description
+                })
+                .ToList();
+        }
     }
 }

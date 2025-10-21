@@ -58,7 +58,7 @@
                                         <button
                                             type="button"
                                             class="btn btn-sm btn-outline-secondary fw-semibold"
-                                            @click="addNewUser"
+                                            @click="showUserSection"
                                         >
                                             <LucideIcon :icon="'UserPlus'" :size="16" />
                                             {{ $t("labelNewUser") }}
@@ -66,6 +66,81 @@
                                     </div>
                                 </template>
                             </SelectionListComponent>
+                        </div>
+                    </Form>
+                </div>
+                <div v-if="showUsers" class="main-div shadow-sm mt-2">
+                    <Form @submit="createUser" ref="formRef">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="userName" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelName") }}
+                                    </label>
+                                    <Field
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        id="userName"
+                                        ref="userNameInput"
+                                        autocomplete="off"
+                                        name="userName"
+                                        :rules="'required|min:3|max:150'"
+                                        v-model="userData.name"
+                                        :placeholder="$t('labelTypeUserName')"
+                                    />
+                                    <ErrorMessage name="userName" class="invalid-feedback d-block" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label for="userEmail" class="form-label fw-semibold mb-0">
+                                        {{ $t("labelEmail") }}
+                                    </label>
+                                    <Field
+                                        type="text"
+                                        class="form-control form-control-sm"
+                                        id="userEmail"
+                                        ref="userEmailInput"
+                                        autocomplete="off"
+                                        name="userEmail"
+                                        :rules="'required|min:5|max:100|email'"
+                                        v-model="userData.email"
+                                        :placeholder="$t('labelTypeUserEmail')"
+                                        @blur="validateEmailBackend"
+                                    />
+                                    <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="userPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelPassword") }}
+                                </label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypePassword')"
+                                    :rules="passwordRules"
+                                    name="userPassword"
+                                    v-model="userData.password"
+                                />
+                            </div>
+                            <div class="col-6">
+                                <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
+                                    {{ $t("labelConfirmedPassword") }}
+                                </label>
+                                <PasswordInputComponent
+                                    :placeholder="$t('labelTypeConfirmedPassword')"
+                                    :rules="confirmedPasswordRules"
+                                    name="userConfirmedPassword"
+                                    v-model="userData.confirmedPassword"
+                                />
+                            </div>
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <button class="btn btn-primary btn-sm mt-2">
+                                <LucideIcon icon="Save" :size="15" />
+                                {{ $t("labelSave") }}
+                            </button>
                         </div>
                     </Form>
                 </div>
@@ -78,7 +153,9 @@
     import { Form, Field, ErrorMessage } from "vee-validate";
     import api from "@/services/api";
     import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
+    import PasswordInputComponent from "@/components/global/PasswordInputComponent.vue";
     import ErrorCode from "@/constants/Errorcode";
+    import TeamsService from "@/services/teams/TeamsService";
 
     export default {
         name: "TeamForm",
@@ -86,6 +163,7 @@
             Form,
             Field,
             ErrorMessage,
+            PasswordInputComponent,
             SelectionListComponent,
         },
         props: {
@@ -108,11 +186,11 @@
                     name: "",
                     users: [],
                 },
+                userData: {},
                 selectedUsers: [],
-                // selectedUsers: this.teamEditing.users ? this.teamEditing.users.map((u) => u.id) : [],
                 searchTerm: "",
                 usersList: [],
-                showTeams: false,
+                showUsers: false,
             };
         },
         computed: {
@@ -135,6 +213,7 @@
         },
         mounted() {
             this.getUsers();
+            this.setupEdit();
         },
         methods: {
             returnToTable() {
@@ -169,7 +248,7 @@
                 this.selectedUsers = [];
             },
             openNewUserSection() {
-            
+                this.showUsers = !this.showUsers;
             },
             save() {
                 const team = {
@@ -207,6 +286,51 @@
                 this.teamData.name = "";
                 this.selectedUsers = [];
                 this.searchTerm = "";
+            },
+            setupEdit() {
+                if(!this.isEdit) return;
+                TeamsService.getTeamById(this.id)
+                    .then((response) => {
+                        this.teamData = response;
+                        this.selectedUsers = response.users.map((u) => u.id);
+                    });
+            },
+            showUserSection() {
+                this.showUsers = !this.showUsers;
+            },
+            closeUserSection() {
+                this.userData = {};
+            },
+            createUser() {
+                const user = {
+                    name: this.userData.name,
+                    email: this.userData.email,
+                };
+
+                api.post("User", user).then(() => {
+                        this.$notify({
+                            title: 'management.user.title',
+                            message: 'management.user.saveSuccess',
+                            variant: 'success',
+                            icon: 'CircleCheckBig',
+                        });
+                        this.closeUserSection();
+                        this.getUsers();
+                    })
+                    .catch((err) => {
+                        const errorCode = err?.response?.data?.errorCode;
+                        let errorMessage = "management.teams.invalid";
+                        if (errorCode && errorCode === ErrorCode.Duplicated) {
+                            this.$refs.formRef.setFieldError("teamName", this.$t("management.user.duplicated"));
+                            errorMessage = "management.user.duplicated";
+                        } 
+                        this.$notify({
+                            title: 'management.user.title',
+                            message: errorMessage,
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    });
             },
         },
     };
