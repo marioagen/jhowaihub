@@ -13,4 +13,16 @@ export default {
                 console.log(e);
             });
     },
+    getWorkflowPermissions() {
+        return api
+            .get("/Permission/Workflow/")
+            .then(({ data }) => {
+                return {
+                    permissions: data,
+                };
+            })
+            .catch(function (e) {
+                console.log(e);
+            });
+    },
 };
