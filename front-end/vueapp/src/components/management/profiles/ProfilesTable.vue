@@ -20,7 +20,7 @@
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToForm(data.row)">
                             <LucideIcon icon="SquarePen" />
                             {{ $t("labelEdit") }}
                         </a>
@@ -156,6 +156,14 @@
             handleTeamCreated: function () {
                 this.getProfiles({ search: "", page: this.queryPage, type: null });
                 this.closeModalTeam();
+            },
+            redirectToForm(profile) {
+                this.$router.push({
+                    name: 'EditProfile',
+                    params: {
+                        id: profile.id,
+                    }
+                });
             },
             openEditModal(profile) {
                 this.$refs.ProfilesModal.open(profile);
