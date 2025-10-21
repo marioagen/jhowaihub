@@ -117,17 +117,26 @@
                 PromptService.updatePrompt(paramsData)
                     .then((response) => {
                         try {
+                            if (!response) {
+                                this.$notify({
+                                    title: 'prompts.title',
+                                    message: 'prompts.createErrorError',
+                                    variant: 'danger',
+                                    icon: 'CircleX',
+                                });
+                            }
                             return this.$notify({
-                                title: 'prompt.title',
-                                message: 'prompt.createSuccess',
+                                title: 'prompts.title',
+                                message: 'prompts.createSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
+                            
                         }
                         catch (e) {
                             this.$notify({
-                                title: 'prompt.title',
-                                message: 'prompt.createErrorError',
+                                title: 'prompts.title',
+                                message: 'prompts.createErrorError',
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });

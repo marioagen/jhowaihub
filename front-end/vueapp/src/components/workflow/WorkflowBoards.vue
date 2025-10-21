@@ -292,7 +292,7 @@ export default {
                     if (!valid) stepsValid = false;
                 }
             }
-
+            console.log(stepRefs, "ref dos steps");
             if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
                 return this.$notify({
                     title: 'workflow.index',
@@ -351,6 +351,7 @@ export default {
                 teamId: this.workflowData.teamId,
                 steps: this.$store.state.tempWorkflow.list,
             };
+            console.log(params, "params edit");
             WorkflowService.editWorkflow(params)
                 .then((response) => {
                     if (response.error === undefined) {

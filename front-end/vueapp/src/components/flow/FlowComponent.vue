@@ -134,7 +134,11 @@
                 sidebar.show();
             },
             closeSidebar() {
-                sidebar.hide();
+                const sidebarEl = this.$refs.sidebar;
+                const sidebar = bootstrap.Offcanvas.getInstance(sidebarEl);
+                if (sidebar) {
+                    sidebar.hide();
+                }
             },
             updateNode() {
                 let valueUpdate = "";
@@ -147,7 +151,7 @@
                 console.log(valueUpdate);
                 this.$refs.VueflowComponent.updateNodeInput(this.nodeFlow.id, valueUpdate);
                 try {
-                    return this.$notify({
+                        this.$notify({
                         title: 'flow.title',
                         message: 'flow.formFlow.editFlowNodeSuccess',
                         variant: 'success',

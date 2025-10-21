@@ -195,6 +195,14 @@
                 PromptService.deletePrompts(this.listIds)
                     .then((response) => {
                         try {
+                            if (!response) {
+                                this.$notify({
+                                    title: 'prompts.title',
+                                    message: 'prompts.createErrorError',
+                                    variant: 'danger',
+                                    icon: 'CircleX',
+                                });
+                            }
                             return this.$notify({
                                 title: 'prompt.title',
                                 message: 'prompt.deleteSuccess',
@@ -341,7 +349,7 @@
 
     .scroll-area {
         display: list-item;
-        max-height: calc(100% - 350px);
+        max-height: 400px;
         overflow-y: auto;
         min-height: 20%;
     }

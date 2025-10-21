@@ -207,6 +207,7 @@ export default {
                     }
                 };
             }
+            console.log(this.nodes,"nodos atualizados")
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
