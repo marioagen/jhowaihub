@@ -281,9 +281,9 @@ namespace WoopiAiHub.Application.Services.Automation
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
             
             if (dependentStepTool == null ||
-                stepTool.Step.Order.Equals(dependentStepTool.Step.Order) is false)
+                stepTool!.Step!.Order.Equals(dependentStepTool!.Step!.Order) is false)
             {
-                await CheckAndAdvanceAiProfileStepAsync(automationServicesDto, dependentStepTool);
+                await CheckAndAdvanceAiProfileStepAsync(automationServicesDto, dependentStepTool!);
                 return;
             }
 

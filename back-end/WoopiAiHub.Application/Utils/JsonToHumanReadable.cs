@@ -41,30 +41,64 @@ namespace WoopiAiHub.Application.Utils
             foreach (var property in element.EnumerateObject())
             {
                 var label = FormatLabel(property.Name);
-
-                if (property.Value.ValueKind == JsonValueKind.Array)
-                {
-                    sb.AppendLine($"{label}:");
-                    foreach (var item in property.Value.EnumerateArray())
-                    {
-                        if (item.ValueKind == JsonValueKind.Object)
-                            FormatSimple(item, sb);
-                    }
-                }
-                else if (property.Value.ValueKind == JsonValueKind.Object)
-                {
-                    sb.AppendLine($"{label}:");
-                    FormatSimple(property.Value, sb);
-                }
-                else
-                {
-                    var value = property.Value.ValueKind == JsonValueKind.String && string.IsNullOrEmpty(property.Value.GetString())
-                        ? "(não informado)"
-                        : property.Value.ToString();
-
-                    sb.AppendLine($"{label}: {value}");
-                }
+                AppendFormattedValue(property.Value, label, sb);
             }
+        }
+
+        /// <summary>
+        /// Append property value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="label"></param>
+        /// <param name="sb"></param>
+        private static void AppendFormattedValue(JsonElement value, string label, StringBuilder sb)
+        {
+            switch (value.ValueKind)
+            {
+                case JsonValueKind.Array:
+                    AppendArray(value, label, sb);
+                    break;
+
+                case JsonValueKind.Object:
+                    sb.AppendLine($"{label}:");
+                    FormatSimple(value, sb);
+                    break;
+
+                default:
+                    AppendPrimitive(value, label, sb);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Append array property
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="label"></param>
+        /// <param name="sb"></param>
+        private static void AppendArray(JsonElement array, string label, StringBuilder sb)
+        {
+            sb.AppendLine($"{label}:");
+            foreach (var item in array.EnumerateArray())
+            {
+                if (item.ValueKind == JsonValueKind.Object)
+                    FormatSimple(item, sb);
+            }
+        }
+
+        /// <summary>
+        /// Append primitive data
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="label"></param>
+        /// <param name="sb"></param>
+        private static void AppendPrimitive(JsonElement value, string label, StringBuilder sb)
+        {
+            var text = value.ValueKind == JsonValueKind.String && string.IsNullOrEmpty(value.GetString())
+                ? "(não informado)"
+                : value.ToString();
+
+            sb.AppendLine($"{label}: {text}");
         }
 
         /// <summary>
