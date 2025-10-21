@@ -66,6 +66,19 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<WorkflowDto>> FindByUsersTeams(List<int> teamIds)
+        {
+            return await _context.Workflows
+                .Include(w => w.Teams)
+                .Where(s => s.Teams.Any(t => teamIds.Contains(t.Id)))
+                .Select(w => new WorkflowDto
+                {
+                    Id = w.Id,
+                    Name = w.Name,
+                })
+                .ToListAsync();
+        }
+
         /// <summary>
         /// Retrieves a workflow by its ID.
         /// </summary>
@@ -250,6 +263,11 @@ namespace WoopiAiHub.Repository
                                Name = t.Name,
                                Created = t.Created,
                                Teams = t.Teams.Select(t => new TeamDto
+                               {
+                                   Id = t.Id,
+                                   Name = t.Name,
+                               }).ToList(),
+                               Steps = t.Steps.Select(t => new StepDto
                                {
                                    Id = t.Id,
                                    Name = t.Name,
