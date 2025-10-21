@@ -11,12 +11,15 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IProfileRepository _profileRepository;
         private readonly IPermissionRepository _permissionRepository;
+        private readonly IStepProfilePermissionsServices _stepProfilePermissionsServices;
 
         public ProfileServices(IProfileRepository profileRepository,
-                               IPermissionRepository permissionRepository)
+                               IPermissionRepository permissionRepository,
+                               IStepProfilePermissionsServices stepProfilePermissionsServices)
         {
             _profileRepository = profileRepository;
             _permissionRepository = permissionRepository;
+            _stepProfilePermissionsServices = stepProfilePermissionsServices;
         }
 
         /// <summary>
@@ -27,12 +30,12 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<ProfileDto> FindById(int id)
         {
-            var team = await _profileRepository.FindById(id);
-            if (team == null)
+            var profile = await _profileRepository.FindById(id);
+            if (profile == null)
             {
                 throw new ArgumentException("Profile not found");
             }
-            return team;
+            return profile;
         }
 
         /// <summary>
@@ -91,6 +94,12 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new InvalidOperationException("Duplicated Profile");
             }
+
+            if (profileCreateDto.PermissionsWorkflow != null)
+            {
+                await _stepProfilePermissionsServices.Create(profile.Id, profileCreateDto.PermissionsWorkflow);
+            }
+
             return createResult;
         }
 
@@ -125,6 +134,13 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new InvalidOperationException("Duplicated Profile");
             }
+
+            await _stepProfilePermissionsServices.Delete(profile.Id);
+            if (profileUpdateDto.PermissionsWorkflow != null)
+            {
+                await _stepProfilePermissionsServices.Create(profile.Id, profileUpdateDto.PermissionsWorkflow);
+            }
+
             return updateResult;
         }
 

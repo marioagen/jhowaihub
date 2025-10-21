@@ -30,10 +30,10 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("{id}")]
         [SwaggerOperation("Endpoint that receive an id and return a valid profile")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
-        public ActionResult<ProfileDto> FindById(int id)
+        public async Task<ActionResult<ProfileDto>> FindById(int id)
         {
-            var team = _profileServices.FindById(id);
-            return Ok(team);
+            var profile = await _profileServices.FindById(id);
+            return Ok(profile);
         }
 
         /// <summary>
