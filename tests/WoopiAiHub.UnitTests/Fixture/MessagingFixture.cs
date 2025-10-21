@@ -2,6 +2,7 @@
 using Bogus;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.DTOs.Response;
 using Xunit;
 
@@ -81,6 +82,19 @@ namespace WoopiAiHub.UnitTests.Fixture
                   Tenant = f.Random.String(),
                   Email = f.Random.String(),
                   TotalPages = f.Random.Int(1, 10)
+              });
+            return faker;
+        }
+
+        public static AutomationOutputDto FindValidAutomationOutputDto()
+        {
+            var faker = new Faker<AutomationOutputDto>("pt_BR")
+              .CustomInstantiator(f => new AutomationOutputDto
+              {
+                  Tenant = f.Random.String(),
+                  Email = f.Random.String(),
+                  ExecutionId = f.Random.Int(1, 10),
+                  Content = f.Random.ToString()
               });
             return faker;
         }

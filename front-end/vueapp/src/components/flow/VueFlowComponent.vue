@@ -15,7 +15,7 @@
                     <div>
                         <button v-for="tool in toolsList" :key="tool.id"
                             class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item" draggable="true"
-                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput, toolType: tool.toolType })">
+                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput, isConnector: tool.isConnector, toolType: tool.toolType })">
                             {{ tool.name }}
                         </button>
                     </div>
@@ -155,15 +155,16 @@ export default {
                     data: { 
                         icon: "Activity", 
                         color: "blue", 
-                        input: stepTool?.input || null, 
+                        parameters: stepTool.parameters, 
                         isEditableInput: stepTool.tool.isEditableInput,
+                        isConnector: stepTool.tool.isConnector,
+                        toolId: stepTool.toolId,
                         toolType: stepTool.tool.toolType,
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
                     type: "hub"
                 }));
-                console.log(mappedNodes, "mapped");
                 const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
                     id: `${tool.id}-${stepTools[index + 1].id}`,
                     source: tool.id.toString(),
@@ -195,19 +196,17 @@ export default {
             this.nodes = this.nodes.filter(node => node.id !== nodeId);
             this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
         },
-        updateNodeInput(nodeId, newInput) {
-            console.log(newInput);
+        updateNodeInput(nodeId, parameters) {
             const idx = this.nodes.findIndex(node => node.id === nodeId);
             if (idx !== -1) {
                 this.nodes[idx] = {
                     ...this.nodes[idx],
                     data: {
                         ...this.nodes[idx].data,
-                        input: newInput
+                        parameters: parameters
                     }
                 };
             }
-            console.log(this.nodes,"nodos atualizados")
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
@@ -245,8 +244,10 @@ export default {
                     color: '#000', 
                     isStartNode: false, 
                     isEditableInput: nodeData.isEditableInput,
-                    toolType: nodeData.toolType,
-                    input: nodeData.input || null
+                    isConnector: nodeData.isConnector,
+                    parameters: [],
+                    toolId: nodeData.id,
+                    toolType: nodeData.toolType
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
@@ -258,13 +259,13 @@ export default {
                 .map((node, index) => ({
                     id: parseInt(node.id, 10),
                     toolId: node.toolId,
-                    tool: { name: node.label, isEditableInput: node.data.isEditableInput, toolType: node.data.toolType },
+                    tool: { name: node.label, isEditableInput: node.data.isEditableInput, isConnector: node.data.isConnector, toolType: node.data.toolType },
                     positionX: parseFloat((node.position.x).toFixed(2)),
                     positionY: parseFloat((node.position.y).toFixed(2)),
                     order: index + 1,
                     status: "Active",
-                    input: node.data.input|| null,
-                    dependsOnStepToolId: index,
+                    parameters: node.data.parameters,
+                    dependsOnStepToolId: index,                    
                 }));
         },
         showCollapse() {

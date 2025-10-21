@@ -1,4 +1,5 @@
 using WoopiAiHub.Domain.Interfaces.Handlers;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.ToolsHandler;
 public class ToolFactoryHandler : IToolFactoryHandler

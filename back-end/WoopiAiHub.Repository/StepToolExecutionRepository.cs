@@ -43,7 +43,7 @@ namespace WoopiAiHub.Repository
             return await _context.StepToolExecutions
                                  .FirstOrDefaultAsync(s => s.CardId == cardId &&
                                                            s.Status == Domain.Enum.StatusExecution.Running &&
-                                                           s.StepTool.Tool.ToolType.Equals("Ocr"));
+                                                           s.StepTool!.Tool!.ToolType!.Equals("Ocr"));
         }
 
        /// <summary>
@@ -120,10 +120,24 @@ namespace WoopiAiHub.Repository
                 return false;
 
             var deletedCount = _context.StepToolExecutions
-                .Where(a => ids.Contains(a.Id))
+                .Where(a => ids!.Contains(a.Id))
                 .ExecuteDelete();
 
             return deletedCount > 0;
+        }
+
+        /// <summary>
+        /// Return StepToolExecution by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<StepToolExecution?> FindByIdAsync(int id)
+        {
+            return await _context.StepToolExecutions
+                .Include(e => e.StepTool)
+                .Include(e => e.Card)
+                    .ThenInclude(e => e!.Document)
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
     }
 }

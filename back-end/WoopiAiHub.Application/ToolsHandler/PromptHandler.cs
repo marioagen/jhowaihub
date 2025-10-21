@@ -8,6 +8,7 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 namespace WoopiAiHub.Application.ToolsHandler;
@@ -33,11 +34,12 @@ public class PromptHandler : IToolHandler
     }
 
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
-                                                        string input,
-                                                        string output)
+                                                        StepToolParameter? input,
+                                                        string output,
+                                                        StepToolExecution? execution = null)
     {
 
-        var promptId = int.Parse(input);
+        var promptId = int.Parse(input.Value);
         var promptDto = _promptServices.FindById(promptId);
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);

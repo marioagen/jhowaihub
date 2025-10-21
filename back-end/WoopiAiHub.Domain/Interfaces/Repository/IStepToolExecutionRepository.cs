@@ -4,7 +4,8 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface IStepToolExecutionRepository
     {
-        Task<bool> CreateRangeAsync(List<StepToolExecution> stepToolExecution);
+        Task<StepToolExecution?> FindByIdAsync(int id);
+        Task<bool> CreateRangeAsync(List<StepToolExecution> stepToolExecutions);
         Task UpdateAsync(StepToolExecution stepToolExecution);
         Task<StepToolExecution?> FindByStepToolIdAndCardIdAsync(int stepToolId, int cardId);
         Task<StepToolExecution?> FindRunningOcrByCardIdAsync(int cardId);

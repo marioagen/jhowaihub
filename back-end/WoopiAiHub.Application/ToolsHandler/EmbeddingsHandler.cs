@@ -8,6 +8,7 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 namespace WoopiAiHub.Application.ToolsHandler;
@@ -32,9 +33,18 @@ public class EmbeddingsHandler : IToolHandler
         _config = config;
     }
 
+    /// <summary>
+    /// Builds an execution payload for processing OCR tasks based on the provided automation service details.
+    /// </summary>
+    /// <param name="automationServicesDto"></param>
+    /// <param name="input"></param>
+    /// <param name="output"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
-                                                        string input,
-                                                        string output)
+                                                        StepToolParameter? input,
+                                                        string output,
+                                                        StepToolExecution? execution = null)
     {
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
         if (string.IsNullOrEmpty(tenantInfo!.EmbeddingModelName))
@@ -46,7 +56,7 @@ public class EmbeddingsHandler : IToolHandler
         var keyMongoAcces = await _keyGeneratorApi.GetKey(keyAccess, automationServicesDto.Tenant);
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
 
-        foreach (var item in documents.DocumentEmbeddings)
+        foreach (var item in documents!.DocumentEmbeddings)
         {
             item.KeyMongoAccess = keyMongoAcces;
         }

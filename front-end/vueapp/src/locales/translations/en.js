@@ -506,6 +506,11 @@
             entriesEditable: "Editable input",
             output: "Output",
             outputSelect: "Select output type",
+            connectorUrl: "n8n URL",
+            connectorApiKey: "API Key",
+            validatingConnector: "Validating connector url",
+            invalidConnector: "Connector did not respond. Invalid URL or key",
+            validConnector: "Connector is active"
         },
         formCreate: {
             title: "New Tool",
@@ -542,6 +547,9 @@
             subtitle: "Update the information of the selected tool",
         },
         sidebarTitle: "Configure I/O:",
+        sidebar:{
+            filter: "Select webhook"
+        },
         formFlow: {
             progressFlowSuccess: "Flow inserted successfully",
             progressFlowFail: "Failed to insert flow",

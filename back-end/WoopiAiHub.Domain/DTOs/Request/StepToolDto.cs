@@ -14,8 +14,8 @@ namespace WoopiAiHub.Domain.DTOs.Request
         public decimal PositionY { get; set; }
         public int? DependsOnStepToolId { get; set; }
         public virtual StepToolDto? DependsOnStepTool { get; set; }
-        public virtual StepDto Step { get; set; }
-        public virtual ToolDto Tool { get; set; }
+        public virtual StepDto? Step { get; set; }
+        public virtual ToolDto? Tool { get; set; }
         public virtual ICollection<StepToolParameterDto> Parameters { get; set; } = new List<StepToolParameterDto>();
         public virtual ICollection<StepToolExecutionDto> Executions { get; set; } = new List<StepToolExecutionDto>();
         public virtual ICollection<StepToolOutputDto> Outputs { get; set; } = new List<StepToolOutputDto>();

@@ -17,6 +17,18 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
+        public static ToolType FindEmptyToolType()
+        {
+            var _faker = new Faker("pt_BR");
+            return new ToolType
+            (
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+                string.Empty,
+                true
+            );
+        }
+
         public static IEnumerable<ToolTypeDto> FindValidToolTypes()
         {
             return new List<ToolTypeDto>() {
@@ -32,6 +44,17 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 DateTime.UtcNow,
                 _faker.Name.FullName(),
+                true
+            );
+        }
+
+        public static ToolType FindValidToolTypeWithName(string name)
+        {
+            var _faker = new Faker("pt_BR");
+            return new ToolType(
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+               name,
                 true
             );
         }

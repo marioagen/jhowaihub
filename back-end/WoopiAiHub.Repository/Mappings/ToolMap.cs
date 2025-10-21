@@ -41,6 +41,14 @@ namespace WoopiAiHub.Repository.Mappings
                    .HasColumnName("IsEditableInput")
                    .HasColumnType("bit")
                    .IsRequired();
+
+            builder.Property(t => t.ConnectorUrl)
+                   .HasColumnName("ConnectorUrl")
+                   .HasColumnType("varchar(255)");
+
+            builder.Property(t => t.ConnectorApiKey)
+                   .HasColumnName("ConnectorApiKey")
+                   .HasColumnType("varchar(255)");
         }
     }
 }
