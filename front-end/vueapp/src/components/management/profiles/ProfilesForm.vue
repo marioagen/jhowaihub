@@ -107,27 +107,53 @@
                             </div>
                         </div>
                     </div>
-                    <div class="border rounded p-2 user-list">
-                        <div class="row ms-2">
+                    <div class="border rounded p-3 workflow-list">
+                        <div
+                            v-for="workflow in workflowList"
+                            :key="workflow.id"
+                            class="mb-3"
+                        >
+                            <span class="fw-bold mb-2">{{ workflow.name }}</span>
                             <div
-                                v-for="permission in filteredPermissions"
-                                :key="permission.id"
-                                class="col-md-3 p-1"
+                                v-for="step in workflow.steps"
+                                :key="step.id"
+                                class="ms-3 mb-2"
                             >
-                                <div class="form-check d-flex align-items-center">
-                                    <input
-                                        class="form-check-input me-2"
-                                        type="checkbox"
-                                        :id="`permission-${permission.id}`"
-                                        :value="permission.id"
-                                        v-model="selectedPermissions"
-                                    />
-                                    <label
-                                        class="form-check-label fw-semibold"
-                                        :for="`permission-${permission.id}`"
-                                    >
-                                        {{ permission.description }}
-                                    </label>
+                                <div class="row">
+                                    <div class="col-2">
+                                        <span class="fw-semibold">
+                                            {{ step.name }}
+                                        </span>
+                                    </div>
+                                    <div class="col-10">
+                                        <div class="row ms-2 justify-content-end">
+                                            <div
+                                                v-for="permission in permissionsWorkflowList"
+                                                :key="permission.id"
+                                                class="col-md-3 p-1"
+                                            >
+                                                <div class="form-check d-flex align-items-center">
+                                                    <input
+                                                        class="form-check-input me-2"
+                                                        type="checkbox"
+                                                        :id="`permission-${profileId ?? 'new'}-${step.id}-${permission.id}`"
+                                                        :value="{
+                                                            profileId: id || null,
+                                                            stepId: step.id,
+                                                            permissionId: permission.id
+                                                        }"
+                                                        v-model="selectedWorkflowPermissions"
+                                                    />
+                                                    <label
+                                                        class="form-check-label"
+                                                        :for="`permission-${workflow.id}-${step.id}-${permission.id}`"
+                                                    >
+                                                        {{ permission.description }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -144,6 +170,7 @@
 <script>
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ProfilesService from "@/services/profiles/ProfilesService";
+    import WorkflowService from "@/services/workflow/WorkflowService";
 
     export default {
         name: "ProfilesForm",
@@ -166,10 +193,14 @@
                 id: "",
                 name: "",
                 permissions: [],
+                workflowPermissions: [],
             },
             isLoading: false,
+            workflowList: [],
             permissionsList: [],
+            permissionsWorkflowList: [],
             selectedPermissions: [],
+            selectedWorkflowPermissions: [],
             nameError: "",
             permissionError: "",
             searchTerm: "",
@@ -191,7 +222,10 @@
             },
         },
         mounted() {
+            this.getWorkflows();
             this.getPermissions();
+            this.getWorkflowPermissions();
+            this.setupEdit();
         },
         methods: {
             returnToTable() {
@@ -204,6 +238,28 @@
                 PermissionsService.getPermissions()
                     .then((response) => {
                         this.permissionsList = response.permissions;
+                    });
+            },
+            getWorkflowPermissions() {
+                PermissionsService.getWorkflowPermissions()
+                    .then((response) => {
+                        this.permissionsWorkflowList = response.permissions;
+                    });
+            },
+            getWorkflows() {
+                var email = this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email)
+                    .then((response) => {
+                        this.workflowList = response;
+                    })
+            },
+            setupEdit() {
+                if(!this.isEdit) return;
+                ProfilesService.getProfileById(this.id)
+                    .then((response) => {
+                        this.profileData = response;
+                        this.selectedPermissions = response.permissions.map(p => p.id);
+                        this.selectedWorkflowPermissions = response.workflowPermission;
                     });
             },
             validateForm() {
@@ -235,11 +291,13 @@
                 var paramsReq = {
                     name: this.profileData.name,
                     permissionsIds: this.selectedPermissions,
+                    permissionsWorkflow: this.selectedWorkflowPermissions,
                 };
+
                 ProfilesService.addProfile(paramsReq)
                     .then((result) => {
                         if (result.success) {
-                            this.resetData();
+                            this.returnToTable();
                             return this.$notify({
                                 title: "Profiles",
                                 message: this.$t("labelProfileAddSuccess"),
@@ -266,10 +324,12 @@
                     id: this.profileData.id,
                     name: this.profileData.name,
                     permissionsIds: this.selectedPermissions,
+                    permissionsWorkflow: this.selectedWorkflowPermissions,
                 };
                 ProfilesService.updateProfile(paramsReq)
                     .then((result) => {
                         if (result.success) {
+                            this.returnToTable();
                             return this.$notify({
                                 title: "Profiles",
                                 message: this.$t("labelProfileEditSuccess"),
