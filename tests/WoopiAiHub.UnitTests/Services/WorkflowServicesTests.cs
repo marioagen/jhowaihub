@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Moq.AutoMock;
+using System;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -111,10 +112,17 @@ namespace WoopiAiHub.UnitTests.Services
         {        
             // Arrange
             var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDtoNoSteps();
-            var teamDto = WorkflowFixture.FindValidTeamDto();
+            var teamFixtrue = new TeamFixture();
+            var team = teamFixtrue.CreateValidTeam();
+            workflowCreateDto.Teams = new List<int> { team.Id };
 
             _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>(), null)).ReturnsAsync((WorkflowDto?)null);
-            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
+            _teamRepositoryMock
+                .Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns((ICollection<int> ids) =>
+                {
+                    return new List<Team> { team };
+                });
 
             // Act
             var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
@@ -123,8 +131,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.RequiredField, ex.ErrorCode);
             Assert.Equal("Workflow must have at least one step", ex.Message);
             Assert.Equal(StepLabel.Required, ex.LabelError);
-            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>(), null), Times.Once);
             _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Never);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Exactly(1));
         }
 
         [Fact(DisplayName = "Create should throw AppException when workflow step has empty name")]
@@ -133,10 +141,17 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDtoStepWithNoName();
-            var teamDto = WorkflowFixture.FindValidTeamDto();
+            var teamFixtrue = new TeamFixture();
+            var team = teamFixtrue.CreateValidTeam();
+            workflowCreateDto.Teams = new List<int> { team.Id };
 
             _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>(), null)).ReturnsAsync((WorkflowDto?)null);
-            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
+            _teamRepositoryMock
+                .Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns((ICollection<int> ids) =>
+                {
+                    return new List<Team> { team };
+                });
 
             // Act
             var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
@@ -145,29 +160,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.RequiredField, ex.ErrorCode);
             Assert.Equal("Step name cannot be empty", ex.Message);
             Assert.Equal(StepLabel.NameRequired, ex.LabelError);
-            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>(), null), Times.Once);
             _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Never);
-        }
-
-        [Fact(DisplayName = "Create should throw AppException when workflow already exists for team")]
-        [Trait("Create", "Fail")]
-        public async Task Create_ShouldThrowAppException_WhenWorkflowAlreadyExistsForTeam()
-        {
-            // Arrange
-            var workflowDto = WorkflowFixture.FindValidWorkflowDto();
-            var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDto();
-
-            _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>(), null)).ReturnsAsync(workflowDto);
-
-            // Act
-            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
-
-            // Assert
-            Assert.Equal(ErrorCode.Conflict, ex.ErrorCode);
-            Assert.Equal("Workflow already exists for this team", ex.Message);
-            Assert.Equal(WorkflowLabel.AlreadyExists, ex.LabelError);
-            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>(), null), Times.Once);
-            _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Never);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Exactly(1));
         }
 
         [Fact(DisplayName = "Create should throw AppException when team not found")]
@@ -176,9 +170,21 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDto();
+            var profileDto = WorkflowFixture.FindValidProfileDto();
+            var status = WorkflowFixture.FindValidStatus();
+            var teamFixtrue = new TeamFixture();
+            var team = teamFixtrue.CreateValidTeam();
+            workflowCreateDto.Teams = new List<int> { 5 };
 
+            _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(profileDto);
+            _statusRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(status);
             _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>(), null)).ReturnsAsync((WorkflowDto?)null);
-            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns((TeamDto?)null);
+            _teamRepositoryMock
+                .Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns((ICollection<int> ids) =>
+                {
+                    return new List<Team> { };
+                });
 
             // Act
             var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
@@ -187,9 +193,9 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal("Team not found", ex.Message);
             Assert.Equal(TeamLabel.NotFound, ex.LabelError);
-            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>(), null), Times.Once);
-            _teamRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
             _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Never);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Exactly(1));
+            _profileRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Never);
         }
 
         [Fact(DisplayName = "Create should throw AppException when Step has invalid ProfileId")]
@@ -199,11 +205,18 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var step = WorkflowFixture.FindValidStepCreateDto();
             var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDto();
-            var teamDto = WorkflowFixture.FindValidTeamDto();
+            var teamFixtrue = new TeamFixture();
+            var team = teamFixtrue.CreateValidTeam();
+            workflowCreateDto.Teams = new List<int> { team.Id };
 
             _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>(), null)).ReturnsAsync((WorkflowDto?)null);
-            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
             _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync((ProfileDto?)null);
+            _teamRepositoryMock
+               .Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+               .Returns((ICollection<int> ids) =>
+               {
+                   return new List<Team> { team };
+               });
 
             // Act
             var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
@@ -212,9 +225,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal("Profile not found", ex.Message);
             Assert.Equal(ProfileLabel.NotFound, ex.LabelError);
-            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>(), null), Times.Once);
-            _teamRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
             _profileRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Exactly(2));
         }
 
         [Fact(DisplayName = "Create should throw AppException when Step has invalid StatusId")]
@@ -226,11 +238,20 @@ namespace WoopiAiHub.UnitTests.Services
             var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDto();
             var teamDto = WorkflowFixture.FindValidTeamDto();
             var profileDto = WorkflowFixture.FindValidProfileDto();
+            var teamFixtrue = new TeamFixture();
+            var team = teamFixtrue.CreateValidTeam();
+            workflowCreateDto.Teams = new List<int> { team.Id };
 
             _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>(), null)).ReturnsAsync((WorkflowDto?)null);
             _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
             _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(profileDto);
             _statusRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync((Status?)null);
+            _teamRepositoryMock
+               .Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+               .Returns((ICollection<int> ids) =>
+               {
+                   return new List<Team> { team };
+               });
 
             // Act
             var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.Create(workflowCreateDto));
@@ -239,10 +260,9 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal("Status not found", ex.Message);
             Assert.Equal(StatusLabel.NotFound, ex.LabelError);
-            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>(), null), Times.Once);
-            _teamRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
             _profileRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
             _statusRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Exactly(2));
         }
 
         [Fact(DisplayName = "Create should return true when success")]
@@ -252,23 +272,29 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var step = WorkflowFixture.FindValidStepCreateDto();
             var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDto();
-            var teamDto = WorkflowFixture.FindValidTeamDto();
             var profileDto = WorkflowFixture.FindValidProfileDto();
             var status = WorkflowFixture.FindValidStatus();
+            var teamFixtrue = new TeamFixture();
+            var team = teamFixtrue.CreateValidTeam();
+            workflowCreateDto.Teams = new List<int> { team.Id };
 
             _workflowRepositoryMock.Setup(r => r.FindByTeamId(It.IsAny<int>(), null)).ReturnsAsync((WorkflowDto?)null);
-            _teamRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).Returns(teamDto);
             _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(profileDto);
             _statusRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(status);
             _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>())).ReturnsAsync(true);
+            _teamRepositoryMock
+                .Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns((ICollection<int> ids) =>
+                {
+                    return new List<Team> { team };
+                });
 
             // Act
             var result = await _workflowServices.Create(workflowCreateDto);
 
             // Assert
             Assert.True(result);
-            _workflowRepositoryMock.Verify(r => r.FindByTeamId(It.IsAny<int>(), null), Times.Once);
-            _teamRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Exactly(2));
             _profileRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
             _statusRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
         }
@@ -295,19 +321,27 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("Update", "Success")]
         public async Task Update_ShouldReturnTrue_WhenUpdateIsSuccessful()
         {
+            var teamFixtrue = new TeamFixture();
             // Arrange
             var updateDto = WorkflowFixture.FindValidWorkflowUpdateDto();
             var workflow = WorkflowFixture.FindValidWorkflow();
             var step = WorkflowFixture.FindValidStep();
+            var team = teamFixtrue.CreateValidTeam();
             updateDto.Steps.Clear();
+
             var stepUpdateDto = WorkflowFixture.FindValidStepUpdateDto();
             var stepUpdateDto2 = WorkflowFixture.FindValidStepUpdateDto();
+
             stepUpdateDto.Id = 0;
             stepUpdateDto.Order = 1;
             updateDto.Steps.Add(stepUpdateDto);
+
             stepUpdateDto2.Id = 10;
-            stepUpdateDto2.Order = 2;            
+            stepUpdateDto2.Order = 2;
             updateDto.Steps.Add(stepUpdateDto2);
+
+            var teams = new List<int> { team.Id };
+            updateDto.Teams = teams;
 
             workflow.Steps.Clear();
             foreach (var stepDto in updateDto.Steps)
@@ -341,6 +375,12 @@ namespace WoopiAiHub.UnitTests.Services
             _stepRepositoryMock.Setup(r => r.DeleteByIds(It.IsAny<ICollection<int>>())).Returns(true);
             _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(WorkflowFixture.FindValidProfileDto());
             _statusRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(WorkflowFixture.FindValidStatus());
+            _teamRepositoryMock
+                .Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns((ICollection<int> ids) =>
+                {
+                    return new List<Team> { team };
+                });
 
             // Act
             var result = await _workflowServices.Update(updateDto);
