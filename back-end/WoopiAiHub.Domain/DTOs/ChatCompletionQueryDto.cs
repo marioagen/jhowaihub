@@ -7,7 +7,7 @@ using WoopiAiHub.Domain.DTOs.Messaging;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class ChatCompletionQueryDto
+    public record ChatCompletionQueryDto
     {
         public string ReferenceFile { get; set; } = string.Empty;
         public string Tenant { get; set; } = string.Empty;

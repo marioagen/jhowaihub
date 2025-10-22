@@ -7,7 +7,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class ChatChoiceDto
+    public record ChatChoiceDto
     {
         public ChatMessageResponseDto Message { get; set; } = new();
     }

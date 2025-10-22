@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class PagedResultDto<T>
+    public record PagedResultDto<T>
     {
         public IEnumerable<T>? Items { get; set; }
         public int Count { get; set; }

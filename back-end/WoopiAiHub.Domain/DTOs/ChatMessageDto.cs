@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class ChatMessageDto
+    public record ChatMessageDto
     {
         public string Role { get; set; } = "system";
         public string Content { get; set; } = string.Empty;

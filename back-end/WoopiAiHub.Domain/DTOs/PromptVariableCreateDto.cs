@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class PromptVariableCreateDto
+    public record PromptVariableCreateDto
     {
         public string Label { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;

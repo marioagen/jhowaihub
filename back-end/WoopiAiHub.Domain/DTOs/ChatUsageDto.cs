@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class ChatUsageDto
+    public record ChatUsageDto
     {
         [JsonPropertyName("prompt_tokens")]
         public int PromptTokens { get; set; }

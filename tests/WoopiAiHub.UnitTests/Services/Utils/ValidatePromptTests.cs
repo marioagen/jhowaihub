@@ -27,6 +27,7 @@ namespace WoopiAiHub.UnitTests.Services.Utils
         }
 
         [Fact(DisplayName = "ValidateOwnership should throw KeyNotFoundException when prompt not found")]
+        [Trait("ValidateOwnership", "Fail")]
         public void ValidateOwnership_PromptNotFound_ThrowsKeyNotFoundException()
         {
             // Arrange
@@ -47,6 +48,7 @@ namespace WoopiAiHub.UnitTests.Services.Utils
         }
 
         [Fact(DisplayName = "ValidateOwnership should throw ArgumentException when guid is empty")]
+        [Trait("ValidateOwnership", "Fail")]
         public void ValidateOwnership_GuidEmpty_ThrowsArgumentException()
         {
             // Arrange

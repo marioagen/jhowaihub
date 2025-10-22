@@ -168,6 +168,11 @@ namespace WoopiAiHub.Application.Services
             return await _userRepository.FindByTeamIdAsync(teamId);
         }
 
+        /// <summary>
+        /// Find user id by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public Guid FindIdByEmail(string email)
         {
             return _userRepository.FindIdByEmail(email);

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class ChatCompletionDto
+    public record ChatCompletionDto
     {
         public List<ChatMessageDto> Messages { get; set; } = new();
         public double Temperature { get; set; }

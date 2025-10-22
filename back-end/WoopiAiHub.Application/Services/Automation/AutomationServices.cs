@@ -232,7 +232,7 @@ namespace WoopiAiHub.Application.Services.Automation
             execution.UpdateStatusExecution(StatusExecution.Running);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);// deve enviar o id do prompt via prompt pra salvar como string id, converter pro int
+            var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
 
             string output = string.Empty;
             if (stepTool.DependsOnStepTool != null)
