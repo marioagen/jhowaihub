@@ -416,12 +416,15 @@ namespace WoopiAiHub.Application.Services.Automation
             {
                 await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id);
                 
-                var nextStepDto = automationServicesDto with
+                if (dependentStepTool != null)
                 {
-                    StepId = nextStep.Id,
-                    StepToolId = dependentStepTool.Id
-                };
-                await StartExecutionByCardAsync(nextStepDto);
+                    var nextStepDto = automationServicesDto with
+                    {
+                        StepId = nextStep.Id,
+                        StepToolId = dependentStepTool.Id
+                    };
+                    await StartExecutionByCardAsync(nextStepDto);
+                }
             }
         }
     }

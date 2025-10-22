@@ -10,7 +10,6 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -23,13 +22,16 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IHubNotifier _hubNotifier;
+        private readonly IDocumentHistoryRepository _documentHistoryRepository;
+
         public PromptServices(IUnitOfWork unitOfWork,
                               IPromptRepository promptRepository,
                               IValidatePrompt validatePrompt,
                               IUserServices userServices,
                               IStepToolExecutionRepository stepToolExecutionRepository,
                               IStepToolOutputRepository stepToolOutputRepository,
-                              IHubNotifier hubNotifier)
+                              IHubNotifier hubNotifier,
+                              IDocumentHistoryRepository documentHistoryRepository)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
@@ -38,6 +40,7 @@ namespace WoopiAiHub.Application.Services
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
             _hubNotifier = hubNotifier;
+            _documentHistoryRepository = documentHistoryRepository;
         }
 
         /// <summary>
@@ -50,7 +53,7 @@ namespace WoopiAiHub.Application.Services
         public bool CreateUniquePrompt(PromptCreateDto promptCreateDto, string email)
         {
             var idUser = _userServices.FindIdByEmail(email);
-            var prompt = GeneratePromptToCreate(promptCreateDto,idUser);
+            var prompt = GeneratePromptToCreate(promptCreateDto, idUser);
 
             var result = _validatePrompt.ValidatePromptFields(prompt);
 
@@ -124,7 +127,7 @@ namespace WoopiAiHub.Application.Services
             if (query == null)
                 throw new ArgumentException("Prompt not found");
 
-            if(idUser == Guid.Empty)
+            if (idUser == Guid.Empty)
                 throw new ArgumentException("Invalid user id");
 
             query = pagedDataDto.IsAscending ?
@@ -171,7 +174,7 @@ namespace WoopiAiHub.Application.Services
         public bool DeleteByIds(List<int> ids)
         {
             var result = _promptRepository.Delete(ids);
-            if(!result)
+            if (!result)
             {
                 throw new ArgumentException("Delete prompt failed");
             }
@@ -248,9 +251,9 @@ namespace WoopiAiHub.Application.Services
             var idUser = _userServices.FindIdByEmail(emailCreator);
             var query = _promptRepository.FindAllWithOwnerStatus(idUser);
 
-            if(query == null)
+            if (query == null)
                 throw new ArgumentException("Prompt not found");
-            if(idUser == Guid.Empty)
+            if (idUser == Guid.Empty)
                 throw new ArgumentException("Invalid user id");
 
 
@@ -303,11 +306,18 @@ namespace WoopiAiHub.Application.Services
             var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(chatCompletionResponseDto.Data.ToString());
             var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
                                                                                               dataDto.CardId);
-            if (execution == null) {
+            if (execution == null)
+            {
 
                 throw new ArgumentException("StepToolExecution not found");
             }
 
+            var documentHistory = new DocumentHistory(execution.Card!.DocumentId, 
+                                                      "Prompt", 
+                                                      chatCompletionResponseDto.Choices[0].Message.Content,
+                                                      0, 
+                                                      DateTime.Now);
+            _documentHistoryRepository.Create(documentHistory);
             await UpdateExecutionAsync(execution!, chatCompletionResponseDto.Email);
             await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.Choices[0].Message.Content);
         }
