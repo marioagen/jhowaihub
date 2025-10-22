@@ -253,7 +253,6 @@ export default {
             this.vueFlowInstance?.addNodes([newNode])
         },
         buildFlowPayload() {
-            console.log(this.nodes);
             return this.nodes
                 .filter(node => node.id !== "start")
                 .map((node, index) => ({
