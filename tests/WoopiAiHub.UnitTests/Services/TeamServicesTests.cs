@@ -1,5 +1,6 @@
 using Moq;
 using Moq.AutoMock;
+using System.Collections.Generic;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -269,7 +270,17 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var ids = new List<int> { 999 };
             var team = new Team("Team with Docs", 999, DateTime.Now);
-            var document = new Document("Doc1", "Content", "Reference", DocumentStatus.Analyzed, true, "email", 1, DateTime.Now);
+            var document = new Document(
+                "Doc1", 
+                "Content", 
+                "Reference", 
+                DocumentStatus.Analyzed, 
+                true, 
+                "email", 
+                1,
+                new List<Workflow>(),
+                DateTime.Now
+            );
             var teams = new List<Team> {team};
 
             _teamRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(teams);

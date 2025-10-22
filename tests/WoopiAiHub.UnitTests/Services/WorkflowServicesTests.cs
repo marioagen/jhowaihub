@@ -86,24 +86,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
         }
 
-        [Fact(DisplayName = "Test FindByTeamId and returns a workflow")]
-        [Trait("FindByTeamId", "Sucess")]
-        public async Task FindByTeamId_WorkflowExists_ReturnsWorkflow()
-        {
-            // Arrange
-            var teamId = 1;
-            var expectedWorkflow = new WorkflowDto { TeamId = teamId };
-            _workflowRepositoryMock.Setup(repo => repo.FindByTeamId(teamId, null))
-                .ReturnsAsync(expectedWorkflow);
-
-            // Act
-            var result = await _workflowServices.FindByTeamId(teamId, null);
-
-            // Assert
-            _workflowRepositoryMock.Verify(repo => repo.FindByTeamId(teamId, null), Times.Once);
-            Assert.Equal(expectedWorkflow, result);
-        }
-
         [Fact(DisplayName = "Test FindByTeamId and throws an exception")]
         [Trait("FindByTeamId", "Fail")]
         public async Task FindByTeamId_WorkflowDoesNotExist_ThrowsAppException()

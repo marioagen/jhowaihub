@@ -22,14 +22,17 @@ namespace WoopiAiHub.UnitTests.Fixture
         public Document FindValidDocument()
         {
             Document Document = new Faker<Document>("pt_BR")
-            .CustomInstantiator(f => new Document(f.Random.AlphaNumeric(10), 
-                                                  f.Lorem.Paragraph(), 
-                                                  f.Random.AlphaNumeric(10), 
-                                                  0, 
-                                                  true, 
-                                                  f.Person.Email, 
-                                                  f.IndexFaker, 
-                                                  f.Date.Past()));
+            .CustomInstantiator(f => new Document(
+                f.Random.AlphaNumeric(10), 
+                f.Lorem.Paragraph(), 
+                f.Random.AlphaNumeric(10),
+                Domain.Enum.DocumentStatus.ReadyForAnalysis,
+                true, 
+                f.Person.Email, 
+                f.IndexFaker,
+                new List<Workflow>(),
+                f.Date.Past())
+            );
             return Document;
         }
 
@@ -223,7 +226,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Name: "idea",
                 Description: "desc",
                 EmailCreator: faker.Internet.Email(),
-                TeamsIds: new List<int> { 10 }
+                Workflows: new List<int> { 10 }
             );
 
             return dto;
@@ -298,7 +301,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             .CustomInstantiator(f => new Workflow(
                     f.IndexFaker,
                     f.Date.Past(),
-                    f.IndexFaker,
+                    new List<Team>(),
                     f.Lorem.Word()                 
                 )
             );

@@ -14,7 +14,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<int>(),
                     Name = f.Lorem.Sentence(3),
                     Steps = new List<StepCreateDto>() { FindValidStepCreateDto() }
                 });
@@ -26,7 +26,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<int>(),
                     Name = f.Lorem.Sentence(3)
                 });
             return faker;
@@ -37,7 +37,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<int>(),
                     Name = f.Lorem.Sentence(3),
                     Steps = new List<StepCreateDto>()
                     {
@@ -119,7 +119,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 {
                     Id = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(3),
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<TeamDto>(),
                     Steps = new List<StepDto>() { FindValidStepDto() }
                 });
             return faker;
@@ -198,7 +198,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new Workflow(
                 f.IndexFaker,
                 f.Date.Past(),
-                f.Random.Int(1, 5),
+                new List<Team>(),
                 f.Person.FirstName)
             {
                 Steps = new List<Step> { FindValidStep() }
@@ -213,7 +213,7 @@ namespace WoopiAiHub.UnitTests.Fixture
            (
                f.IndexFaker,
                f.Date.Past(),
-               f.Random.Int(1, 5),
+               new List<Team>(),
                f.Person.FirstName
 
            )

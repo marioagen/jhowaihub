@@ -197,6 +197,7 @@ namespace WoopiAiHub.UnitTests.Services
             card.UpdateAssignedUser(userId);
             card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1);
             card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
+            card.Step.Workflow.Teams = new List<Team>();
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
             updateAssignedUserDto.UserId = userId;
 
