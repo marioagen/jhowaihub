@@ -352,7 +352,7 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var chatCompletionResponseDto = MessagingFixture.FindValidChatCompletionResponseDto();
             var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
-            _stepToolExecutionRepository.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(It.IsAny<StepToolExecution>);
+            _stepToolExecutionRepository.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
             _documentHistoryRepository.Setup(r => r.Create(It.IsAny<DocumentHistory>())).Returns(true);
 
             //Act

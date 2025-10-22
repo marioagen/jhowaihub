@@ -308,7 +308,6 @@ namespace WoopiAiHub.Application.Services
                                                                                               dataDto.CardId);
             if (execution == null)
             {
-
                 throw new ArgumentException("StepToolExecution not found");
             }
 

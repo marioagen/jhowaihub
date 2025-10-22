@@ -5,6 +5,7 @@ using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.DTOs.Response;
 using Xunit;
+using Newtonsoft.Json.Linq;
 
 namespace WoopiAiHub.UnitTests.Fixture
 {
@@ -101,6 +102,10 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static ChatCompletionResponseDto FindValidChatCompletionResponseDto()
         {
+            JObject mockJObject = new JObject();
+            mockJObject.Add("CardId", 1);
+            mockJObject.Add("StepToolId", 30);
+
             var faker = new Faker<ChatCompletionResponseDto>("pt_BR")
               .CustomInstantiator(f => new ChatCompletionResponseDto
               {
@@ -121,7 +126,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                       CompletionTokens = f.Random.Int(1, 1000),
                       TotalTokens = f.Random.Int(1, 2000)
                   },
-                  Data = new Newtonsoft.Json.Linq.JObject()
+                  Data  = mockJObject
               });
             return faker;
         }
