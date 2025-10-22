@@ -93,8 +93,8 @@ namespace WoopiAiHub.UnitTests.Consumers
         }
 
         [Fact(DisplayName = "It must consume the response and process it successfully")]
-        [Trait("ConsumerAsync", "OcrConsumer unit tests")]
-        public async Task OcrConsumer_ConsumeAsync_ShouldConsumeMessage()
+        [Trait("ConsumerAsync", "PromptConsumer unit tests")]
+        public async Task PromptConsumer_ConsumeAsync_ShouldConsumeMessage()
         {
             // Arrange
             _promptServices
@@ -118,8 +118,8 @@ namespace WoopiAiHub.UnitTests.Consumers
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]
-        [Trait("ConsumerAsync", "OcrConsumer unit tests")]
-        public async Task OcrConsumer_ConsumeAsync_ShouldCatchException_WhenExtractingOcr()
+        [Trait("ConsumerAsync", "PromptConsumer unit tests")]
+        public async Task PromptConsumer_ConsumeAsync_ShouldCatchException_WhenExtractingOcr()
         {
             // Arrange
             var exceptionEsperada = new ArgumentException("StepToolExecution not found");

@@ -14,6 +14,8 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Application.Utils;
+using Newtonsoft.Json;
+using WoopiAiHub.UnitTests.Fixture;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -26,6 +28,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IStepToolExecutionRepository> _stepToolExecutionRepository = new();
         private readonly Mock<IStepToolOutputRepository> _stepToolOutputRepository = new();
         private readonly Mock<IHubNotifier> _hubNotifier = new();
+        private readonly Mock<IDocumentHistoryRepository> _documentHistoryRepository = new();
 
         private PromptServices CreateService()
         {
@@ -36,7 +39,9 @@ namespace WoopiAiHub.UnitTests.Services
                 _userServices.Object,
                 _stepToolExecutionRepository.Object,
                 _stepToolOutputRepository.Object,
-                _hubNotifier.Object
+                _hubNotifier.Object,
+                _documentHistoryRepository.Object
+
             );
         }
 
@@ -338,6 +343,38 @@ namespace WoopiAiHub.UnitTests.Services
 
             //Assert
             Assert.NotNull(result);
+        }
+
+        [Fact(DisplayName = "ProcessChatCompletionResult success")]
+        [Trait("ProcessChatCompletionResult", "Success")]
+        public async Task ProcessChatCompletionResult_Success()
+        {
+            //Arrange
+            var chatCompletionResponseDto = MessagingFixture.FindValidChatCompletionResponseDto();
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+            _stepToolExecutionRepository.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(It.IsAny<StepToolExecution>);
+            _documentHistoryRepository.Setup(r => r.Create(It.IsAny<DocumentHistory>())).Returns(true);
+
+            //Act
+            var service = CreateService();
+            await service.ProcessChatCompletionResult(chatCompletionResponseDto);
+
+            Assert.True(true);
+        }
+
+        [Fact(DisplayName = "ProcessChatCompletionResult should throw argument exception")]
+        [Trait("ProcessChatCompletionResult", "Fail")]
+        public async Task ProcessChatCompletionResult_Fail()
+        {
+            //Arrange
+            var chatCompletionResponseDto = MessagingFixture.FindValidChatCompletionResponseDto();
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+            _stepToolExecutionRepository.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(It.IsAny<StepToolExecution>);
+            _documentHistoryRepository.Setup(r => r.Create(It.IsAny<DocumentHistory>())).Returns(true);
+
+            //Act/Assert
+            var service = CreateService();
+            await Assert.ThrowsAsync<ArgumentException>(async () => await service.ProcessChatCompletionResult(chatCompletionResponseDto));
         }
     }
 
