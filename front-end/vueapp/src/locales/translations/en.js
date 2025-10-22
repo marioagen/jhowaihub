@@ -572,6 +572,13 @@
         labelLoadMore: "Load more",
         searchPrompts: "Search prompts",
         noPromptsListWereFound: "No prompts were found",
+        createSuccess: "Prompts created successfully",
+        createError: "Prompts create failed",
+        updateSuccess: "Prompts updated successfully",
+        updateError: "Prompts update failed",
+        deleteSuccess: "Prompts deleted successfully",
+        deleteError: "Prompts delete failed",
+        removeAllPrompts: "Delete prompts"
     }
 };
 

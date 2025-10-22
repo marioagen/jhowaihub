@@ -52,8 +52,12 @@ namespace WoopiAiHub.Application.Services
             var idUser = _userServices.FindIdByEmail(email);
             var prompt = GeneratePromptToCreate(promptCreateDto,idUser);
 
-            _validatePrompt.ValidatePromptFields(prompt);
+            var result = _validatePrompt.ValidatePromptFields(prompt);
 
+            if (!result)
+            {
+                return false;
+            }
             var createPromptResult = _promptRepository.CreateUniquePrompt(prompt);
             if (!createPromptResult)
             {
@@ -171,7 +175,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new ArgumentException("Delete prompt failed");
             }
-            return _promptRepository.Delete(ids);
+            return result;
         }
 
         /// <summary>
@@ -235,7 +239,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Find all prompts with owner status
+        /// Find all prompts with email creator
         /// </summary>
         /// <param name="emailCreator"></param>
         /// <returns></returns>
@@ -272,7 +276,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Generate a new prompt
+        /// Update a prompt
         /// </summary>
         /// <param name="promptDto"></param>
         /// <param name="promptUpdateDto"></param>

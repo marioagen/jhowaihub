@@ -36,7 +36,7 @@ namespace WoopiAiHub.Application.Messaging
         }
 
         /// <summary>
-        /// Execute the background embeddings of document 
+        /// Execute the background service to consume messages from the ChatCompletion queue.
         /// </summary>
         /// <param name="stoppingToken"></param>
         /// <returns></returns>

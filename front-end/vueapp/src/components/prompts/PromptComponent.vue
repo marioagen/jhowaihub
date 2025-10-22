@@ -70,8 +70,8 @@
     </div>
     <modal-alert v-if="modalAlertShow"
                  :type="'Confirm'"
-                 :alertTitle="$t('labelRemoveAllPrompts')"
-                 :alertMessage="$t('labelRemoveAllPromptsAction')"
+                 :alertTitle="$t('prompts.removeAllPrompts')"
+                 :alertMessage="$t('labelThisActionCannotBeUndone')"
                  :okLabel="$t('labelConfirm')"
                  :cancelLabel="$t('labelCancel')"
                  @open="deletePrompts"
@@ -196,24 +196,24 @@
                     .then((response) => {
                         try {
                             if (!response) {
-                                this.$notify({
+                                 return this.$notify({
                                     title: 'prompts.title',
-                                    message: 'prompts.createErrorError',
+                                    message: 'prompts.deleteError',
                                     variant: 'danger',
                                     icon: 'CircleX',
                                 });
                             }
                             return this.$notify({
-                                title: 'prompt.title',
-                                message: 'prompt.deleteSuccess',
+                                title: 'prompts.title',
+                                message: 'prompts.deleteSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         }
                         catch {
-                            this.$notify({
-                                title: 'prompt.title',
-                                message: 'prompt.deleteErrorError',
+                            return this.$notify({
+                                title: 'prompts.title',
+                                message: 'prompts.deleteError',
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });

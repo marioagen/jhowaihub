@@ -118,25 +118,25 @@
                     .then((response) => {
                         try {
                             if (!response) {
-                                this.$notify({
+                                 return this.$notify({
                                     title: 'prompts.title',
-                                    message: 'prompts.createErrorError',
+                                    message: 'prompts.updateError',
                                     variant: 'danger',
                                     icon: 'CircleX',
                                 });
                             }
                             return this.$notify({
                                 title: 'prompts.title',
-                                message: 'prompts.createSuccess',
+                                message: 'prompts.updateSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                             
                         }
                         catch (e) {
-                            this.$notify({
+                             return this.$notify({
                                 title: 'prompts.title',
-                                message: 'prompts.createErrorError',
+                                message: 'prompts.updateError',
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
@@ -155,23 +155,25 @@
                 PromptService.createPrompt(paramsData)
                     .then((response) => {
                         try {
-                            return this.$notify({
-                                title: 'prompt.title',
-                                message: 'prompt.createSuccess',
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
-                            });
+                            if (!response) {
+                                return this.$notify({
+                                    title: 'prompts.title',
+                                    message: 'prompts.createError',
+                                    variant: 'danger',
+                                    icon: 'CircleX',
+                                });
+                            }
                         }
                         catch (e) {
-                            this.$notify({
-                                title: 'prompt.title',
-                                message: 'prompt.createErrorError',
+                             return this.$notify({
+                                title: 'prompts.title',
+                                message: 'prompts.createErrorError',
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
                         }
                         finally{
-                            this.redirectToPromptList();
+                             return this.redirectToPromptList();
                         }
                     });
             }

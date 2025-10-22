@@ -139,7 +139,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         }
 
         /// <summary>
-        /// Return all prompts
+        /// Return all prompts by email
         /// </summary>
         /// <param name="headersDto"></param>
         /// <returns></returns>

@@ -11,6 +11,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     {
         void ValidateOwnership(int promptId,
                               string emailCreator);
-        void ValidatePromptFields(Prompt prompt);
+        bool ValidatePromptFields(Prompt prompt);
     }
 }

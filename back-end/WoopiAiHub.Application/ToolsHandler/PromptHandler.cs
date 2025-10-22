@@ -21,11 +21,10 @@ public class PromptHandler : IToolHandler
     private readonly IPromptServices _promptServices;
     private readonly ChatCompletionSettings _chatCompletionSettings;
 
-    public PromptHandler(
-    ITenantCacheServices tenantCacheServices,
-    IOptions<MessageQueues> messageQueues,
-    IPromptServices promptServices,
-    IOptions<ChatCompletionSettings> chatCompletionSettings)
+    public PromptHandler(ITenantCacheServices tenantCacheServices,
+                         IOptions<MessageQueues> messageQueues,
+                         IPromptServices promptServices,
+                         IOptions<ChatCompletionSettings> chatCompletionSettings)
     {
         _tenantCacheServices = tenantCacheServices;
         _messageQueues = messageQueues.Value;

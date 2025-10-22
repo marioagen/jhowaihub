@@ -575,6 +575,13 @@
         labelLoadMore: "Cargar más",
         searchPrompts: "Buscar prompts",
         noPromptsListWereFound: "No se encontraron prompts",
+        createSuccess: "Prompt creado exitosamente",
+        createError: "No se pudieron crear el prompt",
+        updateSuccess: "Prompt actualizado exitosamente",
+        updateError: "No se pudieron actualizar el prompt",
+        deleteSuccess: "Prompts eliminados exitosamente",
+        deleteError: "No se pudieron eliminar los prompts",
+        removeAllPrompts: "Eliminar prompts"
     }
 };
 

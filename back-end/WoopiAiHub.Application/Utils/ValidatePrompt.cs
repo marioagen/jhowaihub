@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using WoopiAiHub.Application.Services;
-using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Interfaces.Repository;
+﻿using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 
@@ -46,14 +38,15 @@ namespace WoopiAiHub.Application.Utils
         /// </summary>
         /// <param name="prompt"></param>
         /// <exception cref="AppException"></exception>e
-        public void ValidatePromptFields(Prompt prompt)
+        public bool ValidatePromptFields(Prompt prompt)
         {
             if (string.IsNullOrWhiteSpace(prompt.Name) ||
                 string.IsNullOrWhiteSpace(prompt.Description) ||
                 string.IsNullOrWhiteSpace(prompt.Text))
             {
-                //throw new AppException(ErrorCode.RequiredField, "Required field cannot be null or empty.");
+                return false;
             }
+            return true;
         }
     }
 }
