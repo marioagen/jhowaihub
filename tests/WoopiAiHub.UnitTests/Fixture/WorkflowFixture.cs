@@ -119,7 +119,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 {
                     Id = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(3),
-                    Teams = new List<TeamDto>(),
+                    Teams = new List<TeamDto>() { FindValidTeamDto() },
                     Steps = new List<StepDto>() { FindValidStepDto() }
                 });
             return faker;
@@ -198,7 +198,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new Workflow(
                 f.IndexFaker,
                 f.Date.Past(),
-                new List<Team>(),
+                new List<Team>() { DocumentFixture.FindValidTeam() },
                 f.Person.FirstName)
             {
                 Steps = new List<Step> { FindValidStep() }
@@ -213,7 +213,7 @@ namespace WoopiAiHub.UnitTests.Fixture
            (
                f.IndexFaker,
                f.Date.Past(),
-               new List<Team>(),
+               new List<Team>() { DocumentFixture.FindValidTeam() },
                f.Person.FirstName
 
            )

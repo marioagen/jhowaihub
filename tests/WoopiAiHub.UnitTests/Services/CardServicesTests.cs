@@ -192,12 +192,12 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task AssignUser_ValidUser_UpdatesAssignedUser()
         {
             // Arrange
-            var userId = Guid.NewGuid();
+            var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var card = CardFixture.FindValidCard();
             card.UpdateAssignedUser(userId);
             card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1);
             card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
-            card.Step.Workflow.Teams = new List<Team>();
+            card.Step.Workflow.Teams = new List<Team>() { DocumentFixture.FindValidTeam() };
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
             updateAssignedUserDto.UserId = userId;
 
