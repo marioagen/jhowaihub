@@ -301,7 +301,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             .CustomInstantiator(f => new Workflow(
                     f.IndexFaker,
                     f.Date.Past(),
-                    new List<Team>(),
+                    new List<Team> { FindValidTeam() },
                     f.Lorem.Word()                 
                 )
             );
