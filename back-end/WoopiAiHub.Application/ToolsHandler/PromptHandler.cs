@@ -32,6 +32,14 @@ public class PromptHandler : IToolHandler
         _chatCompletionSettings = chatCompletionSettings.Value;
     }
 
+    /// <summary>
+    /// Builds an execution payload for processing prompt tasks based on the provided automation service details.
+    /// </summary>
+    /// <param name="automationServicesDto"></param>
+    /// <param name="input"></param>
+    /// <param name="output"></param>
+    /// <param name="execution"></param>
+    /// <returns></returns>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                         StepToolParameter? input,
                                                         string output,

@@ -90,26 +90,28 @@
                                 </option>
                             </select>
                         </div>
-                        <button type="button" class="btn btn-primary"
-                                @click="updateNode">
-                            {{ $t("labelSave") }}
-                        </button>
-                    </div>
-                    <div v-else class="mb-3">
-                        <h6>Inputs</h6>
-                        <hr>
-                        <div class="background-div" v-for="(param, index) in parameters" :key="index">
-                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
-                                      v-model="parameters[index].value"></textarea>
-                        </div>
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary"
                                     @click="updateNode">
                                 {{ $t("labelSave") }}
                             </button>
                         </div>
+                        </div>
+                        <div v-else class="mb-3">
+                            <h6>Inputs</h6>
+                            <hr>
+                            <div class="background-div" v-for="(param, index) in parameters" :key="index">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
+                                          v-model="parameters[index].value"></textarea>
+                            </div>
+                            <div class="mt-4">
+                                <button type="button" class="btn btn-primary"
+                                        @click="updateNode">
+                                    {{ $t("labelSave") }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>
             </div>
         </div>
     </main>
@@ -372,7 +374,6 @@
                 PromptService.getPrompts()
                     .then((response) => {
                         this.promptlist = response;
-                        console.log(response);
                     });
             },
             getToolsList() {
