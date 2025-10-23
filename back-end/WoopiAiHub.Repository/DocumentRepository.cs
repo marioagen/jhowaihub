@@ -42,6 +42,13 @@ namespace WoopiAiHub.Repository
                              i.Id.ToString().Contains(search));
             }
 
+            if (documentPagedDataDto.WorkflowIds != null && documentPagedDataDto.WorkflowIds.Any())
+            {
+                var workflowIds = documentPagedDataDto.WorkflowIds;
+
+                query = query.Where(d => d.Workflow.Any(w => workflowIds.Contains(w.Id)));
+            }
+
             if (!documentPagedDataDto.IsAllUsers)
             {
                 query = query.Where(d => d.Cards.Any(c =>

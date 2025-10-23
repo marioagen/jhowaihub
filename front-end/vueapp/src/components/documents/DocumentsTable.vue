@@ -126,6 +126,8 @@
             filters: {
                 input: "",
                 teamId: "",
+                workflowId: "",
+                workflows: [],
                 isAsc: true,
                 isAllUsers: false,
                 login: null,
@@ -144,10 +146,10 @@
                     isAscending: this.filters.isAsc,
                     isAllUsers: this.filters.isAllUsers,
                     colType: this.filters.colType,
-                    teamIds: this.filters.teams,
                     login: this.filters.login,
+                    workflowIds: this.filters.workflows,
                 };
-                
+                console.log(params)
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
                         if (response?.error !== undefined) {
