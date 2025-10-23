@@ -317,6 +317,19 @@ namespace WoopiAiHub.UnitTests.Fixture
             return workflow;
         }
 
+        public static Workflow FindValidWorkflowList()
+        {
+            Workflow workflow = new Faker<Workflow>("pt_BR")
+            .CustomInstantiator(f => new Workflow(
+                    f.IndexFaker,
+                    f.Date.Past(),
+                    new List<Team> { FindValidTeam() },
+                    f.Lorem.Word()
+                )
+            );
+            return workflow;
+        }
+
         public static Step FindValidStep()
         {
             Step step = new Faker<Step>("pt_BR")

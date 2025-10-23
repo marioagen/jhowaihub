@@ -206,10 +206,10 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
-        public static ICollection<Workflow> FindValidWorkflows()
+        public static List<Workflow> FindValidWorkflows()
         {
             var f = new Faker("pt_BR");
-            ICollection<Workflow> workflow = new Faker<Workflow>("pt_BR")
+            List<Workflow> workflow = new Faker<Workflow>("pt_BR")
            .CustomInstantiator(f => new Workflow
            (
                f.IndexFaker,
