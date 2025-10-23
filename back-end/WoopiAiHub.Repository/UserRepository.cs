@@ -205,6 +205,7 @@ namespace WoopiAiHub.Repository
                 {
                     Id = u.Id,
                     Name = u.Name,
+                    Email = u.Email,
                     Teams = u.Teams!
                     .Select(t => new TeamDto
                     {
