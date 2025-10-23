@@ -575,7 +575,7 @@
     },
     management: {
         title: "Gestión de Usuarios y Equipos",
-        subtitle: "Administra usuarios, equipos y permisos del sistema",
+        subtitle: "Administra los usuarios, equipos y permisos del sistema",
         users: {
             title: "Usuarios",
             subtitle: "Administra los usuarios del sistema",
@@ -585,6 +585,7 @@
             editTitle: "Editar Usuario",
             editSubtitle: "Actualiza la información del usuario seleccionado",
             invalid: "Usuario inválido",
+            emailDuplicated: "Correo electrónico ya registrado",
             saveSuccess: "Usuario guardado con éxito",
             saveError: "Error al guardar el usuario",
             deleteSuccess: "Usuario eliminado con éxito",
@@ -603,7 +604,7 @@
             deleteSuccess: "Equipo eliminado con éxito",
             deleteError: "Error al eliminar el equipo",
             duplicated: "Equipo ya registrado",
-            error: "Error al buscar equipos",
+            error: "Error al obtener los equipos",
         },
         profiles: {
             index: "Perfiles",
@@ -617,6 +618,8 @@
             invalid: "Perfil inválido",
             saveSuccess: "Perfil guardado con éxito",
             saveError: "Error al guardar el perfil",
+            editSuccess: "Perfil actualizado con éxito",
+            editError: "Error al actualizar el perfil",
             deleteSuccess: "Perfil eliminado con éxito",
             deleteError: "Error al eliminar el perfil",
             permissionsWorkflow: "Permisos de Flujo de Trabajo",

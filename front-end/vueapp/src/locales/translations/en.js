@@ -579,11 +579,12 @@
             createTitle: "New User",
             createSubtitle: "Create a new user for the system",
             editTitle: "Edit User",
-            editSubtitle: "Update information for the selected user",
+            editSubtitle: "Update the selected user's information",
             invalid: "Invalid user",
+            emailDuplicated: "Email already registered",
             saveSuccess: "User saved successfully",
             saveError: "Error saving user",
-            deleteSuccess: "User removed successfully",
+            deleteSuccess: "User deleted successfully",
         },
         teams: {
             title: "Teams",
@@ -592,7 +593,7 @@
             createTitle: "New Team",
             createSubtitle: "Create a new team for the system",
             editTitle: "Edit Team",
-            editSubtitle: "Update information for the selected team",
+            editSubtitle: "Update the selected team's information",
             invalid: "Invalid team",
             saveSuccess: "Team saved successfully",
             saveError: "Error saving team",
@@ -609,15 +610,17 @@
             createTitle: "New Profile",
             createSubtitle: "Create a new profile for the system",
             editTitle: "Edit Profile",
-            editSubtitle: "Update information for the selected profile",
+            editSubtitle: "Update the selected profile's information",
             invalid: "Invalid profile",
             saveSuccess: "Profile saved successfully",
             saveError: "Error saving profile",
+            editSuccess: "Profile updated successfully",
+            editError: "Error updating profile",
             deleteSuccess: "Profile deleted successfully",
             deleteError: "Error deleting profile",
             permissionsWorkflow: "Workflow Permissions",
         },
-    }
+    },
 };
 
 export default english;
