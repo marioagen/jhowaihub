@@ -52,6 +52,7 @@
                                 :loading="isLoading"
                                 :type="'user-list'"
                                 v-model:selectedItems="selectedUsers"
+                                ref="SelectionListComponent"
                             >
                                 <template #footer>
                                     <div class="border-top mt-2 pt-2">
@@ -300,32 +301,35 @@
             },
             closeUserSection() {
                 this.userData = {};
+                this.showUserSection();
             },
             createUser() {
                 const user = {
                     name: this.userData.name,
                     email: this.userData.email,
+                    password: this.userData.password,
+                    teamIds: [],
                 };
 
                 api.post("User", user).then(() => {
                         this.$notify({
-                            title: 'management.user.title',
-                            message: 'management.user.saveSuccess',
+                            title: 'management.users.title',
+                            message: 'management.users.saveSuccess',
                             variant: 'success',
                             icon: 'CircleCheckBig',
                         });
-                        this.closeUserSection();
                         this.getUsers();
+                        this.closeUserSection();
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
                         let errorMessage = "management.teams.invalid";
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
-                            this.$refs.formRef.setFieldError("teamName", this.$t("management.user.duplicated"));
-                            errorMessage = "management.user.duplicated";
+                            this.$refs.formRef.setFieldError("teamName", this.$t("management.users.duplicated"));
+                            errorMessage = "management.users.duplicated";
                         } 
                         this.$notify({
-                            title: 'management.user.title',
+                            title: 'management.users.title',
                             message: errorMessage,
                             variant: 'danger',
                             icon: 'CircleX',
