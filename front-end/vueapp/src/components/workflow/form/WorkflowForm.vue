@@ -120,6 +120,7 @@
                             :workflowId="id"
                             @update-step="updateStep(index, $event)" 
                             @remove-step="removeStep(index, $event)"
+                            @remove-flow="removeFlow(index, $event)"
                             @saveWorkflow="saveWorkflowInStore"
                             class="workflow-step-card" 
                             ref="stepRefs" 
@@ -306,6 +307,12 @@ export default {
                     if (s.isActive) s.order = order++;
                 });
             }
+            this.saveTempWorkflow();
+        },
+        removeFlow(index, stepId) {
+            let step = this.stepsList.find(s => s.id === stepId)
+            step.stepTools = [];
+            this.updateStep(index, step);
             this.saveTempWorkflow();
         },
         async save() {

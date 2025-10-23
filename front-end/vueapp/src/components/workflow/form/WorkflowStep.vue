@@ -52,11 +52,11 @@
                 <div class="mb-3">
                      <label class="form-label text-muted small">{{ $t("workflow.status") }}</label>
                      <Field
-                         :name="`steps[${index - 1}].statusId`"
-                         rules="required"
-                         v-model="statusIdComputed"
-                         v-slot="{ field, errors }"
-                         ref="statusField"
+                        :name="`steps[${index - 1}].statusId`"
+                        rules="required"
+                        v-model="statusIdComputed"
+                        v-slot="{ field, errors }"
+                        ref="statusField"
                      >
                          <div class="d-flex flex-column">
                              <select class="form-select form-select-sm" v-bind="field">
@@ -258,8 +258,8 @@
                     }
                 });
             },
-            removeFlow() {
-                //remove the given flow endpoint
+            removeFlow() {                
+                this.$emit("remove-flow", this.step.id);
             },
         },
         beforeUnmount() {
