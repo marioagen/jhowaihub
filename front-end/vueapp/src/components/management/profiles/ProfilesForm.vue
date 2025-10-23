@@ -265,10 +265,10 @@
             validateForm() {
                 let valid = true;
                 if (!this.profileData.name || this.profileData.name.length < 2) {
-                    this.nameError = this.$t("labelRequiredField");
+                    this.nameError = this.$t("validation.required");
                     valid = false;
                 } else if (this.selectedPermissions.length == 0) {
-                    this.permissionError = this.$t("labelRequiredField");
+                    this.permissionError = this.$t("validation.required");
                     valid = false;
                 }
                 return valid;
@@ -300,14 +300,14 @@
                             this.returnToTable();
                             return this.$notify({
                                 title: "Profiles",
-                                message: this.$t("labelProfileAddSuccess"),
+                                message: this.$t("management.profiles.saveSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "Profiles",
-                                message: this.$t("labelProfileAddError"),
+                                message: this.$t("management.profiles.saveError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -332,14 +332,14 @@
                             this.returnToTable();
                             return this.$notify({
                                 title: "Profiles",
-                                message: this.$t("labelProfileEditSuccess"),
+                                message: this.$t("management.profiles.editSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "Profiles",
-                                message: this.$t("labelProfileEditError"),
+                                message: this.$t("management.profiles.editError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });

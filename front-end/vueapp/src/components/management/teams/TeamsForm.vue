@@ -61,7 +61,7 @@
                                             @click="showUserSection"
                                         >
                                             <LucideIcon :icon="'UserPlus'" :size="16" />
-                                            {{ $t("labelNewUser") }}
+                                            {{ $t("management.users.createBtn") }}
                                         </button>
                                     </div>
                                 </template>

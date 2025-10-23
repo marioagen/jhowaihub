@@ -117,7 +117,7 @@
                                         class="btn btn-sm btn-outline-secondary fw-semibold"
                                         @click="openTeamSection"
                                     >
-                                        + {{ $t("labelNewTeam") }}
+                                        + {{ $t("management.teams.createBtn") }}
                                     </button>
                                 </div>
                             </template>
@@ -258,7 +258,7 @@
                 api.post("User/IsEmailInUse", paramsReq)
                     .then((response) => {
                         if (response && response.data && response.data === true) {
-                            this.$refs.formRef.setFieldError("userEmail", this.$t("labelErrorEmailAlreadyExists"));
+                            this.$refs.formRef.setFieldError("userEmail", this.$t("management.users.emailDuplicated"));
 
                         } else {
                             this.$refs.formRef.setFieldError("userEmail", "");
@@ -358,17 +358,18 @@
                     response = api.put("User", userEdit);
                 }
                 response.then((response) => {
+                        this.returnToTable();
                         this.$notify({
-                            title: "users.title",
-                            message: "users.saveSuccess",
+                            title: "management.users.title",
+                            message: "management.users.saveSuccess",
                             variant: "success",
                             icon: "CircleX",
                         });
                     })
                     .catch((e) => {
                         this.$notify({
-                            title: "users.title",
-                            message: "users.saveError",
+                            title: "management.users.title",
+                            message: "management.users.saveError",
                             variant: "danger",
                             icon: "CircleX",
                         });
