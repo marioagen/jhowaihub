@@ -16,5 +16,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null);
         Task<List<string>> FindUserProfilesByEmailAsync(string email);
         Task<ICollection<UserDto>> FindByTeamIdAsync(int teamId);
+        Guid FindIdByEmail(string email);
     }
 }

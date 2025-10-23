@@ -20,6 +20,8 @@ import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
 import ToolsPage from "@/pages/tools.vue";
 import NewFlow from "@/pages/flows/newFlow.vue";
 import EditFlow from "@/pages/flows/editFlow.vue";
+import PromptPage from "@/pages/prompts/index.vue";
+import PromptNew from "@/pages/prompts/newPrompt.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -233,6 +235,25 @@ const routes = [
             layout: "default",
         },
         beforeEnter: authenticate,
+    },
+    {
+        path: "/prompts",
+        name: "Prompt",
+        component: PromptPage,
+        meta: {
+            layout: "default",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/prompts/new",
+        name: "PromptNew",
+        component: PromptNew,
+        meta: {
+            layout: "default",
+        },
+        beforeEnter: authenticate,
+        props: true,
     },
 ];
 

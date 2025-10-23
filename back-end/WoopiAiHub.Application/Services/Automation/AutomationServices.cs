@@ -238,7 +238,7 @@ namespace WoopiAiHub.Application.Services.Automation
             if (stepTool.DependsOnStepTool != null)
                 output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id, resolvedCardId);
 
-            var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!);
+            var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
             var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
             var payload = await handler.BuildPayload(enrichedDto, input, output, execution);
 
@@ -298,9 +298,9 @@ namespace WoopiAiHub.Application.Services.Automation
 
             string output = await _stepToolOutputRepository.FindByStepToolId(dependentStepTool!.DependsOnStepTool!.Id, execution.CardId);
 
-            var handler = _toolFactoryHandler.GetHandler(dependentStepTool!.Tool!.ToolType!);
-
+            var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType!.Name);
             var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
+
             var payload = await handler.BuildPayload(nextAutomationDto, input, output, execution);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
@@ -416,12 +416,15 @@ namespace WoopiAiHub.Application.Services.Automation
             {
                 await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id);
                 
-                var nextStepDto = automationServicesDto with
+                if (dependentStepTool != null)
                 {
-                    StepId = nextStep.Id,
-                    StepToolId = dependentStepTool.Id
-                };
-                await StartExecutionByCardAsync(nextStepDto);
+                    var nextStepDto = automationServicesDto with
+                    {
+                        StepId = nextStep.Id,
+                        StepToolId = dependentStepTool.Id
+                    };
+                    await StartExecutionByCardAsync(nextStepDto);
+                }
             }
         }
     }

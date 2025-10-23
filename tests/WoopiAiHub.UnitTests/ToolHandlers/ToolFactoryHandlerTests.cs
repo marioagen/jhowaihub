@@ -30,11 +30,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         [Trait("GetHandler", "Success")]
         public void GetHandler_ValidType_ReturnsCorrectHandler()
         {
-            //Arrange 
-            var toolType = ToolTypeFixture.FindValidToolTypeWithName("Type1");
-
             // Act
-            var handler = _toolFactoryHandler.GetHandler(toolType);
+            var handler = _toolFactoryHandler.GetHandler("Type1");
 
             // Assert
             Assert.Equal(_mockHandler1.Object, handler);
@@ -49,20 +46,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var toolType = ToolTypeFixture.FindValidToolTypeWithName(typeName);
 
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => _toolFactoryHandler.GetHandler(toolType));
+            var exception = Assert.Throws<ArgumentException>(() => _toolFactoryHandler.GetHandler(typeName));
             Assert.Equal($"Handler for type '{typeName}' not found.", exception.Message);
-        }
-
-        [Fact(DisplayName = "GetHandler throws ArgumentNullException or ArgumentException when null or empty Type")]
-        [Trait("GetHandler", "Fail")]
-        public void GetHandler_NullOrEmptyType_ThrowsArgumentException()
-        {
-            //Arrange 
-            var toolType = ToolTypeFixture.FindEmptyToolType();
-
-            // Act & Assert
-            var exception2 = Assert.Throws<ArgumentException>(() => _toolFactoryHandler.GetHandler(toolType));
-            Assert.Equal("Handler for type '' not found.", exception2.Message);
         }
     }
 }
