@@ -91,24 +91,14 @@ namespace WoopiAiHub.Application.Services
 
             _validatePrompt.ValidatePromptFields(prompt);
 
-            try
+            var promptUpdateResult = _promptRepository.Update(prompt);
+
+            if (!promptUpdateResult)
             {
-                var promptUpdateResult = _promptRepository.Update(prompt);
-
-                if (!promptUpdateResult)
-                {
-                    throw new ArgumentException("Update prompt Failed");
-                }
-
-                _unitOfWork.Commit();
-
-                return true;
+                throw new ArgumentException("Update prompt Failed");
             }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+
+            return true;
         }
 
         /// <summary>
@@ -255,7 +245,6 @@ namespace WoopiAiHub.Application.Services
             if (idUser == Guid.Empty)
                 throw new ArgumentException("Invalid user id");
 
-
             return query;
         }
 
@@ -317,9 +306,19 @@ namespace WoopiAiHub.Application.Services
                                                       DateTime.Now);
 
             _unitOfWork.BeginTransaction();
-            _documentHistoryRepository.Create(documentHistory);
-            await UpdateExecutionAsync(execution!, chatCompletionResponseDto.Email);
-            await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.Choices[0].Message.Content);
+            try
+            {
+                _documentHistoryRepository.Create(documentHistory);
+                await UpdateExecutionAsync(execution!, chatCompletionResponseDto.Email);
+                await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.Choices[0].Message.Content);
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+            
         }
 
         /// <summary>
