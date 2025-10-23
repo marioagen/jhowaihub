@@ -62,7 +62,6 @@
             }
         },
         components: {
-
             Pagination,
             TruncateText,
             SearchComponent,

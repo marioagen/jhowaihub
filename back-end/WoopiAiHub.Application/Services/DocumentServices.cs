@@ -720,7 +720,6 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto)
         {
-            
             var resultRegisterConsumption = await RegisterConsumptionPages(documentEmbeddingsResultDto);
             if (!resultRegisterConsumption)
                 throw new AppException(ErrorCode.DefaultError, "Failed to send page consumption", null);

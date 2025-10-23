@@ -104,9 +104,9 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Update an user
+        /// Find user id by email
         /// </summary>
-        /// <param name="user"></param>
+        /// <param name="email"></param>
         /// <returns></returns>
         public Guid FindIdByEmail(string email)
         {

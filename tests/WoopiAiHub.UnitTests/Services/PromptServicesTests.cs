@@ -16,33 +16,19 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Application.Utils;
 using Newtonsoft.Json;
 using WoopiAiHub.UnitTests.Fixture;
+using Moq.AutoMock;
 
 namespace WoopiAiHub.UnitTests.Services
 {
     public class PromptServicesTests
     {
-        private readonly Mock<IUnitOfWork> _unitOfWork = new();
-        private readonly Mock<IPromptRepository> _promptRepository = new();
-        private readonly Mock<IValidatePrompt> _validatePrompt = new();
-        private readonly Mock<IUserServices> _userServices = new();
-        private readonly Mock<IStepToolExecutionRepository> _stepToolExecutionRepository = new();
-        private readonly Mock<IStepToolOutputRepository> _stepToolOutputRepository = new();
-        private readonly Mock<IHubNotifier> _hubNotifier = new();
-        private readonly Mock<IDocumentHistoryRepository> _documentHistoryRepository = new();
+        private readonly AutoMocker _mocker;
+        private readonly PromptServices _promptServices;
 
-        private PromptServices CreateService()
+        public PromptServicesTests ()
         {
-            return new PromptServices(
-                _unitOfWork.Object,
-                _promptRepository.Object,
-                _validatePrompt.Object,
-                _userServices.Object,
-                _stepToolExecutionRepository.Object,
-                _stepToolOutputRepository.Object,
-                _hubNotifier.Object,
-                _documentHistoryRepository.Object
-
-            );
+            _mocker = new AutoMocker();
+            _promptServices = _mocker.CreateInstance<PromptServices>();
         }
 
         [Fact(DisplayName = "Create unique prompt success")]
@@ -53,14 +39,16 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
+            var userServices = _mocker.GetMock<IUserServices>();
+            var validatePrompt = _mocker.GetMock<IValidatePrompt>();
+            var promptRepository = _mocker.GetMock<IPromptRepository>();
 
-            _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
-            _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
-            _promptRepository.Setup(r => r.CreateUniquePrompt(It.IsAny<Prompt>())).Returns(true);
+            userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
+            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
+            promptRepository.Setup(r => r.CreateUniquePrompt(It.IsAny<Prompt>())).Returns(true);
 
             //Act
-            var service = CreateService();
-            var result = service.CreateUniquePrompt(dto, email);
+            var result = _promptServices.CreateUniquePrompt(dto, email);
 
             //Assert
             Assert.True(result);
@@ -74,14 +62,16 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
+            var userServices = _mocker.GetMock<IUserServices>();
+            var validatePrompt = _mocker.GetMock<IValidatePrompt>();
+            var promptRepository = _mocker.GetMock<IPromptRepository>();
 
-            _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
-            _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
-            _promptRepository.Setup(r => r.CreateUniquePrompt(It.IsAny<Prompt>())).Returns(false);
+            userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
+            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
+            promptRepository.Setup(r => r.CreateUniquePrompt(It.IsAny<Prompt>())).Returns(false);
 
             //Act/Assert
-            var service = CreateService();
-            Assert.Throws<AppException>(() => service.CreateUniquePrompt(dto, email));
+            Assert.Throws<AppException>(() => _promptServices.CreateUniquePrompt(dto, email));
         }
 
         [Fact(DisplayName = "Create unique prompt should returns false when data is empty")]
@@ -92,12 +82,13 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
+            var _userServices = _mocker.GetMock<IUserServices>();
+            var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
             _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(false);
 
             //Act
-            var service = CreateService();
-            var result = service.CreateUniquePrompt(dto, email);
+            var result = _promptServices.CreateUniquePrompt(dto, email);
 
             //Assert
             Assert.False(result);
@@ -111,6 +102,10 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
             var email = "user@teste.com";
             var promptDto = new PromptDto { Id = 1, Name = "Antigo", Description = "Desc", Text = "Texto", IdUser = Guid.NewGuid(), Created = DateTime.Now };
+            var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
+            var _unitOfWork = _mocker.GetMock<IUnitOfWork>();
+
 
             _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
             _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
@@ -120,8 +115,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWork.Setup(u => u.Commit());
 
             //Act
-            var service = CreateService();
-            var result = service.Update(dto, email);
+            var result = _promptServices.Update(dto, email);
 
             //Assert
             Assert.True(result);
@@ -134,13 +128,14 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
             var email = "user@teste.com";
+            var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
 
             _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
             _promptRepository.Setup(r => r.FindById(1)).Returns((PromptDto)null);
 
             //Act/Assert
-            var service = CreateService();
-            Assert.Throws<ArgumentException>(() => service.Update(dto, email));
+            Assert.Throws<ArgumentException>(() => _promptServices.Update(dto, email));
         }
 
         [Fact(DisplayName = "Delete prompts by ids success")]
@@ -149,11 +144,11 @@ namespace WoopiAiHub.UnitTests.Services
         {
             //Arrange
             var ids = new List<int> { 1, 2 };
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
             _promptRepository.Setup(r => r.Delete(ids)).Returns(true);
 
             //Act
-            var service = CreateService();
-            var result = service.DeleteByIds(ids);
+            var result = _promptServices.DeleteByIds(ids);
 
             //Assert
             Assert.True(result);
@@ -165,11 +160,11 @@ namespace WoopiAiHub.UnitTests.Services
         {
             //Arrange
             var ids = new List<int> { 1, 2 };
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
             _promptRepository.Setup(r => r.Delete(ids)).Returns(false);
 
             //Act/Assert
-            var service = CreateService();
-            Assert.Throws<ArgumentException>(() => service.DeleteByIds(ids));
+            Assert.Throws<ArgumentException>(() => _promptServices.DeleteByIds(ids));
         }
 
         [Fact(DisplayName = "Find prompts by id success")]
@@ -178,11 +173,11 @@ namespace WoopiAiHub.UnitTests.Services
         {
             //Arrange
             var promptDto = new PromptDto { Id = 1, Name = "Teste", Description = "Desc", Text = "Texto", IdUser = Guid.NewGuid(), Created = DateTime.Now };
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
             _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
 
             //Act
-            var service = CreateService();
-            var result = service.FindById(1);
+            var result = _promptServices.FindById(1);
 
             //Assert
             Assert.Equal(promptDto, result);
@@ -193,11 +188,11 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindById_ShouldThrowArgumentException()
         {
             //Arrange
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
             _promptRepository.Setup(r => r.FindById(1)).Returns((PromptDto)null);
 
-            var service = CreateService();
             //Act/Assert
-            Assert.Throws<ArgumentException>(() => service.FindById(1));
+            Assert.Throws<ArgumentException>(() => _promptServices.FindById(1));
         }
 
         [Fact(DisplayName = "Find all prompts success")]
@@ -208,13 +203,14 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var queryable = new List<PromptDto> { new PromptDto { Id = 1, Name = "Teste", Description = "Desc", Text = "Texto", IdUser = idUser, Created = DateTime.Now } }.AsQueryable();
+            var _userServices = _mocker.GetMock<IUserServices>();
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
 
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
             _promptRepository.Setup(r => r.FindAllWithOwnerStatus(idUser)).Returns(queryable);
 
             //Act
-            var service = CreateService();
-            var result = service.FindAll(email);
+            var result = _promptServices.FindAll(email);
 
             //Assert
             Assert.NotNull(result);
@@ -228,13 +224,14 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
+            var _userServices = _mocker.GetMock<IUserServices>();
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
 
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
             _promptRepository.Setup(r => r.FindAllWithOwnerStatus(idUser)).Returns((IQueryable<PromptDto>)null);
 
             //Act/Assert
-            var service = CreateService();
-            Assert.Throws<ArgumentException>(() => service.FindAll(email));
+            Assert.Throws<ArgumentException>(() => _promptServices.FindAll(email));
         }
 
         [Fact(DisplayName = "Find all prompts should throw argumentException when user id is invalid")]
@@ -245,13 +242,14 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "user@teste.com";
             var idUser = Guid.Empty;
             var queryable = new List<PromptDto>().AsQueryable();
+            var _promptRepository = new Mock<IPromptRepository>();
+            var _userServices = new Mock<IUserServices>();
 
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
             _promptRepository.Setup(r => r.FindAllWithOwnerStatus(idUser)).Returns(queryable);
 
             //Act/Assert
-            var service = CreateService();
-            Assert.Throws<ArgumentException>(() => service.FindAll(email));
+            Assert.Throws<ArgumentException>(() => _promptServices.FindAll(email));
         }
 
         [Fact(DisplayName = "Find all prompts paged should throw argumentException when user page is invalid")]
@@ -262,12 +260,12 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var pagedDataDto = new PagedDataDto { Page = 0, PageSize = 10 };
+            var _userServices = new Mock<IUserServices>();
 
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
 
             //Act/Assert
-            var service = CreateService();
-            Assert.Throws<ArgumentException>(() => service.FindAllPaged(pagedDataDto, email));
+            Assert.Throws<ArgumentException>(() => _promptServices.FindAllPaged(pagedDataDto, email));
         }
 
         [Fact(DisplayName = "Find all prompts paged success")]
@@ -278,12 +276,12 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var pagedDataDto = new PagedDataDto { Page = 1, PageSize = 10 };
+            var _userServices = new Mock<IUserServices>();
 
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
 
             //Act
-            var service = CreateService();
-             var result = service.FindAllPaged(pagedDataDto, email);
+             var result = _promptServices.FindAllPaged(pagedDataDto, email);
 
             //Assert
             Assert.NotNull(result);
@@ -297,13 +295,14 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var pagedDataDto = new PagedDataDto { Page = 1, PageSize = 10 };
+            var _userServices = new Mock<IUserServices>();
+            var _promptRepository = new Mock<IPromptRepository>();
 
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
             _promptRepository.Setup(r => r.FindByIdUser(idUser)).Returns((IQueryable<PromptDto>)null);
 
             //Act/Assert
-            var service = CreateService();
-            Assert.Throws<ArgumentException>(() => service.FindByIdUserPaged(pagedDataDto, email));
+            Assert.Throws<ArgumentException>(() => _promptServices.FindByIdUserPaged(pagedDataDto, email));
         }
 
         [Fact(DisplayName = "Find prompts by idUser paged should throw argument exception when userId is invalid")]
@@ -315,13 +314,14 @@ namespace WoopiAiHub.UnitTests.Services
             var idUser = Guid.Empty;
             var pagedDataDto = new PagedDataDto { Page = 1, PageSize = 10 };
             var queryable = new List<PromptDto>().AsQueryable();
+            var _userServices = new Mock<IUserServices>();
+            var _promptRepository = new Mock<IPromptRepository>();
 
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
             _promptRepository.Setup(r => r.FindByIdUser(idUser)).Returns(queryable);
 
             //Act/Assert
-            var service = CreateService();
-            Assert.Throws<ArgumentException>(() => service.FindByIdUserPaged(pagedDataDto, email));
+            Assert.Throws<ArgumentException>(() => _promptServices.FindByIdUserPaged(pagedDataDto, email));
         }
 
         [Fact(DisplayName = "Find prompts by idUser paged success")]
@@ -333,13 +333,16 @@ namespace WoopiAiHub.UnitTests.Services
             var idUser = Guid.NewGuid();
             var pagedDataDto = new PagedDataDto { Page = 1, PageSize = 10 };
             var queryable = new List<PromptDto>().AsQueryable();
+            var _promptRepository = new Mock<IPromptRepository>();
 
-            _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
+            _mocker.GetMock<IUserServices>().
+               Setup(s => s.FindIdByEmail(It.IsAny<string>()))
+                      .Returns(Guid.NewGuid());
+
             _promptRepository.Setup(r => r.FindByIdUser(idUser)).Returns(queryable);
 
             //Act
-            var service = CreateService();
-            var result = service.FindByIdUserPaged(pagedDataDto, email);
+            var result = _promptServices.FindByIdUserPaged(pagedDataDto, email);
 
             //Assert
             Assert.NotNull(result);
@@ -352,12 +355,16 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var chatCompletionResponseDto = MessagingFixture.FindValidChatCompletionResponseDto();
             var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
-            _stepToolExecutionRepository.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
+            var _stepToolExecutionRepository = new Mock<IStepToolExecutionRepository>();
+            var _documentHistoryRepository = new Mock<IDocumentHistoryRepository>();
+
+            _mocker.GetMock<IStepToolExecutionRepository>().
+               Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
+
             _documentHistoryRepository.Setup(r => r.Create(It.IsAny<DocumentHistory>())).Returns(true);
 
             //Act
-            var service = CreateService();
-            await service.ProcessChatCompletionResult(chatCompletionResponseDto);
+            await _promptServices.ProcessChatCompletionResult(chatCompletionResponseDto);
 
             Assert.True(true);
         }
@@ -369,12 +376,13 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var chatCompletionResponseDto = MessagingFixture.FindValidChatCompletionResponseDto();
             var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+            var _stepToolExecutionRepository = new Mock<IStepToolExecutionRepository>();
+            var _documentHistoryRepository = new Mock<IDocumentHistoryRepository>();
             _stepToolExecutionRepository.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(It.IsAny<StepToolExecution>);
             _documentHistoryRepository.Setup(r => r.Create(It.IsAny<DocumentHistory>())).Returns(true);
 
             //Act/Assert
-            var service = CreateService();
-            await Assert.ThrowsAsync<ArgumentException>(async () => await service.ProcessChatCompletionResult(chatCompletionResponseDto));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _promptServices.ProcessChatCompletionResult(chatCompletionResponseDto));
         }
     }
 

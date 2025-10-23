@@ -91,7 +91,6 @@ namespace WoopiAiHub.Application.Services
 
             _validatePrompt.ValidatePromptFields(prompt);
 
-            _unitOfWork.BeginTransaction();
             try
             {
                 var promptUpdateResult = _promptRepository.Update(prompt);
@@ -316,6 +315,8 @@ namespace WoopiAiHub.Application.Services
                                                       chatCompletionResponseDto.Choices[0].Message.Content,
                                                       0, 
                                                       DateTime.Now);
+
+            _unitOfWork.BeginTransaction();
             _documentHistoryRepository.Create(documentHistory);
             await UpdateExecutionAsync(execution!, chatCompletionResponseDto.Email);
             await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.Choices[0].Message.Content);

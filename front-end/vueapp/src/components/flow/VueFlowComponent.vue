@@ -188,7 +188,6 @@ export default {
                 this.edges = mappedEdges;
 
             } catch (e) {
-            console.log(e);
                 LogService.showMessage("Erro ao carregar fluxo");
             }
         },

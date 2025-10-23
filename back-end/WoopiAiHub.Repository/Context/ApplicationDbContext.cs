@@ -81,6 +81,7 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<StepToolExecution>(new StepToolExecutionMap().Configure);
             modelBuilder.Entity<StepToolParameter>(new StepToolParameterMap().Configure);
             modelBuilder.Entity<StepToolOutput>(new StepToolOutputMap().Configure);
+            modelBuilder.Entity<Prompt>(new PromptMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }

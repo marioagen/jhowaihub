@@ -298,8 +298,6 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Sets the password and salt for a user based on the provided DTO and user object.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="dto"></param>
         /// <param name="user"></param>
         /// <param name="salt"></param>
         private void SetSaltAndPassword(string password,

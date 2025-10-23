@@ -76,9 +76,9 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Find prompts by email of the creator
+        /// Find prompts by user id
         /// </summary>
-        /// <param name="emailCreator"></param>
+        /// <param name="idUser"></param>
         /// <returns></returns>
         public IQueryable<PromptDto> FindByIdUser(Guid idUser)
         {

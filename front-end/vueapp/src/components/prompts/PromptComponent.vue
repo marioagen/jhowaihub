@@ -150,7 +150,7 @@
             redirectToEditPrompt: function (id) {
                 this.$router.push({ name: 'PromptNew', query: { id: id } });
             },
-            getList: function (obj) { // obj = { search, page, type }
+            getList: function (obj) {
                 this.dataPrompt = [];
                 this.listIds = [];
                 this.searchInput = obj.search;
@@ -267,7 +267,6 @@
                                 icon: 'CircleX',
                             });
                         }
-                        console.log(response);
                         this.dataPrompt = response.data.items;
                         this.pagination = {
                             currentPage: response.data.currentPage,
@@ -285,18 +284,13 @@
             filteredPrompts() {
                 const search = (this.filters.input || "").toLowerCase();
                 return this.dataPrompt.filter(item => {
-                    // Filtra por nome
                     const nameMatch = item.name && item.name.toLowerCase().includes(search);
-                    // Filtra por descrição
                     const descMatch = item.description && item.description.toLowerCase().includes(search);
-                    // Filtra por data de criação (formato dd/mm/yyyy ou yyyy-mm-dd)
                     const createdStr = item.created
                         ? new Date(item.created).toLocaleDateString('pt-BR')
                         : "";
                     const createdMatch = createdStr.includes(search) || (item.created && item.created.toLowerCase().includes(search));
-                    // Se o campo de busca estiver vazio, retorna todos
                     if (!search) return true;
-                    // Retorna se algum campo bate
                     return nameMatch || descMatch || createdMatch;
                 });
             }
