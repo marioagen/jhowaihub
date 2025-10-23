@@ -47,15 +47,17 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IAutomationServices, AutomationServices>();
             services.AddScoped<IApiClientFactory, ApiClientFactory>();
             services.AddScoped<IN8NServices, N8NServices>();
-
+            services.AddScoped<IPromptServices, PromptServices>();
+            services.AddScoped<IValidatePrompt, ValidatePrompt>();
             services.AddScoped<IToolHandler, EmbeddingsHandler>();
             services.AddScoped<IToolHandler, OcrHandler>();
+            services.AddScoped<IToolHandler, PromptHandler>();
             services.AddScoped<IToolHandler, N8NHandler>();
             services.AddScoped<IKeyVaultServices, AzureKeyVaultServices>();
-
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();
+            services.AddHostedService<PromptConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

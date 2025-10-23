@@ -337,6 +337,45 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Profiles", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Prompt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("varchar(95)")
+                        .HasColumnName("Description");
+
+                    b.Property<Guid>("IdUser")
+                        .HasColumnType("uniqueIdentifier")
+                        .HasColumnName("IdUser");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdUser");
+
+                    b.ToTable("Prompts");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Question", b =>
                 {
                     b.Property<int>("Id")
@@ -1029,6 +1068,17 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Document");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Prompt", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
+                        .WithMany("Prompts")
+                        .HasForeignKey("IdUser")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.QuestionQuestionnaire", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Question", "Question")
@@ -1278,6 +1328,11 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.TypeDoc", b =>
                 {
                     b.Navigation("Questionnaires");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>
+                {
+                    b.Navigation("Prompts");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>

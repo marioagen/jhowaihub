@@ -15,7 +15,7 @@
                     <div>
                         <button v-for="tool in toolsList" :key="tool.id"
                             class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item" draggable="true"
-                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput, isConnector: tool.isConnector })">
+                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput, isConnector: tool.isConnector, toolType: tool.toolType })">
                             {{ tool.name }}
                         </button>
                     </div>
@@ -159,6 +159,7 @@ export default {
                         isEditableInput: stepTool.tool.isEditableInput,
                         isConnector: stepTool.tool.isConnector,
                         toolId: stepTool.toolId,
+                        toolType: stepTool.tool.toolType,
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -205,7 +206,6 @@ export default {
                     }
                 };
             }
-            console.log(this.nodes);
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
@@ -246,6 +246,7 @@ export default {
                     isConnector: nodeData.isConnector,
                     parameters: [],
                     toolId: nodeData.id,
+                    toolType: nodeData.toolType
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
@@ -256,7 +257,7 @@ export default {
                 .map((node, index) => ({
                     id: parseInt(node.id, 10),
                     toolId: node.toolId,
-                    tool: { name: node.label, isEditableInput: node.data.isEditableInput, isConnector: node.data.isConnector },
+                    tool: { name: node.label, isEditableInput: node.data.isEditableInput, isConnector: node.data.isConnector, toolType: node.data.toolType },
                     positionX: parseFloat((node.position.x).toFixed(2)),
                     positionY: parseFloat((node.position.y).toFixed(2)),
                     order: index + 1,

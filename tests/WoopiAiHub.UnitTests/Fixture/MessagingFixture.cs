@@ -3,7 +3,9 @@ using Bogus;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
+using WoopiAiHub.Domain.DTOs.Response;
 using Xunit;
+using Newtonsoft.Json.Linq;
 
 namespace WoopiAiHub.UnitTests.Fixture
 {
@@ -94,6 +96,37 @@ namespace WoopiAiHub.UnitTests.Fixture
                   Email = f.Random.String(),
                   ExecutionId = f.Random.Int(1, 10),
                   Content = f.Random.ToString()
+              });
+            return faker;
+        }
+
+        public static ChatCompletionResponseDto FindValidChatCompletionResponseDto()
+        {
+            JObject mockJObject = new JObject();
+            mockJObject.Add("CardId", 1);
+            mockJObject.Add("StepToolId", 30);
+
+            var faker = new Faker<ChatCompletionResponseDto>("pt_BR")
+              .CustomInstantiator(f => new ChatCompletionResponseDto
+              {
+                  ReferenceFile = f.Random.Guid().ToString(),
+                  Tenant = f.Random.String(),
+                  Email = f.Random.String(),
+                  Choices = new[] {
+                        new ChatChoiceDto {
+                            Message = new ChatMessageResponseDto {
+                                Role = "assistant",
+                                Content = f.Lorem.Paragraph()
+                            },
+                        }
+                    }.ToList(),
+                  Usage = new ChatUsageDto
+                  {
+                      PromptTokens = f.Random.Int(1, 1000),
+                      CompletionTokens = f.Random.Int(1, 1000),
+                      TotalTokens = f.Random.Int(1, 2000)
+                  },
+                  Data  = mockJObject
               });
             return faker;
         }

@@ -309,6 +309,7 @@
     labelSelectedTeams: "Selected teams",
     labelProfiles: "Profiles",
     labelSelectedProfiles: "Selected profiles",
+    labelCreated: "Created at:",
     unauthorized: {
         title: "You do not have permission to access this screen.",
         returnToHome: "Return",
@@ -554,8 +555,31 @@
             progressFlowFail: "Failed to insert flow",
             editFlowNodeSuccess: "Node edited successfully",
             editFlowNodeFail: "Failed to edit node",
-        }
+        },
     },
+    prompts: {
+        title: "Prompts",
+        createPrompt: "Create prompt",
+        subtitle: "Manage system prompts",
+        myPromptsBadge: "My prompts",
+        newPrompt: "New prompt",
+        namePrompt: "Prompt name",
+        information: "Basic information",
+        subtitleNew: "Create a new AI prompt",
+        promptContent: "Prompt content",
+        placeholderNamePrompt: "Enter the prompt name",
+        searchPrompt: "Search prompt",
+        labelLoadMore: "Load more",
+        searchPrompts: "Search prompts",
+        noPromptsListWereFound: "No prompts were found",
+        createSuccess: "Prompts created successfully",
+        createError: "Prompts create failed",
+        updateSuccess: "Prompts updated successfully",
+        updateError: "Prompts update failed",
+        deleteSuccess: "Prompts deleted successfully",
+        deleteError: "Prompts delete failed",
+        removeAllPrompts: "Delete prompts"
+    }
 };
 
 export default english;

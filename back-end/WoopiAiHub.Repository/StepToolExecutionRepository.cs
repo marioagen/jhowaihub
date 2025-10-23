@@ -62,6 +62,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.StepToolExecutions
                                  .Include(s => s.StepTool)
+                                 .Include(c => c.Card)
                                  .FirstOrDefaultAsync(s => s.StepToolId.Equals(stepToolId) &&
                                                            s.CardId.Equals(cardId));
         }

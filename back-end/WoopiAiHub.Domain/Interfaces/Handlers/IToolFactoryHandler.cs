@@ -3,6 +3,6 @@ namespace WoopiAiHub.Domain.Interfaces.Handlers
 {
     public interface IToolFactoryHandler
     {
-        IToolHandler GetHandler(ToolType type);
+        IToolHandler GetHandler(string type);
     }
 }

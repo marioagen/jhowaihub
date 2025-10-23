@@ -245,6 +245,7 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Crear tipo",
     labelProcessing: "Procesando",
+    labelCreated: "Creado em:",
     Admin: "Admin",
      login: {
         index: "Login",
@@ -558,8 +559,30 @@
             progressFlowFail: "No se pudo insertar el flujo",
             editFlowNodeSuccess: "Nodo editado exitosamente",
             editFlowNodeFail: "No se pudo editar el nodo",
-        }
+        },
     },
+    prompts: {
+        title: "Prompts",
+        createPrompt: "Crear prompt",
+        subtitle: "Gestiona los prompts del sistema",
+        myPromptsBadge: "Mi prompts",
+        newPrompt: "Nuevo prompt",
+        namePrompt: "Nombre del prompt",
+        information: "Informacion basica",
+        subtitleNew: "Crear un nuevo prompt de IA",
+        promptContent: "Contenido del prompt",
+        placeholderNamePrompt: "Introduzca el nombre del prompt",
+        labelLoadMore: "Cargar más",
+        searchPrompts: "Buscar prompts",
+        noPromptsListWereFound: "No se encontraron prompts",
+        createSuccess: "Prompt creado exitosamente",
+        createError: "No se pudieron crear el prompt",
+        updateSuccess: "Prompt actualizado exitosamente",
+        updateError: "No se pudieron actualizar el prompt",
+        deleteSuccess: "Prompts eliminados exitosamente",
+        deleteError: "No se pudieron eliminar los prompts",
+        removeAllPrompts: "Eliminar prompts"
+    }
 };
 
 export default spanish;
