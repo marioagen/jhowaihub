@@ -277,7 +277,11 @@
         assignment: {
             currentUser: "Meus documentos",
             allUsers: "Todos os usuários",
-        }
+        },
+        workflowSelect: {
+            all: "Todos os workflow",
+            none: "Selecione um workflow",
+        },
     },
     labelBackToListDocuments: "Voltar para documentos",    
     labelNoTeamsFound: "Nenhum time vinculado ao seu usuário",

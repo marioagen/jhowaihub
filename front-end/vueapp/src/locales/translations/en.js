@@ -288,7 +288,11 @@
         assignment: {
             currentUser: "My documents",
             allUsers: "All users",
-        }
+        },
+        workflowSelect: {
+            all: "All workflows",
+            none: "Select a workflow",
+        },
     },
     labelBackToListDocuments: "Back to documents",
     pageTitleDocumentsForm: "New Document",

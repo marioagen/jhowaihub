@@ -292,7 +292,11 @@
         assignment: {
             currentUser: "Mis documentos",
             allUsers: "Todos los usuarios",
-        }
+        },
+        workflowSelect: {
+            all: "Todos los flujos de trabajo",
+            none: "Selecciona un flujo de trabajo",
+        },
     },
     labelBackToListDocuments: "Volver a los documentos",
     pageTitleDocumentsForm: "Nuevo documento",
