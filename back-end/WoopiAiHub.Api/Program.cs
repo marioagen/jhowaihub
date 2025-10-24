@@ -13,6 +13,7 @@ using WoopiAiHub.Infrastructure.DependencyInjection;
 using WoopiAiHub.Api.Hubs;
 using WoopiAiHub.Application.Services.Hubs;
 using WoopiAiHub.Domain.Interfaces.Hubs;
+using WoopiAiHub.Application.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,6 +83,8 @@ builder.Services.AddApplication();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IHubNotifier, HubNotifier>();
 builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
+builder.Services.Configure<ChatCompletionSettings>(
+builder.Configuration.GetSection("ChatCompletionSettings"));
 builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>

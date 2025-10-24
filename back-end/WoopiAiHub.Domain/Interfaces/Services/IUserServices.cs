@@ -15,5 +15,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> IsEmailInUseAsync(UserEmailDto userEmailDto);
         Task<ICollection<UserDto>> FindByTeamId(int teamId);
         Task<UserDto> FindById(Guid id);
+        Guid FindIdByEmail(string email);
     }
 }

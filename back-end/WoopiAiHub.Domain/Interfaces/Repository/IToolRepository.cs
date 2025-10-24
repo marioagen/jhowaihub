@@ -9,6 +9,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<IEnumerable<ToolDto>> FindAllAsync();
         Task<ToolDto?> FindByIdAsync(int id);
         Task<Tool?> FindModelByIdAsync(int id);
+        Task<Tool?> FindModelByStepToolIdAsync(int stepToolId);
         Task<bool> CreateUniqueAsync(Tool tool);
         Task<bool> UpdateAsync(Tool tool);
         bool Delete(List<int> ids);

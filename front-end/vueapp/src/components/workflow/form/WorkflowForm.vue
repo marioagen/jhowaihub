@@ -336,7 +336,6 @@ export default {
                     if (!valid) stepsValid = false;
                 }
             }
-
             if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
                 return this.$notify({
                     title: 'workflow.index',

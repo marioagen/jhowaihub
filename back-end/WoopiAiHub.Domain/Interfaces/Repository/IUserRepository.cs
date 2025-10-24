@@ -17,5 +17,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<List<string>> FindUserProfilesByEmailAsync(string email);
         Task<ICollection<UserDto>> FindByTeamIdAsync(int teamId);
         Task<UserDto?> FindById(Guid id);
+        Guid FindIdByEmail(string email);
     }
 }

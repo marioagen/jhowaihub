@@ -17,10 +17,15 @@ namespace WoopiAiHub.Repository.Mappings
                    .HasForeignKey(p => p.StepToolId)
                    .OnDelete(DeleteBehavior.Cascade);
 
-
             builder.Property(p => p.Value)
                    .HasColumnType("nvarchar(max)")
                    .IsRequired();
+
+            builder.Property(p => p.RequiredFile)
+                   .IsRequired();
+
+            builder.Property(p => p.WebhookId)
+                   .IsRequired(false);
 
             builder.Property(p => p.Created)
                    .HasColumnType("datetime")

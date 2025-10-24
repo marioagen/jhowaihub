@@ -156,6 +156,16 @@
                         },
                         labelKey: 'tools.title'
                     },
+                    {
+                        permission: 'Prompts',
+                        activeKey: 'Prompts',
+                        to: '/prompts',
+                        icon: {
+                            name: 'Braces',
+                            color: '#8e51ff'
+                        },
+                        labelKey: 'prompts.title'
+                    },
                 ]
             };
         },

@@ -371,7 +371,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
             return dto;
         }
-        public StepToolExecution FindValidStepToolExecution()
+        public static StepToolExecution FindValidStepToolExecution()
         {
             var guid = Guid.NewGuid();
             var faker = new Faker("pt_BR");

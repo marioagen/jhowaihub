@@ -3,6 +3,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Repository.Context;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Repository
 {
@@ -137,6 +138,7 @@ namespace WoopiAiHub.Repository
         {
             var query = _context.Profiles
                 .Include(t => t.Permissions)
+                .Where(p => p.Name != Profile.IAFileName)
                 .Select(t => new ProfileDto
                 {
                     Id = t.Id,

@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -177,9 +178,9 @@ namespace WoopiAiHub.Repository
                                 || c.Document.Description.Contains(input)
                             ) &&
                             (
-                                allUsers == null // se não veio parâmetro, não filtra
-                                || allUsers == true // se é true, traz todos
-                                || (c.AssignedUser != null && c.AssignedUser.Email == login) // se é false, filtra
+                                allUsers == null
+                                || allUsers == true
+                                || (c.AssignedUser != null && c.AssignedUser.Email == login)
                             )
                         )
                         .Select(c => new CardDto

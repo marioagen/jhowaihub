@@ -104,6 +104,19 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Find user id by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public Guid FindIdByEmail(string email)
+        {
+            var id = _context.Users.Where(p => p.Email == email)
+                                   .Select(c => c.Id)
+                                   .FirstOrDefault();
+            return id;
+        }
+
+        /// <summary>
         /// Find all teams with pagination and include their users.
         /// </summary>
         /// <param name="pagedDataDto"></param>
