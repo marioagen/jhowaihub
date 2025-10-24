@@ -258,9 +258,7 @@
                     this.resetFormConnector();              
                     AutomationServices.getWorkflows(node.data.toolId)
                         .then((result) => {
-                            console.log("getWorkflows result:", result);
-                            if (result.error === undefined) {
-                                
+                            if (result.error === undefined) {                                
                                 this.connectors = result;
                                 this.parameters = node.data.parameters;
                                 if (this.parameters.length===0){
@@ -298,10 +296,7 @@
                 }
 
                 this.sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
-                this.sidebar.show();
-                
-                console.log("loadingWebhooks after:", this.loadingWebhooks);
-                console.log("loadingInputs after:", this.loadingInputs);
+                this.sidebar.show();            
             },
             closeSidebar() {
                 const sidebarEl = this.$refs.sidebar;
