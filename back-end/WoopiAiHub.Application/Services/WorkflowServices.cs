@@ -184,13 +184,15 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<WorkflowDto> FindById(int id)
+        public async Task<WorkflowDto> FindById(int id, WorkflowFilterDto workflowFilterDto)
         {
-            var workflow = await _workflowRepository.FindById(id);
+            var workflow = await _workflowRepository.FindById(id, workflowFilterDto);
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
+            int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
+            workflow.NumDocuments = totalCards;
             return workflow;
         }
 

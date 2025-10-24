@@ -84,11 +84,13 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<WorkflowDto?> FindById(int id)
+        public async Task<WorkflowDto?> FindById(int id, WorkflowFilterDto? workflowFilterDto)
         {
             return await _context.Workflows
+                .Include(w => w.Teams)
+                .Include(w => w.Steps)
                 .Where(w => w.Id == id)
-                .Select(FindWorkflowProjection())
+                .Select(FindWorkflowProjection(workflowFilterDto?.Input, workflowFilterDto?.IsAllUsers, workflowFilterDto?.Login))
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
@@ -169,39 +171,42 @@ namespace WoopiAiHub.Repository
                     Cards = s.Cards
                         .Where(c => c.Enable &&
                             (
-                                (string.IsNullOrWhiteSpace(input) || c.Name.Contains(input)) ||
-                                (string.IsNullOrWhiteSpace(input) ||
-                                (c.Document.Name.Contains(input) || c.Document.Description.Contains(input)))
+                                string.IsNullOrWhiteSpace(input)
+                                || c.Name.Contains(input)
+                                || c.Document.Name.Contains(input)
+                                || c.Document.Description.Contains(input)
                             ) &&
                             (
-                                allUsers == false ||
-                                (c.AssignedUser != null && c.AssignedUser.Email == login)
-                            ))
+                                allUsers == null // se não veio parâmetro, não filtra
+                                || allUsers == true // se é true, traz todos
+                                || (c.AssignedUser != null && c.AssignedUser.Email == login) // se é false, filtra
+                            )
+                        )
                         .Select(c => new CardDto
-                    {
-                        Id = c.Id,
-                        Name = c.Name,
-                        Created = c.Created,
-                        Description = c.Document!.Description,
-                        Owner = c.Document.EmailCreator,
-                        DocumentId = c.Document.Id,
-                        StatusDocument = c.Document.Status,
-                        Percentage = c.Step!.StepTools.Any(st => st.Executions.Any(e => e.CardId == c.Id))
-                        ? (
-                            c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100
-                            /
-                            c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
-                          )
-                        : 100,
-                        AssignedUser = c.AssignedUser != null ?
-                        new UserDto
                         {
-                            Name = c.AssignedUser.Name,
-                            Email = c.AssignedUser.Email,
-                            Created = c.AssignedUser.Created,
-                            Id = c.AssignedUser.Id
-                        }
-                        : null
+                            Id = c.Id,
+                            Name = c.Name,
+                            Created = c.Created,
+                            Description = c.Document!.Description,
+                            Owner = c.Document.EmailCreator,
+                            DocumentId = c.Document.Id,
+                            StatusDocument = c.Document.Status,
+                            Percentage = c.Step!.StepTools.Any(st => st.Executions.Any(e => e.CardId == c.Id))
+                            ? (
+                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100
+                                /
+                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
+                              )
+                            : 100,
+                            AssignedUser = c.AssignedUser != null ?
+                            new UserDto
+                            {
+                                Name = c.AssignedUser.Name,
+                                Email = c.AssignedUser.Email,
+                                Created = c.AssignedUser.Created,
+                                Id = c.AssignedUser.Id
+                            }
+                            : null
                     }).ToList(),                    
                     StepTools = s.StepTools
                         .Select(st => new StepToolDto

@@ -57,9 +57,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("{Id}")]
         [SwaggerOperation("Endpoint that receive an workflow id and return a valid workflow")]
         [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindById(int id)
+        public async Task<IActionResult> FindById(int id, [FromQuery] WorkflowFilterDto workflowFilterDto)
         {
-            var workflow = await _workflowServices.FindById(id);
+            var workflow = await _workflowServices.FindById(id, workflowFilterDto);
             return Ok(workflow);
         }
 
