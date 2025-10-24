@@ -1,6 +1,26 @@
 import api from "@/services/api";
 
 export default {
+    getWorkflows(params) {
+        return api.get("/Workflow/List", { params: params })
+            .then(({ data }) => {
+                console.log(data)
+                return {
+                    content: data.content,
+                    pagination: {
+                        currentPage: data.currentPage,
+                        totalPages: data.pageCount,
+                        itemsPerPage: 10,
+                        totalItems: data.rowCount,
+                    }
+                }
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                }
+            });
+    },
     getWorkflowList(email) {
         return api.get(`/Workflow/Users/${email}`)
             .then(({ data }) => {

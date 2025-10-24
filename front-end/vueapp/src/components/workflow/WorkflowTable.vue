@@ -105,8 +105,16 @@
         methods: {
             getWorkflowList() {
                 this.table.isLoading = true;
-                var email = this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email)
+                const params = {
+                    login: this.$store.state.userProfile.login,
+                    search: this.filters.input,
+                    pageSize: 10,
+                    page: this.table.pagination.currentPage,
+                    isAllUsers: this.filters.isAllUsers,
+                    workflowIds: this.filters.workflows,
+                };
+                
+                WorkflowService.getWorkflows(params)
                     .then((response) => {
                         if(response.error !== undefined) {
                             this.$notify({
@@ -116,7 +124,8 @@
                                 icon: 'CircleX',
                             });
                         }
-                        this.table.data = response;
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -170,6 +179,8 @@
             },
             changePage(page) {
                 console.log("Change page" + page)
+                this.table.pagination.currentPage = page;
+                this.getWorkflowList();
             },
         },
         created() {

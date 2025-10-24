@@ -1,4 +1,6 @@
-﻿using WoopiAiHub.Application.Utils;
+﻿using Microsoft.Extensions.Logging;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -7,6 +9,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -20,6 +23,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
+        private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
@@ -29,6 +33,7 @@ namespace WoopiAiHub.Application.Services
                                 IStepRepository stepRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
+                                ILogger<WorkflowServices> logger,
                                 IValidateWorkflow validateWorkflow)
         {
             _workflowRepository = workflowRepository;
@@ -39,6 +44,7 @@ namespace WoopiAiHub.Application.Services
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
             _teamRepository = teamRepository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -259,6 +265,22 @@ namespace WoopiAiHub.Application.Services
             {
                 _unitOfWork.Rollback();
                 throw;
+            }
+        }
+
+        public PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto)
+        {
+            if(workflowPagedDto.Page > 0)
+            {
+                var workflowList = _workflowRepository.FindAll(workflowPagedDto);
+                var paginatedList = PaginationHelper.Paginate(workflowList, workflowPagedDto.Page);
+                return paginatedList;
+            }
+            else
+            {
+                var ex = new ArgumentException("Invalid Page");
+                _logger.LogError(ex, $"An argument exception occurred in the {nameof(WorkflowServices)} in the {nameof(FindAllPaged)} method");
+                throw ex;
             }
         }
 

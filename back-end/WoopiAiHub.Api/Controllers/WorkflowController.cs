@@ -104,5 +104,20 @@ namespace WoopiAiHub.Api.Controllers
             var result = _workflowServices.FindAllByUser(email);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Receive a page number or a search data and return
+        /// workflows (with pagination)
+        /// </summary>
+        /// <param name="WorkflowPagedDto"></param>
+        /// <returns></returns>
+        [HttpGet("List")]
+        [SwaggerOperation("Endpoint that returns all valids workflows by user email")]
+        [ProducesResponseType(typeof(WorkflowPagedDto), StatusCodes.Status200OK)]
+        public ActionResult<WorkflowPagedDto> FindAllPaged([FromQuery] WorkflowPagedDto workflowPagedDto)
+        {
+            var workflowList = _workflowServices.FindAllPaged(workflowPagedDto);
+            return Ok(workflowList);
+        }
     }
 }

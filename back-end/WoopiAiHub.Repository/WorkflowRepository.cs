@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -8,6 +9,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
+using WoopiAiHub.Repository.Util;
 
 namespace WoopiAiHub.Repository
 {
@@ -290,6 +292,45 @@ namespace WoopiAiHub.Repository
                                }).ToList()
                            })
                            .ToList();
+        }
+
+        public IQueryable<WorkflowDto> FindAll(WorkflowPagedDto workflowPagedDto)
+        {
+            var search = workflowPagedDto.Search?.ToLower();
+            var login = workflowPagedDto.Login?.ToLower();
+            var query = _context.Workflows
+                .Include(w => w.Teams)
+                    .ThenInclude(t => t.Users)
+                .AsNoTracking()
+                .Where(w => w.Teams.Any(t => t.Users.Any(u => u.Email == workflowPagedDto.Login)));
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(i =>
+                             EF.Functions.Like(i.Name, $"%{search}%"));
+            }
+
+            if (!workflowPagedDto.IsAllUsers)
+            {
+                query = query
+                    .Include(w => w.Steps)
+                        .ThenInclude(s => s.Cards)
+                    .Where(w => w.Steps.Any(s => s.Cards.Any(c =>
+                        c.AssignedUser != null &&
+                        EF.Functions.Like(c.AssignedUser.Email, login)
+                    )));
+            }
+
+            return query.Select(w => new WorkflowDto
+            {
+                Id = w.Id,
+                Name = w.Name,
+                Teams = w.Teams.Select(t => new TeamDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                }).ToList(),
+            });
         }
     }
 }

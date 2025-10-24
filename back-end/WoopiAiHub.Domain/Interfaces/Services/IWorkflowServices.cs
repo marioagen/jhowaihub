@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Domain.DTOs.Request;
+﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
@@ -11,5 +12,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto);
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string email);
+        PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
     }
 }
