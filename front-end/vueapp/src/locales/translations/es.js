@@ -559,7 +559,9 @@
             progressFlowFail: "No se pudo insertar el flujo",
             editFlowNodeSuccess: "Nodo editado exitosamente",
             editFlowNodeFail: "No se pudo editar el nodo",
-        },
+            connectorWorkflowFail: "El conector del workflow no respondió. Verifica la URL y la clave API de la herramienta",
+            connectorWorkflowConfigFail: "No se pudo recuperar la configuración del workflow. Verifica la URL y la clave API de la herramienta",
+        }
     },
     prompts: {
         title: "Prompts",

@@ -106,7 +106,6 @@ namespace WoopiAiHub.Repository
                  .FirstOrDefaultAsync(w => w.Id == id);
         }
 
-
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>
@@ -197,8 +196,7 @@ namespace WoopiAiHub.Repository
                                         Id = st.Tool!.Id,
                                         Name = st.Tool.Name,
                                         IsEditableInput = st.Tool.IsEditableInput,
-                                        ToolType = st!.Tool!.ToolType!.Name,
-                                        IsConnector = st.Tool.ToolType!.Name.Contains(ConnectorNames.N8N)
+                                        ToolType = st!.Tool!.ToolType!.Name
                                     },
                                     Executions = st.Executions.Select(e => new StepToolExecutionDto(
                                         e.Id,

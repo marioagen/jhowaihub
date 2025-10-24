@@ -555,7 +555,9 @@
             progressFlowFail: "Failed to insert flow",
             editFlowNodeSuccess: "Node edited successfully",
             editFlowNodeFail: "Failed to edit node",
-        },
+            connectorWorkflowFail: "Workflow connector did not respond. Check tool URL and API key",
+            connectorWorkflowConfigFail: "Failed to retrieve workflow configuration. Check tool URL and API key",
+        }
     },
     prompts: {
         title: "Prompts",
