@@ -149,7 +149,7 @@
                     login: this.filters.login,
                     workflowIds: this.filters.workflows,
                 };
-                console.log(params)
+                
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
                         if (response?.error !== undefined) {

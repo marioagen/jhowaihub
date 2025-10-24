@@ -23,9 +23,9 @@
         </div>
         <div class="col-1">
             <button
-                v-tooltip="filters.isAllUsers ? $t('filters.assignment.allUsers') : $t('filters.assignment.currentUser')"
+                v-tooltip="filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')"
                 class="btn table-btn btn-sm"
-                :class="filters.isAllUsers ? 'btn-outline-primary' : 'btn-outline-secondary'"
+                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
                 type="button"
                 style="display: flex; align-items: center; justify-content: center;"
                 @click="filterUsers"
@@ -43,8 +43,8 @@
             return {
                 teamsList: [],
                 filters: {
-                    input: "",
-                    isAllUsers: false,
+                    input: null,
+                    isAllUsers: true,
                     login: this.$store.state.userProfile.login
                 }
             };
@@ -58,13 +58,13 @@
                 this.filterData();
             },
             cleanInput() {
-                this.filters.input = "";
+                this.filters.input = null;
                 this.filterData();
             },
         },
         computed: {
             showCleanBtn() {
-                return this.filters.input !== "";
+                return this.filters.input !== null;
             },
         },
     };

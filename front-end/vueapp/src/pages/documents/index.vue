@@ -53,7 +53,7 @@
             keyMongoAccess: {
                 handler: async function (newValue) {
                     if (newValue) {
-                        this.reloadTeams();
+                        this.reloadData();
                     }
                 },
             },
@@ -64,9 +64,6 @@
             },
             reloadData() {
                 this.$refs.DocumentsTable.getDocuments();
-            },
-            reloadTeams() {
-                this.searchTeamsFirstLoad();
             },
             filterData(filters) {
                 this.$refs.DocumentsTable.filters = filters;

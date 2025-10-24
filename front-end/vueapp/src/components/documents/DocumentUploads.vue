@@ -386,9 +386,6 @@
                     })
                     .catch(function (e) {
                         console.log(e);
-                    })
-                    .finally(function () {
-                        console.log("Finished request.");
                     });
             },
             validateForm() {

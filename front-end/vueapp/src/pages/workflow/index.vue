@@ -54,8 +54,13 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="isWorkflowSelected">
-                    <div v-if="isLoaded && isLoadedUsers" class="card mb-3 h-100">
+                <div v-if="isLoadingKanban">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                </div>
+                <div v-else>                    
+                    <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
                                 <KanbanBoard
@@ -65,7 +70,7 @@
                                 />
                             </div>
                         </div>
-                    </div>    
+                    </div>
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
@@ -118,10 +123,11 @@
                 numDocs: 0,
                 isLoaded: false,
                 isLoadedUsers: false,
+                isLoadingKanban: true,
                 signalrEventExecutionChanged: "CardExecutionChanged",
                 filters: {
-                    input: "",
-                    isAllUsers: false,
+                    input: null,
+                    isAllUsers: true,
                 },
                 users: []
             };
@@ -132,8 +138,7 @@
         },
         methods: {
             getWorkflowByUser() {
-                this.isLoaded = false;
-                this.isLoadedUsers = false;
+                this.isLoadingKanban = true;
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
@@ -155,11 +160,11 @@
                 let workflowToSelect = this.workflowList[0];
                 const redicteWorkflowId = this.$route.query.id;
                 if(redicteWorkflowId !== undefined) {
-                    const foundWorkflow = this.workflowList.find(w => 
+                    const foundWorkflow = this.workflowList.find(w =>
                         w.id == redicteWorkflowId
                     );
                     if (foundWorkflow) {
-                        workflowToSelect = foundWorkflow;
+                        return this.selectOption(foundWorkflow);
                     } else {
                         return this.$notify({
                             title: 'workflow.index',
@@ -176,27 +181,22 @@
                         w.teams.id === lastSelected.teamId && w.id === lastSelected.id
                     );
                     if (foundWorkflow) {
-                        workflowToSelect = foundWorkflow;
+                        return this.selectOption(lastSelected);
                     }
                 }
 
                 this.selectOption(workflowToSelect);
-                this.filteredworkflows();
             },
-            getWorkflowbyTeam(id) {
-                this.isLoaded = false;
-                WorkflowService.getWorkflowByTeamId(id, this.filters)
+            getWorkflowById(workflowId) {
+                this.isLoadingKanban = true;
+                WorkflowService.getWorkflowById(workflowId, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
+                        console.log(response)
                     })
                     .finally(() => {
-                        this.isLoaded = true;
+                        this.isLoadingKanban = false;
                     });
-            },
-            filteredworkflows() {
-                return this.workflowList.filter(
-                    (workflow) => workflow.id !== this.selectedOption.id
-                );
             },
             selectOption(workflow) {
                 if(workflow.teams.length < 1) return;
@@ -215,11 +215,10 @@
                     teamId: workflow.teams[0].id,
                 });
 
-                this.getUsersByTeamId(workflow.teams[0].id);
-                this.getWorkflowbyTeam(workflow.teams[0].id);
+                this.getWorkflowById(workflow.id);
             },
             reloadKanban() {                
-                this.getWorkflowbyTeam(this.selectedOption.teamId);
+                this.getWorkflowById(this.selectedOption.id);
             },
             filterData(filters) {
                 this.filters = filters;
@@ -227,21 +226,6 @@
             },
             redirectToNewUpload() {
                 this.$router.push({ name: "DocumentsUpload" });
-            },
-            getUsersByTeamId(teamId) {
-                this.isLoadedUsers = false;
-                UserService.getUsersByTeamId(teamId)
-                    .then((response) => {                 
-                        this.users = response;
-                    })
-                    .finally(() => {
-                        this.isLoadedUsers = true;
-                    });                  
-            }
-        },
-        computed: {
-            isWorkflowSelected() {
-                return this.workflowList.length > 0;
             },
         },
         created() {
@@ -251,7 +235,6 @@
         },
         async mounted() {
             await signalRService.startConnection();
-
             signalRService.on(this.signalrEventExecutionChanged, (message) => {
                 const step = this.kanbanCards.steps.find(s => s.id === message.stepId);
                 if (!step?.cards) return;
