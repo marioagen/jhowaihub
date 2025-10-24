@@ -23,8 +23,8 @@ export default {
                 }
             });
     },
-    getWorkflowById(workflowId) {
-        return api.get(`/Workflow/${workflowId}`)
+    getWorkflowById(workflowId, filters) {
+        return api.get(`/Workflow/${workflowId}`, { params: filters })
             .then(({ data }) => {
                 return data;
             })
