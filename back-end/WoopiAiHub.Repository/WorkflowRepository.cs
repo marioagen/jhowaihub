@@ -58,6 +58,11 @@ namespace WoopiAiHub.Repository
                 .FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Retrieves a list of workflows by its ID.
+        /// </summary>
+        /// <param name="ICollection<int>"></param>
+        /// <returns></returns>
         public async Task<List<Workflow>> FindByIdsAsync(ICollection<int> ids)
         {
             return await _context.Workflows
@@ -67,6 +72,11 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Retrieves a list of workflows by its team ids.
+        /// </summary>
+        /// <param name="List<int>"></param>
+        /// <returns></returns>
         public async Task<List<WorkflowDto>> FindByUsersTeams(List<int> teamIds)
         {
             return await _context.Workflows

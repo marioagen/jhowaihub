@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class WorkflowPermissionDto
+    public record class WorkflowPermissionDto
     {
         public int? ProfileId { get; set; }
         public int StepId { get; set; }

@@ -193,7 +193,6 @@
                 WorkflowService.getWorkflowById(workflowId, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
-                        console.log(response)
                     })
                     .finally(() => {
                         this.isLoadingKanban = false;

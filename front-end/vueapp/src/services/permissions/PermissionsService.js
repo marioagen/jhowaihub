@@ -1,4 +1,5 @@
 import api from "@/services/api";
+import logService from '@/services/log/logService.js';
 
 export default {
     getPermissions() {
@@ -10,7 +11,7 @@ export default {
                 };
             })
             .catch(function (e) {
-                console.log(e);
+                logService.showMessage(e);
             });
     },
     getWorkflowPermissions() {
@@ -22,7 +23,7 @@ export default {
                 };
             })
             .catch(function (e) {
-                console.log(e);
+                logService.showMessage(e);
             });
     },
 };

@@ -463,7 +463,6 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 await _documentDtoValidator.ValidateAndThrowAsync(requestCreateDocumentDto);
-                //check workflows
                 var formFile = new FormFile(new MemoryStream(chunks),
                                             0,
                                             chunks.Length,

@@ -23,6 +23,12 @@ namespace WoopiAiHub.Application.Services
             _profileRepository = profileRepository;
         }
 
+        /// <summary>
+        /// It creates the relationship between Profile Step and Permission
+        /// </summary>
+        /// <param name="WorkflowPermissionDto"></param>
+        /// <returns></returns>
+        ///
         public async Task<bool> Create(int ProfileId, List<WorkflowPermissionDto> PermissionsWorkflow)
         {
             if (PermissionsWorkflow == null || PermissionsWorkflow.Count == 0)
@@ -32,6 +38,13 @@ namespace WoopiAiHub.Application.Services
             return true;
         }
 
+        /// <summary>
+        /// It removes the relationship between Profile Step and Permission
+        /// using a ProfileId
+        /// </summary>
+        /// <param name="ProfileId"></param>
+        /// <returns></returns>
+        ///
         public async Task<bool> Delete(int ProfileId)
         {
             return await _stepProfilePermissionsRepository.DeleteAsync(ProfileId);

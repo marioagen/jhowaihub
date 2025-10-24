@@ -14,13 +14,14 @@ namespace WoopiAiHub.Repository
             _context = context;
         }
 
+        /// <summary>
+        /// It creates the relationship between Profile Step and Permission
+        /// </summary>
+        /// <param name="WorkflowPermissionDto"></param>
+        /// <returns></returns>
+        ///
         public async Task<bool> Create(int ProfileId, List<WorkflowPermissionDto> PermissionsWorkflow)
         {
-            //var entity = new StepProfilePermission(StepId, ProfileId, PermissionId);
-
-            //_context.StepProfilePermissions.Add(entity);
-            //return await _context.SaveChangesAsync() > 0;
-
             foreach (var permission in PermissionsWorkflow)
             {
                 var stepProfilePermission = new StepProfilePermission(
@@ -35,6 +36,13 @@ namespace WoopiAiHub.Repository
             return await _context.SaveChangesAsync() > 0;
         }
 
+        /// <summary>
+        /// It removes the relationship between Profile Step and Permission
+        /// using a ProfileId
+        /// </summary>
+        /// <param name="ProfileId"></param>
+        /// <returns></returns>
+        ///
         public async Task<bool> DeleteAsync(int ProfileId)
         {
             var list = await _context.StepProfilePermissions

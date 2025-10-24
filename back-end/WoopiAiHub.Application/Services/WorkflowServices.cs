@@ -39,7 +39,6 @@ namespace WoopiAiHub.Application.Services
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
             _teamRepository = teamRepository;
-
         }
 
         /// <summary>
