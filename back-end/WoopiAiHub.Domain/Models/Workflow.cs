@@ -9,7 +9,7 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual ICollection<Step> Steps { get; set; } = [];
         public virtual ICollection<Team> Teams { get; set; } = [];
-        public virtual ICollection<Document> Documents { get; set; }
+        public virtual ICollection<Document> Documents { get; set; } = [];
 
         public Workflow(int id, DateTime created, List<Team> teams, string name)
             : base(id, created)

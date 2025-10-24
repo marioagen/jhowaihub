@@ -14,13 +14,10 @@ namespace WoopiAiHub.Application.Services
     public class StepProfilePermissionsServices : IStepProfilePermissionsServices
     {
         private readonly IStepProfilePermissionsRepository _stepProfilePermissionsRepository;
-        private readonly IProfileRepository _profileRepository;
 
-        public StepProfilePermissionsServices(IProfileRepository profileRepository,
-                            IStepProfilePermissionsRepository stepProfilePermissionsRepository)
+        public StepProfilePermissionsServices(IStepProfilePermissionsRepository stepProfilePermissionsRepository)
         {
             _stepProfilePermissionsRepository = stepProfilePermissionsRepository;
-            _profileRepository = profileRepository;
         }
 
         /// <summary>

@@ -19,7 +19,6 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="WorkflowPermissionDto"></param>
         /// <returns></returns>
-        ///
         public async Task<bool> Create(int ProfileId, List<WorkflowPermissionDto> PermissionsWorkflow)
         {
             foreach (var permission in PermissionsWorkflow)
@@ -42,14 +41,13 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ProfileId"></param>
         /// <returns></returns>
-        ///
         public async Task<bool> DeleteAsync(int ProfileId)
         {
             var list = await _context.StepProfilePermissions
                 .Where(x => x.ProfileId == ProfileId)
                 .ToListAsync();
 
-            if (!list.Any())
+            if (list.Count() > 0)
                 return false;
 
             _context.StepProfilePermissions.RemoveRange(list);

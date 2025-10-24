@@ -7,7 +7,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface IStepProfilePermissionsServices
     {
-        Task<bool> Create(int StepId, List<WorkflowPermissionDto> PermissionsWorkflow);
+        Task<bool> Create(int ProfileId, List<WorkflowPermissionDto> PermissionsWorkflow);
         Task<bool> Delete(int ProfileId);
     }
 }

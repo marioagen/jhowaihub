@@ -42,7 +42,7 @@ namespace WoopiAiHub.Repository
                              i.Id.ToString().Contains(search));
             }
 
-            if (documentPagedDataDto.WorkflowIds != null && documentPagedDataDto.WorkflowIds.Any())
+            if (documentPagedDataDto.WorkflowIds.Count() > 0)
             {
                 var workflowIds = documentPagedDataDto.WorkflowIds;
 

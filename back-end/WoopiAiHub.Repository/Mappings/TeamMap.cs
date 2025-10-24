@@ -8,6 +8,7 @@ namespace WoopiAiHub.Repository.Mappings
     {
         private const string WorkflowIdColumn = "WorkflowId";
         private const string TeamIdColumn = "TeamId";
+        private const string ProfileIdColumn = "ProfileId";
         public void Configure(EntityTypeBuilder<Team> builder)
         {
             builder.ToTable("Teams");
@@ -40,21 +41,21 @@ namespace WoopiAiHub.Repository.Mappings
                         "TeamProfiles",
                         j => j.HasOne<Profile>()
                               .WithMany()
-                              .HasForeignKey("ProfileId")
+                              .HasForeignKey(ProfileIdColumn)
                               .OnDelete(DeleteBehavior.Restrict),
 
                         j => j.HasOne<Team>()
                               .WithMany()
-                              .HasForeignKey("TeamId")
+                              .HasForeignKey(TeamIdColumn)
                               .OnDelete(DeleteBehavior.Restrict),
 
                         j =>
                         {
-                            j.HasKey("TeamId", "ProfileId");
+                            j.HasKey(TeamIdColumn, ProfileIdColumn);
                             j.ToTable("TeamProfiles");
 
-                            j.Property<int>("TeamId").HasColumnName("TeamId");
-                            j.Property<int>("ProfileId").HasColumnName("ProfileId");
+                            j.Property<int>(TeamIdColumn).HasColumnName(TeamIdColumn);
+                            j.Property<int>(ProfileIdColumn).HasColumnName(ProfileIdColumn);
                         }
                    );
         }

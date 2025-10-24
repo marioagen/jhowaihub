@@ -6,6 +6,8 @@ namespace WoopiAiHub.Repository.Mappings
 {
     public class WorkflowMap : IEntityTypeConfiguration<Workflow>
     {
+        private const string WorkflowIdColumn = "WorkflowId";
+        private const string DocumentIdColumn = "DocumentId";
         public void Configure(EntityTypeBuilder<Workflow> builder)
         {
             builder.ToTable("Workflows");
@@ -32,21 +34,21 @@ namespace WoopiAiHub.Repository.Mappings
                     "WorkflowDocuments",
                     j => j.HasOne<Document>()
                           .WithMany()
-                          .HasForeignKey("DocumentId")
+                          .HasForeignKey(DocumentIdColumn)
                           .OnDelete(DeleteBehavior.Restrict),
 
                     j => j.HasOne<Workflow>()
                           .WithMany()
-                          .HasForeignKey("WorkflowId")
+                          .HasForeignKey(WorkflowIdColumn)
                           .OnDelete(DeleteBehavior.Restrict),
 
                     j =>
                     {
-                        j.HasKey("WorkflowId", "DocumentId");
+                        j.HasKey(WorkflowIdColumn, DocumentIdColumn);
                         j.ToTable("WorkflowDocuments");
 
-                        j.Property<int>("WorkflowId").HasColumnName("WorkflowId");
-                        j.Property<int>("DocumentId").HasColumnName("DocumentId");
+                        j.Property<int>(WorkflowIdColumn).HasColumnName(WorkflowIdColumn);
+                        j.Property<int>(DocumentIdColumn).HasColumnName(DocumentIdColumn);
                     }
                 );
 
