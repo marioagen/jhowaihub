@@ -15,7 +15,7 @@
                     <div>
                         <button v-for="tool in toolsList" :key="tool.id"
                             class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item" draggable="true"
-                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput, isConnector: tool.isConnector, toolType: tool.toolType })">
+                            @dragstart="onDragStart($event, { id: tool.id, name: tool.name, isEditableInput: tool.isEditableInput, toolType: tool.toolType })">
                             {{ tool.name }}
                         </button>
                     </div>
@@ -157,9 +157,8 @@ export default {
                         color: "blue", 
                         parameters: stepTool.parameters, 
                         isEditableInput: stepTool.tool.isEditableInput,
-                        isConnector: stepTool.tool.isConnector,
-                        toolId: stepTool.toolId,
                         toolType: stepTool.tool.toolType,
+                        toolId: stepTool.toolId,
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -243,10 +242,9 @@ export default {
                     color: '#000', 
                     isStartNode: false, 
                     isEditableInput: nodeData.isEditableInput,
-                    isConnector: nodeData.isConnector,
+                    toolType: nodeData.toolType,
                     parameters: [],
                     toolId: nodeData.id,
-                    toolType: nodeData.toolType
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
@@ -257,7 +255,7 @@ export default {
                 .map((node, index) => ({
                     id: parseInt(node.id, 10),
                     toolId: node.toolId,
-                    tool: { name: node.label, isEditableInput: node.data.isEditableInput, isConnector: node.data.isConnector, toolType: node.data.toolType },
+                    tool: { name: node.label, isEditableInput: node.data.isEditableInput, toolType: node.data.toolType },
                     positionX: parseFloat((node.position.x).toFixed(2)),
                     positionY: parseFloat((node.position.y).toFixed(2)),
                     order: index + 1,

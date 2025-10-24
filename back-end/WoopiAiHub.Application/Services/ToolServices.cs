@@ -16,16 +16,19 @@ namespace WoopiAiHub.Application.Services
         private readonly IToolTypeRepository _toolTypeRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IKeyVaultServices _keyVaultServices;
+        private readonly IUnitOfWork _unitOfWork;
 
         public ToolServices(IToolRepository toolRepository,
                             IToolTypeRepository toolTypeRepository,
                             IApiClientFactory apiClientFactory,
-                            IKeyVaultServices keyVaultServices)
+                            IKeyVaultServices keyVaultServices,
+                            IUnitOfWork unitOfWork)
         {
             _toolRepository = toolRepository;
             _toolTypeRepository = toolTypeRepository;
             _apiClientFactory = apiClientFactory;
             _keyVaultServices = keyVaultServices;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -65,18 +68,25 @@ namespace WoopiAiHub.Application.Services
                 keyVaultName
              );
 
-            var result = await _toolRepository.CreateUniqueAsync(tool);
-            if (!result)
+            _unitOfWork.BeginTransaction();
+            try
             {
-                throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
-            }
+                var result = await _toolRepository.CreateUniqueAsync(tool);
+                if (!result)
+                {
+                    throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
+                }
 
-            if (!string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
+                await SetSecret(keyVaultName, toolCreateDto.ConnectorApiKey);
+
+                _unitOfWork.Commit();
+                return result;
+            }
+            catch
             {
-                await _keyVaultServices.SetSecretAsync(keyVaultName, toolCreateDto.ConnectorApiKey);
+                _unitOfWork.Rollback();
+                throw;
             }
-
-            return result;
         }
 
         /// <summary>
@@ -162,18 +172,40 @@ namespace WoopiAiHub.Application.Services
                         toolUpdateDto.ConnectorUrl,
                         keyVaultName);
 
-            var result = await _toolRepository.UpdateAsync(tool);
-            if (!result)
+            _unitOfWork.BeginTransaction();
+            try
             {
-                throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
-            }
+                var result = await _toolRepository.UpdateAsync(tool);
+                if (!result)
+                {
+                    throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
+                }
 
-            if (!string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
+                await SetSecret(keyVaultName, toolUpdateDto.ConnectorApiKey);
+
+                _unitOfWork.Commit();
+                return result;
+            }
+            catch
             {
-                await _keyVaultServices.SetSecretAsync(keyVaultName, toolUpdateDto.ConnectorApiKey);
+                _unitOfWork.Rollback();
+                throw;
             }
+        }
 
-            return result;
+        /// <summary>
+        /// Set secret in key vault
+        /// </summary>
+        /// <param name="keyVaultName"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private async Task SetSecret(string keyVaultName, string? key)
+        {
+            if (!string.IsNullOrEmpty(key))
+            {
+                await _keyVaultServices.SetSecretAsync(keyVaultName, key);
+            }
         }
 
         /// <summary>
