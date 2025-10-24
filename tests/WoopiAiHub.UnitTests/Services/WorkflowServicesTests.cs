@@ -57,14 +57,14 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var workflowId = 1;
             var expectedWorkflow = new WorkflowDto { Id = workflowId };
-            _workflowRepositoryMock.Setup(repo => repo.FindById(workflowId))
+            _workflowRepositoryMock.Setup(repo => repo.FindById(workflowId, null))
                 .ReturnsAsync(expectedWorkflow);
 
             // Act
-            var result = await _workflowServices.FindById(workflowId);
+            var result = await _workflowServices.FindById(workflowId, null);
 
             // Assert
-            _workflowRepositoryMock.Verify(repo => repo.FindById(workflowId), Times.Once);
+            _workflowRepositoryMock.Verify(repo => repo.FindById(workflowId, null), Times.Once);
             Assert.Equal(expectedWorkflow, result);
         }
 
@@ -74,14 +74,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var workflowId = 1;
-            _workflowRepositoryMock.Setup(repo => repo.FindById(workflowId))
+            _workflowRepositoryMock.Setup(repo => repo.FindById(workflowId, null))
                 .ReturnsAsync((WorkflowDto?)null);
 
             // Act
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindById(workflowId));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindById(workflowId, null));
 
             // Assert
-            _workflowRepositoryMock.Verify(repo => repo.FindById(workflowId), Times.Once);
+            _workflowRepositoryMock.Verify(repo => repo.FindById(workflowId, null), Times.Once);
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Workflow not found", exception.Message);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
