@@ -27,7 +27,7 @@ namespace WoopiAiHub.Repository.Mappings
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(w => w.Documents)
-                .WithMany(d => d.Workflow)
+                .WithMany(d => d.Workflows)
                 .UsingEntity<Dictionary<string, object>>(
                     "WorkflowDocuments",
                     j => j.HasOne<Document>()

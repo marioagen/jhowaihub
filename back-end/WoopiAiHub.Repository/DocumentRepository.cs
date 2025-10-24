@@ -30,7 +30,7 @@ namespace WoopiAiHub.Repository
             var search = documentPagedDataDto.Search?.ToLower();
             var login = documentPagedDataDto.Login?.ToLower();
             var query = _context.Documents
-                                .Include(t => t.Workflow)
+                                .Include(t => t.Workflows)
                                 .AsNoTracking()
                                 .Where(i => i.Enable);
 
@@ -46,7 +46,7 @@ namespace WoopiAiHub.Repository
             {
                 var workflowIds = documentPagedDataDto.WorkflowIds;
 
-                query = query.Where(d => d.Workflow.Any(w => workflowIds.Contains(w.Id)));
+                query = query.Where(d => d.Workflows.Any(w => workflowIds.Contains(w.Id)));
             }
 
             if (!documentPagedDataDto.IsAllUsers)

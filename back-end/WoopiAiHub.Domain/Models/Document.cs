@@ -26,7 +26,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<DocumentHistory> DocumentHistories { get; set; }
         public virtual DocumentNormalized? DocumentNormalized { get; set; }
         public virtual ICollection<Card> Cards { get; set; }
-        public virtual ICollection<Workflow> Workflow { get; set; }
+        public virtual ICollection<Workflow> Workflows { get; set; }
 
         public Document(string name,
                        string description,
@@ -43,7 +43,7 @@ namespace WoopiAiHub.Domain.Models
             ReferenceFile = referenceFile;
             Status = status;
             Enable = enable;
-            Workflow = workflow;
+            Workflows = workflow;
             EmailCreator = emailCreator;
         }
 
