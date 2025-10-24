@@ -32,9 +32,9 @@
                     variant="success"
                 />
             </template>
-            <template #cell-workflow="{ data }">
+            <template #cell-workflows="{ data }">
                 <BadgeOutlinedComponent
-                    v-for="(workflowData, index) in data.row.workflow"
+                    v-for="(workflowData, index) in data.row.workflows"
                     :key="index"
                     :text="workflowData.name"
                     :clickable="false"
@@ -111,7 +111,7 @@
                     { key: "description", label: "documents.description" },
                     { key: "created", label: "documents.createdDate" },
                     { key: "status", label: "documents.status" },
-                    { key: "workflow", label: "documents.workflows" },
+                    { key: "workflows", label: "documents.workflows" },
                     { key: "actions", label: "questions.actions" },
                 ],
                 data: [],
