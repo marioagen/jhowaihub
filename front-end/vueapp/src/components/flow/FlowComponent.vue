@@ -41,10 +41,12 @@
                             <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
                         </div>
                     </div>
-                    <div v-if="nodeFlow?.data?.isConnector" class="mb-3">
-                        <select class="form-select form-select-sm w-auto mb-3"
-                                v-model="connector"
-                                @change="changeWebhook">
+                    <div v-if="isN8NTool" class="mb-3">
+                        <select
+                            class="form-select form-select-sm w-auto mb-3"
+                            v-model="connector"
+                            @change="changeWebhook"
+                        >
                             <option value="" disabled>{{ $t("flow.sidebar.filter") }}</option>
                             <option v-for="connector in connectors"
                                     :key="connector.id"
@@ -80,7 +82,7 @@
                             <button type="button" class="btn btn-primary" @click="updateNodeWithForm">{{ $t("labelSave") }}</button>
                         </div>
                     </div>
-                    <div v-if="nodeFlow?.data?.toolType == 'Prompt'">
+                    <div v-else-if="isPromptTool">
                         <h6>Prompts</h6>
                         <hr>
                         <div class="background-div">
@@ -121,6 +123,8 @@
     import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
     import AutomationServices from '@/services/automation/AutomationServices';
     import PromptService from "@/services/prompts/PromptsService";
+    import ToolType from '@/constants/ToolType';
+
     export default {
         name: "FlowPage",
         props: {
@@ -164,7 +168,7 @@
                 valueInput: "",
                 idSelected: 0,
                 promptlist: [],
-                toolTypeSelected: "",
+                toolType: "",
             };
         },
         components: {
@@ -183,26 +187,36 @@
             changeWebhook() {
                 this.getInputs(false);
             },
-            getInputs(dataFromParameters) {
+            getInputs(dataFromParameters) {										   
                 this.loadingInputs = true;
-                let params = {
+                let params ={
                     toolId: this.nodeFlow.data.toolId,
                     workflowId: this.connector
                 }
                 AutomationServices.getWorkflowWebhookInputs(params)
-                    .then((response) => {
-                        this.formFields = response;
-                        this.formData = [];
-                        if (dataFromParameters) {
-                            this.formData = JSON.parse(this.parameters[0].value);
+                    .then((response) => {      
+                        if (response.error === undefined) {
+                            this.formFields = response;                         
+                            this.formData = [];
+                            if (dataFromParameters){
+                                this.formData = JSON.parse(this.parameters[0].value);
+                            }
+                            else{
+                                this.formData = this.transformToObject(response); 
+                            }
                         }
-                        else {
-                            this.formData = this.transformToObject(response);
+                        else{
+                            this.$notify({
+                                title: "flow.title",
+                                message: "flow.formFlow.connectorWorkflowFail",
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
                         }
                     })
-                    .finally(() => {
-                        this.loadingInputs = false;
-                    });
+                .finally(() => {
+                    this.loadingInputs = false;
+                });
             },
             transformToObject(fields) {
                 const result = {};
@@ -222,12 +236,6 @@
             },
             getDefaultValue(type) {
                 switch (type) {
-                    case 'integer':
-                        return null;
-                    case 'string':
-                        return null;
-                    case 'boolean':
-                        return null;
                     case 'array':
                         return [];
                     default:
@@ -243,26 +251,40 @@
             openNodeConfig(node) {
                 this.nodeFlow = node;
                 this.parameters = node.data.parameters;
+                this.toolType = node.data.toolType;
 
-                if (node.data.isConnector) {
+                if (this.isTargetTool(ToolType.N8N)){
                     this.loadingWebhooks = true
-                    this.connector = "";
+                    this.resetFormConnector();              
                     AutomationServices.getWorkflows(node.data.toolId)
-                        .then((response) => {
-                            this.connectors = response;
+                        .then((result) => {
+                            console.log("getWorkflows result:", result);
+                            if (result.error === undefined) {
+                                
+                                this.connectors = result;
+                                this.parameters = node.data.parameters;
+                                if (this.parameters.length===0){
+                                    this.parameters.push({stepToolId: 0, value: null, requiredFile: false, webhookId: null});
+                                }
+                                else{
+                                    this.connector = this.parameters[0].webhookId;
+                                    this.getInputs(true);
+                                }
+                            }                    
+                            else{
+                                this.$notify({
+                                    title: "flow.title",
+                                    message: "flow.formFlow.connectorWorkflowFail",
+                                    variant: "danger",
+                                    icon: "CircleX",
+                                });
+                            }
                         })
                         .finally(() => {
                             this.loadingWebhooks = false;
                         });
-                    if (this.parameters.length === 0) {
-                        this.parameters.push({ stepToolId: 0, value: null, requiredFile: false, webhookId: null });
-                    }
-                    else {
-                        this.connector = this.parameters[0].webhookId;
-                        this.getInputs(true);
-                    }
                 }
-                else if (node.data.toolType == "Prompt") {
+                else if (this.isTargetTool(ToolType.Prompt)){
                     this.findAllPrompts();
                     if (this.parameters.length === 0) {
                         this.parameters.push({ stepToolId: 0, value: null, requiredFile: false, webhookId: null });
@@ -277,6 +299,9 @@
 
                 this.sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
                 this.sidebar.show();
+                
+                console.log("loadingWebhooks after:", this.loadingWebhooks);
+                console.log("loadingInputs after:", this.loadingInputs);
             },
             closeSidebar() {
                 const sidebarEl = this.$refs.sidebar;
@@ -379,22 +404,32 @@
                         this.promptlist = response;
                     });
             },
-            getToolsList() {
-                ToolsServices.getToolsList()
-                    .then((response) => {
-                        this.toolsList = response;
-                    });
+            resetFormConnector(){
+                this.connectors = [];
+                this.parameters = [];
+                this.formFields = [];
+                this.formData = [];
+                this.connector = "";
+            },
+            isTargetTool(targetToolType){
+                return this.toolType?.toLowerCase().includes(targetToolType.toLowerCase()) || false
             },
         },
         computed: {
             selectedItem() {
                 if (this.idSelected != 0)
                     return this.promptlist.find(item => item.id === this.idSelected)
+                return null;
             },
+            isN8NTool(){
+                return this.isTargetTool(ToolType.N8N);
+            },
+            isPromptTool(){
+                return this.isTargetTool(ToolType.Prompt);
+            }
         },
     };
 </script>
-
 
 <style>
     /* import the necessary styles for Vue Flow to work */

@@ -7,8 +7,11 @@ export default {
             .then((response) => {
                 return response.data;
             })
-            .catch(() => {
-                return false; 
+            .catch((e) => {
+                const message = e?.response?.data?.message || "Erro desconhecido";
+                return {
+                    error: message,
+                };
             });
     },
     getWorkflowWebhookInputs(params) {
@@ -17,8 +20,11 @@ export default {
             .then((response) => {
                 return response.data;
             })
-            .catch(() => {
-                return false; 
+            .catch((e) => {
+                const message = e?.response?.data?.message || "Erro desconhecido";
+                return {
+                    error: message,
+                };
             });
     },
 }
