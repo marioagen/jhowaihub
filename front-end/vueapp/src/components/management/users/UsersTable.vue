@@ -200,7 +200,7 @@
                 this.$router.push({
                     name: 'EditUser',
                     params: {
-                        id: user.id,
+                        email: user.email,
                     }
                 });
             },

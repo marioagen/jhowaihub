@@ -179,11 +179,11 @@
                 required: false,
                 default: false,
             },
-            id: {
+            email: {
                 type: String,
                 required: false,
                 default: null,
-            }
+            },
         },
         data() {
             return {
@@ -387,8 +387,18 @@
             },
             setupEdit() {
                 if(!this.isEdit) return;
-                UserService.getUserById(this.id)
+                console.log(this.email);
+                UserService.getUserByEmail(this.email)
                     .then((response) => {
+                        if(response.error !== undefined) {
+                            this.returnToTable();
+                            return this.$notify({
+                                title: 'management.users.title',
+                                message: 'management.users.invalid',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
                         this.userData = response;
                         this.selectedProfiles = response.profiles.map(p => p.id);
                         this.selectedTeams = response.teams.map(t => t.id);

@@ -191,7 +191,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/management/users/edit/:id",
+        path: "/management/users/edit/:email",
         name: "EditUser",
         component: EditUser,
         meta: { 

@@ -117,6 +117,42 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Find user id by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<UserDto?> FindUserByEmail(string email)
+        {
+            return await _context.Users
+                .Include(u => u.Teams)
+                .Include(u => u.Profiles)
+                .Where(u => u.Email == email)
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Teams = u.Teams!
+                    .Select(t => new TeamDto
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        Created = t.Created
+                    })
+                    .ToList(),
+                    Profiles = u.Profiles!
+                    .Select(p => new ProfileDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name
+                    })
+                    .ToList(),
+                    Created = u.Created
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
         /// Find all teams with pagination and include their users.
         /// </summary>
         /// <param name="pagedDataDto"></param>
@@ -201,42 +237,6 @@ namespace WoopiAiHub.Repository
                                  .Where(u => u.IsActive && u.Teams.Any(a => a.Id.Equals(teamId)))
                                  .Select(s=> new UserDto { Id =  s.Id, Name = s.Name, Email = s.Email })
                                  .ToListAsync();
-        }
-
-        /// <summary>
-        /// Find a user by its ID.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<UserDto?> FindById(Guid id)
-        {
-            return await _context.Users
-                .Include(u => u.Teams)
-                .Include(u => u.Profiles)
-                .Where(u => u.Id == id)
-                .Select(u => new UserDto
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    Email = u.Email,
-                    Teams = u.Teams!
-                    .Select(t => new TeamDto
-                    {
-                        Id = t.Id,
-                        Name = t.Name,
-                        Created = t.Created
-                    })
-                    .ToList(),
-                    Profiles = u.Profiles!
-                    .Select(p => new ProfileDto
-                    {
-                        Id = p.Id,
-                        Name = p.Name
-                    })
-                    .ToList(),
-                    Created = u.Created
-                })
-                .FirstOrDefaultAsync();
         }
     }
 }

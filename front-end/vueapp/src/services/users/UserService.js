@@ -41,13 +41,16 @@ export default {
                 logService.showMessage(e);
             });
     },
-    getUserById(userId) {
-        return api.post('/User/FindById', userId)
+    getUserByEmail(email) {
+        return api.get(`/User/FindUserByEmail/${email}`)
             .then(({ data }) => {
                 return data;
             })
-            .catch(function (e) {
+            .catch((e) => {
                 logService.showMessage(e);
+                return {
+                    error: e,
+                }
             });
     },
 };

@@ -1,7 +1,7 @@
 <template>
     <UsersForm 
         :isEdit="true"
-        :id="$route.params.id"
+        :email="$route.params.email"
     />
 </template>
 

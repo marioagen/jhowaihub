@@ -241,20 +241,21 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Retrieves a user by its ID.
+        /// Retrieves a user by its email.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="email"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<UserDto> FindById(Guid id)
+        public async Task<UserDto> FindUserByEmail(string email)
         {
-            var user = await _userRepository.FindById(id);
+            var user = await _userRepository.FindUserByEmail(email);
             if (user == null)
             {
                 throw new ArgumentException("User not found");
             }
             return user;
         }
+
         /// <summary>
         /// Adds profiles to the user based on the provided profileIds.
         /// </summary>

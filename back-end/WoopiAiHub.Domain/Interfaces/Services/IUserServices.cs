@@ -14,7 +14,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         UserPagedResultDto FindAllPaged(PagedDataDto pagedDataDto);
         Task<bool> IsEmailInUseAsync(UserEmailDto userEmailDto);
         Task<ICollection<UserDto>> FindByTeamId(int teamId);
-        Task<UserDto> FindById(Guid id);
+        Task<UserDto> FindUserByEmail(string email);
         Guid FindIdByEmail(string email);
     }
 }
