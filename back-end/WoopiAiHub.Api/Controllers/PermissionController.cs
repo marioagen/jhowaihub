@@ -39,7 +39,6 @@ namespace WoopiAiHub.Api.Controllers
         /// <summary>
         /// Endpoint that receives the request to return workflow permissions paginated.
         /// </summary>
-        /// <param name="pagedDataDto"></param>
         /// <returns></returns>
         [HttpGet]
         [Route("Workflow")]

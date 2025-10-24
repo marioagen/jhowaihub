@@ -293,7 +293,7 @@ namespace WoopiAiHub.Application.Services
         /// each step.</remarks>
         /// <typeparam name="T">The type of the step DTO, which must implement <see cref="IStepDto"/>.</typeparam>
         /// <param name="stepsDto">A collection of step DTOs used to create the steps.</param>
-        /// <param name="teamId">The identifier of the team to associate with the created steps.</param>
+        /// <param name="workflowId">The identifier of the team to associate with the created steps.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a collection of  <see
         /// cref="Step"/> objects created and validated from the provided DTOs.</returns>
         private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int workflowId) where T : IStepDto
@@ -385,7 +385,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="stepDto">An object containing the data required to initialize the step, including its name, order, profile ID, and
         /// status ID.</param>
-        /// <param name="teamId">The identifier of the team associated with the step.</param>
+        /// <param name="workflowId">The identifier of the team associated with the step.</param>
         /// <returns>A new <see cref="Step"/> instance initialized with the provided data.</returns>
         private static Step CreateStep(IStepDto stepDto, int workflowId)
         {

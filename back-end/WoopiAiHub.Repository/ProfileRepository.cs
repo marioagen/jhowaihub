@@ -90,7 +90,6 @@ namespace WoopiAiHub.Repository
                             PermissionId = u.PermissionId
                         })
                         .ToList()
-
                 })
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == id);
