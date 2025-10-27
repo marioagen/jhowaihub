@@ -115,11 +115,11 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Endpoint that receives the request to return a profile.
+        /// Endpoint that receives the request to return a user by its email.
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        [HttpGet("FindUserByEmail/{email}")]
+        [HttpGet("{email}")]
         [SwaggerOperation("Endpoint that receive an email and return a valid user")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<UserDto>> FindUserByEmail(string email)

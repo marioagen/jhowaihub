@@ -42,7 +42,7 @@ export default {
             });
     },
     getUserByEmail(email) {
-        return api.get(`/User/FindUserByEmail/${email}`)
+        return api.get(`/User/${email}`)
             .then(({ data }) => {
                 return data;
             })
