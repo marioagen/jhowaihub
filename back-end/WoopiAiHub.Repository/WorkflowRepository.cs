@@ -294,7 +294,12 @@ namespace WoopiAiHub.Repository
                            .ToList();
         }
 
-        public IQueryable<WorkflowDto> FindAll(WorkflowPagedDto workflowPagedDto)
+        /// <summary>
+        /// Finds all workflows associated with a specific user team by their email address.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public IQueryable<WorkflowDto> FindAllWithFilter(WorkflowPagedDto workflowPagedDto)
         {
             var search = workflowPagedDto.Search?.ToLower();
             var login = workflowPagedDto.Login?.ToLower();

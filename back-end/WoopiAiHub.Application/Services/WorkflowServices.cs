@@ -279,7 +279,7 @@ namespace WoopiAiHub.Application.Services
         {
             if (workflowPagedDto.Page > 0)
             {
-                var workflowList = _workflowRepository.FindAll(workflowPagedDto);
+                var workflowList = _workflowRepository.FindAllWithFilter(workflowPagedDto);
                 var paginatedList = PaginationHelper.Paginate(workflowList, workflowPagedDto.Page);
                 return paginatedList;
             }
