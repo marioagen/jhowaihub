@@ -7,7 +7,7 @@ using WoopiAiHub.Domain.Enum;
 
 namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class WorkflowPagedDto
+    public record class WorkflowPagedDto
     {
         public int Page { get; set; }
         public int PageSize { get; set; }

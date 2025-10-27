@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class PaginatedListDto<T>
+    public record class PaginatedListDto<T>
     {
         public IEnumerable<T> Content { get; set; } = [];
         public int CurrentPage { get; set; } = 1;
