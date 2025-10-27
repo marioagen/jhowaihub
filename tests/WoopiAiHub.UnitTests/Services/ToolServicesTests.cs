@@ -26,6 +26,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IToolTypeRepository> _toolTypeRepositoryMock;
         private readonly Mock<IApiClientFactory> _apiClientFactoryMock;
         private readonly Mock<In8NConnector> _in8nConnectorMock;
+        private readonly Mock<IKeyVaultServices> _keyVaultServicesMock;
 
         public ToolServicesTests()
         {
@@ -35,6 +36,7 @@ namespace WoopiAiHub.UnitTests.Services
             _in8nConnectorMock = _mocker.GetMock<In8NConnector>();
             _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             _toolTypeRepositoryMock = _mocker.GetMock<IToolTypeRepository>();
+            _keyVaultServicesMock = _mocker.GetMock<IKeyVaultServices>();
 
             _toolServices = _mocker.CreateInstance<ToolServices>();
         }
@@ -117,6 +119,8 @@ namespace WoopiAiHub.UnitTests.Services
                                    .ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()))
                 .ReturnsAsync(false);
+            _keyVaultServicesMock.Setup(k => k.SetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
+                                 .Returns(Task.CompletedTask);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.CreateAsync(toolCreateDto));
@@ -269,6 +273,8 @@ namespace WoopiAiHub.UnitTests.Services
                                .ReturnsAsync(tool);
             _toolRepositoryMock.Setup(repo => repo.UpdateAsync(tool))
                                .ReturnsAsync(false);
+            _keyVaultServicesMock.Setup(k => k.SetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
+                                 .Returns(Task.CompletedTask);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.UpdateAsync(toolUpdateDto));

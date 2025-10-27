@@ -60,7 +60,10 @@ namespace WoopiAiHub.Application.Utils
                     break;
 
                 case JsonValueKind.Object:
-                    sb.AppendLine($"{label}:");
+                    if (!string.IsNullOrEmpty(label))
+                    {
+                        sb.AppendLine($"{label}:");
+                    }
                     FormatSimple(value, sb);
                     break;
 
@@ -81,8 +84,7 @@ namespace WoopiAiHub.Application.Utils
             sb.AppendLine($"{label}:");
             foreach (var item in array.EnumerateArray())
             {
-                if (item.ValueKind == JsonValueKind.Object)
-                    FormatSimple(item, sb);
+                AppendFormattedValue(item, string.Empty, sb);
             }
         }
 
@@ -98,7 +100,12 @@ namespace WoopiAiHub.Application.Utils
                 ? "(não informado)"
                 : value.ToString();
 
-            sb.AppendLine($"{label}: {text}");
+            if (string.IsNullOrEmpty(text)) return;
+
+            if (string.IsNullOrEmpty(label))
+                sb.AppendLine($"{text}");
+            else
+                sb.AppendLine($"{label}: {text}");
         }
 
         /// <summary>
