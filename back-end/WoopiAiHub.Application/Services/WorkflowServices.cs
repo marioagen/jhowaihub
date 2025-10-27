@@ -268,9 +268,16 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// This method sends the current page  
+        /// and search text to repository and return an PaginatedListDto<WorkflowDto>.
+        /// </summary>
+        /// <param name="WorkflowPagedDto"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto)
         {
-            if(workflowPagedDto.Page > 0)
+            if (workflowPagedDto.Page > 0)
             {
                 var workflowList = _workflowRepository.FindAll(workflowPagedDto);
                 var paginatedList = PaginationHelper.Paginate(workflowList, workflowPagedDto.Page);
