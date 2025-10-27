@@ -387,7 +387,6 @@
             },
             setupEdit() {
                 if(!this.isEdit) return;
-                console.log(this.email);
                 UserService.getUserByEmail(this.email)
                     .then((response) => {
                         if(response.error !== undefined) {
