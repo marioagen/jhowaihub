@@ -11,8 +11,7 @@ using WoopiAiHub.Repository;
 namespace WoopiAiHub.Application.Services
 {
     public class PermissionServices :  IPermissionServices
-    {
-        private const string WorkflowStepGroup = "Workflow-Step";
+    {        
         private readonly IPermissionRepository _permissionRepository;
 
         public PermissionServices(IPermissionRepository permissionRepository)
@@ -30,21 +29,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Find all permissions
+        /// Find workflow permissions
         /// </summary>
         /// <returns></returns>
         public ICollection<PermissionDto> FindWorkflowPermissions()
         {
-            return _permissionRepository.FindAll()
-                .Where(p => p.Group == WorkflowStepGroup)
-                .Select(p => new PermissionDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Group = p.Group,
-                    Description = p.Description
-                })
-                .ToList();
+            return _permissionRepository.FindWorkflowPermissions();            
         }
     }
 }
