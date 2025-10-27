@@ -299,7 +299,7 @@ namespace WoopiAiHub.Repository
             var search = workflowPagedDto.Search?.ToLower();
             var login = workflowPagedDto.Login?.ToLower();
             var userTeamIds = _context.Users
-                 .Where(u => u.Email.ToLower() == login)
+                 .Where(u => u.Email.Equals(login))
                  .SelectMany(u => u.Teams.Select(t => t.Id))
                  .ToList();
 
