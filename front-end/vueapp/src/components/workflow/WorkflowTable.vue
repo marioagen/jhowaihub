@@ -98,7 +98,7 @@
             filters: {
                 input: "",
                 isAsc: true,
-                isAllUsers: false,
+                isAllUsers: true,
             },
             isDeleting: false,
         }),

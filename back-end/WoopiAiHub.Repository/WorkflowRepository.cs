@@ -298,11 +298,16 @@ namespace WoopiAiHub.Repository
         {
             var search = workflowPagedDto.Search?.ToLower();
             var login = workflowPagedDto.Login?.ToLower();
+            var userTeamIds = _context.Users
+                 .Where(u => u.Email.ToLower() == login)
+                 .SelectMany(u => u.Teams.Select(t => t.Id))
+                 .ToList();
+
             var query = _context.Workflows
                 .Include(w => w.Teams)
                     .ThenInclude(t => t.Users)
                 .AsNoTracking()
-                .Where(w => w.Teams.Any(t => t.Users.Any(u => u.Email == workflowPagedDto.Login)));
+                .Where(w => w.Teams.Any(t => userTeamIds.Contains(t.Id)));
 
             if (!string.IsNullOrEmpty(search))
             {

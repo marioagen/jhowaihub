@@ -20,7 +20,7 @@
                 <div class="card mb-3">
                     <div class="card-body">
                         <WorkflowFilters
-                            @filter="filterData" 
+                            @filter="filterData"
                             class="ms-auto" 
                         />
                     </div>
@@ -47,8 +47,9 @@
             WorkflowTable
         },
         methods: {
-            filterList(obj) {
-                this.$refs.WorkflowTable.filterList(obj.search);
+            filterData(filters) {
+                this.$refs.WorkflowTable.filters = filters;
+                this.$refs.WorkflowTable.getWorkflowList();
             },
             redirectToForm() {
                 this.$router.push({ name: "NewWorkflow" });

@@ -4,7 +4,6 @@ export default {
     getWorkflows(params) {
         return api.get("/Workflow/List", { params: params })
             .then(({ data }) => {
-                console.log(data)
                 return {
                     content: data.content,
                     pagination: {

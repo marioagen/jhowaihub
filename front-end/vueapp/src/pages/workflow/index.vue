@@ -101,8 +101,6 @@
     import WorkflowService from "@/services/workflow/WorkflowService.js";
     import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
     import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
-    import UserService from "@/services/users/UserService";
-    import logService from '@/services/log/logService.js';
 
     export default {
         name: "WorkflowPage",
