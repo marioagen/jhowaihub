@@ -309,6 +309,7 @@
     labelSelectedTeams: "Selected teams",
     labelProfiles: "Profiles",
     labelSelectedProfiles: "Selected profiles",
+    labelCreated: "Created at:",
     unauthorized: {
         title: "You do not have permission to access this screen.",
         returnToHome: "Return",
@@ -505,6 +506,11 @@
             entriesEditable: "Editable input",
             output: "Output",
             outputSelect: "Select output type",
+            connectorUrl: "n8n URL",
+            connectorApiKey: "API Key",
+            validatingConnector: "Validating connector url",
+            invalidConnector: "Connector did not respond. Invalid URL or key",
+            validConnector: "Connector is active"
         },
         formCreate: {
             title: "New Tool",
@@ -541,13 +547,41 @@
             subtitle: "Update the information of the selected tool",
         },
         sidebarTitle: "Configure I/O:",
+        sidebar:{
+            filter: "Select webhook"
+        },
         formFlow: {
             progressFlowSuccess: "Flow inserted successfully",
             progressFlowFail: "Failed to insert flow",
             editFlowNodeSuccess: "Node edited successfully",
             editFlowNodeFail: "Failed to edit node",
+            connectorWorkflowFail: "Workflow connector did not respond. Check tool URL and API key",
+            connectorWorkflowConfigFail: "Failed to retrieve workflow configuration. Check tool URL and API key",
         }
     },
+    prompts: {
+        title: "Prompts",
+        createPrompt: "Create prompt",
+        subtitle: "Manage system prompts",
+        myPromptsBadge: "My prompts",
+        newPrompt: "New prompt",
+        namePrompt: "Prompt name",
+        information: "Basic information",
+        subtitleNew: "Create a new AI prompt",
+        promptContent: "Prompt content",
+        placeholderNamePrompt: "Enter the prompt name",
+        searchPrompt: "Search prompt",
+        labelLoadMore: "Load more",
+        searchPrompts: "Search prompts",
+        noPromptsListWereFound: "No prompts were found",
+        createSuccess: "Prompts created successfully",
+        createError: "Prompts create failed",
+        updateSuccess: "Prompts updated successfully",
+        updateError: "Prompts update failed",
+        deleteSuccess: "Prompts deleted successfully",
+        deleteError: "Prompts delete failed",
+        removeAllPrompts: "Delete prompts"
+    }
 };
 
 export default english;

@@ -28,7 +28,7 @@ namespace WoopiAiHub.Repository
                 return false;
 
             var deletedCount = _context.StepTools
-                .Where(a => ids.Contains(a.Id))
+                .Where(a => ids!.Contains(a.Id))
                 .ExecuteDelete();
 
             return deletedCount > 0;
@@ -46,7 +46,7 @@ namespace WoopiAiHub.Repository
             .Select(q => new StepToolDto
             {
                 Id = q.Id,
-                Name = q.Tool.Name,
+                Name = q.Tool!.Name,
                 StepId = q.StepId,
                 ToolId = q.ToolId,
                 Order = q.Order,
@@ -56,12 +56,14 @@ namespace WoopiAiHub.Repository
                 Parameters = q.Parameters.Select(sp => new StepToolParameterDto
                 {
                     Id = sp.Id,
-                    Type = sp.StepTool.Tool.InputData.Name,
-                    Value = sp.Value
+                    Type = sp.StepTool!.Tool!.InputData!.Name,
+                    Value = sp.Value,
+                    RequiredFile = sp.RequiredFile,
+                    WebhookId = sp.WebhookId
                 }).ToList(),
                 Step = new StepDto
                 {
-                    Name = q.Step.Name,
+                    Name = q.Step!.Name,
                     Order = q.Step.Order,
                 }
 
@@ -80,7 +82,7 @@ namespace WoopiAiHub.Repository
             .Select(q => new StepToolDto
             {
                 Id = q.Id,
-                Name = q.Tool.Name,
+                Name = q.Tool!.Name,
                 StepId = q.StepId,
                 ToolId = q.ToolId,
                 Order = q.Order,
@@ -90,8 +92,10 @@ namespace WoopiAiHub.Repository
                 Parameters = q.Parameters.Select(sp => new StepToolParameterDto
                 {
                     Id = sp.Id,
-                    Type = sp.StepTool.Tool.InputData.Name,
-                    Value = sp.Value
+                    Type = sp.StepTool!.Tool!.InputData!.Name,
+                    Value = sp.Value,
+                    RequiredFile = sp.RequiredFile,
+                    WebhookId = sp.WebhookId
                 }).ToList(),
 
             }).AsQueryable()
@@ -152,7 +156,7 @@ namespace WoopiAiHub.Repository
             .Select(q => new StepToolDto
             {
                 Id = q.Id,
-                Name = q.Tool.Name,
+                Name = q.Tool!.Name,
                 StepId = q.StepId,
                 ToolId = q.ToolId,
                 Order = q.Order,
@@ -162,8 +166,10 @@ namespace WoopiAiHub.Repository
                 Parameters = q.Parameters.Select(sp => new StepToolParameterDto
                 {
                     Id = sp.Id,
-                    Type = sp.StepTool.Tool.InputData.Name,
-                    Value = sp.Value
+                    Type = sp.StepTool!.Tool!.InputData!.Name,
+                    Value = sp.Value,
+                    RequiredFile = sp.RequiredFile,
+                    WebhookId = sp.WebhookId                    
                 }).ToList(),
 
             })
@@ -206,7 +212,7 @@ namespace WoopiAiHub.Repository
         public async Task<StepTool?> FindDependentAsync(int id)
         {
             return await _context.StepTools.Include(u => u.Tool)
-                                             .ThenInclude(t => t.ToolType)
+                                             .ThenInclude(t => t!.ToolType)
                                            .Include(s => s.Step)
                                            .Include(d => d.DependsOnStepTool)
                                            .FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
@@ -224,7 +230,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.StepTools.Include(u => u.DependsOnStepTool)
                                            .Include(t => t.Tool)
-                                            .ThenInclude(s => s.ToolType)
+                                            .ThenInclude(s => s!.ToolType)
                                            .FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
         }
 

@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -105,7 +106,6 @@ namespace WoopiAiHub.Repository
                  .FirstOrDefaultAsync(w => w.Id == id);
         }
 
-
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>
@@ -142,7 +142,7 @@ namespace WoopiAiHub.Repository
                             (
                                 (string.IsNullOrWhiteSpace(input) || c.Name.Contains(input)) ||
                                 (string.IsNullOrWhiteSpace(input) ||
-                                (c.Document.Name.Contains(input) || c.Document.Description.Contains(input)))
+                                (c.Document!.Name.Contains(input) || c.Document.Description.Contains(input)))
                             ) &&
                             (
                                 allUsers == false ||
@@ -188,12 +188,15 @@ namespace WoopiAiHub.Repository
                                     {
                                         Id = p.Id,
                                         Value = p.Value,
+                                        WebhookId = p.WebhookId,
+                                        RequiredFile = p.RequiredFile
                                     }).ToList(),
                                     Tool = new ToolDto
                                     {
                                         Id = st.Tool!.Id,
                                         Name = st.Tool.Name,
                                         IsEditableInput = st.Tool.IsEditableInput,
+                                        ToolType = st!.Tool!.ToolType!.Name
                                     },
                                     Executions = st.Executions.Select(e => new StepToolExecutionDto(
                                         e.Id,
@@ -228,7 +231,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Workflows
                            .AsNoTracking()
-                           .Where(w => w.Team.Users.Any(u => u.Email == userEmail))
+                           .Where(w => w.Team!.Users.Any(u => u.Email == userEmail))
                            .Select(t => new WorkflowDto
                            {
                                Id = t.Id,
@@ -236,7 +239,7 @@ namespace WoopiAiHub.Repository
                                Created = t.Created,
                                Team = new TeamDto
                                {
-                                   Id = t.Team.Id,
+                                   Id = t.Team!.Id,
                                    Name = t.Team.Name,
                                },
                            })

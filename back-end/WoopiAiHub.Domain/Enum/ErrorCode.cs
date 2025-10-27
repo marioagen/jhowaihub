@@ -11,5 +11,6 @@
         UploadFailed = 6,
         NoCreditsAvailable = 7,
         RefitApiError = 8,
+        KeyVaultError = 9,
     }
 }

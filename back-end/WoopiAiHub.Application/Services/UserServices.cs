@@ -169,6 +169,16 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Find user id by email
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public Guid FindIdByEmail(string email)
+        {
+            return _userRepository.FindIdByEmail(email);
+        }
+
+        /// <summary>
         /// Ordenates the list of users and returns a paged result.
         /// </summary>
         /// <param name="totalList"></param>
@@ -288,8 +298,6 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Sets the password and salt for a user based on the provided DTO and user object.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="dto"></param>
         /// <param name="user"></param>
         /// <param name="salt"></param>
         private void SetSaltAndPassword(string password,

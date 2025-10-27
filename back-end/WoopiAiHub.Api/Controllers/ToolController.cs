@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -87,6 +88,20 @@ namespace WoopiAiHub.Api.Controllers
         public IActionResult DeleteByIds(List<int> ids)
         {
             var result = _toolServices.Delete(ids);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to validate connector
+        /// </summary>
+        /// <param name="toolCreateDto"></param>
+        /// <returns></returns>
+        [HttpPost("ValidateConnector")]
+        [SwaggerOperation("Endpoint that receives the request to validate connector")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ValidateConnector([FromBody] ToolConnectorDto toolConnectorDto)
+        {
+            var result = await _toolServices.ValidateConnector(toolConnectorDto);
             return Ok(result);
         }
     }

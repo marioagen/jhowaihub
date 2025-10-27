@@ -6,13 +6,12 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Messaging;
-using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
-using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
@@ -27,6 +26,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly DocumentEmbeddingsDataDto _documentEmbeddingsDataDto;
         private readonly Mock<IDocumentServices> _documentServices;
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
+        private readonly Mock<IAutomationServices> _automationServices;
         private readonly Mock<IMessagePublisher<DocumentEmbeddingsDataDto>> _publisherMock;
         private readonly Mock<IMessageConsumer<ProcessOcrResultDto>> _consumerMock;
         private readonly Mock<ILogger<OcrConsumer>> _loggerMock;
@@ -57,6 +57,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker.Use<IConfiguration>(configuration);
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
             _documentServices = new Mock<IDocumentServices>();
+            _automationServices = new Mock<IAutomationServices>();
 
             _tenantCacheServices = new Mock<ITenantCacheServices>();
             _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
@@ -64,7 +65,9 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
-                                   .Returns(_documentServices.Object);
+                               .Returns(_documentServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IAutomationServices)))
+                               .Returns(_automationServices.Object);
 
             var serviceScopeMock = new Mock<IServiceScope>();
             serviceScopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);

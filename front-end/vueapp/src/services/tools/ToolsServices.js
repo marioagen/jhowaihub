@@ -39,9 +39,10 @@ export default {
             .then(() => {
                 return true;
             })
-            .catch((error) => {
+            .catch((e) => {
+                const message = e?.response?.data?.message || "Erro desconhecido";
                 return {
-                    error: error,
+                    error: message,
                 };
             });
     },
@@ -51,9 +52,10 @@ export default {
             .then(() => {
                 return true;
             })
-            .catch((error) => {
+            .catch((e) => {
+                const message = e?.response?.data?.message || "Erro desconhecido";
                 return {
-                    error: error,
+                    error: message,
                 };
             });
     },
@@ -69,4 +71,14 @@ export default {
                 }
             });
     },
+    validateConnector(params) {
+        return api
+            .post("/Tool/ValidateConnector", params)
+            .then((response) => {
+                return response.data;
+            })
+            .catch(() => {
+                return false; 
+            });
+    }
 };

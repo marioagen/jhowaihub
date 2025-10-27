@@ -4,9 +4,12 @@ using Bogus.DataSets;
 using Microsoft.AspNetCore.Http.HttpResults;
 using StackExchange.Redis;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Connector;
+using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Models;
 using Xunit;
 
@@ -45,13 +48,16 @@ namespace WoopiAiHub.UnitTests.Fixture
         public static StepToolExecution FindValidStepToolExecution()
         {
             var _faker = new Faker("pt_BR");
-            return new StepToolExecution(
+            var step = new StepToolExecution(
                 _faker.Random.Int(1, 1000),
                 DateTime.UtcNow,
                 _faker.Random.Int(1, 1000),
                 Domain.Enum.StatusExecution.Pending,
                 _faker.Random.Int(1, 1000)
             );
+            step.Card = new Card(1, DateTime.Now,1,1,"name",1,true,Guid.NewGuid());
+            step.StepTool = FindValidStepTool();
+            return step;
         }
 
         public static AutomationServicesDto FindValidautomationServicesDto()
@@ -115,7 +121,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                             StepTools = new List<StepToolDto>()
                         },
                         Tool = null,
-                        Parameters = new List<StepToolParameterDto>()
+                        Parameters = []
                     }
                 }
 
@@ -191,6 +197,72 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
+        public static WebhookParametersDto FindValidWebhookParametersDto()
+        {
+            return new WebhookParametersDto { HttpMethod = "POST" };
+        }
+
+        public static WebhookNodeDto FindValidWebhookNodeDto()
+        {
+            var _faker = new Faker("pt_BR");
+            return new WebhookNodeDto
+            {
+                WebhookId = _faker.Random.Guid().ToString(),
+                Parameters = FindValidWebhookParametersDto()
+            };
+        }
+
+        public static WebhookDto FindValidWebhookDto()
+        {
+            var _faker = new Faker("pt_BR");
+            return new WebhookDto
+            {
+                Id = _faker.Random.Guid().ToString(),
+                Name = _faker.Name.LastName(),
+                Nodes = new List<WebhookNodeDto> { FindValidWebhookNodeDto() }
+            };
+        }
+
+        public static WebhookDataDto FindValidWebhookDataDto()
+        {
+            return new WebhookDataDto { Data = new List<WebhookDto> { FindValidWebhookDto() } };
+        }
+
+        public static string FindValidJson()
+        {
+            return "{\r\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\r\n  \"title\": \"Usuario\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"id\": {\r\n      \"type\": \"integer\",\r\n      \"description\": \"Identificador único do usuário.\"\r\n    },\r\n    \"nome\": {\r\n      \"type\": \"string\",\r\n      \"minLength\": 3,\r\n      \"maxLength\": 100,\r\n      \"description\": \"Nome completo do usuário.\"\r\n    },\r\n    \"email\": {\r\n      \"type\": \"string\",\r\n      \"format\": \"email\",\r\n      \"description\": \"E-mail do usuário.\"\r\n    },\r\n    \"ativo\": {\r\n      \"type\": \"boolean\",\r\n      \"default\": true,\r\n      \"description\": \"Indica se o usuário está ativo.\"\r\n    },\r\n    \"enderecos\": {\r\n      \"type\": \"array\",\r\n      \"description\": \"Lista de endereços cadastrados.\",\r\n      \"items\": {\r\n        \"type\": \"object\",\r\n        \"properties\": {\r\n          \"logradouro\": { \"type\": \"string\" },\r\n          \"numero\": { \"type\": \"string\" },\r\n          \"cidade\": { \"type\": \"string\" },\r\n          \"estado\": { \"type\": \"string\", \"minLength\": 2, \"maxLength\": 2 }\r\n        },\r\n        \"required\": [\"logradouro\", \"cidade\", \"estado\"]\r\n      }\r\n    }\r\n  },\r\n  \"required\": [\"id\", \"nome\", \"email\"]\r\n}";
+        }
+
+        public static string FindValidJsonContent()
+        {
+            return "{\r\n  \"nome\": \"Cesar\",\r\n  \"idade\": 30,\r\n  \"endereco\": {\r\n    \"rua\": \"Rua das Flores\",\r\n    \"cidade\": \"São Paulo\",\r\n    \"cep\": \"01000-000\"\r\n  },\r\n  \"telefones\": [\r\n    {\r\n      \"tipo\": \"celular\",\r\n      \"numero\": \"(11) 91234-5678\"\r\n    },\r\n    {\r\n      \"tipo\": \"residencial\",\r\n      \"numero\": \"(11) 3456-7890\"\r\n    }\r\n  ]\r\n}\r\n";
+        }
+
+        public static AutomationOutputDto FindValidAutomationOutputDto()
+        {
+            var _faker = new Faker("pt_BR");
+            return new AutomationOutputDto
+            {
+                Tenant = _faker.Internet.Email(),
+                Email = _faker.Internet.Email(),
+                ExecutionId = _faker.Random.Int(1, 10),
+                Content = FindValidJsonContent(),
+            };
+        }
+
+        public static AutomationServicesDto FindValidAutomationServicesDto()
+        {
+            var _faker = new Faker("pt_BR");
+            return new AutomationServicesDto
+            (
+                _faker.Random.Int(1, 10),
+                _faker.Random.Int(1, 10),
+                _faker.Internet.Email(),
+                _faker.Internet.Email(),
+                _faker.Random.Guid().ToString(),
+                _faker.Random.Int(1, 10)
+            );
+        }
     }
 
     [CollectionDefinition(nameof(AutomationCollection))]

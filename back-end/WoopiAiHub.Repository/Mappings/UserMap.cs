@@ -93,6 +93,11 @@ namespace WoopiAiHub.Repository.Mappings
                         je.Property<Guid>(UserIdColumn).HasColumnName(UserIdColumn);
                         je.Property<int>(ProfileIdColumn).HasColumnName(ProfileIdColumn); 
                     });
+
+            builder.HasMany(u => u.Prompts)
+           .WithOne(p => p.User)
+           .HasForeignKey(p => p.IdUser)
+           .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

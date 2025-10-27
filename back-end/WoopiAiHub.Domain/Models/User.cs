@@ -31,6 +31,8 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual ICollection<Profile> Profiles { get; set; } = [];
         public virtual ICollection<Permission> Permissions { get; set; } = [];
+
+        public virtual ICollection<Prompt> Prompts { get; set; } = [];
         public ICollection<Team> Teams { get; set; } = [];
 
         public User(Guid id,

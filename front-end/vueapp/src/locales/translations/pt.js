@@ -242,6 +242,7 @@
     labelEditType: "Editar tipo",
     labelSaveType: "Criar tipo",
     labelProcessing: "Processando",
+    labelCreated: "Criado em:",
     Admin: "Admin",
     login: {
         index: "Login",
@@ -498,6 +499,11 @@
             entriesEditable: "Entrada editável",
             output: "Saida (Output)",
             outputSelect: "Selecione o tipo de saida",
+            connectorUrl: "n8n URL",
+            connectorApiKey: "Chave de API",
+            validatingConnector: "Validando url do  conector",
+            invalidConnector: "Conector não respondeu. Url ou chave inválidas",
+            validConnector: "Conector está ativo"
         },
         formCreate: {
             title: "Nova Ferramenta",
@@ -534,13 +540,40 @@
             subtitle: "Atualize as informações da ferramenta selecionada",
         },
         sidebarTitle: "Configurar I/O:",
+        sidebar:{
+            filter: "Selecione um webhook"
+        },
         formFlow: {
             progressFlowSuccess: "Fluxo inserido com sucesso",
             progressFlowFail: "Não foi possível inserir fluxo",
             editFlowNodeSuccess: "Nodo editado com sucesso",
             editFlowNodeFail: "Falha ao editar o nodo",
+            connectorWorkflowFail: "Conector do workflow não respondeu. Verifique a URL e a chave da API da ferramenta",
+            connectorWorkflowConfigFail: "Falha ao recuperar a configuração do workflow. Verifique a URL e a chave da API da ferramenta",
         }
     },
+    prompts: {
+        title: "Prompts",
+        createPrompt: "Criar prompt",
+        subtitle: "Gerencia prompts do sistema",
+        myPromptsBadge: "Meus prompts",
+        newPrompt: "Novo prompt",
+        namePrompt: "Nome do prompt",
+        information: "Informações básicas",
+        subtitleNew: "Criar um novo prompt de IA",
+        promptContent: "Conteúdo do prompt",
+        placeholderNamePrompt: "Insira o nome do prompt",
+        labelLoadMore: "Carregar mais",
+        searchPrompts: "Buscar prompts",
+        noPromptsListWereFound: "Nenhum prompt foi encontrado",
+        createSuccess: "Prompt criado com sucesso",
+        createError: "Falha ao criar prompt",
+        updateSuccess: "Prompt atualizado com sucesso",
+        updateError: "Falha ao atualizar prompt",
+        deleteSuccess: "Prompt deletado com sucesso",
+        deleteError: "Falha ao deletar prompt",
+        removeAllPrompts: "Remover prompts",
+    }
 };
 
 export default portuguese;
