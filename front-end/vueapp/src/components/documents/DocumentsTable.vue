@@ -131,7 +131,7 @@
                 isAsc: true,
                 isAllUsers: false,
                 login: null,
-                colType: 0,
+                colType: 2,
             },
             isEmbedding: false,
             isDeleting: false,
@@ -228,6 +228,7 @@
         created() {
             this.filters.login = this.$store.state.userProfile.login;
             this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
+            this.getDocuments();
         },
         computed: {
             showMultiDelete() {
