@@ -125,7 +125,6 @@
             },
             filters: {
                 input: "",
-                teamId: "",
                 workflowId: "",
                 workflows: [],
                 isAsc: true,
