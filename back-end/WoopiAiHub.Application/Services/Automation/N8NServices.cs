@@ -42,7 +42,7 @@ namespace WoopiAiHub.Application.Services.Automation
                     execution.CardId,
                     automationOutputDto.Tenant!,
                     automationOutputDto.Email!,
-                    null,
+                    execution.Card!.Document!.ReferenceFile,
                     0
                 );
 
