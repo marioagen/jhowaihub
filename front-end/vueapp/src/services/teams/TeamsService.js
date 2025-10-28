@@ -53,4 +53,15 @@ export default {
                 }
             });
     },
+    getTeamById(teamId) {
+        return api.get(`Team/${teamId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                }
+            });
+        },
 };

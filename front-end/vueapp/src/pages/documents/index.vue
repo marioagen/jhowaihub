@@ -17,7 +17,7 @@
                 <div class="card mb-3">
                     <div class="card-body">
                         <DocumentFilters 
-                            :teamsList="teamsList"
+                            :workflowsList="workflowsList"
                             @filter="filterData"
                             ref="DocumentFilters"
                         />
@@ -35,13 +35,14 @@
     import GlobalEventService from "@/services/globalEventService.js";
     import DocumentFilters from "@/components/documents/DocumentFilters.vue";
     import DocumentsTable from "@/components/documents/DocumentsTable.vue";
-    import TeamsService from '@/services/teams/TeamsService';
+    import WorkflowService from '@/services/workflow/WorkflowService';
 
     export default {
         name: "DocumentsPage",
         data() {
             return {
                 teamsList: [],
+                workflowsList: [],
             };
         },
         components: {
@@ -53,7 +54,6 @@
                 handler: async function (newValue) {
                     if (newValue) {
                         this.reloadData();
-                        this.reloadTeams();
                     }
                 },
             },
@@ -65,15 +65,24 @@
             reloadData() {
                 this.$refs.DocumentsTable.getDocuments();
             },
-            reloadTeams() {
-                this.searchTeamsFirstLoad();
-            },
             filterData(filters) {
                 this.$refs.DocumentsTable.filters = filters;
                 this.reloadData();
             },
-            async searchTeamsFirstLoad() {
-                this.teamsList = await TeamsService.getTeamsByUser();
+            getWorkflows() {
+                var email = this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email)
+                    .then((response) => {
+                        if(response.error !== undefined) {
+                            return this.$notify({
+                                title: 'workflows.title',
+                                message: 'workflows.error',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        this.workflowsList = response;
+                    });
             },
         },
         computed: {
@@ -84,7 +93,7 @@
         async created() {
             GlobalEventService.on("all-uploads-complete", this.reloadData);
             GlobalEventService.on("refresh-once", this.reloadData);
-            await this.searchTeamsFirstLoad();
+            this.getWorkflows();
         },
         beforeUnmount() {
             GlobalEventService.off("all-uploads-complete", this.reloadData);

@@ -41,7 +41,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams
                            .Include(u => u.Users)
-                           .Include(w => w.Workflow)
+                           .Include(w => w.Workflows)
                            .Select(t => new TeamDto
                            {
                                Id = t.Id,
@@ -58,13 +58,14 @@ namespace WoopiAiHub.Repository
                                            Created = u.Created
                                        })
                                        .ToList(),
-                               Workflow = t.Workflow != null ? new WorkflowDto
-                               {
-                                   Id = t.Workflow.Id,
-                                   Name = t.Workflow.Name,
-                                   TeamId = t.Workflow.TeamId,
-                                   Created = t.Created                                  
-                               } : null
+                               Workflows = t.Workflows != null
+                                    ? t.Workflows.Select(w => new WorkflowDto
+                                    {
+                                        Id = w.Id,
+                                        Name = w.Name,
+                                        Created = w.Created
+                                    }).ToList()
+                                    : new List<WorkflowDto>()
                            })
                            .Where(t => t.Users.Any(u => u.Email == userEmail && u.IsActive))
                            .AsNoTracking();
@@ -186,7 +187,7 @@ namespace WoopiAiHub.Repository
         public List<Team> FindByIds(IEnumerable<int> ids)
         {
             return _context.Teams.Where(t => ids.Contains(t.Id))
-                                  .Include(t => t.Documents)
+                                  .Include(t => t.Workflows)
                                   .ToList();
         }
 
@@ -200,7 +201,7 @@ namespace WoopiAiHub.Repository
                                                   string emailUser)
         {
             return _context.Teams
-                           .Include(t => t.Workflow)
+                           .Include(t => t.Workflows)
                            .ThenInclude(w => w!.Steps)
                            .ThenInclude(s => s.StepTools)
                            .ThenInclude(st => st.Tool)

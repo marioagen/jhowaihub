@@ -35,13 +35,6 @@
             </template>
         </TableComponent>
     </div>
-    <modal-team
-        v-if="modalTeamShow"
-        :teamEditing="selectedTeam"
-        @teamCreated="handleTeamCreated"
-        @close="closeModalTeam"
-    />
-
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteTeam"
@@ -58,7 +51,6 @@
 <script>
     import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ModalTeam from "@/components/management/teams/modals/TeamModal.vue";
     import TeamsService from "@/services/teams/TeamsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import DropdownComponent from "@/components/global/DropdownComponent.vue";
@@ -68,7 +60,6 @@
         components: {
             DropdownComponent,
             TableComponent,
-            ModalTeam,
             ConfirmModal,
         },
         data: () => ({
@@ -138,8 +129,12 @@
                 return date.formatDate(str);
             },
             editTeam(team) {
-                this.selectedTeam = team;
-                this.openModalTeam();
+                this.$router.push({
+                    name: 'EditTeam',
+                    params: {
+                        id: team.id,
+                    }
+                });
             },
             openConfirmation(team) {
                 this.selectedTeam = team;
@@ -184,18 +179,6 @@
             filterList(input) {
                 this.searchInput = input;
                 this.getTeams({ search: input, page: this.queryPage, type: null });
-            },
-            handleTeamCreated: function () {
-                this.getTeams({ search: "", page: this.queryPage, type: null });
-                this.closeModalTeam();
-            },
-            openModalTeam: function () {
-                this.modalTeamShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModalTeam: function () {
-                this.modalTeamShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             changePage(page) {
                 this.getTeams({ search: "", page: page, type: null });

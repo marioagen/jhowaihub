@@ -7,5 +7,6 @@
         public DateTime Created { get; set; }
         public IEnumerable<PermissionDto> Permissions { get; set; } = Enumerable.Empty<PermissionDto>();
         public IEnumerable<UserDto> Users { get; set; } = Enumerable.Empty<UserDto>();
+        public IEnumerable<WorkflowPermissionDto> WorkflowPermission { get; set; } = Enumerable.Empty<WorkflowPermissionDto>();
     }
 }

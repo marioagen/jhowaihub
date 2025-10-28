@@ -33,14 +33,8 @@ namespace WoopiAiHub.Application.Utils
                 throw new AppException(ErrorCode.RequiredField, "Workflow name cannot be empty", WorkflowLabel.NameRequired);
             }
 
-            var workflowDto = await _workflowRepository.FindByTeamId(workflowCreateDto.TeamId, null);
-            if (workflowDto != null)
-            {
-                throw new AppException(ErrorCode.Conflict, "Workflow already exists for this team", WorkflowLabel.AlreadyExists);
-            }
-
-            var team = _teamRepository.FindById(workflowCreateDto.TeamId);
-            if (team == null)
+            var teamsList = _teamRepository.FindByIds(workflowCreateDto.Teams);
+            if (teamsList.Count < 1)
             {
                 throw new AppException(ErrorCode.NotFound, "Team not found", TeamLabel.NotFound);
             }
@@ -63,11 +57,6 @@ namespace WoopiAiHub.Application.Utils
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
-            }
-
-            if (workflow.TeamId != workflowUpdateDto.TeamId)
-            {
-                throw new AppException(ErrorCode.Conflict, "Workflow team ID does not match", WorkflowLabel.TeamIdMismatch);
             }
 
             return workflow;

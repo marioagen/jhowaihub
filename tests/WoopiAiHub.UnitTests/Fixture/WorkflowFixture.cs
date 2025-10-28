@@ -14,7 +14,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<int>(),
                     Name = f.Lorem.Sentence(3),
                     Steps = new List<StepCreateDto>() { FindValidStepCreateDto() }
                 });
@@ -26,7 +26,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<int>(),
                     Name = f.Lorem.Sentence(3)
                 });
             return faker;
@@ -37,7 +37,6 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(3),
                     Steps = new List<StepCreateDto>()
                     {
@@ -48,7 +47,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                             ProfileId = f.Random.Int(1, 100),
                             StatusId = f.Random.Int(1, 5)
                         }
-                    }
+                    },
+                    Teams = new List<int> { 2 }
                 });
             return faker;
         }
@@ -60,7 +60,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                 {
                     Id = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(3),
-                    Steps = new List<StepUpdateDto>() { FindValidStepUpdateDto() }
+                    Steps = new List<StepUpdateDto>() { FindValidStepUpdateDto() },
+                    Teams = new List<int> { f.Random.Int(1, 100) },
                 });
             return faker;
         }
@@ -119,7 +120,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 {
                     Id = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(3),
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<TeamDto>() { FindValidTeamDto() },
                     Steps = new List<StepDto>() { FindValidStepDto() }
                 });
             return faker;
@@ -196,22 +197,22 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new Workflow(
                 f.IndexFaker,
                 f.Date.Past(),
-                f.Random.Int(1, 5),
+                new List<Team>() { DocumentFixture.FindValidTeam() },
                 f.Person.FirstName)
             {
                 Steps = new List<Step> { FindValidStep() }
             };
         }
 
-        public static ICollection<Workflow> FindValidWorkflows()
+        public static List<Workflow> FindValidWorkflows()
         {
             var f = new Faker("pt_BR");
-            ICollection<Workflow> workflow = new Faker<Workflow>("pt_BR")
+            List<Workflow> workflow = new Faker<Workflow>("pt_BR")
            .CustomInstantiator(f => new Workflow
            (
                f.IndexFaker,
                f.Date.Past(),
-               f.Random.Int(1, 5),
+               new List<Team>() { DocumentFixture.FindValidTeam() },
                f.Person.FirstName
 
            )

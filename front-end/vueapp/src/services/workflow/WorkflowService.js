@@ -1,6 +1,25 @@
 import api from "@/services/api";
 
 export default {
+    getWorkflows(params) {
+        return api.get("/Workflow/List", { params: params })
+            .then(({ data }) => {
+                return {
+                    content: data.content,
+                    pagination: {
+                        currentPage: data.currentPage,
+                        totalPages: data.pageCount,
+                        itemsPerPage: 10,
+                        totalItems: data.rowCount,
+                    }
+                }
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                }
+            });
+    },
     getWorkflowList(email) {
         return api.get(`/Workflow/Users/${email}`)
             .then(({ data }) => {
@@ -23,8 +42,8 @@ export default {
                 }
             });
     },
-    getWorkflowById(workflowId) {
-        return api.get(`/Workflow/${workflowId}`)
+    getWorkflowById(workflowId, filters) {
+        return api.get(`/Workflow/${workflowId}`, { params: filters })
             .then(({ data }) => {
                 return data;
             })

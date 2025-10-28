@@ -34,34 +34,53 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col">
+                        <div class="col-12">
                             <label>{{ $t("workflow.name") }}</label>
                             <Field name="name" rules="required" v-slot="{ field, errorMessage }"
                                 v-model="workflowData.name" ref="nameField">
                                 <input class="form-control form-control-sm" :placeholder="$t('workflow.name')"
                                     v-bind="field" />
-                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage
-                                }}</span>
+                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
                             </Field>
                         </div>
-                        <div class="col">
-                            <label>{{ $t("workflow.responsableTeam") }}</label>
-                            <div class="input-group">
-                                <span class="input-group-text border-end-0 bg-white">
-                                    <LucideIcon icon="Users" :size="16" />
-                                </span>
-
-                                <Field name="teamId" rules="required" v-slot="{ field, errors }"
-                                    v-model="workflowData.teamId" ref="teamField">
-                                    <select id="typeDocId" class="form-select form-select-sm border-start-0"
-                                        v-bind="field" :class="{ 'bg-light text-muted': isEdit }" :disabled="isEdit">
-                                        <option value="" disabled>{{ $t("workflow.responsableTeam") }}</option>
-                                        <option v-for="(item, index) in teamsList" :key="index" :value="item.id">
-                                            {{ item.id }} - {{ item.text }}
-                                        </option>
-                                    </select>
-
-                                    <span class="validation-message text-danger" v-if="errors?.length">
+                        <div class="col-12">
+                            <div v-if="isLoadingTeams">
+                                <div class="d-flex justify-content-center">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                            <div v-else class="row mt-3">
+                                <Field
+                                    name="selectedTeams"
+                                    rules="requiredArray"
+                                    v-model="selectedTeams"
+                                    v-slot="{ errors }"
+                                    ref="teamField"
+                                >
+                                    <div class="row">
+                                        <div
+                                            v-for="team in teamsList"
+                                            :key="team.id"
+                                            class="col-3 p-1"
+                                        >
+                                            <div class="form-check d-flex align-items-center">
+                                                <input
+                                                    class="form-check-input me-3"
+                                                    type="checkbox"
+                                                    :id="`team-${team.id}`"
+                                                    :value="team.id"
+                                                    v-model="selectedTeams"
+                                                />
+                                                <label
+                                                    class="form-check-label fw-semibold"
+                                                    :for="`team-${team.id}`"
+                                                >
+                                                    {{ team.text }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="validation-message text-danger" v-if="errors.length">
                                         {{ errors[0] }}
                                     </span>
                                 </Field>
@@ -89,13 +108,27 @@
                 </div>
                 <div v-else class="row">
                     <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
-                        <WorkflowStepComponent v-for="(step, index) in activeStepsList" :key="step.id || index"
-                            :step="step" :index="index + 1" :is-last="index === activeStepsList.length - 1"
-                            :profilesList="profilesList" :statusList="statusList" :isEdit="isEdit" :workflowId="id"
-                            @update-step="updateStep(index, $event)" @remove-step="removeStep(index, $event)"
-                            @saveWorkflow="saveWorkflowInStore" class="workflow-step-card" ref="stepRefs" />
-                        <div class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0"
-                            @click="addStep">
+                        <WorkflowStep 
+                            v-for="(step, index) in activeStepsList" 
+                            :key="step.id || index"
+                            :step="step" 
+                            :index="index + 1" 
+                            :is-last="index === activeStepsList.length - 1"
+                            :profilesList="profilesList" 
+                            :statusList="statusList" 
+                            :isEdit="isEdit" 
+                            :workflowId="id"
+                            @update-step="updateStep(index, $event)" 
+                            @remove-step="removeStep(index, $event)"
+                            @remove-flow="removeFlow(index, $event)"
+                            @saveWorkflow="saveWorkflowInStore"
+                            class="workflow-step-card" 
+                            ref="stepRefs" 
+                        />
+                        <div 
+                            class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0"
+                            @click="addStep"
+                        >
                             <div class="icon-circle mb-2">
                                 <LucideIcon icon="Plus" :size="16" />
                             </div>
@@ -111,7 +144,7 @@
 
 <script>
 import { Field, useForm } from "vee-validate";
-import WorkflowStepComponent from "@/components/workflow/WorkflowStepComponent.vue";
+import WorkflowStep from "@/components/workflow/form/WorkflowStep.vue";
 import TeamsService from "@/services/teams/TeamsService";
 import StatusService from "@/services/status/StatusService";
 import ProfilesService from "@/services/profiles/ProfilesService";
@@ -122,7 +155,7 @@ export default {
     name: "WorkflowBoards",
     components: {
         FullscreenLoadingComponent,
-        WorkflowStepComponent,
+        WorkflowStep,
         Field,
     },
     props: {
@@ -149,14 +182,15 @@ export default {
         return {
             profilesList: [],
             statusList: [],
-            teamsList: [],
             stepsList: [],
+            teamsList: [],
+            selectedTeams: [],
             workflowData: {
                 name: "",
-                teamId: "",
             },
             isLoading: false,
             isLoadingSteps: false,
+            isLoadingTeams: true,
             workflowStepRefs: [],
             tempStepCounter: 1,
         };
@@ -177,10 +211,14 @@ export default {
     },
     methods: {
         getTeams() {
+            this.isLoadingTeams = true;
             TeamsService.getTeamList()
                 .then((response) => {
                     if (response.error !== undefined) return;
                     this.teamsList = response.map(r => ({ id: r.id, text: r.name }));
+                })
+                .finally(() => {
+                    this.isLoadingTeams = false;
                 });
         },
         getStatus() {
@@ -218,7 +256,7 @@ export default {
                         }
                         this.workflowData.id = response.id;
                         this.workflowData.name = response.name;
-                        this.workflowData.teamId = response.teamId;
+                        this.selectedTeams = response.teams.map(team => team.id);
                         this.stepsList = response.steps.map(step => ({
                             ...step,
                             profileId: step.profile?.id || "",
@@ -237,7 +275,7 @@ export default {
         setWorkflowFromStore() {
             let workflowData = this.$store.state.tempWorkflow.data;
             this.workflowData.name = workflowData.name;
-            this.workflowData.teamId = workflowData.teamId;
+            this.workflowData.teams = workflowData.teams;
             this.stepsList = this.$store.state.tempWorkflow.list;
         },
         updateStep(index, updatedStep) {
@@ -246,7 +284,7 @@ export default {
         addStep() {
             this.stepsList.push({
                 id: 0,
-                tempId: this.tempStepCounter++, // gera ID único local
+                tempId: this.tempStepCounter++,
                 name: '',
                 status: '',
                 order: this.stepsList.length + 1,
@@ -269,6 +307,12 @@ export default {
                     if (s.isActive) s.order = order++;
                 });
             }
+            this.saveTempWorkflow();
+        },
+        removeFlow(index, stepId) {
+            let step = this.stepsList.find(s => s.id === stepId)
+            step.stepTools = [];
+            this.updateStep(index, step);
             this.saveTempWorkflow();
         },
         async save() {
@@ -317,8 +361,8 @@ export default {
         createWorkflow() {
             let params = {
                 name: this.workflowData.name,
-                teamId: this.workflowData.teamId,
                 steps: this.$store.state.tempWorkflow.list,
+                teams: this.selectedTeams,
             };
 
             WorkflowService.createWorkflow(params)
@@ -347,8 +391,8 @@ export default {
             let params = {
                 id: this.workflowData.id,
                 name: this.workflowData.name,
-                teamId: this.workflowData.teamId,
                 steps: this.$store.state.tempWorkflow.list,
+                teams: this.selectedTeams,
             };
             WorkflowService.editWorkflow(params)
                 .then((response) => {
@@ -374,7 +418,7 @@ export default {
         },
         redirectToIndex() {
             this.$store.commit('cleanTempWorkflow');
-            return this.$router.push({ name: "WorkflowEditor" });
+            return this.$router.push({ name: "WorkflowManagement" });
         },
         saveWorkflowInStore() {
             this.reorderList();

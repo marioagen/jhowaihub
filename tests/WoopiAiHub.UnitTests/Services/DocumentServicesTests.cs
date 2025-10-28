@@ -142,10 +142,7 @@ namespace WoopiAiHub.UnitTests.Services
             var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
             var tenant = _fixture.FindValidTenantInfoDto();
             var team = DocumentFixture.FindValidTeam();
-            var workflow = DocumentFixture.FindValidWorkflow();
-            var step = DocumentFixture.FindValidStep();
-            workflow.Steps.Add(step);
-            team.Workflow = workflow;
+            var workflows = WorkflowFixture.FindValidWorkflows();
             List<Team> teams = new List<Team> { team };
 
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
@@ -156,6 +153,9 @@ namespace WoopiAiHub.UnitTests.Services
 
             var tenantCache = _mocker.GetMock<ITenantCacheServices>();
             tenantCache.Setup(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>())).ReturnsAsync(tenant);
+
+            var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            workflowRepositoryMock.Setup(a => a.FindByIdsAsync(requestCreateDocumentDto.Workflows)).ReturnsAsync(workflows);
 
             // Act / Assert
             await _documentServices.ProcessChunks(requestCreateDocumentDto, "tenant");

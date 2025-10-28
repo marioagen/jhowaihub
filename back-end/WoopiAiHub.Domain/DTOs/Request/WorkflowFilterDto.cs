@@ -8,8 +8,8 @@ namespace WoopiAiHub.Domain.DTOs.Request
 {
     public record class WorkflowFilterDto
     {
-        public string? Input { get; set; } = string.Empty;
-        public string? Login { get; set; } = string.Empty;
-        public Boolean? IsAllUsers { get; set; } = false;
+        public string? Input { get; set; } = null;
+        public string? Login { get; set; } = null;
+        public Boolean? IsAllUsers { get; set; } = true;
     }
 }

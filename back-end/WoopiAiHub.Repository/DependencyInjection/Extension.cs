@@ -42,6 +42,7 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IStepToolOutputRepository, StepToolOutputRepository>();
             services.AddScoped<IStepToolExecutionRepository, StepToolExecutionRepository>();
             services.AddScoped<IStepToolParameterRepository, StepToolParameterRepository>();
+            services.AddScoped<IStepProfilePermissionsRepository, StepProfilePermissionsRepository>();
             services.AddScoped<IPromptRepository, PromptRepository>();
 
             services.AddStackExchangeRedisCache(options =>

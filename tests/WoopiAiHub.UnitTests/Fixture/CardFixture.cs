@@ -26,8 +26,27 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static Card FindValidCard()
         {
-            var card = new Card(1, DateTime.Now, 1, 1, "Card", 1, true, null);
-            card.Document = new Document("Doc", "Ref", "Link", Domain.Enum.DocumentStatus.ReadyForAnalysis, true,"email",1, DateTime.Now);
+            var card = new Card(
+                1, 
+                DateTime.Now, 
+                1, 
+                1, 
+                "Card", 
+                1, 
+                true, 
+                null
+            );
+            card.Document = new Document(
+                "Doc", 
+                "Ref", 
+                "Link", 
+                Domain.Enum.DocumentStatus.ReadyForAnalysis, 
+                true,
+                "email",
+                1,
+                new List<Workflow>(),
+                DateTime.Now
+               );
             return card;
         }
 

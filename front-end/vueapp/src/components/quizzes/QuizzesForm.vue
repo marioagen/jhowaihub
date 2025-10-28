@@ -16,7 +16,7 @@
                             </div>
                         </div>
                     </div>
-                </div>                
+                </div>            
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="save">
                         <LucideIcon icon="Save" :size="15" />
@@ -26,7 +26,7 @@
             </div>
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
-                     <div>
+                    <div>
                         <h6 class="mb-0">{{ $t("quizzes.basicInfo") }}</h6>
                         <p>
                             <small class="text-muted">{{ $t("quizzes.basicInfoSubtitle") }}</small>

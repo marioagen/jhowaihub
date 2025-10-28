@@ -104,17 +104,17 @@
                             name: 'Workflow', 
                             color: '#615FFF' 
                         },
-                        labelKey: 'workflow.index'
+                        labelKey: 'workflow.sidebar.index'
                     },
                     {
                         permission: 'Workflow',
-                        activeKey: 'WorkflowEditor',
-                        to: '/workflow/editor',
+                        activeKey: 'WorkflowManagement',
+                        to: '/workflow/management',
                         icon: { 
                             name: 'Workflow', 
                             color: '#00bba7' 
                         },
-                        labelKey: 'workflow.editTitle'
+                        labelKey: 'workflow.sidebar.management'
                     },
                     {
                         permission: 'Types',

@@ -34,11 +34,23 @@ export default {
     getUsersByTeamId(teamId){
         return api
             .get(`/User/Team/${teamId}`)
-            .then(({data}) => {
+            .then(({ data }) => {
                 return data;
             })
             .catch(function (e) {
                 logService.showMessage(e);
             });
-    }
+    },
+    getUserByEmail(email) {
+        return api.get(`/User/${email}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                logService.showMessage(e);
+                return {
+                    error: e,
+                }
+            });
+    },
 };

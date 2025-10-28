@@ -32,12 +32,13 @@
                     variant="success"
                 />
             </template>
-            <template #cell-teams="{ data }">
+            <template #cell-workflows="{ data }">
                 <BadgeOutlinedComponent
-                    v-for="(team, index) in data.row.teams"
+                    v-for="(workflowData, index) in data.row.workflows"
                     :key="index"
-                    :text="team.name"
+                    :text="workflowData.name"
                     :clickable="false"
+                    class="ms-1"
                 />
             </template>
             <template #cell-actions="{ data }">
@@ -110,7 +111,7 @@
                     { key: "description", label: "documents.description" },
                     { key: "created", label: "documents.createdDate" },
                     { key: "status", label: "documents.status" },
-                    { key: "teams", label: "documents.teams" },
+                    { key: "workflows", label: "documents.workflows" },
                     { key: "actions", label: "questions.actions" },
                 ],
                 data: [],
@@ -125,9 +126,12 @@
             filters: {
                 input: "",
                 teamId: "",
+                workflowId: "",
+                workflows: [],
                 isAsc: true,
                 isAllUsers: false,
-                login: null
+                login: null,
+                colType: 0,
             },
             isEmbedding: false,
             isDeleting: false,
@@ -137,13 +141,13 @@
                 this.table.isLoading = true;
                 const params = {
                     search: this.filters.input,
-                    pageSize: this.table.pagination.itemsPerPage,
+                    pageSize: 10,
                     page: this.table.pagination.currentPage,
                     isAscending: this.filters.isAsc,
                     isAllUsers: this.filters.isAllUsers,
-                    colType: this.colType,
-                    teamIds: this.filters.teams,
+                    colType: this.filters.colType,
                     login: this.filters.login,
+                    workflowIds: this.filters.workflows,
                 };
                 
                 DocumentsServices.getDocuments(params)
@@ -156,10 +160,8 @@
                                 icon: 'CircleX',
                             });
                         }
-                        else{
-                            this.table.data = response.content;
-                            this.table.pagination = response.pagination;
-                        }
+                        this.table.data = response.content;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;

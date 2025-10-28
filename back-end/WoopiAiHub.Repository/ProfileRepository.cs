@@ -80,7 +80,16 @@ namespace WoopiAiHub.Repository
                             Id = u.Id,
                             Name = u.Name,
                             Created = u.Created
-                        }).ToList()
+                        }).ToList(),
+                    WorkflowPermission = t.StepProfilePermissions
+                        .Where(u => u.ProfileId == t.Id)
+                        .Select(u => new WorkflowPermissionDto
+                        {
+                            ProfileId = u.ProfileId,
+                            StepId = u.StepId,
+                            PermissionId = u.PermissionId
+                        })
+                        .ToList()
                 })
                 .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.Id == id);
