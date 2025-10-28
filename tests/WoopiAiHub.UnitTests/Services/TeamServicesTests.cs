@@ -1,5 +1,6 @@
 using Moq;
 using Moq.AutoMock;
+using System.Collections.Generic;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -260,24 +261,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.False(result);
-        }
-
-        [Fact(DisplayName = "DeleteByIds should thrown excpetion when has documents")]
-        [Trait("DeleteByIds", "Exception")]
-        public void DeleteByIds_InvalidIds_ShouldThrowException()
-        {
-            // Arrange
-            var ids = new List<int> { 999 };
-            var team = new Team("Team with Docs", 999, DateTime.Now);
-            var document = new Document("Doc1", "Content", "Reference", DocumentStatus.Analyzed, true, "email", 1, DateTime.Now);
-            team.Documents = new List<Document> {document};
-            var teams = new List<Team> {team};
-
-            _teamRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(teams);
-            _teamRepositoryMock.Setup(r => r.DeleteByIds(ids)).Returns(false);
-
-            // Act & Assert
-            Assert.Throws<AppException>(() => _service.DeleteByIds(ids));
         }
 
         [Fact(DisplayName = "FindAllPaged should return paged result correctly (first page, ascending)")]

@@ -1,17 +1,32 @@
 <template>
-    <div class="modal fade show" id="novoTimeModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="overlay" :class="{ active: showModalUserTeam }"></div>
-                <div class="modal-header custom-header">
-                    <h6 class="modal-title" id="novoTimeModalLabel">
-                        {{ userData.id ? $t("labelEditUser") : $t("labelNewUser") }}
-                        <small class="text-muted d-block text-sm">{{ $t("labelNewUserMessage") }}</small>
-                    </h6>
-                    <button type="button" class="btn-close" @click="close"></button>
+    <main>
+        <div class="container-fluid scroll-area mx-4 mt-4">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-1">
+                            <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="returnToTable">
+                                <LucideIcon icon="ArrowLeft" />
+                            </button>
+                        </div>
+                        <div class="col-10">
+                            <div>
+                                <h5 class="mb-0 fw-bold">{{ $t(formTitle) }}</h5>
+                                <p><small class="text-muted">{{ $t(formSubtitle) }}</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>            
+                <div class="col-auto ms-auto">
+                    <button class="btn btn-primary btn-sm" @click="saveUser">
+                        <LucideIcon icon="Save" :size="15" />
+                        {{ $t("labelSave") }}
+                    </button>
                 </div>
-                <Form ref="formRef" @submit="saveUser">
-                    <div class="modal-body">
+            </div>
+            <div class="row mt-1">
+                <div class="main-div shadow-sm">
+                    <Form ref="formRef">
                         <div class="row">
                             <div class="col-6">
                                 <div class="mb-3">
@@ -82,18 +97,17 @@
                             :labelPanel="'labelProfiles'"
                             :labelSelectedQuantity="'labelSelectedProfiles'"
                             :labelSearch="'labelSearchProfiles'"
-                            :items="profiles"
-                            :loading="loading"
+                            :items="profilesList"
+                            :loading="isLoading"
                             v-model:selectedItems="selectedProfiles"
                         />
-
                         <SelectionListComponent
                             :id="'teams'"
                             :labelPanel="'labelTeams'"
                             :labelSelectedQuantity="'labelSelectedTeams'"
                             :labelSearch="'labelSearchTeams'"
-                            :items="teams"
-                            :loading="loading"
+                            :items="teamsList"
+                            :loading="isLoading"
                             v-model:selectedItems="selectedTeams"
                         >
                             <template #footer>
@@ -101,48 +115,58 @@
                                     <button
                                         type="button"
                                         class="btn btn-sm btn-outline-secondary fw-semibold"
-                                        @click="addNewTeam"
+                                        @click="openTeamSection"
                                     >
-                                        + {{ $t("labelNewTeam") }}
+                                        + {{ $t("management.teams.createBtn") }}
                                     </button>
                                 </div>
                             </template>
                         </SelectionListComponent>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
-                            {{ $t("labelCancel") }}
-                        </button>
-                        <button v-if="userData.id" type="submit" class="btn btn-primary btn-sm">
-                            {{ $t("labelEdit") }}
-                        </button>
-                        <button v-else type="submit" class="btn btn-primary btn-sm">
-                            {{ $t("labelCreate") }}
-                        </button>
-                    </div>
-                </Form>
+                    </Form>
+                </div>
+                <div v-if="showTeams" class="main-div shadow-sm mt-2">
+                    <Form @submit="createTeam" ref="formRefTeam">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="teamName" class="form-label fw-semibold mb-0">{{ $t("labelTeamName") }}</label>
+                                <Field
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    id="teamName"
+                                    ref="teamNameInput"
+                                    autocomplete="off"
+                                    name="teamName"
+                                    v-model="teamData.name"
+                                    :placeholder="$t('labelTypeTeamName')"
+                                    :rules="'required|min:3|max:100'"
+                                />
+                                <ErrorMessage name="teamName" class="invalid-feedback d-block" />
+                            </div>
+                        </div>
+                        <div class="col-auto ms-auto">
+                            <button class="btn btn-primary btn-sm">
+                                <LucideIcon icon="Save" :size="15" />
+                                {{ $t("labelSave") }}
+                            </button>
+                        </div>
+                    </Form>
+                </div>
             </div>
         </div>
-    </div>
-    <modal-user-team v-if="showModalUserTeam" @close="closeModalUserTeam" @teamCreated="teamCreated"></modal-user-team>
-    <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
+    </main>
 </template>
 
 <script>
     import api from "@/services/api";
-    import ModalUserTeam from "@/components/management/users/modals/TeamModal.vue";
-    import ToastAlert from "@/components/common/toast-alert";
-    import ErrorCode from "@/constants/Errorcode";
     import { Form, Field, ErrorMessage } from "vee-validate";
     import SelectionListComponent from "@/components/global/SelectionListComponent.vue";
     import PasswordInputComponent from "@/components/global/PasswordInputComponent.vue";
+    import UserService from "@/services/users/UserService";
+    import ErrorCode from "@/constants/Errorcode";
 
     export default {
-        name: "ModalUser",
+        name: "UserForm",
         components: {
-            ModalUserTeam,
-            ToastAlert,
-            ErrorCode,
             Form,
             Field,
             ErrorMessage,
@@ -150,40 +174,47 @@
             PasswordInputComponent,
         },
         props: {
-            userEditing: {
-                required: true,
-                type: Object,
-                default: {},
+            isEdit: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            email: {
+                type: String,
+                required: false,
+                default: null,
             },
         },
         data() {
             return {
+                isLoading: true,
                 userData: {
-                    id: this.userEditing.id ? this.userEditing.id : null,
-                    name: this.userEditing.name ? this.userEditing.name : "",
-                    email: this.userEditing.email ? this.userEditing.email : "",
-                    teams: this.userEditing.teams ? this.userEditing.teams : [],
-                    profiles: this.userEditing.profiles ? this.userEditing.profiles : [],
+                    id: null,
+                    name: "",
+                    email: "",
+                    teams: [],
+                    profiles: [],
                     password: "",
                 },
-                selectedTeams: this.userEditing.teams ? this.userEditing.teams.map((u) => u.id) : [],
-                selectedProfiles: this.userEditing.profiles ? this.userEditing.profiles.map((u) => u.id) : [],
+                teamData: {},
+                selectedTeams: [],
+                selectedProfiles: [],
                 searchTeams: "",
                 searchProfiles: "",
-                teams: [],
-                profiles: [],
-                loading: false,
-                showModalUserTeam: false,
-                toastShow: false,
-                toastColor: "",
-                toastMessage: "",
-                myInterval: null,
+                teamsList: [],
+                profilesList: [],
                 showPassword: false,
                 showConfirmedPassword: false,
+                showTeams: false,
             };
         },
-        emits: ["close", "userCreated"],
         computed: {
+            formTitle() {
+                return this.isEdit ? "management.users.editTitle" : "management.users.createTitle";
+            },
+            formSubtitle() {
+                return this.isEdit ? "management.users.editSubtitle" : "management.users.createSubtitle";
+            },
             filteredTeams() {
                 if (!this.searchTeams) {
                     return this.teams;
@@ -192,7 +223,7 @@
             },
             passwordRules() {
                 return {
-                    required: this.userEditing.id ? false : true,
+                    required: this.isEdit,
                     custom_password: true,
                     min: 6,
                     max: 50,
@@ -200,7 +231,7 @@
             },
             confirmedPasswordRules() {
                 return {
-                    required: this.userEditing.id ? false : true,
+                    required: this.isEdit,
                     confirmed: "userPassword",
                     min: 6,
                     max: 50,
@@ -208,8 +239,9 @@
             },
         },
         mounted() {
-            this.loadTeams();
-            this.loadProfiles();
+            this.getTeams();
+            this.getProfiles();
+            this.setupEdit();
         },
         methods: {
             async validateEmailBackend() {
@@ -221,26 +253,30 @@
                     email: this.userData.email.trim(),
                     userId: this.userData.id,
                 };
-                let self = this;
+
+                this.isLoading = true;
                 api.post("User/IsEmailInUse", paramsReq)
-                    .then(function (response) {
+                    .then((response) => {
                         if (response && response.data && response.data === true) {
-                            self.$refs.formRef.setFieldError("userEmail", self.$t("labelErrorEmailAlreadyExists"));
+                            this.$refs.formRef.setFieldError("userEmail", this.$t("management.users.emailDuplicated"));
 
                         } else {
-                            self.$refs.formRef.setFieldError("userEmail", "");
+                            this.$refs.formRef.setFieldError("userEmail", "");
                         }
-                        self.loading = false;
                     })
-                    .catch(function (e) {
-                        self.alertToast(self.$t("labelUserError"), "toast-warning");
-                        self.loading = false;
+                    .catch((e) => {
+                        this.$notify({
+                            title: 'management.users.title',
+                            message: "management.users.invalid",
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
                     })
-                    .finally(function () {
-                        console.log("Finished request.");
+                    .finally(() => {
+                        this.isLoading = false;
                     });
             },
-            loadTeams() {
+            getTeams() {
                 var paramsReq = {
                     search: "",
                     pageSize: 0,
@@ -248,21 +284,19 @@
                     isAscending: this.isAscending,
                 };
 
+                this.isLoading = true;
                 api.get("/Team/Paged", { params: paramsReq })
                     .then((response) => {
-                        this.teams = response.data.content;
-                        this.loading = false;
+                        this.teamsList = response.data.content;
                     })
                     .catch((e) => {
                         console.log(e);
-                        this.loading = false;
                     })
                     .finally(() => {
-                        console.log("Finished request.");
-                        this.loading = false;
+                        this.isLoading = false;
                     });
             },
-            loadProfiles() {
+            getProfiles() {
                 var paramsReq = {
                     search: "",
                     pageSize: 0,
@@ -270,15 +304,16 @@
                     isAscending: this.isAscending,
                 };
 
+                this.isLoading = true;
                 api.get("/Profile/Paged", { params: paramsReq })
                     .then((response) => {
-                        this.profiles = response.data.content;
+                        this.profilesList = response.data.content;
                     })
                     .catch((e) => {
                         console.log(e);
                     })
                     .finally(() => {
-                        this.loading = false;
+                        this.isLoading = false;
                     });
             },
             selectAll() {
@@ -287,14 +322,22 @@
             clearSelection() {
                 this.selectedTeams = [];
             },
-            addNewTeam() {
-                this.showModalUserTeam = true;
+            returnToTable() {
+                this.$router.push({
+                    name: "Management",
+                    query: { tab: "users" },
+                });
             },
-            saveUser: function (e) {
+            openTeamSection() {
+                this.showTeams = !this.showTeams;
+            },
+            closeTeamSection() {
+                this.showTeams = false;
+                this.teamData.name = "";
+            },
+            saveUser() {
                 let response;
-                let self = this;
-
-                if (this.userData.id == null) {
+                if (!this.isEdit) {
                     const user = {
                         name: this.userData.name,
                         email: this.userData.email,
@@ -314,21 +357,19 @@
                     };
                     response = api.put("User", userEdit);
                 }
-                response
-                    .then((response) => {
-                        this.$emit("userCreated");
-                        this.close();
+                response.then((response) => {
+                        this.returnToTable();
                         this.$notify({
-                            title: "users.title",
-                            message: "users.saveSuccess",
+                            title: "management.users.title",
+                            message: "management.users.saveSuccess",
                             variant: "success",
                             icon: "CircleX",
                         });
                     })
                     .catch((e) => {
                         this.$notify({
-                            title: "users.title",
-                            message: "users.saveError",
+                            title: "management.users.title",
+                            message: "management.users.saveError",
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -344,69 +385,66 @@
                     this.$refs.formRef.resetForm();
                 }
             },
-            close: function () {
-                this.$emit("close");
+            setupEdit() {
+                if(!this.isEdit) return;
+                UserService.getUserByEmail(this.email)
+                    .then((response) => {
+                        if(response.error !== undefined) {
+                            this.returnToTable();
+                            return this.$notify({
+                                title: 'management.users.title',
+                                message: 'management.users.invalid',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        this.userData = response;
+                        this.selectedProfiles = response.profiles.map(p => p.id);
+                        this.selectedTeams = response.teams.map(t => t.id);
+                    });
             },
-            closeModalUserTeam() {
-                this.showModalUserTeam = false;
-                this.loadTeams();
-            },
-            teamCreated() {
-                this.loadTeams();
-                this.closeModalUserTeam();
-            },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
+            createTeam() {
+                const team = {
+                    name: this.teamData.name,
+                };
+                api.post("Team", team).then(() => {
+                        this.$notify({
+                            title: 'management.teams.title',
+                            message: 'management.teams.saveSuccess',
+                            variant: 'success',
+                            icon: 'CircleCheckBig',
+                        });
+                        this.closeTeamSection();
+                        this.getTeams();
+                    })
+                    .catch((err) => {
+                        const errorCode = err?.response?.data?.errorCode;
+                        let errorMessage = "management.teams.invalid";
+                        if (errorCode && errorCode === ErrorCode.Duplicated) {
+                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.duplicated"));
+                            errorMessage = "management.teams.duplicated";
+                        } 
+                        this.$notify({
+                            title: 'management.teams.title',
+                            message: errorMessage,
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    });
             },
         },
     };
 </script>
 
 <style scoped>
-    .custom-header {
-        padding: 15px 15px 0;
-        border-bottom-width: 0px !important;
+    .container-fluid {
+        padding: 0 13px;
     }
 
-    .initials {
-        width: 30px;
-        height: 30px;
-    }
-
-    .show {
-        display: block;
-    }
-
-    .overlay.active {
-        display: block;
-        z-index: 1060;
-    }
-
-    .overlay {
-        display: none;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.85);
-        position: absolute;
-        left: 0;
-        top: 0;
-        z-index: -1;
+    .main-div {
+        border: 1px solid #d3d3d3;
+        border-radius: 8px;
+        background: white;
+        padding: 20px 24px;
     }
 </style>

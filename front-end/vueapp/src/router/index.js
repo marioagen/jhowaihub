@@ -9,12 +9,18 @@ import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
 import TypesPage from "@/pages/types.vue";
 import QuestionsPage from "@/pages/questions.vue";
-import ManagementPage from "@/pages/management.vue";
+import ManagementPage from "@/pages/management/index.vue";
+import NewUser from "@/pages/management/users/newUser.vue";
+import EditUser from "@/pages/management/users/editUser.vue";
+import NewTeam from "@/pages/management/teams/newTeam.vue";
+import EditTeam from "@/pages/management/teams/editTeam.vue";
+import NewProfile from "@/pages/management/profiles/newProfile.vue";
+import EditProfile from "@/pages/management/profiles/editProfile.vue";
 import QuizzesPage from "@/pages/quizzes/index.vue";
 import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
 import WorkflowPage from "@/pages/workflow/index.vue";
-import WorkflowEditor from "@/pages/workflow/editorIndex.vue";
+import WorkflowManagement from "@/pages/workflow/management.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
 import ToolsPage from "@/pages/tools.vue";
@@ -174,6 +180,72 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
+        path: "/management/users/new",
+        name: "NewUser",
+        component: NewUser,
+        meta: { 
+            layout: "default",
+            module: "Management",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/management/users/edit/:email",
+        name: "EditUser",
+        component: EditUser,
+        meta: { 
+            layout: "default",
+            module: "Management",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/management/teams/new",
+        name: "NewTeam",
+        component: NewTeam,
+        meta: { 
+            layout: "default",
+            module: "Management",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/management/teams/edit/:id",
+        name: "EditTeam",
+        component: EditTeam,
+        meta: { 
+            layout: "default",
+            module: "Management",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/management/profiles/new",
+        name: "NewProfile",
+        component: NewProfile,
+        meta: { 
+            layout: "default",
+            module: "Management",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/management/profiles/edit/:id",
+        name: "EditProfile",
+        component: EditProfile,
+        meta: { 
+            layout: "default",
+            module: "Management",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
         path: "/workflow",
         name: "Workflow",
         component: WorkflowPage,
@@ -183,9 +255,9 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/workflow/editor",
-        name: "WorkflowEditor",
-        component: WorkflowEditor,
+        path: "/workflow/management",
+        name: "WorkflowManagement",
+        component: WorkflowManagement,
         meta: { 
             layout: "default",
         },

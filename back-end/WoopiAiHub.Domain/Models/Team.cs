@@ -8,8 +8,8 @@ namespace WoopiAiHub.Domain.Models
         public string Name { get; private set; } = string.Empty;
 
         public virtual ICollection<User> Users { get; set; } = [];
-        public virtual ICollection<Document> Documents { get; set; } = [];
-        public virtual Workflow? Workflow { get; set; }
+        public virtual ICollection<Workflow> Workflows { get; set; } = [];
+        public virtual ICollection<Profile> Profiles { get; set; } = [];
 
         public Team(string name,
                     int id,

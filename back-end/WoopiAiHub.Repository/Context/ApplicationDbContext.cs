@@ -44,6 +44,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<StepToolExecution> StepToolExecutions { get; set; }
         public DbSet<StepToolOutput> StepToolOutputs { get; set; }
         public DbSet<StepToolParameter> StepToolParameters { get; set; }
+        public DbSet<StepProfilePermission> StepProfilePermissions { get; set; }
         public DbSet<Prompt> Prompts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -81,6 +82,7 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<StepToolExecution>(new StepToolExecutionMap().Configure);
             modelBuilder.Entity<StepToolParameter>(new StepToolParameterMap().Configure);
             modelBuilder.Entity<StepToolOutput>(new StepToolOutputMap().Configure);
+            modelBuilder.Entity<StepProfilePermission>(new StepProfilePermissionMap().Configure);
             modelBuilder.Entity<Prompt>(new PromptMap().Configure);
             base.OnModelCreating(modelBuilder);
         }

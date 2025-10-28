@@ -1,5 +1,5 @@
 <template>
-    <main class="flex-shrink-0" v-if="loading">
+    <main class="flex-shrink-0" v-if="isLoading">
         <div class="container mb-5">
             <div class="row justify-content-md-center full-height">
                 <div class="col-md-auto">
@@ -12,7 +12,7 @@
                                 <img
                                     svg-inline
                                     src="@/assets/img/icon-load-circle.svg"
-                                    alt="Loading"
+                                    alt="isLoading"
                                     width="60"
                                     class="refresh-animated"
                                 />
@@ -23,8 +23,7 @@
             </div>
         </div>
     </main>
-
-    <main class="main-scroll" v-if="!loading">
+    <main class="main-scroll" v-if="!isLoading">
         <div class="container-fluid mt-4">
             <div clas="align-items-center">   
                 <div class="row">
@@ -35,8 +34,8 @@
                     </div>
                     <div class="col-10">
                         <div>
-                            <h5 class="mb-1">{{ $t("pageTitleDocumentsForm") }}</h5>
-                            <p><small class="text-muted">{{ $t("pageSubtitleDocumentsForm") }}</small></p>
+                            <h5 class="mb-1">{{ $t("documents.upload.title") }}</h5>
+                            <p><small class="text-muted">{{ $t("documents.upload.subtitle") }}</small></p>
                         </div>
                     </div>
                 </div>
@@ -44,15 +43,15 @@
                     <div class="col-md-12 mb-5">
                         <div class="box-upload-form">
                             <form class="form-upload" @submit.prevent="save">
-                                <h5 class="mb-4">{{ $t("labelGeneralInformation") }}</h5>
+                                <h5 class="mb-4">{{ $t("documents.upload.cardTitle") }}</h5>
                                 <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
-                                    <label class="label-container">
-                                        {{ $t("labelUploadPdf") }}
+                                    <label class="label-container mb-2">
+                                        {{ $t("documents.upload.dropZone") }}
                                         <span class="clear-button">
                                             <img
                                                 src="../../assets/img/icon-dropzone-remove-all.svg"
                                                 alt="Remove All"
-                                                :title="$t('labelRemoveAllDropzone')"
+                                                :title="$t('documents.upload.removeAllDropzone')"
                                                 @click="confirmationDialog()"
                                             />
                                         </span>
@@ -95,7 +94,6 @@
                                                     : $t("labelCharacters")
                                             }}
                                         </a>
-
                                         <a
                                             v-if="form.description.length > 250"
                                             class="char-counter char-error exceedDesc"
@@ -112,32 +110,29 @@
                                         <div class="d-flex align-items-center mb-1">
                                             <LucideIcon icon="Building" class="icon-blue" />
                                             <label class="form-label mb-0 ms-2">
-                                                {{ $t("labelTeamsTitleDocuments") }}
+                                                {{ $t("documents.upload.linkWorkflow") }}
                                             </label>
                                         </div>
                                         <span class="selected-count">
-                                            {{ selectedTeams.length }} {{ $t("labelSelectedWithO") }}
+                                            {{ selectedWorkflows.length }} {{ $t("labelSelectedWithO") }}
                                         </span>
                                     </div>
-
                                     <div class="text-muted small mb-3">
-                                        {{ $t("labelTeamsSubtextDocuments") }}
+                                        {{ $t("documents.upload.linkSubtitle") }}
                                     </div>
-
                                     <div v-if="hasError" class="text-danger small mb-3 d-flex align-items-center gap-1">
                                         <span class="text-danger">*</span>
                                         <span>{{ $t("labelRequiredField") }}</span>
                                     </div>
-
                                     <div class="mb-3 rounded">
                                         <div class="input-group">
-                                            <span class="input-group-text">
-                                                <i class="fas fa-search text-secondary"></i>
+                                            <span class="input-group-text border-end-0">
+                                                <LucideIcon icon="Search" size="16" />
                                             </span>
                                             <input
                                                 type="text"
                                                 class="form-control form-control-sm"
-                                                :placeholder="$t('labelSearchTeams')"
+                                                :placeholder="$t('filters.searchWorkflow')"
                                                 v-model="searchTerm"
                                             />
                                         </div>
@@ -161,27 +156,25 @@
                                         </button>
                                     </div>
                                     <div class="text-muted small mb-1">
-                                        {{$t("documents.upload.warningTeamsNotListed")}}
+                                        {{$t("documents.upload.warningWorkflowNotListed")}}
                                     </div>
                                     <div class="border rounded p-1 user-list scrollable-list bg-white">
-                                        <div v-if="loading" class="text-center">
+                                        <div v-if="isLoading" class="text-center">
                                             <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden">{{ $t("labelLoading") }}</span>
+                                                <span class="visually-hidden">{{ $t("labelloading") }}</span>
                                             </div>
                                         </div>
-
-                                        <div v-else-if="filteredUsers.length === 0" class="text-center text-muted py-3">
-                                            {{ $t("labelNoTeamsFound") }}
+                                        <div v-else-if="filtersWorkflowList.length === 0" class="text-center text-muted py-3">
+                                            {{ $t("documents.upload.noWorkflowFound") }}
                                         </div>
-
-                                        <div v-if="!loading" v-for="team in filteredUsers" :key="team.id" class="p-1">
+                                        <div v-if="!isLoading" v-for="team in filtersWorkflowList" :key="team.id" class="p-1">
                                             <div class="form-check d-flex align-items-center">
                                                 <input
                                                     class="form-check-input me-3"
                                                     type="checkbox"
                                                     :id="`user-${team.id}`"
                                                     :value="team.id"
-                                                    v-model="selectedTeams"
+                                                    v-model="selectedWorkflows"
                                                 />
                                                 <label
                                                     class="form-check-label d-flex align-items-center w-100"
@@ -192,22 +185,20 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div v-if="selectedTeams.length > 0" class="mt-3">
-                                        <label class="form-label">{{ $t("labelSelectedTeams") }}</label>
+                                    <div v-if="selectedWorkflows.length > 0" class="mt-3">
+                                        <label class="form-label">{{ $t("documents.upload.selectionList") }}</label>
                                         <div class="d-flex flex-wrap gap-2">
                                             <div
-                                                v-for="id in selectedTeams"
+                                                v-for="id in selectedWorkflows"
                                                 :key="id"
                                                 class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-team-chip"
                                             >
                                                 <LucideIcon icon="Building" class="me-1" />
-                                                <span class="me-1">{{ getTeamName(id) }}</span>
+                                                <span class="me-1">{{ getName(id)}}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
                                 <button
                                     type="submit"
                                     class="btn btn-primary m-2 float-right"
@@ -216,7 +207,6 @@
                                 >
                                     {{ $t("labelSend") }}
                                 </button>
-
                                 <router-link
                                     class="btn btn-secondary m-2 btn-custom-cancel float-right"
                                     :to="{ name: 'Documents', query: { page: '1' } }"
@@ -253,6 +243,7 @@
     import uploadFileWorker from "@/workers";
     import Dropzone from "dropzone";
     import "dropzone/dist/dropzone.css";
+    import WorkflowService from "@/services/workflow/WorkflowService";
 
     export default {
         name: "DocumentUpload",
@@ -290,20 +281,21 @@
                     emailCreator: "",
                 },
                 searchTerm: "",
-                loading: false,
+                isLoading: false,
                 message: "",
                 modalAlertShow: false,
                 myInterval: null,
                 fileUpload: null,
                 chunks: [],
                 teams: [],
+                workflowsList: [],
                 toastShow: false,
                 toastColor: "",
                 toastMessage: "",
                 timeoutMessage: ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
                 timerReq: ENV_CONFIG.VUE_APP_TIMER_REQ,
                 dropzoneInstance: null,
-                selectedTeams: [],
+                selectedWorkflows: [],
                 hasError: true,
             };
         },
@@ -312,7 +304,7 @@
             ToastAlert,
         },
         watch: {
-            selectedTeams() {
+            selectedWorkflows() {
                 this.validateSelection();
             },
         },
@@ -329,20 +321,20 @@
                 this.dropzoneInstance.on("addedfile", this.onFileAdded);
                 this.dropzoneInstance.on("removedfile", this.onFileRemove);
             },
-            getTeamName(teamId) {
-                const team = this.teams.find((t) => t.id === teamId);
-                return team ? team.name : "Desconhecido";
+            getName(id) {
+                const workflow = this.workflowsList.find((t) => t.id === id);
+                return workflow ? workflow.name : "Desconhecido";
             },
             selectAll(event) {
                 event.target.blur();
-                this.selectedTeams = this.filteredUsers.map((user) => user.id);
+                this.selectedWorkflows = this.filtersWorkflowList.map((user) => user.id);
             },
             clearSelection(event) {
                 event.target.blur();
-                this.selectedTeams = [];
+                this.selectedWorkflows = [];
             },
             validateSelection() {
-                this.hasError = this.selectedTeams.length === 0;
+                this.hasError = this.selectedWorkflows.length === 0;
             },
             clickUplodFile: function () {
                 document.getElementById("inputFileId").click();
@@ -394,9 +386,6 @@
                     })
                     .catch(function (e) {
                         console.log(e);
-                    })
-                    .finally(function () {
-                        console.log("Finished request.");
                     });
             },
             validateForm() {
@@ -405,7 +394,7 @@
                     this.clearMyInterval();
                     this.alertToast(this.$t("labelNoFileChosen") + ".", "toast-warning");
                     valid = false;
-                } else if (this.selectedTeams.length == 0) {
+                } else if (this.selectedWorkflows.length == 0) {
                     this.clearMyInterval();
                     this.alertToast(this.$t("labelNoTeamChosen") + ".", "toast-warning");
                     valid = false;
@@ -419,7 +408,8 @@
                     return true;
                 };
                 this.message = this.$t("labelSendingTheDocument");
-                this.loading = true;
+                this.isLoading = true;
+
                 const apiHeaders = {
                     "X-Email": this.$store.state.userProfile.login,
                     "X-Tenant": this.$store.state.userProfile.tenant,
@@ -436,7 +426,7 @@
                         description: this.form.description,
                         emailCreator: this.$store.state.userProfile.login,
                         filesNames: filesNames,
-                        teamsIds: this.selectedTeams.slice(),
+                        workflows: this.selectedWorkflows.slice(),
                     };
 
                     return this.readFileAsArrayBuffer(file).then((arrayBuffer) => {
@@ -470,8 +460,10 @@
                                 uploadFileWorker.send({ message: chunkData });
                             });
                         });
-                    localStorage.setItem("showToast", "true");
-                    this.$router.push({ name: "Workflow" });
+                    localStorage.setItem("showToast", "true");                 
+                })
+                .finally(() => {
+                    this.$router.push({ name: "Documents" });
                 });
             },
             backToListDocuments() {
@@ -524,28 +516,31 @@
                     this.alertToast(this.$t("labelNoFileChosen") + ".", "toast-warning");
                 }
             },
-            loadTeams() {
-                api.get("/Team")
+            getWorkflows() {
+                var email = this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email)
                     .then((response) => {
-                        this.teams = response.data.filter(t => t.workflow);                        
-                        this.loading = false;
-                    })
-                    .catch((e) => {
-                        console.log(e);
-                        this.loading = false;
+                        if(response.error !== undefined) {
+                            return this.$notify({
+                                title: 'workflows.title',
+                                message: 'workflows.error',
+                                variant: 'danger',
+                                icon: 'CircleX',
+                            });
+                        }
+                        this.workflowsList = response.filter(t => t.name);
                     })
                     .finally(() => {
-                        console.log("Finished request.");
-                        this.loading = false;
+                        this.isLoading = false;
                     });
             },
         },
         computed: {
-            filteredUsers() {
+            filtersWorkflowList() {
                 if (!this.searchTerm) {
-                    return this.teams;
+                    return this.workflowsList;
                 }
-                return this.teams.filter((team) => team.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
+                return this.workflowsList.filter((team) => team.name.toLowerCase().includes(this.searchTerm.toLowerCase()));
             },
         },
         created() {
@@ -553,7 +548,7 @@
         },
         mounted() {
             this.initializeDropzone();
-            this.loadTeams();
+            this.getWorkflows();
             this.validateSelection();
         },
     };

@@ -6,6 +6,6 @@
         public string Name { get; set; } = string.Empty;
         public DateTime Created { get; set; }
         public IEnumerable<UserDto> Users { get; set; } = Enumerable.Empty<UserDto>();
-        public WorkflowDto? Workflow { get; set; }
+        public List<WorkflowDto>? Workflows { get; set; }
     }
 }

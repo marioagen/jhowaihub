@@ -81,4 +81,15 @@ export default {
                 };
             });
     },
+    getProfileById(profileId) {
+        return api.get(`/Profile/${profileId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
 };

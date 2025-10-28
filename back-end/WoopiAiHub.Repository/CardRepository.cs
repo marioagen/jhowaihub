@@ -37,7 +37,7 @@ namespace WoopiAiHub.Repository
                                     .ThenInclude(p => p!.Profile)
                                  .Include(s => s.Step)
                                  .ThenInclude(w => w!.Workflow)
-                                 .ThenInclude(t => t!.Team)
+                                 .ThenInclude(t => t!.Teams)
                                  .ThenInclude(u => u!.Users)
                                  .FirstOrDefaultAsync();
         }

@@ -11,7 +11,7 @@ using WoopiAiHub.Repository;
 namespace WoopiAiHub.Application.Services
 {
     public class PermissionServices :  IPermissionServices
-    {
+    {        
         private readonly IPermissionRepository _permissionRepository;
 
         public PermissionServices(IPermissionRepository permissionRepository)
@@ -26,6 +26,15 @@ namespace WoopiAiHub.Application.Services
         public ICollection<PermissionDto> FindAll()
         {
             return _permissionRepository.FindAll();
+        }
+
+        /// <summary>
+        /// Find workflow permissions
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<PermissionDto> FindWorkflowPermissions()
+        {
+            return _permissionRepository.FindWorkflowPermissions();            
         }
     }
 }

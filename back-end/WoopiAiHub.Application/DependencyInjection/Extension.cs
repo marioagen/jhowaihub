@@ -45,6 +45,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IToolDataServices, ToolDataServices>();
             services.AddScoped<IToolFactoryHandler, ToolFactoryHandler>();
             services.AddScoped<IAutomationServices, AutomationServices>();
+            services.AddScoped<IStepProfilePermissionsServices, StepProfilePermissionsServices>();
             services.AddScoped<IApiClientFactory, ApiClientFactory>();
             services.AddScoped<IN8NServices, N8NServices>();
             services.AddScoped<IPromptServices, PromptServices>();

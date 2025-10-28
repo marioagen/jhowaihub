@@ -7,6 +7,7 @@ namespace WoopiAiHub.Repository
 {
     public class PermissionRepository : IPermissionRepository
     {
+        private const string WorkflowStepGroup = "Workflow-Step";
         private readonly Context.ApplicationDbContext _context;
         public PermissionRepository(Context.ApplicationDbContext context)
         {
@@ -40,6 +41,24 @@ namespace WoopiAiHub.Repository
                     Description = q.Description
                 })
                 .AsNoTracking()
+                .ToList();
+        }
+
+        /// <summary>
+        /// Find workflow permissions and convert to a PermissionDto list
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<PermissionDto> FindWorkflowPermissions()
+        {
+            return FindAll()
+                .Where(p => p.Group == WorkflowStepGroup)
+                .Select(p => new PermissionDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Group = p.Group,
+                    Description = p.Description
+                })
                 .ToList();
         }
 

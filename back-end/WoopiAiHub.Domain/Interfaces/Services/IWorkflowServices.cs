@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Domain.DTOs.Request;
+﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
@@ -8,8 +9,9 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> Create(WorkflowCreateDto workflowCreateDto);
         Task<bool> Update(WorkflowUpdateDto workflowUpdateDto);
         Task<WorkflowDto> FindByTeamId(int teamId, WorkflowFilterDto workflowFilterDto);
-        Task<WorkflowDto> FindById(int id);
+        Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto);
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string email);
+        PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -110,6 +111,20 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<ActionResult<ICollection<UserDto>>> FindByTeamId(int id)
         {
             var result = await _userServices.FindByTeamId(id);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to return a user by its email.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [HttpGet("{email}")]
+        [SwaggerOperation("Endpoint that receive an email and return a valid user")]
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        public async Task<ActionResult<UserDto>> FindUserByEmail(string email)
+        {
+            var result = await _userServices.FindUserByEmail(email);
             return Ok(result);
         }
     }

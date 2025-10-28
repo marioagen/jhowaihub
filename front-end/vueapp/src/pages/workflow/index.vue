@@ -16,7 +16,7 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
+                        <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
                             <div>
                                 <LucideIcon icon="Clock" :size="14" class="me-2" />
                                 <span>{{$t("workflow.boardView")}}</span>
@@ -32,9 +32,15 @@
                                     <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li v-for="item in workflowList" :key="item.id">
-                                        <a class="dropdown-item" @click="selectOption(item)">
-                                            <div class="fw-bold">{{ item.team.name }}</div>
+                                    <li 
+                                        v-for="item in workflowList" 
+                                        :key="item.id"
+                                    >
+                                        <a 
+                                            class="dropdown-item" 
+                                            @click="selectOption(item)"
+                                        >
+                                            <div class="fw-bold">{{ item.teams.name }}</div>
                                             <div class="text-muted small">{{ item.name }}</div>
                                         </a>
                                     </li>
@@ -48,18 +54,23 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="isWorkflowSelected && isLoaded && isLoadedUsers">
+                <div v-if="isLoadingKanban">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                </div>
+                <div v-else>                    
                     <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
-                                <WorkflowCards 
+                                <KanbanBoard
                                     :kanbanData="kanbanCards"
                                     :users="users"
                                     @reload="reloadKanban"
                                 />
                             </div>
                         </div>
-                    </div>    
+                    </div>
                     <div class="card mb-3">
                         <div class="card-body">
                             <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
@@ -88,10 +99,8 @@
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
     import WorkflowService from "@/services/workflow/WorkflowService.js";
-    import WorkflowCards from "@/components/workflow/WorkflowCards.vue";
+    import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
     import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
-    import UserService from "@/services/users/UserService";
-    import logService from '@/services/log/logService.js';
 
     export default {
         name: "WorkflowPage",
@@ -113,22 +122,22 @@
                 numDocs: 0,
                 isLoaded: false,
                 isLoadedUsers: false,
+                isLoadingKanban: true,
                 signalrEventExecutionChanged: "CardExecutionChanged",
                 filters: {
-                    input: "",
-                    isAllUsers: false,
+                    input: null,
+                    isAllUsers: true,
                 },
                 users: []
             };
         },
         components: {
             WorkflowFilters,
-            WorkflowCards,
+            KanbanBoard,
         },
         methods: {
             getWorkflowByUser() {
-                this.isLoaded = false;
-                this.isLoadedUsers = false;
+                this.isLoadingKanban = true;
                 var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
@@ -142,59 +151,72 @@
                         }
                         this.workflowList = response;
                         if(this.workflowList.length > 0) {
-                            const lastSelected = this.$store.state.lastSelectedWorkflow;
-                            let workflowToSelect = this.workflowList[0];
-
-                            if (lastSelected) {
-                                const foundWorkflow = this.workflowList.find(w => 
-                                    w.team.id === lastSelected.teamId && w.id === lastSelected.id
-                                );
-                                if (foundWorkflow) {
-                                    workflowToSelect = foundWorkflow;
-                                }
-                            }
-
-                            this.selectOption(workflowToSelect);
-                            this.filteredworkflows();
+                            this.setSelectedWorkflow();
                         }
                     });
             },
-            getWorkflowbyTeam(id) {
-                this.isLoaded = false;
-                WorkflowService.getWorkflowByTeamId(id, this.filters)
+            setSelectedWorkflow() {
+                let workflowToSelect = this.workflowList[0];
+                const redicteWorkflowId = this.$route.query.id;
+                if(redicteWorkflowId !== undefined) {
+                    const foundWorkflow = this.workflowList.find(w =>
+                        w.id == redicteWorkflowId
+                    );
+                    if (foundWorkflow) {
+                        return this.selectOption(foundWorkflow);
+                    } else {
+                        return this.$notify({
+                            title: 'workflow.index',
+                            message: 'workflow.error',
+                            variant: 'danger',
+                            icon: 'CircleX',
+                        });
+                    }
+                }
+
+                const lastSelected = this.$store.state.lastSelectedWorkflow;
+                if (lastSelected && redicteWorkflowId === undefined) {
+                    const foundWorkflow = this.workflowList.find(w =>
+                        w.teams.id === lastSelected.teamId && w.id === lastSelected.id
+                    );
+                    if (foundWorkflow) {
+                        return this.selectOption(lastSelected);
+                    }
+                }
+
+                this.selectOption(workflowToSelect);
+            },
+            getWorkflowById(workflowId) {
+                this.isLoadingKanban = true;
+                WorkflowService.getWorkflowById(workflowId, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
                     })
                     .finally(() => {
-                        this.isLoaded = true;
+                        this.isLoadingKanban = false;
                     });
             },
-            filteredworkflows() {
-                return this.workflowList.filter(
-                    (workflow) => workflow.id !== this.selectedOption.id
-                );
-            },
             selectOption(workflow) {
+                if(workflow.teams.length < 1) return;
                 this.isLoaded = false;
                 this.isLoadedUsers = false;
                 this.selectedOption = {
                     id: workflow.id,
                     name: workflow.name,
-                    teamName: workflow.team.name,
-                    teamId: workflow.team.id,
+                    teamName: workflow.teams[0].name,
+                    teamId: workflow.teams[0].id,
                 }
-                
                 this.$store.commit('setLastSelectedWorkflow', {
                     id: workflow.id,
                     name: workflow.name,
-                    teamName: workflow.team.name,
-                    teamId: workflow.team.id,
+                    teamName: workflow.teams[0].name,
+                    teamId: workflow.teams[0].id,
                 });
-                this.getUsersByTeamId(workflow.team.id);
-                this.getWorkflowbyTeam(workflow.team.id);
+
+                this.getWorkflowById(workflow.id);
             },
-            reloadKanban() {
-                this.getWorkflowbyTeam(this.selectedOption.teamId);
+            reloadKanban() {                
+                this.getWorkflowById(this.selectedOption.id);
             },
             filterData(filters) {
                 this.filters = filters;
@@ -202,21 +224,6 @@
             },
             redirectToNewUpload() {
                 this.$router.push({ name: "DocumentsUpload" });
-            },
-            getUsersByTeamId(teamId) {
-                this.isLoadedUsers = false;
-                UserService.getUsersByTeamId(teamId)
-                    .then((response) => {                 
-                        this.users = response;
-                    })
-                    .finally(() => {
-                        this.isLoadedUsers = true;
-                    });                  
-            }
-        },
-        computed: {
-            isWorkflowSelected() {
-                return this.workflowList.length > 0;
             },
         },
         created() {
@@ -226,7 +233,6 @@
         },
         async mounted() {
             await signalRService.startConnection();
-
             signalRService.on(this.signalrEventExecutionChanged, (message) => {
                 if (!this.kanbanCards.steps) return;
 

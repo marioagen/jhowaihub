@@ -7,7 +7,13 @@
                     <small class="text-muted">{{ $t("labelProfilesMessage") }}</small>
                 </p>
             </div>
-            <button class="btn btn-primary btn-sm" @click="openModalProfile">+ {{ $t("labelNewProfile") }}</button>
+            <button 
+                class="btn btn-primary btn-sm"
+                @click="redirectToForm"
+            >
+                <LucideIcon icon="Plus" />
+                {{ $t("management.profiles.createBtn") }}
+            </button>
         </div>
         <div class="card mb-3">
             <div class="card-body">
@@ -60,6 +66,11 @@
             ProfilesModal,
         },
         methods: {
+            redirectToForm() {
+                this.$router.push({
+                    name: 'NewProfile',
+                });
+            },
             setMenuActions: function () {
                 this.menuActions = {
                     options: [

@@ -1,4 +1,6 @@
-﻿using WoopiAiHub.Application.Utils;
+﻿using Microsoft.Extensions.Logging;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -7,26 +9,31 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
     public class WorkflowServices : IWorkflowServices
     {
         private readonly IWorkflowRepository _workflowRepository;
+        private readonly ITeamRepository _teamRepository;
         private readonly IStepRepository _stepRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
+        private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
                                 IProfileRepository profileRepository,
+                                ITeamRepository teamRepository,
                                 IStatusRepository statusRepository,
                                 IStepRepository stepRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
+                                ILogger<WorkflowServices> logger,
                                 IValidateWorkflow validateWorkflow)
         {
             _workflowRepository = workflowRepository;
@@ -36,6 +43,8 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
+            _teamRepository = teamRepository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -50,9 +59,11 @@ namespace WoopiAiHub.Application.Services
 
             _validateStep.ValidateCreateStep(workflowCreateDto.Steps);
 
-            var workflow = new Workflow(0, DateTime.UtcNow, workflowCreateDto.TeamId, workflowCreateDto.Name);
+            var teamsList = _teamRepository.FindByIds(workflowCreateDto.Teams);
 
-            ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, workflow.TeamId);
+            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowCreateDto.Name);
+
+            ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, 0);
 
             workflow.AddSteps(steps);
 
@@ -85,6 +96,13 @@ namespace WoopiAiHub.Application.Services
                 var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
                 _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
                 workflow.Update(workflowUpdateDto.Name);
+
+                workflow.Teams.Clear();
+                var teamsList = _teamRepository.FindByIds(workflowUpdateDto.Teams);
+                foreach (var team in teamsList)
+                {
+                    workflow.AddTeam(team);
+                }
 
                 StepTool? lastGlobalStepTool = null;
 
@@ -151,7 +169,7 @@ namespace WoopiAiHub.Application.Services
                     }
                     else
                     {
-                        var newStep = CreateStep(stepDto, workflow.TeamId);
+                        var newStep = CreateStep(stepDto, workflowUpdateDto.Id);
                         foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                         {
                             var stepTool = CreateStepToolUpdate(stepToolDto);
@@ -184,13 +202,15 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<WorkflowDto> FindById(int id)
+        public async Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto)
         {
-            var workflow = await _workflowRepository.FindById(id);
+            var workflow = await _workflowRepository.FindById(id, workflowFilterDto);
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
+            int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
+            workflow.NumDocuments = totalCards;
             return workflow;
         }
 
@@ -203,7 +223,6 @@ namespace WoopiAiHub.Application.Services
         public async Task<WorkflowDto> FindByTeamId(int teamId, WorkflowFilterDto workflowFilterDto)
         {
             var workflow = await _workflowRepository.FindByTeamId(teamId, workflowFilterDto);
-
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
@@ -232,6 +251,7 @@ namespace WoopiAiHub.Application.Services
                     throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
                 }
 
+                workflow.Teams.Clear();
                 var stepIds = workflow.Steps.Select(s => s.Id).ToList();
                 await _validateStep.ValidateDeleteStep(stepIds);
 
@@ -245,6 +265,29 @@ namespace WoopiAiHub.Application.Services
             {
                 _unitOfWork.Rollback();
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// This method sends the current page  
+        /// and search text to repository and return an PaginatedListDto<WorkflowDto>.
+        /// </summary>
+        /// <param name="WorkflowPagedDto"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto)
+        {
+            if (workflowPagedDto.Page > 0)
+            {
+                var workflowList = _workflowRepository.FindAllWithFilter(workflowPagedDto);
+                var paginatedList = PaginationHelper.Paginate(workflowList, workflowPagedDto.Page);
+                return paginatedList;
+            }
+            else
+            {
+                var ex = new ArgumentException("Invalid Page");
+                _logger.LogError(ex, $"An argument exception occurred in the {nameof(WorkflowServices)} in the {nameof(FindAllPaged)} method");
+                throw ex;
             }
         }
 
@@ -279,18 +322,16 @@ namespace WoopiAiHub.Application.Services
         /// each step.</remarks>
         /// <typeparam name="T">The type of the step DTO, which must implement <see cref="IStepDto"/>.</typeparam>
         /// <param name="stepsDto">A collection of step DTOs used to create the steps.</param>
-        /// <param name="teamId">The identifier of the team to associate with the created steps.</param>
+        /// <param name="workflowId">The identifier of the team to associate with the created steps.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a collection of  <see
         /// cref="Step"/> objects created and validated from the provided DTOs.</returns>
-        private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int teamId) where T : IStepDto
+        private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int workflowId) where T : IStepDto
         {
             var steps = new List<Step>();
             StepTool? lastStepTool = null;
-
-
             foreach (var stepDto in stepsDto)
             {
-                var step = CreateStep(stepDto, teamId);
+                var step = CreateStep(stepDto, workflowId);
                 StepTool? previousStepToolInSameStep = null;
 
                 foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
@@ -373,14 +414,14 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="stepDto">An object containing the data required to initialize the step, including its name, order, profile ID, and
         /// status ID.</param>
-        /// <param name="teamId">The identifier of the team associated with the step.</param>
+        /// <param name="workflowId">The identifier of the team associated with the step.</param>
         /// <returns>A new <see cref="Step"/> instance initialized with the provided data.</returns>
-        private static Step CreateStep(IStepDto stepDto, int teamId)
+        private static Step CreateStep(IStepDto stepDto, int workflowId)
         {
             return new Step(
                 0,
                 DateTime.UtcNow,
-                teamId,
+                workflowId,
                 stepDto.Name,
                 stepDto.Order,
                 stepDto.ProfileId,

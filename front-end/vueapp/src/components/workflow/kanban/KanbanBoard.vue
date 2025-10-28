@@ -31,7 +31,7 @@
                             :key="card.id"
                             class="card-body" 
                         >
-                            <CardComponent 
+                            <KanbanCard
                                 :dataCard="card"
                                 :dataStep="step"
                                 :isFirstStep="step.order === minOrder"
@@ -49,11 +49,11 @@
 </template>
 
 <script>
-    import CardComponent from "@/components/workflow/CardComponent.vue";
+    import KanbanCard from "@/components/workflow/kanban/KanbanCard.vue";
     export default {
-        name: "WorkflowCards",
+        name: "KanbanBoard",
         components: {
-            CardComponent
+            KanbanCard
         },
         props: {
             kanbanData: {
