@@ -70,7 +70,7 @@
                     workflows: [],
                     isAllUsers: true,
                     login: this.$store.state.userProfile.login,
-                    colType: 0,
+                    colType: 2,
                 }
             };
         },
