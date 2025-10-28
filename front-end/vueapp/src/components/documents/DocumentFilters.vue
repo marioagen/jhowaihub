@@ -69,7 +69,8 @@
                     workflowId: "",
                     workflows: [],
                     isAllUsers: true,
-                    login: this.$store.state.userProfile.login
+                    login: this.$store.state.userProfile.login,
+                    colType: 0,
                 }
             };
         },
