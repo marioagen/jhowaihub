@@ -121,8 +121,7 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Receive a page number or a search data and return
-        /// workflows (with pagination)
+        /// Endpoint that returns all valids workflows
         /// </summary>
         /// <param name="WorkflowPagedDto"></param>
         /// <returns></returns>
