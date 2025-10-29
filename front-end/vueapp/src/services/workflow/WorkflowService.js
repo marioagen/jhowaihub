@@ -31,6 +31,17 @@ export default {
                 }
             });
     },
+    getWorkflowCompleteList() {
+        return api.get(`/Workflow/ListAll`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
     getWorkflowByTeamId(teamId, filters) {
         return api.get(`/Workflow/Teams/${teamId}`, { params: filters })
             .then(({ data }) => {

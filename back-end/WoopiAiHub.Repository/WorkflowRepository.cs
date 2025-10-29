@@ -295,6 +295,33 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Finds all workflows.
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<WorkflowDto> FindAll()
+        {
+            return _context.Workflows
+                           .AsNoTracking()
+                           .Select(t => new WorkflowDto
+                           {
+                               Id = t.Id,
+                               Name = t.Name,
+                               Created = t.Created,
+                               Teams = t.Teams.Select(t => new TeamDto
+                               {
+                                   Id = t.Id,
+                                   Name = t.Name,
+                               }).ToList(),
+                               Steps = t.Steps.Select(t => new StepDto
+                               {
+                                   Id = t.Id,
+                                   Name = t.Name,
+                               }).ToList()
+                           })
+                           .ToList();
+        }
+
+        /// <summary>
         /// Finds all workflows associated with a specific user team by their email address.
         /// </summary>
         /// <param name="userEmail"></param>

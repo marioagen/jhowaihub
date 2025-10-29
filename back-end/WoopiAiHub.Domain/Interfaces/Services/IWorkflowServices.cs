@@ -12,6 +12,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto);
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string email);
+        ICollection<WorkflowDto> FindAll();
         PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
     }
 }
