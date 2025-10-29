@@ -438,5 +438,15 @@ namespace WoopiAiHub.Application.Services
             var workflow = _workflowRepository.FindAllByUser(email);
             return workflow;
         }
+
+        /// <summary>
+        /// Find all workflows.
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<WorkflowDto> FindAll()
+        {
+            var workflow = _workflowRepository.FindAll();
+            return workflow;
+        }
     }
 }
