@@ -29,7 +29,7 @@
                         <div
                             v-for="card in step.cards"
                             :key="card.id"
-                            class="card-body" 
+                            class="card-body"
                         >
                             <KanbanCard
                                 :dataCard="card"
