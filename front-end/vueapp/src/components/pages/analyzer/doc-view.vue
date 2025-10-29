@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="col-md-6">
         <div class="mb-2" style="margin-top: 12px !important">
-            <div v-if="isPdf">
+            <div v-if="viewMode === 'pdf'">
                 <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
                 <a @click="openTab" v-if="srcPdf">
                     <i class="fas fa-expand text-primary" style="cursor: pointer" :title="$t('labelExpand')"></i>
@@ -13,6 +13,15 @@
                     :title="$t('labelDocumentTranscript')"
                     v-if="srcPdf"
                 />
+                <button 
+                    type="button" 
+                    class="btn btn-info btn-sm mb-1 ocr-button" 
+                    @click="getOcrText"
+                    v-if="hasOcrText"
+                    :title="$t('labelViewOcrText')">
+                    <i class="fas fa-file-alt"></i>
+                    OCR
+                </button>
                 <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
                     <i class="fas fa-sync-alt"></i>
                     {{ $t("labelReprocess") }}
@@ -45,7 +54,7 @@
                     </span>
                 </div>
             </div>
-            <div v-else>
+            <div v-else-if="viewMode === 'normalized'">
                 <div>
                     <strong class="form-label mb-3">
                         {{ upperFormat($t("labelStandardizedFullText")) }}&nbsp;&nbsp;
@@ -53,7 +62,7 @@
                     <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingDocumentNormalized"></i>
                     <img
                         src="../../../assets/img/go-to-pdf.png"
-                        @click="isPdf = true"
+                        @click="viewMode = 'pdf'"
                         style="cursor: pointer; float: right"
                         :title="$t('labelPdfBack')"
                     />
@@ -62,6 +71,26 @@
                     type="text"
                     class="form-control custom-textarea textarea-norm-full"
                     v-model="contentDocumentNormalized"
+                    readonly
+                ></textarea>
+            </div>
+            <div v-else-if="viewMode === 'ocr'">
+                <div>
+                    <strong class="form-label mb-3">
+                        TEXTO COMPLETO DO OCR&nbsp;&nbsp;
+                    </strong>
+                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingOcrText"></i>
+                    <img
+                        src="../../../assets/img/go-to-pdf.png"
+                        @click="viewMode = 'pdf'"
+                        style="cursor: pointer; float: right"
+                        :title="$t('labelPdfBack')"
+                    />
+                </div>
+                <textarea
+                    type="text"
+                    class="form-control custom-textarea textarea-norm-full"
+                    v-model="contentOcrText"
                     readonly
                 ></textarea>
             </div>
@@ -80,12 +109,15 @@
         data() {
             return {
                 idAnalyzer: this.$route.params.id,
-                isPdf: true,
+                viewMode: 'pdf',
                 srcPdf: null,
                 errorPdf: false,
                 loading: true,
                 loadingDocumentNormalized: false,
+                loadingOcrText: false,
                 contentDocumentNormalized: "",
+                contentOcrText: "",
+                hasOcrText: false,
                 controllAttempt: 0,
                 showModalForm: false,
                 showLoading: false,
@@ -133,7 +165,7 @@
             },
             getDocumentNormalized() {
                 this.loadingDocumentNormalized = false;
-                this.isPdf = false;
+                this.viewMode = 'normalized';
                 if (this.contentDocumentNormalized == "") {
                     this.loadingDocumentNormalized = true;
                     DocumentsServices.getNormalizedDocument(this.idAnalyzer)
@@ -149,6 +181,46 @@
                             console.log("Finished request.");
                         });
                 }
+            },
+            getOcrText() {
+                this.loadingOcrText = false;
+                this.viewMode = 'ocr';
+                if (this.contentOcrText == "") {
+                    this.loadingOcrText = true;
+                    DocumentsServices.getOcrText(this.idAnalyzer)
+                        .then((response) => {
+                            if (response.error !== undefined) {
+                                this.modalAlertShow = true;
+                                this.loadingOcrText = false;
+                                return;
+                            }
+                            if (response.hasOcr) {
+                                this.contentOcrText = response.content;
+                            } else {
+                                this.contentOcrText = "OCR não disponível para este documento.";
+                            }
+                            this.loadingOcrText = false;
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching OCR text:", error);
+                            this.contentOcrText = "Erro ao carregar texto do OCR.";
+                            this.loadingOcrText = false;
+                        })
+                        .finally(() => {
+                            console.log("Finished OCR request.");
+                        });
+                }
+            },
+            checkOcrAvailability() {
+                DocumentsServices.getOcrText(this.idAnalyzer)
+                    .then((response) => {
+                        if (response && response.hasOcr) {
+                            this.hasOcrText = true;
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error checking OCR availability:", error);
+                    });
             },
             openTab() {
                 window.open(this.srcPdf, "_blank");
@@ -195,6 +267,7 @@
         },
         created() {
             this.getDocument();
+            this.checkOcrAvailability();
         },
     };
 </script>
@@ -256,5 +329,17 @@
 
     .reindex-button {
         margin-left: 5%;
+    }
+
+    .ocr-button {
+        margin-left: 5%;
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+        color: white;
+    }
+
+    .ocr-button:hover {
+        background-color: #138496;
+        border-color: #117a8b;
     }
 </style>

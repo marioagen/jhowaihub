@@ -970,5 +970,72 @@ namespace WoopiAiHub.Application.Services
                 Email = processOcrResultDto.Email
             };
         }
+
+        /// <summary>
+        /// Retrieves the concatenated OCR text for a document by checking if an OCR StepTool execution exists with status "Ready"
+        /// </summary>
+        /// <param name="documentId">The document ID</param>
+        /// <returns>OcrTextResponseDto containing the OCR text if available</returns>
+        public async Task<OcrTextResponseDto> GetOcrTextByDocumentId(int documentId)
+        {
+            var response = new OcrTextResponseDto { HasOcr = false };
+
+            // Find the document
+            var document = _documentRepository.FindById(documentId);
+            if (document == null)
+                return response;
+
+            response.ReferenceFile = document.ReferenceFile;
+
+            // Find cards associated with this document
+            var card = await _cardRepository.FindByDocumentIdAsync(documentId);
+            if (card == null)
+                return response;
+
+            // Find StepToolExecutions for this card that are OCR type with status Ready
+            var executions = card.Executions
+                .Where(e => e.Status == StatusExecution.Ready &&
+                           e.StepTool != null &&
+                           e.StepTool.Tool != null &&
+                           e.StepTool.Tool.ToolType != null &&
+                           e.StepTool.Tool.ToolType.Name == HandlersTypes.Ocr)
+                .ToList();
+
+            if (!executions.Any())
+                return response;
+
+            // Get the first OCR execution (there should only be one per card)
+            var ocrExecution = executions.First();
+
+            // Find the output for this StepTool execution
+            var outputJson = await _stepToolOutputRepository.FindByStepToolId(ocrExecution.StepToolId, card.Id);
+            
+            if (string.IsNullOrEmpty(outputJson))
+                return response;
+
+            try
+            {
+                // Deserialize the output to DocumentEmbeddingsDataDto
+                var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
+                
+                if (embeddingsData?.DocumentEmbeddings == null || !embeddingsData.DocumentEmbeddings.Any())
+                    return response;
+
+                // Concatenate the text from all pages
+                var fullText = string.Join(Environment.NewLine + Environment.NewLine, 
+                    embeddingsData.DocumentEmbeddings
+                        .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
+                        .Select(e => e.Text));
+
+                response.Content = fullText;
+                response.HasOcr = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deserializing OCR output for document {DocumentId}", documentId);
+            }
+
+            return response;
+        }
     }
 }
