@@ -32,7 +32,7 @@ export default {
             });
     },
     getWorkflowCompleteList() {
-        return api.get(`/Workflow/ListAll`)
+        return api.get(`/Workflow`)
             .then(({ data }) => {
                 return data;
             })

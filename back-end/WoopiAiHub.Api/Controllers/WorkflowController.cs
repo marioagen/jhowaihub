@@ -125,7 +125,7 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="WorkflowPagedDto"></param>
         /// <returns></returns>
-        [HttpGet("ListAll")]
+        [HttpGet()]
         [SwaggerOperation("Endpoint that returns all valids workflows")]
         [ProducesResponseType(typeof(WorkflowPagedDto), StatusCodes.Status200OK)]
         public ActionResult<WorkflowPagedDto> FindAll()
