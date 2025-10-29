@@ -1,7 +1,7 @@
 <template>
     <main>
         <div class="container-fluid scroll-area mx-2">
-            <Form @submit="save">
+            <form @submit.prevent="save">
                 <div class="row align-items-center mt-3">
                     <div class="col-md-8 d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
@@ -83,7 +83,7 @@
                         </div>
                     </div>
                 </div>
-            </Form>
+            </form>
         </div>
    </main>
 </template>
@@ -140,9 +140,9 @@
             updatePrompt: function () {
                 var paramsData = {
                     id: this.idEdit,
-                    name: this.form.name,
-                    description: this.form.description,
-                    text: this.form.text,
+                    name: this.values.name,
+                    description: this.values.description,
+                    text: this.values.text,
                 };
                 PromptService.updatePrompt(paramsData)
                     .then((response) => {
@@ -171,16 +171,15 @@
                                 icon: 'CircleX',
                             });
                         }
-                        finally{
-                            this.redirectToPromptList();
-                        }
+                    }).finally(() => {
+                        this.redirectToPromptList()
                     });
             },
             createPrompt: function () {
                 var paramsData = {
-                    name: this.form.name,
-                    description: this.form.description,
-                    text: this.form.text,
+                    name: this.values.name,
+                    description: this.values.description,
+                    text: this.values.text,
                 };
                 PromptService.createPrompt(paramsData)
                     .then((response) => {
@@ -208,10 +207,9 @@
                                 icon: 'CircleX',
                             });
                         }
-                        finally{
-                             return this.redirectToPromptList();
-                        }
-                    });
+                    }).finally(() => {
+                        this.redirectToPromptList();
+                    });;
             },
             resetData() {
                 this.resetForm({
