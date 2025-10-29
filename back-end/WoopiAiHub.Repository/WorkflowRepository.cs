@@ -69,6 +69,9 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Workflows
                 .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                        .ThenInclude(t => t.Tool)
+                            .ThenInclude(tt => tt.ToolType)
                 .Include(w => w.Teams)
                 .Where(w => ids.Contains(w.Id))
                 .ToListAsync();
