@@ -247,8 +247,7 @@
                     });
             },
             getWorkflows() {
-                var email = this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email)
+                WorkflowService.getWorkflowCompleteList()
                     .then((response) => {
                         this.workflowList = response;
                     })

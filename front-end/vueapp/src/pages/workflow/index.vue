@@ -59,7 +59,7 @@
                         <div class="spinner-border text-primary" role="status"></div>
                     </div>
                 </div>
-                <div v-else>                    
+                <div v-else-if="hasList">
                     <div class="card mb-3 h-100">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
@@ -89,6 +89,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div v-else class="text-center">
+                    <span class="text-primary">{{ $t("workflow.notFound") }}</span>
                 </div>
             </div>
         </div>
@@ -135,6 +138,11 @@
             WorkflowFilters,
             KanbanBoard,
         },
+        computed: {
+            hasList() {
+                return this.workflowList.length > 0;
+            },
+        },
         methods: {
             getWorkflowByUser() {
                 this.isLoadingKanban = true;
@@ -149,10 +157,12 @@
                                 icon: 'CircleX',
                             });
                         }
+                        
                         this.workflowList = response;
                         if(this.workflowList.length > 0) {
-                            this.setSelectedWorkflow();
+                            return this.setSelectedWorkflow();
                         }
+                        this.isLoadingKanban = false;
                     });
             },
             setSelectedWorkflow() {
