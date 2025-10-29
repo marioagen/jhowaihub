@@ -187,7 +187,7 @@
                 const lastSelected = this.$store.state.lastSelectedWorkflow;
                 if (lastSelected && redicteWorkflowId === undefined) {
                     const foundWorkflow = this.workflowList.find(w =>
-                        w.teams.id === lastSelected.teamId && w.id === lastSelected.id
+                        w.id === lastSelected.id
                     );
                     if (foundWorkflow) {
                         return this.selectOption(lastSelected);
@@ -207,20 +207,18 @@
                     });
             },
             selectOption(workflow) {
-                if(workflow.teams.length < 1) return;
+                if(workflow.id === undefined) return;
+
                 this.isLoaded = false;
                 this.isLoadedUsers = false;
                 this.selectedOption = {
                     id: workflow.id,
                     name: workflow.name,
-                    teamName: workflow.teams[0].name,
-                    teamId: workflow.teams[0].id,
                 }
+
                 this.$store.commit('setLastSelectedWorkflow', {
                     id: workflow.id,
                     name: workflow.name,
-                    teamName: workflow.teams[0].name,
-                    teamId: workflow.teams[0].id,
                 });
 
                 this.getWorkflowById(workflow.id);
