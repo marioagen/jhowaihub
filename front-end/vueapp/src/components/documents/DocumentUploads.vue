@@ -463,7 +463,7 @@
                     localStorage.setItem("showToast", "true");                 
                 })
                 .finally(() => {
-                    this.$router.push({ name: "Documents" });
+                    this.$router.push({ name: "Workflow" });
                 });
             },
             backToListDocuments() {
