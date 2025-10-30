@@ -1,7 +1,7 @@
 <template>
     <main>
         <div class="container-fluid scroll-area mx-2">
-            <form @submit="save">
+            <form @submit.prevent="save">
                 <div class="row align-items-center mt-3">
                     <div class="col-md-8 d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
@@ -26,11 +26,27 @@
                                 <h6 class="card-title mb-3">{{$t('prompts.information')}}</h6>
                                 <div class="mb-3">
                                     <label for="inputNamePrompt" class="form-label">{{$t('prompts.namePrompt')}}</label>
-                                    <input type="text" class="form-control" id="inputNamePrompt" aria-describedby="" :placeholder="$t('prompts.placeholderNamePrompt')" v-model="form.name" >
+                                    <Field name="name" :rules="'required|max:50'" v-slot="{ field, errorMessage }">
+                                            <input v-bind="field" type="text"
+                                                  class="form-control"
+                                                  :placeholder="$t('prompts.placeholderNamePrompt')"
+                                                  id="inputNamePrompt" aria-describedby=""
+                                                  name="name"
+                                                  :class="{ 'is-invalid': errorMessage }"/>
+                                        <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
+                                    </Field>
                                 </div>
                                 <div class="mb-3">
                                     <label for="FormControlTextarea1" class="form-label">{{$t('labelDescription')}}</label>
-                                    <textarea class="form-control" id="FormControlTextarea1" v-model="form.description" rows="3"></textarea>
+                                    <Field name="description" :rules="'required|max:100'" v-slot="{ field, errorMessage }">
+                                        <textarea v-bind="field" type="text"
+                                                  class="form-control"
+                                                  id="inputNamePrompt" aria-describedby=""
+                                                  rows="3"
+                                                  name="description"
+                                                  :class="{ 'is-invalid': errorMessage }"/>
+                                        <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
+                                    </Field>
                                 </div>
                             </div>
                         </div>
@@ -52,7 +68,15 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="FormControlTextarea2" class="form-label">{{$t('prompts.promptContent')}}</label>
-                                        <textarea class="form-control" id="FormControlTextarea2" v-model="form.text" rows="3"></textarea>
+                                        <Field name="text" rules="required" v-slot="{ field, errorMessage }">
+                                            <textarea v-bind="field" type="text"
+                                                      class="form-control"
+                                                      id="FormControlTextarea2"
+                                                      rows="3"
+                                                      name="text"
+                                                      :class="{ 'is-invalid': errorMessage }"/>
+                                            <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
+                                        </Field>
                                     </div>
                                 </div>
                             </div>
@@ -65,6 +89,7 @@
 </template>
 <script>
     import PromptService from "@/services/prompts/PromptsService";
+    import { Field, useForm } from "vee-validate";
     export default {
         name: "PromptComponent",
         props: {
@@ -84,35 +109,40 @@
             }
         },
         components: {
+            Field,
+        },
+        setup() {
+            const { validate, setValues, values, resetForm } = useForm();
+            return { validate, setValues, values, resetForm };
         },
         methods: {
             redirectToPromptList: function () {
                 this.$router.push({ name: "Prompt" });
             },
-            save: function (e) {
-                if (this.idEdit !== undefined) {
-                    this.updatePrompt();
-                }
-                else {
-                    this.createPrompt();
+            async save (e) {
+                const result = await this.validate();
+                if (result.valid) {
+                    if (this.idEdit !== undefined) {
+                        this.updatePrompt();
+                    }
+                    else {
+                        this.createPrompt();
+                    }
                 }
             },
-            findById: function (id) {
-                PromptService.getPromptById(id)
-                    .then((response) => {
-                        this.form = {
-                            name: response.name,
-                            description: response.description,
-                            text: response.text,
-                        }
-                    });
-            },
+            findById(id) {
+                this.resetData();
+                PromptService.getPromptById(id).then((response) => {
+                    this.form = { name: response.name, description: response.description, text: response.text, };
+                    this.setValues(this.form);
+                });
+            }, 
             updatePrompt: function () {
                 var paramsData = {
                     id: this.idEdit,
-                    name: this.form.name,
-                    description: this.form.description,
-                    text: this.form.text,
+                    name: this.values.name,
+                    description: this.values.description,
+                    text: this.values.text,
                 };
                 PromptService.updatePrompt(paramsData)
                     .then((response) => {
@@ -141,16 +171,15 @@
                                 icon: 'CircleX',
                             });
                         }
-                        finally{
-                            this.redirectToPromptList();
-                        }
+                    }).finally(() => {
+                        this.redirectToPromptList()
                     });
             },
             createPrompt: function () {
                 var paramsData = {
-                    name: this.form.name,
-                    description: this.form.description,
-                    text: this.form.text,
+                    name: this.values.name,
+                    description: this.values.description,
+                    text: this.values.text,
                 };
                 PromptService.createPrompt(paramsData)
                     .then((response) => {
@@ -163,6 +192,12 @@
                                     icon: 'CircleX',
                                 });
                             }
+                            return this.$notify({
+                                title: 'prompts.title',
+                                message: 'prompts.updateSuccess',
+                                variant: 'success',
+                                icon: 'CircleCheckBig',
+                            });
                         }
                         catch (e) {
                              return this.$notify({
@@ -172,11 +207,19 @@
                                 icon: 'CircleX',
                             });
                         }
-                        finally{
-                             return this.redirectToPromptList();
-                        }
-                    });
-            }
+                    }).finally(() => {
+                        this.redirectToPromptList();
+                    });;
+            },
+            resetData() {
+                this.resetForm({
+                    values: {
+                        name: "",
+                        description: "",
+                        text: ""
+                    }
+                });
+            },
         },
         mounted() {
             this.idEdit = this.$route.query.id
@@ -185,6 +228,7 @@
             }
         },
         unmounted() { }
+
     }
 
 </script>
