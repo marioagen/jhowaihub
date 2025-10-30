@@ -669,9 +669,9 @@ namespace WoopiAiHub.UnitTests.Services
             marketPlaceApi.Verify(s => s.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
         }
 
-        [Fact(DisplayName = "GetOcrTextByDocumentId - Should return OCR text when available")]
-        [Trait("GetOcrTextByDocumentId", "Success")]
-        public async Task GetOcrTextByDocumentId_Success()
+        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return OCR text when available")]
+        [Trait("FindOcrTextByDocumentId", "Success")]
+        public async Task FindOcrTextByDocumentId_Success()
         {
             // Arrange
             var documentId = 1;
@@ -718,7 +718,7 @@ namespace WoopiAiHub.UnitTests.Services
             var documentServices = _mocker.CreateInstance<DocumentServices>();
 
             // Act
-            var result = await documentServices.GetOcrTextByDocumentId(documentId);
+            var result = await documentServices.FindOcrTextByDocumentId(documentId);
 
             // Assert
             Assert.True(result.HasOcr);
@@ -730,9 +730,9 @@ namespace WoopiAiHub.UnitTests.Services
             stepToolOutputRepositoryMock.Verify(r => r.FindByStepToolId(stepToolId, cardId), Times.Once);
         }
 
-        [Fact(DisplayName = "GetOcrTextByDocumentId - Should return HasOcr false when document not found")]
-        [Trait("GetOcrTextByDocumentId", "DocumentNotFound")]
-        public async Task GetOcrTextByDocumentId_DocumentNotFound()
+        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return HasOcr false when document not found")]
+        [Trait("FindOcrTextByDocumentId", "DocumentNotFound")]
+        public async Task FindOcrTextByDocumentId_DocumentNotFound()
         {
             // Arrange
             var documentId = 1;
@@ -743,7 +743,7 @@ namespace WoopiAiHub.UnitTests.Services
             var documentServices = _mocker.CreateInstance<DocumentServices>();
 
             // Act
-            var result = await documentServices.GetOcrTextByDocumentId(documentId);
+            var result = await documentServices.FindOcrTextByDocumentId(documentId);
 
             // Assert
             Assert.False(result.HasOcr);
@@ -751,9 +751,9 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
         }
 
-        [Fact(DisplayName = "GetOcrTextByDocumentId - Should return HasOcr false when no OCR execution found")]
-        [Trait("GetOcrTextByDocumentId", "NoOcrExecution")]
-        public async Task GetOcrTextByDocumentId_NoOcrExecution()
+        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return HasOcr false when no OCR execution found")]
+        [Trait("FindOcrTextByDocumentId", "NoOcrExecution")]
+        public async Task FindOcrTextByDocumentId_NoOcrExecution()
         {
             // Arrange
             var documentId = 1;
@@ -775,7 +775,7 @@ namespace WoopiAiHub.UnitTests.Services
             var documentServices = _mocker.CreateInstance<DocumentServices>();
 
             // Act
-            var result = await documentServices.GetOcrTextByDocumentId(documentId);
+            var result = await documentServices.FindOcrTextByDocumentId(documentId);
 
             // Assert
             Assert.False(result.HasOcr);

@@ -3,7 +3,7 @@ namespace WoopiAiHub.Domain.DTOs.Response
     /// <summary>
     /// Response DTO containing the concatenated OCR text from a document
     /// </summary>
-    public class OcrTextResponseDto
+    public record OcrTextResponseDto
     {
         /// <summary>
         /// Full concatenated OCR text from all pages

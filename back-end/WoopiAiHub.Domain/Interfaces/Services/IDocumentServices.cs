@@ -45,6 +45,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto dto);
         Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto);
-        Task<OcrTextResponseDto> GetOcrTextByDocumentId(int documentId);
+        Task<OcrTextResponseDto> FindOcrTextByDocumentId(int documentId);
     };
 }

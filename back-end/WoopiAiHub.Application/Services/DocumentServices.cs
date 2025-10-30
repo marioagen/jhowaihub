@@ -976,66 +976,70 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="documentId">The document ID</param>
         /// <returns>OcrTextResponseDto containing the OCR text if available</returns>
-        public async Task<OcrTextResponseDto> GetOcrTextByDocumentId(int documentId)
+        public async Task<OcrTextResponseDto> FindOcrTextByDocumentId(int documentId)
         {
             var response = new OcrTextResponseDto { HasOcr = false };
 
-            // Find the document
             var document = _documentRepository.FindById(documentId);
             if (document == null)
                 return response;
 
             response.ReferenceFile = document.ReferenceFile;
 
-            // Find cards associated with this document
             var card = await _cardRepository.FindByDocumentIdAsync(documentId);
             if (card == null)
                 return response;
 
-            // Find StepToolExecutions for this card that are OCR type with status Ready
-            var executions = card.Executions
-                .Where(e => e.Status == StatusExecution.Ready &&
-                           e.StepTool != null &&
-                           e.StepTool.Tool != null &&
-                           e.StepTool.Tool.ToolType != null &&
-                           e.StepTool.Tool.ToolType.Name == HandlersTypes.Ocr)
-                .ToList();
-
-            if (!executions.Any())
+            var ocrExecution = FindReadyOcrExecution(card);
+            if (ocrExecution == null)
                 return response;
 
-            // Get the first OCR execution (there should only be one per card)
-            var ocrExecution = executions.First();
-
-            // Find the output for this StepTool execution
             var outputJson = await _stepToolOutputRepository.FindByStepToolId(ocrExecution.StepToolId, card.Id);
-            
             if (string.IsNullOrEmpty(outputJson))
                 return response;
 
-            try
+            var ocrText = ExtractOcrTextFromOutput(outputJson, documentId);
+            if (!string.IsNullOrEmpty(ocrText))
             {
-                // Deserialize the output to DocumentEmbeddingsDataDto
-                var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
-                
-                if (embeddingsData?.DocumentEmbeddings == null || !embeddingsData.DocumentEmbeddings.Any())
-                    return response;
-
-                // Concatenate the text from all pages
-                var fullText = string.Join(Environment.NewLine + Environment.NewLine, 
-                    embeddingsData.DocumentEmbeddings
-                        .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
-                        .Select(e => e.Text));
-
-                response.Content = fullText;
+                response.Content = ocrText;
                 response.HasOcr = true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deserializing OCR output for document {DocumentId}", documentId);
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Finds the OCR execution with Ready status for a card
+        /// </summary>
+        /// <param name="card">The card to search in</param>
+        /// <returns>OCR execution or null if not found</returns>
+        private StepToolExecution? FindReadyOcrExecution(Card card)
+        {
+            return card.Executions
+                .FirstOrDefault(e => e.Status == StatusExecution.Ready &&
+                                    e.StepTool != null &&
+                                    e.StepTool.Tool != null &&
+                                    e.StepTool.Tool.ToolType != null &&
+                                    e.StepTool.Tool.ToolType.Name == HandlersTypes.Ocr);
+        }
+
+        /// <summary>
+        /// Extracts and concatenates OCR text from serialized output
+        /// </summary>
+        /// <param name="outputJson">Serialized StepToolOutput JSON</param>
+        /// <param name="documentId">Document ID for logging</param>
+        /// <returns>Concatenated OCR text or empty string if extraction fails</returns>
+        private string ExtractOcrTextFromOutput(string outputJson, int documentId)
+        {
+            var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
+
+            if (embeddingsData?.DocumentEmbeddings == null || !embeddingsData.DocumentEmbeddings.Any())
+                return string.Empty;
+
+            return string.Join(Environment.NewLine + Environment.NewLine,
+                embeddingsData.DocumentEmbeddings
+                    .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
+                    .Select(e => e.Text));
         }
     }
 }

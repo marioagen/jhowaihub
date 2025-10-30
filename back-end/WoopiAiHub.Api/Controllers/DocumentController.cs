@@ -371,17 +371,17 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("OcrText/{id}")]
         [SwaggerOperation(Summary = "Retrieve the OCR text for a document if available")]
         [ProducesResponseType(typeof(OcrTextResponseDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetOcrText(int id)
+        public async Task<IActionResult> FindOcrText(int id)
         {
             try
             {
-                var result = await _documentServices.GetOcrTextByDocumentId(id);
+                var result = await _documentServices.FindOcrTextByDocumentId(id);
                 return Ok(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An exception occurred in {Controller}.{Method} method for documentId: {id}.",
-                    nameof(DocumentController), nameof(GetOcrText), id);
+                    nameof(DocumentController), nameof(FindOcrText), id);
                 return StatusCode(500, "An unexpected error occurred while retrieving OCR text. Please try again or contact support.");
             }
         }
