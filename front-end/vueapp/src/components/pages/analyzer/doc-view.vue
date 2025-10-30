@@ -8,20 +8,11 @@
                 </a>
                 <img
                     src="../../../assets/img/go-to-text.png"
-                    @click="getDocumentNormalized"
+                    @click="toggleToText"
                     style="cursor: pointer; float: right"
-                    :title="$t('labelDocumentTranscript')"
+                    :title="hasOcrText ? $t('labelOcrText') : $t('labelDocumentTranscript')"
                     v-if="srcPdf"
                 />
-                <button 
-                    type="button" 
-                    class="btn btn-info btn-sm mb-1 ocr-button" 
-                    @click="getOcrText"
-                    v-if="hasOcrText"
-                    :title="$t('labelViewOcrText')">
-                    <i class="fas fa-file-alt"></i>
-                    OCR
-                </button>
                 <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
                     <i class="fas fa-sync-alt"></i>
                     {{ $t("labelReprocess") }}
@@ -54,12 +45,12 @@
                     </span>
                 </div>
             </div>
-            <div v-else-if="viewMode === 'normalized'">
+            <div v-else-if="viewMode === 'text'">
                 <div>
                     <strong class="form-label mb-3">
-                        {{ upperFormat($t("labelStandardizedFullText")) }}&nbsp;&nbsp;
+                        {{ upperFormat(hasOcrText ? $t("labelOcrText") : $t("labelStandardizedFullText")) }}&nbsp;&nbsp;
                     </strong>
-                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingDocumentNormalized"></i>
+                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingText"></i>
                     <img
                         src="../../../assets/img/go-to-pdf.png"
                         @click="viewMode = 'pdf'"
@@ -70,27 +61,7 @@
                 <textarea
                     type="text"
                     class="form-control custom-textarea textarea-norm-full"
-                    v-model="contentDocumentNormalized"
-                    readonly
-                ></textarea>
-            </div>
-            <div v-else-if="viewMode === 'ocr'">
-                <div>
-                    <strong class="form-label mb-3">
-                        TEXTO COMPLETO DO OCR&nbsp;&nbsp;
-                    </strong>
-                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingOcrText"></i>
-                    <img
-                        src="../../../assets/img/go-to-pdf.png"
-                        @click="viewMode = 'pdf'"
-                        style="cursor: pointer; float: right"
-                        :title="$t('labelPdfBack')"
-                    />
-                </div>
-                <textarea
-                    type="text"
-                    class="form-control custom-textarea textarea-norm-full"
-                    v-model="contentOcrText"
+                    v-model="textContent"
                     readonly
                 ></textarea>
             </div>
@@ -113,10 +84,8 @@
                 srcPdf: null,
                 errorPdf: false,
                 loading: true,
-                loadingDocumentNormalized: false,
-                loadingOcrText: false,
-                contentDocumentNormalized: "",
-                contentOcrText: "",
+                loadingText: false,
+                textContent: "",
                 hasOcrText: false,
                 controllAttempt: 0,
                 showModalForm: false,
@@ -163,52 +132,48 @@
                 this.dataView.Embeddings_model_name = model;
                 this.$emit("showNormalize", this.dataView, this.isReprocessing);
             },
-            getDocumentNormalized() {
-                this.loadingDocumentNormalized = false;
-                this.viewMode = 'normalized';
-                if (this.contentDocumentNormalized == "") {
-                    this.loadingDocumentNormalized = true;
-                    DocumentsServices.getNormalizedDocument(this.idAnalyzer)
-                        .then((response) => {
-                            if (response.error !== undefined) {
-                                this.modalAlertShow = true;
-                                this.loadingDocumentNormalized = false;
-                            }
-                            this.contentDocumentNormalized = response.content;
-                            this.loadingDocumentNormalized = false;
-                        })
-                        .finally(() => {
-                            console.log("Finished request.");
-                        });
-                }
-            },
-            getOcrText() {
-                this.loadingOcrText = false;
-                this.viewMode = 'ocr';
-                if (this.contentOcrText == "") {
-                    this.loadingOcrText = true;
-                    DocumentsServices.getOcrText(this.idAnalyzer)
-                        .then((response) => {
-                            if (response.error !== undefined) {
-                                this.modalAlertShow = true;
-                                this.loadingOcrText = false;
-                                return;
-                            }
-                            if (response.hasOcr) {
-                                this.contentOcrText = response.content;
-                            } else {
-                                this.contentOcrText = "OCR não disponível para este documento.";
-                            }
-                            this.loadingOcrText = false;
-                        })
-                        .catch((error) => {
-                            console.error("Error fetching OCR text:", error);
-                            this.contentOcrText = "Erro ao carregar texto do OCR.";
-                            this.loadingOcrText = false;
-                        })
-                        .finally(() => {
-                            console.log("Finished OCR request.");
-                        });
+            toggleToText() {
+                this.viewMode = 'text';
+                if (this.textContent == "") {
+                    this.loadingText = true;
+                    // If OCR is available, fetch OCR text; otherwise, fetch normalized text
+                    if (this.hasOcrText) {
+                        DocumentsServices.getOcrText(this.idAnalyzer)
+                            .then((response) => {
+                                if (response.error !== undefined) {
+                                    this.modalAlertShow = true;
+                                    this.loadingText = false;
+                                    return;
+                                }
+                                if (response.hasOcr) {
+                                    this.textContent = response.content;
+                                } else {
+                                    this.textContent = "OCR não disponível para este documento.";
+                                }
+                                this.loadingText = false;
+                            })
+                            .catch((error) => {
+                                console.error("Error fetching OCR text:", error);
+                                this.textContent = "Erro ao carregar texto do OCR.";
+                                this.loadingText = false;
+                            })
+                            .finally(() => {
+                                console.log("Finished request.");
+                            });
+                    } else {
+                        DocumentsServices.getNormalizedDocument(this.idAnalyzer)
+                            .then((response) => {
+                                if (response.error !== undefined) {
+                                    this.modalAlertShow = true;
+                                    this.loadingText = false;
+                                }
+                                this.textContent = response.content;
+                                this.loadingText = false;
+                            })
+                            .finally(() => {
+                                console.log("Finished request.");
+                            });
+                    }
                 }
             },
             checkOcrAvailability() {
@@ -329,17 +294,5 @@
 
     .reindex-button {
         margin-left: 5%;
-    }
-
-    .ocr-button {
-        margin-left: 5%;
-        background-color: #17a2b8;
-        border-color: #17a2b8;
-        color: white;
-    }
-
-    .ocr-button:hover {
-        background-color: #138496;
-        border-color: #117a8b;
     }
 </style>
