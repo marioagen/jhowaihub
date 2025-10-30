@@ -100,12 +100,34 @@
                         </div>
                     </div>
                     <div v-else class="mb-3">
-                        <h6>Inputs</h6>
+                        <h6>{{ $t("flow.sidebar.inputs") }}</h6>
                         <hr>
                         <div class="background-div" v-for="(param, index) in parameters" :key="index">
                             <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
                                       v-model="parameters[index].value"></textarea>
                         </div>
+                        
+                        <!-- Previous StepTools Dependencies -->
+                        <div v-if="previousStepTools && previousStepTools.length > 0" class="mt-4">
+                            <h6>{{ $t("flow.sidebar.dependencies") }}</h6>
+                            <hr>
+                            <p class="text-muted small">{{ $t("flow.sidebar.dependenciesHint") }}</p>
+                            <div v-for="prevTool in previousStepTools" :key="prevTool.id" class="form-check mb-2">
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    :id="'dep-' + prevTool.id"
+                                    :value="prevTool.id"
+                                    v-model="selectedDependencies"
+                                />
+                                <label class="form-check-label d-flex align-items-center" :for="'dep-' + prevTool.id">
+                                    <span class="badge bg-primary me-2">{{ prevTool.step?.order || 0 }}</span>
+                                    <span>{{ prevTool.name }}</span>
+                                    <span class="text-muted ms-2 small">({{ prevTool.step?.name || '' }})</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary"
                                     @click="updateNode">
@@ -123,6 +145,7 @@
     import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
     import AutomationServices from '@/services/automation/AutomationServices';
     import PromptService from "@/services/prompts/PromptsService";
+    import WorkflowService from "@/services/workflow/WorkflowService";
     import ToolType from '@/constants/ToolType';
 
     export default {
@@ -169,6 +192,8 @@
                 idSelected: 0,
                 promptlist: [],
                 toolType: "",
+                previousStepTools: [],
+                selectedDependencies: [],
             };
         },
         components: {
@@ -253,6 +278,12 @@
                 this.parameters = node.data.parameters;
                 this.toolType = node.data.toolType;
 
+                // Load previous StepTools for dependencies
+                this.loadPreviousStepTools(node);
+
+                // Initialize selected dependencies from node data
+                this.selectedDependencies = node.data.dependsOnStepToolIds || [];
+
                 if (this.isTargetTool(ToolType.N8N)){
                     this.loadingWebhooks = true
                     this.resetFormConnector();              
@@ -310,7 +341,12 @@
                 if (this.idSelected) {
                     this.parameters[0].value = this.idSelected.toString();
                 }
-                this.$refs.VueflowComponent.updateNodeInput(this.nodeFlow.id, this.parameters);
+                // Update node with parameters and dependencies
+                this.$refs.VueflowComponent.updateNodeInput(
+                    this.nodeFlow.id, 
+                    this.parameters,
+                    this.selectedDependencies
+                );
                 this.showMessage();
             },
             showMessage() {
@@ -338,7 +374,12 @@
                 }
                 this.parameters[0].value = JSON.stringify(this.formData);
                 this.parameters[0].webhookId = this.connector;
-                this.$refs.VueflowComponent.updateNodeInput(this.nodeFlow.id, this.parameters);
+                // Update node with parameters and dependencies
+                this.$refs.VueflowComponent.updateNodeInput(
+                    this.nodeFlow.id, 
+                    this.parameters,
+                    this.selectedDependencies
+                );
                 this.closeSidebar();
                 this.showMessage();
             },
@@ -398,6 +439,24 @@
                     .then((response) => {
                         this.promptlist = response;
                     });
+            },
+            loadPreviousStepTools(node) {
+                // Only load if the node has an ID (meaning it's an existing node)
+                if (node.data.stepToolId) {
+                    WorkflowService.getPreviousStepTools(node.data.stepToolId)
+                        .then((result) => {
+                            if (result && !result.error) {
+                                this.previousStepTools = result;
+                            } else {
+                                this.previousStepTools = [];
+                            }
+                        })
+                        .catch(() => {
+                            this.previousStepTools = [];
+                        });
+                } else {
+                    this.previousStepTools = [];
+                }
             },
             resetFormConnector(){
                 this.connectors = [];

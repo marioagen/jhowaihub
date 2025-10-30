@@ -159,6 +159,8 @@ export default {
                         isEditableInput: stepTool.tool.isEditableInput,
                         toolType: stepTool.tool.toolType,
                         toolId: stepTool.toolId,
+                        stepToolId: stepTool.id,
+                        dependsOnStepToolIds: stepTool.dependencies ? stepTool.dependencies.map(d => d.dependsOnStepToolId) : [],
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -194,14 +196,15 @@ export default {
             this.nodes = this.nodes.filter(node => node.id !== nodeId);
             this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
         },
-        updateNodeInput(nodeId, parameters) {
+        updateNodeInput(nodeId, parameters, dependsOnStepToolIds = []) {
             const idx = this.nodes.findIndex(node => node.id === nodeId);
             if (idx !== -1) {
                 this.nodes[idx] = {
                     ...this.nodes[idx],
                     data: {
                         ...this.nodes[idx].data,
-                        parameters: parameters
+                        parameters: parameters,
+                        dependsOnStepToolIds: dependsOnStepToolIds
                     }
                 };
             }
@@ -245,6 +248,8 @@ export default {
                     toolType: nodeData.toolType,
                     parameters: [],
                     toolId: nodeData.id,
+                    stepToolId: null,
+                    dependsOnStepToolIds: [],
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
@@ -261,7 +266,8 @@ export default {
                     order: index + 1,
                     status: "Active",
                     parameters: node.data.parameters,
-                    dependsOnStepToolId: index,                    
+                    dependsOnStepToolId: index,
+                    dependsOnStepToolIds: node.data.dependsOnStepToolIds || [],
                 }));
         },
         showCollapse() {
