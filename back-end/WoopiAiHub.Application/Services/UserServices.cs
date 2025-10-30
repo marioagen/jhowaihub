@@ -257,24 +257,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Adds profiles to the user based on the provided profileIds.
-        /// </summary>
-        /// <param name="profileIds"></param>
-        /// <param name="user"></param>
-        private void AddProfiles(ICollection<int>? profileIds, User user)
-        {
-            if (profileIds != null)
-            {
-                user.Profiles.Clear();
-                var profiles = _profileRepository.FindByIds(profileIds);
-                foreach (var profile in profiles)
-                {
-                    user.AddProfile(profile);
-                }
-            }
-        }
-
-        /// <summary>
         /// Adds teams to the user based on the provided teamIds.
         /// </summary>
         /// <param name="teamIds"></param>
@@ -303,11 +285,6 @@ namespace WoopiAiHub.Application.Services
             if (userCreateDto.TeamIds.Count > 0)
             {
                 AddTeams(userCreateDto.TeamIds, user);
-            }
-
-            if (userCreateDto.ProfileIds.Count > 0)
-            {
-                AddProfiles(userCreateDto.ProfileIds, user);
             }
         }
 
