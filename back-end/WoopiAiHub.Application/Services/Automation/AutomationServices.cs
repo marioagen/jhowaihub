@@ -234,13 +234,34 @@ namespace WoopiAiHub.Application.Services.Automation
 
             var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
 
-            string output = string.Empty;
-            if (stepTool.DependsOnStepTool != null)
-                output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id, resolvedCardId);
-
             var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
             var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
-            var payload = await handler.BuildPayload(enrichedDto, input, output, execution);
+
+            ExecutionMessageDto payload;
+
+            // Check if we have new-style dependencies or old-style dependency
+            if (stepTool.Dependencies != null && stepTool.Dependencies.Any())
+            {
+                // Use new multiple dependencies approach
+                var outputs = new List<StepToolOutput>();
+                foreach (var dependency in stepTool.Dependencies)
+                {
+                    var depOutputs = await _stepToolOutputRepository.FindAllByStepToolIdAsync(dependency.DependsOnStepToolId, resolvedCardId);
+                    outputs.AddRange(depOutputs);
+                }
+                payload = await handler.BuildPayload(enrichedDto, input, outputs, execution);
+            }
+            else if (stepTool.DependsOnStepTool != null)
+            {
+                // Use legacy single dependency approach for backward compatibility
+                string output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id, resolvedCardId);
+                payload = await handler.BuildPayload(enrichedDto, input, output, execution);
+            }
+            else
+            {
+                // No dependencies
+                payload = await handler.BuildPayload(enrichedDto, input, string.Empty, execution);
+            }
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
         }
@@ -296,12 +317,34 @@ namespace WoopiAiHub.Application.Services.Automation
             await _stepToolExecutionRepository.UpdateAsync(execution);
             var input = _stepToolParameterRepository.FindByStepToolId(dependentStepTool.Id);
 
-            string output = await _stepToolOutputRepository.FindByStepToolId(dependentStepTool!.DependsOnStepTool!.Id, execution.CardId);
-
             var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType!.Name);
             var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
 
-            var payload = await handler.BuildPayload(nextAutomationDto, input, output, execution);
+            ExecutionMessageDto payload;
+
+            // Check if we have new-style dependencies or old-style dependency
+            if (dependentStepTool.Dependencies != null && dependentStepTool.Dependencies.Any())
+            {
+                // Use new multiple dependencies approach
+                var outputs = new List<StepToolOutput>();
+                foreach (var dependency in dependentStepTool.Dependencies)
+                {
+                    var depOutputs = await _stepToolOutputRepository.FindAllByStepToolIdAsync(dependency.DependsOnStepToolId, execution.CardId);
+                    outputs.AddRange(depOutputs);
+                }
+                payload = await handler.BuildPayload(nextAutomationDto, input, outputs, execution);
+            }
+            else if (dependentStepTool.DependsOnStepTool != null)
+            {
+                // Use legacy single dependency approach for backward compatibility
+                string output = await _stepToolOutputRepository.FindByStepToolId(dependentStepTool.DependsOnStepTool.Id, execution.CardId);
+                payload = await handler.BuildPayload(nextAutomationDto, input, output, execution);
+            }
+            else
+            {
+                // No dependencies
+                payload = await handler.BuildPayload(nextAutomationDto, input, string.Empty, execution);
+            }
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
         }

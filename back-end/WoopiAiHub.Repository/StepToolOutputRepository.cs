@@ -46,6 +46,19 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Retrieves all outputs associated with the specified step tool identifier and card ID.
+        /// </summary>
+        /// <param name="stepToolId">The identifier of the step tool whose outputs are to be retrieved.</param>
+        /// <param name="cardId">The identifier of the card associated with the outputs.</param>
+        /// <returns>A list of StepToolOutput objects associated with the specified step tool and card.</returns>
+        public async Task<List<StepToolOutput>> FindAllByStepToolIdAsync(int stepToolId, int cardId)
+        {
+            return await _context.StepToolOutputs
+                .Where(u => u.StepToolId.Equals(stepToolId) && u.CardId.Equals(cardId))
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Deletes the entities with the specified IDs from the data source.
         /// </summary>
         /// <remarks>If the specified collection of IDs is empty or none of the IDs match existing

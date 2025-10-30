@@ -10,5 +10,10 @@ namespace WoopiAiHub.Domain.Interfaces.Handlers
                                                StepToolParameter? input,
                                                string output,
                                                StepToolExecution? execution = null);
+        
+        Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
+                                               StepToolParameter? input,
+                                               ICollection<StepToolOutput> outputs,
+                                               StepToolExecution? execution = null);
     }
 }
