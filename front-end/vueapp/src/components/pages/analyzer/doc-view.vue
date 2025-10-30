@@ -11,7 +11,7 @@
                     @click="toggleToText"
                     style="cursor: pointer; float: right"
                     :title="hasOcrText ? $t('labelOcrText') : $t('labelDocumentTranscript')"
-                    v-if="srcPdf"
+                    v-if="srcPdf && (hasOcrText || hasNormalizedText)"
                 />
                 <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
                     <i class="fas fa-sync-alt"></i>
@@ -87,6 +87,7 @@
                 loadingText: false,
                 textContent: "",
                 hasOcrText: false,
+                hasNormalizedText: true,
                 controllAttempt: 0,
                 showModalForm: false,
                 showLoading: false,
@@ -153,12 +154,11 @@
                                 this.loadingText = false;
                             })
                             .catch((error) => {
-                                console.error("Error fetching OCR text:", error);
                                 this.textContent = "Erro ao carregar texto do OCR.";
                                 this.loadingText = false;
                             })
                             .finally(() => {
-                                console.log("Finished request.");
+                                // Request finished
                             });
                     } else {
                         DocumentsServices.getNormalizedDocument(this.idAnalyzer)
@@ -171,7 +171,7 @@
                                 this.loadingText = false;
                             })
                             .finally(() => {
-                                console.log("Finished request.");
+                                // Request finished
                             });
                     }
                 }
@@ -184,7 +184,7 @@
                         }
                     })
                     .catch((error) => {
-                        console.error("Error checking OCR availability:", error);
+                        // Error checking OCR availability - continue with normalized text
                     });
             },
             openTab() {
