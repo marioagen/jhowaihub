@@ -10,8 +10,8 @@
                     src="../../../assets/img/go-to-text.png"
                     @click="toggleToText"
                     style="cursor: pointer; float: right"
-                    :title="hasOcrText ? $t('labelOcrText') : $t('labelDocumentTranscript')"
-                    v-if="srcPdf && (hasOcrText || hasNormalizedText)"
+                    :title="$t('labelOcrText')"
+                    v-if="srcPdf && hasOcrText"
                 />
                 <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
                     <i class="fas fa-sync-alt"></i>
@@ -48,7 +48,7 @@
             <div v-else-if="viewMode === 'text'">
                 <div>
                     <strong class="form-label mb-3">
-                        {{ upperFormat(hasOcrText ? $t("labelOcrText") : $t("labelStandardizedFullText")) }}&nbsp;&nbsp;
+                        {{ upperFormat($t("labelOcrText")) }}&nbsp;&nbsp;
                     </strong>
                     <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingText"></i>
                     <img
@@ -87,7 +87,6 @@
                 loadingText: false,
                 textContent: "",
                 hasOcrText: false,
-                hasNormalizedText: true,
                 controllAttempt: 0,
                 showModalForm: false,
                 showLoading: false,
@@ -137,43 +136,27 @@
                 this.viewMode = 'text';
                 if (this.textContent == "") {
                     this.loadingText = true;
-                    // If OCR is available, fetch OCR text; otherwise, fetch normalized text
-                    if (this.hasOcrText) {
-                        DocumentsServices.getOcrText(this.idAnalyzer)
-                            .then((response) => {
-                                if (response.error !== undefined) {
-                                    this.modalAlertShow = true;
-                                    this.loadingText = false;
-                                    return;
-                                }
-                                if (response.hasOcr) {
-                                    this.textContent = response.content;
-                                } else {
-                                    this.textContent = "OCR não disponível para este documento.";
-                                }
+                    DocumentsServices.getOcrText(this.idAnalyzer)
+                        .then((response) => {
+                            if (response.error !== undefined) {
+                                this.modalAlertShow = true;
                                 this.loadingText = false;
-                            })
-                            .catch((error) => {
-                                this.textContent = "Erro ao carregar texto do OCR.";
-                                this.loadingText = false;
-                            })
-                            .finally(() => {
-                                // Request finished
-                            });
-                    } else {
-                        DocumentsServices.getNormalizedDocument(this.idAnalyzer)
-                            .then((response) => {
-                                if (response.error !== undefined) {
-                                    this.modalAlertShow = true;
-                                    this.loadingText = false;
-                                }
+                                return;
+                            }
+                            if (response.hasOcr) {
                                 this.textContent = response.content;
-                                this.loadingText = false;
-                            })
-                            .finally(() => {
-                                // Request finished
-                            });
-                    }
+                            } else {
+                                this.textContent = "OCR não disponível para este documento.";
+                            }
+                            this.loadingText = false;
+                        })
+                        .catch((error) => {
+                            this.textContent = "Erro ao carregar texto do OCR.";
+                            this.loadingText = false;
+                        })
+                        .finally(() => {
+                            // Request finished
+                        });
                 }
             },
             checkOcrAvailability() {
