@@ -61,6 +61,14 @@ namespace WoopiAiHub.Repository
                     RequiredFile = sp.RequiredFile,
                     WebhookId = sp.WebhookId
                 }).ToList(),
+                Dependencies = q.Dependencies.Select(d => new StepToolDependencyDto
+                {
+                    Id = d.Id,
+                    StepToolId = d.StepToolId,
+                    DependsOnStepToolId = d.DependsOnStepToolId,
+                    DependsOnStepToolName = d.DependsOnStepTool.Tool!.Name,
+                    DependsOnStepOrder = d.DependsOnStepTool.Step!.Order
+                }).ToList(),
                 Step = new StepDto
                 {
                     Name = q.Step!.Name,
@@ -268,6 +276,54 @@ namespace WoopiAiHub.Repository
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Finds all StepTools that were executed before the specified StepTool, 
+        /// including those from previous steps and earlier in the same step.
+        /// </summary>
+        /// <param name="stepToolId">The ID of the StepTool to find previous tools for.</param>
+        /// <returns>A list of StepToolDto objects representing previous StepTools.</returns>
+        public async Task<List<StepToolDto>> FindPreviousStepToolsAsync(int stepToolId)
+        {
+            var currentStepTool = await _context.StepTools
+                .Include(st => st.Step)
+                .FirstOrDefaultAsync(st => st.Id == stepToolId);
+
+            if (currentStepTool == null)
+                return new List<StepToolDto>();
+
+            var currentStepId = currentStepTool.StepId;
+            var currentStepOrder = currentStepTool.Step!.Order;
+            var currentToolOrder = currentStepTool.Order;
+            var workflowId = currentStepTool.Step.WorkflowId;
+
+            var previousStepTools = await _context.StepTools
+                .Include(st => st.Step)
+                .Include(st => st.Tool)
+                .Where(st => st.Step!.WorkflowId == workflowId &&
+                            (st.Step.Order < currentStepOrder ||
+                             (st.Step.Order == currentStepOrder && st.Order < currentToolOrder)))
+                .OrderBy(st => st.Step!.Order)
+                .ThenBy(st => st.Order)
+                .Select(q => new StepToolDto
+                {
+                    Id = q.Id,
+                    Name = q.Tool!.Name,
+                    StepId = q.StepId,
+                    ToolId = q.ToolId,
+                    Order = q.Order,
+                    PositionX = q.PositionX,
+                    PositionY = q.PositionY,
+                    Step = new StepDto
+                    {
+                        Name = q.Step!.Name,
+                        Order = q.Step.Order,
+                    }
+                })
+                .ToListAsync();
+
+            return previousStepTools;
         }
     }
 }

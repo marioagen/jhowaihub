@@ -20,6 +20,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
+        private readonly IStepToolRepository _stepToolRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
@@ -31,6 +32,7 @@ namespace WoopiAiHub.Application.Services
                                 ITeamRepository teamRepository,
                                 IStatusRepository statusRepository,
                                 IStepRepository stepRepository,
+                                IStepToolRepository stepToolRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
                                 ILogger<WorkflowServices> logger,
@@ -40,6 +42,7 @@ namespace WoopiAiHub.Application.Services
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
+            _stepToolRepository = stepToolRepository;
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
@@ -140,6 +143,12 @@ namespace WoopiAiHub.Application.Services
 
                             stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
                             stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+
+                            // Handle new dependencies if provided
+                            if (stepToolDto.DependsOnStepToolIds != null && stepToolDto.DependsOnStepToolIds.Any())
+                            {
+                                stepTool.UpdateDependencies(stepToolDto.DependsOnStepToolIds.ToList());
+                            }
 
                             if (stepToolDto.Parameters.Count > 0)
                             {
@@ -447,6 +456,17 @@ namespace WoopiAiHub.Application.Services
         {
             var workflow = _workflowRepository.FindAll();
             return workflow;
+        }
+
+        /// <summary>
+        /// Finds all StepTools that were executed before the specified StepTool.
+        /// This includes StepTools from previous steps and earlier in the same step.
+        /// </summary>
+        /// <param name="stepToolId">The ID of the StepTool to find previous tools for.</param>
+        /// <returns>A list of StepToolDto objects representing previous StepTools.</returns>
+        public async Task<List<StepToolDto>> FindPreviousStepToolsAsync(int stepToolId)
+        {
+            return await _stepToolRepository.FindPreviousStepToolsAsync(stepToolId);
         }
     }
 }

@@ -28,6 +28,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<StepToolOutput> Outputs { get; set; } = new List<StepToolOutput>();
         public virtual ICollection<StepToolExecution> Executions { get; private set; } = new List<StepToolExecution>();
         public virtual ICollection<StepToolParameter> Parameters { get; private set; } = new List<StepToolParameter>();
+        public virtual ICollection<StepToolDependency> Dependencies { get; private set; } = new List<StepToolDependency>();
 
         public StepTool(int id, 
                        DateTime created, 
@@ -78,6 +79,32 @@ namespace WoopiAiHub.Domain.Models
         {
             DependsOnStepToolId = null;
             DependsOnStepTool = null;
+        }
+
+        public void AddDependency(StepToolDependency dependency)
+        {
+            ArgumentNullException.ThrowIfNull(dependency);
+            Dependencies.Add(dependency);
+        }
+
+        public void RemoveDependencies()
+        {
+            Dependencies.Clear();
+        }
+
+        public void UpdateDependencies(ICollection<int> dependsOnStepToolIds)
+        {
+            ArgumentNullException.ThrowIfNull(dependsOnStepToolIds);
+            
+            // Remove existing dependencies
+            Dependencies.Clear();
+            
+            // Add new dependencies
+            foreach (var dependsOnId in dependsOnStepToolIds)
+            {
+                var dependency = new StepToolDependency(0, DateTime.UtcNow, Id, dependsOnId);
+                Dependencies.Add(dependency);
+            }
         }
     }
 }

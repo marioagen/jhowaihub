@@ -133,5 +133,20 @@ namespace WoopiAiHub.Api.Controllers
             var workflowList = _workflowServices.FindAll();
             return Ok(workflowList);
         }
+
+        /// <summary>
+        /// Endpoint that returns all StepTools that can be used as dependencies
+        /// for the specified StepTool (i.e., previous StepTools in the workflow).
+        /// </summary>
+        /// <param name="stepToolId">The ID of the StepTool to find previous tools for.</param>
+        /// <returns>A list of StepToolDto objects representing available dependencies.</returns>
+        [HttpGet("StepTools/{stepToolId}/Previous")]
+        [SwaggerOperation("Endpoint that returns all previous StepTools for dependency selection")]
+        [ProducesResponseType(typeof(List<StepToolDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindPreviousStepTools(int stepToolId)
+        {
+            var previousStepTools = await _workflowServices.FindPreviousStepToolsAsync(stepToolId);
+            return Ok(previousStepTools);
+        }
     }
 }

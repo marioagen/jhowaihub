@@ -11,6 +11,7 @@ namespace WoopiAiHub.Domain.DTOs.Request
         public decimal PositionX { get; set; }
         public decimal PositionY { get; set; }
         public int? DependsOnStepToolId { get; set; }
+        public ICollection<int> DependsOnStepToolIds { get; set; } = [];
         public ICollection<StepToolParameterUpdateDto> Parameters { get; set; } = [];
     }
 }
