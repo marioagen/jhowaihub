@@ -47,7 +47,7 @@ namespace WoopiAiHub.Repository
                 .Where(x => x.ProfileId == ProfileId)
                 .ToListAsync();
 
-            if (list.Count() > 0)
+            if (list.Count() < 0)
                 return false;
 
             _context.StepProfilePermissions.RemoveRange(list);
