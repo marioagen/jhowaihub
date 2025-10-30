@@ -74,13 +74,6 @@ namespace WoopiAiHub.Repository
                             Created = u.Created
                         })
                         .ToList(),
-                     Users = t.Users
-                        .Select(u => new UserDto
-                        {
-                            Id = u.Id,
-                            Name = u.Name,
-                            Created = u.Created
-                        }).ToList(),
                     WorkflowPermission = t.StepProfilePermissions
                         .Where(u => u.ProfileId == t.Id)
                         .Select(u => new WorkflowPermissionDto
@@ -153,13 +146,6 @@ namespace WoopiAiHub.Repository
                             Group = u.Group
                         })
                         .ToList(),
-                        Users = t.Users
-                        .Select(u => new UserDto
-                        {
-                            Id = u.Id,
-                            Name = u.Name,
-                            Created = u.Created
-                        }).ToList()
                 })
                 .AsQueryable()
                 .AsNoTracking();
@@ -186,7 +172,6 @@ namespace WoopiAiHub.Repository
         {
             return _context.Profiles.Where(u => u.Id == id)
                                     .Include(t => t.Permissions)
-                                    .Include(t => t.Users)
                                     .FirstOrDefault();
         }
     }

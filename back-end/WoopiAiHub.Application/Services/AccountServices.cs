@@ -131,10 +131,9 @@ namespace WoopiAiHub.Application.Services
                                 throw new InvalidOperationException(_messageHttpContextNotAvailable);
 
                     await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
-                    await _tenantContextService.TrySetTenantConnectionAsync(httpContext, 
-                                                                            userAccess.Tenant);
-                    var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
+                    await _tenantContextService.TrySetTenantConnectionAsync(httpContext, userAccess.Tenant);
 
+                    var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
                     if (user == null)
                         throw new AppException(null,
                                                "User not found.",
