@@ -573,7 +573,10 @@
         },
         sidebarTitle: "Configure I/O:",
         sidebar:{
-            filter: "Select webhook"
+            filter: "Select webhook",
+            inputs: "Inputs",
+            dependencies: "Dependencies",
+            dependenciesHint: "Select previous tools whose outputs you want to use as input"
         },
         formFlow: {
             progressFlowSuccess: "Flow inserted successfully",

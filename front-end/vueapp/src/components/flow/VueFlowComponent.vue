@@ -266,7 +266,10 @@ export default {
                     order: index + 1,
                     status: "Active",
                     parameters: node.data.parameters,
+                    // Legacy single dependency field - maintained for backward compatibility
+                    // Backend will prioritize dependsOnStepToolIds if provided
                     dependsOnStepToolId: index,
+                    // New multiple dependencies field
                     dependsOnStepToolIds: node.data.dependsOnStepToolIds || [],
                 }));
         },

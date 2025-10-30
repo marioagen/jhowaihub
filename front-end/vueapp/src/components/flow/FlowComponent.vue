@@ -121,9 +121,9 @@
                                     v-model="selectedDependencies"
                                 />
                                 <label class="form-check-label d-flex align-items-center" :for="'dep-' + prevTool.id">
-                                    <span class="badge bg-primary me-2">{{ prevTool.step?.order || 0 }}</span>
+                                    <span class="badge bg-primary me-2">{{ prevTool.step?.order ?? '-' }}</span>
                                     <span>{{ prevTool.name }}</span>
-                                    <span class="text-muted ms-2 small">({{ prevTool.step?.name || '' }})</span>
+                                    <span class="text-muted ms-2 small" v-if="prevTool.step?.name">({{ prevTool.step.name }})</span>
                                 </label>
                             </div>
                         </div>
