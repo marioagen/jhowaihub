@@ -59,7 +59,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Create_ShouldReturnTrue_WhenUserIsCreated()
         {
             // Arrange
-            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", Password = "Password123", TeamIds = [1], ProfileIds = [1] };
+            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", Password = "Password123", TeamIds = [1] };
             var headersDto = new HeadersDto { Tenant = "tenant" };
             var requestDto = _fixture.FindValidRequestAssignLicensesByHub();
             var userId = Guid.NewGuid();
@@ -465,7 +465,6 @@ namespace WoopiAiHub.UnitTests.Services
                 Email = "test@email.com",
                 Password = "password123",
                 TeamIds = new List<int>(),
-                ProfileIds = new List<int> { 1, 2 }
             };
 
             var headers = new HeadersDto { Tenant = "tenant" };

@@ -113,7 +113,6 @@ namespace WoopiAiHub.Application.Services
                     Email = userUpdateDto.Email,
                     Password = userUpdateDto.Password,
                     TeamIds =  userUpdateDto.TeamIds,
-                    ProfileIds = userUpdateDto.ProfileIds,
                 };
                 return await ReactivateUser(existingUser, userCreateDto, headersDto);
             }
@@ -385,7 +384,6 @@ namespace WoopiAiHub.Application.Services
                     Email = userUpdateDto.Email,
                     Password = userUpdateDto.Password,
                     TeamIds =  userUpdateDto.TeamIds,
-                    ProfileIds = userUpdateDto.ProfileIds,
                 };
 
                 UpdateTeamsAndProfiles(userCreateDto, user);
