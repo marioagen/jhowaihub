@@ -79,26 +79,10 @@
                             </div>
                         </div>
                         
-                        <!-- Previous StepTools Dependencies -->
-                        <div v-if="previousStepTools && previousStepTools.length > 0" class="mt-4">
-                            <h6>{{ $t("flow.sidebar.dependencies") }}</h6>
-                            <hr>
-                            <p class="text-muted small">{{ $t("flow.sidebar.dependenciesHint") }}</p>
-                            <div v-for="prevTool in previousStepTools" :key="prevTool.id" class="form-check mb-2">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    :id="'dep-' + prevTool.id"
-                                    :value="prevTool.id"
-                                    v-model="selectedDependencies"
-                                />
-                                <label class="form-check-label d-flex align-items-center" :for="'dep-' + prevTool.id">
-                                    <span class="badge bg-primary me-2">{{ prevTool.step?.order ?? '-' }}</span>
-                                    <span>{{ prevTool.name }}</span>
-                                    <span class="text-muted ms-2 small" v-if="prevTool.step?.name">({{ prevTool.step.name }})</span>
-                                </label>
-                            </div>
-                        </div>
+                        <DependencySelector 
+                            :previousStepTools="previousStepTools"
+                            v-model="selectedDependencies"
+                        />
                         
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary" @click="updateNodeWithForm">{{ $t("labelSave") }}</button>
@@ -115,26 +99,10 @@
                             </select>
                         </div>
                         
-                        <!-- Previous StepTools Dependencies -->
-                        <div v-if="previousStepTools && previousStepTools.length > 0" class="mt-4">
-                            <h6>{{ $t("flow.sidebar.dependencies") }}</h6>
-                            <hr>
-                            <p class="text-muted small">{{ $t("flow.sidebar.dependenciesHint") }}</p>
-                            <div v-for="prevTool in previousStepTools" :key="prevTool.id" class="form-check mb-2">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    :id="'dep-' + prevTool.id"
-                                    :value="prevTool.id"
-                                    v-model="selectedDependencies"
-                                />
-                                <label class="form-check-label d-flex align-items-center" :for="'dep-' + prevTool.id">
-                                    <span class="badge bg-primary me-2">{{ prevTool.step?.order ?? '-' }}</span>
-                                    <span>{{ prevTool.name }}</span>
-                                    <span class="text-muted ms-2 small" v-if="prevTool.step?.name">({{ prevTool.step.name }})</span>
-                                </label>
-                            </div>
-                        </div>
+                        <DependencySelector 
+                            :previousStepTools="previousStepTools"
+                            v-model="selectedDependencies"
+                        />
                         
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary"
@@ -151,26 +119,10 @@
                                       v-model="parameters[index].value"></textarea>
                         </div>
                         
-                        <!-- Previous StepTools Dependencies -->
-                        <div v-if="previousStepTools && previousStepTools.length > 0" class="mt-4">
-                            <h6>{{ $t("flow.sidebar.dependencies") }}</h6>
-                            <hr>
-                            <p class="text-muted small">{{ $t("flow.sidebar.dependenciesHint") }}</p>
-                            <div v-for="prevTool in previousStepTools" :key="prevTool.id" class="form-check mb-2">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    :id="'dep-' + prevTool.id"
-                                    :value="prevTool.id"
-                                    v-model="selectedDependencies"
-                                />
-                                <label class="form-check-label d-flex align-items-center" :for="'dep-' + prevTool.id">
-                                    <span class="badge bg-primary me-2">{{ prevTool.step?.order ?? '-' }}</span>
-                                    <span>{{ prevTool.name }}</span>
-                                    <span class="text-muted ms-2 small" v-if="prevTool.step?.name">({{ prevTool.step.name }})</span>
-                                </label>
-                            </div>
-                        </div>
+                        <DependencySelector 
+                            :previousStepTools="previousStepTools"
+                            v-model="selectedDependencies"
+                        />
 
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary"
@@ -187,6 +139,7 @@
 
 <script>
     import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
+    import DependencySelector from '@/components/flow/DependencySelector.vue';
     import AutomationServices from '@/services/automation/AutomationServices';
     import PromptService from "@/services/prompts/PromptsService";
     import WorkflowService from "@/services/workflow/WorkflowService";
@@ -242,6 +195,7 @@
         },
         components: {
             VueFlowComponent,
+            DependencySelector,
         },
         methods: {
             redirectToIndex() {
