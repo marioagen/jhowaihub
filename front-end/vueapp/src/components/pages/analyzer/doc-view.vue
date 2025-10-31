@@ -74,6 +74,7 @@
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import ModalReprocess from "@/components/pages/analyzer/modal-reprocess";
     import ModalAlert from "@/components/common/modal-alert";
+    import LogService from '@/services/log/logService';
 
     export default {
         name: "DocView",
@@ -153,9 +154,6 @@
                         .catch((error) => {
                             this.textContent = "Erro ao carregar texto do OCR.";
                             this.loadingText = false;
-                        })
-                        .finally(() => {
-                            // Request finished
                         });
                 }
             },
@@ -167,7 +165,7 @@
                         }
                     })
                     .catch((error) => {
-                        // Error checking OCR availability - continue with normalized text
+                        LogService.showMessage("Erro ao buscar texto do OCR.");
                     });
             },
             openTab() {
