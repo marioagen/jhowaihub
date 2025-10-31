@@ -1,7 +1,7 @@
 ﻿<template>
     <div class="col-md-6">
         <div class="mb-2" style="margin-top: 12px !important">
-            <div v-if="viewMode === 'pdf'">
+            <div v-if="viewMode === $options.VIEW_MODE_PDF">
                 <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
                 <a @click="openTab" v-if="srcPdf">
                     <i class="fas fa-expand text-primary" style="cursor: pointer" :title="$t('labelExpand')"></i>
@@ -45,7 +45,7 @@
                     </span>
                 </div>
             </div>
-            <div v-else-if="viewMode === 'text'">
+            <div v-else-if="viewMode === $options.VIEW_MODE_TEXT">
                 <div>
                     <strong class="form-label mb-3">
                         {{ upperFormat($t("labelOcrText")) }}&nbsp;&nbsp;
@@ -53,7 +53,7 @@
                     <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingText"></i>
                     <img
                         src="../../../assets/img/go-to-pdf.png"
-                        @click="viewMode = 'pdf'"
+                        @click="viewMode = $options.VIEW_MODE_PDF"
                         style="cursor: pointer; float: right"
                         :title="$t('labelPdfBack')"
                     />
@@ -76,12 +76,17 @@
     import ModalAlert from "@/components/common/modal-alert";
     import LogService from '@/services/log/logService';
 
+    const VIEW_MODE_PDF = 'pdf';
+    const VIEW_MODE_TEXT = 'text';
+
     export default {
         name: "DocView",
+        VIEW_MODE_PDF,
+        VIEW_MODE_TEXT,
         data() {
             return {
                 idAnalyzer: this.$route.params.id,
-                viewMode: 'pdf',
+                viewMode: VIEW_MODE_PDF,
                 srcPdf: null,
                 errorPdf: false,
                 loading: true,
@@ -134,7 +139,7 @@
                 this.$emit("showNormalize", this.dataView, this.isReprocessing);
             },
             toggleToText() {
-                this.viewMode = 'text';
+                this.viewMode = VIEW_MODE_TEXT;
                 if (this.textContent == "") {
                     this.loadingText = true;
                     DocumentsServices.getOcrText(this.idAnalyzer)
