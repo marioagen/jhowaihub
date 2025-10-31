@@ -129,16 +129,8 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Update(Team team)
         {
-            try
-            {
-                _context.Teams.Update(team);
-                _context.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            
+            _context.Teams.Update(team);
+            _context.SaveChanges();
             return true;
         }
 
