@@ -439,22 +439,32 @@
                     });
             },
             loadPreviousStepTools(node) {
-                // Only load if the node has an ID (meaning it's an existing node)
-                if (node.data.stepToolId) {
-                    WorkflowService.getPreviousStepTools(node.data.stepToolId)
-                        .then((result) => {
-                            if (result && !result.error) {
-                                this.previousStepTools = result;
-                            } else {
-                                this.previousStepTools = [];
-                            }
-                        })
-                        .catch(() => {
-                            this.previousStepTools = [];
-                        });
-                } else {
-                    this.previousStepTools = [];
-                }
+                // Get previous tools from the in-memory flow nodes
+                // This ensures we include any tools that were added/removed in memory
+                // but not yet saved to the backend
+                const allNodes = this.$refs.VueflowComponent?.nodes || [];
+                const currentNodeId = node.id;
+                
+                // Filter nodes to get only those that come before the current node
+                // Exclude the "start" node and the current node itself
+                this.previousStepTools = allNodes
+                    .filter(n => n.id !== "start" && n.id !== currentNodeId)
+                    .map((n, index) => ({
+                        id: parseInt(n.id, 10),
+                        name: n.label || n.data?.name || `Tool ${n.id}`,
+                        toolId: n.toolId,
+                        order: index + 1,
+                        step: {
+                            order: this.stepOrder,
+                            name: `Step ${this.stepOrder}`
+                        }
+                    }))
+                    .filter((tool, idx, arr) => {
+                        // Only include tools that come before the current node
+                        const currentNodeIndex = allNodes.findIndex(n => n.id === currentNodeId);
+                        const toolNodeIndex = allNodes.findIndex(n => n.id === tool.id.toString());
+                        return toolNodeIndex < currentNodeIndex;
+                    });
             },
             resetFormConnector(){
                 this.connectors = [];
