@@ -11,7 +11,7 @@
                             class="btn btn-outline-secondary btn-sm me-2 fw-semibold"
                             @click="selectAll"
                         >
-                            <i class="bi bi-check-all"></i>
+                            <LucideIcon icon="CheckCheck" :size="15" />
                             {{ $t("labelSelectAll") }}
                         </button>
                         <button
@@ -19,7 +19,7 @@
                             class="btn btn-outline-secondary btn-sm fw-semibold"
                             @click="clearSelection"
                         >
-                            <i class="bi bi-x-circle"></i>
+                            <LucideIcon icon="CircleX" :size="15" />
                             {{ $t("labelClearSelection") }}
                         </button>
                     </div>

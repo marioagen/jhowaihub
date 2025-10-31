@@ -223,6 +223,7 @@
             },
         },
         mounted() {
+            this.resetForm();
             this.getUsers();
             this.getProfiles();
             this.setupEdit();
@@ -319,6 +320,7 @@
                 this.teamData.id = 0;
                 this.teamData.name = "";
                 this.selectedUsers = [];
+                this.selectedProfiles = [];
                 this.searchTerm = "";
             },
             setupEdit() {
