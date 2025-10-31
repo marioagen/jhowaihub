@@ -29,6 +29,17 @@ namespace WoopiAiHub.Domain.Models
             Users.Add(user);
         }
 
+        public void AddProfile(Profile profile)
+        {
+            if (profile == null)
+                throw new ArgumentNullException(nameof(profile));
+
+            if (this.Profiles.Any(t => t.Id == profile.Id))
+                return;
+
+            Profiles.Add(profile);
+        }
+
         public void Update(string name)
         {
             Name = name;

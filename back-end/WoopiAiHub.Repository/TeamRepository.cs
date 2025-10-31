@@ -80,6 +80,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams
                 .Include(t => t.Users)
+                .Include(t => t.Profiles)
                 .Select(t => new TeamDto
                 {
                     Id = t.Id,
@@ -95,7 +96,14 @@ namespace WoopiAiHub.Repository
                             IsActive = u.IsActive,
                             Created = u.Created
                         })
-                        .ToList()
+                        .ToList(),
+                    Profiles = t.Profiles!
+                        .Select( p => new ProfileDto
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                        })
+                        .ToList(),
                 })
                 .AsNoTracking()
                 .FirstOrDefault(t => t.Id == id);
@@ -110,6 +118,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams.Where(u => u.Id == id)
                                         .Include(t => t.Users)
+                                        .Include(T => T.Profiles)
                                         .FirstOrDefault();
         }
 
@@ -120,8 +129,16 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Update(Team team)
         {
-            _context.Teams.Update(team);
-            _context.SaveChanges();
+            try
+            {
+                _context.Teams.Update(team);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            
             return true;
         }
 

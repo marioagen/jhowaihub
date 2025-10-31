@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -13,12 +14,15 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IProfileRepository _profileRepository;
 
         public TeamServices(ITeamRepository teamRepository,
-                            IUserRepository userRepository)
+                            IUserRepository userRepository,
+                            IProfileRepository profileRepository)
         {
             _teamRepository = teamRepository;
             _userRepository = userRepository;
+            _profileRepository = profileRepository;
         }
 
         /// <summary>
@@ -134,6 +138,17 @@ namespace WoopiAiHub.Application.Services
                 }
             }
 
+            if(teamCreateDto.ProfileIds.Count() > 0)
+            {
+                team.Profiles.Clear();
+                var profiles = _profileRepository.FindByIds(teamCreateDto.ProfileIds);
+
+                foreach(var profile in profiles)
+                {
+                    team.AddProfile(profile);
+                }
+            }
+
             var createResult = _teamRepository.CreateUniqueTeam(team);
             if (!createResult)
             {
@@ -165,6 +180,17 @@ namespace WoopiAiHub.Application.Services
                 foreach (var user in users)
                 {
                     team.AddUser(user);
+                }
+            }
+
+            if (teamUpdateDto.ProfileIds.Count() > 0)
+            {
+                team.Profiles.Clear();
+                var profiles = _profileRepository.FindByIds(teamUpdateDto.ProfileIds);
+
+                foreach (var profile in profiles)
+                {
+                    team.AddProfile(profile);
                 }
             }
 

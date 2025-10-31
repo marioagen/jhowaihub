@@ -44,6 +44,15 @@
                                 <ErrorMessage name="teamName" class="invalid-feedback d-block" />
                             </div>
                             <SelectionListComponent
+                                :id="'profiles'"
+                                :labelPanel="'labelProfiles'"
+                                :labelSelectedQuantity="'labelSelectedProfiles'"
+                                :labelSearch="'labelSearchProfiles'"
+                                :items="profilesList"
+                                :loading="isLoading"
+                                v-model:selectedItems="selectedProfiles"
+                            />
+                            <SelectionListComponent
                                 :id="'users'"
                                 :labelPanel="'labelTeamMembers'"
                                 :labelSelectedQuantity="'labelSelectedUsers'"
@@ -189,6 +198,7 @@
                 },
                 userData: {},
                 selectedUsers: [],
+                selectedProfiles: [],
                 searchTerm: "",
                 usersList: [],
                 showUsers: false,
@@ -214,6 +224,7 @@
         },
         mounted() {
             this.getUsers();
+            this.getProfiles();
             this.setupEdit();
         },
         methods: {
@@ -242,6 +253,26 @@
                         this.isLoading = false;
                     });
             },
+            getProfiles() {
+                var paramsReq = {
+                    search: "",
+                    pageSize: 0,
+                    page: 1,
+                    isAscending: this.isAscending,
+                };
+                
+                this.isLoading = true;
+                api.get("/Profile/Paged", { params: paramsReq })
+                    .then(({ data }) => {
+                        this.profilesList = data.content;
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
+            },
             selectAll() {
                 this.selectedUsers = this.filteredUsers.map((user) => user.id);
             },
@@ -256,7 +287,9 @@
                     id: this.teamData.id,
                     name: this.teamData.name,
                     userIds: this.selectedUsers,
+                    profileIds: this.selectedProfiles,
                 };
+                console.log(team)
                 const request = team.id === 0 ? api.post("Team", team) : api.put("Team", team);
                 request.then(() => {
                         this.$notify({
@@ -294,6 +327,7 @@
                     .then((response) => {
                         this.teamData = response;
                         this.selectedUsers = response.users.map((u) => u.id);
+                        this.selectedProfiles = response.profiles.map(p => p.id);
                     });
             },
             showUserSection() {
