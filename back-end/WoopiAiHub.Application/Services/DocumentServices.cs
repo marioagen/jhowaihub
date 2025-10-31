@@ -998,7 +998,7 @@ namespace WoopiAiHub.Application.Services
             if (string.IsNullOrEmpty(outputJson))
                 return response;
 
-            var ocrText = ExtractOcrTextFromOutput(outputJson, documentId);
+            var ocrText = ExtractOcrTextFromOutput(outputJson);
             if (!string.IsNullOrEmpty(ocrText))
             {
                 response.Content = ocrText;
@@ -1029,7 +1029,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="outputJson">Serialized StepToolOutput JSON</param>
         /// <param name="documentId">Document ID for logging</param>
         /// <returns>Concatenated OCR text or empty string if extraction fails</returns>
-        private string ExtractOcrTextFromOutput(string outputJson, int documentId)
+        private string ExtractOcrTextFromOutput(string outputJson)
         {
             var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
 
