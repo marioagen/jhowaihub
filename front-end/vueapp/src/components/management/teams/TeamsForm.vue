@@ -289,7 +289,7 @@
                     userIds: this.selectedUsers,
                     profileIds: this.selectedProfiles,
                 };
-                console.log(team)
+                
                 const request = team.id === 0 ? api.post("Team", team) : api.put("Team", team);
                 request.then(() => {
                         this.$notify({
