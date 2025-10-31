@@ -49,7 +49,7 @@
                                 :labelSelectedQuantity="'labelSelectedProfiles'"
                                 :labelSearch="'labelSearchProfiles'"
                                 :items="profilesList"
-                                :loading="isLoading"
+                                :loading="isLoadingProfiles"
                                 v-model:selectedItems="selectedProfiles"
                             />
                             <SelectionListComponent
@@ -58,7 +58,7 @@
                                 :labelSelectedQuantity="'labelSelectedUsers'"
                                 :labelSearch="'labelSearchUsers'"
                                 :items="filteredUsers"
-                                :loading="isLoading"
+                                :loading="isLoadingUsers"
                                 :type="'user-list'"
                                 v-model:selectedItems="selectedUsers"
                                 ref="SelectionListComponent"
@@ -190,7 +190,8 @@
         },
         data() {
             return {
-                isLoading: true,
+                isLoadingUsers: true,
+                isLoadingProfiles: true,
                 teamData: {
                     id: 0,
                     name: "",
@@ -242,7 +243,7 @@
                     page: 1,
                     isAscending: this.isAscending,
                 };
-                this.isLoading = true;
+                this.isLoadingUsers = true;
                 api.get("/User/Paged", { params: paramsReq })
                     .then((response) => {
                         this.usersList = response.data.content;
@@ -251,7 +252,7 @@
                         console.log(e);
                     })
                     .finally(() => {
-                        this.isLoading = false;
+                        this.isLoadingUsers = false;
                     });
             },
             getProfiles() {
@@ -262,7 +263,7 @@
                     isAscending: this.isAscending,
                 };
                 
-                this.isLoading = true;
+                this.isLoadingProfiles = true;
                 api.get("/Profile/Paged", { params: paramsReq })
                     .then(({ data }) => {
                         this.profilesList = data.content;
@@ -271,7 +272,7 @@
                         console.log(e);
                     })
                     .finally(() => {
-                        this.isLoading = false;
+                        this.isLoadingProfiles = false;
                     });
             },
             selectAll() {
