@@ -439,32 +439,38 @@
                     });
             },
             loadPreviousStepTools(node) {
-                // Get previous tools from the in-memory flow nodes
-                // This ensures we include any tools that were added/removed in memory
-                // but not yet saved to the backend
-                const allNodes = this.$refs.VueflowComponent?.nodes || [];
+                // Get previous tools from tempWorkflow.list (Vuex store)
+                // This is used to generate the nodes in VueFlow for the current step
+                const tempWorkflowList = this.$store.state.tempWorkflow.list || [];
                 const currentNodeId = node.id;
                 
-                // Filter nodes to get only those that come before the current node
-                // Exclude the "start" node and the current node itself
-                this.previousStepTools = allNodes
-                    .filter(n => n.id !== "start" && n.id !== currentNodeId)
-                    .map((n, index) => ({
-                        id: parseInt(n.id, 10),
-                        name: n.label || n.data?.name || `Tool ${n.id}`,
-                        toolId: n.toolId,
-                        order: index + 1,
+                // Get the current step's stepTools from tempWorkflow
+                const currentStep = tempWorkflowList.find(step => 
+                    step.order === this.stepOrder || step.id === this.stepId
+                );
+                
+                if (!currentStep || !currentStep.stepTools) {
+                    this.previousStepTools = [];
+                    return;
+                }
+                
+                // Get all stepTools for the current step and filter to get previous ones
+                const allStepTools = currentStep.stepTools || [];
+                const currentToolIndex = allStepTools.findIndex(tool => tool.id.toString() === currentNodeId);
+                
+                // Filter to include only tools that come before the current node
+                this.previousStepTools = allStepTools
+                    .filter((tool, index) => index < currentToolIndex)
+                    .map(tool => ({
+                        id: tool.id,
+                        name: tool.tool?.name || tool.name || `Tool ${tool.id}`,
+                        toolId: tool.toolId,
+                        order: tool.order,
                         step: {
-                            order: this.stepOrder,
-                            name: `Step ${this.stepOrder}`
+                            order: currentStep.order,
+                            name: currentStep.name
                         }
-                    }))
-                    .filter((tool, idx, arr) => {
-                        // Only include tools that come before the current node
-                        const currentNodeIndex = allNodes.findIndex(n => n.id === currentNodeId);
-                        const toolNodeIndex = allNodes.findIndex(n => n.id === tool.id.toString());
-                        return toolNodeIndex < currentNodeIndex;
-                    });
+                    }));
             },
             resetFormConnector(){
                 this.connectors = [];
