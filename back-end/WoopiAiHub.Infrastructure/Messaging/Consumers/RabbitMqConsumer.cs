@@ -17,11 +17,35 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
 
         private readonly RabbitMqManager _manager;
         private readonly ILogger<RabbitMqConsumer<T>> _logger;
+        private readonly ResiliencePipeline _retryPipeline;
 
         public RabbitMqConsumer(RabbitMqManager manager, ILogger<RabbitMqConsumer<T>> logger)
         {
             _manager = manager;
             _logger = logger;
+            
+            // Create Polly retry pipeline once for reuse across all messages
+            // This improves performance under high message volume
+            _retryPipeline = new ResiliencePipelineBuilder()
+                .AddRetry(new RetryStrategyOptions
+                {
+                    MaxRetryAttempts = MaxRetryAttempts,
+                    Delay = TimeSpan.FromSeconds(InitialRetryDelaySeconds),
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true,
+                    OnRetry = args =>
+                    {
+                        // Log retry attempts
+                        _logger.LogWarning(
+                            "Retry attempt {AttemptNumber} of {MaxAttempts} for message processing. Exception: {Exception}",
+                            args.AttemptNumber,
+                            MaxRetryAttempts,
+                            args.Outcome.Exception?.Message
+                        );
+                        return ValueTask.CompletedTask;
+                    }
+                })
+                .Build();
         }
 
         /// <summary>
@@ -71,31 +95,9 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
                 if (message is null)
                     throw new InvalidOperationException("The message could not be deserialized.");
 
-                // Create Polly retry pipeline with 3 attempts and exponential backoff
-                // Retry delays: ~2s, ~4s, ~8s (with jitter)
-                var retryPipeline = new ResiliencePipelineBuilder()
-                    .AddRetry(new RetryStrategyOptions
-                    {
-                        MaxRetryAttempts = MaxRetryAttempts,
-                        Delay = TimeSpan.FromSeconds(InitialRetryDelaySeconds),
-                        BackoffType = DelayBackoffType.Exponential,
-                        UseJitter = true,
-                        OnRetry = args =>
-                        {
-                            // Log retry attempts
-                            _logger.LogWarning(
-                                "Retry attempt {AttemptNumber} of {MaxAttempts} for message processing. Exception: {Exception}",
-                                args.AttemptNumber,
-                                MaxRetryAttempts,
-                                args.Outcome.Exception?.Message
-                            );
-                            return ValueTask.CompletedTask;
-                        }
-                    })
-                    .Build();
-
                 // Execute message processing with retry policy
-                await retryPipeline.ExecuteAsync(async ct =>
+                // Retry delays: ~2s, ~4s, ~8s (with jitter)
+                await _retryPipeline.ExecuteAsync(async ct =>
                 {
                     await process(message).ConfigureAwait(false);
                 }).ConfigureAwait(false);
