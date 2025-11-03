@@ -231,7 +231,9 @@ export default {
             console.log("Open Node:", node);
             const idx = this.nodes.findIndex(n => n.id === node.id);
             console.log("All Nodes:", this.nodes[idx]);
-            this.$emit('openNodeConfig', this.nodes, node)
+            // Emit the node from this.nodes array instead of the VueFlow event parameter
+            // to ensure we're passing the updated node with dependencies
+            this.$emit('openNodeConfig', this.nodes, this.nodes[idx])
         },
         onConnect(params) {
             this.vueFlowInstance?.addEdges([{ ...params, type: 'special' }])
