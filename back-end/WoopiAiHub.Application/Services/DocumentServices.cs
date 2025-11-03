@@ -332,31 +332,47 @@ namespace WoopiAiHub.Application.Services
                 {
                     if (output.StepTool?.Tool == null) continue;
 
-                    try
+                    // Validate JSON structure before deserialization
+                    if (!string.IsNullOrWhiteSpace(output.Value) && 
+                        output.Value.TrimStart().StartsWith("{") && 
+                        output.Value.TrimEnd().EndsWith("}"))
                     {
-                        var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(output.Value);
-                        if (jsonObject != null)
+                        try
                         {
-                            foreach (var kvp in jsonObject)
+                            var settings = new JsonSerializerSettings
                             {
-                                existingStep.Outputs.Add(new ExtractedFieldDto
+                                MaxDepth = 5, // Limit nesting depth for security
+                                DateParseHandling = DateParseHandling.None
+                            };
+                            
+                            var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(output.Value, settings);
+                            if (jsonObject != null && jsonObject.Count > 0)
+                            {
+                                foreach (var kvp in jsonObject)
                                 {
-                                    Label = kvp.Key,
-                                    Value = kvp.Value?.ToString() ?? string.Empty,
-                                    IsEdited = false
-                                });
+                                    existingStep.Outputs.Add(new ExtractedFieldDto
+                                    {
+                                        Label = kvp.Key,
+                                        Value = kvp.Value?.ToString() ?? string.Empty,
+                                        IsEdited = false
+                                    });
+                                }
+                                continue;
                             }
                         }
-                    }
-                    catch (JsonException)
-                    {
-                        existingStep.Outputs.Add(new ExtractedFieldDto
+                        catch (JsonException ex)
                         {
-                            Label = output.StepTool.Tool.Name,
-                            Value = output.Value,
-                            IsEdited = false
-                        });
+                            _logger.LogWarning(ex, $"Failed to parse JSON from StepToolOutput {output.Id}. Falling back to plain text display.");
+                        }
                     }
+                    
+                    // Fall back to plain text display
+                    existingStep.Outputs.Add(new ExtractedFieldDto
+                    {
+                        Label = output.StepTool.Tool.Name,
+                        Value = output.Value,
+                        IsEdited = false
+                    });
                 }
             }
 

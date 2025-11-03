@@ -76,16 +76,18 @@
                 this.isEditing[index] = true;
             },
             handleFieldEdit(index, value) {
-                this.fields[index].value = value;
+                // Emit the change instead of directly mutating the prop
+                const updatedField = { ...this.fields[index], value };
+                this.$emit("field-changed", { index, field: updatedField });
             },
             saveEdit(index) {
-                const field = this.fields[index];
-                field.isEdited = true;
+                const field = { ...this.fields[index], isEdited: true };
                 this.isEditing[index] = false;
                 this.$emit("field-updated", { index, field });
             },
             cancelEdit(index) {
-                this.fields[index].value = this.originalValues[index];
+                const restoredField = { ...this.fields[index], value: this.originalValues[index] };
+                this.$emit("field-changed", { index, field: restoredField });
                 this.isEditing[index] = false;
                 delete this.originalValues[index];
             },
