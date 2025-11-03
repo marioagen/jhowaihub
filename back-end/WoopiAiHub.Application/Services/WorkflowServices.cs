@@ -108,7 +108,11 @@ namespace WoopiAiHub.Application.Services
                 }
 
                 StepTool? lastGlobalStepTool = null;
+                
+                // Dictionary to track StepTool instances by their DTO IDs and order for dependency resolution
+                var stepToolMap = new Dictionary<(int? stepId, int order), StepTool>();
 
+                // First pass: Create/update all StepTools and parameters
                 foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
                 {
                     Step? existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id);
@@ -144,11 +148,8 @@ namespace WoopiAiHub.Application.Services
                             stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
                             stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
 
-                            // Handle new dependencies if provided
-                            if (stepToolDto.DependsOnStepToolIds != null && stepToolDto.DependsOnStepToolIds.Any())
-                            {
-                                stepTool.UpdateDependencies(stepToolDto.DependsOnStepToolIds.ToList());
-                            }
+                            // Store reference for later dependency resolution
+                            stepToolMap[(stepDto.Id, stepToolDto.Order)] = stepTool;
 
                             if (stepToolDto.Parameters.Count > 0)
                             {
@@ -184,12 +185,49 @@ namespace WoopiAiHub.Application.Services
                             var stepTool = CreateStepToolUpdate(stepToolDto);
                             stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
 
+                            // Store reference for later dependency resolution
+                            stepToolMap[(stepDto.Id, stepToolDto.Order)] = stepTool;
+
                             newStep.AddStepTool(stepTool);
                             previousStepToolInStep = stepTool;
                             lastGlobalStepTool = stepTool;
                         }
 
                         workflow.AddStep(newStep);
+                    }
+                }
+
+                // Save changes to ensure all StepTools have IDs
+                await _unitOfWork.SaveChangesAsync();
+
+                // Second pass: Resolve and set up dependencies now that all StepTools have IDs
+                foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
+                {
+                    foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                    {
+                        if (stepToolDto.DependsOnStepToolIds != null && stepToolDto.DependsOnStepToolIds.Any())
+                        {
+                            var stepTool = stepToolMap[(stepDto.Id, stepToolDto.Order)];
+                            
+                            // Resolve StepTool references from all steps
+                            var dependsOnStepTools = new List<StepTool>();
+                            foreach (var dependsOnId in stepToolDto.DependsOnStepToolIds)
+                            {
+                                var dependsOnStepTool = workflow.Steps
+                                    .SelectMany(s => s.StepTools)
+                                    .FirstOrDefault(st => st.Id == dependsOnId);
+                                
+                                if (dependsOnStepTool != null)
+                                {
+                                    dependsOnStepTools.Add(dependsOnStepTool);
+                                }
+                            }
+
+                            if (dependsOnStepTools.Any())
+                            {
+                                stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
+                            }
+                        }
                     }
                 }
 

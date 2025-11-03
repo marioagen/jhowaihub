@@ -106,5 +106,25 @@ namespace WoopiAiHub.Domain.Models
                 Dependencies.Add(dependency);
             }
         }
+
+        public void UpdateDependenciesWithStepTools(ICollection<StepTool> dependsOnStepTools)
+        {
+            ArgumentNullException.ThrowIfNull(dependsOnStepTools);
+            
+            // Remove existing dependencies
+            Dependencies.Clear();
+            
+            // Add new dependencies using StepTool references
+            // Entity Framework will handle the ID mapping after SaveChanges
+            foreach (var dependsOnStepTool in dependsOnStepTools)
+            {
+                var dependency = new StepToolDependency(0, DateTime.UtcNow, Id, 0)
+                {
+                    StepTool = this,
+                    DependsOnStepTool = dependsOnStepTool
+                };
+                Dependencies.Add(dependency);
+            }
+        }
     }
 }
