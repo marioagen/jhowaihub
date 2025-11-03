@@ -12,6 +12,9 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
 {
     public class RabbitMqConsumer<T> : IMessageConsumer<T>
     {
+        private const int MaxRetryAttempts = 3;
+        private const int InitialRetryDelaySeconds = 2;
+
         private readonly RabbitMqManager _manager;
         private readonly ILogger<RabbitMqConsumer<T>> _logger;
 
@@ -69,12 +72,12 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
                     throw new InvalidOperationException("The message could not be deserialized.");
 
                 // Create Polly retry pipeline with 3 attempts and exponential backoff
-                // Retry delays: 2s, 4s, 8s
+                // Retry delays: ~2s, ~4s, ~8s (with jitter)
                 var retryPipeline = new ResiliencePipelineBuilder()
                     .AddRetry(new RetryStrategyOptions
                     {
-                        MaxRetryAttempts = 3,
-                        Delay = TimeSpan.FromSeconds(2),
+                        MaxRetryAttempts = MaxRetryAttempts,
+                        Delay = TimeSpan.FromSeconds(InitialRetryDelaySeconds),
                         BackoffType = DelayBackoffType.Exponential,
                         UseJitter = true,
                         OnRetry = args =>
@@ -83,7 +86,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
                             _logger.LogWarning(
                                 "Retry attempt {AttemptNumber} of {MaxAttempts} for message processing. Exception: {Exception}",
                                 args.AttemptNumber,
-                                3,
+                                MaxRetryAttempts,
                                 args.Outcome.Exception?.Message
                             );
                             return ValueTask.CompletedTask;
@@ -106,7 +109,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
                 // Send message to DLQ by rejecting with requeue=false
                 _logger.LogError(ex, "Message processing failed after all retry attempts. Sending to DLQ.");
                 await channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: false).ConfigureAwait(false);
-                throw;
+                // Message has been sent to DLQ, do not re-throw to avoid disrupting the consumer pipeline
             }
         }
     }
