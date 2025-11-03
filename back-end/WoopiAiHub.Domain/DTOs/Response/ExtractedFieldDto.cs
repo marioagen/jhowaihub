@@ -1,0 +1,9 @@
+namespace WoopiAiHub.Domain.DTOs.Response
+{
+    public class ExtractedFieldDto
+    {
+        public string Label { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+        public bool IsEdited { get; set; }
+    }
+}

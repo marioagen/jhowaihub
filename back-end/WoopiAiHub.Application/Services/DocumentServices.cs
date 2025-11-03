@@ -280,6 +280,98 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Returns document information grouped by processing steps with extracted data.
+        /// </summary>
+        /// <param name="id">Document ID</param>
+        /// <param name="headersDto">Request headers</param>
+        /// <returns>Document with steps and extracted fields</returns>
+        /// <exception cref="ArgumentException">Thrown when document is not found</exception>
+        public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int id,
+                                                                             HeadersDto headersDto)
+        {
+            var document = _documentRepository.FindById(id);
+
+            if (document == null)
+            {
+                var ex = new ArgumentException(FindingDocumentErrorMessage);
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindByIdAnalyzeWithSteps)} method");
+                throw ex;
+            }
+
+            var cards = await _cardRepository.FindByDocumentIdAsync(id);
+
+            var steps = new List<DocumentStepDto>();
+            string lastProcessedStepId = string.Empty;
+            int maxStepOrder = 0;
+
+            foreach (var card in cards)
+            {
+                if (card.Step == null) continue;
+
+                var stepId = $"step-{card.Step.Id}";
+                var existingStep = steps.FirstOrDefault(s => s.Id == stepId);
+
+                if (existingStep == null)
+                {
+                    existingStep = new DocumentStepDto
+                    {
+                        Id = stepId,
+                        Name = $"Etapa {card.Step.Order} - {card.Step.Name}",
+                        Outputs = new List<ExtractedFieldDto>()
+                    };
+                    steps.Add(existingStep);
+                }
+
+                if (card.Step.Order > maxStepOrder)
+                {
+                    maxStepOrder = card.Step.Order;
+                    lastProcessedStepId = stepId;
+                }
+
+                foreach (var output in card.Outputs)
+                {
+                    if (output.StepTool?.Tool == null) continue;
+
+                    try
+                    {
+                        var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(output.Value);
+                        if (jsonObject != null)
+                        {
+                            foreach (var kvp in jsonObject)
+                            {
+                                existingStep.Outputs.Add(new ExtractedFieldDto
+                                {
+                                    Label = kvp.Key,
+                                    Value = kvp.Value?.ToString() ?? string.Empty,
+                                    IsEdited = false
+                                });
+                            }
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        existingStep.Outputs.Add(new ExtractedFieldDto
+                        {
+                            Label = output.StepTool.Tool.Name,
+                            Value = output.Value,
+                            IsEdited = false
+                        });
+                    }
+                }
+            }
+
+            return new DocumentAnalyzeStepsDto
+            {
+                DocumentId = $"doc-{document.Id}",
+                Name = document.Name,
+                Description = document.Description,
+                ReferenceFile = document.ReferenceFile,
+                LastProcessedStepId = lastProcessedStepId,
+                Steps = steps.OrderBy(s => s.Name).ToList()
+            };
+        }
+
+        /// <summary>
         /// Return the status and name of an document
         /// </summary>
         /// <param name="id"></param>

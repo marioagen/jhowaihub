@@ -314,6 +314,31 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
+        /// It receives an id and returns document information grouped by processing steps.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="headersDto"></param>
+        /// <returns></returns>
+        [HttpGet("AnalyzeSteps/{id}")]
+        [SwaggerOperation("It receives an id and returns a DocumentAnalyzeStepsDto with the document's information grouped by steps")]
+        [ProducesResponseType(typeof(DocumentAnalyzeStepsDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindByIdAnalyzeWithSteps(int id,
+                                                                   [FromHeader] HeadersDto headersDto)
+        {
+            try
+            {
+                var result = await _documentServices.FindByIdAnalyzeWithSteps(id,
+                                                                              headersDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(FindByIdAnalyzeWithSteps)} method");
+                return BadRequest("Error while finding documents by id" + ex);
+            }
+        }
+
+        /// <summary>
         /// Receive the status to check exceeded pages
         /// </summary>
         /// <returns></returns>

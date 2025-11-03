@@ -64,5 +64,19 @@ namespace WoopiAiHub.Repository
 
             return deletedCount > 0;
         }
+
+        /// <summary>
+        /// Finds all step tool outputs for a specific card.
+        /// </summary>
+        /// <param name="cardId">The ID of the card.</param>
+        /// <returns>A list of step tool outputs with related StepTool and Tool information.</returns>
+        public async Task<List<StepToolOutput>> FindByCardIdAsync(int cardId)
+        {
+            return await _context.StepToolOutputs
+                .Where(o => o.CardId == cardId)
+                .Include(o => o.StepTool)
+                    .ThenInclude(st => st.Tool)
+                .ToListAsync();
+        }
     }
 }

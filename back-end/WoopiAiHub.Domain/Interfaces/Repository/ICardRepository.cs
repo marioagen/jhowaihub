@@ -9,5 +9,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> DeleteByDocumentIds(List<int> documentIds);
         Task<bool> ExistsStepsInUse(ICollection<int> ids);
         Task<ICollection<int>> FindActiveCardIdsInFirstStepAsync(IEnumerable<int> cardIds);
+        Task<List<Card>> FindByDocumentIdAsync(int documentId);
     }
 }

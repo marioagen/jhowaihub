@@ -88,5 +88,22 @@ namespace WoopiAiHub.Repository
                 .Select(c => c.Id)
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Finds all cards associated with a specific document ID.
+        /// </summary>
+        /// <param name="documentId">The ID of the document.</param>
+        /// <returns>A list of cards with their related Step information.</returns>
+        public async Task<List<Card>> FindByDocumentIdAsync(int documentId)
+        {
+            return await _context.Cards
+                .Where(c => c.DocumentId == documentId && c.Enable)
+                .Include(c => c.Step)
+                .Include(c => c.Outputs)
+                    .ThenInclude(o => o.StepTool)
+                        .ThenInclude(st => st!.Tool)
+                .OrderBy(c => c.Step!.Order)
+                .ToListAsync();
+        }
     }
 }

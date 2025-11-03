@@ -668,5 +668,52 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile), Times.Once);
             marketPlaceApi.Verify(s => s.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
         }
+
+        [Fact(DisplayName = "FindByIdAnalyzeWithStepsSuccess")]
+        [Trait("FindByIdAnalyzeWithSteps", "Success")]
+        public async Task FindByIdAnalyzeWithSteps_Success()
+        {
+            // Arrange
+            var document = _fixture.FindValidDocument();
+            var headers = _fixture.FindValidHeadersDto();
+            var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
+            var tool = new Tool(1, DateTime.Now, "Test Tool", true, 1, 1, 1, false, null, null);
+            var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
+            var card = new Card(1, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var outputValue = "{\"Campo1\": \"Valor1\", \"Campo2\": \"Valor2\"}";
+            var output = new StepToolOutput(1, DateTime.Now, 1, 1, outputValue);
+
+            var documentRepository = _mocker.GetMock<IDocumentRepository>();
+            var cardRepository = _mocker.GetMock<ICardRepository>();
+            
+            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
+            cardRepository.Setup(a => a.FindByDocumentIdAsync(It.IsAny<int>())).ReturnsAsync(new List<Card> { card });
+
+            // Act
+            var result = await _documentServices.FindByIdAnalyzeWithSteps(document.Id, headers);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal($"doc-{document.Id}", result.DocumentId);
+            Assert.Equal(document.Name, result.Name);
+            Assert.Equal(document.Description, result.Description);
+            Assert.Equal(document.ReferenceFile, result.ReferenceFile);
+            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
+            cardRepository.Verify(a => a.FindByDocumentIdAsync(It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindByIdAnalyzeWithStepsFail")]
+        [Trait("FindByIdAnalyzeWithSteps", "Fail")]
+        public async Task FindByIdAnalyzeWithSteps_Fail()
+        {
+            // Arrange
+            var headers = _fixture.FindValidHeadersDto();
+            var documentRepository = _mocker.GetMock<IDocumentRepository>();
+            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns((Document)null!);
+
+            // Act / Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _documentServices.FindByIdAnalyzeWithSteps(1, headers));
+            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
+        }
     }
 }
