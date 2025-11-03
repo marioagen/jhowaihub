@@ -622,7 +622,17 @@
         deleteSuccess: "Prompt deletado com sucesso",
         deleteError: "Falha ao deletar prompt",
         removeAllPrompts: "Remover prompts",
-    }
+    },
+    labelPreviousStep: "Etapa anterior",
+    labelNextStep: "Próxima etapa",
+    labelNoDataInDocument: "Não há dados nesse documento",
+    labelAskTheDoc: "Pergunte ao Doc",
+    labelConversationWithDocument: "Conversa com o Documento",
+    labelAskAI: "PERGUNTE À IA",
+    labelTypeYourQuestion: "Digite sua pergunta sobre o documento...",
+    labelSendQuestion: "Enviar Pergunta",
+    labelSave: "Salvar",
+    labelExtractedData: "Dados Extraídos",
 };
 
 export default portuguese;

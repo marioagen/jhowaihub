@@ -21,16 +21,10 @@
                     <!-- Component DocView -->
                     <doc-view @showNormalize="normalize" id="docView" />
                     <div :class="!isExpandedHistory ? 'col-md-3' : 'col-md-6'" id="docHistory">
-                        <!--Component HistoryView-->
-                        <history-view
-                            :dataShowHistory="dataShowHistory"
-                            :dataIsExpandedHistory="isExpandedHistory"
-                            :dataUnshiftHistoryList="dataUnshiftHistoryList"
-                            :dataPushHistoryList="dataPushHistoryList"
-                            @expandHistory="expandHistory"
-                            @showAlertToast="showAlertToast"
-                            @clearMyInterval="clearMyInterval"
-                            @updateHistoryListOrder="updateHistoryListOrder"
+                        <!--Component StepAnalysisView-->
+                        <step-analysis-view
+                            :document-id="parseInt(idAnalyzer)"
+                            @show-alert-toast="showAlertToast"
                         />
                     </div>
                 </div>
@@ -50,7 +44,7 @@
 <script>
     import PromptView from "@/components/pages/analyzer/prompt-view";
     import DocView from "@/components/pages/analyzer/doc-view";
-    import HistoryView from "@/components/pages/analyzer/history-view";
+    import StepAnalysisView from "@/components/pages/analyzer/step-analysis-view";
     import ToastAlert from "@/components/common/toast-alert";
     import api from "@/services/api";
     import NormalizeIndex from "@/components/pages/normalize/loading";
@@ -84,7 +78,7 @@
         components: {
             PromptView,
             DocView,
-            HistoryView,
+            StepAnalysisView,
             ToastAlert,
             NormalizeIndex,
         },
