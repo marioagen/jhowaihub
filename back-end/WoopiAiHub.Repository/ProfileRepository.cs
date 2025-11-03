@@ -160,7 +160,10 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public ICollection<Domain.Models.Profile> FindByIds(IEnumerable<int> ids)
         {
-            return _context.Profiles.Where(t => ids.Contains(t.Id)).ToList();
+            return _context.Profiles
+                .Include(p => p.Steps)
+                .Where(t => ids.Contains(t.Id))
+                .ToList();
         }
 
         /// <summary>

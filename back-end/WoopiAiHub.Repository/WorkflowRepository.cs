@@ -96,6 +96,19 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Retrieves a list of workflows by its team ids.
+        /// </summary>
+        /// <param name="List<int>"></param>
+        /// <returns></returns>
+        public async Task<ICollection<Workflow>> FindByStep(List<int> stepsIds)
+        {
+            return await _context.Workflows
+                .Include(w => w.Steps)
+                .Where(w => w.Steps.Any(s => stepsIds.Contains(s.Id)))
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Retrieves a workflow by its ID.
         /// </summary>
         /// <param name="id"></param>

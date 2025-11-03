@@ -14,6 +14,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string userEmail);
         ICollection<WorkflowDto> FindAll();
+        Task<ICollection<Workflow>> FindByStep(List<int> stepIds);
         Task<List<Workflow>> FindByIdsAsync(ICollection<int> ids);
         IQueryable<WorkflowDto> FindAllWithFilter(WorkflowPagedDto workflowPagedDto);
     }

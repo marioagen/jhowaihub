@@ -14,15 +14,21 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IWorkflowServices _workflowServices;
         private readonly IProfileRepository _profileRepository;
+        private readonly IWorkflowRepository _workflowRepository;
 
         public TeamServices(ITeamRepository teamRepository,
                             IUserRepository userRepository,
+                            IWorkflowRepository workflowRepository,
+                            IWorkflowServices workflowServices,
                             IProfileRepository profileRepository)
         {
             _teamRepository = teamRepository;
             _userRepository = userRepository;
+            _workflowServices = workflowServices;
             _profileRepository = profileRepository;
+            _workflowRepository = workflowRepository;
         }
 
         /// <summary>
@@ -138,10 +144,11 @@ namespace WoopiAiHub.Application.Services
                 }
             }
 
-            if(teamCreateDto.ProfileIds.Count() > 0)
+            ICollection<Profile> profiles = new List<Profile>();
+            if (teamCreateDto.ProfileIds.Count() > 0)
             {
                 team.Profiles.Clear();
-                var profiles = _profileRepository.FindByIds(teamCreateDto.ProfileIds);
+                profiles = _profileRepository.FindByIds(teamCreateDto.ProfileIds);
 
                 foreach(var profile in profiles)
                 {
@@ -154,6 +161,17 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
             }
+
+            if(profiles.Count() > 0)
+            {
+                var workflows = await _workflowServices.FindByProfileStep(profiles);
+                foreach (var workflow in workflows)
+                {
+                    workflow.AddTeam(team);
+                    await _workflowRepository.Update(workflow);
+                }
+            }
+            
             return createResult;
         }
 
@@ -183,10 +201,11 @@ namespace WoopiAiHub.Application.Services
                 }
             }
 
+            ICollection<Profile> profiles = new List<Profile>();
             if (teamUpdateDto.ProfileIds.Count() > 0)
             {
                 team.Profiles.Clear();
-                var profiles = _profileRepository.FindByIds(teamUpdateDto.ProfileIds);
+                profiles = _profileRepository.FindByIds(teamUpdateDto.ProfileIds);
 
                 foreach (var profile in profiles)
                 {
@@ -199,6 +218,17 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
             }
+
+            if (profiles.Count() > 0)
+            {
+                var workflows = await _workflowServices.FindByProfileStep(profiles);
+                foreach (var workflow in workflows)
+                {
+                    workflow.AddTeam(team);
+                    await _workflowRepository.Update(workflow);
+                }
+            }
+
             return updateResult;
         }
 

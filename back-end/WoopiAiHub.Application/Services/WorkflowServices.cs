@@ -440,6 +440,21 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Find all workflows associated with a step.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ICollection<Workflow>> FindByProfileStep(ICollection<Profile> profiles)
+        {
+            var steps = profiles
+                .SelectMany(p => p.Steps)
+                .Select(s => s.Id)
+                .Distinct()
+                .ToList();
+
+            return await _workflowRepository.FindByStep(steps);
+        }
+
+        /// <summary>
         /// Find all workflows.
         /// </summary>
         /// <returns></returns>
