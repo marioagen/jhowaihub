@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Polly;
+using Polly.Retry;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -10,10 +13,12 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
     public class RabbitMqConsumer<T> : IMessageConsumer<T>
     {
         private readonly RabbitMqManager _manager;
+        private readonly ILogger<RabbitMqConsumer<T>> _logger;
 
-        public RabbitMqConsumer(RabbitMqManager manager)
+        public RabbitMqConsumer(RabbitMqManager manager, ILogger<RabbitMqConsumer<T>> logger)
         {
             _manager = manager;
+            _logger = logger;
         }
 
         /// <summary>
@@ -39,24 +44,70 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
 
         /// <summary>
         /// Handles a received message by deserializing it and executing the provided process function.
-        /// Acknowledges the message after successful processing.
+        /// Uses Polly retry policy with 3 attempts and exponential backoff.
+        /// Flow:
+        /// 1. Deserialize message
+        /// 2. Try to process with Polly retry (3 attempts with exponential backoff)
+        /// 3. On success: BasicAck (acknowledge message)
+        /// 4. On final failure after retries: BasicNack with requeue=false (send to DLQ)
         /// </summary>
         /// <param name="channel"></param>
         /// <param name="args"></param>
         /// <param name="process"></param>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
-        private static async Task HandleMessageAsync(IChannel channel, BasicDeliverEventArgs args, Func<T, Task> process)
+        private async Task HandleMessageAsync(IChannel channel, BasicDeliverEventArgs args, Func<T, Task> process)
         {
-            var body = args.Body.ToArray();
-            var json = Encoding.UTF8.GetString(body);
-            var message = JsonConvert.DeserializeObject<T>(json);
+            try
+            {
+                // Deserialize message
+                var body = args.Body.ToArray();
+                var json = Encoding.UTF8.GetString(body);
+                var message = JsonConvert.DeserializeObject<T>(json);
 
-            if (message is null)
-                throw new InvalidOperationException("The message could not be deserialized.");
+                if (message is null)
+                    throw new InvalidOperationException("The message could not be deserialized.");
 
-            await process(message).ConfigureAwait(false);
-            await channel.BasicAckAsync(args.DeliveryTag, multiple: false).ConfigureAwait(false);
+                // Create Polly retry pipeline with 3 attempts and exponential backoff
+                // Retry delays: 2s, 4s, 8s
+                var retryPipeline = new ResiliencePipelineBuilder()
+                    .AddRetry(new RetryStrategyOptions
+                    {
+                        MaxRetryAttempts = 3,
+                        Delay = TimeSpan.FromSeconds(2),
+                        BackoffType = DelayBackoffType.Exponential,
+                        UseJitter = true,
+                        OnRetry = args =>
+                        {
+                            // Log retry attempts
+                            _logger.LogWarning(
+                                "Retry attempt {AttemptNumber} of {MaxAttempts} for message processing. Exception: {Exception}",
+                                args.AttemptNumber,
+                                3,
+                                args.Outcome.Exception?.Message
+                            );
+                            return ValueTask.CompletedTask;
+                        }
+                    })
+                    .Build();
+
+                // Execute message processing with retry policy
+                await retryPipeline.ExecuteAsync(async ct =>
+                {
+                    await process(message).ConfigureAwait(false);
+                }).ConfigureAwait(false);
+
+                // Success: Acknowledge the message
+                await channel.BasicAckAsync(args.DeliveryTag, multiple: false).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Final failure after all retry attempts
+                // Send message to DLQ by rejecting with requeue=false
+                _logger.LogError(ex, "Message processing failed after all retry attempts. Sending to DLQ.");
+                await channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: false).ConfigureAwait(false);
+                throw;
+            }
         }
     }
 }
