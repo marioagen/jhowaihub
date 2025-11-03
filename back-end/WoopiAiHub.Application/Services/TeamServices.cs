@@ -183,13 +183,11 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<bool> Update(TeamUpdateDto teamUpdateDto)
         {
-
             var team = _teamRepository.FindByIdReturnModel(teamUpdateDto.Id);
             if (team == null)
                 return false;
 
             team.Update(teamUpdateDto.Name);
-
             if (teamUpdateDto.UserIds != null)
             {
                 team.Users.Clear();
@@ -217,16 +215,6 @@ namespace WoopiAiHub.Application.Services
             if (!updateResult)
             {
                 throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
-            }
-
-            if (profiles.Count() > 0)
-            {
-                var workflows = await _workflowServices.FindByProfileStep(profiles);
-                foreach (var workflow in workflows)
-                {
-                    workflow.AddTeam(team);
-                    await _workflowRepository.Update(workflow);
-                }
             }
 
             return updateResult;
