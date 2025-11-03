@@ -78,8 +78,19 @@ export default {
     },
     data() {
         return {
-            selectedDependencies: this.modelValue || []
+            // Create a deep copy to avoid sharing references between component instances
+            selectedDependencies: this.modelValue ? JSON.parse(JSON.stringify(this.modelValue)) : []
         };
+    },
+    watch: {
+        // Watch for changes in modelValue from parent and update local state
+        modelValue: {
+            handler(newValue) {
+                // Create a deep copy to avoid shared references
+                this.selectedDependencies = newValue ? JSON.parse(JSON.stringify(newValue)) : [];
+            },
+            deep: true
+        }
     },
     computed: {
         selectedItems() {
@@ -115,7 +126,8 @@ export default {
             this.updateModel();
         },
         reloadData() {
-            this.selectedDependencies = this.modelValue || [];
+            // Create a deep copy to avoid shared references
+            this.selectedDependencies = this.modelValue ? JSON.parse(JSON.stringify(this.modelValue)) : [];
         }
     },
 };
