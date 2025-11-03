@@ -153,6 +153,7 @@ export default {
                     label: stepTool.tool.name,
                     toolId: stepTool.toolId,
                     data: { 
+                        order: stepTool.order,
                         icon: "Activity", 
                         color: "blue", 
                         parameters: stepTool.parameters, 
@@ -160,7 +161,8 @@ export default {
                         toolType: stepTool.tool.toolType,
                         toolId: stepTool.toolId,
                         stepToolId: stepTool.id,
-                        dependsOnStepToolIds: stepTool.dependencies ? stepTool.dependencies.map(d => d.dependsOnStepToolId) : [],
+                        dependsOnStepToolIds: [],//stepTool.dependencies ? stepTool.dependencies.map(d => d.dependsOnStepToolId) : [],
+                        dependencies: this.findDependencyStepTools(step, stepTool),
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -192,11 +194,21 @@ export default {
                 LogService.showMessage("Erro ao carregar fluxo");
             }
         },
+        findDependencyStepTools(step, stepTool) {
+            console.log("Finding dependencies for stepTool:", stepTool);
+            return !stepTool.dependencies ||  stepTool.dependencies.length == 0 ? 
+                this.$store.state.tempWorkflow.list
+                    .find(item => item.order === step.order)?.stepTools
+                    .filter(st => stepTool.dependencies.some(d => d.dependsOnStepToolId === st.id))
+                    .map(st => ({ step: step, stepTool: st }))                
+                : stepTool.dependencies; 
+        },
         deleteNode(nodeId) {
             this.nodes = this.nodes.filter(node => node.id !== nodeId);
             this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
         },
-        updateNodeInput(nodeId, parameters, dependsOnStepToolIds = []) {
+        updateNodeInput(nodeId, parameters, dependencies) {
+            console.log("Updating Node dep:",  dependencies);
             const idx = this.nodes.findIndex(node => node.id === nodeId);
             if (idx !== -1) {
                 this.nodes[idx] = {
@@ -204,16 +216,20 @@ export default {
                     data: {
                         ...this.nodes[idx].data,
                         parameters: parameters,
-                        dependsOnStepToolIds: dependsOnStepToolIds
+                        dependencies: dependencies
                     }
                 };
-            }
+                console.log("Updated Node nó:",idx, this.nodes[idx]);
+            }            
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
         },
         openNodeConfig(node) {
-            this.$emit('openNodeConfig', node)
+            console.log("Open Node:", node);
+            const idx = this.nodes.findIndex(n => n.id === node.id);
+            console.log("All Nodes:", this.nodes[idx]);
+            this.$emit('openNodeConfig', this.nodes, node)
         },
         onConnect(params) {
             this.vueFlowInstance?.addEdges([{ ...params, type: 'special' }])
@@ -241,6 +257,7 @@ export default {
                 label: nodeData.name,
                 toolId: nodeData.id,
                 data: { 
+                    order: this.nodes.length + 1,
                     icon: 'Activity', 
                     color: '#000', 
                     isStartNode: false, 
@@ -250,6 +267,7 @@ export default {
                     toolId: nodeData.id,
                     stepToolId: null,
                     dependsOnStepToolIds: [],
+                    dependencies: [],
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
@@ -271,6 +289,7 @@ export default {
                     dependsOnStepToolId: index,
                     // New multiple dependencies field
                     dependsOnStepToolIds: node.data.dependsOnStepToolIds || [],
+                    dependencies: node.data.dependencies || []
                 }));
         },
         showCollapse() {

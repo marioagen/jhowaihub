@@ -4,20 +4,52 @@
         <hr>
         <p class="text-muted small">{{ $t("flow.sidebar.dependenciesHint") }}</p>
         
+        <!-- Dropdown to Add Dependencies -->
+        <div class="dropdown">
+            <button 
+                class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-between" 
+                type="button" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"
+            >
+                <span>{{ availableStepTools.length > 0 ? $t('flow.sidebar.addDependency') : $t('flow.sidebar.noDependencies') }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+            </button>
+            <ul class="dropdown-menu w-100">
+                <li v-if="availableStepTools.length === 0" class="dropdown-item-text text-muted small">
+                    {{ $t('flow.sidebar.allDependenciesSelected') }}
+                </li>
+                <li v-for="step in availableStepTools" :key="step.id">
+                    <div v-if="step.stepTools.length" >
+                        <span class="dropdown-divider"></span>
+                        <h6>{{ step.name }}</h6>
+                        <a v-for="stepTool in step.stepTools" :key="stepTool.id" class="dropdown-item" href="#" @click.prevent="addDependency(step, stepTool)">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="fw-medium">{{ stepTool.tool.name }} <small class="text-muted">({{ stepTool.tool.toolType }})</small></div>                                
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
         <!-- Selected Dependencies Display -->
-        <div v-if="selectedItems.length > 0" class="mb-3">
-            <div v-for="item in selectedItems" :key="item.id" class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-2">
+        <div v-if="selectedDependencies.length > 0" class="mb-3">
+            <div v-for="(item, index) in selectedDependencies" :key="index" class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-2">
                 <div class="d-flex align-items-center flex-grow-1">
-                    <span class="badge bg-secondary me-2">{{ item.step?.order ?? '-' }}</span>
                     <div class="flex-grow-1">
-                        <div class="fw-medium">{{ item.name }}</div>
-                        <small class="text-muted">{{ item.description }}</small>
+                        <div class="fw-medium">{{ item.step.name }} <small class="text-muted">({{ item.stepTool.tool.name }}/{{ item.stepTool.tool.toolType }})</small></div>
                     </div>
                 </div>
                 <button 
                     type="button" 
                     class="btn btn-sm btn-link text-danger p-0 ms-2" 
-                    @click="removeDependency(item.id)"
+                    @click="removeDependency(item)"
                     :title="$t('labelRemove')"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -27,44 +59,11 @@
                 </button>
             </div>
         </div>
-        
-        <!-- Dropdown to Add Dependencies -->
-        <div class="dropdown">
-            <button 
-                class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-between" 
-                type="button" 
-                :id="'dropdown-' + _uid"
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-            >
-                <span>{{ availableTools.length > 0 ? $t('flow.sidebar.addDependency') : $t('flow.sidebar.noDependencies') }}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
-            </button>
-            <ul class="dropdown-menu w-100" :aria-labelledby="'dropdown-' + _uid">
-                <li v-if="availableTools.length === 0" class="dropdown-item-text text-muted small">
-                    {{ $t('flow.sidebar.allDependenciesSelected') }}
-                </li>
-                <li v-for="tool in availableTools" :key="tool.id">
-                    <a class="dropdown-item" href="#" @click.prevent="addDependency(tool)">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-secondary me-2">{{ tool.step?.order ?? '-' }}</span>
-                            <div>
-                                <div class="fw-medium">{{ tool.name }}</div>
-                                <small class="text-muted">{{ tool.description }}</small>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </div>
     </div>
 </template>
 
 <script>
+
 export default {
     name: 'DependencySelector',
     props: {
@@ -75,46 +74,50 @@ export default {
         modelValue: {
             type: Array,
             default: () => []
-        }
+        },
+    },
+    data() {
+        return {
+            selectedDependencies: this.modelValue || []
+        };
     },
     computed: {
-        selectedDependencies: {
-            get() {
-                return this.modelValue;
-            },
-            set(value) {
-                this.$emit('update:modelValue', value);
-            }
-        },
         selectedItems() {
-            // Get full tool objects for selected IDs
             return this.previousStepTools.filter(tool => 
                 this.selectedDependencies.includes(tool.id)
-            ).map(tool => ({
-                ...tool,
-                description: tool.step?.name ? `{{${tool.name}.embeddings}}` : ''
-            }));
+            );
         },
-        availableTools() {
-            // Get tools that haven't been selected yet
-            return this.previousStepTools.filter(tool => 
-                !this.selectedDependencies.includes(tool.id)
-            ).map(tool => ({
-                ...tool,
-                description: tool.step?.name ? `{{${tool.name}.embeddings}}` : ''
-            }));
+        availableStepTools() {
+            return this.previousStepTools.map(step => ({
+                ...step,
+                stepTools: step.stepTools.filter(stepTool => 
+                    !this.selectedDependencies.some(
+                        selected => 
+                            selected.step.order === step.order && 
+                            selected.stepTool.id === stepTool.id
+                    )
+                )
+            })).filter(step => step.stepTools.length > 0);
         }
     },
     methods: {
-        addDependency(tool) {
-            if (!this.selectedDependencies.includes(tool.id)) {
-                this.selectedDependencies = [...this.selectedDependencies, tool.id];
-            }
+        updateModel() {
+            this.$emit('update:modelValue', this.selectedDependencies);
         },
-        removeDependency(toolId) {
-            this.selectedDependencies = this.selectedDependencies.filter(id => id !== toolId);
+        addDependency(step, stepTool) {
+            this.selectedDependencies.push({ step: step, stepTool: stepTool});
+            this.updateModel();
+        },
+        removeDependency(item) {
+            this.selectedDependencies = this.selectedDependencies
+                .filter(dependency => dependency.stepTool.id !== item.stepTool.id || 
+                                      dependency.step.order !== item.step.order);
+            this.updateModel();
+        },
+        reloadData() {
+            this.selectedDependencies = this.modelValue || [];
         }
-    }
+    },
 };
 </script>
 

@@ -41,7 +41,13 @@
                             <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
                         </div>
                     </div>
-                    <div v-if="isN8NTool" class="mb-3">
+                    <DependencySelector 
+                        :previousStepTools="previousStepTools"
+                        v-model="selectedDependencies"
+                        ref="dependencyTools"
+                    />
+                    <hr>
+                    <div v-if="isN8NTool" class="mb-3">                        
                         <select
                             class="form-select form-select-sm w-auto mb-3"
                             v-model="connector"
@@ -79,18 +85,12 @@
                             </div>
                         </div>
                         
-                        <DependencySelector 
-                            :previousStepTools="previousStepTools"
-                            v-model="selectedDependencies"
-                        />
-                        
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary" @click="updateNodeWithForm">{{ $t("labelSave") }}</button>
                         </div>
                     </div>
-                    <div v-else-if="isPromptTool">
+                    <div v-else-if="isPromptTool">                                                                 
                         <h6>Prompts</h6>
-                        <hr>
                         <div class="background-div">
                             <select class="form-select" v-model="idSelected">
                                 <option v-for="item in promptlist" :key="item.id" :value="item.id">
@@ -98,12 +98,7 @@
                                 </option>
                             </select>
                         </div>
-                        
-                        <DependencySelector 
-                            :previousStepTools="previousStepTools"
-                            v-model="selectedDependencies"
-                        />
-                        
+
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary"
                                     @click="updateNode">
@@ -113,16 +108,10 @@
                     </div>
                     <div v-else class="mb-3">
                         <h6>{{ $t("flow.sidebar.inputs") }}</h6>
-                        <hr>
                         <div class="background-div" v-for="(param, index) in parameters" :key="index">
                             <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
                                       v-model="parameters[index].value"></textarea>
-                        </div>
-                        
-                        <DependencySelector 
-                            :previousStepTools="previousStepTools"
-                            v-model="selectedDependencies"
-                        />
+                        </div>                    
 
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary"
@@ -142,7 +131,6 @@
     import DependencySelector from '@/components/flow/DependencySelector.vue';
     import AutomationServices from '@/services/automation/AutomationServices';
     import PromptService from "@/services/prompts/PromptsService";
-    import WorkflowService from "@/services/workflow/WorkflowService";
     import ToolType from '@/constants/ToolType';
 
     export default {
@@ -191,6 +179,7 @@
                 toolType: "",
                 previousStepTools: [],
                 selectedDependencies: [],
+                nodes: []
             };
         },
         components: {
@@ -271,25 +260,30 @@
                     this.fillValues(this.formFields, data)
                 }
             },
-            openNodeConfig(node) {
-                this.nodeFlow = node;
-                this.parameters = node.data.parameters;
-                this.toolType = node.data.toolType;
+            openNodeConfig(nodes, selectedNode) {
+                console.log("selectedNode:", selectedNode);
+                this.nodes = nodes;
+                this.nodeFlow = selectedNode;
+                this.parameters = selectedNode.data.parameters;
+                this.toolType = selectedNode.data.toolType;
+
 
                 // Load previous StepTools for dependencies
-                this.loadPreviousStepTools(node);
+                this.loadPreviousStepTools(selectedNode);
 
+                
                 // Initialize selected dependencies from node data
-                this.selectedDependencies = node.data.dependsOnStepToolIds || [];
+                this.selectedDependencies = [...this.nodeFlow.data.dependencies] || [];
+                console.log("Selected Dependencies on open:", this.selectedDependencies);
 
                 if (this.isTargetTool(ToolType.N8N)){
                     this.loadingWebhooks = true
                     this.resetFormConnector();              
-                    AutomationServices.getWorkflows(node.data.toolId)
+                    AutomationServices.getWorkflows(selectedNode.data.toolId)
                         .then((result) => {
                             if (result.error === undefined) {                                
                                 this.connectors = result;
-                                this.parameters = node.data.parameters;
+                                this.parameters = selectedNode.data.parameters;
                                 if (this.parameters.length===0){
                                     this.parameters.push({stepToolId: 0, value: null, requiredFile: false, webhookId: null});
                                 }
@@ -318,12 +312,12 @@
                     }
                     else {
                         this.idSelected = parseInt(this.parameters[0]?.value);
-                    }
+                    }                    
                 }
                 else if (this.parameters.length === 0) {
                     this.parameters.push({ stepToolId: 0, value: null, requiredFile: false, webhookId: null });
                 }
-
+                this.$refs.dependencyTools.reloadData();
                 this.sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
                 this.sidebar.show();            
             },
@@ -439,38 +433,36 @@
                     });
             },
             loadPreviousStepTools(node) {
-                // Get previous tools from tempWorkflow.list (Vuex store)
-                // This is used to generate the nodes in VueFlow for the current step
+                // Get previous tools from tempWorkflow.list
                 const tempWorkflowList = this.$store.state.tempWorkflow.list || [];
-                const currentNodeId = node.id;
                 
-                // Get the current step's stepTools from tempWorkflow
-                const currentStep = tempWorkflowList.find(step => 
-                    step.order === this.stepOrder || step.id === this.stepId
+                // Get steps up to current step order
+                const relevantSteps = tempWorkflowList.filter(step => 
+                    step.order <= this.stepOrder
                 );
                 
-                if (!currentStep || !currentStep.stepTools) {
+                if (!relevantSteps || relevantSteps.length === 0) {
                     this.previousStepTools = [];
                     return;
                 }
                 
-                // Get all stepTools for the current step and filter to get previous ones
-                const allStepTools = currentStep.stepTools || [];
-                const currentToolIndex = allStepTools.findIndex(tool => tool.id.toString() === currentNodeId);
+                // Get max order from steps
+                const maxOrder = Math.max(...relevantSteps.map(step => step.order));
+                const nodesToolIds = this.nodes.map(n => n.data?.toolId).filter(Boolean);
                 
-                // Filter to include only tools that come before the current node
-                this.previousStepTools = allStepTools
-                    .filter((tool, index) => index < currentToolIndex)
-                    .map(tool => ({
-                        id: tool.id,
-                        name: tool.tool?.name || tool.name || `Tool ${tool.id}`,
-                        toolId: tool.toolId,
-                        order: tool.order,
-                        step: {
-                            order: currentStep.order,
-                            name: currentStep.name
-                        }
-                    }));
+                // Map and filter steps/stepTools
+                this.previousStepTools = relevantSteps.map(step => ({
+                    id: step.id,
+                    name: step?.name || 'Unnamed Tool',
+                    order: step.order,
+                    stepTools: step.stepTools.filter(stepTool => 
+                        // Para steps anteriores, inclui todos os stepTools
+                        step.order < maxOrder || 
+                        // Para o step atual, inclui apenas stepTools com ordem menor que o nó atual
+                        (step.order === maxOrder && stepTool.order < node.data.order && nodesToolIds.includes(stepTool.tool?.id))
+                    )
+                }));
+                console.log("Previous Step Tools:", this.previousStepTools);
             },
             resetFormConnector(){
                 this.connectors = [];
