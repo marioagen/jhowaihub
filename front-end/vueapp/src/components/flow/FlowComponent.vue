@@ -273,7 +273,10 @@
 
                 
                 // Initialize selected dependencies from node data
-                this.selectedDependencies = [...this.nodeFlow.data.dependencies] || [];
+                // Check if dependencies exist before spreading to avoid errors
+                this.selectedDependencies = selectedNode.data.dependencies 
+                    ? [...selectedNode.data.dependencies] 
+                    : (selectedNode.data.dependsOnStepToolIds || []);
                 console.log("Selected Dependencies on open:", this.selectedDependencies);
 
                 if (this.isTargetTool(ToolType.N8N)){

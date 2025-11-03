@@ -216,7 +216,9 @@ export default {
                     data: {
                         ...this.nodes[idx].data,
                         parameters: parameters,
-                        dependencies: dependencies
+                        dependencies: dependencies,
+                        // Also store in dependsOnStepToolIds for compatibility with buildFlowPayload
+                        dependsOnStepToolIds: dependencies
                     }
                 };
                 console.log("Updated Node nó:",idx, this.nodes[idx]);
