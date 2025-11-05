@@ -182,7 +182,6 @@ namespace WoopiAiHub.Application.Services
 
             var users = await _userRepository.FindByTeamIdsAsync(teamIds);
 
-
             return users;
         }
 
