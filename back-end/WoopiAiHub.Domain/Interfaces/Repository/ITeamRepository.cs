@@ -14,8 +14,9 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         IQueryable<TeamDto> FindAllPaged(PagedDataDto pagedDataDto);
         List<Team> FindByIds(IEnumerable<int> ids);
         Team FindByIdReturnModel(int id);
-        IQueryable<TeamDto> FindAllByUser(string userEmail);
+        IQueryable<TeamDto> FindAll();
         ICollection<Team> FindByIdsAndUser(IEnumerable<int> ids,
                                            string emailUser);
+        IQueryable<TeamDto> FindAllByUser(string userEmail);
     }
 }

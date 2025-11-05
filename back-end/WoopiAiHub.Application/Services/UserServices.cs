@@ -169,6 +169,24 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Retrieves a collection of users associated with the specified team IDs.
+        /// </summary>
+        /// <param name="teamIds">An array of team IDs for which to retrieve the associated users.  The array must not be null or empty.</param>
+        /// <returns>A collection of <see cref="UserDto"/> objects representing the users associated with the specified team IDs.
+        /// If no users are found for the provided team IDs, an empty collection is returned.</returns>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="teamIds"/> is null or empty.</exception>
+        public async Task<ICollection<UserDto>> FindByTeamIds(int[] teamIds)
+        {
+            if (teamIds == null || teamIds.Length == 0)
+                throw new ArgumentException("Team IDs cannot be null or empty", nameof(teamIds));
+
+            var users = await _userRepository.FindByTeamIdsAsync(teamIds);
+
+
+            return users;
+        }
+
+        /// <summary>
         /// Find user id by email
         /// </summary>
         /// <param name="email"></param>
