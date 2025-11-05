@@ -362,5 +362,28 @@ namespace WoopiAiHub.Api.Controllers
                 return StatusCode(500, "An unexpected error occurred while retrieving the document. Please try again or contact support.");
             }
         }
+
+        /// <summary>
+        /// Retrieve the OCR text for a document if available.
+        /// </summary>
+        /// <param name="id">Document ID</param>
+        /// <returns>OCR text response with concatenated text from all pages</returns>
+        [HttpGet("OcrText/{id}")]
+        [SwaggerOperation(Summary = "Retrieve the OCR text for a document if available")]
+        [ProducesResponseType(typeof(OcrTextResponseDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindOcrText(int id)
+        {
+            try
+            {
+                var result = await _documentServices.FindOcrTextByDocumentId(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An exception occurred in {Controller}.{Method} method for documentId: {id}.",
+                    nameof(DocumentController), nameof(FindOcrText), id);
+                return StatusCode(500, "An unexpected error occurred while retrieving OCR text. Please try again or contact support.");
+            }
+        }
     }
 }
