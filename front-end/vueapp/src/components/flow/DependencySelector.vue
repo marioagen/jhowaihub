@@ -13,11 +13,7 @@
                 aria-expanded="false"
             >
                 <span>{{ availableStepTools.length > 0 ? $t('flow.sidebar.addDependency') : $t('flow.sidebar.noDependencies') }}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
+                <LucideIcon :icon="'CirclePlus'" :size="16" />
             </button>
             <ul class="dropdown-menu w-100">
                 <li v-if="availableStepTools.length === 0" class="dropdown-item-text text-muted small">
@@ -39,23 +35,25 @@
             </ul>
         </div>
         <!-- Selected Dependencies Display -->
-        <div v-if="selectedDependencies.length > 0" class="mb-3">
+        <div v-if="selectedDependencies.length > 0" class="mb-3 mt-2">
             <div v-for="(item, index) in selectedDependencies" :key="index" class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-2">
                 <div class="d-flex align-items-center flex-grow-1">
                     <div class="flex-grow-1">
-                        <div class="fw-medium">{{ item.step.name }} <small class="text-muted">({{ item.stepTool.tool.name }}/{{ item.stepTool.tool.toolType }})</small></div>
+                        <div class="fw-medium">
+                            {{ findStepNameByOrder(item.stepOrder) }} 
+                            <small class="text-muted">
+                                ({{ findToolLabelById(item.stepOrder, item.stepToolOrder) }})
+                            </small>
+                        </div>
                     </div>
                 </div>
                 <button 
                     type="button" 
                     class="btn btn-sm btn-link text-danger p-0 ms-2" 
                     @click="removeDependency(item)"
-                    :title="$t('labelRemove')"
+                    :title="$t('flow.sidebar.deleteDependency')"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+                    <LucideIcon :icon="'CircleX'" :size="16" />
                 </button>
             </div>
         </div>
@@ -63,6 +61,7 @@
 </template>
 
 <script>
+import LucideIcon from '@/components/global/LucideIcon.vue'
 
 export default {
     name: 'DependencySelector',
@@ -76,36 +75,31 @@ export default {
             default: () => []
         },
     },
+    components: {
+        LucideIcon
+    },
     data() {
         return {
-            // Create a deep copy to avoid sharing references between component instances
             selectedDependencies: this.modelValue ? JSON.parse(JSON.stringify(this.modelValue)) : []
         };
     },
     watch: {
-        // Watch for changes in modelValue from parent and update local state
         modelValue: {
             handler(newValue) {
-                // Create a deep copy to avoid shared references
                 this.selectedDependencies = newValue ? JSON.parse(JSON.stringify(newValue)) : [];
             },
             deep: true
         }
     },
     computed: {
-        selectedItems() {
-            return this.previousStepTools.filter(tool => 
-                this.selectedDependencies.includes(tool.id)
-            );
-        },
         availableStepTools() {
             return this.previousStepTools.map(step => ({
                 ...step,
                 stepTools: step.stepTools.filter(stepTool => 
                     !this.selectedDependencies.some(
                         selected => 
-                            selected.step.order === step.order && 
-                            selected.stepTool.id === stepTool.id
+                            selected.stepOrder === step.order && 
+                            selected.stepToolOrder === stepTool.order
                     )
                 )
             })).filter(step => step.stepTools.length > 0);
@@ -116,18 +110,26 @@ export default {
             this.$emit('update:modelValue', this.selectedDependencies);
         },
         addDependency(step, stepTool) {
-            this.selectedDependencies.push({ step: step, stepTool: stepTool});
+            this.selectedDependencies.push({ stepOrder: step.order, stepToolOrder: stepTool.order});
             this.updateModel();
         },
         removeDependency(item) {
             this.selectedDependencies = this.selectedDependencies
-                .filter(dependency => dependency.stepTool.id !== item.stepTool.id || 
-                                      dependency.step.order !== item.step.order);
+                .filter(dependency => dependency.stepToolOrder !== item.stepToolOrder || 
+                                      dependency.stepOrder !== item.stepOrder);
             this.updateModel();
         },
         reloadData() {
-            // Create a deep copy to avoid shared references
             this.selectedDependencies = this.modelValue ? JSON.parse(JSON.stringify(this.modelValue)) : [];
+        },
+        findStepNameByOrder(order) {
+            const step = this.previousStepTools.find(s => s.order === order);
+            return step ? step.name : '';
+        },
+        findToolLabelById(stepOrder, stepToolOrder) {
+            const step = this.previousStepTools.find(s => s.order === stepOrder);
+            const stepTool = step ? step.stepTools.find(st => st.order === stepToolOrder) : null;
+            return stepTool ? `${stepTool.tool.name}/${stepTool.tool.toolType}` : '';
         }
     },
 };

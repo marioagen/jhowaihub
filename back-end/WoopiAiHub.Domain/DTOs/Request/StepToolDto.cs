@@ -19,6 +19,6 @@ namespace WoopiAiHub.Domain.DTOs.Request
         public virtual ICollection<StepToolParameterDto> Parameters { get; set; } = new List<StepToolParameterDto>();
         public virtual ICollection<StepToolExecutionDto> Executions { get; set; } = new List<StepToolExecutionDto>();
         public virtual ICollection<StepToolOutputDto> Outputs { get; set; } = new List<StepToolOutputDto>();
-        public virtual ICollection<StepToolDependencyDto> Dependencies { get; set; } = new List<StepToolDependencyDto>();
+        public virtual ICollection<DTOs.StepToolDependencyDto> Dependencies { get; set; } = new List<DTOs.StepToolDependencyDto>();
     }
 }

@@ -14,6 +14,5 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         ICollection<WorkflowDto> FindAllByUser(string email);
         ICollection<WorkflowDto> FindAll();
         PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
-        Task<List<StepToolDto>> FindPreviousStepToolsAsync(int stepToolId);
     }
 }

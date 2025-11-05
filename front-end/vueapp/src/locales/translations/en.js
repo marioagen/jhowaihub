@@ -579,7 +579,8 @@
             dependenciesHint: "Select previous tools whose outputs you want to use as input",
             addDependency: "Add Dependency",
             noDependencies: "No tools available",
-            allDependenciesSelected: "All dependencies already selected"
+            allDependenciesSelected: "All dependencies already selected",
+            deleteDependency: "Remove Dependency",
         },
         formFlow: {
             progressFlowSuccess: "Flow inserted successfully",

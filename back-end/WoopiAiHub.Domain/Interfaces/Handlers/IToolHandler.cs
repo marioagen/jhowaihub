@@ -6,10 +6,6 @@ namespace WoopiAiHub.Domain.Interfaces.Handlers
     public interface IToolHandler
     {
         string Type { get; }
-        Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
-                                               StepToolParameter? input,
-                                               string output,
-                                               StepToolExecution? execution = null);
         
         Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                StepToolParameter? input,

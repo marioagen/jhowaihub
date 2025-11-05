@@ -87,6 +87,7 @@ export default {
     },
     data() {
         return {
+            step: null,
             toolsList: [],
             nodes: [],
             edges: [],
@@ -130,7 +131,7 @@ export default {
         },
         async getFlow() {
             try {
-                let step = this.$store.state.tempWorkflow.list.find(item => {
+                this.step = this.$store.state.tempWorkflow.list.find(item => {
                     if (this.isEdit && this.stepId == 0) {
                         if (item.order == this.stepOrder) {
                             return item.stepTools;
@@ -146,7 +147,7 @@ export default {
                     }
                 });
 
-                let stepTools = step ? step.stepTools : [];
+                let stepTools = this.step ? this.step.stepTools : [];
                 const mappedNodes = stepTools.map(stepTool => ({
                     id: stepTool.id.toString(),
                     position: { x: stepTool.positionX, y: stepTool.positionY },
@@ -161,8 +162,7 @@ export default {
                         toolType: stepTool.tool.toolType,
                         toolId: stepTool.toolId,
                         stepToolId: stepTool.id,
-                        dependsOnStepToolIds: [],//stepTool.dependencies ? stepTool.dependencies.map(d => d.dependsOnStepToolId) : [],
-                        dependencies: this.findDependencyStepTools(step, stepTool),
+                        dependencies: stepTool.dependencies
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -194,21 +194,35 @@ export default {
                 LogService.showMessage("Erro ao carregar fluxo");
             }
         },
-        findDependencyStepTools(step, stepTool) {
-            console.log("Finding dependencies for stepTool:", stepTool);
-            return !stepTool.dependencies ||  stepTool.dependencies.length == 0 ? 
-                this.$store.state.tempWorkflow.list
-                    .find(item => item.order === step.order)?.stepTools
-                    .filter(st => stepTool.dependencies.some(d => d.dependsOnStepToolId === st.id))
-                    .map(st => ({ step: step, stepTool: st }))                
-                : stepTool.dependencies; 
-        },
         deleteNode(nodeId) {
+            this.removeNodeDependency(nodeId);
             this.nodes = this.nodes.filter(node => node.id !== nodeId);
-            this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
+            this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);            
+        },
+        removeNodeDependency(nodeId) {
+            const idx = this.nodes.findIndex(node => node.id === nodeId);
+            if (idx !== -1) {
+                const node = this.nodes[idx];
+                this.nodes.forEach(n => {
+                    if (n.order > node.data.order) {
+                        n.data.dependencies = (n.data.dependencies || []).filter(d => 
+                            !(d.stepOrder === this.step.order && d.stepToolOrder === node.data.order)
+                        );
+                    }
+                });
+
+                this.$store.state.tempWorkflow.list.forEach(step => {
+                    if (step.order > this.step.order){
+                        step.stepTools.forEach(stepTool => {
+                            stepTool.dependencies = (stepTool.dependencies || []).filter(d => 
+                                 !(d.stepOrder === this.step.order && d.stepToolOrder === node.data.order)
+                            );
+                        });
+                    }
+                });
+            }
         },
         updateNodeInput(nodeId, parameters, dependencies) {
-            console.log("Updating Node dep:",  dependencies);
             const idx = this.nodes.findIndex(node => node.id === nodeId);
             if (idx !== -1) {
                 this.nodes[idx] = {
@@ -216,23 +230,16 @@ export default {
                     data: {
                         ...this.nodes[idx].data,
                         parameters: parameters,
-                        dependencies: dependencies,
-                        // Also store in dependsOnStepToolIds for compatibility with buildFlowPayload
-                        dependsOnStepToolIds: dependencies
+                        dependencies: dependencies
                     }
                 };
-                console.log("Updated Node nó:",idx, this.nodes[idx]);
             }            
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
         },
         openNodeConfig(node) {
-            console.log("Open Node:", node);
             const idx = this.nodes.findIndex(n => n.id === node.id);
-            console.log("All Nodes:", this.nodes[idx]);
-            // Emit the node from this.nodes array instead of the VueFlow event parameter
-            // to ensure we're passing the updated node with dependencies
             this.$emit('openNodeConfig', this.nodes, this.nodes[idx])
         },
         onConnect(params) {
@@ -270,7 +277,6 @@ export default {
                     parameters: [],
                     toolId: nodeData.id,
                     stepToolId: null,
-                    dependsOnStepToolIds: [],
                     dependencies: [],
                 }
             }
@@ -288,12 +294,11 @@ export default {
                     order: index + 1,
                     status: "Active",
                     parameters: node.data.parameters,
-                    // Legacy single dependency field - maintained for backward compatibility
-                    // Backend will prioritize dependsOnStepToolIds if provided
                     dependsOnStepToolId: index,
-                    // New multiple dependencies field
-                    dependsOnStepToolIds: node.data.dependsOnStepToolIds || [],
-                    dependencies: node.data.dependencies || []
+                    dependencies: (node.data.dependencies || []).map(d => ({
+                           stepOrder: d.stepOrder ?? null,
+                           stepToolOrder: d.stepToolOrder ?? null
+                       }))
                 }));
         },
         showCollapse() {

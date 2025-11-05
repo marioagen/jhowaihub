@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -9,7 +8,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -197,7 +195,6 @@ namespace WoopiAiHub.Application.Services
                     }
                 }
 
-                // Save changes to ensure all StepTools have IDs
                 await _unitOfWork.SaveChangesAsync();
 
                 // Second pass: Resolve and set up dependencies now that all StepTools have IDs
@@ -205,17 +202,17 @@ namespace WoopiAiHub.Application.Services
                 {
                     foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                     {
-                        if (stepToolDto.DependsOnStepToolIds != null && stepToolDto.DependsOnStepToolIds.Any())
+                        if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Any())
                         {
                             var stepTool = stepToolMap[(stepDto.Id, stepToolDto.Order)];
                             
-                            // Resolve StepTool references from all steps
                             var dependsOnStepTools = new List<StepTool>();
-                            foreach (var dependsOnId in stepToolDto.DependsOnStepToolIds)
+                            stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
+                            foreach (var dependsOn in stepToolDto.Dependencies)
                             {
                                 var dependsOnStepTool = workflow.Steps
                                     .SelectMany(s => s.StepTools)
-                                    .FirstOrDefault(st => st.Id == dependsOnId);
+                                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
                                 
                                 if (dependsOnStepTool != null)
                                 {
@@ -384,7 +381,10 @@ namespace WoopiAiHub.Application.Services
                 foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                 {
                     var stepTool = CreateStepToolUpdate(stepToolDto);
+                    stepTool.Step = step;
                     SetDependencies(stepTool, previousStepToolInSameStep, lastStepTool);
+
+                    SetOutputDependencies(steps, stepToolDto, stepTool);
 
                     step.AddStepTool(stepTool);
 
@@ -401,6 +401,33 @@ namespace WoopiAiHub.Application.Services
             }
 
             return steps;
+        }
+
+        /// <summary>
+        /// Set output dependencies
+        /// </summary>
+        /// <param name="steps"></param>
+        /// <param name="stepToolDto"></param>
+        /// <param name="stepTool"></param>
+        private static void SetOutputDependencies(List<Step> steps, StepToolUpdateDto stepToolDto, StepTool stepTool)
+        {
+            var dependsOnStepTools = new List<StepTool>();
+            foreach (var dependsOn in stepToolDto.Dependencies)
+            {
+                var dependsOnStepTool = steps
+                    .SelectMany(s => s.StepTools)
+                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
+
+                if (dependsOnStepTool != null)
+                {
+                    dependsOnStepTools.Add(dependsOnStepTool);
+                }
+            }
+
+            if (dependsOnStepTools.Any())
+            {
+                stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
+            }
         }
 
         /// <summary>
@@ -494,17 +521,6 @@ namespace WoopiAiHub.Application.Services
         {
             var workflow = _workflowRepository.FindAll();
             return workflow;
-        }
-
-        /// <summary>
-        /// Finds all StepTools that were executed before the specified StepTool.
-        /// This includes StepTools from previous steps and earlier in the same step.
-        /// </summary>
-        /// <param name="stepToolId">The ID of the StepTool to find previous tools for.</param>
-        /// <returns>A list of StepToolDto objects representing previous StepTools.</returns>
-        public async Task<List<StepToolDto>> FindPreviousStepToolsAsync(int stepToolId)
-        {
-            return await _stepToolRepository.FindPreviousStepToolsAsync(stepToolId);
         }
     }
 }

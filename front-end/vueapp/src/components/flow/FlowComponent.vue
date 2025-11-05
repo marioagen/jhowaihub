@@ -261,23 +261,14 @@
                 }
             },
             openNodeConfig(nodes, selectedNode) {
-                console.log("selectedNode:", selectedNode);
                 this.nodes = nodes;
                 this.nodeFlow = selectedNode;
                 this.parameters = selectedNode.data.parameters;
                 this.toolType = selectedNode.data.toolType;
 
-
-                // Load previous StepTools for dependencies
                 this.loadPreviousStepTools(selectedNode);
 
-                
-                // Initialize selected dependencies from node data
-                // Check if dependencies exist before spreading to avoid errors
-                this.selectedDependencies = selectedNode.data.dependencies 
-                    ? [...selectedNode.data.dependencies] 
-                    : (selectedNode.data.dependsOnStepToolIds || []);
-                console.log("Selected Dependencies on open:", this.selectedDependencies);
+                this.selectedDependencies = selectedNode.data.dependencies;
 
                 if (this.isTargetTool(ToolType.N8N)){
                     this.loadingWebhooks = true
@@ -311,6 +302,7 @@
                 else if (this.isTargetTool(ToolType.Prompt)){
                     this.findAllPrompts();
                     if (this.parameters.length === 0) {
+                        this.idSelected = 0;
                         this.parameters.push({ stepToolId: 0, value: null, requiredFile: false, webhookId: null });
                     }
                     else {
@@ -336,7 +328,7 @@
                 if (this.idSelected) {
                     this.parameters[0].value = this.idSelected.toString();
                 }
-                // Update node with parameters and dependencies
+
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id, 
                     this.parameters,
@@ -369,7 +361,7 @@
                 }
                 this.parameters[0].value = JSON.stringify(this.formData);
                 this.parameters[0].webhookId = this.connector;
-                // Update node with parameters and dependencies
+
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id, 
                     this.parameters,
@@ -436,10 +428,8 @@
                     });
             },
             loadPreviousStepTools(node) {
-                // Get previous tools from tempWorkflow.list
                 const tempWorkflowList = this.$store.state.tempWorkflow.list || [];
                 
-                // Get steps up to current step order
                 const relevantSteps = tempWorkflowList.filter(step => 
                     step.order <= this.stepOrder
                 );
@@ -449,23 +439,18 @@
                     return;
                 }
                 
-                // Get max order from steps
                 const maxOrder = Math.max(...relevantSteps.map(step => step.order));
                 const nodesToolIds = this.nodes.map(n => n.data?.toolId).filter(Boolean);
                 
-                // Map and filter steps/stepTools
                 this.previousStepTools = relevantSteps.map(step => ({
                     id: step.id,
                     name: step?.name || 'Unnamed Tool',
                     order: step.order,
                     stepTools: step.stepTools.filter(stepTool => 
-                        // Para steps anteriores, inclui todos os stepTools
                         step.order < maxOrder || 
-                        // Para o step atual, inclui apenas stepTools com ordem menor que o nó atual
                         (step.order === maxOrder && stepTool.order < node.data.order && nodesToolIds.includes(stepTool.tool?.id))
                     )
                 }));
-                console.log("Previous Step Tools:", this.previousStepTools);
             },
             resetFormConnector(){
                 this.connectors = [];

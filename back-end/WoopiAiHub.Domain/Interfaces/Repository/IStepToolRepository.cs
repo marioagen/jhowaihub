@@ -17,6 +17,5 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<StepTool?> FindDependentAsync(int id);
         Task<StepTool?> FindByStepIdAndOrderAsync(int stepId, int order);
         ICollection<StepTool> FindStepToolsByStepId(int stepId);
-        Task<List<StepToolDto>> FindPreviousStepToolsAsync(int stepToolId);
     }
 }

@@ -33,55 +33,6 @@ public class PromptHandler : IToolHandler
     }
 
     /// <summary>
-    /// Builds an execution payload for processing prompt tasks based on the provided automation service details.
-    /// </summary>
-    /// <param name="automationServicesDto"></param>
-    /// <param name="input"></param>
-    /// <param name="output"></param>
-    /// <param name="execution"></param>
-    /// <returns></returns>
-    public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
-                                                        StepToolParameter? input,
-                                                        string output,
-                                                        StepToolExecution? execution = null)
-    {
-
-        var promptId = int.Parse(input.Value);
-        var promptDto = _promptServices.FindById(promptId);
-        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
-        var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
-        var fullText = string.Join("\n", documents.DocumentEmbeddings.Select(d => d.Text));
-
-        return new ExecutionMessageDto
-        {
-            Queue = _messageQueues.ChatCompletionQueue,
-            Message = new ChatCompletionQueryDto
-            {
-                ResponseQueue = _messageQueues.ChatCompletionQueueAiHubResponse,
-                Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
-                ReferenceFile = automationServicesDto.ReferenceFile,
-                Tenant = automationServicesDto.Tenant,
-                Model = _chatCompletionSettings.Model,
-                ApiVersion = _chatCompletionSettings.ApiVersion,
-                ChatCompletion = new ChatCompletionDto
-                {
-                    Temperature = _chatCompletionSettings.Temperature,
-                    MaxTokens = _chatCompletionSettings.MaxTokens,
-                    Messages = new List<ChatMessageDto>
-                        {
-                            new ChatMessageDto
-                            {
-                                Role = "system",
-                                Content = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orienta��es a seguir: ", promptDto.Text)
-                            }
-                        }
-                },
-                Email = automationServicesDto.Email
-            }
-        };
-    }
-
-    /// <summary>
     /// Builds an execution payload for processing prompt tasks with multiple outputs from dependent StepTools.
     /// This allows combining multiple document embeddings from different sources.
     /// </summary>
@@ -95,30 +46,12 @@ public class PromptHandler : IToolHandler
                                                         ICollection<StepToolOutput> outputs,
                                                         StepToolExecution? execution = null)
     {
+        var output = outputs.FirstOrDefault()?.Value ?? string.Empty;
         var promptId = int.Parse(input!.Value);
         var promptDto = _promptServices.FindById(promptId);
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
-
-        // Combine all outputs from multiple dependencies
-        var allTexts = new List<string>();
-        foreach (var output in outputs)
-        {
-            try
-            {
-                var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output.Value);
-                if (documents?.DocumentEmbeddings != null)
-                {
-                    allTexts.AddRange(documents.DocumentEmbeddings.Select(d => d.Text));
-                }
-            }
-            catch
-            {
-                // If not a DocumentEmbeddingsDataDto, try to use the value directly
-                allTexts.Add(output.Value);
-            }
-        }
-
-        var fullText = string.Join("\n", allTexts);
+        var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
+        var fullText = string.Join("\n", documents!.DocumentEmbeddings.Select(d => d.Text));
 
         return new ExecutionMessageDto
         {
@@ -127,7 +60,7 @@ public class PromptHandler : IToolHandler
             {
                 ResponseQueue = _messageQueues.ChatCompletionQueueAiHubResponse,
                 Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
-                ReferenceFile = automationServicesDto.ReferenceFile,
+                ReferenceFile = automationServicesDto.ReferenceFile!,
                 Tenant = automationServicesDto.Tenant,
                 Model = _chatCompletionSettings.Model,
                 ApiVersion = _chatCompletionSettings.ApiVersion,
@@ -136,13 +69,13 @@ public class PromptHandler : IToolHandler
                     Temperature = _chatCompletionSettings.Temperature,
                     MaxTokens = _chatCompletionSettings.MaxTokens,
                     Messages = new List<ChatMessageDto>
-                    {
-                        new ChatMessageDto
                         {
-                            Role = "system",
-                            Content = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptDto.Text)
+                            new ChatMessageDto
+                            {
+                                Role = "system",
+                                Content = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptDto.Text)
+                            }
                         }
-                    }
                 },
                 Email = automationServicesDto.Email
             }

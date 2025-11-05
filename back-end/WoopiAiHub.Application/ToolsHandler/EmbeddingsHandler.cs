@@ -34,18 +34,21 @@ public class EmbeddingsHandler : IToolHandler
     }
 
     /// <summary>
-    /// Builds an execution payload for processing OCR tasks based on the provided automation service details.
+    /// Builds an execution payload for processing OCR tasks with multiple outputs from dependent StepTools.
+    /// This overload allows handling outputs from multiple dependencies.
     /// </summary>
     /// <param name="automationServicesDto"></param>
     /// <param name="input"></param>
-    /// <param name="output"></param>
+    /// <param name="outputs">Collection of outputs from dependent StepTools</param>
+    /// <param name="execution"></param>
     /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                         StepToolParameter? input,
-                                                        string output,
+                                                        ICollection<StepToolOutput> outputs,
                                                         StepToolExecution? execution = null)
     {
+        var output = outputs.FirstOrDefault()?.Value ?? string.Empty;
+        
         var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
         if (string.IsNullOrEmpty(tenantInfo!.EmbeddingModelName))
         {
@@ -66,24 +69,5 @@ public class EmbeddingsHandler : IToolHandler
             Queue = _messageQueues.EmbeddingQueue,
             Message = documents
         };
-    }
-
-    /// <summary>
-    /// Builds an execution payload for processing OCR tasks with multiple outputs from dependent StepTools.
-    /// This overload allows handling outputs from multiple dependencies.
-    /// </summary>
-    /// <param name="automationServicesDto"></param>
-    /// <param name="input"></param>
-    /// <param name="outputs">Collection of outputs from dependent StepTools</param>
-    /// <param name="execution"></param>
-    /// <returns></returns>
-    public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
-                                                        StepToolParameter? input,
-                                                        ICollection<StepToolOutput> outputs,
-                                                        StepToolExecution? execution = null)
-    {
-        // For embeddings, we use the first output as the default behavior
-        var output = outputs.FirstOrDefault()?.Value ?? string.Empty;
-        return await BuildPayload(automationServicesDto, input, output, execution);
     }
 }

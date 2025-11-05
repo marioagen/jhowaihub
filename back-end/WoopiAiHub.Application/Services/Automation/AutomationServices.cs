@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
@@ -259,28 +260,16 @@ namespace WoopiAiHub.Application.Services.Automation
         {
             var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
 
-            // Check if we have new-style dependencies or old-style dependency
             if (stepTool.Dependencies != null && stepTool.Dependencies.Any())
             {
-                // Use new multiple dependencies approach
-                var outputs = new List<StepToolOutput>();
-                foreach (var dependency in stepTool.Dependencies)
-                {
-                    var depOutputs = await _stepToolOutputRepository.FindAllByStepToolIdAsync(dependency.DependsOnStepToolId, cardId);
-                    outputs.AddRange(depOutputs);
-                }
+                var ids = stepTool.Dependencies.Select(d => d.DependsOnStepToolId).ToList();
+                var outputs = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync(ids, cardId);
                 return await handler.BuildPayload(automationServicesDto, input, outputs, execution);
             }
-            else if (stepTool.DependsOnStepTool != null)
-            {
-                // Use legacy single dependency approach for backward compatibility
-                string output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id, cardId);
-                return await handler.BuildPayload(automationServicesDto, input, output, execution);
-            }
             else
-            {
-                // No dependencies
-                return await handler.BuildPayload(automationServicesDto, input, string.Empty, execution);
+            {                
+                var output = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync([stepTool.DependsOnStepTool!.Id], cardId);
+                return await handler.BuildPayload(automationServicesDto, input, output, execution);
             }
         }
 

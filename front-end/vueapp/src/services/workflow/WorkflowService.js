@@ -98,15 +98,4 @@ export default {
                 }
             });
     },
-    getPreviousStepTools(stepToolId) {
-        return api.get(`/Workflow/StepTools/${stepToolId}/Previous`)
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                }
-            });
-    },
 }
