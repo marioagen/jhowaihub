@@ -121,11 +121,11 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="headersDto"></param>
         /// <returns></returns>
         [HttpGet]
-        [SwaggerOperation("Endpoint that receives the request to return all teams by user's email")]
+        [SwaggerOperation("Endpoint that receives the request to return all teams")]
         [ProducesResponseType(typeof(ICollection<TeamDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindAll([FromHeader] HeadersDto headersDto)
+        public async Task<IActionResult> FindAll()
         {
-            var result = await _teamServices.FindByUser(headersDto.EmailCreator);
+            var result = await _teamServices.FindAll();
             return Ok(result);
         }
     }

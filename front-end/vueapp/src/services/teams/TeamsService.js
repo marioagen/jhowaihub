@@ -30,17 +30,6 @@ export default {
                 }
             });
     },
-    getTeamsByUser() {
-        if (!store.state.userProfile.keyMongoAccess) {
-            return Promise.resolve({
-                data: [], 
-            });
-        }   
-        return api.get("/Team")
-            .then(({ data }) => {
-                return data;
-            })
-    },
     deleteTeamById(teamId) {
         return api
             .delete("/Team/DeleteByIds", { data: [teamId] })
