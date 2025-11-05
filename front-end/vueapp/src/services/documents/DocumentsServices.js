@@ -94,4 +94,16 @@ export default {
                 };
             });
     },
+    getOcrText(docId) {
+        return api
+            .get(`/Document/OcrText/${docId}`)
+            .then((result) => {
+                return result.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
 };

@@ -54,6 +54,7 @@
     labelDownloadCsv: "Download CSV",
     labelDownloadSuccessfully: "Download successfully",
     labelDocumentTranscript: "Document transcription",
+    labelOcrText: "OCR Text",
     labelDuplicatedQuestionnaire: "Duplicated questionnaire name",
     labelEdit: "Edit",
     labelEdited: "Edited",
