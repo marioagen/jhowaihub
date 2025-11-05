@@ -89,15 +89,26 @@ namespace WoopiAiHub.Domain.Models
 
         public void RemoveDependencies()
         {
-            Dependencies.Clear();
+            // Instead of clearing (which causes EF to try to delete with non-nullable FK),
+            // we'll remove items one by one, which allows EF to properly handle the deletion
+            var existingDependencies = Dependencies.ToList();
+            foreach (var existingDep in existingDependencies)
+            {
+                Dependencies.Remove(existingDep);
+            }
         }
 
         public void UpdateDependencies(ICollection<int> dependsOnStepToolIds)
         {
             ArgumentNullException.ThrowIfNull(dependsOnStepToolIds);
             
-            // Remove existing dependencies
-            Dependencies.Clear();
+            // Instead of clearing (which causes EF to try to delete with non-nullable FK),
+            // we'll remove items one by one, which allows EF to properly handle the deletion
+            var existingDependencies = Dependencies.ToList();
+            foreach (var existingDep in existingDependencies)
+            {
+                Dependencies.Remove(existingDep);
+            }
             
             // Add new dependencies
             foreach (var dependsOnId in dependsOnStepToolIds)
@@ -111,8 +122,13 @@ namespace WoopiAiHub.Domain.Models
         {
             ArgumentNullException.ThrowIfNull(dependsOnStepTools);
             
-            // Remove existing dependencies
-            Dependencies.Clear();
+            // Instead of clearing (which causes EF to try to delete with non-nullable FK),
+            // we'll remove items one by one, which allows EF to properly handle the deletion
+            var existingDependencies = Dependencies.ToList();
+            foreach (var existingDep in existingDependencies)
+            {
+                Dependencies.Remove(existingDep);
+            }
             
             // Add new dependencies using StepTool references
             // Entity Framework will handle the ID mapping after SaveChanges
