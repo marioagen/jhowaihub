@@ -127,6 +127,8 @@ namespace WoopiAiHub.Application.Services
                         var stepToolsToRemove = existingStep.StepTools
                                                             .Where(st => !stepToolIdsFromDto.Contains(st.Id))
                                                             .ToList();
+                        // Delete existing dependencies explicitly via repository
+                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepToolsToRemove.Select(s=>s.Id).ToList());
                         foreach (var stepToolToRemove in stepToolsToRemove)
                         {
                             var dependents = workflow.Steps.SelectMany(s => s.StepTools)
@@ -209,7 +211,7 @@ namespace WoopiAiHub.Application.Services
                         var stepTool = stepToolMap[(stepDto.Id, stepToolDto.Order)];
                         
                         // Delete existing dependencies explicitly via repository
-                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepTool.Id);
+                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
                         
                         if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Any())
                         {

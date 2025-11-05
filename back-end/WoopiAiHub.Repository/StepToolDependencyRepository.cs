@@ -14,10 +14,15 @@ namespace WoopiAiHub.Repository
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task DeleteByStepToolIdAsync(int stepToolId)
+        /// <summary>
+        /// Deletes all StepToolDependency records associated with the provided step tool IDs.
+        /// </summary>
+        /// <param name="stepToolIds"></param>
+        /// <returns></returns>
+        public async Task DeleteByStepToolIdAsync(IEnumerable<int> stepToolIds)
         {
             var dependencies = await _context.Set<StepToolDependency>()
-                .Where(d => d.StepToolId == stepToolId)
+                .Where(d => stepToolIds!.Contains(d.StepToolId) || stepToolIds!.Contains(d.DependsOnStepToolId))
                 .ToListAsync();
 
             if (dependencies.Any())
@@ -27,6 +32,11 @@ namespace WoopiAiHub.Repository
             }
         }
 
+        /// <summary>
+        /// Adds a new StepToolDependency record to the database asynchronously.
+        /// </summary>
+        /// <param name="dependency"></param>
+        /// <returns></returns>
         public async Task AddAsync(StepToolDependency dependency)
         {
             ArgumentNullException.ThrowIfNull(dependency);
@@ -34,7 +44,12 @@ namespace WoopiAiHub.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ICollection<StepToolDependency>> GetByStepToolIdAsync(int stepToolId)
+        /// <summary>
+        /// Finds all StepToolDependency records associated with the specified step tool ID.
+        /// </summary>
+        /// <param name="stepToolId"></param>
+        /// <returns></returns>
+        public async Task<ICollection<StepToolDependency>> FindByStepToolIdAsync(int stepToolId)
         {
             return await _context.Set<StepToolDependency>()
                 .Where(d => d.StepToolId == stepToolId)

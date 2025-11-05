@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using System.Text.Json;
+using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
@@ -40,10 +40,10 @@ namespace WoopiAiHub.Application.ToolsHandler
                                                             ICollection<StepToolOutput> outputs,
                                                             StepToolExecution? execution = null)
         {
-            string outputsJson = ConvertOutputsToJson(outputs, input!.Value);
-
             var tool = await _toolRepository.FindModelByStepToolIdAsync(automationServicesDto!.StepToolId)
                 ?? throw new AppException(ErrorCode.NotFound, "Tool not found", null);
+
+            string outputsJson = ConvertOutputsToJson(outputs, input!.Value);
 
             var automationInputDto = new AutomationInputDto
             {
@@ -82,10 +82,17 @@ namespace WoopiAiHub.Application.ToolsHandler
                     var key = o?.StepTool?.Tool?.ToolType?.Name;
                     if (string.IsNullOrWhiteSpace(key))
                         continue;
-
                     key = key!.ToLowerInvariant();
-                    var value = o!.Value ?? string.Empty;
 
+                    var value = string.Empty;
+                    if (key.Equals(HandlersTypes.Ocr.ToLowerInvariant()))
+                    {
+                        value = ExtractOcrTextFromOutput(o!.Value!);
+                    }
+                    else
+                    {
+                        value = o!.Value ?? string.Empty;
+                    }                       
                     outputsDict[key] = value;
                 }
             }
@@ -94,8 +101,8 @@ namespace WoopiAiHub.Application.ToolsHandler
             {
                 try
                 {
-                    var inputDict = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonInput);
-
+                    var inputDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonInput);
+                    
                     if (inputDict != null)
                     {
                         foreach (var kv in inputDict)
@@ -110,9 +117,28 @@ namespace WoopiAiHub.Application.ToolsHandler
                 }
             }
 
-            var outputsJson = JsonSerializer.Serialize(outputsDict, new JsonSerializerOptions{WriteIndented = false});
+            var outputsJson = JsonConvert.SerializeObject(outputsDict);
 
             return outputsJson;
+        }
+
+        /// <summary>
+        /// Extracts and concatenates OCR text from serialized output
+        /// </summary>
+        /// <param name="outputJson">Serialized StepToolOutput JSON</param>
+        /// <param name="documentId">Document ID for logging</param>
+        /// <returns>Concatenated OCR text or empty string if extraction fails</returns>
+        private static string ExtractOcrTextFromOutput(string outputJson)
+        {
+            var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
+
+            if (embeddingsData?.DocumentEmbeddings == null || !embeddingsData.DocumentEmbeddings.Any())
+                return string.Empty;
+
+            return string.Join(Environment.NewLine + Environment.NewLine,
+                embeddingsData.DocumentEmbeddings
+                    .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
+                    .Select(e => e.Text));
         }
     }
 }

@@ -44,13 +44,15 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Arrange
             var automationServiceDto = AutomationFixture.FindValidAutomationServicesDto();
             var tenantInfo = new TenantInfoDto { EmbeddingModelName = string.Empty };
-            
+            var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
+
             _mockTenantCacheServices
                 .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
                 .ReturnsAsync(tenantInfo);
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _handler.BuildPayload(automationServiceDto, It.IsAny<StepToolParameter>(), It.IsAny<string>()));
+            await Assert.ThrowsAsync<ArgumentException>(() => _handler.BuildPayload(automationServiceDto, It.IsAny<StepToolParameter>(), [output]));
         }
 
         [Fact(DisplayName = "BuildPayload should return ExecutionMessageDto with correct queue and message")]
@@ -63,7 +65,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var keyAccess = "test-key-access";
             var keyMongoAccess = "test-key-mongo-access";
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
-            var output = JsonConvert.SerializeObject(documentEmbeddingsDataDto);
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
             _mockTenantCacheServices
                 .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
@@ -76,7 +78,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .ReturnsAsync(keyMongoAccess);
 
             // Act
-            var result = await _handler.BuildPayload(automationServicesDto, null, output);
+            var result = await _handler.BuildPayload(automationServicesDto, null, [output]);
 
             // Assert
             _mockTenantCacheServices.Verify(repo => repo.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once);

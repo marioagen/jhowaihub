@@ -263,6 +263,18 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 10)
             );
         }
+
+        public static StepToolOutput FindValidStepToolOutput(string? value = null)
+        {
+            var _faker = new Faker("pt_BR");
+            return new StepToolOutput(
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                value ?? FindValidJsonContent()
+            );
+        }
     }
 
     [CollectionDefinition(nameof(AutomationCollection))]

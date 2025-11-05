@@ -53,9 +53,14 @@ namespace WoopiAiHub.Repository
         /// <returns>A list of StepToolOutput objects associated with the specified step tool and card.</returns>
         public async Task<List<StepToolOutput>> FindAllByStepToolListIdsAsync(IEnumerable<int> stepToolIds, int cardId)
         {
-            return await _context.StepToolOutputs.Where(u => stepToolIds!.Contains(u.StepToolId) && 
-                                                             u.CardId.Equals(cardId))
-                                                 .ToListAsync();
+            return await _context.StepToolOutputs
+                                 .AsNoTracking()
+                                 .Include(sto => sto.StepTool)
+                                    .ThenInclude(st => st.Tool)
+                                        .ThenInclude(t => t!.ToolType)
+                                 .Where(u => stepToolIds!.Contains(u.StepToolId) && 
+                                             u.CardId.Equals(cardId))
+                                 .ToListAsync();
         }
 
         /// <summary>

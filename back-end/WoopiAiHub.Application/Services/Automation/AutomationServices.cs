@@ -267,8 +267,11 @@ namespace WoopiAiHub.Application.Services.Automation
                 return await handler.BuildPayload(automationServicesDto, input, outputs, execution);
             }
             else
-            {                
-                var output = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync([stepTool.DependsOnStepTool!.Id], cardId);
+            {   
+                var output = new List<StepToolOutput>();
+                if (stepTool.DependsOnStepToolId.HasValue)
+                    output = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync([stepTool.DependsOnStepToolId.Value], cardId);
+
                 return await handler.BuildPayload(automationServicesDto, input, output, execution);
             }
         }
