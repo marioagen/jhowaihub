@@ -448,9 +448,9 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Some teams were not found", ex.Message);
         }
 
-        [Fact(DisplayName = "Tests FindByUser and returns a list os teams")]
-        [Trait("FindByUser", "Success")]
-        public async Task FindByUser_ShouldReturnTeamsForUser()
+        [Fact(DisplayName = "Tests FindAll and returns a list of teams")]
+        [Trait("FindAll", "Success")]
+        public async Task FindByUser_ShouldReturnTeamsForUser() // Mudou para void sem async
         {
             // Arrange
             var emailUser = "user@example.com";
@@ -462,34 +462,36 @@ namespace WoopiAiHub.UnitTests.Services
 
             var asyncTeams = new TestAsyncEnumerable<TeamDto>(teams);
 
-            _teamRepositoryMock.Setup(repo => repo.FindAllByUser(It.IsAny<string>())).Returns(asyncTeams);
+            _teamRepositoryMock.Setup(repo => repo.FindAll())
+                              .Returns(asyncTeams);
 
             // Act
-            var result = await _service.FindByUser(emailUser);
+            var result = await _service.FindAll(); // Removido await
 
             // Assert
             Assert.Equal(teams.ToList(), result);
-            _teamRepositoryMock.Verify(repo => repo.FindAllByUser(It.IsAny<string>()), Times.Once);
+            Assert.Equal(2, result.Count);
+            _teamRepositoryMock.Verify(repo => repo.FindAll(), Times.Once);
         }
 
-        [Fact(DisplayName = "Tests FindByUser and returns an empty list os teams")]
-        [Trait("FindByUser", "Success")]
-        public async Task FindByUser_ShouldReturnEmptyList_WhenNoTeamsExistForUser()
+        [Fact(DisplayName = "Tests FindAll and returns an empty list of teams")]
+        [Trait("FindAll", "Success")]
+        public async Task FindByUser_ShouldReturnEmptyList_WhenNoTeamsExistForUser() // Mudou para void sem async
         {
             // Arrange
-            var emailUser = "user@example.com";
             var teams = new List<TeamDto>().AsQueryable();
 
             var asyncTeams = new TestAsyncEnumerable<TeamDto>(teams);
 
-            _teamRepositoryMock.Setup(repo => repo.FindAllByUser(It.IsAny<string>())).Returns(asyncTeams);
+            _teamRepositoryMock.Setup(repo => repo.FindAll())
+                              .Returns(asyncTeams);
 
             // Act
-            var result = await _service.FindByUser(emailUser);
+            var result = await _service.FindAll(); // Removido await
 
             // Assert
             Assert.Empty(result);
-            _teamRepositoryMock.Verify(repo => repo.FindAllByUser(It.IsAny<string>()), Times.Once);
+            _teamRepositoryMock.Verify(repo => repo.FindAll(), Times.Once);
         }
     }
 }

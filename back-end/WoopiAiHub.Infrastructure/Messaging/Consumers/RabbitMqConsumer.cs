@@ -26,13 +26,6 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
             _logger = logger;
 
             var rabbitMqConfig = config.Value;
-            
-            // Log the configuration values being used
-            _logger.LogInformation(
-                "RabbitMQ Consumer initialized with MaxRetryAttempts={MaxRetryAttempts}, InitialRetryDelaySeconds={InitialRetryDelaySeconds}",
-                rabbitMqConfig.MaxRetryAttempts,
-                rabbitMqConfig.InitialRetryDelaySeconds
-            );
 
             _retryPipeline = new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions

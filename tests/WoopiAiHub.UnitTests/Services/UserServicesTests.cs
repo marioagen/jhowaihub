@@ -582,6 +582,48 @@ namespace WoopiAiHub.UnitTests.Services
                 x => x.EmailExistsAsync(It.IsAny<string>(), It.IsAny<Guid?>()),
                 Times.Never);
         }
+
+        [Fact(DisplayName = "FindByTeamIds")]
+        [Trait("FindByTeamIds", "Success")]
+        public async Task FindByTeamIds_ShouldReturnUsers_WhenTeamIdsAreValid()
+        {
+            // Arrange
+            var teamIds = new[] { 1, 2, 3 };
+            var expectedUsers = new List<UserDto>
+            {
+                new UserDto { Id = Guid.NewGuid(), Name = "User 1", Email = "user1@a.com" },
+                new UserDto { Id = Guid.NewGuid(), Name = "User 2", Email = "user2@a.com" }
+            };
+
+            _userRepositoryMock
+                .Setup(r => r.FindByTeamIdsAsync(teamIds))
+                .ReturnsAsync(expectedUsers);
+
+            // Act
+            var result = await _userServices.FindByTeamIds(teamIds);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedUsers.Count, result.Count);
+            Assert.Equal(expectedUsers.First().Name, result.First().Name);
+            _userRepositoryMock.Verify(r => r.FindByTeamIdsAsync(teamIds), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindByTeamIds - Invalid Parameters")]
+        [Trait("FindByTeamIds", "Exception")]
+        public async Task FindByTeamIds_ShouldThrowArgumentException_WhenTeamIdsIsNullOrEmpty()
+        {
+            // Arrange
+            int[]? nullIds = null;
+            var emptyIds = Array.Empty<int>();
+
+            // Act & Assert - caso nulo
+            await Assert.ThrowsAsync<ArgumentException>(() => _userServices.FindByTeamIds(nullIds!));
+
+            // Act & Assert - caso vazio
+            await Assert.ThrowsAsync<ArgumentException>(() => _userServices.FindByTeamIds(emptyIds));
+        }
+
     }
 }
 
