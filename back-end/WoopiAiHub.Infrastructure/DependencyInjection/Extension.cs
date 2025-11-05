@@ -23,6 +23,14 @@ namespace WoopiAiHub.Infrastructure.DependencyInjection
             {
                 case "RabbitMQ":
                     services.Configure<RabbitMqConfig>(configuration.GetSection("Messaging:Brokers:RabbitMQ"));
+                    services.PostConfigure<RabbitMqConfig>(options =>
+                    {
+                        // Ensure default values if not set in configuration
+                        if (options.MaxRetryAttempts <= 0)
+                            options.MaxRetryAttempts = 3;
+                        if (options.InitialRetryDelaySeconds <= 0)
+                            options.InitialRetryDelaySeconds = 2;
+                    });
                     services.AddSingleton<RabbitMqManager>();
                     services.AddSingleton<IMessageManager, RabbitMqManager>();
                     services.AddSingleton(typeof(IMessagePublisher<>), typeof(RabbitMqPublisher<>));
