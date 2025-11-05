@@ -19,6 +19,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
         private readonly IStepToolRepository _stepToolRepository;
+        private readonly IStepToolDependencyRepository _stepToolDependencyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
@@ -31,6 +32,7 @@ namespace WoopiAiHub.Application.Services
                                 IStatusRepository statusRepository,
                                 IStepRepository stepRepository,
                                 IStepToolRepository stepToolRepository,
+                                IStepToolDependencyRepository stepToolDependencyRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
                                 ILogger<WorkflowServices> logger,
@@ -41,6 +43,7 @@ namespace WoopiAiHub.Application.Services
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
             _stepToolRepository = stepToolRepository;
+            _stepToolDependencyRepository = stepToolDependencyRepository;
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
@@ -198,31 +201,29 @@ namespace WoopiAiHub.Application.Services
                 await _unitOfWork.SaveChangesAsync();
 
                 // Second pass: Resolve and set up dependencies now that all StepTools have IDs
+                // Using explicit repository delete to avoid EF severed association errors
                 foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
                 {
                     foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                     {
+                        var stepTool = stepToolMap[(stepDto.Id, stepToolDto.Order)];
+                        
+                        // Delete existing dependencies explicitly via repository
+                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepTool.Id);
+                        
                         if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Any())
                         {
-                            var stepTool = stepToolMap[(stepDto.Id, stepToolDto.Order)];
-                            
-                            var dependsOnStepTools = new List<StepTool>();
-                            stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
                             foreach (var dependsOn in stepToolDto.Dependencies)
                             {
                                 var dependsOnStepTool = workflow.Steps
                                     .SelectMany(s => s.StepTools)
                                     .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
                                 
-                                if (dependsOnStepTool != null)
+                                if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
                                 {
-                                    dependsOnStepTools.Add(dependsOnStepTool);
+                                    var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
+                                    await _stepToolDependencyRepository.AddAsync(dependency);
                                 }
-                            }
-
-                            if (dependsOnStepTools.Any())
-                            {
-                                stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
                             }
                         }
                     }
