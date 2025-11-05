@@ -32,11 +32,8 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
             using var connection = await this.ConnectionFactory.CreateConnectionAsync();
             using var channel = await connection.CreateChannelAsync();
 
-            // Define Dead Letter Exchange name
             const string dlxName = "dlx.exchange";
 
-            // Declare Dead Letter Exchange (DLX) once
-            // This exchange will receive all messages that failed after retries
             await channel.ExchangeDeclareAsync(
                 exchange: dlxName,
                 type: "direct",
@@ -47,11 +44,8 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
 
             foreach (var queue in _queues.Queues())
             {
-                // Define DLQ name for this queue
                 var dlqName = $"{queue}.dlq";
 
-                // Create the Dead Letter Queue (DLQ)
-                // This queue will store messages that failed after all retry attempts
                 await channel.QueueDeclareAsync(
                     queue: dlqName,
                     durable: true,
@@ -60,24 +54,19 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
                     arguments: null
                 );
 
-                // Bind DLQ to the Dead Letter Exchange
-                // Messages sent to DLX with this routing key will go to this DLQ
                 await channel.QueueBindAsync(
                     queue: dlqName,
                     exchange: dlxName,
-                    routingKey: queue, // Use original queue name as routing key
+                    routingKey: queue, 
                     arguments: null
                 );
 
-                // Configure main queue with DLQ settings
-                // When a message is rejected (BasicNack with requeue=false), it goes to DLX
                 var queueArguments = new Dictionary<string, object?>
                 {
-                    { "x-dead-letter-exchange", dlxName },      // Send failed messages to DLX
-                    { "x-dead-letter-routing-key", queue }      // Use queue name as routing key in DLX
+                    { "x-dead-letter-exchange", dlxName },     
+                    { "x-dead-letter-routing-key", queue }     
                 };
 
-                // Create the main queue with DLQ configuration
                 await channel.QueueDeclareAsync(
                     queue: queue,
                     durable: true,

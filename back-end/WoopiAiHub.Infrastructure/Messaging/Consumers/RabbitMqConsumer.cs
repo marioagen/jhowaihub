@@ -17,34 +17,29 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
         private readonly RabbitMqManager _manager;
         private readonly ILogger<RabbitMqConsumer<T>> _logger;
         private readonly ResiliencePipeline _retryPipeline;
-        private readonly int _maxRetryAttempts;
 
-        public RabbitMqConsumer(RabbitMqManager manager, ILogger<RabbitMqConsumer<T>> logger, IOptions<RabbitMqConfig> config)
+        public RabbitMqConsumer(RabbitMqManager manager, 
+                                ILogger<RabbitMqConsumer<T>> logger, 
+                                IOptions<RabbitMqConfig> config)
         {
             _manager = manager;
             _logger = logger;
-            
-            // Get retry configuration from appsettings
+
             var rabbitMqConfig = config.Value;
-            _maxRetryAttempts = rabbitMqConfig.MaxRetryAttempts;
-            var initialRetryDelaySeconds = rabbitMqConfig.InitialRetryDelaySeconds;
-            
-            // Create Polly retry pipeline once for reuse across all messages
-            // This improves performance under high message volume
+
             _retryPipeline = new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions
                 {
-                    MaxRetryAttempts = _maxRetryAttempts,
-                    Delay = TimeSpan.FromSeconds(initialRetryDelaySeconds),
+                    MaxRetryAttempts = rabbitMqConfig.MaxRetryAttempts,
+                    Delay = TimeSpan.FromSeconds(rabbitMqConfig.InitialRetryDelaySeconds),
                     BackoffType = DelayBackoffType.Exponential,
                     UseJitter = true,
                     OnRetry = args =>
                     {
-                        // Log retry attempts
                         _logger.LogWarning(
                             "Retry attempt {AttemptNumber} of {MaxAttempts} for message processing. Exception: {Exception}",
                             args.AttemptNumber,
-                            _maxRetryAttempts,
+                            rabbitMqConfig.MaxRetryAttempts,
                             args.Outcome.Exception?.Message
                         );
                         return ValueTask.CompletedTask;
@@ -92,7 +87,6 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
         {
             try
             {
-                // Deserialize message
                 var body = args.Body.ToArray();
                 var json = Encoding.UTF8.GetString(body);
                 var message = JsonConvert.DeserializeObject<T>(json);
@@ -100,23 +94,17 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
                 if (message is null)
                     throw new InvalidOperationException("The message could not be deserialized.");
 
-                // Execute message processing with retry policy
-                // Retry delays calculated using exponential backoff with jitter (configurable via appsettings)
                 await _retryPipeline.ExecuteAsync(async ct =>
                 {
                     await process(message).ConfigureAwait(false);
                 }).ConfigureAwait(false);
 
-                // Success: Acknowledge the message
                 await channel.BasicAckAsync(args.DeliveryTag, multiple: false).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                // Final failure after all retry attempts
-                // Send message to DLQ by rejecting with requeue=false
                 _logger.LogError(ex, "Message processing failed after all retry attempts. Sending to DLQ.");
                 await channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: false).ConfigureAwait(false);
-                // Message has been sent to DLQ, do not re-throw to avoid disrupting the consumer pipeline
             }
         }
     }
