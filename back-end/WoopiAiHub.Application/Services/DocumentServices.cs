@@ -387,7 +387,7 @@ namespace WoopiAiHub.Application.Services
                 ResponseQueue = _messageQueues.EmbeddingQueueAiHubResponse,
                 ReferenceFile = dto.ReferenceFile,
                 DocumentEmbeddings = documentEmbeddings,
-                Data = new MetaDataAutomationDto { CardId = dto.Data.CardId, StepToolId = dependentStepTool.Id },
+                Data = new MetaDataAutomationDto { CardId = dto.Data.CardId, StepToolId = dependentStepTool?.Id ?? 0 },
             });
 
             await SaveStepToolOutputAsync(execution, embeddingsJson);
