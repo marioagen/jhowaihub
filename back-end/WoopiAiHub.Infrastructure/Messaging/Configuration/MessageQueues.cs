@@ -13,6 +13,8 @@
         public string AutomationQueueResponse { get; set; } = string.Empty;
         public string ChatCompletionQueueAiHubResponse { get; set; } = string.Empty;
         public string OcrAnonimizationQueueConsumer { get; set; } = string.Empty;
+        public string DeleteQueueConsumer { get; set; } = string.Empty;
+        public string DeleteQueuePublisher { get; set; } = string.Empty;
 
         public IEnumerable<string> Queues()
         {
@@ -28,7 +30,9 @@
               AutomationQueueConsumer,
               AutomationQueueResponse,
               ChatCompletionQueueAiHubResponse,
-              OcrAnonimizationQueueConsumer
+              OcrAnonimizationQueueConsumer,
+              DeleteQueueConsumer,
+              DeleteQueuePublisher
             ];
         }
     }
