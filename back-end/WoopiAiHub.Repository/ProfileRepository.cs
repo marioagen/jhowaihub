@@ -105,20 +105,20 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(List<int> ids)
+        public async Task<bool> DeleteByIdsAsync(List<int> ids)
         {
-            var profiles = _context.Profiles.Where(a => ids.Contains(a.Id));
+            var profiles = await _context.Profiles
+                .Where(a => ids.Contains(a.Id))
+                .ToListAsync();
 
             if (profiles.Any())
             {
                 _context.Profiles.RemoveRange(profiles);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>

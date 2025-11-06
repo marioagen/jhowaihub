@@ -157,9 +157,10 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(List<int> ids)
+        public async Task<bool> DeleteByIds(List<int> ids)
         {
-            return _profileRepository.DeleteByIds(ids);
+            await _stepProfilePermissionsServices.DeleteByIds(ids);
+            return await _profileRepository.DeleteByIdsAsync(ids);
         }
 
         /// <summary>
