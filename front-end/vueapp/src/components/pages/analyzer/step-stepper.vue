@@ -57,6 +57,7 @@
         },
         computed: {
             currentStep() {
+                console.log(this.currentStep);
                 return this.steps[this.currentIndex] || { id: "", name: "" };
             },
             totalSteps() {

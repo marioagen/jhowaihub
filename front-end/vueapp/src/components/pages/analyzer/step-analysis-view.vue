@@ -1,23 +1,16 @@
 <template>
     <div class="step-analysis-container">
-        <step-stepper
-            v-if="documentData && documentData.steps && documentData.steps.length > 0"
-            :steps="documentData.steps"
-            :initial-step-id="documentData.lastProcessedStepId"
-            @step-changed="handleStepChange"
-        />
+        <doc-chat :document-id="documentId"
+                  @question-sent="handleQuestionSent" />
+        <step-stepper v-if="documentData && documentData.steps && documentData.steps.length > 0"
+                      :steps="documentData.steps"
+                      :initial-step-id="documentData.lastProcessedStepId"
+                      @step-changed="handleStepChange" />
 
-        <extracted-fields
-            v-if="currentStepData"
-            :fields="currentStepData.outputs"
-            :title="`${$t('labelExtractedData')} - ${currentStepData.name}`"
-            @field-updated="handleFieldUpdate"
-        />
-
-        <doc-chat
-            :document-id="documentId"
-            @question-sent="handleQuestionSent"
-        />
+        <extracted-fields v-if="currentStepData"
+                          :fields="currentStepData.outputs"
+                          :title="`${$t('labelExtractedData')} - ${currentStepData.name}`"
+                          @field-updated="handleFieldUpdate" />
     </div>
 </template>
 
@@ -87,7 +80,7 @@
             },
             async handleQuestionSent(question) {
                 try {
-                    const response = await api.post("/Document/Input", {
+                    const response = await api.post("/Document/input", {
                         id: this.documentId,
                         input: question,
                     });

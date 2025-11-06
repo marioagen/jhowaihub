@@ -16,29 +16,34 @@
 
             <div class="chat-input-section">
                 <label class="input-label">{{ $t("labelAskAI") }}</label>
-                <textarea
-                    v-model="question"
-                    class="chat-textarea"
-                    :placeholder="$t('labelTypeYourQuestion')"
-                    rows="4"
-                    @input="handleInput"
-                ></textarea>
+                <textarea v-model="question"
+                          class="chat-textarea"
+                          :placeholder="$t('labelTypeYourQuestion')"
+                          rows="4"
+                          @input="handleInput"></textarea>
 
-                <button
-                    v-if="question.trim()"
-                    class="send-button"
-                    @click="sendQuestion"
-                    :disabled="isSending"
-                >
+                <button v-if="question.trim()"
+                        class="send-button"
+                        @click="sendQuestion"
+                        :disabled="isSending">
                     <i class="fas fa-paper-plane"></i>
                     {{ $t("labelSendQuestion") }}
                 </button>
+                <div v-if="output != ''">
+                    <label class="input-label">{{ $t("labelAskAI") }}</label>
+                    <textarea v-model="output"
+                              class="chat-textarea"
+                              :placeholder="$t('labelTypeYourQuestion')"
+                              rows="4">
+                    </textarea>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+    import api from "@/services/api";
     export default {
         name: "DocChat",
         props: {
@@ -53,6 +58,7 @@
                 isExpanded: false,
                 question: "",
                 isSending: false,
+                output: "",
             };
         },
         methods: {
@@ -64,14 +70,23 @@
             },
             async sendQuestion() {
                 if (!this.question.trim()) return;
-
                 this.isSending = true;
                 try {
-                    this.$emit("question-sent", this.question);
-                    // Clear the question after sending
-                    this.question = "";
+                    this.$emit("show-alert-toast", {
+                        msg: "Pergunta enviada com sucesso",
+                        color: "toast-success",
+                    });
+                    const response = await api.post("/Document/input", {
+                        id: this.documentId,
+                        input: question,
+                    });
+                    this.output = response;
                 } catch (error) {
                     console.error("Error sending question:", error);
+                    this.$emit("show-alert-toast", {
+                        msg: "Erro ao enviar pergunta",
+                        color: "toast-danger",
+                    });
                 } finally {
                     this.isSending = false;
                 }

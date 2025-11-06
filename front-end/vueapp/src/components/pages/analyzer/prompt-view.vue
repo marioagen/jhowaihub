@@ -38,7 +38,7 @@
                 </a>
             </div>
         </div>
-        <div class="mb-1 mt-1">
+        <!--<div class="mb-1 mt-1">
             <div class="input-group custom-input-button">
                 <input
                     type="text"
@@ -55,8 +55,8 @@
                     @click="submitInput"
                 ></i>
             </div>
-        </div>
-        <div class="mb-2">
+        </div>-->
+        <!--<div class="mb-2">
             <div style="width: 100%">
                 <div style="float: left">
                     <strong class="form-label mb-3">{{ upperFormat($t("labelOutput")) }}</strong>
@@ -77,7 +77,7 @@
                 :disabled="output.length === 0"
                 :readonly="output.length > 0"
             ></textarea>
-        </div>
+        </div>-->
         <div class="mb-2">
             <span v-if="hashDocument != ''" title="Hash" id="hashId">
                 <i class="fas fa-hashtag" id="hashIcon"></i>

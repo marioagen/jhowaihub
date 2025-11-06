@@ -330,12 +330,13 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var output in card.Outputs)
                 {
-                    if (output.StepTool?.Tool == null) continue;
+                    if (output.StepTool?.Tool == null && output.StepTool?.Tool.ToolTypeId != 1 ) continue;
 
                     // Validate JSON structure before deserialization
                     if (!string.IsNullOrWhiteSpace(output.Value) && 
                         output.Value.TrimStart().StartsWith("{") && 
-                        output.Value.TrimEnd().EndsWith("}"))
+                        output.Value.TrimEnd().EndsWith("}")
+                        && output.StepTool?.Tool.ToolTypeId != 1)
                     {
                         try
                         {
