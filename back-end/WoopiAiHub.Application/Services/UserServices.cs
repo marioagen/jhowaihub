@@ -112,7 +112,7 @@ namespace WoopiAiHub.Application.Services
                     Name = userUpdateDto.Name,
                     Email = userUpdateDto.Email,
                     Password = userUpdateDto.Password,
-                    TeamIds =  userUpdateDto.TeamIds,
+                    TeamIds = userUpdateDto.TeamIds,
                 };
                 return await ReactivateUser(existingUser, userCreateDto, headersDto);
             }
@@ -264,7 +264,6 @@ namespace WoopiAiHub.Application.Services
         {
             if (teamIds != null)
             {
-                user.Teams.Clear();
                 var teams = _teamRepository.FindByIds(teamIds);
                 foreach (var team in teams)
                 {
@@ -366,30 +365,31 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         private async Task<bool> UpdateUser(UserUpdateDto userUpdateDto)
         {
-                var user = await _userRepository.FindByReferenceAsync(userUpdateDto.Id);
-                if (user == null)
-                    return false;
+            var user = await _userRepository.FindByReferenceAsync(userUpdateDto.Id);
+            if (user == null)
+                return false;
 
-                user.Update(userUpdateDto.Name,
-                            userUpdateDto.Email);
+            user.Update(userUpdateDto.Name,
+                        userUpdateDto.Email);
 
-                if (!string.IsNullOrEmpty(userUpdateDto.Password))
-                {
-                    SetSaltAndPassword(userUpdateDto.Password, user, user.Salt);
-                }
+            if (!string.IsNullOrEmpty(userUpdateDto.Password))
+            {
+                SetSaltAndPassword(userUpdateDto.Password, user, user.Salt);
+            }
             
-                var userCreateDto = new UserCreateDto
-                {
-                    Name = userUpdateDto.Name,
-                    Email = userUpdateDto.Email,
-                    Password = userUpdateDto.Password,
-                    TeamIds =  userUpdateDto.TeamIds,
-                };
+            var userCreateDto = new UserCreateDto
+            {
+                Name = userUpdateDto.Name,
+                Email = userUpdateDto.Email,
+                Password = userUpdateDto.Password,
+                TeamIds =  userUpdateDto.TeamIds,
+            };
 
-                UpdateTeamsAndProfiles(userCreateDto, user);
+            user.Teams.Clear();
+            UpdateTeamsAndProfiles(userCreateDto, user);
 
-             var updateResult = _userRepository.Update(user);
-                return updateResult;
+            var updateResult = _userRepository.Update(user);
+            return updateResult;
         }
 
         /// <summary>
