@@ -87,6 +87,7 @@ export default {
     },
     data() {
         return {
+            step: null,
             toolsList: [],
             nodes: [],
             edges: [],
@@ -130,7 +131,7 @@ export default {
         },
         async getFlow() {
             try {
-                let step = this.$store.state.tempWorkflow.list.find(item => {
+                this.step = this.$store.state.tempWorkflow.list.find(item => {
                     if (this.isEdit && this.stepId == 0) {
                         if (item.order == this.stepOrder) {
                             return item.stepTools;
@@ -146,19 +147,22 @@ export default {
                     }
                 });
 
-                let stepTools = step ? step.stepTools : [];
+                let stepTools = this.step ? this.step.stepTools : [];
                 const mappedNodes = stepTools.map(stepTool => ({
                     id: stepTool.id.toString(),
                     position: { x: stepTool.positionX, y: stepTool.positionY },
                     label: stepTool.tool.name,
                     toolId: stepTool.toolId,
                     data: { 
+                        order: stepTool.order,
                         icon: "Activity", 
                         color: "blue", 
                         parameters: stepTool.parameters, 
                         isEditableInput: stepTool.tool.isEditableInput,
                         toolType: stepTool.tool.toolType,
                         toolId: stepTool.toolId,
+                        stepToolId: stepTool.id,
+                        dependencies: stepTool.dependencies
                     },
                     sourcePosition: "right",
                     targetPosition: "left",
@@ -191,26 +195,52 @@ export default {
             }
         },
         deleteNode(nodeId) {
+            this.removeNodeDependency(nodeId);
             this.nodes = this.nodes.filter(node => node.id !== nodeId);
-            this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);
+            this.edges = this.edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId);            
         },
-        updateNodeInput(nodeId, parameters) {
+        removeNodeDependency(nodeId) {
+            const idx = this.nodes.findIndex(node => node.id === nodeId);
+            if (idx !== -1) {
+                const node = this.nodes[idx];
+                this.nodes.forEach(n => {
+                    if (n.order > node.data.order) {
+                        n.data.dependencies = (n.data.dependencies || []).filter(d => 
+                            !(d.stepOrder === this.step.order && d.stepToolOrder === node.data.order)
+                        );
+                    }
+                });
+
+                this.$store.state.tempWorkflow.list.forEach(step => {
+                    if (step.order > this.step.order){
+                        step.stepTools.forEach(stepTool => {
+                            stepTool.dependencies = (stepTool.dependencies || []).filter(d => 
+                                 !(d.stepOrder === this.step.order && d.stepToolOrder === node.data.order)
+                            );
+                        });
+                    }
+                });
+            }
+        },
+        updateNodeInput(nodeId, parameters, dependencies) {
             const idx = this.nodes.findIndex(node => node.id === nodeId);
             if (idx !== -1) {
                 this.nodes[idx] = {
                     ...this.nodes[idx],
                     data: {
                         ...this.nodes[idx].data,
-                        parameters: parameters
+                        parameters: parameters,
+                        dependencies: dependencies
                     }
                 };
-            }
+            }            
         },
         deleteEdge(edgeId) {
             this.edges = this.edges.filter(edge => edge.id !== edgeId);
         },
         openNodeConfig(node) {
-            this.$emit('openNodeConfig', node)
+            const idx = this.nodes.findIndex(n => n.id === node.id);
+            this.$emit('openNodeConfig', this.nodes, this.nodes[idx])
         },
         onConnect(params) {
             this.vueFlowInstance?.addEdges([{ ...params, type: 'special' }])
@@ -238,6 +268,7 @@ export default {
                 label: nodeData.name,
                 toolId: nodeData.id,
                 data: { 
+                    order: this.nodes.length + 1,
                     icon: 'Activity', 
                     color: '#000', 
                     isStartNode: false, 
@@ -245,6 +276,8 @@ export default {
                     toolType: nodeData.toolType,
                     parameters: [],
                     toolId: nodeData.id,
+                    stepToolId: null,
+                    dependencies: [],
                 }
             }
             this.vueFlowInstance?.addNodes([newNode])
@@ -261,7 +294,11 @@ export default {
                     order: index + 1,
                     status: "Active",
                     parameters: node.data.parameters,
-                    dependsOnStepToolId: index,                    
+                    dependsOnStepToolId: index,
+                    dependencies: (node.data.dependencies || []).map(d => ({
+                           stepOrder: d.stepOrder ?? null,
+                           stepToolOrder: d.stepToolOrder ?? null
+                       }))
                 }));
         },
         showCollapse() {

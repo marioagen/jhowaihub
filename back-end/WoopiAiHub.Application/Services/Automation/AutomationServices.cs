@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
@@ -233,16 +234,46 @@ namespace WoopiAiHub.Application.Services.Automation
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
             var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
-
-            string output = string.Empty;
-            if (stepTool.DependsOnStepTool != null)
-                output = await _stepToolOutputRepository.FindByStepToolId(stepTool.DependsOnStepTool.Id, resolvedCardId);
-
-            var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
             var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
-            var payload = await handler.BuildPayload(enrichedDto, input, output, execution);
+
+            var payload = await BuildPayloadWithDependenciesAsync(stepTool, enrichedDto, input, resolvedCardId, execution);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
+        }
+
+        /// <summary>
+        /// Builds the execution payload for a step tool by resolving its dependencies and retrieving outputs.
+        /// Supports both new multiple dependencies and legacy single dependency approaches.
+        /// </summary>
+        /// <param name="stepTool">The step tool to build the payload for.</param>
+        /// <param name="automationServicesDto">The automation service details for the execution.</param>
+        /// <param name="input">The input parameters for the step tool.</param>
+        /// <param name="cardId">The card ID associated with the execution.</param>
+        /// <param name="execution">The execution record for this step tool.</param>
+        /// <returns>A task that represents the asynchronous operation, containing the built execution message.</returns>
+        private async Task<ExecutionMessageDto> BuildPayloadWithDependenciesAsync(
+            StepTool stepTool,
+            AutomationServicesDto automationServicesDto,
+            StepToolParameter? input,
+            int cardId,
+            StepToolExecution? execution)
+        {
+            var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
+
+            if (stepTool.Dependencies != null && stepTool.Dependencies.Count > 0)
+            {
+                var ids = stepTool.Dependencies.Select(d => d.DependsOnStepToolId).ToList();
+                var outputs = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync(ids, cardId);
+                return await handler.BuildPayload(automationServicesDto, input, outputs, execution);
+            }
+            else
+            {   
+                var output = new List<StepToolOutput>();
+                if (stepTool.DependsOnStepToolId.HasValue)
+                    output = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync([stepTool.DependsOnStepToolId.Value], cardId);
+
+                return await handler.BuildPayload(automationServicesDto, input, output, execution);
+            }
         }
 
         /// <summary>
@@ -295,13 +326,9 @@ namespace WoopiAiHub.Application.Services.Automation
             execution.UpdateStatusExecution(StatusExecution.Running);
             await _stepToolExecutionRepository.UpdateAsync(execution);
             var input = _stepToolParameterRepository.FindByStepToolId(dependentStepTool.Id);
-
-            string output = await _stepToolOutputRepository.FindByStepToolId(dependentStepTool!.DependsOnStepTool!.Id, execution.CardId);
-
-            var handler = _toolFactoryHandler.GetHandler(dependentStepTool.Tool.ToolType!.Name);
             var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
 
-            var payload = await handler.BuildPayload(nextAutomationDto, input, output, execution);
+            var payload = await BuildPayloadWithDependenciesAsync(dependentStepTool, nextAutomationDto, input, execution.CardId, execution);
 
             await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
         }

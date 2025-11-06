@@ -61,6 +61,11 @@ namespace WoopiAiHub.Repository
                     RequiredFile = sp.RequiredFile,
                     WebhookId = sp.WebhookId
                 }).ToList(),
+                Dependencies = q.Dependencies.Select(d => new StepToolDependencyDto
+                {
+                    StepToolOrder = d.DependsOnStepTool.Order,
+                    StepOrder = d.DependsOnStepTool.Step!.Order
+                }).ToList(),
                 Step = new StepDto
                 {
                     Name = q.Step!.Name,
