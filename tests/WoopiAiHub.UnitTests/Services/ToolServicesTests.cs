@@ -138,7 +138,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "CreateAsync should throw AppException when connector is required")]
         [Trait("CreateAsync", "Fail")]
-        public async Task CreateAsync_ShouldThrowAppException_WhenCoonectorIsRequired()
+        public async Task CreateAsync_ShouldThrowAppException_WhenConnectorIsRequired()
         {
             // Arrange
             var toolCreateDto = ToolFixture.FindValidToolCreateDto();
@@ -152,7 +152,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.CreateAsync(toolCreateDto));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Coonector Url and Connector Api Key are required", exception.Message);
+            Assert.Equal("Connector Url and Connector Api Key are required", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()), Times.Never);
             _toolTypeRepositoryMock.Verify(tt => tt.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
         }
@@ -234,7 +234,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.UpdateAsync(toolUpdateDto));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Coonector Url is required", exception.Message);
+            Assert.Equal("Connector Url is required", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
             _toolRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Tool>()), Times.Never);
         }
@@ -259,7 +259,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.UpdateAsync(toolUpdateDto));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Coonector Api Key is required", exception.Message);
+            Assert.Equal("Connector Api Key is required", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
             _toolRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Tool>()), Times.Never);
         }

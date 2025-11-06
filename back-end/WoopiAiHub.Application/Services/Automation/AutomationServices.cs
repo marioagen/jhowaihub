@@ -356,7 +356,7 @@ namespace WoopiAiHub.Application.Services.Automation
             var response = await api.FindWorkflowInputs(webhookInputDto.WorkflowId.ToString());
 
             if (!response.IsSuccessStatusCode)
-                throw new AppException(ErrorCode.RefitApiError, "Coonector fails listing workflows", null);
+                throw new AppException(ErrorCode.RefitApiError, "Connector fails listing workflows", null);
             
             return JsonSchemaToFormMapper.MapToFormFields(response.Content!);
         }

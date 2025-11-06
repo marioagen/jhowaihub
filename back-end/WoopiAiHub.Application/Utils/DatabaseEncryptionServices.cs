@@ -16,18 +16,19 @@ namespace WoopiAiHub.Application.Utils
         }
 
         /// <summary>
-        /// Encrypts and returns the encrypted value (for storage in database)
-        /// Note: This doesn't actually "set" anything - the encrypted value should be stored by the caller
+        /// This method is maintained for interface compatibility but is no longer used.
+        /// With database storage, encryption happens directly in the service layer before saving.
         /// </summary>
         /// <param name="key">Unused - kept for interface compatibility</param>
-        /// <param name="value">The plain text value to encrypt</param>
+        /// <param name="value">Unused - kept for interface compatibility</param>
         /// <returns>Completed task</returns>
+        /// <remarks>
+        /// In the new architecture, API keys are encrypted in ToolServices before being saved to the database.
+        /// This method exists only to maintain compatibility with the IKeyVaultServices interface.
+        /// </remarks>
         public Task SetSecretAsync(string key, string value)
         {
-            // This method is called during Tool creation/update
-            // The actual storage happens in the repository layer
-            // We just need to ensure the value gets encrypted before storage
-            // The encryption will be handled in GetSecretAsync when needed
+            // No operation needed - encryption happens at the service layer
             return Task.CompletedTask;
         }
 
@@ -48,9 +49,14 @@ namespace WoopiAiHub.Application.Utils
                 var decrypted = _encryptionService.Decrypt(key);
                 return Task.FromResult<string?>(decrypted);
             }
-            catch
+            catch (FormatException)
             {
-                // If decryption fails, return null
+                // Invalid base64 format - likely corrupted data
+                return Task.FromResult<string?>(null);
+            }
+            catch (System.Security.Cryptography.CryptographicException)
+            {
+                // Decryption failed - wrong key or tampered data
                 return Task.FromResult<string?>(null);
             }
         }

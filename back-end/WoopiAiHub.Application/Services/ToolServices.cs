@@ -53,7 +53,7 @@ namespace WoopiAiHub.Application.Services
             {
                 if (string.IsNullOrEmpty(toolCreateDto.ConnectorUrl) || string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
                 {
-                    throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
+                    throw new AppException(ErrorCode.RequiredField, "Connector Url and Connector Api Key are required", null);
                 }
                 // Encrypt the API key for storage in the database
                 encryptedApiKey = _encryptionService.Encrypt(toolCreateDto.ConnectorApiKey);
@@ -206,12 +206,12 @@ namespace WoopiAiHub.Application.Services
             {
                 if (string.IsNullOrEmpty(toolUpdateDto.ConnectorUrl))
                 {
-                    throw new AppException(ErrorCode.RequiredField, "Coonector Url is required", null);
+                    throw new AppException(ErrorCode.RequiredField, "Connector Url is required", null);
                 }
 
                 if (string.IsNullOrEmpty(tool.ConnectorApiKey) && string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
                 {
-                    throw new AppException(ErrorCode.RequiredField, "Coonector Api Key is required", null);
+                    throw new AppException(ErrorCode.RequiredField, "Connector Api Key is required", null);
                 }
             }
         }
@@ -301,7 +301,7 @@ namespace WoopiAiHub.Application.Services
         {
             if (string.IsNullOrEmpty(toolConnectorDto.ConnectorUrl) || string.IsNullOrEmpty(toolConnectorDto.ConnectorApiKey))
             {
-                throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
+                throw new AppException(ErrorCode.RequiredField, "Connector Url and Connector Api Key are required", null);
             }
 
             var api = _apiClientFactory.Create(toolConnectorDto.ConnectorUrl);
