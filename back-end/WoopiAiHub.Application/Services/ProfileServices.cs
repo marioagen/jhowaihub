@@ -1,8 +1,10 @@
-﻿using WoopiAiHub.Domain.DTOs.Response;
+﻿using AutoMapper;
+using System.Linq;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
@@ -10,15 +12,18 @@ namespace WoopiAiHub.Application.Services
     public class ProfileServices : IProfileServices
     {
         private readonly IProfileRepository _profileRepository;
+        private readonly IWorkflowServices _workflowServices;
         private readonly IPermissionRepository _permissionRepository;
         private readonly IStepProfilePermissionsServices _stepProfilePermissionsServices;
 
         public ProfileServices(IProfileRepository profileRepository,
                                IPermissionRepository permissionRepository,
+                               IWorkflowServices workflowServices,
                                IStepProfilePermissionsServices stepProfilePermissionsServices)
         {
             _profileRepository = profileRepository;
             _permissionRepository = permissionRepository;
+            _workflowServices = workflowServices;
             _stepProfilePermissionsServices = stepProfilePermissionsServices;
         }
 
@@ -74,7 +79,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Profile name cannot be empty");
             }
 
-            var profile = new Profile(profileCreateDto.Name, 0, DateTime.Now)
+            var profile = new Domain.Models.Profile(profileCreateDto.Name, 0, DateTime.Now)
             {
                 Permissions = new List<Permission>()
             };
@@ -95,7 +100,7 @@ namespace WoopiAiHub.Application.Services
                 throw new InvalidOperationException("Duplicated Profile");
             }
 
-            if (profileCreateDto.PermissionsWorkflow != null)
+            if (profileCreateDto.PermissionsWorkflow.Count() > 0)
             {
                 await _stepProfilePermissionsServices.Create(profile.Id, profileCreateDto.PermissionsWorkflow);
             }
@@ -111,12 +116,12 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<bool> Update(ProfileUpdateDto profileUpdateDto)
         {
-
             var profile = _profileRepository.FindByIdReturnModel(profileUpdateDto.Id);
             if (profile == null)
                 return false;
 
             profile.Update(profileUpdateDto.Name);
+            var stepsIds = profile.Steps.Select(s => s.Id).ToList();
 
             if (profileUpdateDto.PermissionsIds != null)
             {
@@ -135,12 +140,15 @@ namespace WoopiAiHub.Application.Services
                 throw new InvalidOperationException("Duplicated Profile");
             }
 
-            await _stepProfilePermissionsServices.Delete(profile.Id);
-            if (profileUpdateDto.PermissionsWorkflow != null)
+            var profileId = profile.Id;
+            await _stepProfilePermissionsServices.Delete(profileId);
+            if (profileUpdateDto.PermissionsWorkflow.Count() > 0)
             {
-                await _stepProfilePermissionsServices.Create(profile.Id, profileUpdateDto.PermissionsWorkflow);
+                await _stepProfilePermissionsServices.Create(profileId, profileUpdateDto.PermissionsWorkflow);
+                stepsIds = profileUpdateDto.PermissionsWorkflow.Select(x => x.StepId).ToList();
             }
 
+            await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(stepsIds, profile);
             return updateResult;
         }
 

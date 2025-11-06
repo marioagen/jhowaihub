@@ -15,6 +15,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         ICollection<WorkflowDto> FindAllByUser(string userEmail);
         ICollection<WorkflowDto> FindAll();
         Task<ICollection<Workflow>> FindByStep(List<int> stepIds);
+        Task<ICollection<Workflow>> FindByTeams(List<int> teamsIds);
         Task<List<Workflow>> FindByIdsAsync(ICollection<int> ids);
         IQueryable<WorkflowDto> FindAllWithFilter(WorkflowPagedDto workflowPagedDto);
     }

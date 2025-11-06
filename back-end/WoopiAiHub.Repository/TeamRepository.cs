@@ -119,6 +119,7 @@ namespace WoopiAiHub.Repository
             return _context.Teams.Where(u => u.Id == id)
                                         .Include(t => t.Users)
                                         .Include(T => T.Profiles)
+                                            .ThenInclude(p => p.StepProfilePermissions)
                                         .FirstOrDefault();
         }
 
@@ -196,8 +197,9 @@ namespace WoopiAiHub.Repository
         public List<Team> FindByIds(IEnumerable<int> ids)
         {
             return _context.Teams.Where(t => ids.Contains(t.Id))
-                                  .Include(t => t.Workflows)
-                                  .ToList();
+                    .Include(t => t.Profiles)
+                    .Include(t => t.Workflows)
+                    .ToList();
         }
 
         /// <summary>

@@ -175,6 +175,9 @@ namespace WoopiAiHub.Repository
         {
             return _context.Profiles.Where(u => u.Id == id)
                                     .Include(t => t.Permissions)
+                                    .Include(t => t.Teams)
+                                    .Include(t => t.StepProfilePermissions)
+                                    .Include(t => t.Steps)
                                     .FirstOrDefault();
         }
     }

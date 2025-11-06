@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -10,6 +11,7 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Repository;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -443,7 +445,7 @@ namespace WoopiAiHub.Application.Services
         /// Find all workflows associated with a step.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<Workflow>> FindByProfileStep(ICollection<Profile> profiles)
+        public async Task<ICollection<Workflow>> FindByProfileStep(ICollection<Domain.Models.Profile> profiles)
         {
             var steps = profiles
                 .SelectMany(p => p.Steps)
@@ -452,6 +454,82 @@ namespace WoopiAiHub.Application.Services
                 .ToList();
 
             return await _workflowRepository.FindByStep(steps);
+        }
+
+        public async Task UpdateTeamProfileRelationshipToWorkflow(List<int> steps, Domain.Models.Profile profile)
+        {
+            var profileId = profile.Id;
+            var profileTeams = profile.Teams;
+            var workflows = await _workflowRepository.FindByStep(steps);
+
+            if (workflows.Count() == 0) return;
+
+            var workflowsToRemove = new List<TeamsWorkflowsDto>();
+            foreach (var team in profileTeams)
+            {
+                var teamsWorkflows = await VerifyWorkflowMatchInOtherTeamProfile(profileId, team.Id, workflows.ToList());
+                workflowsToRemove.Add(teamsWorkflows);
+            }
+
+            var filterEmptyWorkflows = workflowsToRemove
+                .Where(w => w.Workflows.Count > 0)
+                .ToList();
+            
+            if (filterEmptyWorkflows.Count() > 0)
+            {
+                await RemoveTeamWorkflowRelationship(filterEmptyWorkflows);
+            }
+        }
+
+        private async Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows)
+        {
+            var team = _teamRepository.FindByIdReturnModel(teamId);
+            var profiles = team.Profiles.Where(p => p.Id != profileId).ToList();
+
+            if (!profiles.Any())
+                return new TeamsWorkflowsDto
+                {
+                    TeamId = teamId,
+                };
+
+            var workflowIds = workflows.Select(w => w.Id).ToHashSet();
+            var workflowsToRemove = new HashSet<int>();
+
+            foreach (var profile in profiles)
+            {
+                if(profile.StepProfilePermissions == null) 
+                    continue;
+
+                var stepIds = profile.StepProfilePermissions
+                    .Select(spp => spp.StepId)
+                    .ToList();
+
+                if (!stepIds.Any())
+                    continue;
+
+                var workflowsFromSteps = await _workflowRepository.FindByStep(stepIds);
+                var workflowsFromStepIds = workflowsFromSteps.Select(w => w.Id).ToHashSet();
+                
+                var missingWorkflows = workflowIds.Except(workflowsFromStepIds);
+                foreach (var id in missingWorkflows)
+                    workflowsToRemove.Add(id);
+            }
+
+            return new TeamsWorkflowsDto
+            {
+                TeamId = teamId,
+                Workflows = workflowsToRemove.ToList(),
+            };
+        }
+
+        private async Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto)
+        {
+            foreach(var teamsWorkflows in teamsWorkflowsDto)
+            {
+                var team = _teamRepository.FindByIdReturnModel(teamsWorkflows.TeamId);
+                var workflows = await _workflowRepository.FindByIdsAsync(teamsWorkflows.Workflows);
+                team.RemoveWorkflows(workflows);
+            }
         }
 
         /// <summary>

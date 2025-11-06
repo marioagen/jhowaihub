@@ -32,6 +32,28 @@ namespace WoopiAiHub.Domain.Models
             Permissions.Add(permission);
         }
 
+        public void AddTeam(Team team)
+        {
+            if (team == null)
+                throw new ArgumentNullException(nameof(team));
+
+            if (this.Teams.Any(t => t.Id == team.Id))
+                return;
+
+            Teams.Add(team);
+        }
+
+        public void RemoveTeam(Team team)
+        {
+            if (team == null)
+                throw new ArgumentNullException(nameof(team));
+
+            if (this.Teams.Any(t => t.Id == team.Id))
+                return;
+
+            Teams.Remove(team);
+        }
+
         public void Update(string name)
         {
             Name = name;

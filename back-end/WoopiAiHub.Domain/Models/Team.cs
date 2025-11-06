@@ -40,6 +40,36 @@ namespace WoopiAiHub.Domain.Models
             Profiles.Add(profile);
         }
 
+        public void RemoveProfile(Profile profile)
+        {
+            if (profile == null)
+                throw new ArgumentNullException(nameof(profile));
+
+            if (this.Profiles.Any(t => t.Id == profile.Id))
+                return;
+
+            Profiles.Remove(profile);
+        }
+
+        public void RemoveWorkflow(Workflow workflow)
+        {
+            if (workflow == null)
+                throw new ArgumentNullException(nameof(workflow));
+
+            if (this.Profiles.Any(t => t.Id == workflow.Id))
+                return;
+
+            Workflows.Remove(workflow);
+        }
+
+        public void RemoveWorkflows(List<Workflow> workflows)
+        {
+            foreach(var workflow in workflows)
+            {
+                RemoveWorkflow(workflow);
+            }
+        }
+
         public void Update(string name)
         {
             Name = name;
