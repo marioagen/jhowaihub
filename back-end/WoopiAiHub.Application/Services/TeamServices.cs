@@ -202,12 +202,19 @@ namespace WoopiAiHub.Application.Services
             ICollection<Profile> profiles = new List<Profile>();
             if (teamUpdateDto.ProfileIds.Count() > 0)
             {
+                team.Workflows.Clear();
                 team.Profiles.Clear();
                 profiles = _profileRepository.FindByIds(teamUpdateDto.ProfileIds);
 
                 foreach (var profile in profiles)
                 {
                     team.AddProfile(profile);
+                }
+
+                var workflows = await _workflowServices.FindByProfileStep(profiles);
+                foreach (var workflow in workflows)
+                {
+                    team.AddWorkflow(workflow);
                 }
             }
 
@@ -228,10 +235,21 @@ namespace WoopiAiHub.Application.Services
         public bool DeleteByIds(List<int> ids)
         {
             var teams = _teamRepository.FindByIds(ids);
+            var isAdmin = teams.Any(t => t.Name.Equals("admin", StringComparison.OrdinalIgnoreCase));
+            if (isAdmin)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.InvalidValue, "Can't delete Admin team", null);
+            }
+
             bool hasDocuments = teams.Any(d => d.Workflows.Count > 0);
             if (hasDocuments)
             {
                 throw new AppException(Domain.Enum.ErrorCode.InvalidValue, "Can't delete with documents", null);
+            }
+
+            foreach (var team in teams)
+            {
+                team.Profiles.Clear();
             }
             return _teamRepository.DeleteByIds(ids);
         }

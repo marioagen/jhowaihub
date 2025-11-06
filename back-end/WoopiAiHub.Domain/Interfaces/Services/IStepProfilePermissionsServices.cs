@@ -9,5 +9,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     {
         Task<bool> Create(int ProfileId, List<WorkflowPermissionDto> PermissionsWorkflow);
         Task<bool> Delete(int ProfileId);
+        Task DeleteByIds(List<int> ProfileIds);
     }
 }

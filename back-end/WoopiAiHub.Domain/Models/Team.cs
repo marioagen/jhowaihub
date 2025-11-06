@@ -51,6 +51,17 @@ namespace WoopiAiHub.Domain.Models
             Profiles.Remove(profile);
         }
 
+        public void AddWorkflow(Workflow workflow)
+        {
+            if (workflow == null)
+                throw new ArgumentNullException(nameof(workflow));
+
+            if (this.Workflows.Any(t => t.Id == workflow.Id))
+                return;
+
+            Workflows.Add(workflow);
+        }
+
         public void RemoveWorkflow(Workflow workflow)
         {
             if (workflow == null)

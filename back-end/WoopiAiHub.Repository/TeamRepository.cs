@@ -142,7 +142,8 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
-            var teams = _context.Teams.Where(a => ids.Contains(a.Id));
+            var teams = _context.Teams
+                .Where(a => ids.Contains(a.Id));
 
             if (teams.Any())
             {
