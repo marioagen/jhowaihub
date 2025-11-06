@@ -17,16 +17,13 @@ public class PromptHandler : IToolHandler
 {
     public string Type => HandlersTypes.Prompt;
     private readonly MessageQueues _messageQueues;
-    private readonly ITenantCacheServices _tenantCacheServices;
     private readonly IPromptServices _promptServices;
     private readonly ChatCompletionSettings _chatCompletionSettings;
 
-    public PromptHandler(ITenantCacheServices tenantCacheServices,
-                         IOptions<MessageQueues> messageQueues,
+    public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
                          IOptions<ChatCompletionSettings> chatCompletionSettings)
     {
-        _tenantCacheServices = tenantCacheServices;
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
         _chatCompletionSettings = chatCompletionSettings.Value;
@@ -49,7 +46,6 @@ public class PromptHandler : IToolHandler
         var output = outputs.FirstOrDefault()?.Value ?? string.Empty;
         var promptId = int.Parse(input!.Value);
         var promptDto = _promptServices.FindById(promptId);
-        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
         var fullText = string.Join("\n", documents!.DocumentEmbeddings.Select(d => d.Text));
 
@@ -73,7 +69,7 @@ public class PromptHandler : IToolHandler
                             new ChatMessageDto
                             {
                                 Role = "system",
-                                Content = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptDto.Text)
+                                Content = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptDto!.Text)
                             }
                         }
                 },

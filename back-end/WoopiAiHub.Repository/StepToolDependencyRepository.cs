@@ -25,7 +25,7 @@ namespace WoopiAiHub.Repository
                 .Where(d => stepToolIds!.Contains(d.StepToolId) || stepToolIds!.Contains(d.DependsOnStepToolId))
                 .ToListAsync();
 
-            if (dependencies.Any())
+            if (dependencies.Count > 0)
             {
                 _context.Set<StepToolDependency>().RemoveRange(dependencies);
                 await _context.SaveChangesAsync();
@@ -37,7 +37,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="dependency"></param>
         /// <returns></returns>
-        public async Task AddAsync(StepToolDependency dependency)
+        public async Task CreateAsync(StepToolDependency dependency)
         {
             ArgumentNullException.ThrowIfNull(dependency);
             await _context.Set<StepToolDependency>().AddAsync(dependency);

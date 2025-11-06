@@ -260,7 +260,7 @@ namespace WoopiAiHub.Application.Services.Automation
         {
             var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
 
-            if (stepTool.Dependencies != null && stepTool.Dependencies.Any())
+            if (stepTool.Dependencies != null && stepTool.Dependencies.Count() > 0)
             {
                 var ids = stepTool.Dependencies.Select(d => d.DependsOnStepToolId).ToList();
                 var outputs = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync(ids, cardId);

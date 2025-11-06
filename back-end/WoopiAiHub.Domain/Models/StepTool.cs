@@ -89,8 +89,6 @@ namespace WoopiAiHub.Domain.Models
 
         public void RemoveDependencies()
         {
-            // Instead of clearing (which causes EF to try to delete with non-nullable FK),
-            // we'll remove items one by one, which allows EF to properly handle the deletion
             var existingDependencies = Dependencies.ToList();
             foreach (var existingDep in existingDependencies)
             {
@@ -102,15 +100,12 @@ namespace WoopiAiHub.Domain.Models
         {
             ArgumentNullException.ThrowIfNull(dependsOnStepToolIds);
             
-            // Instead of clearing (which causes EF to try to delete with non-nullable FK),
-            // we'll remove items one by one, which allows EF to properly handle the deletion
             var existingDependencies = Dependencies.ToList();
             foreach (var existingDep in existingDependencies)
             {
                 Dependencies.Remove(existingDep);
             }
             
-            // Add new dependencies
             foreach (var dependsOnId in dependsOnStepToolIds)
             {
                 var dependency = new StepToolDependency(0, DateTime.UtcNow, Id, dependsOnId);
@@ -122,16 +117,12 @@ namespace WoopiAiHub.Domain.Models
         {
             ArgumentNullException.ThrowIfNull(dependsOnStepTools);
             
-            // Instead of clearing (which causes EF to try to delete with non-nullable FK),
-            // we'll remove items one by one, which allows EF to properly handle the deletion
             var existingDependencies = Dependencies.ToList();
             foreach (var existingDep in existingDependencies)
             {
                 Dependencies.Remove(existingDep);
             }
             
-            // Add new dependencies using StepTool references
-            // Entity Framework will handle the ID mapping after SaveChanges
             foreach (var dependsOnStepTool in dependsOnStepTools)
             {
                 var dependency = new StepToolDependency(0, DateTime.UtcNow, Id, 0)

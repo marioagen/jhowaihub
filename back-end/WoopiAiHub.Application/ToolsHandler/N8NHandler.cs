@@ -74,52 +74,60 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// <returns></returns>
         private static string ConvertOutputsToJson(ICollection<StepToolOutput> outputs, string jsonInput)
         {
-            var outputsDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            if (outputs != null)
-            {
-                foreach (var o in outputs)
-                {
-                    var key = o?.StepTool?.Tool?.ToolType?.Name;
-                    if (string.IsNullOrWhiteSpace(key))
-                        continue;
-                    key = key!.ToLowerInvariant();
+            var outputsDict = BuildOutputsDictionary(outputs);
+            MergeJsonInput(outputsDict, jsonInput);
+            return JsonConvert.SerializeObject(outputsDict);
+        }
 
-                    var value = string.Empty;
-                    if (key.Equals(HandlersTypes.Ocr.ToLowerInvariant()))
-                    {
-                        value = ExtractOcrTextFromOutput(o!.Value!);
-                    }
-                    else
-                    {
-                        value = o!.Value ?? string.Empty;
-                    }                       
-                    outputsDict[key] = value;
-                }
+        /// <summary>
+        /// Builds a dictionary from the outputs collection
+        /// </summary>
+        /// <param name="outputs"></param>
+        /// <returns></returns>
+        private static Dictionary<string, string> BuildOutputsDictionary(ICollection<StepToolOutput> outputs)
+        {
+            var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (outputs == null) return dict;
+
+            foreach (var o in outputs)
+            {
+                var key = o?.StepTool?.Tool?.ToolType?.Name;
+                if (string.IsNullOrWhiteSpace(key))
+                    continue;
+
+                key = key.ToLowerInvariant();
+                dict[key] = key.Equals(HandlersTypes.Ocr.ToLowerInvariant())
+                    ? ExtractOcrTextFromOutput(o!.Value!)
+                    : o!.Value ?? string.Empty;
             }
 
-            if (!string.IsNullOrWhiteSpace(jsonInput))
+            return dict;
+        }
+
+        /// <summary>
+        /// Merges additional JSON input into the outputs dictionary
+        /// </summary>
+        /// <param name="outputsDict"></param>
+        /// <param name="jsonInput"></param>
+        private static void MergeJsonInput(Dictionary<string, string> outputsDict, string jsonInput)
+        {
+            if (string.IsNullOrWhiteSpace(jsonInput))
+                return;
+
+            try
             {
-                try
+                var inputDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonInput);
+                if (inputDict == null) return;
+
+                foreach (var kv in inputDict)
                 {
-                    var inputDict = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonInput);
-                    
-                    if (inputDict != null)
-                    {
-                        foreach (var kv in inputDict)
-                        {
-                            outputsDict[kv.Key.ToLowerInvariant()] = kv.Value?.ToString() ?? string.Empty;
-                        }
-                    }
-                }
-                catch (JsonException)
-                {
-                    outputsDict["input"] = jsonInput;
+                    outputsDict[kv.Key.ToLowerInvariant()] = kv.Value?.ToString() ?? string.Empty;
                 }
             }
-
-            var outputsJson = JsonConvert.SerializeObject(outputsDict);
-
-            return outputsJson;
+            catch (JsonException)
+            {
+                outputsDict["input"] = jsonInput;
+            }
         }
 
         /// <summary>
@@ -132,7 +140,7 @@ namespace WoopiAiHub.Application.ToolsHandler
         {
             var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
 
-            if (embeddingsData?.DocumentEmbeddings == null || !embeddingsData.DocumentEmbeddings.Any())
+            if (embeddingsData?.DocumentEmbeddings == null || embeddingsData.DocumentEmbeddings.Count == 0)
                 return string.Empty;
 
             return string.Join(Environment.NewLine + Environment.NewLine,

@@ -2,10 +2,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
-    /// <summary>
-    /// Represents a dependency relationship between two StepTools.
-    /// This allows a StepTool to depend on outputs from multiple other StepTools.
-    /// </summary>
     public class StepToolDependency : BaseEntity
     {
         [Column("StepToolId", TypeName = "int")]
