@@ -210,7 +210,7 @@ namespace WoopiAiHub.Application.Services
                         // Delete existing dependencies explicitly via repository
                         await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
                         
-                        if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count() > 0)
+                        if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count > 0)
                         {
                             foreach (var dependsOn in stepToolDto.Dependencies)
                             {
@@ -424,7 +424,7 @@ namespace WoopiAiHub.Application.Services
                 }
             }
 
-            if (dependsOnStepTools.Count() > 0)
+            if (dependsOnStepTools.Count > 0)
             {
                 stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
             }
