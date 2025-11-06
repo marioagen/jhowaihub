@@ -28,6 +28,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<StepToolOutput> Outputs { get; set; } = new List<StepToolOutput>();
         public virtual ICollection<StepToolExecution> Executions { get; private set; } = new List<StepToolExecution>();
         public virtual ICollection<StepToolParameter> Parameters { get; private set; } = new List<StepToolParameter>();
+        public virtual ICollection<StepToolDependency> Dependencies { get; private set; } = new List<StepToolDependency>();
 
         public StepTool(int id, 
                        DateTime created, 
@@ -78,6 +79,59 @@ namespace WoopiAiHub.Domain.Models
         {
             DependsOnStepToolId = null;
             DependsOnStepTool = null;
+        }
+
+        public void AddDependency(StepToolDependency dependency)
+        {
+            ArgumentNullException.ThrowIfNull(dependency);
+            Dependencies.Add(dependency);
+        }
+
+        public void RemoveDependencies()
+        {
+            var existingDependencies = Dependencies.ToList();
+            foreach (var existingDep in existingDependencies)
+            {
+                Dependencies.Remove(existingDep);
+            }
+        }
+
+        public void UpdateDependencies(ICollection<int> dependsOnStepToolIds)
+        {
+            ArgumentNullException.ThrowIfNull(dependsOnStepToolIds);
+            
+            var existingDependencies = Dependencies.ToList();
+            foreach (var existingDep in existingDependencies)
+            {
+                Dependencies.Remove(existingDep);
+            }
+            
+            foreach (var dependsOnId in dependsOnStepToolIds)
+            {
+                var dependency = new StepToolDependency(0, DateTime.UtcNow, Id, dependsOnId);
+                Dependencies.Add(dependency);
+            }
+        }
+
+        public void UpdateDependenciesWithStepTools(ICollection<StepTool> dependsOnStepTools)
+        {
+            ArgumentNullException.ThrowIfNull(dependsOnStepTools);
+            
+            var existingDependencies = Dependencies.ToList();
+            foreach (var existingDep in existingDependencies)
+            {
+                Dependencies.Remove(existingDep);
+            }
+            
+            foreach (var dependsOnStepTool in dependsOnStepTools)
+            {
+                var dependency = new StepToolDependency(0, DateTime.UtcNow, Id, 0)
+                {
+                    StepTool = this,
+                    DependsOnStepTool = dependsOnStepTool
+                };
+                Dependencies.Add(dependency);
+            }
         }
     }
 }

@@ -58,7 +58,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
 
             var stepToolParameter = new StepToolParameter(1,DateTime.Now,2,true,Guid.NewGuid(),"6");
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
-            var output = JsonConvert.SerializeObject(documentEmbeddingsDataDto);
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
             _mockTenantCacheServices
                 .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
@@ -68,7 +68,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                                .Returns(PromptFixture.FindValidPromptDto());
 
             // Act
-            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, output);
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
 
             // Assert
             Assert.Equal(_messageQueues.ChatCompletionQueue, result.Queue);
