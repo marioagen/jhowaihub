@@ -16,18 +16,21 @@ namespace WoopiAiHub.Application.Services
         private readonly IToolTypeRepository _toolTypeRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IKeyVaultServices _keyVaultServices;
+        private readonly IEncryptionService _encryptionService;
         private readonly IUnitOfWork _unitOfWork;
 
         public ToolServices(IToolRepository toolRepository,
                             IToolTypeRepository toolTypeRepository,
                             IApiClientFactory apiClientFactory,
                             IKeyVaultServices keyVaultServices,
+                            IEncryptionService encryptionService,
                             IUnitOfWork unitOfWork)
         {
             _toolRepository = toolRepository;
             _toolTypeRepository = toolTypeRepository;
             _apiClientFactory = apiClientFactory;
             _keyVaultServices = keyVaultServices;
+            _encryptionService = encryptionService;
             _unitOfWork = unitOfWork;
         }
 
@@ -45,14 +48,15 @@ namespace WoopiAiHub.Application.Services
             var toolType = await _toolTypeRepository.FindModelByIdAsync(toolCreateDto.ToolTypeId)
                 ?? throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
             
-            string keyVaultName = string.Empty;
+            string encryptedApiKey = string.Empty;
             if (toolType.IsN8nTool())
             {
                 if (string.IsNullOrEmpty(toolCreateDto.ConnectorUrl) || string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
                 {
                     throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
                 }
-                keyVaultName = _keyVaultServices.CreateKeyName();
+                // Encrypt the API key for storage in the database
+                encryptedApiKey = _encryptionService.Encrypt(toolCreateDto.ConnectorApiKey);
             }
 
             var tool = new Tool(
@@ -65,7 +69,7 @@ namespace WoopiAiHub.Application.Services
                 toolCreateDto.OutputDataId,
                 toolCreateDto.IsEditableInput,
                 toolCreateDto.ConnectorUrl,
-                keyVaultName
+                encryptedApiKey
              );
 
             _unitOfWork.BeginTransaction();
@@ -76,8 +80,6 @@ namespace WoopiAiHub.Application.Services
                 {
                     throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
                 }
-
-                await SetSecret(keyVaultName, toolCreateDto.ConnectorApiKey);
 
                 _unitOfWork.Commit();
                 return result;
@@ -162,7 +164,7 @@ namespace WoopiAiHub.Application.Services
 
             ValidateConnector(toolUpdateDto, tool, toolType);
 
-            string keyVaultName = FindOrCreateKeyName(tool, toolType);
+            string encryptedApiKey = GetEncryptedApiKey(tool, toolType, toolUpdateDto.ConnectorApiKey);
 
             tool.Update(toolUpdateDto.Name,
                         toolUpdateDto.ToolTypeId,
@@ -170,7 +172,7 @@ namespace WoopiAiHub.Application.Services
                         toolUpdateDto.OutputDataId,
                         toolUpdateDto.IsEditableInput,
                         toolUpdateDto.ConnectorUrl,
-                        keyVaultName);
+                        encryptedApiKey);
 
             _unitOfWork.BeginTransaction();
             try
@@ -180,8 +182,6 @@ namespace WoopiAiHub.Application.Services
                 {
                     throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
                 }
-
-                await SetSecret(keyVaultName, toolUpdateDto.ConnectorApiKey);
 
                 _unitOfWork.Commit();
                 return result;
@@ -194,22 +194,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Set secret in key vault
-        /// </summary>
-        /// <param name="keyVaultName"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        private async Task SetSecret(string keyVaultName, string? key)
-        {
-            if (!string.IsNullOrEmpty(key))
-            {
-                await _keyVaultServices.SetSecretAsync(keyVaultName, key);
-            }
-        }
-
-        /// <summary>
-        /// Validadte connetor url and conenctor api key
+        /// Validate connector url and connector api key
         /// </summary>
         /// <param name="toolUpdateDto"></param>
         /// <param name="tool"></param>
@@ -232,17 +217,26 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Find or create key name
+        /// Get encrypted API key for storage
         /// </summary>
         /// <param name="tool"></param>
         /// <param name="toolType"></param>
+        /// <param name="newApiKey"></param>
         /// <returns></returns>
-        private string FindOrCreateKeyName(Tool tool, ToolType toolType)
+        private string GetEncryptedApiKey(Tool tool, ToolType toolType, string? newApiKey)
         {
-            if (toolType!.IsN8nTool() && string.IsNullOrEmpty(tool.ConnectorApiKey))
+            if (!toolType!.IsN8nTool())
             {
-                return _keyVaultServices.CreateKeyName();
+                return string.Empty;
             }
+
+            // If a new API key is provided, encrypt and return it
+            if (!string.IsNullOrEmpty(newApiKey))
+            {
+                return _encryptionService.Encrypt(newApiKey);
+            }
+
+            // Otherwise, keep the existing encrypted value
             return tool.ConnectorApiKey ?? string.Empty;
         }
 
