@@ -36,9 +36,15 @@ namespace WoopiAiHub.Repository
                                  .Include(s => s.Step)
                                     .ThenInclude(p => p!.Profile)
                                  .Include(s => s.Step)
-                                 .ThenInclude(w => w!.Workflow)
-                                 .ThenInclude(t => t!.Teams)
-                                 .ThenInclude(u => u!.Users)
+                                    .ThenInclude(w => w!.Workflow)
+                                        .ThenInclude(ws => ws!.Steps)
+                                            .ThenInclude(st => st.StepTools)
+                                                .ThenInclude(t => t.Tool)
+                                                    .ThenInclude(tt => tt!.ToolType)
+                                 .Include(c => c.Outputs)
+                                    .ThenInclude(o => o.StepTool)
+                                        .ThenInclude(st => st!.Tool)
+                                            .ThenInclude(t => t!.ToolType)
                                  .FirstOrDefaultAsync();
         }
 

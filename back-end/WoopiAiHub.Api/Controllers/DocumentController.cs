@@ -314,20 +314,23 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// It receives an id and returns document information grouped by processing steps.
+        /// It receives a document id and optional card id, then returns document information grouped by processing steps.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Document ID</param>
+        /// <param name="cardId">Optional Card ID - if not provided, uses the first active card</param>
         /// <param name="headersDto"></param>
         /// <returns></returns>
         [HttpGet("AnalyzeSteps/{id}")]
-        [SwaggerOperation("It receives an id and returns a DocumentAnalyzeStepsDto with the document's information grouped by steps")]
+        [SwaggerOperation("It receives a document id and optional card id, then returns a DocumentAnalyzeStepsDto with the document's information grouped by steps")]
         [ProducesResponseType(typeof(DocumentAnalyzeStepsDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindByIdAnalyzeWithSteps(int id,
+                                                                   [FromQuery] int? cardId,
                                                                    [FromHeader] HeadersDto headersDto)
         {
             try
             {
                 var result = await _documentServices.FindByIdAnalyzeWithSteps(id,
+                                                                              cardId,
                                                                               headersDto);
                 return Ok(result);
             }
