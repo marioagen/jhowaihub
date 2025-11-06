@@ -17,7 +17,6 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
-using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -48,11 +47,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IMemoryCache _cache;
         private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly ITenantCacheServices _tenantCacheServices;
-        private readonly ITeamServices _teamServices;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly MessageQueues _messageQueues;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private readonly IHubNotifier _hubNotifier;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
@@ -77,7 +74,6 @@ namespace WoopiAiHub.Application.Services
                                 ITenantCacheServices tenantCacheServices,
                                 ITeamServices teamServices,
                                 IKeyGeneratorApi keyGeneratorApi,
-                                IMessagePublisher<ProcessOcrDto> publisher,
                                 IOptions<MessageQueues> messageQueues,
                                 IHubNotifier documentNotifier,
                                 IUnitOfWork unitOfWork,
@@ -102,10 +98,8 @@ namespace WoopiAiHub.Application.Services
             _cache = cache;
             _questionnaireRepository = questionnaireRepository;
             _tenantCacheServices = tenantCacheServices;
-            _teamServices = teamServices;
             _keyGeneratorApi = keyGeneratorApi;
             _messageQueues = messageQueues.Value;
-            _publisher = publisher;
             _hubNotifier = documentNotifier;
             _automationServices = automationServices;
             _workflowRepository = workflowRepository;
@@ -433,7 +427,6 @@ namespace WoopiAiHub.Application.Services
 
             await _stepToolOutputRepository.CreateAsync(output);
         }
-
 
         /// <summary>
         /// Updates document status

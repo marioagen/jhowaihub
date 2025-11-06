@@ -18,7 +18,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
-        private readonly IStepToolRepository _stepToolRepository;
         private readonly IStepToolDependencyRepository _stepToolDependencyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
@@ -31,7 +30,6 @@ namespace WoopiAiHub.Application.Services
                                 ITeamRepository teamRepository,
                                 IStatusRepository statusRepository,
                                 IStepRepository stepRepository,
-                                IStepToolRepository stepToolRepository,
                                 IStepToolDependencyRepository stepToolDependencyRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
@@ -42,7 +40,6 @@ namespace WoopiAiHub.Application.Services
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
-            _stepToolRepository = stepToolRepository;
             _stepToolDependencyRepository = stepToolDependencyRepository;
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
