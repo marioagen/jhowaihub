@@ -149,24 +149,24 @@
                             this.$refs.DeleteDialog.close();
                             this.getTeams({ search: "", page: 1, type: null });
                             return this.$notify({
-                                title: 'team.title',
-                                message: 'team.deleteSuccess',
+                                title: 'management.teams.title',
+                                message: 'management.teams.deleteSuccess',
                                 variant: 'success',
                                 icon: 'CircleCheckBig',
                             });
                         }
                         else if (response.error.response.data.errorCode == 5) {
                              return this.$notify({
-                                title: 'team.title',
-                                message: 'team.deleteDocError',
+                                title: 'management.teams.title',
+                                message: 'management.teams.deleteDocError',
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
                         }
 
                         this.$notify({
-                            title: 'team.title',
-                            message: 'team.deleteError',
+                            title: 'management.teams.title',
+                            message: 'management.teams.deleteError',
                             variant: 'danger',
                             icon: 'CircleX',
                         });
