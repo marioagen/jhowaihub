@@ -271,167 +271,35 @@ namespace WoopiAiHub.Application.Services
                 throw ex;
             }
 
+            // Get the first active card for this document to pass to the frontend
+            var cards = _cardRepository.FindByDocumentIdCardListAsync(id).Result;
+            var activeCard = cards.FirstOrDefault();
+
             return new FindByIdAnalyzeDto
             {
                 Name = result.Name,
                 Description = result.Description,
                 ReferenceFile = result.ReferenceFile,
+                CardId = activeCard?.Id
             };
         }
 
         /// <summary>
         /// Returns document information grouped by processing steps with extracted data.
         /// </summary>
-        /// <param name="id">Document ID</param>
-        /// <param name="cardId">Optional Card ID - if not provided, uses the first active card</param>
+        /// <param name="cardId">Card ID to analyze</param>
         /// <param name="headersDto">Request headers</param>
         /// <returns>Document with steps and extracted fields</returns>
-        /// <exception cref="ArgumentException">Thrown when document or card is not found</exception>
-        public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int id,
-                                                                             int? cardId,
+        /// <exception cref="ArgumentException">Thrown when card is not found</exception>
+        public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
                                                                              HeadersDto headersDto)
         {
-            var document = _documentRepository.FindById(id);
+            var card = await GetCardWithRelationships(cardId);
+            var document = card.Document ?? throw new ArgumentException("Document not found for the card");
+            var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
 
-            if (document == null)
-            {
-                var ex = new ArgumentException(FindingDocumentErrorMessage);
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindByIdAnalyzeWithSteps)} method");
-                throw ex;
-            }
-
-            // Get the specific card to analyze
-            Card? targetCard = null;
-            if (cardId.HasValue)
-            {
-                targetCard = await _cardRepository.FindById(cardId.Value);
-                if (targetCard == null || targetCard.DocumentId != id)
-                {
-                    var ex = new ArgumentException("Card not found or does not belong to the specified document");
-                    _logger.LogError(ex, $"Card {cardId} not found for document {id}");
-                    throw ex;
-                }
-            }
-            else
-            {
-                // Get the first active card for this document if cardId not specified
-                var cards = await _cardRepository.FindByDocumentIdCardListAsync(id);
-                targetCard = cards.FirstOrDefault();
-                if (targetCard == null)
-                {
-                    var ex = new ArgumentException("No active cards found for the specified document");
-                    _logger.LogError(ex, $"No active cards found for document {id}");
-                    throw ex;
-                }
-            }
-
-            // Get all steps in the workflow for this card
-            var workflow = targetCard.Step?.Workflow;
-            if (workflow == null)
-            {
-                var ex = new ArgumentException("Workflow not found for the card");
-                _logger.LogError(ex, $"Workflow not found for card {targetCard.Id}");
-                throw ex;
-            }
-
-            // Build steps from the workflow's step tools and their outputs for this specific card
-            var steps = new List<DocumentStepDto>();
-            string lastProcessedStepId = string.Empty;
-            int maxStepOrder = 0;
-
-            // Load the card with all its outputs
-            var cardWithOutputs = await _cardRepository.FindById(targetCard.Id);
-            if (cardWithOutputs == null) return new DocumentAnalyzeStepsDto();
-
-            // Get all steps from the workflow
-            var workflowSteps = workflow.Steps.OrderBy(s => s.Order).ToList();
-
-            foreach (var step in workflowSteps)
-            {
-                var stepId = $"step-{step.Id}";
-                var stepDto = new DocumentStepDto
-                {
-                    Id = stepId,
-                    Name = $"{step.Order} - {step.Name}",
-                    Outputs = new List<ExtractedFieldDto>()
-                };
-
-                // Find outputs for this step and card
-                foreach (var stepTool in step.StepTools.OrderBy(st => st.Order))
-                {
-                    var outputs = cardWithOutputs.Outputs
-                        .Where(o => o.StepToolId == stepTool.Id)
-                        .ToList();
-
-                    foreach (var output in outputs)
-                    {
-                        if (output.StepTool?.Tool == null) continue;
-
-                        // Filter out OCR and Embeddings tools
-                        if (output.StepTool.Tool.ToolType?.Name == HandlersTypes.Ocr ||
-                            output.StepTool.Tool.ToolType?.Name == HandlersTypes.Embeddings)
-                        {
-                            continue;
-                        }
-
-                        // Validate JSON structure before deserialization
-                        if (!string.IsNullOrWhiteSpace(output.Value) && 
-                            output.Value.TrimStart().StartsWith("{") && 
-                            output.Value.TrimEnd().EndsWith("}"))
-                        {
-                            try
-                            {
-                                var settings = new JsonSerializerSettings
-                                {
-                                    MaxDepth = 5, // Limit nesting depth for security
-                                    DateParseHandling = DateParseHandling.None
-                                };
-                                
-                                var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(output.Value, settings);
-                                if (jsonObject != null && jsonObject.Count > 0)
-                                {
-                                    foreach (var kvp in jsonObject)
-                                    {
-                                        stepDto.Outputs.Add(new ExtractedFieldDto
-                                        {
-                                            Label = kvp.Key,
-                                            Value = kvp.Value?.ToString() ?? string.Empty,
-                                            IsEdited = false
-                                        });
-                                    }
-                                    continue;
-                                }
-                            }
-                            catch (JsonException ex)
-                            {
-                                _logger.LogWarning(ex, $"Failed to parse JSON from StepToolOutput {output.Id}. Falling back to plain text display.");
-                            }
-                        }
-                        
-                        // Fall back to plain text display
-                        if (!string.IsNullOrWhiteSpace(output.Value))
-                        {
-                            stepDto.Outputs.Add(new ExtractedFieldDto
-                            {
-                                Label = output.StepTool.Tool.Name,
-                                Value = output.Value,
-                                IsEdited = false
-                            });
-                        }
-                    }
-                }
-
-                // Only add steps that have outputs
-                if (stepDto.Outputs.Any())
-                {
-                    steps.Add(stepDto);
-                    if (step.Order > maxStepOrder)
-                    {
-                        maxStepOrder = step.Order;
-                        lastProcessedStepId = stepId;
-                    }
-                }
-            }
+            var steps = await BuildStepsFromWorkflow(workflow, card);
+            var lastProcessedStepId = GetLastProcessedStepId(steps);
 
             return new DocumentAnalyzeStepsDto
             {
@@ -440,8 +308,149 @@ namespace WoopiAiHub.Application.Services
                 Description = document.Description,
                 ReferenceFile = document.ReferenceFile,
                 LastProcessedStepId = lastProcessedStepId,
-                Steps = steps.OrderBy(s => s.Name).ToList()
+                Steps = steps
             };
+        }
+
+        private async Task<Card> GetCardWithRelationships(int cardId)
+        {
+            var card = await _cardRepository.FindById(cardId);
+            if (card == null)
+            {
+                var ex = new ArgumentException($"Card {cardId} not found");
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindByIdAnalyzeWithSteps)} method");
+                throw ex;
+            }
+            return card;
+        }
+
+        private async Task<List<DocumentStepDto>> BuildStepsFromWorkflow(Workflow workflow, Card card)
+        {
+            var steps = new List<DocumentStepDto>();
+            var workflowSteps = workflow.Steps.OrderBy(s => s.Order).ToList();
+
+            foreach (var step in workflowSteps)
+            {
+                var stepDto = CreateStepDto(step);
+                PopulateStepOutputs(stepDto, step, card);
+
+                // Only add steps that have outputs
+                if (stepDto.Outputs.Any())
+                {
+                    steps.Add(stepDto);
+                }
+            }
+
+            return steps;
+        }
+
+        private DocumentStepDto CreateStepDto(Step step)
+        {
+            return new DocumentStepDto
+            {
+                Id = $"step-{step.Id}",
+                Name = $"{step.Order} - {step.Name}",
+                Outputs = new List<ExtractedFieldDto>()
+            };
+        }
+
+        private void PopulateStepOutputs(DocumentStepDto stepDto, Step step, Card card)
+        {
+            foreach (var stepTool in step.StepTools.OrderBy(st => st.Order))
+            {
+                var outputs = card.Outputs
+                    .Where(o => o.StepToolId == stepTool.Id)
+                    .ToList();
+
+                foreach (var output in outputs)
+                {
+                    if (ShouldSkipOutput(output)) continue;
+                    
+                    var extractedFields = ParseOutput(output);
+                    stepDto.Outputs.AddRange(extractedFields);
+                }
+            }
+        }
+
+        private bool ShouldSkipOutput(StepToolOutput output)
+        {
+            if (output.StepTool?.Tool == null) return true;
+
+            // Filter out OCR and Embeddings tools
+            var toolTypeName = output.StepTool.Tool.ToolType?.Name;
+            return toolTypeName == HandlersTypes.Ocr || toolTypeName == HandlersTypes.Embeddings;
+        }
+
+        private List<ExtractedFieldDto> ParseOutput(StepToolOutput output)
+        {
+            var fields = new List<ExtractedFieldDto>();
+
+            if (string.IsNullOrWhiteSpace(output.Value))
+                return fields;
+
+            // Try to parse as JSON first
+            if (TryParseJsonOutput(output.Value, out var jsonFields))
+            {
+                fields.AddRange(jsonFields);
+            }
+            else
+            {
+                // Fall back to plain text display
+                fields.Add(new ExtractedFieldDto
+                {
+                    Label = output.StepTool?.Tool?.Name ?? "Unknown",
+                    Value = output.Value,
+                    IsEdited = false
+                });
+            }
+
+            return fields;
+        }
+
+        private bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields)
+        {
+            fields = new List<ExtractedFieldDto>();
+
+            if (!value.TrimStart().StartsWith("{") || !value.TrimEnd().EndsWith("}"))
+                return false;
+
+            try
+            {
+                var settings = new JsonSerializerSettings
+                {
+                    MaxDepth = 5, // Limit nesting depth for security
+                    DateParseHandling = DateParseHandling.None
+                };
+
+                var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(value, settings);
+                if (jsonObject != null && jsonObject.Count > 0)
+                {
+                    foreach (var kvp in jsonObject)
+                    {
+                        fields.Add(new ExtractedFieldDto
+                        {
+                            Label = kvp.Key,
+                            Value = kvp.Value?.ToString() ?? string.Empty,
+                            IsEdited = false
+                        });
+                    }
+                    return true;
+                }
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogWarning(ex, $"Failed to parse JSON output. Falling back to plain text display.");
+            }
+
+            return false;
+        }
+
+        private string GetLastProcessedStepId(List<DocumentStepDto> steps)
+        {
+            if (!steps.Any()) return string.Empty;
+
+            // Return the last step with outputs as the most recently processed
+            return steps.LastOrDefault()?.Id ?? string.Empty;
         }
 
         /// <summary>

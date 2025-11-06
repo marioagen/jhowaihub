@@ -39,17 +39,25 @@
                 documentData: null,
                 currentStepData: null,
                 loading: false,
+                cardId: null,
             };
         },
         methods: {
             async loadDocumentData() {
                 this.loading = true;
                 try {
-                    const response = await api.get(`/Document/AnalyzeSteps/${this.documentId}`);
+                    // First, get the document info to retrieve the cardId
+                    const docResponse = await api.get(`/Document/Analyze/${this.documentId}`);
+                    this.cardId = docResponse.data.cardId;
+
+                    if (!this.cardId) {
+                        throw new Error("No active card found for this document");
+                    }
+
+                    // Now fetch the steps using the cardId
+                    const response = await api.get(`/Document/AnalyzeSteps/${this.cardId}`);
                     this.documentData = response.data;
 
-                    console.log(this.documentData);
-                    console.log(response.data);
                     // Set the initial step to the last processed one
                     if (this.documentData.lastProcessedStepId && this.documentData.steps.length > 0) {
                         const lastStep = this.documentData.steps.find(
