@@ -669,6 +669,122 @@ namespace WoopiAiHub.UnitTests.Services
             marketPlaceApi.Verify(s => s.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
         }
 
+        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return OCR text when available")]
+        [Trait("FindOcrTextByDocumentId", "Success")]
+        public async Task FindOcrTextByDocumentId_Success()
+        {
+            // Arrange
+            var documentId = 1;
+            var cardId = 10;
+            var stepToolId = 5;
+            var referenceFile = "test-file.pdf";
+
+            var document = new Document("Test Document", "Description", referenceFile, 
+                DocumentStatus.OCR, true, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
+
+            var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, true);
+            var tool = new Tool(1, DateTime.UtcNow, "OCR Tool", true, 1, 1, 1, false, null, null);
+            typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
+
+            var stepTool = new StepTool(stepToolId, DateTime.UtcNow, 1, 1, 1, 0, 0);
+            typeof(StepTool).GetProperty("Tool")!.SetValue(stepTool, tool);
+
+            var execution = new StepToolExecution(1, DateTime.UtcNow, stepToolId, StatusExecution.Ready, cardId);
+            typeof(StepToolExecution).GetProperty("StepTool")!.SetValue(execution, stepTool);
+
+            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, true, null);
+            typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution> { execution });
+
+            var ocrOutput = new DocumentEmbeddingsDataDto
+            {
+                ReferenceFile = referenceFile,
+                DocumentEmbeddings = new List<DocumentEmbeddingsAddDto>
+                {
+                    new DocumentEmbeddingsAddDto { Text = "Page 1 text", Metadata = new { PageNumber = 1 } },
+                    new DocumentEmbeddingsAddDto { Text = "Page 2 text", Metadata = new { PageNumber = 2 } }
+                }
+            };
+            var outputJson = Newtonsoft.Json.JsonConvert.SerializeObject(ocrOutput);
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock.Setup(r => r.FindById(documentId)).Returns(document);
+
+            var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
+            cardRepositoryMock.Setup(r => r.FindByDocumentIdAsync(documentId)).ReturnsAsync(card);
+
+            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            stepToolOutputRepositoryMock.Setup(r => r.FindByStepToolId(stepToolId, cardId)).ReturnsAsync(outputJson);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            var result = await documentServices.FindOcrTextByDocumentId(documentId);
+
+            // Assert
+            Assert.True(result.HasOcr);
+            Assert.Contains("Page 1 text", result.Content);
+            Assert.Contains("Page 2 text", result.Content);
+            Assert.Equal(referenceFile, result.ReferenceFile);
+            documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
+            cardRepositoryMock.Verify(r => r.FindByDocumentIdAsync(documentId), Times.Once);
+            stepToolOutputRepositoryMock.Verify(r => r.FindByStepToolId(stepToolId, cardId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return HasOcr false when document not found")]
+        [Trait("FindOcrTextByDocumentId", "DocumentNotFound")]
+        public async Task FindOcrTextByDocumentId_DocumentNotFound()
+        {
+            // Arrange
+            var documentId = 1;
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock.Setup(r => r.FindById(documentId)).Returns((Document)null!);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            var result = await documentServices.FindOcrTextByDocumentId(documentId);
+
+            // Assert
+            Assert.False(result.HasOcr);
+            Assert.Empty(result.Content);
+            documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return HasOcr false when no OCR execution found")]
+        [Trait("FindOcrTextByDocumentId", "NoOcrExecution")]
+        public async Task FindOcrTextByDocumentId_NoOcrExecution()
+        {
+            // Arrange
+            var documentId = 1;
+            var cardId = 10;
+            var referenceFile = "test-file.pdf";
+
+            var document = new Document("Test Document", "Description", referenceFile, 
+                DocumentStatus.NotAnalyzed, true, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
+
+            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, true, null);
+            typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution>());
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock.Setup(r => r.FindById(documentId)).Returns(document);
+
+            var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
+            cardRepositoryMock.Setup(r => r.FindByDocumentIdAsync(documentId)).ReturnsAsync(card);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            var result = await documentServices.FindOcrTextByDocumentId(documentId);
+
+            // Assert
+            Assert.False(result.HasOcr);
+            Assert.Empty(result.Content);
+            Assert.Equal(referenceFile, result.ReferenceFile);
+            documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
+            cardRepositoryMock.Verify(r => r.FindByDocumentIdAsync(documentId), Times.Once);
+        }
+
         [Fact(DisplayName = "FindByIdAnalyzeWithStepsSuccess")]
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_Success()

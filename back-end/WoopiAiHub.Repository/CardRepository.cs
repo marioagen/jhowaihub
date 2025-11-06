@@ -90,11 +90,28 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Retrieves a card by its document ID, including related executions, step tools, and tool type information.
+        /// </summary>
+        /// <param name="documentId">The document ID to search for</param>
+        /// <returns>A card with its related data, or null if not found</returns>
+        public async Task<Card?> FindByDocumentIdCardAsync(int documentId)
+        {
+            return await _context.Cards
+                .Where(c => c.DocumentId == documentId && c.Enable)
+                .Include(c => c.Executions)
+                    .ThenInclude(e => e.StepTool)
+                        .ThenInclude(st => st!.Tool)
+                            .ThenInclude(t => t!.ToolType)
+                .OrderByDescending(c => c.Created)
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
         /// Finds all cards associated with a specific document ID.
         /// </summary>
         /// <param name="documentId">The ID of the document.</param>
         /// <returns>A list of cards with their related Step information.</returns>
-        public async Task<List<Card>> FindByDocumentIdAsync(int documentId)
+        public async Task<List<Card>> FindByDocumentIdCardListAsync(int documentId)
         {
             return await _context.Cards
                 .Where(c => c.DocumentId == documentId && c.Enable)

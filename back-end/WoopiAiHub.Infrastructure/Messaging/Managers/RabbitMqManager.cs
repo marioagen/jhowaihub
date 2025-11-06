@@ -20,7 +20,11 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
         }
 
         /// <summary>
-        /// Initialize RabbitMQ connection and create queues 
+        /// Initialize RabbitMQ connection and create queues with Dead Letter Queue (DLQ) support.
+        /// For each main queue, creates:
+        /// - Dead Letter Exchange (DLX)
+        /// - Dead Letter Queue (DLQ)
+        /// - Main queue configured to send failed messages to DLQ
         /// </summary>
         /// <returns></returns>
         public async Task CreateQueuesAsync()
@@ -28,9 +32,48 @@ namespace WoopiAiHub.Infrastructure.Messaging.Managers
             using var connection = await this.ConnectionFactory.CreateConnectionAsync();
             using var channel = await connection.CreateChannelAsync();
 
+            const string dlxName = "dlx.exchange";
+
+            await channel.ExchangeDeclareAsync(
+                exchange: dlxName,
+                type: "direct",
+                durable: true,
+                autoDelete: false,
+                arguments: null
+            );
+
             foreach (var queue in _queues.Queues())
             {
-                await channel.QueueDeclareAsync(queue: queue, durable: true, exclusive: false, autoDelete: false, arguments: null);
+                var dlqName = $"{queue}.dlq";
+
+                await channel.QueueDeclareAsync(
+                    queue: dlqName,
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null
+                );
+
+                await channel.QueueBindAsync(
+                    queue: dlqName,
+                    exchange: dlxName,
+                    routingKey: queue, 
+                    arguments: null
+                );
+
+                var queueArguments = new Dictionary<string, object?>
+                {
+                    { "x-dead-letter-exchange", dlxName },     
+                    { "x-dead-letter-routing-key", queue }     
+                };
+
+                await channel.QueueDeclareAsync(
+                    queue: queue,
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: queueArguments
+                );
             }
         }
 

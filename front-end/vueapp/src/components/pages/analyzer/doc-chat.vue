@@ -78,9 +78,9 @@
                     });
                     const response = await api.post("/Document/input", {
                         id: this.documentId,
-                        input: question,
+                        input: this.question,
                     });
-                    this.output = response;
+                    this.output = response.data;
                 } catch (error) {
                     console.error("Error sending question:", error);
                     this.$emit("show-alert-toast", {

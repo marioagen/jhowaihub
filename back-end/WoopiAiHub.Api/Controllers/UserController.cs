@@ -114,6 +114,16 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPost("Team/Query")]
+        [SwaggerOperation("Endpoint that receives the request to return all users from multiple teams")]
+        [ProducesResponseType(typeof(ICollection<UserDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ICollection<UserDto>>> FindByTeamIds([FromBody] FindByTeamIdsDto findByTeamIdsDto)
+        {
+            var result = await _userServices.FindByTeamIds(findByTeamIdsDto.TeamIds);
+            return Ok(result);
+        }
+
         /// <summary>
         /// Endpoint that receives the request to return a user by its email.
         /// </summary>

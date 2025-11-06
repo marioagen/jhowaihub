@@ -37,7 +37,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public IQueryable<TeamDto> FindAllByUser(string userEmail)
+        public IQueryable<TeamDto> FindAll()
         {
             return _context.Teams
                            .Include(u => u.Users)
@@ -67,7 +67,6 @@ namespace WoopiAiHub.Repository
                                     }).ToList()
                                     : new List<WorkflowDto>()
                            })
-                           .Where(t => t.Users.Any(u => u.Email == userEmail && u.IsActive))
                            .AsNoTracking();
         }
 
@@ -176,6 +175,45 @@ namespace WoopiAiHub.Repository
                                 .AsNoTracking();
 
             return query;
+        }
+
+        /// <summary>
+        /// Retrieve all teams associated with a specific user email, including their active users.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public IQueryable<TeamDto> FindAllByUser(string userEmail)
+        {
+            return _context.Teams
+                           .Include(u => u.Users)
+                           .Include(w => w.Workflows)
+                           .Select(t => new TeamDto
+                           {
+                               Id = t.Id,
+                               Name = t.Name,
+                               Created = t.Created,
+                               Users = t.Users!
+                                       .Where(u => u.IsActive)
+                                       .Select(u => new UserDto
+                                       {
+                                           Id = u.Id,
+                                           Name = u.Name,
+                                           Email = u.Email,
+                                           IsActive = u.IsActive,
+                                           Created = u.Created
+                                       })
+                                       .ToList(),
+                               Workflows = t.Workflows != null
+                                    ? t.Workflows.Select(w => new WorkflowDto
+                                    {
+                                        Id = w.Id,
+                                        Name = w.Name,
+                                        Created = w.Created
+                                    }).ToList()
+                                    : new List<WorkflowDto>()
+                           })
+                           .Where(t => t.Users.Any(u => u.Email == userEmail && u.IsActive))
+                           .AsNoTracking();
         }
 
         /// <summary>

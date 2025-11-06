@@ -47,7 +47,9 @@
                 try {
                     const response = await api.get(`/Document/AnalyzeSteps/${this.documentId}`);
                     this.documentData = response.data;
-                    
+
+                    console.log(this.documentData);
+                    console.log(response.data);
                     // Set the initial step to the last processed one
                     if (this.documentData.lastProcessedStepId && this.documentData.steps.length > 0) {
                         const lastStep = this.documentData.steps.find(
@@ -71,34 +73,12 @@
                 this.currentStepData = step;
             },
             handleFieldUpdate({ index, field }) {
-                // Here you could send the update to the backend if needed
+                
                 console.log("Field updated:", field);
                 this.$emit("show-alert-toast", {
                     msg: "Campo atualizado com sucesso",
                     color: "toast-success",
                 });
-            },
-            async handleQuestionSent(question) {
-                try {
-                    const response = await api.post("/Document/input", {
-                        id: this.documentId,
-                        input: question,
-                    });
-                    
-                    this.$emit("show-alert-toast", {
-                        msg: "Pergunta enviada com sucesso",
-                        color: "toast-success",
-                    });
-
-                    // You might want to display the response somehow
-                    console.log("AI Response:", response.data);
-                } catch (error) {
-                    console.error("Error sending question:", error);
-                    this.$emit("show-alert-toast", {
-                        msg: "Erro ao enviar pergunta",
-                        color: "toast-danger",
-                    });
-                }
             },
         },
         mounted() {

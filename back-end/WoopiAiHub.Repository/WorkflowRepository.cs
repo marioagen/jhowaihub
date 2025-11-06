@@ -148,6 +148,18 @@ namespace WoopiAiHub.Repository
                  .FirstOrDefaultAsync(w => w.Id == id);
         }
 
+
+        /// <summary>
+        /// Update output of step in a workflow.
+        /// </summary>
+        /// <param name="stepToolOutput"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateStepToolOutput(StepToolOutput stepToolOutput)
+        { 
+            _context.StepToolOutputs.Update(stepToolOutput);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>

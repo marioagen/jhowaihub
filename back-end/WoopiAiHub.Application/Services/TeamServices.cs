@@ -100,9 +100,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="emailUser"></param>
         /// <returns></returns>
-        public async Task<ICollection<TeamDto>> FindByUser(string emailUser)
+        public async Task<ICollection<TeamDto>> FindAll()
         {
-            return await _teamRepository.FindAllByUser(emailUser).ToListAsync();
+            return await _teamRepository.FindAll().ToListAsync();
         }
 
         /// <summary>

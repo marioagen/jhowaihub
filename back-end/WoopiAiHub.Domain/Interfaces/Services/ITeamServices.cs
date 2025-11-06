@@ -15,6 +15,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         bool DeleteByIds(List<int> ids);
         ICollection<Team> FindByIdsAndUser(ICollection<int> ids,
                                            string emailUser);
-        Task<ICollection<TeamDto>> FindByUser(string emailUser);
+        Task<ICollection<TeamDto>> FindAll();
     }
 }
