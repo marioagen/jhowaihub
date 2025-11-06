@@ -236,6 +236,7 @@ namespace WoopiAiHub.Repository
             return await _context.StepTools.Include(u => u.DependsOnStepTool)
                                            .Include(t => t.Tool)
                                             .ThenInclude(s => s!.ToolType)
+                                           .Include(st => st.Dependencies)
                                            .FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
         }
 
