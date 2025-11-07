@@ -85,10 +85,10 @@
             },
             copy() {
                 navigator.clipboard.writeText(this.output)
-            }
+            },
             clear() {
                 this.output = ''
-            }
+            },
         },
     };
 </script>
