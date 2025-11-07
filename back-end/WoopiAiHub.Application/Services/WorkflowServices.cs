@@ -532,6 +532,12 @@ namespace WoopiAiHub.Application.Services
             return await _workflowRepository.FindByStep(steps);
         }
 
+        /// <summary>
+        /// Update team-profiles with its workflows.
+        /// </summary>
+        /// <param name="list<int>"></param>
+        /// <param name="profile"></param>
+        /// <returns></returns>
         public async Task UpdateTeamProfileRelationshipToWorkflow(List<int> steps, Domain.Models.Profile profile)
         {
             var profileId = profile.Id;
@@ -555,13 +561,18 @@ namespace WoopiAiHub.Application.Services
                     Workflows = w.Workflows.Distinct().ToList()
                 })
                 .ToList();
-            
+
             if (filterEmptyWorkflows.Count() > 0)
             {
                 await RemoveTeamWorkflowRelationship(filterEmptyWorkflows);
             }
         }
 
+        /// <summary>
+        /// verify other profiles for a matching workflow.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private async Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows)
         {
             var team = _teamRepository.FindByIdReturnModel(teamId);
@@ -579,7 +590,7 @@ namespace WoopiAiHub.Application.Services
 
             foreach (var profile in profiles)
             {
-                if(profile.StepProfilePermissions == null) 
+                if (profile.StepProfilePermissions == null)
                     continue;
 
                 var stepIds = profile.StepProfilePermissions
@@ -608,6 +619,11 @@ namespace WoopiAiHub.Application.Services
             };
         }
 
+        /// <summary>
+        /// Remove relationship for workflows and teams
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private async Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto)
         {
             foreach (var teamsWorkflows in teamsWorkflowsDto)
