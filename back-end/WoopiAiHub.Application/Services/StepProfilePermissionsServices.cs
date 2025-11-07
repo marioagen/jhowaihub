@@ -25,7 +25,6 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="WorkflowPermissionDto"></param>
         /// <returns></returns>
-        ///
         public async Task<bool> Create(int ProfileId, List<WorkflowPermissionDto> PermissionsWorkflow)
         {
             if (PermissionsWorkflow == null || PermissionsWorkflow.Count == 0)
@@ -41,7 +40,6 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="ProfileId"></param>
         /// <returns></returns>
-        ///
         public async Task<bool> DeleteRow(List<StepProfilePermission> permissions)
         {
             foreach (var permission in permissions)
@@ -58,7 +56,6 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="ProfileId"></param>
         /// <returns></returns>
-        ///
         public async Task<bool> Delete(int ProfileId)
         {
             return await _stepProfilePermissionsRepository.DeleteAsync(ProfileId);
@@ -70,7 +67,6 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="ProfileIds"></param>
         /// <returns></returns>
-        ///
         public async Task DeleteByIds(List<int> ProfileIds)
         {
             foreach (int ProfileId in ProfileIds)
