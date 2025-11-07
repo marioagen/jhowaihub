@@ -117,17 +117,13 @@ namespace WoopiAiHub.Repository
         {
             var workflows = _context.Workflows.Where(a => a.Id == id && a.Enable.Equals(true));
 
-            if (workflows.Any())
+            if (await workflows.AnyAsync())
             {
-                workflows.ExecuteUpdate(b => b
-                .SetProperty(u => u.Enable, false));
+                await workflows.ExecuteUpdateAsync(b => b.SetProperty(u => u.Enable, false));
                 await _context.SaveChangesAsync();
                 return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         /// <summary>
