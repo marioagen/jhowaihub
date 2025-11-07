@@ -352,7 +352,6 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("varchar(95)")
                         .HasColumnName("Description");
 
                     b.Property<Guid>("IdUser")
@@ -361,7 +360,6 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(50)")
                         .HasColumnName("Name");
 
                     b.Property<string>("Text")
@@ -762,7 +760,7 @@ namespace WoopiAiHub.Repository.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConnectorApiKey")
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("ConnectorApiKey");
 
                     b.Property<string>("ConnectorUrl")
