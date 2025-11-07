@@ -3,6 +3,7 @@ using Moq.AutoMock;
 using System;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -324,8 +325,10 @@ namespace WoopiAiHub.UnitTests.Services
             var teamFixtrue = new TeamFixture();
             // Arrange
             var updateDto = WorkflowFixture.FindValidWorkflowUpdateDto();
+
             var workflow = WorkflowFixture.FindValidWorkflow();
             var step = WorkflowFixture.FindValidStep();
+
             var team = teamFixtrue.CreateValidTeam();
             updateDto.Steps.Clear();
 
@@ -468,5 +471,48 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Empty(result);
         }
 
+        [Fact(DisplayName = "Test FindAllPaged page greater than zero returns PaginatedList")]
+        [Trait("FindAllPaged", "Success")]
+        public void FindAllPaged_PageGreaterThanZero_ReturnsPaginatedList()
+        {
+            // Arrange
+            var workflowPagedDto = new WorkflowPagedDto { Page = 1 };
+            var workflowList = new List<WorkflowDto> { new WorkflowDto() };
+
+            _workflowRepositoryMock.Setup(repo => repo.FindAllWithFilter(workflowPagedDto)).Returns(workflowList.AsQueryable());
+
+            // Act
+            var result = _workflowServices.FindAllPaged(workflowPagedDto);
+
+            // Assert
+            Assert.NotNull(result);
+        }
+
+        [Fact(DisplayName = "Test FindAllPaged page less than or equal to zero throws ArgumentException")]
+        [Trait("FindAllPaged", "Fail")]
+        public void FindAllPaged_PageLessThanOrEqualToZero_ThrowsArgumentException()
+        {
+            // Arrange
+            var workflowPagedDto = new WorkflowPagedDto { Page = 0 };
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentException>(() => _workflowServices.FindAllPaged(workflowPagedDto));
+            Assert.Equal("Invalid Page", exception.Message);
+        }
+
+        [Fact(DisplayName = "Test FindAll returns all Workflows")]
+        [Trait("FindAll", "Success")]
+        public void FindAll_ReturnsAllWorkflows()
+        {
+            // Arrange
+            var workflowList = new List<WorkflowDto> { new WorkflowDto(), new WorkflowDto() };
+            _workflowRepositoryMock.Setup(repo => repo.FindAll()).Returns(workflowList);
+
+            // Act
+            var result = _workflowServices.FindAll();
+
+            // Assert
+            Assert.Equal(workflowList, result);
+        }
     }
 }

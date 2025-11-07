@@ -41,7 +41,13 @@
                             <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
                         </div>
                     </div>
-                    <div v-if="isN8NTool" class="mb-3">
+                    <DependencySelector 
+                        :previousStepTools="previousStepTools"
+                        v-model="selectedDependencies"
+                        ref="dependencyTools"
+                    />
+                    <hr>
+                    <div v-if="isN8NTool" class="mb-3">                        
                         <select
                             class="form-select form-select-sm w-auto mb-3"
                             v-model="connector"
@@ -78,13 +84,13 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary" @click="updateNodeWithForm">{{ $t("labelSave") }}</button>
                         </div>
                     </div>
-                    <div v-else-if="isPromptTool">
+                    <div v-else-if="isPromptTool">                                                                 
                         <h6>Prompts</h6>
-                        <hr>
                         <div class="background-div">
                             <select class="form-select" v-model="idSelected">
                                 <option v-for="item in promptlist" :key="item.id" :value="item.id">
@@ -92,6 +98,7 @@
                                 </option>
                             </select>
                         </div>
+
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary"
                                     @click="updateNode">
@@ -100,12 +107,12 @@
                         </div>
                     </div>
                     <div v-else class="mb-3">
-                        <h6>Inputs</h6>
-                        <hr>
+                        <h6>{{ $t("flow.sidebar.inputs") }}</h6>
                         <div class="background-div" v-for="(param, index) in parameters" :key="index">
                             <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
                                       v-model="parameters[index].value"></textarea>
-                        </div>
+                        </div>                    
+
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary"
                                     @click="updateNode">
@@ -121,6 +128,7 @@
 
 <script>
     import VueFlowComponent from '@/components/flow/VueFlowComponent.vue';
+    import DependencySelector from '@/components/flow/DependencySelector.vue';
     import AutomationServices from '@/services/automation/AutomationServices';
     import PromptService from "@/services/prompts/PromptsService";
     import ToolType from '@/constants/ToolType';
@@ -169,10 +177,14 @@
                 idSelected: 0,
                 promptlist: [],
                 toolType: "",
+                previousStepTools: [],
+                selectedDependencies: [],
+                nodes: []
             };
         },
         components: {
             VueFlowComponent,
+            DependencySelector,
         },
         methods: {
             redirectToIndex() {
@@ -248,19 +260,24 @@
                     this.fillValues(this.formFields, data)
                 }
             },
-            openNodeConfig(node) {
-                this.nodeFlow = node;
-                this.parameters = node.data.parameters;
-                this.toolType = node.data.toolType;
+            openNodeConfig(nodes, selectedNode) {
+                this.nodes = nodes;
+                this.nodeFlow = selectedNode;
+                this.parameters = selectedNode.data.parameters;
+                this.toolType = selectedNode.data.toolType;
+
+                this.loadPreviousStepTools(selectedNode);
+
+                this.selectedDependencies = selectedNode.data.dependencies;
 
                 if (this.isTargetTool(ToolType.N8N)){
                     this.loadingWebhooks = true
                     this.resetFormConnector();              
-                    AutomationServices.getWorkflows(node.data.toolId)
+                    AutomationServices.getWorkflows(selectedNode.data.toolId)
                         .then((result) => {
                             if (result.error === undefined) {                                
                                 this.connectors = result;
-                                this.parameters = node.data.parameters;
+                                this.parameters = selectedNode.data.parameters;
                                 if (this.parameters.length===0){
                                     this.parameters.push({stepToolId: 0, value: null, requiredFile: false, webhookId: null});
                                 }
@@ -285,16 +302,17 @@
                 else if (this.isTargetTool(ToolType.Prompt)){
                     this.findAllPrompts();
                     if (this.parameters.length === 0) {
+                        this.idSelected = 0;
                         this.parameters.push({ stepToolId: 0, value: null, requiredFile: false, webhookId: null });
                     }
                     else {
                         this.idSelected = parseInt(this.parameters[0]?.value);
-                    }
+                    }                    
                 }
                 else if (this.parameters.length === 0) {
                     this.parameters.push({ stepToolId: 0, value: null, requiredFile: false, webhookId: null });
                 }
-
+                this.$refs.dependencyTools.reloadData();
                 this.sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
                 this.sidebar.show();            
             },
@@ -310,7 +328,12 @@
                 if (this.idSelected) {
                     this.parameters[0].value = this.idSelected.toString();
                 }
-                this.$refs.VueflowComponent.updateNodeInput(this.nodeFlow.id, this.parameters);
+
+                this.$refs.VueflowComponent.updateNodeInput(
+                    this.nodeFlow.id, 
+                    this.parameters,
+                    this.selectedDependencies
+                );
                 this.showMessage();
             },
             showMessage() {
@@ -338,7 +361,12 @@
                 }
                 this.parameters[0].value = JSON.stringify(this.formData);
                 this.parameters[0].webhookId = this.connector;
-                this.$refs.VueflowComponent.updateNodeInput(this.nodeFlow.id, this.parameters);
+
+                this.$refs.VueflowComponent.updateNodeInput(
+                    this.nodeFlow.id, 
+                    this.parameters,
+                    this.selectedDependencies
+                );
                 this.closeSidebar();
                 this.showMessage();
             },
@@ -398,6 +426,31 @@
                     .then((response) => {
                         this.promptlist = response;
                     });
+            },
+            loadPreviousStepTools(node) {
+                const tempWorkflowList = this.$store.state.tempWorkflow.list || [];
+                
+                const relevantSteps = tempWorkflowList.filter(step => 
+                    step.order <= this.stepOrder
+                );
+                
+                if (!relevantSteps || relevantSteps.length === 0) {
+                    this.previousStepTools = [];
+                    return;
+                }
+                
+                const maxOrder = Math.max(...relevantSteps.map(step => step.order));
+                const nodesToolIds = this.nodes.map(n => n.data?.toolId).filter(Boolean);
+                
+                this.previousStepTools = relevantSteps.map(step => ({
+                    id: step.id,
+                    name: step?.name || 'Unnamed Tool',
+                    order: step.order,
+                    stepTools: step.stepTools.filter(stepTool => 
+                        step.order < maxOrder || 
+                        (step.order === maxOrder && stepTool.order < node.data.order && nodesToolIds.includes(stepTool.tool?.id))
+                    )
+                }));
             },
             resetFormConnector(){
                 this.connectors = [];

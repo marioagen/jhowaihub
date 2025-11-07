@@ -1,17 +1,17 @@
 ﻿<template>
     <div class="col-md-6">
         <div class="mb-2" style="margin-top: 12px !important">
-            <div v-if="isPdf">
+            <div v-if="viewMode === $options.VIEW_MODE_PDF">
                 <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
                 <a @click="openTab" v-if="srcPdf">
                     <i class="fas fa-expand text-primary" style="cursor: pointer" :title="$t('labelExpand')"></i>
                 </a>
                 <img
                     src="../../../assets/img/go-to-text.png"
-                    @click="getDocumentNormalized"
+                    @click="toggleToText"
                     style="cursor: pointer; float: right"
-                    :title="$t('labelDocumentTranscript')"
-                    v-if="srcPdf"
+                    :title="$t('labelOcrText')"
+                    v-if="srcPdf && hasOcrText"
                 />
                 <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
                     <i class="fas fa-sync-alt"></i>
@@ -45,15 +45,15 @@
                     </span>
                 </div>
             </div>
-            <div v-else>
+            <div v-else-if="viewMode === $options.VIEW_MODE_TEXT">
                 <div>
                     <strong class="form-label mb-3">
-                        {{ upperFormat($t("labelStandardizedFullText")) }}&nbsp;&nbsp;
+                        {{ upperFormat($t("labelOcrText")) }}&nbsp;&nbsp;
                     </strong>
-                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingDocumentNormalized"></i>
+                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingText"></i>
                     <img
                         src="../../../assets/img/go-to-pdf.png"
-                        @click="isPdf = true"
+                        @click="viewMode = $options.VIEW_MODE_PDF"
                         style="cursor: pointer; float: right"
                         :title="$t('labelPdfBack')"
                     />
@@ -61,7 +61,7 @@
                 <textarea
                     type="text"
                     class="form-control custom-textarea textarea-norm-full"
-                    v-model="contentDocumentNormalized"
+                    v-model="textContent"
                     readonly
                 ></textarea>
             </div>
@@ -74,18 +74,25 @@
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import ModalReprocess from "@/components/pages/analyzer/modal-reprocess";
     import ModalAlert from "@/components/common/modal-alert";
+    import LogService from '@/services/log/logService';
+
+    const VIEW_MODE_PDF = 'pdf';
+    const VIEW_MODE_TEXT = 'text';
 
     export default {
         name: "DocView",
+        VIEW_MODE_PDF,
+        VIEW_MODE_TEXT,
         data() {
             return {
                 idAnalyzer: this.$route.params.id,
-                isPdf: true,
+                viewMode: VIEW_MODE_PDF,
                 srcPdf: null,
                 errorPdf: false,
                 loading: true,
-                loadingDocumentNormalized: false,
-                contentDocumentNormalized: "",
+                loadingText: false,
+                textContent: "",
+                hasOcrText: false,
                 controllAttempt: 0,
                 showModalForm: false,
                 showLoading: false,
@@ -131,24 +138,40 @@
                 this.dataView.Embeddings_model_name = model;
                 this.$emit("showNormalize", this.dataView, this.isReprocessing);
             },
-            getDocumentNormalized() {
-                this.loadingDocumentNormalized = false;
-                this.isPdf = false;
-                if (this.contentDocumentNormalized == "") {
-                    this.loadingDocumentNormalized = true;
-                    DocumentsServices.getNormalizedDocument(this.idAnalyzer)
+            toggleToText() {
+                this.viewMode = VIEW_MODE_TEXT;
+                if (this.textContent == "") {
+                    this.loadingText = true;
+                    DocumentsServices.getOcrText(this.idAnalyzer)
                         .then((response) => {
                             if (response.error !== undefined) {
                                 this.modalAlertShow = true;
-                                this.loadingDocumentNormalized = false;
+                                this.loadingText = false;
+                                return;
                             }
-                            this.contentDocumentNormalized = response.content;
-                            this.loadingDocumentNormalized = false;
+                            if (response.hasOcr) {
+                                this.textContent = response.content;
+                            } else {
+                                this.textContent = "OCR não disponível para este documento.";
+                            }
+                            this.loadingText = false;
                         })
-                        .finally(() => {
-                            console.log("Finished request.");
+                        .catch((error) => {
+                            this.textContent = "Erro ao carregar texto do OCR.";
+                            this.loadingText = false;
                         });
                 }
+            },
+            checkOcrAvailability() {
+                DocumentsServices.getOcrText(this.idAnalyzer)
+                    .then((response) => {
+                        if (response && response.hasOcr) {
+                            this.hasOcrText = true;
+                        }
+                    })
+                    .catch((error) => {
+                        LogService.showMessage("Erro ao buscar texto do OCR.");
+                    });
             },
             openTab() {
                 window.open(this.srcPdf, "_blank");
@@ -195,6 +218,7 @@
         },
         created() {
             this.getDocument();
+            this.checkOcrAvailability();
         },
     };
 </script>

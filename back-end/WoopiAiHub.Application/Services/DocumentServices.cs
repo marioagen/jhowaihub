@@ -17,7 +17,6 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
-using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -48,11 +47,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IMemoryCache _cache;
         private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly ITenantCacheServices _tenantCacheServices;
-        private readonly ITeamServices _teamServices;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly MessageQueues _messageQueues;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMessagePublisher<ProcessOcrDto> _publisher;
         private readonly IHubNotifier _hubNotifier;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
@@ -77,7 +74,6 @@ namespace WoopiAiHub.Application.Services
                                 ITenantCacheServices tenantCacheServices,
                                 ITeamServices teamServices,
                                 IKeyGeneratorApi keyGeneratorApi,
-                                IMessagePublisher<ProcessOcrDto> publisher,
                                 IOptions<MessageQueues> messageQueues,
                                 IHubNotifier documentNotifier,
                                 IUnitOfWork unitOfWork,
@@ -102,10 +98,8 @@ namespace WoopiAiHub.Application.Services
             _cache = cache;
             _questionnaireRepository = questionnaireRepository;
             _tenantCacheServices = tenantCacheServices;
-            _teamServices = teamServices;
             _keyGeneratorApi = keyGeneratorApi;
             _messageQueues = messageQueues.Value;
-            _publisher = publisher;
             _hubNotifier = documentNotifier;
             _automationServices = automationServices;
             _workflowRepository = workflowRepository;
@@ -387,7 +381,7 @@ namespace WoopiAiHub.Application.Services
                 ResponseQueue = _messageQueues.EmbeddingQueueAiHubResponse,
                 ReferenceFile = dto.ReferenceFile,
                 DocumentEmbeddings = documentEmbeddings,
-                Data = new MetaDataAutomationDto { CardId = dto.Data.CardId, StepToolId = dependentStepTool!.Id },
+                Data = new MetaDataAutomationDto { CardId = dto.Data.CardId, StepToolId = dependentStepTool?.Id ?? 0 },
             });
 
             await SaveStepToolOutputAsync(execution, embeddingsJson);
@@ -433,7 +427,6 @@ namespace WoopiAiHub.Application.Services
 
             await _stepToolOutputRepository.CreateAsync(output);
         }
-
 
         /// <summary>
         /// Updates document status
@@ -969,6 +962,77 @@ namespace WoopiAiHub.Application.Services
                 ChunkSize = tenant.ChunkSize,
                 Email = processOcrResultDto.Email
             };
+        }
+
+        /// <summary>
+        /// Retrieves the concatenated OCR text for a document by checking if an OCR StepTool execution exists with status "Ready"
+        /// </summary>
+        /// <param name="documentId">The document ID</param>
+        /// <returns>OcrTextResponseDto containing the OCR text if available</returns>
+        public async Task<OcrTextResponseDto> FindOcrTextByDocumentId(int documentId)
+        {
+            var response = new OcrTextResponseDto { HasOcr = false };
+
+            var document = _documentRepository.FindById(documentId);
+            if (document == null)
+                return response;
+
+            response.ReferenceFile = document.ReferenceFile;
+
+            var card = await _cardRepository.FindByDocumentIdAsync(documentId);
+            if (card == null)
+                return response;
+
+            var ocrExecution = FindReadyOcrExecution(card);
+            if (ocrExecution == null)
+                return response;
+
+            var outputJson = await _stepToolOutputRepository.FindByStepToolId(ocrExecution.StepToolId, card.Id);
+            if (string.IsNullOrEmpty(outputJson))
+                return response;
+
+            var ocrText = ExtractOcrTextFromOutput(outputJson);
+            if (!string.IsNullOrEmpty(ocrText))
+            {
+                response.Content = ocrText;
+                response.HasOcr = true;
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Finds the OCR execution with Ready status for a card
+        /// </summary>
+        /// <param name="card">The card to search in</param>
+        /// <returns>OCR execution or null if not found</returns>
+        private StepToolExecution? FindReadyOcrExecution(Card card)
+        {
+            return card.Executions
+                .FirstOrDefault(e => e.Status == StatusExecution.Ready &&
+                                    e.StepTool != null &&
+                                    e.StepTool.Tool != null &&
+                                    e.StepTool.Tool.ToolType != null &&
+                                    e.StepTool.Tool.ToolType.Name == HandlersTypes.Ocr);
+        }
+
+        /// <summary>
+        /// Extracts and concatenates OCR text from serialized output
+        /// </summary>
+        /// <param name="outputJson">Serialized StepToolOutput JSON</param>
+        /// <param name="documentId">Document ID for logging</param>
+        /// <returns>Concatenated OCR text or empty string if extraction fails</returns>
+        private string ExtractOcrTextFromOutput(string outputJson)
+        {
+            var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
+
+            if (embeddingsData?.DocumentEmbeddings == null || !embeddingsData.DocumentEmbeddings.Any())
+                return string.Empty;
+
+            return string.Join(Environment.NewLine + Environment.NewLine,
+                embeddingsData.DocumentEmbeddings
+                    .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
+                    .Select(e => e.Text));
         }
     }
 }

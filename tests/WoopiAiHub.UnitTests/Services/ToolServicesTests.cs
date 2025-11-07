@@ -26,7 +26,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IToolTypeRepository> _toolTypeRepositoryMock;
         private readonly Mock<IApiClientFactory> _apiClientFactoryMock;
         private readonly Mock<In8NConnector> _in8nConnectorMock;
-        private readonly Mock<IKeyVaultServices> _keyVaultServicesMock;
+        private readonly Mock<IEncryptionService> _encryptionServiceMock;
 
         public ToolServicesTests()
         {
@@ -36,7 +36,12 @@ namespace WoopiAiHub.UnitTests.Services
             _in8nConnectorMock = _mocker.GetMock<In8NConnector>();
             _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             _toolTypeRepositoryMock = _mocker.GetMock<IToolTypeRepository>();
-            _keyVaultServicesMock = _mocker.GetMock<IKeyVaultServices>();
+            _encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
+
+            _encryptionServiceMock.Setup(e => e.Encrypt(It.IsAny<string>()))
+                                  .Returns((string input) => $"encrypted_{input}");
+            _encryptionServiceMock.Setup(e => e.Decrypt(It.IsAny<string>()))
+                                  .Returns((string input) => input.Replace("encrypted_", ""));
 
             _toolServices = _mocker.CreateInstance<ToolServices>();
         }
@@ -119,8 +124,6 @@ namespace WoopiAiHub.UnitTests.Services
                                    .ReturnsAsync(toolType);
             _toolRepositoryMock.Setup(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()))
                 .ReturnsAsync(false);
-            _keyVaultServicesMock.Setup(k => k.SetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
-                                 .Returns(Task.CompletedTask);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.CreateAsync(toolCreateDto));
@@ -132,7 +135,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "CreateAsync should throw AppException when connector is required")]
         [Trait("CreateAsync", "Fail")]
-        public async Task CreateAsync_ShouldThrowAppException_WhenCoonectorIsRequired()
+        public async Task CreateAsync_ShouldThrowAppException_WhenConnectorIsRequired()
         {
             // Arrange
             var toolCreateDto = ToolFixture.FindValidToolCreateDto();
@@ -146,7 +149,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.CreateAsync(toolCreateDto));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Coonector Url and Connector Api Key are required", exception.Message);
+            Assert.Equal("Connector Url and Connector Api Key are required", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.CreateUniqueAsync(It.IsAny<Tool>()), Times.Never);
             _toolTypeRepositoryMock.Verify(tt => tt.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
         }
@@ -228,7 +231,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.UpdateAsync(toolUpdateDto));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Coonector Url is required", exception.Message);
+            Assert.Equal("Connector Url is required", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
             _toolRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Tool>()), Times.Never);
         }
@@ -253,7 +256,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.UpdateAsync(toolUpdateDto));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Coonector Api Key is required", exception.Message);
+            Assert.Equal("Connector Api Key is required", exception.Message);
             _toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
             _toolRepositoryMock.Verify(repo => repo.UpdateAsync(It.IsAny<Tool>()), Times.Never);
         }
@@ -273,8 +276,6 @@ namespace WoopiAiHub.UnitTests.Services
                                .ReturnsAsync(tool);
             _toolRepositoryMock.Setup(repo => repo.UpdateAsync(tool))
                                .ReturnsAsync(false);
-            _keyVaultServicesMock.Setup(k => k.SetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
-                                 .Returns(Task.CompletedTask);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.UpdateAsync(toolUpdateDto));

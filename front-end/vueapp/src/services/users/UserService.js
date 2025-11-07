@@ -31,7 +31,7 @@ export default {
                 return false;
             });
     },
-    getUsersByTeamId(teamId){
+    getUsersByTeamId(teamId) {
         return api
             .get(`/User/Team/${teamId}`)
             .then(({ data }) => {
@@ -39,6 +39,17 @@ export default {
             })
             .catch(function (e) {
                 logService.showMessage(e);
+            });
+    },
+    getUsersByTeamIds(teamIds) {
+        return api
+            .post('/User/Team/Query', { teamIds })
+            .then(({ data }) => {
+                return data;
+            })
+            .catch(function (e) {
+                logService.showMessage(e);
+                throw e;
             });
     },
     getUserByEmail(email) {

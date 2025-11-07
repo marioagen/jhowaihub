@@ -219,8 +219,32 @@ namespace WoopiAiHub.Repository
                                  .Include(u => u.Teams)
                                  .AsNoTracking()
                                  .Where(u => u.IsActive && u.Teams.Any(a => a.Id.Equals(teamId)))
-                                 .Select(s=> new UserDto { Id =  s.Id, Name = s.Name, Email = s.Email })
+                                 .Select(s => new UserDto { Id = s.Id, Name = s.Name, Email = s.Email })
                                  .ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves a collection of users who are associated with any of the specified team IDs.
+        /// </summary>
+        /// <remarks>This method performs a database query to find users associated with the specified
+        /// team IDs. The results are distinct and include only the user's ID, name, and email.</remarks>
+        /// <param name="teamIds">An array of team IDs to filter users by. Only users belonging to at least one of the specified teams will be
+        /// included.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of <see
+        /// cref="UserDto"/> objects, each representing a distinct user associated with the specified team IDs. If no
+        /// users are found, the collection will be empty.</returns>
+        public async Task<ICollection<UserDto>> FindByTeamIdsAsync(int[] teamIds)
+        {
+            return await _context.Users
+                .Where(u => u.Teams.Any(t => teamIds.Contains(t.Id)))
+                .Select(u => new UserDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                })
+                .Distinct()
+                .ToListAsync();
         }
     }
 }

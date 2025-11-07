@@ -97,5 +97,5 @@ export default {
                     error: error,
                 }
             });
-    },    
+    },
 }

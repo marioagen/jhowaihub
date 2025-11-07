@@ -45,6 +45,7 @@
     labelDownloadCsv: "Baixar CSV",
     labelDownloadSuccessfully: "Download com sucesso",
     labelDocumentTranscript: "Transcrição do documento",
+    labelOcrText: "Texto OCR",
     labelDuplicatedQuestionnaire: "Nome do questionário duplicado",
     labelEdit: "Editar",
     labelEdited: "Editado",
@@ -538,7 +539,14 @@
         },
         sidebarTitle: "Configurar I/O:",
         sidebar:{
-            filter: "Selecione um webhook"
+            filter: "Selecione um webhook",
+            inputs: "Entradas",
+            dependencies: "Dependências",
+            dependenciesHint: "Selecione as ferramentas anteriores cujas saídas você deseja usar como entrada",
+            addDependency: "Adicionar Dependência",
+            noDependencies: "Nenhuma ferramenta disponível",
+            allDependenciesSelected: "Todas as dependências já foram selecionadas",
+            deleteDependency: "Remover Dependência",
         },
         formFlow: {
             progressFlowSuccess: "Fluxo inserido com sucesso",
