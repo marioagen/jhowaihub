@@ -113,7 +113,7 @@ namespace WoopiAiHub.Application.Services
                 // First pass: Create/update all StepTools and parameters
                 foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
                 {
-                    Step? existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id);
+                    Step? existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id && s.Order == stepDto.Order);
                     StepTool? previousStepToolInStep = null;
 
                     if (existingStep != null)
