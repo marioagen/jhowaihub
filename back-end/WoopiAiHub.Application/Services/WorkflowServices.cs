@@ -299,7 +299,6 @@ namespace WoopiAiHub.Application.Services
                 var stepIds = workflow.Steps.Select(s => s.Id).ToList();
                 await _validateStep.ValidateDeleteStep(stepIds);
 
-                _stepRepository.DeleteByIds(stepIds);
                 await _workflowRepository.DeleteById(id);
 
                 _unitOfWork.Commit();
