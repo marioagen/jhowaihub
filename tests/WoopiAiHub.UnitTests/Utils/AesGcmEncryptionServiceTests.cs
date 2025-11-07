@@ -21,8 +21,8 @@ namespace WoopiAiHub.UnitTests.Utils
             var decrypted = service.Decrypt(encrypted);
 
             // Assert
-            Assert.NotEqual(plainText, encrypted); // Encrypted should be different
-            Assert.Equal(plainText, decrypted); // Decrypted should match original
+            Assert.NotEqual(plainText, encrypted);
+            Assert.Equal(plainText, decrypted);
         }
 
         [Fact(DisplayName = "Encrypt should produce different outputs for same input")]
@@ -39,7 +39,7 @@ namespace WoopiAiHub.UnitTests.Utils
             var encrypted2 = service.Encrypt(plainText);
 
             // Assert
-            Assert.NotEqual(encrypted1, encrypted2); // Should be different due to random nonce
+            Assert.NotEqual(encrypted1, encrypted2);
         }
 
         [Fact(DisplayName = "Encrypt should throw exception for empty text")]
@@ -92,9 +92,7 @@ namespace WoopiAiHub.UnitTests.Utils
             var encrypted2 = service2.Encrypt(plainText);
 
             // Assert
-            Assert.NotEqual(encrypted1, encrypted2);
-            
-            // Verify decryption with wrong key fails with AuthenticationTagMismatchException
+            Assert.NotEqual(encrypted1, encrypted2);           
             Assert.Throws<System.Security.Cryptography.AuthenticationTagMismatchException>(() => service2.Decrypt(encrypted1));
         }
     }

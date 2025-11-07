@@ -90,7 +90,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 true,
                 string.Empty,
-                string.Empty
+                _faker.Random.Guid().ToString()
             );
         }
 
