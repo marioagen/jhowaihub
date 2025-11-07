@@ -399,14 +399,17 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             var apiClientFactoryMock = _mocker.GetMock<IApiClientFactory>();
             apiClientFactoryMock.Setup(factory => factory.Create(It.IsAny<string>()))
-                .Returns(apiClientMock.Object);
+                                .Returns(apiClientMock.Object);
 
-            var keyVaultServices = _mocker.GetMock<IKeyVaultServices>();
-            keyVaultServices.Setup(k => k.GetSecretAsync(It.IsAny<string>()))
-                .ReturnsAsync(keyVaultValue);
+            var encryptionService = _mocker.GetMock<IEncryptionService>();
+            encryptionService.Setup(k => k.Decrypt(It.IsAny<string>()))
+                             .Returns(keyVaultValue);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _service.FindN8nWorkflowsByToolId(1));
+            toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
+            apiClientMock.Verify(x => x.FindWorkflows(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            encryptionService.Verify(k => k.Decrypt(It.IsAny<string>()), Times.Once);
             Assert.Equal(ErrorCode.RefitApiError, exception.ErrorCode);
         }
 
@@ -435,9 +438,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             apiClientFactoryMock.Setup(factory => factory.Create(It.IsAny<string>()))
                 .Returns(apiClientMock.Object);
 
-            var keyVaultServices = _mocker.GetMock<IKeyVaultServices>();
-            keyVaultServices.Setup(k => k.GetSecretAsync(It.IsAny<string>()))
-                .ReturnsAsync(keyVaultValue);
+            var encryptionService = _mocker.GetMock<IEncryptionService>();
+            encryptionService.Setup(k => k.Decrypt(It.IsAny<string>()))
+                             .Returns(keyVaultValue);
 
             // Act
             var result = await _service.FindN8nWorkflowsByToolId(1);

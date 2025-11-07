@@ -20,7 +20,7 @@ namespace WoopiAiHub.Domain.Models
         public bool IsEditableInput { get; private set; }
         [Column("ConnectorUrl", TypeName = "varchar(255)")]
         public string? ConnectorUrl { get; private set; }
-        [Column("ConnectorApiKey", TypeName = "varchar(255)")]
+        [Column("ConnectorApiKey", TypeName = "varchar(max)")]
         public string? ConnectorApiKey { get; private set; }
 
         public virtual ToolType? ToolType { get; set; }
