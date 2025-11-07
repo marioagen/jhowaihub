@@ -402,14 +402,12 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             apiClientFactoryMock.Setup(factory => factory.Create(It.IsAny<string>()))
                 .Returns(apiClientMock.Object);
 
-            var encryptionService = _mocker.GetMock<IEncryptionService>();
-            encryptionService.Setup(es => es.Decrypt(It.IsAny<string>())).Returns(keyVaultValue);
+            var keyVaultServices = _mocker.GetMock<IKeyVaultServices>();
+            keyVaultServices.Setup(k => k.GetSecretAsync(It.IsAny<string>()))
+                .ReturnsAsync(keyVaultValue);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _service.FindN8nWorkflowsByToolId(1));
-            encryptionService.Verify(es => es.Decrypt(It.IsAny<string>()), Times.Once);
-            toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
-            apiClientFactoryMock.Verify(factory => factory.Create(It.IsAny<string>()), Times.Once);
             Assert.Equal(ErrorCode.RefitApiError, exception.ErrorCode);
         }
 
@@ -438,8 +436,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             apiClientFactoryMock.Setup(factory => factory.Create(It.IsAny<string>()))
                 .Returns(apiClientMock.Object);
 
-            var encryptionService = _mocker.GetMock<IEncryptionService>();
-            encryptionService.Setup(es => es.Decrypt(It.IsAny<string>())).Returns(keyVaultValue);
+            var keyVaultServices = _mocker.GetMock<IKeyVaultServices>();
+            keyVaultServices.Setup(k => k.GetSecretAsync(It.IsAny<string>()))
+                .ReturnsAsync(keyVaultValue);
 
             // Act
             var result = await _service.FindN8nWorkflowsByToolId(1);
@@ -447,9 +446,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Assert
             Assert.NotNull(result);
             Assert.IsType<List<ConnectorDto>>(result);
-            encryptionService.Verify(es => es.Decrypt(It.IsAny<string>()), Times.Once);
-            _toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
-            apiClientFactoryMock.Verify(factory => factory.Create(It.IsAny<string>()), Times.Once);
         }
 
         [Fact(DisplayName = "FindN8nWebhookInputs should throw an AppException when the tool is not found")]

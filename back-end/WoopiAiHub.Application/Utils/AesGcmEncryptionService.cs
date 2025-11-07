@@ -12,8 +12,8 @@ namespace WoopiAiHub.Application.Utils
     public class AesGcmEncryptionService : IEncryptionService
     {
         private readonly byte[] _key;
-        private const int NonceSize = 12;
-        private const int TagSize = 16;
+        private const int NonceSize = 12; // 96 bits recommended for GCM
+        private const int TagSize = 16; // 128 bits authentication tag
 
         public AesGcmEncryptionService(IOptions<EncryptionSettings> options)
         {
@@ -23,6 +23,8 @@ namespace WoopiAiHub.Application.Utils
             {
                 throw new ArgumentException("Encryption key cannot be null or empty.", nameof(options));
             }
+
+            // Derive a 256-bit (32 byte) key from the provided key string
             _key = DeriveKey(keyString);
         }
 
@@ -43,11 +45,13 @@ namespace WoopiAiHub.Application.Utils
             var ciphertext = new byte[plainBytes.Length];
             var tag = new byte[TagSize];
 
+            // Generate random nonce
             RandomNumberGenerator.Fill(nonce);
 
             using var aesGcm = new AesGcm(_key, TagSize);
             aesGcm.Encrypt(nonce, plainBytes, ciphertext, tag);
 
+            // Combine nonce + ciphertext + tag
             var result = new byte[NonceSize + ciphertext.Length + TagSize];
             Buffer.BlockCopy(nonce, 0, result, 0, NonceSize);
             Buffer.BlockCopy(ciphertext, 0, result, NonceSize, ciphertext.Length);
@@ -75,6 +79,7 @@ namespace WoopiAiHub.Application.Utils
                 throw new ArgumentException("Invalid encrypted data format.", nameof(encryptedText));
             }
 
+            // Extract nonce, ciphertext, and tag
             var nonce = new byte[NonceSize];
             var ciphertext = new byte[encryptedBytes.Length - NonceSize - TagSize];
             var tag = new byte[TagSize];

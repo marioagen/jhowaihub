@@ -352,7 +352,6 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(95)
                         .HasColumnType("varchar(95)")
                         .HasColumnName("Description");
 
@@ -362,7 +361,6 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("Name");
 
@@ -375,7 +373,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("IdUser");
 
-                    b.ToTable("Prompts", (string)null);
+                    b.ToTable("Prompts");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Question", b =>
@@ -739,12 +737,17 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
+                    b.Property<int?>("DocumentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("varchar(100)")
                         .HasColumnName("Name");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
 
                     b.ToTable("Teams", (string)null);
                 });
@@ -759,7 +762,7 @@ namespace WoopiAiHub.Repository.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConnectorApiKey")
-                        .HasColumnType("varchar(max)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("ConnectorApiKey");
 
                     b.Property<string>("ConnectorUrl")
@@ -1287,6 +1290,13 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("StepTool");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Document", null)
+                        .WithMany("Teams")
+                        .HasForeignKey("DocumentId");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.ToolData", "InputData")
@@ -1358,6 +1368,8 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("DocumentHistories");
 
                     b.Navigation("DocumentNormalized");
+
+                    b.Navigation("Teams");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Permission", b =>
