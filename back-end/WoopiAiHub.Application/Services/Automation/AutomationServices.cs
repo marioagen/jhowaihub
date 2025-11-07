@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Hubs;
@@ -29,9 +27,9 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly ICardRepository _cardRepository;
         private readonly IToolRepository _toolRepository;
         private readonly IApiClientFactory _apiClientFactory;
-        private readonly IKeyVaultServices _keyVaultServices;
         private readonly IStepRepository _stepRepository;
         private readonly IHubNotifier _hubNotifier;
+        private readonly IEncryptionService _encryptionService;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -43,9 +41,9 @@ namespace WoopiAiHub.Application.Services.Automation
                                   ICardRepository cardRepository,
                                   IToolRepository toolRepository,
                                   IApiClientFactory apiClientFactory,
-                                  IKeyVaultServices keyVaultServices,
                                   IStepRepository stepRepository,
-                                  IHubNotifier hubNotifier)
+                                  IHubNotifier hubNotifier,
+                                  IEncryptionService encryptionService)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -57,9 +55,9 @@ namespace WoopiAiHub.Application.Services.Automation
             _cardRepository = cardRepository;
             _toolRepository = toolRepository;
             _apiClientFactory = apiClientFactory;
-            _keyVaultServices = keyVaultServices;
             _stepRepository = stepRepository;
             _hubNotifier = hubNotifier;
+            _encryptionService = encryptionService;
         }
 
         /// <summary>
@@ -320,7 +318,7 @@ namespace WoopiAiHub.Application.Services.Automation
             if (!tool.ToolType!.IsN8nTool())
                 throw new AppException(ErrorCode.InvalidValue, "Tool isn't a n8n connector", null);
 
-            var apiKey = await _keyVaultServices.GetSecretAsync(tool.ConnectorApiKey!);
+            var apiKey = _encryptionService.Decrypt(tool.ConnectorApiKey!);
             if (string.IsNullOrEmpty(apiKey))
             {
                 throw new AppException(ErrorCode.NotFound, "Tool connector api-key not found", null);

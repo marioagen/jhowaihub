@@ -26,7 +26,6 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IToolTypeRepository> _toolTypeRepositoryMock;
         private readonly Mock<IApiClientFactory> _apiClientFactoryMock;
         private readonly Mock<In8NConnector> _in8nConnectorMock;
-        private readonly Mock<IKeyVaultServices> _keyVaultServicesMock;
         private readonly Mock<IEncryptionService> _encryptionServiceMock;
 
         public ToolServicesTests()
@@ -37,10 +36,8 @@ namespace WoopiAiHub.UnitTests.Services
             _in8nConnectorMock = _mocker.GetMock<In8NConnector>();
             _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             _toolTypeRepositoryMock = _mocker.GetMock<IToolTypeRepository>();
-            _keyVaultServicesMock = _mocker.GetMock<IKeyVaultServices>();
             _encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
 
-            // Setup encryption service to return a "fake encrypted" value
             _encryptionServiceMock.Setup(e => e.Encrypt(It.IsAny<string>()))
                                   .Returns((string input) => $"encrypted_{input}");
             _encryptionServiceMock.Setup(e => e.Decrypt(It.IsAny<string>()))
