@@ -352,6 +352,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasColumnType("varchar(95)")
                         .HasColumnName("Description");
 
                     b.Property<Guid>("IdUser")
@@ -360,6 +361,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("Name");
 
                     b.Property<string>("Text")
