@@ -111,8 +111,8 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        height: 100%;
-        overflow: auto;
+        height: 600px; /* usa a altura do pai */
+        overflow-y: auto; /* scroll vertical */
     }
 
     @media (max-width: 768px) {
