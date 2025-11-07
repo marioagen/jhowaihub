@@ -626,7 +626,7 @@
     },
     labelPreviousStep: "Etapa anterior",
     labelNextStep: "Próxima etapa",
-    labelNoDataInDocument: "Não há dados nesse documento",
+    labelNoDataInDocument: "Não há dados disponíveis",
     labelAskTheDoc: "Pergunte ao Doc",
     labelConversationWithDocument: "Conversa com o Documento",
     labelAskAI: "PERGUNTE À IA",
@@ -634,6 +634,10 @@
     labelSendQuestion: "Enviar Pergunta",
     labelSave: "Salvar",
     labelExtractedData: "Dados Extraídos",
+    labelErrorLoadDocumentData: "Erro ao carregar dados do documento",
+    labelSuccessEditOutput: "Output editado com sucesso",
+    labelFailedEditOutput: "O output não pode ser editado",
+    labelClear: "Limpar"
 };
 
 export default portuguese;

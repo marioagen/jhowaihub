@@ -19,6 +19,7 @@
     import ExtractedFields from "@/components/pages/analyzer/extracted-fields";
     import DocChat from "@/components/pages/analyzer/doc-chat";
     import api from "@/services/api";
+    import WorkflowService from "@/services/workflow/WorkflowService";
 
     export default {
         name: "StepAnalysisView",
@@ -50,10 +51,6 @@
                     const docResponse = await api.get(`/Document/Analyze/${this.documentId}`);
                     this.cardId = docResponse.data.cardId;
 
-                    if (!this.cardId) {
-                        throw new Error("No active card found for this document");
-                    }
-
                     // Now fetch the steps using the cardId
                     const response = await api.get(`/Document/AnalyzeSteps/${this.cardId}`);
                     this.documentData = response.data;
@@ -68,9 +65,8 @@
                         this.currentStepData = this.documentData.steps[0];
                     }
                 } catch (error) {
-                    console.error("Error loading document data:", error);
                     this.$emit("show-alert-toast", {
-                        msg: "Erro ao carregar dados do documento",
+                        msg: $t('labelErrorLoadDocumentData'),
                         color: "toast-danger",
                     });
                 } finally {
@@ -80,13 +76,28 @@
             handleStepChange(step) {
                 this.currentStepData = step;
             },
-            handleFieldUpdate({ index, field }) {
-                
-                console.log("Field updated:", field);
-                this.$emit("show-alert-toast", {
-                    msg: "Campo atualizado com sucesso",
-                    color: "toast-success",
-                });
+            handleFieldUpdate({ id, field }) {
+                let params = {
+                    id: id,
+                    value: field.value,
+                };
+                WorkflowService.updateStepToolOutput(params)
+                    .then((response) => {
+                        if (response == true) {
+                            this.$emit("show-alert-toast", {
+                                msg: $t('labelSuccessEditOutput'),
+                                color: "toast-success",
+                            });
+                        } else {
+                            this.$emit("show-alert-toast", {
+                                msg: $t('labelFailedEditOutput'),
+                                color: "toast-danger",
+                            });
+                        }
+                    })
+                    .finally(() => {
+                        this.loadDocumentData();
+                    });
             },
         },
         mounted() {
@@ -101,6 +112,7 @@
         flex-direction: column;
         gap: 1rem;
         height: 100%;
+        overflow: auto;
     }
 
     @media (max-width: 768px) {

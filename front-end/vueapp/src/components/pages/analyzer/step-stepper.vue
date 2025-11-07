@@ -14,7 +14,7 @@
                 <i class="fas fa-file-alt"></i>
                 {{ currentStep.name }}
             </div>
-            <div class="step-indicator">{{ currentIndex + 1 }} de {{ totalSteps }}</div>
+            <div class="step-indicator">{{ currentIndex + 1 }} - {{ totalSteps }}</div>
             <div class="step-dots">
                 <span
                     v-for="(step, index) in steps"
@@ -57,7 +57,6 @@
         },
         computed: {
             currentStep() {
-                console.log(this.currentStep);
                 return this.steps[this.currentIndex] || { id: "", name: "" };
             },
             totalSteps() {

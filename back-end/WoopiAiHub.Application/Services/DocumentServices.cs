@@ -174,13 +174,13 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+
         /// <summary>
-        /// This sends the ids to repository, that change the status and deletes hash
-        /// of the document. Using soft delete idea.
+        /// Delete documents by ids
         /// </summary>
-        /// <param name="deleteDto"></param>
+        /// <param name="ids"></param>
+        /// <param name="headersDto"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
         public async Task<bool> Delete(List<int> ids, HeadersDto headersDto)
         {
             ArgumentNullException.ThrowIfNull(ids);
@@ -210,10 +210,8 @@ namespace WoopiAiHub.Application.Services
         /// This method sends a question to questionnaire and gets a response
         /// It also requests the repository layer to save the question and answer history
         /// </summary>
-        /// <param name="idDocument"></param>
-        /// <param name="idQuestionnaire"></param>
-        /// <param name="emailCreator"></param>
-        /// <param name="keyMongoAccess"></param>
+        /// <param name="documentQuestionnaireDto"></param>
+        /// <param name="headersDto"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public async Task<bool> InputQuestionnaire(DocumentQuestionnaireDto documentQuestionnaireDto,
@@ -271,7 +269,6 @@ namespace WoopiAiHub.Application.Services
                 throw ex;
             }
 
-            // Get the first active card for this document to pass to the frontend
             var cards = _cardRepository.FindByDocumentIdCardListAsync(id).Result;
             var activeCard = cards.FirstOrDefault();
 
@@ -312,6 +309,11 @@ namespace WoopiAiHub.Application.Services
             };
         }
 
+        /// <summary>
+        /// Find card by id and returns the card with relationships
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
         private async Task<Card> GetCardWithRelationships(int cardId)
         {
             var card = await _cardRepository.FindById(cardId);
@@ -324,6 +326,12 @@ namespace WoopiAiHub.Application.Services
             return card;
         }
 
+        /// <summary>
+        /// Prepare steps from workflow
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <param name="card"></param>
+        /// <returns></returns>
         private async Task<List<DocumentStepDto>> BuildStepsFromWorkflow(Workflow workflow, Card card)
         {
             var steps = new List<DocumentStepDto>();
@@ -333,27 +341,33 @@ namespace WoopiAiHub.Application.Services
             {
                 var stepDto = CreateStepDto(step);
                 PopulateStepOutputs(stepDto, step, card);
-
-                // Only add steps that have outputs
-                if (stepDto.Outputs.Any())
-                {
-                    steps.Add(stepDto);
-                }
+                steps.Add(stepDto);
             }
 
             return steps;
         }
 
+        /// <summary>
+        /// Create a new DocumentStepDto
+        /// </summary>
+        /// <param name="step"></param>
+        /// <returns></returns>
         private DocumentStepDto CreateStepDto(Step step)
         {
             return new DocumentStepDto
             {
-                Id = $"step-{step.Id}",
-                Name = $"{step.Order} - {step.Name}",
+                Id = step.Id.ToString(),
+                Name = step.Name,
                 Outputs = new List<ExtractedFieldDto>()
             };
         }
 
+        /// <summary>
+        /// Populate StepOutputs by stepDto, step and card
+        /// </summary>
+        /// <param name="stepDto"></param>
+        /// <param name="step"></param>
+        /// <param name="card"></param>
         private void PopulateStepOutputs(DocumentStepDto stepDto, Step step, Card card)
         {
             foreach (var stepTool in step.StepTools.OrderBy(st => st.Order))
@@ -372,15 +386,24 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Skips output if is OCR or Embeddings
+        /// </summary>
+        /// <param name="output"></param>
+        /// <returns></returns>
         private bool ShouldSkipOutput(StepToolOutput output)
         {
             if (output.StepTool?.Tool == null) return true;
 
-            // Filter out OCR and Embeddings tools
             var toolTypeName = output.StepTool.Tool.ToolType?.Name;
             return toolTypeName == HandlersTypes.Ocr || toolTypeName == HandlersTypes.Embeddings;
         }
 
+        /// <summary>
+        /// Parse output to Json or ExtractedFieldDto
+        /// </summary>
+        /// <param name="output"></param>
+        /// <returns></returns>
         private List<ExtractedFieldDto> ParseOutput(StepToolOutput output)
         {
             var fields = new List<ExtractedFieldDto>();
@@ -388,26 +411,36 @@ namespace WoopiAiHub.Application.Services
             if (string.IsNullOrWhiteSpace(output.Value))
                 return fields;
 
-            // Try to parse as JSON first
-            if (TryParseJsonOutput(output.Value, out var jsonFields))
+            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType?.Name))
             {
                 fields.AddRange(jsonFields);
             }
             else
             {
-                // Fall back to plain text display
                 fields.Add(new ExtractedFieldDto
                 {
                     Label = output.StepTool?.Tool?.Name ?? "Unknown",
                     Value = output.Value,
-                    IsEdited = false
+                    IsEdited = false,
+                    OutputId = output.Id,
+                    OutputType = output.StepTool?.Tool?.ToolType?.Name ?? "None",
                 });
             }
 
             return fields;
         }
 
-        private bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields)
+        /// <summary>
+        /// Parse output to json
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="fields"></param>
+        /// <param name="id"></param>
+        /// <param name="outputType"></param>
+        /// <returns></returns>
+        private bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields, 
+                                        int id,
+                                        string outputType)
         {
             fields = new List<ExtractedFieldDto>();
 
@@ -431,7 +464,9 @@ namespace WoopiAiHub.Application.Services
                         {
                             Label = kvp.Key,
                             Value = kvp.Value?.ToString() ?? string.Empty,
-                            IsEdited = false
+                            IsEdited = false,
+                            OutputId = id,
+                            OutputType = outputType,
                         });
                     }
                     return true;
@@ -445,6 +480,11 @@ namespace WoopiAiHub.Application.Services
             return false;
         }
 
+        /// <summary>
+        /// Get the last proccesd step id from stop
+        /// </summary>
+        /// <param name="steps"></param>
+        /// <returns></returns>
         private string GetLastProcessedStepId(List<DocumentStepDto> steps)
         {
             if (!steps.Any()) return string.Empty;

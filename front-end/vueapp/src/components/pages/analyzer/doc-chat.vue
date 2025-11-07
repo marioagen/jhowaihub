@@ -30,12 +30,13 @@
                     {{ $t("labelSendQuestion") }}
                 </button>
                 <div v-if="output != ''">
-                    <label class="input-label">{{ $t("labelAskAI") }}</label>
+                    <label class="input-label">{{ $t("labelOutput") }}</label>
                     <textarea v-model="output"
                               class="chat-textarea"
-                              :placeholder="$t('labelTypeYourQuestion')"
                               rows="4">
                     </textarea>
+                    <button type="button" class="btn btn-outline-primary" @click="copy">{{ $t("labelCopy") }}</button>
+                    <button type="button" class="btn btn-outline-primary" @click="clear">{{ $t("labelClear") }}</button>
                 </div>
             </div>
         </div>
@@ -66,31 +67,28 @@
                 this.isExpanded = !this.isExpanded;
             },
             handleInput() {
-                // This ensures the button appears/disappears reactively
             },
             async sendQuestion() {
                 if (!this.question.trim()) return;
                 this.isSending = true;
                 try {
-                    this.$emit("show-alert-toast", {
-                        msg: "Pergunta enviada com sucesso",
-                        color: "toast-success",
-                    });
                     const response = await api.post("/Document/input", {
                         id: this.documentId,
                         input: this.question,
                     });
                     this.output = response.data;
                 } catch (error) {
-                    console.error("Error sending question:", error);
-                    this.$emit("show-alert-toast", {
-                        msg: "Erro ao enviar pergunta",
-                        color: "toast-danger",
-                    });
+
                 } finally {
                     this.isSending = false;
                 }
             },
+            copy() {
+                navigator.clipboard.writeText(this.output)
+            }
+            clear() {
+                this.output = ''
+            }
         },
     };
 </script>
@@ -209,13 +207,11 @@
 
     .send-button {
         align-self: flex-start;
-        padding: 0.75rem 1.5rem;
         background: #0073e6;
         border: none;
         border-radius: 6px;
         color: white;
         font-size: 0.95rem;
-        font-weight: 500;
         cursor: pointer;
         display: flex;
         align-items: center;

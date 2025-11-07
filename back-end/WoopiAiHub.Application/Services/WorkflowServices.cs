@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -448,5 +449,31 @@ namespace WoopiAiHub.Application.Services
             var workflow = _workflowRepository.FindAll();
             return workflow;
         }
+
+        /// <summary>
+        /// Update output of step in a workflow by id.
+        /// </summary>
+        /// <param name="stepId"></param>
+        ///<returns></returns>
+        public async Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto)
+        {
+            var stepToolOutput = this.FindByStepToolOutputById(outputUpdateDto.Id);
+            stepToolOutput.Value = outputUpdateDto.Value;
+            var result = await _workflowRepository.UpdateStepToolOutput(stepToolOutput);
+            return result;
+        }
+
+        /// <summary>
+        ///  Find StepToolOutput by step id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public StepToolOutput FindByStepToolOutputById(int id)
+        {
+
+            var stepToolOutput = _workflowRepository.FindByStepToolOutputById(id);
+            return stepToolOutput;
+        }
+
     }
 }

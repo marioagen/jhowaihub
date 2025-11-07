@@ -384,5 +384,13 @@ namespace WoopiAiHub.Repository
                 }).ToList(),
             });
         }
+        
+        public StepToolOutput FindByStepToolOutputById(int id)
+        {
+            var stepToolOutput = _context.StepToolOutputs.Where(p => p.Id == id)
+                                                         .FirstOrDefault();
+            return stepToolOutput;
+        }
+        
     }
 }

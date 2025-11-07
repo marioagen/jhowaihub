@@ -19,24 +19,49 @@
                         {{ $t("labelEdited") }}
                     </span>
                 </div>
-                <div class="field-value-container">
-                    <input
-                        type="text"
-                        class="field-value"
-                        :value="field.value"
-                        @input="(e) => handleFieldEdit(index, e.target.value)"
-                        :readonly="!isEditing[index]"
-                    />
-                    <button
-                        v-if="!isEditing[index]"
-                        class="edit-button"
-                        @click="startEditing(index)"
-                        :title="$t('labelEdit')"
-                    >
+                <div class="field-value-container" v-if=" field.outputType == 'N8N'">
+                    <input type="text"
+                           class="field-value"
+                           @input="(e) => handleFieldEdit(index, e.target.value)"
+                           :readonly="!isEditing[index]"
+                           v-model="fields[index].value" />
+                    <button v-if="!isEditing[index]"
+                            class="edit-button"
+                            @click="startEditing(index)"
+                            :title="$t('labelEdit')">
                         <i class="fas fa-pen"></i>
                     </button>
                     <div v-else class="edit-actions">
-                        <button class="save-button" @click="saveEdit(index)" :title="$t('labelSave')">
+                        <button class="save-button" @click="saveEdit(index, field.outputId)" :title="$t('labelSave')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="cancel-button" @click="cancelEdit(index)" :title="$t('labelCancel')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="field-value-container" v-if=" field.outputType == 'N8N'">
+                    <input type="text"
+                           class="field-value"
+                           @input="(e) => handleFieldEdit(index, e.target.value)"
+                           :readonly="!isEditing[index]"
+                           v-model="fields[index].value" />
+                </div>
+                <div v-if=" field.outputType == 'Prompt'">
+                    <textarea type="text"
+                           class="form-control mb-2"
+                           @input="(e) => handleFieldEdit(index, e.target.value)"
+                           :readonly="!isEditing[index]"
+                           v-model="fields[index].value" 
+                           rows="5"></textarea>
+                    <button v-if="!isEditing[index]"
+                            class="edit-button mb-2"
+                            @click="startEditing(index)"
+                            :title="$t('labelEdit')">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <div v-else class="edit-actions">
+                        <button class="save-button" @click="saveEdit(index, field.outputId)" :title="$t('labelSave')">
                             <i class="fas fa-check"></i>
                         </button>
                         <button class="cancel-button" @click="cancelEdit(index)" :title="$t('labelCancel')">
@@ -76,14 +101,18 @@
                 this.isEditing[index] = true;
             },
             handleFieldEdit(index, value) {
-                // Emit the change instead of directly mutating the prop
+                console.log(this.fields);
                 const updatedField = { ...this.fields[index], value };
                 this.$emit("field-changed", { index, field: updatedField });
             },
-            saveEdit(index) {
-                const field = { ...this.fields[index], isEdited: true };
+            saveEdit(index, id) {
+                const field = {
+                    ...this.fields[index],
+                    value: this.isEditing[index] ? this.fields[index].value : "",
+                    isEdited: true
+                };
                 this.isEditing[index] = false;
-                this.$emit("field-updated", { index, field });
+                this.$emit("field-updated", { id, field });
             },
             cancelEdit(index) {
                 const restoredField = { ...this.fields[index], value: this.originalValues[index] };
@@ -91,7 +120,7 @@
                 this.isEditing[index] = false;
                 delete this.originalValues[index];
             },
-        },
+        }
     };
 </script>
 

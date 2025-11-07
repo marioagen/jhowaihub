@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="col-md-6">
+    <div class="col-md-8">
         <div class="mb-2" style="margin-top: 12px !important">
             <div v-if="viewMode === $options.VIEW_MODE_PDF">
                 <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>

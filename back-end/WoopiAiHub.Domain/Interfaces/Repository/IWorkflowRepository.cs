@@ -17,5 +17,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<List<Workflow>> FindByIdsAsync(ICollection<int> ids);
         IQueryable<WorkflowDto> FindAllWithFilter(WorkflowPagedDto workflowPagedDto);
         Task<bool> UpdateStepToolOutput(StepToolOutput stepToolOutput);
+        StepToolOutput FindByStepToolOutputById(int id);
     }
 }
