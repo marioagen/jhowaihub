@@ -473,6 +473,11 @@ namespace WoopiAiHub.Application.Services
 
             var filterEmptyWorkflows = workflowsToRemove
                 .Where(w => w.Workflows.Count > 0)
+                .Select(w => new TeamsWorkflowsDto
+                {
+                    TeamId = w.TeamId,
+                    Workflows = w.Workflows.Distinct().ToList()
+                })
                 .ToList();
             
             if (filterEmptyWorkflows.Count() > 0)
@@ -490,10 +495,11 @@ namespace WoopiAiHub.Application.Services
                 return new TeamsWorkflowsDto
                 {
                     TeamId = teamId,
+                    Workflows = workflows.Select(w => w.Id).ToList()
                 };
 
             var workflowIds = workflows.Select(w => w.Id).ToHashSet();
-            var workflowsToRemove = new HashSet<int>();
+            var workflowsFound = new HashSet<int>();
 
             foreach (var profile in profiles)
             {
@@ -509,26 +515,37 @@ namespace WoopiAiHub.Application.Services
 
                 var workflowsFromSteps = await _workflowRepository.FindByStep(stepIds);
                 var workflowsFromStepIds = workflowsFromSteps.Select(w => w.Id).ToHashSet();
-                
-                var missingWorkflows = workflowIds.Except(workflowsFromStepIds);
-                foreach (var id in missingWorkflows)
-                    workflowsToRemove.Add(id);
+
+                foreach (var id in workflowIds)
+                {
+                    if (workflowsFromStepIds.Contains(id))
+                        workflowsFound.Add(id);
+                }
             }
+
+            var workflowsNotFound = workflowIds.Except(workflowsFound).ToList();
 
             return new TeamsWorkflowsDto
             {
                 TeamId = teamId,
-                Workflows = workflowsToRemove.ToList(),
+                Workflows = workflowsNotFound,
             };
         }
 
         private async Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto)
         {
-            foreach(var teamsWorkflows in teamsWorkflowsDto)
+            foreach (var teamsWorkflows in teamsWorkflowsDto)
             {
                 var team = _teamRepository.FindByIdReturnModel(teamsWorkflows.TeamId);
+                if (team == null)
+                    continue;
+
                 var workflows = await _workflowRepository.FindByIdsAsync(teamsWorkflows.Workflows);
+                if (workflows == null || !workflows.Any())
+                    continue;
+
                 team.RemoveWorkflows(workflows);
+                _teamRepository.Update(team);
             }
         }
 

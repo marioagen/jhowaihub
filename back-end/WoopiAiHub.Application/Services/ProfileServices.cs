@@ -120,8 +120,7 @@ namespace WoopiAiHub.Application.Services
             if (profile == null)
                 return false;
 
-            profile.Update(profileUpdateDto.Name);
-            var stepsIds = profile.Steps.Select(s => s.Id).ToList();
+            profile.Update(profileUpdateDto.Name);            
 
             if (profileUpdateDto.PermissionsIds != null)
             {
@@ -140,15 +139,35 @@ namespace WoopiAiHub.Application.Services
                 throw new InvalidOperationException("Duplicated Profile");
             }
 
+            var oldStepsIds = profile.StepProfilePermissions
+                .Select(spp => spp.StepId)
+                .ToList();
+
+            var newStepsIds = profileUpdateDto.PermissionsWorkflow
+                .Select(x => x.StepId)
+                .ToList();
+
+            var addedStepIds = newStepsIds.Except(oldStepsIds).ToList();
+            var removedStepIds = oldStepsIds.Except(newStepsIds).ToList();
+
             var profileId = profile.Id;
-            await _stepProfilePermissionsServices.Delete(profileId);
-            if (profileUpdateDto.PermissionsWorkflow.Count() > 0)
+            if (addedStepIds.Count() > 0)
             {
-                await _stepProfilePermissionsServices.Create(profileId, profileUpdateDto.PermissionsWorkflow);
-                stepsIds = profileUpdateDto.PermissionsWorkflow.Select(x => x.StepId).ToList();
+                var newPermissionsOnly = profileUpdateDto.PermissionsWorkflow
+                    .Where(x => addedStepIds.Contains(x.StepId))
+                    .ToList();
+                await _stepProfilePermissionsServices.Create(profileId, newPermissionsOnly);
             }
 
-            await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(stepsIds, profile);
+            if(removedStepIds.Count() > 0)
+            {
+                var toRemovePermissions = profile.StepProfilePermissions
+                    .Where(x => removedStepIds.Contains(x.StepId))
+                    .ToList();
+                await _stepProfilePermissionsServices.DeleteRow(toRemovePermissions);
+                await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(removedStepIds, profile);
+            }
+
             return updateResult;
         }
 

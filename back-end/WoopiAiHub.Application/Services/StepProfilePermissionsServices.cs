@@ -37,6 +37,23 @@ namespace WoopiAiHub.Application.Services
 
         /// <summary>
         /// It removes the relationship between Profile Step and Permission
+        /// using a ProfileId, PermissionId  and StepId
+        /// </summary>
+        /// <param name="ProfileId"></param>
+        /// <returns></returns>
+        ///
+        public async Task<bool> DeleteRow(List<StepProfilePermission> permissions)
+        {
+            foreach (var permission in permissions)
+            {
+                await _stepProfilePermissionsRepository.DeleteRowAsync(permission.ProfileId, permission.StepId, permission.PermissionId);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// It removes the relationship between Profile Step and Permission
         /// using a ProfileId
         /// </summary>
         /// <param name="ProfileId"></param>
