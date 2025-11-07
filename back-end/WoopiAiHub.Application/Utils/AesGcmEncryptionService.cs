@@ -97,8 +97,7 @@ namespace WoopiAiHub.Application.Utils
         /// <returns>32-byte key suitable for AES-256</returns>
         private static byte[] DeriveKey(string keyString)
         {
-            using var sha256 = SHA256.Create();
-            return sha256.ComputeHash(Encoding.UTF8.GetBytes(keyString));
+            return SHA256.HashData(Encoding.UTF8.GetBytes(keyString));
         }
     }
 }
