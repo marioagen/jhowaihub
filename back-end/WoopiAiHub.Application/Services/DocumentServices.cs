@@ -285,7 +285,7 @@ namespace WoopiAiHub.Application.Services
         public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
                                                                              HeadersDto headersDto)
         {
-            var card = await GetCardWithRelationships(cardId);
+            var card = await FindCardWithRelationships(cardId);
             var document = card.Document ?? throw new ArgumentException("Document not found for the card");
             var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
 
@@ -308,7 +308,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="cardId"></param>
         /// <returns></returns>
-        private async Task<Card> GetCardWithRelationships(int cardId)
+        private async Task<Card> FindCardWithRelationships(int cardId)
         {
             var card = await _cardRepository.FindById(cardId);
             if (card == null)
@@ -445,7 +445,7 @@ namespace WoopiAiHub.Application.Services
             {
                 var settings = new JsonSerializerSettings
                 {
-                    MaxDepth = 5, // Limit nesting depth for security
+                    MaxDepth = 5,
                     DateParseHandling = DateParseHandling.None
                 };
 
