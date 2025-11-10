@@ -11,18 +11,6 @@ namespace WoopiAiHub.Repository.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Teams_Documents_DocumentId",
-                table: "Teams");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Teams_DocumentId",
-                table: "Teams");
-
-            migrationBuilder.DropColumn(
-                name: "DocumentId",
-                table: "Teams");
-
             migrationBuilder.CreateTable(
                 name: "StepToolDependencies",
                 columns: table => new
@@ -68,23 +56,6 @@ namespace WoopiAiHub.Repository.Migrations
             migrationBuilder.DropTable(
                 name: "StepToolDependencies");
 
-            migrationBuilder.AddColumn<int>(
-                name: "DocumentId",
-                table: "Teams",
-                type: "int",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Teams_DocumentId",
-                table: "Teams",
-                column: "DocumentId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Teams_Documents_DocumentId",
-                table: "Teams",
-                column: "DocumentId",
-                principalTable: "Documents",
-                principalColumn: "Id");
         }
     }
 }

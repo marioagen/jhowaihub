@@ -80,7 +80,7 @@
                     await DocumentServices.inputDocument(params)
                     .then((response) => {
                             this.$emit("show-alert-toast", {
-                                msg: $t('labelSuccessEditOutput'),
+                                msg: this.$t('labelSuccessEditOutput'),
                                 color: "toast-success"
                             });
                         this.output = response.data;
@@ -88,7 +88,7 @@
                     
                 } catch (error) {
                     this.$emit("show-alert-toast", {
-                        msg: $t('labelFailedEditOutput'),
+                        msg: this.$t('labelFailedEditOutput'),
                         color: "toast-danger"
                     });
                 } finally {

@@ -116,6 +116,7 @@ export default {
             signalrEventExecutionChanged: "CardExecutionChanged",
             filters: {
                 input: null,
+                login: null,
                 isAllUsers: true,
             },
             users: []

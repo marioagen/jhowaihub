@@ -81,12 +81,12 @@
                     .then((response) => {
                         if (response == true) {
                             this.$emit("show-alert-toast", {
-                                msg: $t('labelSuccessEditOutput'),
+                                msg: this.$t('labelSuccessEditOutput'),
                                 color: "toast-success"
                             });
                         } else {
                             this.$emit("show-alert-toast", {
-                                msg: $t('labelFailedEditOutput'),
+                                msg: this.$t('labelFailedEditOutput'),
                                 color: "toast-danger"
                             });
                         }
