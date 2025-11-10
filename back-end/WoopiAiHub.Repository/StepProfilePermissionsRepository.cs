@@ -38,6 +38,27 @@ namespace WoopiAiHub.Repository
 
         /// <summary>
         /// It removes the relationship between Profile Step and Permission
+        /// using a list of ProfileIds
+        /// </summary>
+        /// <param name="ProfileId"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteListAsyncByIds(List<int> ProfileIds)
+        {
+            var list = await _context.StepProfilePermissions
+                    .Where(x => ProfileIds.Contains(x.ProfileId))
+                    .ToListAsync();
+
+            if (list.Count() < 0)
+                return false;
+
+            _context.StepProfilePermissions.RemoveRange(list);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// It removes the relationship between Profile Step and Permission
         /// using a ProfileId
         /// </summary>
         /// <param name="ProfileId"></param>

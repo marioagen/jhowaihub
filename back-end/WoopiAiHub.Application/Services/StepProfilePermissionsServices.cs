@@ -69,10 +69,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task DeleteByIds(List<int> ProfileIds)
         {
-            foreach (int ProfileId in ProfileIds)
-            {
-                await _stepProfilePermissionsRepository.DeleteAsync(ProfileId);
-            }
+            await _stepProfilePermissionsRepository.DeleteListAsyncByIds(ProfileIds);
         }
     }
 }
