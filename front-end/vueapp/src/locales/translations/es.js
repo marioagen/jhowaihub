@@ -578,7 +578,14 @@
         },
         sidebarTitle: "Configurar I/O:",
         sidebar:{
-            filter: "Selecciona un webhook"
+            filter: "Selecciona un webhook",
+            inputs: "Entradas",
+            dependencies: "Dependencias",
+            dependenciesHint: "Seleccione las herramientas anteriores cuyas salidas desea usar como entrada",
+            addDependency: "Agregar Dependencia",
+            noDependencies: "No hay herramientas disponibles",
+            allDependenciesSelected: "Todas las dependencias ya seleccionadas",
+            deleteDependency: "Eliminar Dependencia",
         },
         formFlow: {
             progressFlowSuccess: "Flujo insertado exitosamente",

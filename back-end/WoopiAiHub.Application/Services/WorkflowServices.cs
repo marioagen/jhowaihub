@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -10,7 +9,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -21,6 +19,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
+        private readonly IStepToolDependencyRepository _stepToolDependencyRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
@@ -32,6 +31,7 @@ namespace WoopiAiHub.Application.Services
                                 ITeamRepository teamRepository,
                                 IStatusRepository statusRepository,
                                 IStepRepository stepRepository,
+                                IStepToolDependencyRepository stepToolDependencyRepository,
                                 IUnitOfWork unitOfWork,
                                 IValidateStep validateStep,
                                 ILogger<WorkflowServices> logger,
@@ -41,6 +41,7 @@ namespace WoopiAiHub.Application.Services
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
+            _stepToolDependencyRepository = stepToolDependencyRepository;
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _validateWorkflow = validateWorkflow;
@@ -106,10 +107,14 @@ namespace WoopiAiHub.Application.Services
                 }
 
                 StepTool? lastGlobalStepTool = null;
+                
+                // Dictionary to track StepTool instances by their DTO IDs and order for dependency resolution
+                var stepToolMap = new Dictionary<(int? stepId, int order), StepTool>();
 
+                // First pass: Create/update all StepTools and parameters
                 foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
                 {
-                    Step? existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id);
+                    Step? existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id && s.Order == stepDto.Order);
                     StepTool? previousStepToolInStep = null;
 
                     if (existingStep != null)
@@ -120,6 +125,8 @@ namespace WoopiAiHub.Application.Services
                         var stepToolsToRemove = existingStep.StepTools
                                                             .Where(st => !stepToolIdsFromDto.Contains(st.Id))
                                                             .ToList();
+                        // Delete existing dependencies explicitly via repository
+                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepToolsToRemove.Select(s=>s.Id).ToList());
                         foreach (var stepToolToRemove in stepToolsToRemove)
                         {
                             var dependents = workflow.Steps.SelectMany(s => s.StepTools)
@@ -141,6 +148,9 @@ namespace WoopiAiHub.Application.Services
 
                             stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
                             stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+
+                            // Store reference for later dependency resolution
+                            stepToolMap[(stepDto.Id, stepToolDto.Order)] = stepTool;
 
                             if (stepToolDto.Parameters.Count > 0)
                             {
@@ -176,12 +186,46 @@ namespace WoopiAiHub.Application.Services
                             var stepTool = CreateStepToolUpdate(stepToolDto);
                             stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
 
+                            // Store reference for later dependency resolution
+                            stepToolMap[(stepDto.Id, stepToolDto.Order)] = stepTool;
+
                             newStep.AddStepTool(stepTool);
                             previousStepToolInStep = stepTool;
                             lastGlobalStepTool = stepTool;
                         }
 
                         workflow.AddStep(newStep);
+                    }
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+
+                // Second pass: Resolve and set up dependencies now that all StepTools have IDs
+                // Using explicit repository delete to avoid EF severed association errors
+                foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
+                {
+                    foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                    {
+                        var stepTool = stepToolMap[(stepDto.Id, stepToolDto.Order)];
+                        
+                        // Delete existing dependencies explicitly via repository
+                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
+                        
+                        if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count > 0)
+                        {
+                            foreach (var dependsOn in stepToolDto.Dependencies)
+                            {
+                                var dependsOnStepTool = workflow.Steps
+                                    .SelectMany(s => s.StepTools)
+                                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
+                                
+                                if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
+                                {
+                                    var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
+                                    await _stepToolDependencyRepository.CreateAsync(dependency);
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -338,7 +382,10 @@ namespace WoopiAiHub.Application.Services
                 foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                 {
                     var stepTool = CreateStepToolUpdate(stepToolDto);
+                    stepTool.Step = step;
                     SetDependencies(stepTool, previousStepToolInSameStep, lastStepTool);
+
+                    SetOutputDependencies(steps, stepToolDto, stepTool);
 
                     step.AddStepTool(stepTool);
 
@@ -355,6 +402,33 @@ namespace WoopiAiHub.Application.Services
             }
 
             return steps;
+        }
+
+        /// <summary>
+        /// Set output dependencies
+        /// </summary>
+        /// <param name="steps"></param>
+        /// <param name="stepToolDto"></param>
+        /// <param name="stepTool"></param>
+        private static void SetOutputDependencies(List<Step> steps, StepToolUpdateDto stepToolDto, StepTool stepTool)
+        {
+            var dependsOnStepTools = new List<StepTool>();
+            foreach (var dependsOn in stepToolDto.Dependencies)
+            {
+                var dependsOnStepTool = steps
+                    .SelectMany(s => s.StepTools)
+                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
+
+                if (dependsOnStepTool != null)
+                {
+                    dependsOnStepTools.Add(dependsOnStepTool);
+                }
+            }
+
+            if (dependsOnStepTools.Count > 0)
+            {
+                stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
+            }
         }
 
         /// <summary>

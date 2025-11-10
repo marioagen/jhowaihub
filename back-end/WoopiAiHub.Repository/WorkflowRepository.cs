@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -7,9 +6,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
-using WoopiAiHub.Repository.Util;
 
 namespace WoopiAiHub.Repository
 {
@@ -143,8 +140,11 @@ namespace WoopiAiHub.Repository
                      .ThenInclude(s => s.StepTools)
                          .ThenInclude(p => p.Parameters)
                  .Include(w => w.Steps)
-                   .ThenInclude(s => s.StepTools)
-                       .ThenInclude(p => p.Outputs)
+                     .ThenInclude(s => s.StepTools)
+                         .ThenInclude(p => p.Outputs)
+                 .Include(w => w.Steps)
+                      .ThenInclude(s => s.StepTools)
+                          .ThenInclude(st => st.Dependencies)
                  .FirstOrDefaultAsync(w => w.Id == id);
         }
 
@@ -249,12 +249,15 @@ namespace WoopiAiHub.Repository
                             {
                                 Id = p.Id,
                                 Value = p.Value,
+                                WebhookId = p.WebhookId,
+                                RequiredFile = p.RequiredFile
                             }).ToList(),
                             Tool = new ToolDto
                             {
                                 Id = st.Tool!.Id,
                                 Name = st.Tool.Name,
                                 IsEditableInput = st.Tool.IsEditableInput,
+                                ToolType = st!.Tool!.ToolType!.Name
                             },
                             Executions = st.Executions.Select(e => new StepToolExecutionDto(
                                 e.Id,
@@ -273,7 +276,12 @@ namespace WoopiAiHub.Repository
                                 o.Value,
                                 null,
                                 null
-                            )).ToList()
+                            )).ToList(),
+                            Dependencies = st.Dependencies.Select(d => new StepToolDependencyDto
+                            {
+                                StepToolOrder = d.DependsOnStepTool.Order,
+                                StepOrder = d.DependsOnStepTool.Step!.Order
+                            }).ToList(),
                         })
                         .ToList()
                 }).ToList()

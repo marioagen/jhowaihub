@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -22,9 +21,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
-using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
-using WoopiAiHub.Repository;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
