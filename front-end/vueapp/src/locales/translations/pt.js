@@ -474,7 +474,8 @@
         userAssigned: "Responsável",
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
-        unassignInfo: "Desatribuir documento"
+        unassignInfo: "Desatribuir documento",
+        cardsOpened: "Existem cards abertos neste Workflow",
     },
     tools: {
         index: "Ferramentas",
