@@ -25,8 +25,14 @@ namespace WoopiAiHub.Repository.Mappings
                    .WithMany(pr => pr.Profiles)
                    .UsingEntity<Dictionary<string, object>>(
                        "ProfilePermissions",
-                       r => r.HasOne<Permission>().WithMany().HasForeignKey(PermissionIdColumn),
-                       l => l.HasOne<Profile>().WithMany().HasForeignKey(ProfileIdColumn),
+                       r => r.HasOne<Permission>()
+                            .WithMany()
+                            .HasForeignKey(PermissionIdColumn)
+                            .OnDelete(DeleteBehavior.Restrict),
+                       l => l.HasOne<Profile>()
+                            .WithMany()
+                            .HasForeignKey(ProfileIdColumn)
+                            .OnDelete(DeleteBehavior.Cascade),
                        je =>
                        {
                            je.HasKey(PermissionIdColumn, ProfileIdColumn);

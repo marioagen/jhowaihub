@@ -474,7 +474,8 @@
         userAssigned: "Responsável",
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
-        unassignInfo: "Desatribuir documento"
+        unassignInfo: "Desatribuir documento",
+        cardsOpened: "Existem cards abertos neste Workflow",
     },
     tools: {
         index: "Ferramentas",
@@ -578,9 +579,8 @@
             title: "Times",
             subtitle: "Gerencie os times do sistema",
             createBtn: "Novo Time",
-            createTitle: "Novo Time",
             createSubtitle: "Crie um novo time para o sistema",
-            editTitle: "Editar Perfil",
+            editTitle: "Editar Time",
             editSubtitle: "Atualize as informações do time selecionado",
             invalid: "Time inválido",
             saveSuccess: "Time salvo com sucesso",
@@ -630,7 +630,21 @@
         deleteSuccess: "Prompt deletado com sucesso",
         deleteError: "Falha ao deletar prompt",
         removeAllPrompts: "Remover prompts",
-    }
+    },
+    labelPreviousStep: "Etapa anterior",
+    labelNextStep: "Próxima etapa",
+    labelNoDataInDocument: "Não há dados disponíveis",
+    labelAskTheDoc: "Pergunte ao Doc",
+    labelConversationWithDocument: "Conversa com o Documento",
+    labelAskAI: "PERGUNTE À IA",
+    labelTypeYourQuestion: "Digite sua pergunta sobre o documento...",
+    labelSendQuestion: "Enviar Pergunta",
+    labelSave: "Salvar",
+    labelExtractedData: "Dados Extraídos",
+    labelErrorLoadDocumentData: "Erro ao carregar dados do documento",
+    labelSuccessEditOutput: "Output editado com sucesso",
+    labelFailedEditOutput: "O output não pode ser editado",
+    labelClear: "Limpar"
 };
 
 export default portuguese;

@@ -503,7 +503,8 @@
         userAssigned: "Assigned",
         userApplicant: "Applicant",
         assignBtn: "Assign",
-        unassignInfo: "Unassign document"
+        unassignInfo: "Unassign document",
+        cardsOpened: "There are open cards in this Workflow"
     },
     tools: {
         index: "Tools",
@@ -666,7 +667,20 @@
         deleteSuccess: "Prompts deleted successfully",
         deleteError: "Prompts delete failed",
         removeAllPrompts: "Delete prompts"
-    }
+    },
+    labelPreviousStep: "Previous Step",
+    labelNextStep: "Next Step",
+    labelNoDataInDocument: "No data available",
+    labelAskTheDoc: "Ask the Document",
+    labelConversationWithDocument: "Conversation with the Document",
+    labelAskAI: "ASK AI",
+    labelTypeYourQuestion: "Type your question about the document...",
+    labelSendQuestion: "Send Question",
+    labelExtractedData: "Extracted Data",
+    labelErrorLoadDocumentData: "Error loading document data",
+    labelSuccessEditOutput: "Output edited successfully",
+    labelFailedEditOutput: "The output could not be edited.",
+    labelClear:"Clear"
 };
 
 export default english;

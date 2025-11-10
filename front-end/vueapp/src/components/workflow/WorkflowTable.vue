@@ -154,20 +154,20 @@
             deleteWorkflow() {
                 this.isDeleting = true;
                 WorkflowService.deleteWorkflowById(this.selectedWorkflow)
-                    .then((success) => {
-                        if (success) {
+                    .then((result) => {
+                        if (result.error === undefined) {
                             this.$refs.DeleteDialog.close();
-                            this.getWorkflowList();
+                            this.getWorkflowList();                            
                             this.$notify({
                                 title: "workflow.index",
-                                message: "workflow.removeSuccess",
+                                message:"workflow.removeSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "workflow.index",
-                                message: "workflow.removeError",
+                                message:  result.error.response.data.labelError ?? "workflow.removeError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });

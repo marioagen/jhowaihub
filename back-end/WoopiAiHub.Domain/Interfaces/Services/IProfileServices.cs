@@ -17,6 +17,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         ProfilePagedResultDto FindAllPaged(PagedDataDto pagedDataDto);
         Task<bool> CreateUniqueProfile(ProfileCreateDto profileCreateDto);
         Task<bool> Update(ProfileUpdateDto profileUpdateDto);
-        bool DeleteByIds(List<int> ids);
+        Task<bool> DeleteByIds(List<int> ids);
     }
 }

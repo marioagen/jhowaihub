@@ -47,7 +47,7 @@ namespace WoopiAiHub.Repository.Mappings
                         j => j.HasOne<Team>()
                               .WithMany()
                               .HasForeignKey(TeamIdColumn)
-                              .OnDelete(DeleteBehavior.Restrict),
+                              .OnDelete(DeleteBehavior.Cascade),
 
                         j =>
                         {

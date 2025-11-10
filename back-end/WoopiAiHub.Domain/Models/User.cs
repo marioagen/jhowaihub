@@ -29,7 +29,6 @@ namespace WoopiAiHub.Domain.Models
         [Column("Created", TypeName = "datetime")]
         public DateTime Created { get; private set; }
 
-        public virtual ICollection<Profile> Profiles { get; set; } = [];
         public virtual ICollection<Permission> Permissions { get; set; } = [];
 
         public virtual ICollection<Prompt> Prompts { get; set; } = [];
@@ -58,16 +57,6 @@ namespace WoopiAiHub.Domain.Models
             Teams.Add(team);
         }
 
-        public void AddProfile(Profile profile)
-        {
-            ArgumentNullException.ThrowIfNull(nameof(profile));
-
-            if (this.Profiles.Any(t => t.Id == profile.Id))
-                return;
-
-            Profiles.Add(profile);
-        }
-
         public void Reactivate(string name,
                                string email)
         {
@@ -87,7 +76,6 @@ namespace WoopiAiHub.Domain.Models
         public void Deactivate()
         {
             IsActive = false;
-            Profiles.Clear();
             Teams.Clear();
         }
 

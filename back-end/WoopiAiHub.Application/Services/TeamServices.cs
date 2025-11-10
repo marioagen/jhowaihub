@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -13,12 +14,21 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IWorkflowServices _workflowServices;
+        private readonly IProfileRepository _profileRepository;
+        private readonly IWorkflowRepository _workflowRepository;
 
         public TeamServices(ITeamRepository teamRepository,
-                            IUserRepository userRepository)
+                            IUserRepository userRepository,
+                            IWorkflowRepository workflowRepository,
+                            IWorkflowServices workflowServices,
+                            IProfileRepository profileRepository)
         {
             _teamRepository = teamRepository;
             _userRepository = userRepository;
+            _workflowServices = workflowServices;
+            _profileRepository = profileRepository;
+            _workflowRepository = workflowRepository;
         }
 
         /// <summary>
@@ -134,11 +144,34 @@ namespace WoopiAiHub.Application.Services
                 }
             }
 
+            ICollection<Profile> profiles = new List<Profile>();
+            if (teamCreateDto.ProfileIds.Count() > 0)
+            {
+                team.Profiles.Clear();
+                profiles = _profileRepository.FindByIds(teamCreateDto.ProfileIds);
+
+                foreach(var profile in profiles)
+                {
+                    team.AddProfile(profile);
+                }
+            }
+
             var createResult = _teamRepository.CreateUniqueTeam(team);
             if (!createResult)
             {
                 throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
             }
+
+            if(profiles.Count() > 0)
+            {
+                var workflows = await _workflowServices.FindByProfileStep(profiles);
+                foreach (var workflow in workflows)
+                {
+                    workflow.AddTeam(team);
+                }
+                await _workflowRepository.UpdateRange(workflows);
+            }
+            
             return createResult;
         }
 
@@ -150,13 +183,11 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<bool> Update(TeamUpdateDto teamUpdateDto)
         {
-
             var team = _teamRepository.FindByIdReturnModel(teamUpdateDto.Id);
             if (team == null)
                 return false;
 
             team.Update(teamUpdateDto.Name);
-
             if (teamUpdateDto.UserIds != null)
             {
                 team.Users.Clear();
@@ -168,11 +199,31 @@ namespace WoopiAiHub.Application.Services
                 }
             }
 
+            ICollection<Profile> profiles = new List<Profile>();
+            if (teamUpdateDto.ProfileIds.Count() > 0)
+            {
+                team.Workflows.Clear();
+                team.Profiles.Clear();
+                profiles = _profileRepository.FindByIds(teamUpdateDto.ProfileIds);
+
+                foreach (var profile in profiles)
+                {
+                    team.AddProfile(profile);
+                }
+
+                var workflows = await _workflowServices.FindByProfileStep(profiles);
+                foreach (var workflow in workflows)
+                {
+                    team.AddWorkflow(workflow);
+                }
+            }
+
             var updateResult = _teamRepository.Update(team);
             if (!updateResult)
             {
                 throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
             }
+
             return updateResult;
         }
 
@@ -184,10 +235,21 @@ namespace WoopiAiHub.Application.Services
         public bool DeleteByIds(List<int> ids)
         {
             var teams = _teamRepository.FindByIds(ids);
+            var isAdmin = teams.Any(t => t.Name.Equals("admin", StringComparison.OrdinalIgnoreCase));
+            if (isAdmin)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.InvalidValue, "Can't delete Admin team", null);
+            }
+
             bool hasDocuments = teams.Any(d => d.Workflows.Count > 0);
             if (hasDocuments)
             {
                 throw new AppException(Domain.Enum.ErrorCode.InvalidValue, "Can't delete with documents", null);
+            }
+
+            foreach (var team in teams)
+            {
+                team.Profiles.Clear();
             }
             return _teamRepository.DeleteByIds(ids);
         }

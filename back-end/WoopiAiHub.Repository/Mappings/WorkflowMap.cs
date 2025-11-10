@@ -19,6 +19,11 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasMaxLength(255)
                 .IsRequired();
 
+            builder.Property(w => w.Enable)
+               .HasColumnName("Enable")
+               .HasColumnType("bit")
+               .IsRequired();
+
             builder.Property(w => w.Created)
                 .HasColumnType("datetime")
                 .IsRequired();

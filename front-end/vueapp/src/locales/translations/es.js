@@ -507,7 +507,8 @@
         userAssigned: "Responsable",
         userApplicant: "Solicitante",
         assignBtn: "Asignar",
-        unassignInfo: "Desasignar documento"
+        unassignInfo: "Desasignar documento",
+        cardsOpened: "Hay tarjetas abiertas en este Workflow"
     },
     tools: {
         index: "Herramientas",
@@ -669,7 +670,20 @@
         deleteSuccess: "Prompts eliminados exitosamente",
         deleteError: "No se pudieron eliminar los prompts",
         removeAllPrompts: "Eliminar prompts"
-    }
+    },
+    labelPreviousStep: "Paso anterior",
+    labelNextStep: "Siguiente paso",
+    labelNoDataInDocument: "No hay datos disponibles",
+    labelAskTheDoc: "Preguntar al documento",
+    labelConversationWithDocument: "Escriba su pregunta sobre el documento...",
+    labelAskAI: "Preguntar a la IA",
+    labelTypeYourQuestion: "Escriba su pregunta sobre el documento...",
+    labelSendQuestion: "Enviar pregunta",
+    labelExtractedData: "Datos extraídos",
+    labelErrorLoadDocumentData: "Error al cargar datos del documento",
+    labelSuccessEditOutput: "Output editada con éxito",
+    labelFailedEditOutput: "No se pudo editar el output.",
+    labelClear:"Limpiar"
 };
 
 export default spanish;

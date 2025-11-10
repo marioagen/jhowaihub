@@ -48,7 +48,7 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(t => t.ConnectorApiKey)
                    .HasColumnName("ConnectorApiKey")
-                   .HasColumnType("varchar(255)");
+                   .HasColumnType("varchar(max)");
         }
     }
 }

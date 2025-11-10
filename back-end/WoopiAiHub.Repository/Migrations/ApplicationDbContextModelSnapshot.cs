@@ -73,23 +73,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("UserPermissions", (string)null);
                 });
 
-            modelBuilder.Entity("UserProfiles", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("UserId");
-
-                    b.Property<int>("ProfileId")
-                        .HasColumnType("int")
-                        .HasColumnName("ProfileId");
-
-                    b.HasKey("UserId", "ProfileId");
-
-                    b.HasIndex("ProfileId");
-
-                    b.ToTable("UserProfiles", (string)null);
-                });
-
             modelBuilder.Entity("UserTeams", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -790,7 +773,7 @@ namespace WoopiAiHub.Repository.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConnectorApiKey")
-                        .HasColumnType("varchar(255)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("ConnectorApiKey");
 
                     b.Property<string>("ConnectorUrl")
@@ -971,6 +954,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
+                    b.Property<bool>("Enable")
+                        .HasColumnType("bit")
+                        .HasColumnName("Enable");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -1023,7 +1010,7 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasOne("WoopiAiHub.Domain.Models.Permission", null)
                         .WithMany()
                         .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WoopiAiHub.Domain.Models.Profile", null)
@@ -1044,7 +1031,7 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasOne("WoopiAiHub.Domain.Models.Team", null)
                         .WithMany()
                         .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -1053,21 +1040,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasOne("WoopiAiHub.Domain.Models.Permission", null)
                         .WithMany()
                         .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WoopiAiHub.Domain.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("UserProfiles", b =>
-                {
-                    b.HasOne("WoopiAiHub.Domain.Models.Profile", null)
-                        .WithMany()
-                        .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

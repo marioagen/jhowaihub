@@ -93,15 +93,6 @@
                             </div>
                         </div>
                         <SelectionListComponent
-                            :id="'profiles'"
-                            :labelPanel="'labelProfiles'"
-                            :labelSelectedQuantity="'labelSelectedProfiles'"
-                            :labelSearch="'labelSearchProfiles'"
-                            :items="profilesList"
-                            :loading="isLoading"
-                            v-model:selectedItems="selectedProfiles"
-                        />
-                        <SelectionListComponent
                             :id="'teams'"
                             :labelPanel="'labelTeams'"
                             :labelSelectedQuantity="'labelSelectedTeams'"
@@ -198,9 +189,7 @@
                 },
                 teamData: {},
                 selectedTeams: [],
-                selectedProfiles: [],
                 searchTeams: "",
-                searchProfiles: "",
                 teamsList: [],
                 profilesList: [],
                 showPassword: false,
@@ -240,7 +229,6 @@
         },
         mounted() {
             this.getTeams();
-            this.getProfiles();
             this.setupEdit();
         },
         methods: {
@@ -296,26 +284,6 @@
                         this.isLoading = false;
                     });
             },
-            getProfiles() {
-                var paramsReq = {
-                    search: "",
-                    pageSize: 0,
-                    page: 1,
-                    isAscending: this.isAscending,
-                };
-
-                this.isLoading = true;
-                api.get("/Profile/Paged", { params: paramsReq })
-                    .then((response) => {
-                        this.profilesList = response.data.content;
-                    })
-                    .catch((e) => {
-                        console.log(e);
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            },
             selectAll() {
                 this.selectedTeams = this.filteredTeams.map((user) => user.id);
             },
@@ -343,7 +311,6 @@
                         email: this.userData.email,
                         password: this.userData.password,
                         teamIds: this.selectedTeams,
-                        profileIds: this.selectedProfiles,
                     };
                     response = api.post("User", user);
                 } else {
@@ -352,7 +319,6 @@
                         email: this.userData.email,
                         password: this.userData.password,
                         teamIds: this.selectedTeams,
-                        profileIds: this.selectedProfiles,
                         id: this.userData.id,
                     };
                     response = api.put("User", userEdit);
@@ -399,7 +365,7 @@
                             });
                         }
                         this.userData = response;
-                        this.selectedProfiles = response.profiles.map(p => p.id);
+                        // this.selectedProfiles = response.profiles.map(p => p.id);
                         this.selectedTeams = response.teams.map(t => t.id);
                     });
             },

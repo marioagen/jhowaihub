@@ -7,5 +7,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<bool> Create(int ProfileId, List<WorkflowPermissionDto> PermissionsWorkflow);
         Task<bool> DeleteAsync(int ProfileId);
+        Task<bool> DeleteListAsyncByIds(List<int> ProfileIds);
+        Task<bool> DeleteRowAsync(int ProfileId, int StepId, int PermissionId);
     }
 }

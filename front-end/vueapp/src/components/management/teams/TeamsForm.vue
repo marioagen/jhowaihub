@@ -44,12 +44,21 @@
                                 <ErrorMessage name="teamName" class="invalid-feedback d-block" />
                             </div>
                             <SelectionListComponent
+                                :id="'profiles'"
+                                :labelPanel="'labelProfiles'"
+                                :labelSelectedQuantity="'labelSelectedProfiles'"
+                                :labelSearch="'labelSearchProfiles'"
+                                :items="profilesList"
+                                :loading="isLoadingProfiles"
+                                v-model:selectedItems="selectedProfiles"
+                            />
+                            <SelectionListComponent
                                 :id="'users'"
                                 :labelPanel="'labelTeamMembers'"
                                 :labelSelectedQuantity="'labelSelectedUsers'"
                                 :labelSearch="'labelSearchUsers'"
                                 :items="filteredUsers"
-                                :loading="isLoading"
+                                :loading="isLoadingUsers"
                                 :type="'user-list'"
                                 v-model:selectedItems="selectedUsers"
                                 ref="SelectionListComponent"
@@ -181,7 +190,8 @@
         },
         data() {
             return {
-                isLoading: true,
+                isLoadingUsers: true,
+                isLoadingProfiles: true,
                 teamData: {
                     id: 0,
                     name: "",
@@ -189,6 +199,7 @@
                 },
                 userData: {},
                 selectedUsers: [],
+                selectedProfiles: [],
                 searchTerm: "",
                 usersList: [],
                 showUsers: false,
@@ -213,7 +224,9 @@
             },
         },
         mounted() {
+            this.resetForm();
             this.getUsers();
+            this.getProfiles();
             this.setupEdit();
         },
         methods: {
@@ -230,7 +243,7 @@
                     page: 1,
                     isAscending: this.isAscending,
                 };
-                this.isLoading = true;
+                this.isLoadingUsers = true;
                 api.get("/User/Paged", { params: paramsReq })
                     .then((response) => {
                         this.usersList = response.data.content;
@@ -239,7 +252,27 @@
                         console.log(e);
                     })
                     .finally(() => {
-                        this.isLoading = false;
+                        this.isLoadingUsers = false;
+                    });
+            },
+            getProfiles() {
+                var paramsReq = {
+                    search: "",
+                    pageSize: 0,
+                    page: 1,
+                    isAscending: this.isAscending,
+                };
+                
+                this.isLoadingProfiles = true;
+                api.get("/Profile/Paged", { params: paramsReq })
+                    .then(({ data }) => {
+                        this.profilesList = data.content;
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    })
+                    .finally(() => {
+                        this.isLoadingProfiles = false;
                     });
             },
             selectAll() {
@@ -256,7 +289,9 @@
                     id: this.teamData.id,
                     name: this.teamData.name,
                     userIds: this.selectedUsers,
+                    profileIds: this.selectedProfiles,
                 };
+                
                 const request = team.id === 0 ? api.post("Team", team) : api.put("Team", team);
                 request.then(() => {
                         this.$notify({
@@ -286,6 +321,7 @@
                 this.teamData.id = 0;
                 this.teamData.name = "";
                 this.selectedUsers = [];
+                this.selectedProfiles = [];
                 this.searchTerm = "";
             },
             setupEdit() {
@@ -294,6 +330,7 @@
                     .then((response) => {
                         this.teamData = response;
                         this.selectedUsers = response.users.map((u) => u.id);
+                        this.selectedProfiles = response.profiles.map(p => p.id);
                     });
             },
             showUserSection() {

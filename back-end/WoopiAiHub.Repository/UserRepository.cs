@@ -63,7 +63,6 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Users.Where(u => u.Id == referenceUserId)
                                        .Include(t => t.Teams)
-                                       .Include(p => p.Profiles)
                                        .FirstOrDefaultAsync();
         }
 
@@ -76,7 +75,6 @@ namespace WoopiAiHub.Repository
         {
             var usersInDb = _context.Users
                                     .Where(u => ids.Contains(u.Id))
-                                    .Include(u => u.Profiles)
                                     .Include(u => u.Teams)
                                     .ToList();
 
@@ -125,7 +123,6 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Users
                 .Include(u => u.Teams)
-                .Include(u => u.Profiles)
                 .Where(u => u.Email == email)
                 .Select(u => new UserDto
                 {
@@ -138,13 +135,6 @@ namespace WoopiAiHub.Repository
                         Id = t.Id,
                         Name = t.Name,
                         Created = t.Created
-                    })
-                    .ToList(),
-                    Profiles = u.Profiles!
-                    .Select(p => new ProfileDto
-                    {
-                        Id = p.Id,
-                        Name = p.Name
                     })
                     .ToList(),
                     Created = u.Created
@@ -176,13 +166,6 @@ namespace WoopiAiHub.Repository
                             Created = u.Created
                         })
                         .ToList(),
-                    Profiles = t.Profiles!
-                        .Select(u => new ProfileDto
-                        {
-                            Id = u.Id,
-                            Name = u.Name
-                        })
-                        .ToList()
                 })
                 .AsQueryable()
                 .AsNoTracking();
@@ -218,7 +201,8 @@ namespace WoopiAiHub.Repository
             return await _context.Users
                                  .AsNoTracking()
                                  .Where(u => u.Email == email)
-                                 .SelectMany(u => u.Profiles)
+                                 .SelectMany(u => u.Teams)
+                                 .Include(t => t.Profiles)
                                  .Select(p => p.Name.ToLower())
                                  .Distinct()
                                  .ToListAsync();
