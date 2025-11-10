@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class DocumentAnalyzeStepsDto
+    public record DocumentAnalyzeStepsDto
     {
         public string DocumentId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;

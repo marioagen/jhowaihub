@@ -532,7 +532,7 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto)
         {
             var stepToolOutput = this.FindByStepToolOutputById(outputUpdateDto.Id);
-            stepToolOutput.Value = outputUpdateDto.Value;
+            stepToolOutput.ChangeValue(outputUpdateDto.Value);
             var result = await _workflowRepository.UpdateStepToolOutput(stepToolOutput);
             return result;
         }

@@ -11,7 +11,7 @@ namespace WoopiAiHub.Domain.Models
         public int CardId { get; private set; }
 
         [Column("Value", TypeName = "nvarchar(max)")]
-        public string Value { get;  set; }
+        public string Value { get; private set; }
 
         public virtual StepTool StepTool { get; set; }
         public virtual Card Card { get; set; }
@@ -24,6 +24,11 @@ namespace WoopiAiHub.Domain.Models
         {
             StepToolId = stepToolId;
             CardId = cardId;
+            Value = value;
+        }
+
+        public void ChangeValue(string value)
+        {
             Value = value;
         }
 

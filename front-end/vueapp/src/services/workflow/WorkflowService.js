@@ -98,4 +98,15 @@ export default {
                 }
             });
     },
+    updateStepToolOutput(params) {
+        return api.put("/Workflow/UpdateOutput", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
 }
