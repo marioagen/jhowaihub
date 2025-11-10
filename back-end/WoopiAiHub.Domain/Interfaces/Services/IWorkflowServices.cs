@@ -17,5 +17,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<ICollection<Workflow>> FindByProfileStep(ICollection<Profile> profiles);
         Task UpdateTeamProfileRelationshipToWorkflow(List<int> steps, Profile profile);
         PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
+        Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto);
     }
 }

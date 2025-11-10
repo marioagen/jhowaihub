@@ -27,6 +27,11 @@ namespace WoopiAiHub.Domain.Models
             Value = value;
         }
 
+        public void ChangeValue(string value)
+        {
+            Value = value;
+        }
+
         /// <summary>
         /// Use to EF context
         /// </summary>

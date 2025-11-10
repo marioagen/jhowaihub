@@ -133,5 +133,19 @@ namespace WoopiAiHub.Api.Controllers
             var workflowList = _workflowServices.FindAll();
             return Ok(workflowList);
         }
+
+        /// <summary>
+        /// Endpoint that returns all valids workflows
+        /// </summary>
+        /// <param name="WorkflowPagedDto"></param>
+        /// <returns></returns>
+        [HttpPut("UpdateOutput")]
+        [SwaggerOperation("Endpoint that returns all valids workflows")]
+        [ProducesResponseType(typeof(WorkflowPagedDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateStepToolOutput([FromBody] OutputUpdateDto outputUpdateDto)
+        {
+            var result = await _workflowServices.UpdateStepToolOutput(outputUpdateDto);
+            return Ok(result);
+        }
     }
 }

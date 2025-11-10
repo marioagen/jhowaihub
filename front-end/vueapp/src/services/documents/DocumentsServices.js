@@ -106,4 +106,40 @@ export default {
                 };
             });
     },
+    async inputDocument(params) {
+        return await api
+            .post("/Document/Input/", params)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
+    async findByIdAnalyze(id) {
+        return await api
+            .get(`/Document/Analyze/${id}`)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
+    async findByIdAnalyzeWithSteps(id) {
+        return await api
+            .get(`/Document/AnalyzeSteps/${id}`)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    }
 };

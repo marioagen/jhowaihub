@@ -89,7 +89,18 @@ export default {
     },
     deleteWorkflowById(workflowId) {
         return api.delete(`/Workflow/${workflowId}`)
-            .then(({ data } ) => {
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    updateStepToolOutput(params) {
+        return api.put("/Workflow/UpdateOutput", params)
+            .then(({ data }) => {
                 return data;
             })
             .catch((error) => {

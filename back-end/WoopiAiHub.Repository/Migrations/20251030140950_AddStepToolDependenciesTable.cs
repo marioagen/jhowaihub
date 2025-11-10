@@ -56,18 +56,6 @@ namespace WoopiAiHub.Repository.Migrations
             migrationBuilder.DropTable(
                 name: "StepToolDependencies");
 
-            migrationBuilder.AddColumn<int>(
-                name: "DocumentId",
-                table: "Teams",
-                type: "int",
-                nullable: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Teams_Documents_DocumentId",
-                table: "Teams",
-                column: "DocumentId",
-                principalTable: "Documents",
-                principalColumn: "Id");
         }
     }
 }
