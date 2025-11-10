@@ -139,13 +139,14 @@ namespace WoopiAiHub.Application.Services
                 throw new InvalidOperationException("Duplicated Profile");
             }
 
-            var oldStepsIds = profile.StepProfilePermissions
+            var oldStepsIds = (profile.StepProfilePermissions ?? Enumerable.Empty<StepProfilePermission>())
                 .Select(spp => spp.StepId)
                 .ToList();
 
-            var newStepsIds = profileUpdateDto.PermissionsWorkflow
+            var newStepsIds = profileUpdateDto.PermissionsWorkflow?
                 .Select(x => x.StepId)
-                .ToList();
+                .ToList()
+                ?? new List<int>();
 
             var addedStepIds = newStepsIds.Except(oldStepsIds).ToList();
             var removedStepIds = oldStepsIds.Except(newStepsIds).ToList();
