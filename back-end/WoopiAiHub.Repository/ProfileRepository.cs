@@ -74,13 +74,6 @@ namespace WoopiAiHub.Repository
                             Created = u.Created
                         })
                         .ToList(),
-                     Users = t.Users
-                        .Select(u => new UserDto
-                        {
-                            Id = u.Id,
-                            Name = u.Name,
-                            Created = u.Created
-                        }).ToList(),
                     WorkflowPermission = t.StepProfilePermissions
                         .Where(u => u.ProfileId == t.Id)
                         .Select(u => new WorkflowPermissionDto
@@ -112,20 +105,20 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(List<int> ids)
+        public async Task<bool> DeleteByIdsAsync(List<int> ids)
         {
-            var profiles = _context.Profiles.Where(a => ids.Contains(a.Id));
+            var profiles = await _context.Profiles
+                .Where(a => ids.Contains(a.Id))
+                .ToListAsync();
 
             if (profiles.Any())
             {
                 _context.Profiles.RemoveRange(profiles);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
@@ -153,13 +146,6 @@ namespace WoopiAiHub.Repository
                             Group = u.Group
                         })
                         .ToList(),
-                        Users = t.Users
-                        .Select(u => new UserDto
-                        {
-                            Id = u.Id,
-                            Name = u.Name,
-                            Created = u.Created
-                        }).ToList()
                 })
                 .AsQueryable()
                 .AsNoTracking();
@@ -174,7 +160,10 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public ICollection<Domain.Models.Profile> FindByIds(IEnumerable<int> ids)
         {
-            return _context.Profiles.Where(t => ids.Contains(t.Id)).ToList();
+            return _context.Profiles
+                .Include(p => p.Steps)
+                .Where(t => ids.Contains(t.Id))
+                .ToList();
         }
 
         /// <summary>
@@ -186,7 +175,9 @@ namespace WoopiAiHub.Repository
         {
             return _context.Profiles.Where(u => u.Id == id)
                                     .Include(t => t.Permissions)
-                                    .Include(t => t.Users)
+                                    .Include(t => t.Teams)
+                                    .Include(t => t.StepProfilePermissions)
+                                    .Include(t => t.Steps)
                                     .FirstOrDefault();
         }
     }

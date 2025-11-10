@@ -25,7 +25,6 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="WorkflowPermissionDto"></param>
         /// <returns></returns>
-        ///
         public async Task<bool> Create(int ProfileId, List<WorkflowPermissionDto> PermissionsWorkflow)
         {
             if (PermissionsWorkflow == null || PermissionsWorkflow.Count == 0)
@@ -37,14 +36,40 @@ namespace WoopiAiHub.Application.Services
 
         /// <summary>
         /// It removes the relationship between Profile Step and Permission
+        /// using a ProfileId, PermissionId  and StepId
+        /// </summary>
+        /// <param name="ProfileId"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteRow(List<StepProfilePermission> permissions)
+        {
+            foreach (var permission in permissions)
+            {
+                await _stepProfilePermissionsRepository.DeleteRowAsync(permission.ProfileId, permission.StepId, permission.PermissionId);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// It removes the relationship between Profile Step and Permission
         /// using a ProfileId
         /// </summary>
         /// <param name="ProfileId"></param>
         /// <returns></returns>
-        ///
         public async Task<bool> Delete(int ProfileId)
         {
             return await _stepProfilePermissionsRepository.DeleteAsync(ProfileId);
+        }
+
+        /// <summary>
+        /// It removes the relationship between Profiles Step and Permission
+        /// using a list of ProfileId
+        /// </summary>
+        /// <param name="ProfileIds"></param>
+        /// <returns></returns>
+        public async Task DeleteByIds(List<int> ProfileIds)
+        {
+            await _stepProfilePermissionsRepository.DeleteListAsyncByIds(ProfileIds);
         }
     }
 }

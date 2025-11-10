@@ -402,17 +402,15 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = WorkflowFixture.FindValidWorkflow();
 
             _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync(workflow);
-            _cardRepositoryMock.Setup(repo => repo.ExistsStepsInUse(It.IsAny<List<int>>())).ReturnsAsync(false);
-            _stepRepositoryMock.Setup(repo => repo.DeleteByIds(It.IsAny<List<int>>())).Returns(true);
+            _workflowRepositoryMock.Setup(repo => repo.DeleteById(It.IsAny<int>())).ReturnsAsync(true);
 
             // Act
             var result = await _workflowServices.DeleteById(1);
 
             // Assert
             Assert.True(result);
-            _stepRepositoryMock.Verify(repo => repo.DeleteByIds(It.IsAny<List<int>>()), Times.Once);
+            _workflowRepositoryMock.Verify(repo => repo.FindByIdReturnModel(It.IsAny<int>()), Times.Once);
             _workflowRepositoryMock.Verify(repo => repo.DeleteById(It.IsAny<int>()), Times.Once);
-            _unitOfWorkMock.Verify(uow => uow.Commit(), Times.Once);
         }
 
         [Fact(DisplayName = "DeleteById should throw exception when workflow not found")]

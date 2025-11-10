@@ -1,6 +1,7 @@
 ﻿using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
 {
@@ -13,6 +14,8 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string email);
         ICollection<WorkflowDto> FindAll();
+        Task<ICollection<Workflow>> FindByProfileStep(ICollection<Profile> profiles);
+        Task UpdateTeamProfileRelationshipToWorkflow(List<int> steps, Profile profile);
         PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
         Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto);
     }

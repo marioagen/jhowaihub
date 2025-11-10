@@ -184,14 +184,14 @@
                             this.getProfiles({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: "Profiles",
-                                message: this.$t("labelProfileRemoveSuccess"),
+                                message: "management.profiles.deleteSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "Profiles",
-                                message: this.$t("labelProfileRemoveError"),
+                                message: "management.profiles.deleteError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });

@@ -272,7 +272,7 @@ export default {
                         keyMongoAccess: "",
                         isAdmin: tokenData.isAdmin
                     };
-
+                    
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();

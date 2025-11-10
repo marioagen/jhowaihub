@@ -474,7 +474,8 @@
         userAssigned: "Responsável",
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
-        unassignInfo: "Desatribuir documento"
+        unassignInfo: "Desatribuir documento",
+        cardsOpened: "Existem cards abertos neste Workflow",
     },
     tools: {
         index: "Ferramentas",
@@ -578,9 +579,8 @@
             title: "Times",
             subtitle: "Gerencie os times do sistema",
             createBtn: "Novo Time",
-            createTitle: "Novo Time",
             createSubtitle: "Crie um novo time para o sistema",
-            editTitle: "Editar Perfil",
+            editTitle: "Editar Time",
             editSubtitle: "Atualize as informações do time selecionado",
             invalid: "Time inválido",
             saveSuccess: "Time salvo com sucesso",

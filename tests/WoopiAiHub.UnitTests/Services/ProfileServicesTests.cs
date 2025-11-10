@@ -96,12 +96,12 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Test DeleteByIds and returns true when success")]
         [Trait("DeleteByIds", "Success")]
-        public void DeleteByIds_ReturnsTrue_WhenSuccess()
+        public async void DeleteByIds_ReturnsTrue_WhenSuccess()
         {
             var ids = new List<int> { 1, 2 };
-            _profileRepoMock.Setup(r => r.DeleteByIds(ids)).Returns(true);
+            _profileRepoMock.Setup(r => r.DeleteByIdsAsync(ids)).ReturnsAsync(true);
 
-            var result = _profileServices.DeleteByIds(ids);
+            var result = await _profileServices.DeleteByIds(ids);
 
             Assert.True(result);
         }

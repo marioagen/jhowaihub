@@ -42,6 +42,17 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Updates a list of workflows.
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateRange(ICollection<Workflow> workflows)
+        {
+            _context.Workflows.UpdateRange(workflows);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
         /// Retrieves a workflow associated with a specific team ID.
         /// </summary>
         /// <param name="teamId"></param>
@@ -51,7 +62,7 @@ namespace WoopiAiHub.Repository
             return await _context.Workflows
                 .Include(w => w.Teams)
                 .Include(w => w.Steps)
-                .Where(s => s.Teams.Any(t => t.Id == teamId))
+                .Where(s => s.Teams.Any(t => t.Id == teamId) && s.Enable.Equals(true))
                 .Select(FindWorkflowProjection(workflowFilterDto?.Input, workflowFilterDto?.IsAllUsers, workflowFilterDto?.Login))
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
@@ -70,7 +81,7 @@ namespace WoopiAiHub.Repository
                         .ThenInclude(t => t.Tool)
                             .ThenInclude(tt => tt.ToolType)
                 .Include(w => w.Teams)
-                .Where(w => ids.Contains(w.Id))
+                .Where(w => ids.Contains(w.Id) && w.Enable.Equals(true))
                 .ToListAsync();
         }
 
@@ -83,12 +94,39 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Workflows
                 .Include(w => w.Teams)
-                .Where(s => s.Teams.Any(t => teamIds.Contains(t.Id)))
+                .Where(s => s.Teams.Any(t => teamIds.Contains(t.Id)) && s.Enable.Equals(true))
                 .Select(w => new WorkflowDto
                 {
                     Id = w.Id,
                     Name = w.Name,
                 })
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves a list of workflows by its team ids.
+        /// </summary>
+        /// <param name="List<int>"></param>
+        /// <returns></returns>
+        public async Task<ICollection<Workflow>> FindByStep(List<int> stepsIds)
+        {
+            return await _context.Workflows
+                .Include(w => w.Steps)
+                .Include(w => w.Teams)
+                .Where(w => w.Enable && w.Steps.Any(s => stepsIds.Contains(s.Id)))
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves a list of workflows by its team ids.
+        /// </summary>
+        /// <param name="List<int>"></param>
+        /// <returns></returns>
+        public async Task<ICollection<Workflow>> FindByTeams(List<int> teamsIds)
+        {
+            return await _context.Workflows
+                .Include(w => w.Teams)
+                .Where(w => w.Enable && w.Teams.Any(s => teamsIds.Contains(s.Id)))
                 .ToListAsync();
         }
 
@@ -102,7 +140,7 @@ namespace WoopiAiHub.Repository
             return await _context.Workflows
                 .Include(w => w.Teams)
                 .Include(w => w.Steps)
-                .Where(w => w.Id == id)
+                .Where(w => w.Id == id && w.Enable.Equals(true))
                 .Select(FindWorkflowProjection(workflowFilterDto?.Input, workflowFilterDto?.IsAllUsers, workflowFilterDto?.Login))
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
@@ -115,9 +153,15 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<bool> DeleteById(int id)
         {
-            return await _context.Workflows
-                .Where(w => w.Id == id)
-                .ExecuteDeleteAsync() > 0;
+            var workflows = _context.Workflows.Where(a => a.Id == id && a.Enable.Equals(true));
+
+            if (await workflows.AnyAsync())
+            {
+                await workflows.ExecuteUpdateAsync(b => b.SetProperty(u => u.Enable, false));
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -145,7 +189,7 @@ namespace WoopiAiHub.Repository
                  .Include(w => w.Steps)
                       .ThenInclude(s => s.StepTools)
                           .ThenInclude(st => st.Dependencies)
-                 .FirstOrDefaultAsync(w => w.Id == id);
+                 .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
         }
 
 
@@ -297,7 +341,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Workflows
                            .AsNoTracking()
-                           .Where(w => w.Teams.Any(t => t.Users.Any(u => u.Email == userEmail)))
+                           .Where(w => w.Teams.Any(t => t.Users.Any(u => u.Email == userEmail)) && w.Enable.Equals(true))
                            .Select(t => new WorkflowDto
                            {
                                Id = t.Id,
@@ -325,6 +369,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Workflows
                            .AsNoTracking()
+                           .Where(w => w.Enable.Equals(true))
                            .Select(t => new WorkflowDto
                            {
                                Id = t.Id,
@@ -362,7 +407,7 @@ namespace WoopiAiHub.Repository
                 .Include(w => w.Teams)
                     .ThenInclude(t => t.Users)
                 .AsNoTracking()
-                .Where(w => w.Teams.Any(t => userTeamIds.Contains(t.Id)));
+                .Where(w => w.Teams.Any(t => userTeamIds.Contains(t.Id)) && w.Enable.Equals(true));
 
             if (!string.IsNullOrEmpty(search))
             {

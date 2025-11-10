@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<ICollection<ProfileDto>> FindAll();
         Task<ProfileDto?> FindById(int id);
         bool Update(Profile team);
-        bool DeleteByIds(List<int> ids);
+        Task<bool> DeleteByIdsAsync(List<int> ids);
         IQueryable<ProfileDto> FindAllPaged(PagedDataDto pagedDataDto);
         ICollection<Profile> FindByIds(IEnumerable<int> ids);
         Profile FindByIdReturnModel(int id);

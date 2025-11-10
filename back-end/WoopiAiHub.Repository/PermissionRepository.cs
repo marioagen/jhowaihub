@@ -72,7 +72,6 @@ namespace WoopiAiHub.Repository
             var result = await _context.Users
                               .AsNoTracking()
                               .Where(u => u.Email == email)
-                              .SelectMany(u => u.Profiles)
                               .SelectMany(p => p.Permissions)
                               .Where(p => !string.IsNullOrWhiteSpace(p.Group) &&
                                           !string.IsNullOrWhiteSpace(p.Name))

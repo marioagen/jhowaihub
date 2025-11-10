@@ -59,7 +59,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Create_ShouldReturnTrue_WhenUserIsCreated()
         {
             // Arrange
-            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", Password = "Password123", TeamIds = [1], ProfileIds = [1] };
+            var userCreateDto = new UserCreateDto { Name = "Test", Email = "test@email.com", Password = "Password123", TeamIds = [1] };
             var headersDto = new HeadersDto { Tenant = "tenant" };
             var requestDto = _fixture.FindValidRequestAssignLicensesByHub();
             var userId = Guid.NewGuid();
@@ -222,16 +222,9 @@ namespace WoopiAiHub.UnitTests.Services
                 new Team("Time 2", 2, DateTime.Now)
             };
       
-            var profiles = new List<Profile>
-            {
-                new Profile("Profile 1", 1, DateTime.Now),
-                new Profile("Profile 2", 2, DateTime.Now)
-            };
-
             var user = new User(userId, "Antigo Nome", "antigo@email.com", false, DateTime.Now)
             {
                 Teams = teams,
-                Profiles = profiles
             };
 
             _marketPlaceApiMock
@@ -245,10 +238,6 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock
                 .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
                 .Returns(teams);
-
-            _profileRepositoryMock
-                .Setup(repo => repo.FindByIds(It.IsAny<IEnumerable<int>>()))
-                .Returns(profiles);
 
             _userRepositoryMock
                 .Setup(repo => repo.Update(user))
@@ -476,18 +465,11 @@ namespace WoopiAiHub.UnitTests.Services
                 Email = "test@email.com",
                 Password = "password123",
                 TeamIds = new List<int>(),
-                ProfileIds = new List<int> { 1, 2 }
             };
 
             var headers = new HeadersDto { Tenant = "tenant" };
 
             var teams = new List<Team>();
-
-            var profiles = new List<Profile>
-            {
-                new Profile("Profile 1", 1, DateTime.Now),
-                new Profile("Profile 2", 2, DateTime.Now)
-            };
 
             _marketPlaceApiMock
                 .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
@@ -501,10 +483,6 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(repo => repo.FindByIds(dto.TeamIds))
                 .Returns(teams);
 
-            _profileRepositoryMock
-                .Setup(repo => repo.FindByIds(dto.ProfileIds))
-                .Returns(profiles);
-
             _userRepositoryMock
                 .Setup(repo => repo.CreateAsync(It.IsAny<User>()))
                 .ReturnsAsync(true);
@@ -514,8 +492,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            _userRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<User>(u =>
-                u.Profiles.Count == 2)), Times.Once);
         }
 
         [Fact(DisplayName = "Create should return false when marketplace returns Guid.Empty")]

@@ -87,9 +87,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpDelete]
         [SwaggerOperation("EndPoint that delete profiles by ids")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult DeleteByIds(List<int> ids)
+        public async Task<IActionResult> DeleteByIds(List<int> ids)
         {
-            var deleted = _profileServices.DeleteByIds(ids);
+            var deleted = await _profileServices.DeleteByIds(ids);
             return Ok(deleted);
         }
 
