@@ -7,6 +7,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("Name", TypeName = "varchar(255)")]
         public string Name { get; private set; } = string.Empty;
 
+        [Column("Enable", TypeName = "bit")]
+        public bool Enable { get; private set; }
+
         public virtual ICollection<Step> Steps { get; set; } = [];
         public virtual ICollection<Team> Teams { get; set; } = [];
         public virtual ICollection<Document> Documents { get; set; } = [];
@@ -17,6 +20,7 @@ namespace WoopiAiHub.Domain.Models
             Name = name;
             Steps = new List<Step>();
             Teams = teams;
+            Enable = true;
         }
 
         /// <summary>

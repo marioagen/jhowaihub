@@ -507,7 +507,8 @@
         userAssigned: "Responsable",
         userApplicant: "Solicitante",
         assignBtn: "Asignar",
-        unassignInfo: "Desasignar documento"
+        unassignInfo: "Desasignar documento",
+        cardsOpened: "Hay tarjetas abiertas en este Workflow"
     },
     tools: {
         index: "Herramientas",
