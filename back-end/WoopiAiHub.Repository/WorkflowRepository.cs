@@ -126,7 +126,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Workflows
                 .Include(w => w.Teams)
-                .Where(w => w.Teams.Any(s => teamsIds.Contains(s.Id)))
+                .Where(w => w.Enable && w.Teams.Any(s => teamsIds.Contains(s.Id)))
                 .ToListAsync();
         }
 
