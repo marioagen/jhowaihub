@@ -290,30 +290,16 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> DeleteById(int id)
         {
-            _unitOfWork.BeginTransaction();
-            try
+            var workflow = await _workflowRepository.FindByIdReturnModel(id);
+            if (workflow == null)
             {
-                var workflow = await _workflowRepository.FindByIdReturnModel(id);
-                if (workflow == null)
-                {
-                    throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
-                }
-
-                workflow.Teams.Clear();
-                var stepIds = workflow.Steps.Select(s => s.Id).ToList();
-                await _validateStep.ValidateDeleteStep(stepIds);
-
-                _stepRepository.DeleteByIds(stepIds);
-                await _workflowRepository.DeleteById(id);
-
-                _unitOfWork.Commit();
-                return true;
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+
+            var stepIds = workflow.Steps.Select(s => s.Id).ToList();
+            await _validateStep.ValidateDeleteStep(stepIds);
+
+            return await _workflowRepository.DeleteById(id);
         }
 
         /// <summary>

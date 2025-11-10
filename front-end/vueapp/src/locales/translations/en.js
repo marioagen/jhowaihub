@@ -503,7 +503,8 @@
         userAssigned: "Assigned",
         userApplicant: "Applicant",
         assignBtn: "Assign",
-        unassignInfo: "Unassign document"
+        unassignInfo: "Unassign document",
+        cardsOpened: "There are open cards in this Workflow"
     },
     tools: {
         index: "Tools",

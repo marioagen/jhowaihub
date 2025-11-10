@@ -4,5 +4,6 @@
     {
         public const string NotFound = "card.notFound";
         public const string UserCannotBeAssigned = "card.userCannotBeAssingned";
+        public const string CardsOpened = "card.cardsOpened";
     }
 }
