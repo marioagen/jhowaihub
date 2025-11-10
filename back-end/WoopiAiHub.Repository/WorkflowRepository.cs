@@ -42,6 +42,17 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Updates a list of workflows.
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateRange(ICollection<Workflow> workflows)
+        {
+            _context.Workflows.UpdateRange(workflows);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
         /// Retrieves a workflow associated with a specific team ID.
         /// </summary>
         /// <param name="teamId"></param>

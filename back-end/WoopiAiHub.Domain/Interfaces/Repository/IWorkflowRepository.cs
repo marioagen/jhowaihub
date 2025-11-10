@@ -8,6 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<bool> Create(Workflow workflow);
         Task<bool> Update(Workflow workflow);
+        Task<bool> UpdateRange(ICollection<Workflow> workflows);
         Task<WorkflowDto?> FindByTeamId(int teamId, WorkflowFilterDto? workflowFilterDto);
         Task<WorkflowDto?> FindById(int id, WorkflowFilterDto? workflowFilterDto);
         Task<Workflow?> FindByIdReturnModel(int id);

@@ -168,8 +168,8 @@ namespace WoopiAiHub.Application.Services
                 foreach (var workflow in workflows)
                 {
                     workflow.AddTeam(team);
-                    await _workflowRepository.Update(workflow);
                 }
+                await _workflowRepository.UpdateRange(workflows);
             }
             
             return createResult;
