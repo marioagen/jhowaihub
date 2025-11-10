@@ -79,6 +79,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams
                 .Include(t => t.Users)
+                .Include(t => t.Profiles)
                 .Select(t => new TeamDto
                 {
                     Id = t.Id,
@@ -94,7 +95,14 @@ namespace WoopiAiHub.Repository
                             IsActive = u.IsActive,
                             Created = u.Created
                         })
-                        .ToList()
+                        .ToList(),
+                    Profiles = t.Profiles!
+                        .Select( p => new ProfileDto
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                        })
+                        .ToList(),
                 })
                 .AsNoTracking()
                 .FirstOrDefault(t => t.Id == id);
@@ -109,6 +117,8 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams.Where(u => u.Id == id)
                                         .Include(t => t.Users)
+                                        .Include(T => T.Profiles)
+                                            .ThenInclude(p => p.StepProfilePermissions)
                                         .FirstOrDefault();
         }
 
@@ -131,7 +141,8 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
-            var teams = _context.Teams.Where(a => ids.Contains(a.Id));
+            var teams = _context.Teams
+                .Where(a => ids.Contains(a.Id));
 
             if (teams.Any())
             {
@@ -225,8 +236,9 @@ namespace WoopiAiHub.Repository
         public List<Team> FindByIds(IEnumerable<int> ids)
         {
             return _context.Teams.Where(t => ids.Contains(t.Id))
-                                  .Include(t => t.Workflows)
-                                  .ToList();
+                    .Include(t => t.Profiles)
+                    .Include(t => t.Workflows)
+                    .ToList();
         }
 
         /// <summary>

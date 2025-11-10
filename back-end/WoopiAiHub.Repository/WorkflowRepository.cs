@@ -42,6 +42,17 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Updates a list of workflows.
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateRange(ICollection<Workflow> workflows)
+        {
+            _context.Workflows.UpdateRange(workflows);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
         /// Retrieves a workflow associated with a specific team ID.
         /// </summary>
         /// <param name="teamId"></param>
@@ -89,6 +100,33 @@ namespace WoopiAiHub.Repository
                     Id = w.Id,
                     Name = w.Name,
                 })
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves a list of workflows by its team ids.
+        /// </summary>
+        /// <param name="List<int>"></param>
+        /// <returns></returns>
+        public async Task<ICollection<Workflow>> FindByStep(List<int> stepsIds)
+        {
+            return await _context.Workflows
+                .Include(w => w.Steps)
+                .Include(w => w.Teams)
+                .Where(w => w.Enable && w.Steps.Any(s => stepsIds.Contains(s.Id)))
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves a list of workflows by its team ids.
+        /// </summary>
+        /// <param name="List<int>"></param>
+        /// <returns></returns>
+        public async Task<ICollection<Workflow>> FindByTeams(List<int> teamsIds)
+        {
+            return await _context.Workflows
+                .Include(w => w.Teams)
+                .Where(w => w.Enable && w.Teams.Any(s => teamsIds.Contains(s.Id)))
                 .ToListAsync();
         }
 

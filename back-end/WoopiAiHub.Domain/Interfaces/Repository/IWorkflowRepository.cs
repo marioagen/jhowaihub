@@ -8,12 +8,15 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<bool> Create(Workflow workflow);
         Task<bool> Update(Workflow workflow);
+        Task<bool> UpdateRange(ICollection<Workflow> workflows);
         Task<WorkflowDto?> FindByTeamId(int teamId, WorkflowFilterDto? workflowFilterDto);
         Task<WorkflowDto?> FindById(int id, WorkflowFilterDto? workflowFilterDto);
         Task<Workflow?> FindByIdReturnModel(int id);
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string userEmail);
         ICollection<WorkflowDto> FindAll();
+        Task<ICollection<Workflow>> FindByStep(List<int> stepIds);
+        Task<ICollection<Workflow>> FindByTeams(List<int> teamsIds);
         Task<List<Workflow>> FindByIdsAsync(ICollection<int> ids);
         IQueryable<WorkflowDto> FindAllWithFilter(WorkflowPagedDto workflowPagedDto);
     }

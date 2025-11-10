@@ -69,14 +69,14 @@ namespace WoopiAiHub.UnitTests.Services
             var teamCreateDto = new TeamCreateDto
             {
                 Name = "Equipe Teste",
-                UserIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+                UserIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
             };
 
             var users = new List<User>
-        {
-            new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
-            new User(teamCreateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
-        };
+            {
+                new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
+                new User(teamCreateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
+            };
 
             _userRepositoryMock
                 .Setup(repo => repo.FindByIdsAsync(teamCreateDto.UserIds))
@@ -121,9 +121,9 @@ namespace WoopiAiHub.UnitTests.Services
             };
 
             var users = new List<User>
-        {
-            new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now)
-        };
+            {
+                new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now)
+            };
 
             _userRepositoryMock
                 .Setup(repo => repo.FindByIdsAsync(teamCreateDto.UserIds))
@@ -157,10 +157,10 @@ namespace WoopiAiHub.UnitTests.Services
             };
 
             var users = new List<User>
-        {
-            new User(teamUpdateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
-            new User(teamUpdateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
-        };
+            {
+                new User(teamUpdateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
+                new User(teamUpdateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
+            };
 
             _teamRepositoryMock.Setup(r => r.FindByIdReturnModel(teamId)).Returns(team);
             _userRepositoryMock.Setup(r => r.FindByIdsAsync(teamUpdateDto.UserIds)).ReturnsAsync(users);

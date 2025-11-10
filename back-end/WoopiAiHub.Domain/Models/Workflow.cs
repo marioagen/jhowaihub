@@ -36,6 +36,7 @@ namespace WoopiAiHub.Domain.Models
                 return;
             Steps.Add(step);
         }
+        
         public void AddTeam(Team team)
         {
             ArgumentNullException.ThrowIfNull(team);
@@ -43,6 +44,15 @@ namespace WoopiAiHub.Domain.Models
             if (Teams.Any(s => s.Id != 0 && s.Id == team.Id))
                 return;
             Teams.Add(team);
+        }
+
+        public void RemoveTeam(Team team)
+        {
+            ArgumentNullException.ThrowIfNull(team);
+
+            if (Teams.Any(s => s.Id != 0 && s.Id == team.Id))
+                return;
+            Teams.Remove(team);
         }
 
         public void AddSteps(ICollection<Step> steps)

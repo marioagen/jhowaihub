@@ -11,6 +11,6 @@ namespace WoopiAiHub.Domain.DTOs.Request
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public List<int> PermissionsIds { get; set; } = new List<int>();
-        public List<WorkflowPermissionDto>? PermissionsWorkflow { get; set; } = new List<WorkflowPermissionDto>();
+        public List<WorkflowPermissionDto> PermissionsWorkflow { get; set; } = new List<WorkflowPermissionDto>();
     }
 }

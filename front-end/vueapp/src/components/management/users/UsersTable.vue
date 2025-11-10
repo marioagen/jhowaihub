@@ -29,7 +29,7 @@
                         v-for="profile in data.row.profiles"
                         :key="profile.id"
                         :text="profile.name"
-                        class="ms-2"
+                        class="ms-2 mt-1"
                         variant="primary"
                         @setClick="filterByProfile(profile)"
                     />
@@ -42,7 +42,7 @@
                         v-for="team in data.row.teams"
                         :key="team.id"
                         :text="team.name"
-                        class="ms-2"
+                        class="ms-2 mt-1"
                         variant="primary"
                         @setClick="filterByTeam(team)"
                     />

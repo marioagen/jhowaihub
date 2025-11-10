@@ -80,20 +80,6 @@ namespace WoopiAiHub.Repository.Mappings
                         je.Property<int>(PermissionIdColumn).HasColumnName(PermissionIdColumn);
                     });
 
-            builder.HasMany(u => u.Profiles)
-                .WithMany(t => t.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "UserProfiles",
-                    r => r.HasOne<Profile>().WithMany().HasForeignKey(ProfileIdColumn),
-                    l => l.HasOne<User>().WithMany().HasForeignKey(UserIdColumn),
-                    je =>
-                    {
-                        je.HasKey(UserIdColumn, ProfileIdColumn);
-                        je.ToTable("UserProfiles");
-                        je.Property<Guid>(UserIdColumn).HasColumnName(UserIdColumn);
-                        je.Property<int>(ProfileIdColumn).HasColumnName(ProfileIdColumn); 
-                    });
-
             builder.HasMany(u => u.Prompts)
            .WithOne(p => p.User)
            .HasForeignKey(p => p.IdUser)
