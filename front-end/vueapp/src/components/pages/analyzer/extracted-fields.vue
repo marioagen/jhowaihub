@@ -101,7 +101,6 @@
                 this.isEditing[index] = true;
             },
             handleFieldEdit(index, value) {
-                console.log(this.fields);
                 const updatedField = { ...this.fields[index], value };
                 this.$emit("field-changed", { index, field: updatedField });
             },

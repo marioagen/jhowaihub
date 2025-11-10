@@ -20,7 +20,7 @@
     import DocChat from "@/components/pages/analyzer/doc-chat";
     import api from "@/services/api";
     import WorkflowService from "@/services/workflow/WorkflowService";
-
+    import DocumentService from "@/services/documents/DocumentsServices";
     export default {
         name: "StepAnalysisView",
         components: {
@@ -47,15 +47,11 @@
             async loadDocumentData() {
                 this.loading = true;
                 try {
-                    // First, get the document info to retrieve the cardId
-                    const docResponse = await api.get(`/Document/Analyze/${this.documentId}`);
-                    this.cardId = docResponse.data.cardId;
 
-                    // Now fetch the steps using the cardId
-                    const response = await api.get(`/Document/AnalyzeSteps/${this.cardId}`);
-                    this.documentData = response.data;
+                    await this.findByIdAnalyze(this.documentId);
 
-                    // Set the initial step to the last processed one
+                    await this.findByIdAnalyzeWithSteps(this.cardId);
+
                     if (this.documentData.lastProcessedStepId && this.documentData.steps.length > 0) {
                         const lastStep = this.documentData.steps.find(
                             s => s.id === this.documentData.lastProcessedStepId
@@ -67,7 +63,7 @@
                 } catch (error) {
                     this.$emit("show-alert-toast", {
                         msg: $t('labelErrorLoadDocumentData'),
-                        color: "toast-danger",
+                        color: "toast-danger"
                     });
                 } finally {
                     this.loading = false;
@@ -86,12 +82,12 @@
                         if (response == true) {
                             this.$emit("show-alert-toast", {
                                 msg: $t('labelSuccessEditOutput'),
-                                color: "toast-success",
+                                color: "toast-success"
                             });
                         } else {
                             this.$emit("show-alert-toast", {
                                 msg: $t('labelFailedEditOutput'),
-                                color: "toast-danger",
+                                color: "toast-danger"
                             });
                         }
                     })
@@ -99,6 +95,24 @@
                         this.loadDocumentData();
                     });
             },
+            async findByIdAnalyze(id) {
+               await DocumentService.findByIdAnalyze(id)
+                    .then((response) => {
+                        this.cardId = response.data.cardId;
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    });
+            },
+            async findByIdAnalyzeWithSteps(id){
+               await DocumentService.findByIdAnalyzeWithSteps(id)
+                    .then((response) => {
+                        this.documentData = response.data;
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    });
+            }
         },
         mounted() {
             this.loadDocumentData();

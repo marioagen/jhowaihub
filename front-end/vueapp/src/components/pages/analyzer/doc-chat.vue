@@ -45,6 +45,7 @@
 
 <script>
     import api from "@/services/api";
+    import DocumentServices from "@/services/documents/DocumentsServices";
     export default {
         name: "DocChat",
         props: {
@@ -71,14 +72,25 @@
             async sendQuestion() {
                 if (!this.question.trim()) return;
                 this.isSending = true;
+                let params = {
+                    id: this.documentId,
+                    input: this.question,
+                }
                 try {
-                    const response = await api.post("/Document/input", {
-                        id: this.documentId,
-                        input: this.question,
-                    });
-                    this.output = response.data;
+                    await DocumentServices.inputDocument(params)
+                    .then((response) => {
+                            this.$emit("show-alert-toast", {
+                                msg: $t('labelSuccessEditOutput'),
+                                color: "toast-success"
+                            });
+                        this.output = response.data;
+                    })
+                    
                 } catch (error) {
-
+                    this.$emit("show-alert-toast", {
+                        msg: $t('labelFailedEditOutput'),
+                        color: "toast-danger"
+                    });
                 } finally {
                     this.isSending = false;
                 }
