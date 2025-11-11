@@ -22,11 +22,9 @@
         </div>
         <profiles-table ref="ProfilesTable" />
     </div>
-    <ProfilesModal :isEdit="false" :type="modalType" @reload="reloadTable" ref="ProfilesModal" />
 </template>
 
 <script>
-    import ProfilesModal from "@/components/management/profiles/modals/ProfilesModal.vue";
     import ProfilesTable from "@/components/management/profiles/ProfilesTable.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import editIcon from "@/assets/img/edit-outlined.svg";
@@ -63,7 +61,6 @@
         components: {
             ProfilesTable,
             SearchComponent,
-            ProfilesModal,
         },
         methods: {
             redirectToForm() {
@@ -84,9 +81,6 @@
                     ],
                 };
             },
-            openModalProfile() {
-                this.$refs.ProfilesModal.open();
-            },
             filterList(obj) {
                 this.$refs.ProfilesTable.filterList(obj.search);
             },
@@ -98,7 +92,6 @@
                 };
             },
             reloadTable() {
-                this.$refs.ProfilesModal.close();
                 this.$refs.ProfilesTable.reload();
             },
         },
