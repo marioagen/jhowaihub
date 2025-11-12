@@ -1,7 +1,7 @@
 ﻿<template>
     <main>
         <div class="container-fluid mt-4">
-            <div class="custom-padding">
+            <div>
                 <div class="row">
                     <!-- Component Breadcrumb -->
                     <breadcrumb :crumbs="crumbsData" />
@@ -20,7 +20,7 @@
                     />
                     <!-- Component DocView -->
                     <doc-view @showNormalize="normalize" id="docView" />
-                    <div :class="!isExpandedHistory ? 'col-md-3' : 'col-md-6'" id="docHistory">
+                    <div :class="'col-md-4'" id="docHistory">
                         <!--Component StepAnalysisView-->
                         <step-analysis-view
                             :document-id="parseInt(idAnalyzer)"
