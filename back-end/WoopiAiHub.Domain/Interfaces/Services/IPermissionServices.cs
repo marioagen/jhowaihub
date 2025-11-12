@@ -9,7 +9,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface IPermissionServices
     {
-        ICollection<PermissionDto> FindAll();
+        List<GroupedPermissionsDto> FindAll();
         ICollection<PermissionDto> FindWorkflowPermissions();
     }
 }
