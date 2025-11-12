@@ -259,9 +259,21 @@
                 if (!this.searchTerm) {
                     return this.permissionsList;
                 }
-                return this.permissionsList.filter((permission) =>
-                    permission.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-                );
+
+                const term = this.searchTerm.toLowerCase();
+                return this.permissionsList
+                    .map(group => {
+                        const filtered = group.permissions.filter(p =>
+                            p.name.toLowerCase().includes(term) ||
+                            p.description.toLowerCase().includes(term)
+                        );
+
+                        return {
+                            ...group,
+                            permissions: filtered
+                        };
+                    })
+                    .filter(group => group.permissions.length > 0);
             },
         },
         mounted() {
@@ -281,7 +293,6 @@
                 this.isLoadingPermissions = true;
                 PermissionsService.getPermissions()
                     .then((response) => {
-                        console.log(response)
                         this.permissionsList = response.permissions;
                     })
                     .finally(() => {
