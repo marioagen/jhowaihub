@@ -25,9 +25,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         FindByIdAnalyzeDto FindByIdAnalyze(int id,
                                            HeadersDto headersDto);
 
-        Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
-                                                                HeadersDto headersDto);
-
         Task<bool> ChangeStatus(int id,
                                 DocumentStatus status,
                                 string emailCreator);

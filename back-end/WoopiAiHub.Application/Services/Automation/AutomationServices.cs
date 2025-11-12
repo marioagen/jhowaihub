@@ -126,7 +126,8 @@ namespace WoopiAiHub.Application.Services.Automation
 
             foreach (var workflow in workflows)
             {
-                var stepToolIds = allStepTools.OrderBy(st => st.Order)
+                var stepToolIds = allStepTools.Where(st => st.Step!.WorkflowId.Equals(workflow.Id))
+                                              .OrderBy(st => st.Order)
                                               .Select(st => st.Id)
                                               .ToList();
 

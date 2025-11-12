@@ -62,7 +62,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindById_Success()
         {
             // Arrange
-            var document = _fixture.FindValidDocument();
+            var document = DocumentFixture.FindValidDocument();
             var documentHistoryList = _fixture.FindValidDocumentHistoryList();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(documentHistoryList);
@@ -82,7 +82,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindById_Fail()
         {
             // Arrange
-            var document = _fixture.FindValidDocument();
+            var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(new List<DocumentHistory>());
 
@@ -102,7 +102,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var updateHistoryDto = _fixture.FindValidUpdateHistoryDto();
-            var document = _fixture.FindValidDocument();
+            var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.UpdateHistory(It.IsAny<UpdateHistoryDto>())).Returns(true);
 
@@ -120,7 +120,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var updateHistoryDto = _fixture.FindValidUpdateHistoryDto();
-            var document = _fixture.FindValidDocument();
+            var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.UpdateHistory(It.IsAny<UpdateHistoryDto>())).Returns(false);
 
@@ -137,7 +137,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void Delete_Success()
         {
             // Arrange
-            var document = _fixture.FindValidDocument();
+            var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.Delete(It.IsAny<int>())).Returns(true);
 
@@ -154,7 +154,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void Delete_Fail()
         {
             // Arrange
-            var document = _fixture.FindValidDocument();
+            var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.Delete(It.IsAny<int>())).Returns(false);
 

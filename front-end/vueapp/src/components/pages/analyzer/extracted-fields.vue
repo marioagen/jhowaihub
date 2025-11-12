@@ -7,7 +7,7 @@
 
         <div v-if="fields.length === 0" class="no-data-message">
             <i class="fas fa-info-circle"></i>
-            {{ $t("labelNoDataInDocument") }}
+            {{ $t("analyze.noDataInDocument") }}
         </div>
 
         <div v-else class="fields-list">

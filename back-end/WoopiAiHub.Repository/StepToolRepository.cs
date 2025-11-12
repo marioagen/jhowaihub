@@ -201,6 +201,7 @@ namespace WoopiAiHub.Repository
                 return new List<StepTool>();
 
             return await _context.StepTools
+                .Include(st => st.Step)
                 .AsNoTracking()
                 .Where(st => stepIds.Contains(st.StepId))
                 .OrderBy(st => st.StepId)
