@@ -1,6 +1,6 @@
 <template>
     <main>
-        <div class="container-fluid scroll-area mx-4 mt-4">
+        <div class="container-fluid scroll-area mx-4 mt-4 mb-4">
             <div class="row align-items-center">
                 <div class="col-6">
                     <div class="row">
@@ -60,8 +60,39 @@
                                 {{ $t("labelClearSelection") }}
                             </button>
                         </div>
-                        <div class="border rounded p-2 user-list">
-                            <div class="row ms-2">
+                        <div class="accordion-wrapper-scroll border rounded p-2 user-list">
+                            <div
+                                v-for="(group, index) in filteredPermissions"
+                                :key="group.group"
+                                class="mb-2 border rounded"
+                            >
+                                <div
+                                    class="d-flex justify-content-between align-items-center p-2 px-3"
+                                >
+                                    <div>
+                                        <strong>{{ group.group }}</strong>
+                                        <span class="text-muted ms-1">
+                                            ({{ group.permissions.length }})
+                                        </span>
+                                    </div>
+
+                                    <a @click="toggleCollapse(index)">
+                                        <LucideIcon
+                                            :icon="openIndex === index ? 'ChevronUp' : 'ChevronDown'"
+                                            :size="20"
+                                        />
+                                    </a>
+                                </div>
+
+                                <CollapseComponent
+                                    ref="collapseComponents"
+                                >
+                                    <div class="accordion-body-scroll p-3">
+                                        {{ group.permissions }}
+                                    </div>
+                                </CollapseComponent>
+                            </div>
+                            <!-- <div class="row ms-2">
                                 <div
                                     v-for="permission in filteredPermissions"
                                     :key="permission.id"
@@ -86,7 +117,7 @@
                             </div>
                             <div v-if="permissionError" class="invalid-feedback d-block">
                                 {{ permissionError }}
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -107,7 +138,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="border rounded p-3 workflow-list">
+                    <div class="accordion-wrapper-scroll border rounded p-3 workflow-list">
                         <div
                             v-for="workflow in workflowList"
                             :key="workflow.id"
@@ -171,10 +202,12 @@
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import CollapseComponent from "@/components/global/CollapseComponent.vue";
 
     export default {
         name: "ProfilesForm",
         components: {
+            CollapseComponent,
         },
         props: {
             isEdit: {
@@ -204,6 +237,7 @@
             nameError: "",
             permissionError: "",
             searchTerm: "",
+            opened: {},
         }),
         computed: {
             formTitle() {
@@ -237,6 +271,7 @@
             getPermissions() {
                 PermissionsService.getPermissions()
                     .then((response) => {
+                        console.log(response)
                         this.permissionsList = response.permissions;
                     });
             },
@@ -355,6 +390,15 @@
                     permissions: [] 
                 };
             },
+            toggleCollapse(index) {
+                const collapse = this.$refs.collapseComponents[index];
+                if (collapse && collapse.toggle) {
+                    collapse.toggle();
+                    this.$set
+                    ? this.$set(this.opened, index, !this.opened[index])
+                    : (this.opened[index] = !this.opened[index]);
+                }
+            }
         },
     };
 </script>
@@ -369,5 +413,22 @@
         border-radius: 8px;
         background: white;
         padding: 20px 24px;
+    }
+
+    /* 🔹 outer wrapper: scroll entire list */
+    .accordion-wrapper-scroll {
+        max-height: 300px; /* adjust as needed */
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+
+    /* optional prettier scrollbar for Webkit browsers */
+    .accordion-wrapper-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .accordion-wrapper-scroll::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
     }
 </style>
