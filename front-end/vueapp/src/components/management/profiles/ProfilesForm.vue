@@ -60,7 +60,10 @@
                                 {{ $t("labelClearSelection") }}
                             </button>
                         </div>
-                        <div class="accordion-wrapper-scroll border rounded p-2 user-list">
+                        <div v-if="isLoadingPermissions">
+                            <LoadingComponent />
+                        </div>
+                        <div v-else class="accordion-wrapper-scroll border rounded p-2 user-list">
                             <div
                                 v-for="(group, index) in filteredPermissions"
                                 :key="group.group"
@@ -72,7 +75,7 @@
                                     <div>
                                         <strong>{{ group.group }}</strong>
                                         <span class="text-muted ms-1">
-                                            ({{ group.permissions.length }})
+                                            ({{ checkedCount(group.permissions) }} / {{ group.permissions.length }})
                                         </span>
                                     </div>
 
@@ -87,37 +90,36 @@
                                 <CollapseComponent
                                     ref="collapseComponents"
                                 >
-                                    <div class="accordion-body-scroll p-3">
-                                        {{ group.permissions }}
+                                    <div class="p-1">
+                                        <div class="row">
+                                            <div
+                                                v-for="permission in group.permissions"
+                                                :key="permission.id"
+                                                class="col-md-3 p-1"
+                                            >
+                                                <div class="form-check d-flex align-items-center">
+                                                    <input
+                                                        class="form-check-input me-2"
+                                                        type="checkbox"
+                                                        :id="`permission-${permission.id}`"
+                                                        :value="permission.id"
+                                                        v-model="selectedPermissions"
+                                                    />
+                                                    <label
+                                                        class="form-check-label fw-semibold"
+                                                        :for="`permission-${permission.id}`"
+                                                    >
+                                                        {{ permission.description }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div v-if="permissionError" class="invalid-feedback d-block">
+                                            {{ permissionError }}
+                                        </div>
                                     </div>
                                 </CollapseComponent>
                             </div>
-                            <!-- <div class="row ms-2">
-                                <div
-                                    v-for="permission in filteredPermissions"
-                                    :key="permission.id"
-                                    class="col-md-3 p-1"
-                                >
-                                    <div class="form-check d-flex align-items-center">
-                                        <input
-                                            class="form-check-input me-2"
-                                            type="checkbox"
-                                            :id="`permission-${permission.id}`"
-                                            :value="permission.id"
-                                            v-model="selectedPermissions"
-                                        />
-                                        <label
-                                            class="form-check-label fw-semibold"
-                                            :for="`permission-${permission.id}`"
-                                        >
-                                            {{ permission.description }}
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div v-if="permissionError" class="invalid-feedback d-block">
-                                {{ permissionError }}
-                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -138,7 +140,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-wrapper-scroll border rounded p-3 workflow-list">
+                    <div v-if="isLoadingWorkflowPermissions">
+                        <LoadingComponent />
+                    </div>
+                    <div v-else class="accordion-wrapper-scroll border rounded p-3 workflow-list">
                         <div
                             v-for="workflow in workflowList"
                             :key="workflow.id"
@@ -203,10 +208,12 @@
     import ProfilesService from "@/services/profiles/ProfilesService";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import CollapseComponent from "@/components/global/CollapseComponent.vue";
+    import LoadingComponent from "@/components/global/LoadingComponent.vue";
 
     export default {
         name: "ProfilesForm",
         components: {
+            LoadingComponent,
             CollapseComponent,
         },
         props: {
@@ -229,6 +236,8 @@
                 workflowPermissions: [],
             },
             isLoading: false,
+            isLoadingPermissions: true,
+            isLoadingWorkflowPermissions: true,
             workflowList: [],
             permissionsList: [],
             permissionsWorkflowList: [],
@@ -269,16 +278,24 @@
                 });
             },
             getPermissions() {
+                this.isLoadingPermissions = true;
                 PermissionsService.getPermissions()
                     .then((response) => {
                         console.log(response)
                         this.permissionsList = response.permissions;
+                    })
+                    .finally(() => {
+                        this.isLoadingPermissions = false;
                     });
             },
             getWorkflowPermissions() {
+                this.isLoadingWorkflowPermissions = true;
                 PermissionsService.getWorkflowPermissions()
                     .then((response) => {
                         this.permissionsWorkflowList = response.permissions;
+                    })
+                    .finally(() => {
+                        this.isLoadingWorkflowPermissions = false;
                     });
             },
             getWorkflows() {
@@ -390,6 +407,9 @@
                     permissions: [] 
                 };
             },
+            checkedCount(permissions) {
+                return permissions.filter(p => this.selectedPermissions.includes(p.id)).length;
+            },
             toggleCollapse(index) {
                 const collapse = this.$refs.collapseComponents[index];
                 if (collapse && collapse.toggle) {
@@ -415,14 +435,12 @@
         padding: 20px 24px;
     }
 
-    /* 🔹 outer wrapper: scroll entire list */
     .accordion-wrapper-scroll {
-        max-height: 300px; /* adjust as needed */
+        max-height: 300px;
         overflow-y: auto;
         scrollbar-width: thin;
     }
 
-    /* optional prettier scrollbar for Webkit browsers */
     .accordion-wrapper-scroll::-webkit-scrollbar {
         width: 6px;
     }
