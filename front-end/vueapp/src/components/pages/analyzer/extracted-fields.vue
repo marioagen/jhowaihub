@@ -18,6 +18,9 @@
                         <i class="fas fa-pen"></i>
                         {{ $t("labelEdited") }}
                     </span>
+                    <span @click="open(fields[index].value, field.label)">
+                        <LucideIcon icon="Eye" :size="16" />
+                    </span>
                 </div>
                 <div class="field-value-container" v-if="field.outputType == 'N8N'">
                     <input type="text"
@@ -28,11 +31,11 @@
                 </div>
                 <div v-if=" field.outputType == 'Prompt'">
                     <textarea type="text"
-                           class="form-control mb-2"
-                           @input="(e) => handleFieldEdit(index, e.target.value)"
-                           :readonly="!isEditing[index]"
-                           v-model="fields[index].value" 
-                           rows="5"></textarea>
+                              class="form-control mb-2"
+                              @input="(e) => handleFieldEdit(index, e.target.value)"
+                              :readonly="!isEditing[index]"
+                              v-model="fields[index].value"
+                              rows="5"></textarea>
                     <button v-if="!isEditing[index]"
                             class="edit-button mb-2"
                             @click="startEditing(index)"
@@ -51,9 +54,10 @@
             </div>
         </div>
     </div>
+    <ExtractDataModal ref="ExtractModal" />
 </template>
-
 <script>
+    import ExtractDataModal from "@/components/analyze/ExtractDataModal.vue";
     export default {
         name: "ExtractedFields",
         props: {
@@ -65,6 +69,14 @@
             title: {
                 type: String,
                 default: "Dados Extraídos",
+            },
+            value: {
+                type: String,
+                default: "",
+            },
+            label: {
+                type: String,
+                default: "",
             },
         },
         emits: ["field-updated"],
@@ -98,6 +110,10 @@
                 this.isEditing[index] = false;
                 delete this.originalValues[index];
             },
+            open(value, label) {
+                console.log(this.$refs.ExtractModal.value);
+                this.$refs.ExtractModal.open(value,label);
+            }
         }
     };
 </script>

@@ -84,6 +84,7 @@
         },
         methods: {
             open() {
+                console.log("fim");
                 this.modalInstance?.show();
             },
             close() {
