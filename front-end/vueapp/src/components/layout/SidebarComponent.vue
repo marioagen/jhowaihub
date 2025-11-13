@@ -81,11 +81,18 @@
                 },
                 menuItems: [
                     {
+                        permission: 'Dashboard',
+                        activeKey: 'Dashboard',
+                        to: '/dashboard',
+                        icon: { name: 'LayoutGrid', color: '#f43f5e' },
+                        labelKey: 'pages.dashboard'
+                    },
+                    {
                         permission: 'Management',
                         activeKey: 'DocumentList',
                         to: '/management',
                         icon: { name: 'Users', color: '#ff6900' },
-                        labelKey: 'labelManageUsers'
+                        labelKey: 'pages.management'
                     },
                     {
                         activeKey: 'DocumentList',
@@ -94,7 +101,7 @@
                             name: 'FileText', 
                             color: '#2f80ed' 
                         },
-                        labelKey: 'labelDocuments'
+                        labelKey: 'pages.documents'
                     },
                     {
                         permission: 'Workflow',
@@ -104,7 +111,7 @@
                             name: 'Workflow', 
                             color: '#615FFF' 
                         },
-                        labelKey: 'workflow.sidebar.index'
+                        labelKey: 'pages.workflows'
                     },
                     {
                         permission: 'Workflow',
@@ -114,7 +121,7 @@
                             name: 'Workflow', 
                             color: '#00bba7' 
                         },
-                        labelKey: 'workflow.sidebar.management'
+                        labelKey: 'pages.workflowManagement'
                     },
                     {
                         permission: 'Types',
@@ -124,7 +131,7 @@
                             name: 'BookmarkCheck', 
                             color: '#f2c94c' 
                         },
-                        labelKey: 'labelTypes'
+                        labelKey: 'pages.types'
                     },
                     {
                         permission: 'Questions',
@@ -134,7 +141,7 @@
                             name: 'MessageSquare', 
                             color: '#3fd67b' 
                         },
-                        labelKey: 'labelQuestions'
+                        labelKey: 'pages.questions'
                     },
                     {
                         permission: 'Quizzes',
@@ -144,7 +151,7 @@
                             name: 'ClipboardList', 
                             color: '#a259ff' 
                         },
-                        labelKey: 'quizzes.title'
+                        labelKey: 'pages.quizzes'
                     },
                     {
                         permission: 'Tools',
@@ -154,7 +161,7 @@
                             name: 'PocketKnife', 
                             color: '#f59e0b'
                         },
-                        labelKey: 'tools.title'
+                        labelKey: 'pages.tools'
                     },
                     {
                         permission: 'Prompts',
@@ -164,7 +171,7 @@
                             name: 'Braces',
                             color: '#8e51ff'
                         },
-                        labelKey: 'prompts.title'
+                        labelKey: 'pages.prompts'
                     },
                 ]
             };
