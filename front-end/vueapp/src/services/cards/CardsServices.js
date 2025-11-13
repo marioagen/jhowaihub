@@ -36,5 +36,17 @@ export default {
                     error: error,
                 };
             });
-    }
+    },
+    async findByIdAnalyzeWithSteps(id) {
+        return await api
+            .get(`/Card/AnalyzeSteps/${id}`)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    }    
 };
