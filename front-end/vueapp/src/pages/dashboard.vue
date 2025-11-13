@@ -1,10 +1,12 @@
 <template>
-    <h1>Dashboard</h1>
+    <DashboardComponent />
 </template>
 
 <script>
+    import DashboardComponent from '@/components/dashboard/DashboardComponent.vue';
     export default {
         components: {
+            DashboardComponent,
         }
     }
 </script>
