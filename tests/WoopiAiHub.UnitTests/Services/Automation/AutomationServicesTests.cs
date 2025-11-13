@@ -39,16 +39,18 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         public async Task PrepareExecutionAsync_Success_ShouldCreateExecutions()
         {
             // Arrange
-            var workflows = WorkflowFixture.FindValidWorkflows(); ; // Crie um fixture que retorna workflows válidos
+            var workflows = WorkflowFixture.FindValidWorkflows();
             var stepIds = workflows.SelectMany(wf => wf.Steps.Select(s => s.Id)).ToList();
             var stepTool = WorkflowFixture.FindValidStepTool();
-            stepTool.Step = WorkflowFixture.FindValidStep();
+            stepTool.Step = WorkflowFixture.FindValidStep(workflows.First().Id);
+
             var stepTools = new List<StepTool> { stepTool };
             var activeCardIds = new List<int> { 10, 20 };
             var existingExecutions = new List<(int StepToolId, int CardId)>
             {
-                (10,20)
-            }; 
+                (1, 10),
+                (1, 20)
+            };
 
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
@@ -100,7 +102,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var stepTool = WorkflowFixture.FindValidStepTool();
             stepTool.Step = WorkflowFixture.FindValidStep();
             var stepTools = new List<StepTool> { stepTool };
-            var activeCardIds = new List<int> { 10, 20 };
+            var activeCardIds = new List<int>();
             var existingExecutions = new List<(int StepToolId, int CardId)>
             {
                 (1, 10),
