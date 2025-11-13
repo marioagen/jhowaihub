@@ -41,7 +41,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var workflows = WorkflowFixture.FindValidWorkflows(); ; // Crie um fixture que retorna workflows válidos
             var stepIds = workflows.SelectMany(wf => wf.Steps.Select(s => s.Id)).ToList();
-            var stepTools = new List<StepTool> { new StepTool(1, DateTime.UtcNow, 1, 1, 1, 0, 0) };
+            var stepTool = WorkflowFixture.FindValidStepTool();
+            stepTool.Step = WorkflowFixture.FindValidStep();
+            var stepTools = new List<StepTool> { stepTool };
             var activeCardIds = new List<int> { 10, 20 };
             var existingExecutions = new List<(int StepToolId, int CardId)>
             {
@@ -95,7 +97,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var workflows = WorkflowFixture.FindValidWorkflows();
             var stepIds = workflows.SelectMany(wf => wf.Steps.Select(s => s.Id)).ToList();
-            var stepTools = new List<StepTool> { new StepTool(1, DateTime.UtcNow, 1, 1, 1, 0, 0) };
+            var stepTool = WorkflowFixture.FindValidStepTool();
+            stepTool.Step = WorkflowFixture.FindValidStep();
+            var stepTools = new List<StepTool> { stepTool };
             var activeCardIds = new List<int> { 10, 20 };
             var existingExecutions = new List<(int StepToolId, int CardId)>
             {
