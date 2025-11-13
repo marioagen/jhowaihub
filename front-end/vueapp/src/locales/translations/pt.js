@@ -650,7 +650,19 @@
         nextStep: "Próxima etapa",
         noDataInDocument: "Não há dados disponíveis",
         failedLoadDocument: "Falha ao carregar documento",
-    }    
+    },
+    pages: {
+        dashboard: "Dashboard",
+        management: "Gestão de Usuários",
+        documents: "Documentos",
+        workflows: "Workflows de Documentos",
+        workflowManagement: "Gestão de Workflows",
+        types: "Tipos",
+        questions: "Perguntas",
+        quizzes: "Questionários",
+        tools: "Ferramentas",
+        prompts: "Prompts",
+    },
 };
 
 export default portuguese;

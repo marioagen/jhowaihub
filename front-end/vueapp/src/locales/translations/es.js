@@ -689,7 +689,19 @@
         nextStep: "Siguiente paso",
         noDataInDocument: "No hay datos disponibles",
         failedLoadDocument: "No se pudo cargar el documento.",
-    }
+    },
+    pages: {
+        dashboard: "Panel de Control",
+        management: "Gestión de Usuarios",
+        documents: "Documentos",
+        workflows: "Flujos de Trabajo de Documentos",
+        workflowManagement: "Gestión de Flujos de Trabajo",
+        types: "Tipos",
+        questions: "Preguntas",
+        quizzes: "Cuestionarios",
+        tools: "Herramientas",
+        prompts: "Prompts",
+    },
 };
 
 export default spanish;

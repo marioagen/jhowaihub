@@ -686,7 +686,19 @@
         nextStep: "Next Step",
         noDataInDocument: "No data available",
         failedLoadDocument: "Failed to load document",
-    }
+    },
+    pages: {
+        dashboard: "Dashboard",
+        management: "User Management",
+        documents: "Documents",
+        workflows: "Document Workflows",
+        workflowManagement: "Workflow Management",
+        types: "Types",
+        questions: "Questions",
+        quizzes: "Quizzes",
+        tools: "Tools",
+        prompts: "Prompts",
+    },
 };
 
 export default english;
