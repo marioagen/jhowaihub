@@ -223,7 +223,7 @@
             },
             redirectToAnalyzer() {
                 if (!this.showLoading) {
-                    this.$router.push({ name: 'Analyzer', params: { id: this.dataCard.documentId }, query: { page: this.backPage } });
+                    this.$router.push({ name: 'Analyzer', params: { documentId: this.dataCard.documentId, cardId: this.dataCard.id }, query: { page: this.backPage } });
                 }
             },
             reloadList() {

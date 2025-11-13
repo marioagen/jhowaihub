@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
@@ -61,6 +63,23 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> UnassignUser(int cardId)
         {
             var result = await _cardServices.UnassignUser(cardId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// It receives a card id and returns document information grouped by processing steps.
+        /// </summary>
+        /// <param name="id">Card ID</param>
+        /// <param name="headersDto"></param>
+        /// <returns></returns>
+        [HttpGet("AnalyzeSteps/{id}")]
+        [SwaggerOperation("It receives a card id and returns a DocumentAnalyzeStepsDto with the document's information grouped by steps")]
+        [ProducesResponseType(typeof(DocumentAnalyzeStepsDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindByIdAnalyzeWithSteps(int id,
+                                                                   [FromHeader] HeadersDto headersDto)
+        {
+            var result = await _cardServices.FindByIdAnalyzeWithSteps(id,
+                                                                      headersDto);
             return Ok(result);
         }
     }

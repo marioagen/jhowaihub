@@ -671,19 +671,25 @@
         deleteError: "No se pudieron eliminar los prompts",
         removeAllPrompts: "Eliminar prompts"
     },
-    labelPreviousStep: "Paso anterior",
-    labelNextStep: "Siguiente paso",
-    labelNoDataInDocument: "No hay datos disponibles",
-    labelAskTheDoc: "Preguntar al documento",
-    labelConversationWithDocument: "Escriba su pregunta sobre el documento...",
-    labelAskAI: "Preguntar a la IA",
-    labelTypeYourQuestion: "Escriba su pregunta sobre el documento...",
-    labelSendQuestion: "Enviar pregunta",
-    labelExtractedData: "Datos extraídos",
-    labelErrorLoadDocumentData: "Error al cargar datos del documento",
-    labelSuccessEditOutput: "Output editada con éxito",
-    labelFailedEditOutput: "No se pudo editar el output.",
-    labelClear:"Limpiar"
+    analyze:{
+        title: "Análisis de Documentos",
+        errorLoadDocumentData: "Error al cargar datos del documento",
+        failedEditOutput: "No se pudo editar el output.",
+        successEditOutput: "Output editada con éxito",
+        extractedData: "Datos extraídos",
+        askTheDoc: "Preguntar al documento",
+        conversationWithDocument: "Escriba su pregunta sobre el documento...",
+        askAI:"Preguntar a la IA",
+        typeYourQuestion: "Escriba su pregunta sobre el documento...",
+        sendQuestion: "Enviar pregunta",
+        output: "Salida",
+        clear: "Limpiar",
+        copy: "Copiar",
+        previousStep: "Paso anterior",
+        nextStep: "Siguiente paso",
+        noDataInDocument: "No hay datos disponibles",
+        failedLoadDocument: "No se pudo cargar el documento.",
+    }
 };
 
 export default spanish;

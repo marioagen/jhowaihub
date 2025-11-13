@@ -62,7 +62,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindById_Success()
         {
             // Arrange
-            var document = _fixture.FindValidDocument();
+            var document = DocumentFixture.FindValidDocument();
             var documentNormalized = _fixture.FindValidDocumentNormalized();
             var documentNormalizedRepository = _mocker.GetMock<IDocumentNormalizedRepository>();
             documentNormalizedRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(documentNormalized);
@@ -81,7 +81,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindById_Fail()
         {
             // Arrange
-            var document = _fixture.FindValidDocument();
+            var document = DocumentFixture.FindValidDocument();
             DocumentNormalized documentNormalized = null;
             var documentNormalizedRepository = _mocker.GetMock<IDocumentNormalizedRepository>();
             documentNormalizedRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(documentNormalized);

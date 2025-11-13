@@ -40,7 +40,7 @@ namespace WoopiAiHub.Application.Messaging
         {
             await _consumer.ConsumerAsync(_queues.AutomationQueueResponse, async message =>
             {
-                using var scope = _scopeFactory.CreateScope();
+               using var scope = _scopeFactory.CreateScope();
                 try
                 {
                     var connectionString = await GetConnectionStringAsync(scope, message.Tenant!, ColTypeModule.WoopiAiHub);

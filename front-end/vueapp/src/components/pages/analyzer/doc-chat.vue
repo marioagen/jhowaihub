@@ -2,23 +2,23 @@
     <div class="doc-chat-container">
         <button class="chat-toggle-button" @click="toggleChat" :class="{ expanded: isExpanded }">
             <i class="fas fa-comment-dots"></i>
-            {{ $t("labelAskTheDoc") }}
+            {{ $t("analyze.askTheDoc") }}
         </button>
 
         <div v-if="isExpanded" class="chat-panel">
             <div class="chat-header">
                 <i class="fas fa-comment-dots"></i>
-                {{ $t("labelConversationWithDocument") }}
+                {{ $t("analyze.conversationWithDocument") }}
                 <button class="close-button" @click="toggleChat" :title="$t('labelClose')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <div class="chat-input-section">
-                <label class="input-label">{{ $t("labelAskAI") }}</label>
+                <label class="input-label">{{ $t("analyze.askAI") }}</label>
                 <textarea v-model="question"
                           class="chat-textarea"
-                          :placeholder="$t('labelTypeYourQuestion')"
+                          :placeholder="$t('analyze.typeYourQuestion')"
                           rows="4"
                           @input="handleInput"></textarea>
 
@@ -27,16 +27,16 @@
                         @click="sendQuestion"
                         :disabled="isSending">
                     <i class="fas fa-paper-plane"></i>
-                    {{ $t("labelSendQuestion") }}
+                    {{ $t("analyze.sendQuestion") }}
                 </button>
                 <div v-if="output != ''">
-                    <label class="input-label">{{ $t("labelOutput") }}</label>
+                    <label class="input-label">{{ $t("analyze.output") }}</label>
                     <textarea v-model="output"
                               class="chat-textarea"
                               rows="4">
                     </textarea>
-                    <button type="button" class="btn btn-outline-primary" @click="copy">{{ $t("labelCopy") }}</button>
-                    <button type="button" class="btn btn-outline-primary" @click="clear">{{ $t("labelClear") }}</button>
+                    <button type="button" class="btn btn-outline-primary" @click="copy">{{ $t("analyze.copy") }}</button>
+                    <button type="button" class="btn btn-outline-primary" @click="clear">{{ $t("analyze.clear") }}</button>
                 </div>
             </div>
         </div>
@@ -44,7 +44,6 @@
 </template>
 
 <script>
-    import api from "@/services/api";
     import DocumentServices from "@/services/documents/DocumentsServices";
     export default {
         name: "DocChat",
@@ -79,17 +78,21 @@
                 try {
                     await DocumentServices.inputDocument(params)
                     .then((response) => {
-                            this.$emit("show-alert-toast", {
-                                msg: this.$t('labelSuccessEditOutput'),
-                                color: "toast-success"
-                            });
+                        this.$notify({
+                            title: "analyze.title",
+                            message:"analyze.successEditOutput",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
                         this.output = response.data;
                     })
                     
                 } catch (error) {
-                    this.$emit("show-alert-toast", {
-                        msg: this.$t('labelFailedEditOutput'),
-                        color: "toast-danger"
+                    this.$notify({
+                        title: "analyze.title",
+                        message:"analyze.failedEditOutput",
+                        variant: "danger",
+                        icon: "CircleX",
                     });
                 } finally {
                     this.isSending = false;
