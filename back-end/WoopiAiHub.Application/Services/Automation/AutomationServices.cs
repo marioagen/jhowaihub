@@ -163,7 +163,7 @@ namespace WoopiAiHub.Application.Services.Automation
         public async Task StartExecutionByWorkflowsAsync(AutomationServicesDto automationServicesDto, ICollection<Workflow> workflows)
         {
             var firstSteps = workflows.SelectMany(wf => wf.Steps.Where(s => s.Order == 1)).ToList();
-            await Parallel.ForEachAsync(firstSteps, async (step, ct) =>
+            foreach (var step in firstSteps)
             {
                 try
                 {
@@ -173,7 +173,7 @@ namespace WoopiAiHub.Application.Services.Automation
                 {
                     _logger.LogError(ex, "Erro ao iniciar execuções do Step {StepId}", step.Id);
                 }
-            });
+            }
         }
 
         /// <summary>

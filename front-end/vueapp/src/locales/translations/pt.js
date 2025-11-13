@@ -219,6 +219,7 @@
     labelMessage: "Tem certeza?",
     labelCancelMessage: "Cancelar",
     labelConfirmMessage: "Confirmar",
+    labelRequiredField: "Campo obrigatório",
     labelYouAreAboutToDeleteUser: "Você está prestes a deletar um usuário do sistema",
     labelYouAreAboutToDeleteType: "Você está prestes a deletar um tipo do sistema",
     labelEditTitleType: "Edição de tipo",
