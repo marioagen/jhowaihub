@@ -8,5 +8,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public string ReferenceFile { get; set; } = string.Empty;
         public string LastProcessedStepId { get; set; } = string.Empty;
         public List<DocumentStepDto> Steps { get; set; } = new();
+        public bool CanAnswer { get; set; } = false;
     }
 }

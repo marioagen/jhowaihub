@@ -286,6 +286,8 @@ namespace WoopiAiHub.Application.Services
                                                                              HeadersDto headersDto)
         {
             var card = await FindCardWithRelationships(cardId);
+            //procurar na stepToolExecution o card relacionado com status ready, q tenha a steptool id com a tool ocr e o mesmo para embeddings
+
             var document = card.Document ?? throw new ArgumentException("Document not found for the card");
             var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
 

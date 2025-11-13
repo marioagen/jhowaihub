@@ -19,7 +19,7 @@
                     {{ $t("labelCancel") }}
                 </button>
                 <button class="btn btn-primary btn-sm" @click="copy">
-                    {{ $t(labelCopy) }}
+                    {{ $t("labelCopy") }}
                 </button>
             </div>
         </template>
@@ -53,11 +53,5 @@
                navigator.clipboard.writeText(text)
             },
         },
-        mounted() {
-            console.log("mounted");
-        },
-        created(){
-            console.log("created");
-        }
     };
 </script>

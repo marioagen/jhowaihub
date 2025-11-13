@@ -28,6 +28,20 @@
                            @input="(e) => handleFieldEdit(index, e.target.value)"
                            :readonly="!isEditing[index]"
                            v-model="fields[index].value" />
+                    <button v-if="!isEditing[index]"
+                            class="edit-button mb-2"
+                            @click="startEditing(index)"
+                            :title="$t('labelEdit')">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <div v-else class="edit-actions">
+                        <button class="save-button" @click="saveEdit(index, field.outputId)" :title="$t('labelSave')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="cancel-button" @click="cancelEdit(index)" :title="$t('labelCancel')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
                 <div v-if=" field.outputType == 'Prompt'">
                     <textarea type="text"
@@ -80,6 +94,9 @@
             },
         },
         emits: ["field-updated"],
+        components: {
+            ExtractDataModal
+        },
         data() {
             return {
                 isEditing: {},
@@ -111,7 +128,6 @@
                 delete this.originalValues[index];
             },
             open(value, label) {
-                console.log(this.$refs.ExtractModal.value);
                 this.$refs.ExtractModal.open(value,label);
             }
         }
