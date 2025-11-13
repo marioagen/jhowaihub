@@ -38,11 +38,6 @@
             </template>
         </TableComponent>
     </div>
-    <ProfilesModal 
-        :isEdit="true" 
-        @reload="reload" 
-        ref="ProfilesModal" 
-    />
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteProfile"
@@ -59,7 +54,6 @@
 <script>
     import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ProfilesModal from "@/components/management/profiles/modals/ProfilesModal.vue";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
@@ -70,7 +64,6 @@
         components: {
             DropdownComponent,
             TableComponent,
-            ProfilesModal,
             ConfirmModal,
         },
         data: () => ({
@@ -165,9 +158,6 @@
                     }
                 });
             },
-            openEditModal(profile) {
-                this.$refs.ProfilesModal.open(profile);
-            },
             openConfirmation(profile) {
                 this.selectedProfile = [profile.id];
                 this.$refs.DeleteDialog.open();
@@ -204,7 +194,6 @@
                     });
             },
             reload() {
-                this.$refs.ProfilesModal.close();
                 this.getProfiles({ search: "", page: this.queryPage, type: null });
             },
         },

@@ -23,9 +23,18 @@ namespace WoopiAiHub.Application.Services
         /// Find all permissions
         /// </summary>
         /// <returns></returns>
-        public ICollection<PermissionDto> FindAll()
+        public List<GroupedPermissionsDto> FindAll()
         {
-            return _permissionRepository.FindAll();
+            var permissions = _permissionRepository.FindAll();
+
+            return permissions
+                .GroupBy(p => p.Group)
+                .Select(g => new GroupedPermissionsDto
+                {
+                    Group = g.Key,
+                    Permissions = g.ToList()
+                })
+                .ToList();
         }
 
         /// <summary>

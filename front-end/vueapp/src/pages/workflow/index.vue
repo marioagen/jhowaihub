@@ -45,9 +45,7 @@
                     </div>
                 </div>
                 <div v-if="isLoadingKanban">
-                    <div class="d-flex justify-content-center">
-                        <div class="spinner-border text-primary" role="status"></div>
-                    </div>
+                    <LoadingComponent />
                 </div>
                 <div v-else-if="hasList">
                     <div class="card mb-3 h-100">
@@ -91,6 +89,7 @@ import WorkflowService from "@/services/workflow/WorkflowService.js";
 import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
 import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
 import UserService from "@/services/users/UserService";
+import LoadingComponent from "@/components/global/LoadingComponent.vue";
 
 export default {
     name: "WorkflowPage",
@@ -123,6 +122,7 @@ export default {
         };
     },
     components: {
+        LoadingComponent,
         WorkflowFilters,
         KanbanBoard,
     },
