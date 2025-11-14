@@ -2,7 +2,7 @@
 
 namespace WoopiAiHub.Domain.DTOs.Messaging
 {
-    public record class TenantActivationDto
+    public record class TenantSubscriptionDto
     {
         public Guid MarketplaceId { get; set; }
         public string Name { get; set; } = string.Empty;

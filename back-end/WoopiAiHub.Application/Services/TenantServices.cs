@@ -13,6 +13,7 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 using WoopiAiHub.Repository.Util;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -47,7 +48,7 @@ namespace WoopiAiHub.Application.Services
             _logger = logger;
         }
 
-        public void ProcessSubscription(TenantActivationDto tenantActivationDto)
+        public void ProcessSubscription(TenantSubscriptionDto tenantActivationDto)
         {
             switch(tenantActivationDto.Action)
             {
@@ -71,19 +72,26 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
-        private void CreateTenant(TenantActivationDto tenantActivationDto)
+        private void CreateTenant(TenantSubscriptionDto tenantActivationDto)
         {
             try
             {
-                var result = _tenantRepository.CreateDatabase();
-                if (result)
+                using var scope = _serviceProvider.CreateScope();
+                
+
+                var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+                httpAccessor.HttpContext ??= new DefaultHttpContext();
+
+                if (httpAccessor.HttpContext != null)
                 {
                     var template = _configuration.GetConnectionString("TemplateConnection");
                     var connectionString = template?.Replace("___NEWDB___", tenantActivationDto.Name);
-                    if (_httpContextAcessor.HttpContext != null)
+                    httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
+                    var result = _tenantRepository.CreateDatabase();
+                    if (result)
                     {
-                        _httpContextAcessor.HttpContext.Items["TenantConnection"] = connectionString;
-                        using var scope = _serviceProvider.CreateScope();
+                        
                         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
                         dbContext.Database.GetDbConnection().ConnectionString = connectionString;

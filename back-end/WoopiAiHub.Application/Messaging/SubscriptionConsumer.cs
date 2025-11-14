@@ -12,14 +12,14 @@ namespace WoopiAiHub.Application.Messaging
 {
     public class SubscriptionConsumer : BaseConsumer
     {
-        private readonly IMessageConsumer<TenantActivationDto> _consumer;
+        private readonly IMessageConsumer<TenantSubscriptionDto> _consumer;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<SubscriptionConsumer> _logger;
         private readonly MessageQueues _queues;
 
         public SubscriptionConsumer(IServiceScopeFactory scopeFactory,
                            IConfiguration configuration,
-                           IMessageConsumer<TenantActivationDto> consumer,
+                           IMessageConsumer<TenantSubscriptionDto> consumer,
                            ILogger<SubscriptionConsumer> logger,
                            IOptions<MessageQueues> queues) : base(configuration)
         {
@@ -36,7 +36,7 @@ namespace WoopiAiHub.Application.Messaging
         /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _consumer.ConsumerAsync(_queues.OcrQueueAiHubResponse, async message =>
+            await _consumer.ConsumerAsync(_queues.MarketplaceSubscriptionQueue, async message =>
             {
                 using var scope = _scopeFactory.CreateScope();
                 try
