@@ -1,8 +1,13 @@
 <template>
-    <BarGraphComponent
-        :options="options"
-        :series="series"
-    />
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>Consumo Diário de Tokens</h5>
+            <BarGraphComponent
+                :options="options"
+                :series="series"
+            />
+        </div>
+    </div>
 </template>
 
 <script>
@@ -15,7 +20,9 @@
             options: {
                 chart: {
                     id: 'sales-bar',
-                    toolbar: { show: false }
+                    toolbar: { 
+                        show: false
+                    },
                 },
                 plotOptions: {
                     bar: {
