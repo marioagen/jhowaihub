@@ -16,18 +16,27 @@
                 </div>
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="row">
+                <div class="row position-relative">
                     <div class="col">
                         <button
                             class="btn btn-outlined-light btn-sm border d-flex align-items-center justify-content-between"
                             style="width: 200px;"
                             @click="toggleDateFilter"
                         >
-                            {{ label }}
-                            Esse mês
+                            {{ filters.preset }}
                             <LucideIcon v-if="showDateFilter" icon="ChevronUp" :size="17" />
                             <LucideIcon v-else icon="ChevronDown" :size="17" />
                         </button>
+                        <div 
+                            v-if="showDateFilter" 
+                            class="position-absolute" 
+                            style="z-index: 1050; width: 500px;"
+                        >
+                            <DashboardDateFilter 
+                                @close="showDateFilter = false"
+                                @filterData="filterData"
+                            />
+                        </div>
                     </div>
                     <div class="col">
                         <button class="btn btn-primary btn-sm">
@@ -65,11 +74,19 @@
         },
         data: () => ({
             showDateFilter: false,
+            filters: {
+                preset: "currentMonth",
+                start: "",
+                end: "",
+            }
         }),
         methods: {
             toggleDateFilter() {
                 this.showDateFilter = !this.showDateFilter;
             },
+            filterData(filters) {
+                this.filters = filters;
+            }
         }
     }
 </script>
