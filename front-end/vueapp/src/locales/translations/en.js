@@ -699,6 +699,10 @@
         tools: "Tools",
         prompts: "Prompts",
     },
+    dashboard: {
+        title: "Consumption and Ticketing Dashboard",
+        subtitle: "Woopi AI",
+    },
 };
 
 export default english;

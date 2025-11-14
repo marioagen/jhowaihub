@@ -702,6 +702,10 @@
         tools: "Herramientas",
         prompts: "Prompts",
     },
+    dashboard: {
+        title: "Panel de Consumo y Ticketing",
+        subtitle: "Woopi AI",
+    },
 };
 
 export default spanish;

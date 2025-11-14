@@ -663,6 +663,10 @@
         tools: "Ferramentas",
         prompts: "Prompts",
     },
+    dashboard: {
+        title: "Dashboard de Consumo e Bilhetagem",
+        subtitle: "Woopi AI",
+    },
 };
 
 export default portuguese;
