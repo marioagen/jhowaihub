@@ -1,13 +1,12 @@
 ﻿<template>
     <main>
         <div class="container-fluid mt-4">
-            <div class="custom-padding">
+            <div>
                 <div class="row">
-                    <!-- Component Breadcrumb -->
                     <breadcrumb :crumbs="crumbsData" />
                 </div>
                 <div class="row">
-                    <!-- Component PromptView -->
+
                     <prompt-view
                         :hashDocument="hashDocument"
                         :historyListOrder="historyListOrder"
@@ -18,12 +17,12 @@
                         @clearMyInterval="clearMyInterval"
                         v-if="!isExpandedHistory"
                     />
-                    <!-- Component DocView -->
+
                     <doc-view @showNormalize="normalize" id="docView" />
-                    <div :class="!isExpandedHistory ? 'col-md-3' : 'col-md-6'" id="docHistory">
-                        <!--Component StepAnalysisView-->
+                    <div :class="'col-md-4'" id="docHistory">
                         <step-analysis-view
                             :document-id="parseInt(idAnalyzer)"
+                            :card-id="parseInt(idCard)"
                             @show-alert-toast="showAlertToast"
                         />
                     </div>
@@ -55,7 +54,8 @@
             return {
                 crumbsData: [],
                 sidebarData: "Documents",
-                idAnalyzer: this.$route.params.id,
+                idAnalyzer: this.$route.params.documentId,
+                idCard: this.$route.params.cardId,
                 backPage: this.$route.query.page,
                 hashDocument: "",
                 isExpandedHistory: false,

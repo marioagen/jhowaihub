@@ -7,7 +7,7 @@
 
         <div v-if="fields.length === 0" class="no-data-message">
             <i class="fas fa-info-circle"></i>
-            {{ $t("labelNoDataInDocument") }}
+            {{ $t("analyze.noDataInDocument") }}
         </div>
 
         <div v-else class="fields-list">
@@ -140,6 +140,8 @@
         border-radius: 8px;
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow-y: scroll;
+        max-height: calc(100vh - 330px);
     }
 
     .section-title {

@@ -159,7 +159,7 @@ const routes = [
         },
     },
     {
-        path: "/analyzer/:id",
+        path: "/analyzer/:documentId/:cardId",
         name: "Analyzer",
         component: AnalyzerIndex,
         meta: { 

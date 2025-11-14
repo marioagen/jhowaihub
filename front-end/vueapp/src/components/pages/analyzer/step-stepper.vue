@@ -4,7 +4,7 @@
             class="stepper-arrow stepper-arrow-left"
             @click="previousStep"
             :disabled="currentIndex === 0"
-            :title="$t('labelPreviousStep')"
+            :title="$t('analyze.previousStep')"
         >
             <i class="fas fa-chevron-left"></i>
         </button>
@@ -28,7 +28,7 @@
             class="stepper-arrow stepper-arrow-right"
             @click="nextStep"
             :disabled="currentIndex === steps.length - 1"
-            :title="$t('labelNextStep')"
+            :title="$t('analyze.nextStep')"
         >
             <i class="fas fa-chevron-right"></i>
         </button>
@@ -120,7 +120,6 @@
         background: white;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-bottom: 1rem;
     }
 
     .stepper-arrow {

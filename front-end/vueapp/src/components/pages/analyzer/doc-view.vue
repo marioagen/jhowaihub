@@ -7,16 +7,18 @@
                     <i class="fas fa-expand text-primary" style="cursor: pointer" :title="$t('labelExpand')"></i>
                 </a>
                 <img
-                    src="../../../assets/img/go-to-text.png"
+                    src="@/assets/img/go-to-text.png"
                     @click="toggleToText"
                     style="cursor: pointer; float: right"
                     :title="$t('labelOcrText')"
                     v-if="srcPdf && hasOcrText"
                 />
+                <!--
                 <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
                     <i class="fas fa-sync-alt"></i>
                     {{ $t("labelReprocess") }}
                 </button>
+                -->
                 <div class="view-pdf" v-if="srcPdf">
                     <object :data="srcPdf + `#zoom=80`" type="application/pdf" width="100%" height="100%">
                         <embed :src="srcPdf" type="application/pdf" />
@@ -52,7 +54,7 @@
                     </strong>
                     <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingText"></i>
                     <img
-                        src="../../../assets/img/go-to-pdf.png"
+                        src="@/assets/img/go-to-pdf.png"
                         @click="viewMode = $options.VIEW_MODE_PDF"
                         style="cursor: pointer; float: right"
                         :title="$t('labelPdfBack')"
@@ -85,7 +87,7 @@
         VIEW_MODE_TEXT,
         data() {
             return {
-                idAnalyzer: this.$route.params.id,
+                idAnalyzer: this.$route.params.documentId,
                 viewMode: VIEW_MODE_PDF,
                 srcPdf: null,
                 errorPdf: false,
@@ -93,7 +95,6 @@
                 loadingText: false,
                 textContent: "",
                 hasOcrText: false,
-                controllAttempt: 0,
                 showModalForm: false,
                 showLoading: false,
                 message: "",
@@ -112,27 +113,22 @@
         },
         methods: {
             getDocument() {
-                this.controllAttempt++;
                 this.srcPdf = null;
                 this.errorPdf = false;
                 DocumentsServices.findDocument(this.idAnalyzer)
                     .then((response) => {
                         if (response.error !== undefined) {
-                            if (this.controllAttempt < attempt) {
-                                this.getPdf(fileGuidId, attempt);
-                            } else {
-                                this.loading = false;
-                                this.errorPdf = true;
-                            }
-                            return console.log(response.error);
+                            this.$notify({
+                                title: "analyze.title",
+                                message:"analyze.failedLoadDocument",
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
                         }
 
                         this.srcPdf = window.URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
                         this.loading = false;
                     })
-                    .finally(() => {
-                        console.log("Finished request.");
-                    });
             },
             updateModel(model) {
                 this.dataView.Embeddings_model_name = model;

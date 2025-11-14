@@ -1,8 +1,6 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
 using Microsoft.AspNetCore.Http;
-using PdfSharp.Pdf.IO;
-using System;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Dto;
@@ -20,7 +18,7 @@ namespace WoopiAiHub.UnitTests.Fixture
 {
     public class DocumentFixture
     {
-        public Document FindValidDocument()
+        public static Document FindValidDocument()
         {
             Document Document = new Faker<Document>("pt_BR")
             .CustomInstantiator(f => new Document(
@@ -255,7 +253,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return documentAnalysisResponseDto;
         }
 
-        public HeadersDto FindValidHeadersDto()
+        public static HeadersDto FindValidHeadersDto()
         {
             HeadersDto headersDto = new Faker<HeadersDto>("pt_BR")
             .RuleFor(a => a.EmailCreator, f => f.Person.Email)

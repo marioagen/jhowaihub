@@ -668,19 +668,25 @@
         deleteError: "Prompts delete failed",
         removeAllPrompts: "Delete prompts"
     },
-    labelPreviousStep: "Previous Step",
-    labelNextStep: "Next Step",
-    labelNoDataInDocument: "No data available",
-    labelAskTheDoc: "Ask the Document",
-    labelConversationWithDocument: "Conversation with the Document",
-    labelAskAI: "ASK AI",
-    labelTypeYourQuestion: "Type your question about the document...",
-    labelSendQuestion: "Send Question",
-    labelExtractedData: "Extracted Data",
-    labelErrorLoadDocumentData: "Error loading document data",
-    labelSuccessEditOutput: "Output edited successfully",
-    labelFailedEditOutput: "The output could not be edited.",
-    labelClear:"Clear"
+    analyze:{
+        title: "Analyze Document",
+        errorLoadDocumentData: "Error loading document data",
+        failedEditOutput: "The output could not be edited.",
+        successEditOutput: "Output edited successfully",
+        extractedData: "Extracted Data",
+        askTheDoc: "Ask the Document",
+        conversationWithDocument: "Conversation with the Document",
+        askAI:"ASK AI",
+        typeYourQuestion: "Type your question about the document...",
+        sendQuestion: "Send Question",
+        output: "Output",
+        clear: "Clear",
+        copy: "Copy",
+        previousStep: "Previous Step",
+        nextStep: "Next Step",
+        noDataInDocument: "No data available",
+        failedLoadDocument: "Failed to load document",
+    }
 };
 
 export default english;

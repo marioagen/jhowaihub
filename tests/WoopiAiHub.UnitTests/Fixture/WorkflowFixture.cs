@@ -235,13 +235,13 @@ namespace WoopiAiHub.UnitTests.Fixture
             return workflow;
         }
 
-        public static Step FindValidStep()
+        public static Step FindValidStep(int? workflowId = null)
         {
             var f = new Faker("pt_BR");
             return new Step(
                 f.IndexFaker,
                 f.Date.Past(),
-                f.Random.Int(1, 5),
+                workflowId ?? f.Random.Int(1, 5),
                 f.Person.FirstName,
                 1,
                 f.Random.Int(1, 5),

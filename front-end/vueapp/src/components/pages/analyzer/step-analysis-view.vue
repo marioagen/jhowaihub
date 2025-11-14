@@ -1,7 +1,8 @@
 <template>
     <div class="step-analysis-container">
         <doc-chat :document-id="documentId"
-                  @question-sent="handleQuestionSent" />
+                  @question-sent="handleQuestionSent"
+                  v-if="documentData && documentData.canAnswer"/>
         <step-stepper v-if="documentData && documentData.steps && documentData.steps.length > 0"
                       :steps="documentData.steps"
                       :initial-step-id="documentData.lastProcessedStepId"
@@ -9,7 +10,7 @@
 
         <extracted-fields v-if="currentStepData"
                           :fields="currentStepData.outputs"
-                          :title="`${$t('labelExtractedData')} - ${currentStepData.name}`"
+                          :title="`${$t('analyze.extractedData')} - ${currentStepData.name}`"
                           @field-updated="handleFieldUpdate" />
     </div>
 </template>
@@ -18,9 +19,9 @@
     import StepStepper from "@/components/pages/analyzer/step-stepper";
     import ExtractedFields from "@/components/pages/analyzer/extracted-fields";
     import DocChat from "@/components/pages/analyzer/doc-chat";
-    import api from "@/services/api";
     import WorkflowService from "@/services/workflow/WorkflowService";
-    import DocumentService from "@/services/documents/DocumentsServices";
+    import CardsServices from "@/services/cards/CardsServices";
+    
     export default {
         name: "StepAnalysisView",
         components: {
@@ -33,23 +34,22 @@
                 type: Number,
                 required: true,
             },
+            cardId: {
+                type: Number,
+                required: true,
+            },
         },
-        emits: ["show-alert-toast"],
         data() {
             return {
                 documentData: null,
                 currentStepData: null,
                 loading: false,
-                cardId: null,
             };
         },
         methods: {
             async loadDocumentData() {
                 this.loading = true;
                 try {
-
-                    await this.findByIdAnalyze(this.documentId);
-
                     await this.findByIdAnalyzeWithSteps(this.cardId);
 
                     if (this.documentData.lastProcessedStepId && this.documentData.steps.length > 0) {
@@ -61,12 +61,15 @@
                         this.currentStepData = this.documentData.steps[0];
                     }
                 } catch (error) {
-                    this.$emit("show-alert-toast", {
-                        msg: $t('labelErrorLoadDocumentData'),
-                        color: "toast-danger"
-                    });
+                        this.$notify({
+                            title: "analyze.title",
+                            message:"analyze.errorLoadDocumentData",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
                 } finally {
                     this.loading = false;
+                    console.log(this.documentData);
                 }
             },
             handleStepChange(step) {
@@ -80,14 +83,18 @@
                 WorkflowService.updateStepToolOutput(params)
                     .then((response) => {
                         if (response == true) {
-                            this.$emit("show-alert-toast", {
-                                msg: this.$t('labelSuccessEditOutput'),
-                                color: "toast-success"
+                            this.$notify({
+                                title: "analyze.title",
+                                message:"analyze.successEditOutput",
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
                         } else {
-                            this.$emit("show-alert-toast", {
-                                msg: this.$t('labelFailedEditOutput'),
-                                color: "toast-danger"
+                            this.$notify({
+                                title: "analyze.title",
+                                message:"analyze.failedEditOutput",
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                     })
@@ -95,17 +102,8 @@
                         this.loadDocumentData();
                     });
             },
-            async findByIdAnalyze(id) {
-               await DocumentService.findByIdAnalyze(id)
-                    .then((response) => {
-                        this.cardId = response.data.cardId;
-                    })
-                    .catch((err) => {
-                        console.log(err)
-                    });
-            },
             async findByIdAnalyzeWithSteps(id){
-               await DocumentService.findByIdAnalyzeWithSteps(id)
+               await CardsServices.findByIdAnalyzeWithSteps(id)
                     .then((response) => {
                         this.documentData = response.data;
                     })
@@ -125,7 +123,6 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        height: 600px;
         overflow-y: auto;
     }
 
