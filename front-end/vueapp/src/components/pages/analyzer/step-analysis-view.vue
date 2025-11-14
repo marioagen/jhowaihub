@@ -1,7 +1,8 @@
 <template>
     <div class="step-analysis-container">
         <doc-chat :document-id="documentId"
-                  @question-sent="handleQuestionSent" />
+                  @question-sent="handleQuestionSent"
+                  v-if="documentData && documentData.canAnswer"/>
         <step-stepper v-if="documentData && documentData.steps && documentData.steps.length > 0"
                       :steps="documentData.steps"
                       :initial-step-id="documentData.lastProcessedStepId"
@@ -73,11 +74,20 @@
             handleStepChange(step) {
                 this.currentStepData = step;
             },
-            handleFieldUpdate({ id, field }) {
-                let params = {
-                    id: id,
-                    value: field.value,
-                };
+            handleFieldUpdate({ id, field, outputsJson }) {
+                let params = {}
+                if (outputsJson) {
+                    params = {
+                        id: id,
+                        value: outputsJson,
+                    };
+                }
+                else {
+                    params = {
+                        id: id,
+                        value: field.value,
+                    };
+                }
                 WorkflowService.updateStepToolOutput(params)
                     .then((response) => {
                         if (response == true) {

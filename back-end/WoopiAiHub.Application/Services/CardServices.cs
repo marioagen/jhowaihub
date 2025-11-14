@@ -10,6 +10,7 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using Newtonsoft.Json;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -18,14 +19,17 @@ namespace WoopiAiHub.Application.Services
         private readonly ICardRepository _cardRepository;
         private readonly IStepRepository _stepRepository;
         private readonly IAutomationServices _automationServices;
+        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
 
         public CardServices(ICardRepository cardRepository,
                             IStepRepository stepRepository,
-                            IAutomationServices automationServices)
+                            IAutomationServices automationServices,
+                            IStepToolExecutionRepository stepToolExecutionRepository)
         {
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
             _automationServices = automationServices;
+            _stepToolExecutionRepository = stepToolExecutionRepository;
         }
 
         /// <summary>
@@ -127,6 +131,7 @@ namespace WoopiAiHub.Application.Services
                                                                              HeadersDto headersDto)
         {
             var card = await FindCardWithRelationships(cardId);
+            var verifyAnswer = await VerifyCanAnswer(card);
             var document = card.Document ?? throw new ArgumentException("Document not found for the card");
             var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
 
@@ -140,8 +145,33 @@ namespace WoopiAiHub.Application.Services
                 Description = document.Description,
                 ReferenceFile = document.ReferenceFile,
                 LastProcessedStepId = lastProcessedStepId,
-                Steps = steps
+                Steps = steps,
+                CanAnswer = verifyAnswer
             };
+        }
+
+        /// <summary>
+        /// Verify if can answer after embeddings and OCR
+        /// </summary>
+        /// <param name="card"></param>
+        /// <returns></returns>
+        private async Task<bool> VerifyCanAnswer(Card card)
+        {
+           var executions =  await _stepToolExecutionRepository.FindByStepToolByCardIdAsync(card.Id);
+
+            bool hasOcrReady = executions.Any(execution =>
+            execution.StepTool.Tool.ToolType.Name.Equals(HandlersTypes.Ocr) &&
+            execution.Status == StatusExecution.Ready);
+
+            bool hasEmbeddingsReady = executions.Any(execution =>
+                execution.StepTool.Tool.ToolType.Name.Equals(HandlersTypes.Embeddings) &&
+                execution.Status == StatusExecution.Ready);
+
+            if(hasOcrReady && hasEmbeddingsReady)
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
