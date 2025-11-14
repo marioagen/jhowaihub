@@ -69,7 +69,6 @@
                         });
                 } finally {
                     this.loading = false;
-                    console.log(this.documentData);
                 }
             },
             handleStepChange(step) {

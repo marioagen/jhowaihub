@@ -121,7 +121,6 @@
                         outputsObj[field.label] = field.value;
                     });
                     const outputsJson = JSON.stringify(outputsObj);
-                    console.log(outputsJson);
 
                     this.$emit("field-updated", { id, field: this.fields[index], outputsJson });
                     return;
