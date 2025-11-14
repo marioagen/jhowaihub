@@ -75,11 +75,20 @@
             handleStepChange(step) {
                 this.currentStepData = step;
             },
-            handleFieldUpdate({ id, field }) {
-                let params = {
-                    id: id,
-                    value: field.value,
-                };
+            handleFieldUpdate({ id, field, outputsJson }) {
+                let params = {}
+                if (outputsJson) {
+                    params = {
+                        id: id,
+                        value: outputsJson,
+                    };
+                }
+                else {
+                    params = {
+                        id: id,
+                        value: field.value,
+                    };
+                }
                 WorkflowService.updateStepToolOutput(params)
                     .then((response) => {
                         if (response == true) {

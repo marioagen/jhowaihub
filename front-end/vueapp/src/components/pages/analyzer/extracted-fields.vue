@@ -113,13 +113,20 @@
                 this.$emit("field-changed", { index, field: updatedField });
             },
             saveEdit(index, id) {
-                const field = {
-                    ...this.fields[index],
-                    value: this.isEditing[index] ? this.fields[index].value : "",
-                    isEdited: true
-                };
                 this.isEditing[index] = false;
-                this.$emit("field-updated", { id, field });
+                this.fields[index].isEdited = true;
+                if (this.fields[index].outputType === 'N8N') {
+                    const outputsObj = {};
+                    this.fields.forEach(field => {
+                        outputsObj[field.label] = field.value;
+                    });
+                    const outputsJson = JSON.stringify(outputsObj);
+                    console.log(outputsJson);
+
+                    this.$emit("field-updated", { id, field: this.fields[index], outputsJson });
+                    return;
+                }
+                this.$emit("field-updated", { id, field: this.fields[index] });
             },
             cancelEdit(index) {
                 const restoredField = { ...this.fields[index], value: this.originalValues[index] };
