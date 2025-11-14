@@ -77,18 +77,21 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                
 
-                var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
-                httpAccessor.HttpContext ??= new DefaultHttpContext();
 
-                if (httpAccessor.HttpContext != null)
+                //var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+                //httpAccessor.HttpContext ??= new DefaultHttpContext();
+
+                //if (httpAccessor.HttpContext != null)
+                //{
+                var template = _configuration.GetConnectionString("TemplateConnection");
+                var connectionString = template?.Replace("___NEWDB___", tenantActivationDto.Name);
+                if (_httpContextAcessor.HttpContext != null)
                 {
-                    var template = _configuration.GetConnectionString("TemplateConnection");
-                    var connectionString = template?.Replace("___NEWDB___", tenantActivationDto.Name);
-                    httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+                    _httpContextAcessor.HttpContext.Items["TenantConnection"] = connectionString;
+                }
 
-                    var result = _tenantRepository.CreateDatabase();
+                var result = _tenantRepository.CreateDatabase();
                     if (result)
                     {
                         
@@ -120,7 +123,7 @@ namespace WoopiAiHub.Application.Services
                             var resultUser = _userRepository.CreateAsync(user);
                         }
                     }
-                }
+             //   }
             }
             catch (Exception ex)
             {
