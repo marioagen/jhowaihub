@@ -45,9 +45,7 @@ namespace WoopiAiHub.Repository.Cache
                 return new TenantInfoDto();
             }
 
-            var tenant = await _marketplace.FindTenantByNameAndModule(apiKey,
-                                                                      tenantName,
-                                                                      module);
+            var tenant = await _marketplace.FindTenantByName(apiKey, tenantName);
             if (tenant != null)
             {
                 var json = JsonSerializer.Serialize(tenant);

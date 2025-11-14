@@ -1,32 +1,39 @@
 ﻿using AutoMapper;
-using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Interfaces.Refit;
-using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Utils;
-using WoopiAiHub.Domain.Utils;
-using WoopiAiHub.Repository.Context;
-using WoopiAiHub.Repository.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository.Context;
+using WoopiAiHub.Repository.Util;
 
 namespace WoopiAiHub.Application.Services
 {
     public class TenantServices : ITenantServices
     {
         private readonly ITenantRepository _tenantRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAcessor;
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<TenantServices> _logger;
         private readonly IMapper _mapper;
 
         public TenantServices(ITenantRepository tenantRepository,
                               IServiceProvider serviceProvider,
                               ICoreDependencies coreDependencies,
-                              IApiDependencies apiDependencies
+                              IApiDependencies apiDependencies,
+                              IUserRepository userRepository,
+                              ILogger<TenantServices> logger
                             )
         {
             _configuration = coreDependencies.Configuration;
@@ -36,6 +43,82 @@ namespace WoopiAiHub.Application.Services
             _keyGeneratorApi = apiDependencies.KeyGeneratorApi;
             _serviceProvider = serviceProvider;
             _mapper = coreDependencies.Mapper;
+            _userRepository = userRepository;
+            _logger = logger;
+        }
+
+        public void ProcessSubscription(TenantActivationDto tenantActivationDto)
+        {
+            switch(tenantActivationDto.Action)
+            {
+                case SubscriptionAction.Activate:
+                    CreateTenant(tenantActivationDto);
+                    break;
+                case SubscriptionAction.Deactivate:
+                    // DeactivateTenant(tenantActivationDto);
+                    break;
+                case SubscriptionAction.Reactivate:
+                    // ReactivateTenant(tenantActivationDto);
+                    break;
+                case SubscriptionAction.ChangePlan:
+                    // ChangePlanTenant(tenantActivationDto);
+                    break;
+                case SubscriptionAction.Renew:
+                    // RenewSubscrition(tenantActivationDto);
+                    break;
+                default:
+                    throw new ArgumentException($"Unknown action: {tenantActivationDto.Action}");
+            }
+        }
+
+        private void CreateTenant(TenantActivationDto tenantActivationDto)
+        {
+            try
+            {
+                var result = _tenantRepository.CreateDatabase();
+                if (result)
+                {
+                    var template = _configuration.GetConnectionString("TemplateConnection");
+                    var connectionString = template?.Replace("___NEWDB___", tenantActivationDto.Name);
+                    if (_httpContextAcessor.HttpContext != null)
+                    {
+                        _httpContextAcessor.HttpContext.Items["TenantConnection"] = connectionString;
+                        using var scope = _serviceProvider.CreateScope();
+                        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                        dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+                        var tenant = new Tenant(
+                                0,
+                                DateTime.Now,
+                                tenantActivationDto.Name,
+                                tenantActivationDto.MarketplaceId!,
+                                true,
+                                tenantActivationDto.PlanName,
+                                tenantActivationDto.DateStart,
+                                tenantActivationDto.DateEnd,
+                                tenantActivationDto.DateRenew,
+                                string.Empty
+                            );
+                        var resultTenant = _tenantRepository.CreateUniqueTenant(tenant);
+                        if (resultTenant)
+                        {
+                            var user = new User(
+                                    Guid.NewGuid(),
+                                    tenant.Name!,
+                                    tenantActivationDto.Email,
+                                    true,
+                                    DateTime.Now
+                                );
+                            var resultUser = _userRepository.CreateAsync(user);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error activating tenant {TenantName}", tenantActivationDto.Name);
+                throw;
+            }
         }
 
         /// <summary>
@@ -74,9 +157,7 @@ namespace WoopiAiHub.Application.Services
 
             string result = await _keyGeneratorApi.GetKey(keyAccess, tenant);
 
-            await ApplyMigrations(keyAccess,
-                                  tenant,
-                                  ColTypeModule.WoopiAiHub);
+            await ApplyMigrations(keyAccess, tenant);
 
             return result;
         }
@@ -84,18 +165,14 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Apply ApplicationDbContext Migrations
         /// </summary>
-        private async Task ApplyMigrations(string keyAccess,
-                                           string tenantName,
-                                           ColTypeModule module)
+        private async Task ApplyMigrations(string keyAccess, string tenantName)
         {
             if (string.IsNullOrEmpty(tenantName))
             {
                 throw new ArgumentException("Tenant name cannot be null or empty.", nameof(tenantName));
             }
 
-            var tenant = await _marketPlaceApi.FindTenantByNameAndModule(keyAccess,
-                                                                         tenantName,
-                                                                         module);
+            var tenant = await _marketPlaceApi.FindTenantByName(keyAccess,tenantName);
 
             if (tenant == null)
             {
@@ -109,19 +186,11 @@ namespace WoopiAiHub.Application.Services
                 _httpContextAcessor.HttpContext.Items["TenantConnection"] = connectionString;
             }
 
-            var result = _tenantRepository.CreateDatabase();
-            if (result)
-            {
-                using var scope = _serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            using var scope = _serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                dbContext.Database.GetDbConnection().ConnectionString = connectionString;
-                InitApplicationDb.RunApplicationMigration(dbContext);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Tenant '{tenantName}' not found.");
-            }
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+            InitApplicationDb.RunApplicationMigration(dbContext);
         }
     }
 }

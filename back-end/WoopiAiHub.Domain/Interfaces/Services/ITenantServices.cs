@@ -1,8 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Refit;
-using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
+﻿using WoopiAiHub.Domain.DTOs.Messaging;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
 {
@@ -11,5 +7,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<IEnumerable<string>> FindAllByUserEmail(string email);
 
         Task<string> InitializeTenant(string tenant);
+
+        void ProcessSubscription(TenantActivationDto tenantActivationDto);
     }
 }
