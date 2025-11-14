@@ -1,11 +1,13 @@
 ﻿using Google.Api;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace WoopiAiHub.Repository
 {
@@ -48,6 +50,31 @@ namespace WoopiAiHub.Repository
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Retrieves a tenant associated with the specified marketplace subscription identifier.
+        /// </summary>
+        /// <remarks>This method performs a query to locate a tenant based on the provided marketplace
+        /// subscription identifier. If no tenant matches the specified identifier, the method returns <see
+        /// langword="null"/>.</remarks>
+        /// <param name="marketplaceId">The unique identifier of the marketplace subscription to search for.</param>
+        /// <returns>The <see cref="Tenant"/> object associated with the specified marketplace subscription identifier,  or <see
+        /// langword="null"/> if no matching tenant is found.</returns>
+        public Tenant? FindByMarketPlaceId(Guid marketplaceId)
+        {
+            return _context.Tenants.Where(t => t.MarketplaceSubscriptionId.Equals(marketplaceId)).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Update a tenant
+        /// </summary>
+        /// <param name="tenant"></param>
+        /// <returns></returns>
+        public bool Update(Tenant tenant)
+        {
+            _context.Tenants.Update(tenant);
+            return _context.SaveChanges() > 0;
         }
 
         /// <summary>

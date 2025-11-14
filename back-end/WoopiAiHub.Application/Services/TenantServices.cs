@@ -1,10 +1,10 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -13,7 +13,6 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 using WoopiAiHub.Repository.Util;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -21,20 +20,25 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly ITenantRepository _tenantRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IProfileRepository _profileRepository;
+        private readonly ITeamRepository _teamRepository;
+        private readonly IUserServices _userServices;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAcessor;
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<TenantServices> _logger;
-        private readonly IMapper _mapper;
 
         public TenantServices(ITenantRepository tenantRepository,
                               IServiceProvider serviceProvider,
                               ICoreDependencies coreDependencies,
                               IApiDependencies apiDependencies,
                               IUserRepository userRepository,
-                              ILogger<TenantServices> logger
+                              ILogger<TenantServices> logger,
+                              IProfileRepository profileRepository,
+                              ITeamRepository teamRepository,
+                              IUserServices userServices
                             )
         {
             _configuration = coreDependencies.Configuration;
@@ -43,93 +47,197 @@ namespace WoopiAiHub.Application.Services
             _marketPlaceApi = apiDependencies.MarketPlaceApi;
             _keyGeneratorApi = apiDependencies.KeyGeneratorApi;
             _serviceProvider = serviceProvider;
-            _mapper = coreDependencies.Mapper;
             _userRepository = userRepository;
+            _profileRepository = profileRepository;
+            _teamRepository = teamRepository;
+            _userServices = userServices;
             _logger = logger;
         }
 
-        public void ProcessSubscription(TenantSubscriptionDto tenantActivationDto)
+        /// <summary>
+        /// Process Marketplace sub
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        /// <exception cref="ArgumentException"></exception>
+        public void ProcessSubscription(TenantSubscriptionDto tenantSubscriptionDto)
         {
-            switch(tenantActivationDto.Action)
+            switch(tenantSubscriptionDto.Action)
             {
                 case SubscriptionAction.Activate:
-                    CreateTenant(tenantActivationDto);
+                    CreateDatabaseAndSeedData(tenantSubscriptionDto);
                     break;
                 case SubscriptionAction.Deactivate:
-                    // DeactivateTenant(tenantActivationDto);
+                    SetActive(tenantSubscriptionDto, false);
                     break;
                 case SubscriptionAction.Reactivate:
-                    // ReactivateTenant(tenantActivationDto);
+                    SetActive(tenantSubscriptionDto, true);
                     break;
                 case SubscriptionAction.ChangePlan:
-                    // ChangePlanTenant(tenantActivationDto);
+                    ChangeSubscriptionPlan(tenantSubscriptionDto);
                     break;
                 case SubscriptionAction.Renew:
-                    // RenewSubscrition(tenantActivationDto);
+                     RenewSubscrition(tenantSubscriptionDto);
                     break;
                 default:
-                    throw new ArgumentException($"Unknown action: {tenantActivationDto.Action}");
+                    throw new ArgumentException($"Unknown action: {tenantSubscriptionDto.Action}");
             }
         }
 
-        private void CreateTenant(TenantSubscriptionDto tenantActivationDto)
+        /// <summary>
+        /// Update subscription dates
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        private void RenewSubscrition(TenantSubscriptionDto tenantSubscriptionDto)
+        {
+            SetConnectionString(tenantSubscriptionDto);
+            var tenant = _tenantRepository.FindByMarketPlaceId(tenantSubscriptionDto.MarketplaceId);
+            if (tenant is not null)
+            {
+                tenant.SetSubscriptionDates(tenantSubscriptionDto.DateStart,
+                                            tenantSubscriptionDto.DateEnd,
+                                            tenantSubscriptionDto.DateRenew);
+                _tenantRepository.Update(tenant);
+            }
+        }
+
+        /// <summary>
+        /// Update plan
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        private void ChangeSubscriptionPlan(TenantSubscriptionDto tenantSubscriptionDto)
+        {
+            SetConnectionString(tenantSubscriptionDto);
+            var tenant = _tenantRepository.FindByMarketPlaceId(tenantSubscriptionDto.MarketplaceId);
+            if (tenant is not null)
+            {
+                tenant.SetPlanName(tenantSubscriptionDto.PlanName);
+                _tenantRepository.Update(tenant);
+            }
+        }
+
+        /// <summary>
+        /// Set IsActive
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        /// <param name="active"></param>
+        private void SetActive(TenantSubscriptionDto tenantSubscriptionDto, bool active)
+        {
+            SetConnectionString(tenantSubscriptionDto);
+            var tenant = _tenantRepository.FindByMarketPlaceId(tenantSubscriptionDto.MarketplaceId);
+            if (tenant is not null)
+            {
+                tenant.SetActive(active);
+                _tenantRepository.Update(tenant);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new database and seed initial data
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        private void CreateDatabaseAndSeedData(TenantSubscriptionDto tenantSubscriptionDto)
         {
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-
-
-                //var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
-                //httpAccessor.HttpContext ??= new DefaultHttpContext();
-
-                //if (httpAccessor.HttpContext != null)
-                //{
-                var template = _configuration.GetConnectionString("TemplateConnection");
-                var connectionString = template?.Replace("___NEWDB___", tenantActivationDto.Name);
-                if (_httpContextAcessor.HttpContext != null)
-                {
-                    _httpContextAcessor.HttpContext.Items["TenantConnection"] = connectionString;
-                }
+                var connectionString = SetConnectionString(tenantSubscriptionDto);
 
                 var result = _tenantRepository.CreateDatabase();
-                    if (result)
-                    {
-                        
-                        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-                        dbContext.Database.GetDbConnection().ConnectionString = connectionString;
-                        var tenant = new Tenant(
-                                0,
-                                DateTime.Now,
-                                tenantActivationDto.Name,
-                                tenantActivationDto.MarketplaceId!,
-                                true,
-                                tenantActivationDto.PlanName,
-                                tenantActivationDto.DateStart,
-                                tenantActivationDto.DateEnd,
-                                tenantActivationDto.DateRenew,
-                                string.Empty
-                            );
-                        var resultTenant = _tenantRepository.CreateUniqueTenant(tenant);
-                        if (resultTenant)
-                        {
-                            var user = new User(
-                                    Guid.NewGuid(),
-                                    tenant.Name!,
-                                    tenantActivationDto.Email,
-                                    true,
-                                    DateTime.Now
-                                );
-                            var resultUser = _userRepository.CreateAsync(user);
-                        }
-                    }
-             //   }
+                if (result)
+                {
+                    SeedInitialData(tenantSubscriptionDto, connectionString);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error activating tenant {TenantName}", tenantActivationDto.Name);
+                _logger.LogError(ex, "Error activating tenant {TenantName}", tenantSubscriptionDto.Name);
                 throw;
             }
+        }
+
+        private string? SetConnectionString(TenantSubscriptionDto tenantSubscriptionDto)
+        {
+            var template = _configuration.GetConnectionString("TemplateConnection");
+            var connectionString = template?.Replace("___NEWDB___", tenantSubscriptionDto.Name);
+
+            _httpContextAcessor!.HttpContext ??= new DefaultHttpContext();
+            _httpContextAcessor.HttpContext.Items["TenantConnection"] = connectionString;
+            return connectionString;
+        }
+
+        /// <summary>
+        /// Initialize data
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        /// <param name="connectionString"></param>
+        private void SeedInitialData(TenantSubscriptionDto tenantSubscriptionDto, string? connectionString)
+        {
+            var scope = _serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+
+            if (CreateTenant(tenantSubscriptionDto))
+            {
+                var userCreateDto = new UserCreateDto
+                {
+                    Name = tenantSubscriptionDto.Name!,
+                    Email = tenantSubscriptionDto.Email,
+                    Password = tenantSubscriptionDto.Email,
+                    TeamIds = new List<int> { 1 }
+                };
+                var headerDto = new HeadersDto
+                {
+                    Tenant = tenantSubscriptionDto.Name!
+                };
+
+                //var user = new User(
+                //    Guid.NewGuid(),
+                //    tenantSubscriptionDto.Name!,
+                //    tenantSubscriptionDto.Email,
+                //    true,
+                //    DateTime.Now
+                //);
+                var userService = scope.ServiceProvider.GetRequiredService<IUserServices>();
+                userService.Create(userCreateDto, headerDto);
+            }
+        }
+
+        /// <summary>
+        /// Create tenant
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        /// <returns></returns>
+        private bool CreateTenant(TenantSubscriptionDto tenantSubscriptionDto)
+        {
+            var tenant = new Tenant(
+                    0,
+                    DateTime.Now,
+                    tenantSubscriptionDto.Name,
+                    tenantSubscriptionDto.MarketplaceId!,
+                    true,
+                    tenantSubscriptionDto.PlanName,
+                    tenantSubscriptionDto.DateStart,
+                    tenantSubscriptionDto.DateEnd,
+                    tenantSubscriptionDto.DateRenew,
+                    string.Empty
+                );
+            return _tenantRepository.CreateUniqueTenant(tenant);
+        }
+
+        /// <summary>
+        /// Assign user to team admin
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private bool AssingUserToTeamAdmin(User user)
+        {
+            var team = _teamRepository.FindByIdReturnModel(1);
+            if (team != null)
+            {
+                team.AddUser(user);
+                return _teamRepository.Update(team);
+            }
+            return false;
         }
 
         /// <summary>

@@ -46,5 +46,24 @@ namespace WoopiAiHub.Domain.Models
 
         // Construtor apenas com os parâmetros da BaseEntity
         public Tenant(int id, DateTime created) : base(id, created) { }
+
+        public void SetActive(bool value)
+        {
+            IsActive = value;
+        }
+
+        public void SetSubscriptionDates(DateTime? startDate,
+                                         DateTime? endDate,
+                                         DateTime? renewDate)
+        {
+            DateStartSubscription = startDate;
+            DateEndSubscription = endDate;
+            DateRenewSubscription = renewDate;
+        }
+
+        public void SetPlanName(string planName)
+        {
+            PlanName = planName;
+        }
     }
 }
