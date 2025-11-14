@@ -7,7 +7,6 @@ using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
-using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
@@ -19,10 +18,6 @@ namespace WoopiAiHub.Application.Services
     public class TenantServices : ITenantServices
     {
         private readonly ITenantRepository _tenantRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IProfileRepository _profileRepository;
-        private readonly ITeamRepository _teamRepository;
-        private readonly IUserServices _userServices;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAcessor;
         private readonly IMarketPlaceApi _marketPlaceApi;
@@ -34,11 +29,7 @@ namespace WoopiAiHub.Application.Services
                               IServiceProvider serviceProvider,
                               ICoreDependencies coreDependencies,
                               IApiDependencies apiDependencies,
-                              IUserRepository userRepository,
-                              ILogger<TenantServices> logger,
-                              IProfileRepository profileRepository,
-                              ITeamRepository teamRepository,
-                              IUserServices userServices
+                              ILogger<TenantServices> logger
                             )
         {
             _configuration = coreDependencies.Configuration;
@@ -47,10 +38,6 @@ namespace WoopiAiHub.Application.Services
             _marketPlaceApi = apiDependencies.MarketPlaceApi;
             _keyGeneratorApi = apiDependencies.KeyGeneratorApi;
             _serviceProvider = serviceProvider;
-            _userRepository = userRepository;
-            _profileRepository = profileRepository;
-            _teamRepository = teamRepository;
-            _userServices = userServices;
             _logger = logger;
         }
 
@@ -190,13 +177,6 @@ namespace WoopiAiHub.Application.Services
                     Tenant = tenantSubscriptionDto.Name!
                 };
 
-                //var user = new User(
-                //    Guid.NewGuid(),
-                //    tenantSubscriptionDto.Name!,
-                //    tenantSubscriptionDto.Email,
-                //    true,
-                //    DateTime.Now
-                //);
                 var userService = scope.ServiceProvider.GetRequiredService<IUserServices>();
                 userService.Create(userCreateDto, headerDto);
             }
@@ -222,22 +202,6 @@ namespace WoopiAiHub.Application.Services
                     string.Empty
                 );
             return _tenantRepository.CreateUniqueTenant(tenant);
-        }
-
-        /// <summary>
-        /// Assign user to team admin
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        private bool AssingUserToTeamAdmin(User user)
-        {
-            var team = _teamRepository.FindByIdReturnModel(1);
-            if (team != null)
-            {
-                team.AddUser(user);
-                return _teamRepository.Update(team);
-            }
-            return false;
         }
 
         /// <summary>
