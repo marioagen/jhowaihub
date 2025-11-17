@@ -65,6 +65,7 @@
 <script>
     import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
     import LoadingComponent from '@/components/global/LoadingComponent.vue';
+    import DashboardServices from '@/services/dashboard/DashboardServices';
     export default {
         components: {
             BarGraphComponent,
@@ -145,7 +146,31 @@
             },
         }),
         created() {
+            this.getWorkflowsData();
+            this.getWorkflowsAutomaticData();
             console.log(this.rangeDates)
+        },
+        methods: {
+            getWorkflowsData() {
+                this.isLoadingWorkflows = true;
+                DashboardServices.getWorkflowsData()
+                    .then((response) => {
+                        console.log(response)
+                    })
+                    .finally(() => {
+                        this.isLoadingWorkflows = false;
+                    });
+            },
+            getWorkflowsAutomaticData() {
+                this.isLoadingAutomation = true;
+                DashboardServices.getWorkflowsAutomaticData()
+                    .then((response) => {
+                        console.log(response)
+                    })
+                    .finally(() => {
+                        this.isLoadingAutomation = false;
+                    });
+            },
         },
     }
 </script>

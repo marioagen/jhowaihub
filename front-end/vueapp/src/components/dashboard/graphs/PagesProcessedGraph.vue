@@ -35,6 +35,7 @@
 <script>
     import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
     import LoadingComponent from '@/components/global/LoadingComponent.vue';
+    import DashboardServices from '@/services/dashboard/DashboardServices';
     export default {
         components: {
             BarGraphComponent,
@@ -82,7 +83,20 @@
             },
         }),
         created() {
+            this.getPagesData();
             console.log(this.rangeDates)
+        },
+        methods: {
+            getPagesData() {
+                this.isLoading = true;
+                DashboardServices.getPagesData()
+                    .then((response) => {
+                        console.log(response)
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
+            },
         },
     }
 </script>

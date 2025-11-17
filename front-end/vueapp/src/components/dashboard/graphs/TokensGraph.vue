@@ -42,6 +42,7 @@
 <script>
     import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
     import LoadingComponent from '@/components/global/LoadingComponent.vue';
+    import DashboardServices from '@/services/dashboard/DashboardServices';
     export default {
         components: {
             BarGraphComponent,
@@ -89,7 +90,20 @@
             },
         }),
         created() {
+            this.getTokensData();
             console.log(this.rangeDates)
+        },
+        methods: {
+            getTokensData() {
+                this.isLoading = true;
+                DashboardServices.getTokensData()
+                    .then((response) => {
+                        console.log(response)
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
+            },
         },
     }
 </script>

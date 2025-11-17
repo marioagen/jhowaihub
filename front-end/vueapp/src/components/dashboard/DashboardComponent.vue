@@ -80,6 +80,7 @@
     import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGraph.vue';
     import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
     import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
+    import DashboardServices from '@/services/dashboard/DashboardServices';
     export default {
         components: {
             DashboardDateFilter,
@@ -121,6 +122,15 @@
             presetDate() {
                 return this.$t(`dashboard.filters.${this.filters.preset}`);
             },
+            getDashboardData() {
+                DashboardServices.getMainDashboardData()
+                    .then((response) => {
+                        console.log(response)
+                    });
+            }
+        },
+        created() {
+            this.getDashboardData();
         }
     }
 </script>
