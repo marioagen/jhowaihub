@@ -68,6 +68,19 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Asynchronously retrieves a <see cref="StepToolExecution"/> entity based on the specified card ID.
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
+        public async Task<ICollection<StepToolExecution>> FindByStepToolByCardIdAsync(int cardId)
+        {
+            return await _context.StepToolExecutions
+                        .Include(s => s.StepTool)
+                        .Where(s => s.CardId == cardId)
+                        .ToListAsync();
+        }
+
+        /// <summary>
         /// Updates the specified <see cref="StepToolExecution"/> entity in the database.
         /// </summary>
         /// <remarks>This method updates the state of the provided entity in the database context and
