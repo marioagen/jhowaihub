@@ -40,6 +40,7 @@
                     <label class="form-label">Data Final</label>
                     <input type="date" class="form-control form-control-sm" v-model="end" />
                 </div>
+                <hr/>
                 <div class="d-flex justify-content-end gap-2 mt-3">
                     <button 
                         class="btn btn-light btn-sm" 

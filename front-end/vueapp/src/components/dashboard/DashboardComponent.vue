@@ -17,7 +17,7 @@
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="row position-relative">
-                    <div class="col">
+                    <div class="col" v-outsideClick="handleOutsideClick">
                         <button
                             class="btn btn-outlined-light btn-sm border d-flex align-items-center justify-content-between"
                             style="width: 200px;"
@@ -86,7 +86,12 @@
             },
             filterData(filters) {
                 this.filters = filters;
-            }
+            },
+            handleOutsideClick() {
+                if (this.showDateFilter) {
+                    this.showDateFilter = false;
+                }
+            },
         }
     }
 </script>
