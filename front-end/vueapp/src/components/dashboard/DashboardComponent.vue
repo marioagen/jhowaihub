@@ -56,21 +56,27 @@
                         <span class="me-1">Total WTC</span>
                         <LucideIcon icon="Info" :size="17" />
                     </div>
-                    <h1 class="total-wtc-value">444,31</h1>
+                    <h2 class="mb-0 fw-bold text-primary">444,31</h2>
                 </div>
             </div>
             <TokensGraph />
+            <PagesProcessedGraph />
+            <WorkflowsGraph />
         </div>
     </main>
 </template>
 
 <script>
     import TokensGraph from '@/components/dashboard/graphs/TokensGraph.vue';
+    import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGraph.vue';
+    import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
     import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
     export default {
         components: {
             DashboardDateFilter,
             TokensGraph,
+            WorkflowsGraph,
+            PagesProcessedGraph,
         },
         data: () => ({
             showDateFilter: false,
@@ -116,11 +122,5 @@
         margin-left: auto;
         display: block; /* auto funciona apenas com block ou flex item */
         width: fit-content;
-    }
-
-    .total-wtc-value {
-        color: #0056d2;
-        font-weight: 700;
-        margin: 0;
     }
 </style>
