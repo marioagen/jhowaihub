@@ -666,6 +666,37 @@
     dashboard: {
         title: "Dashboard de Consumo e Bilhetagem",
         subtitle: "Woopi AI",
+        exportBtn: "Exportar CSV",
+        totalWTC: "Total WTC",
+        WTCText: "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
+        filters: {
+            currentMonth: "Este mês",
+            lastMonth: "Mês passado",
+            previousSeven: "Últimos 7 dias",
+            previousNinety: "Últimos 90 dias",
+        },
+        graphs: {
+            tokenGraphTitle: "Consumo de Tokens de IA",
+            tokenGraphSubtitle: "Consumo Diário de Tokens",
+            pagesGraphTitle: "Páginas de Documento Processadas (OCR)",
+            pagesGraphSubtitle: "Consumo Diário",
+            workflowsAutomaticGraphTitle: "Execuções de Workflows de Automação de IA",
+            workflowsGraphTitle: "Execuções de Workflows Woopi AI",
+            tokensTooltip: "Visualização do consumo de tokens para os diferentes modelos de Inteligência Artificial. Tokens são as unidades de processamento de texto utilizadas pelos modelos.",
+            pagesTooltip: "Quantidade de páginas de documentos que passaram pelo processo de Reconhecimento Óptico de Caracteres (OCR), que converte imagens de texto em texto editável.",
+            workflowAutomaticTooltip: "Número de vezes que os fluxos de automação de IA foram executados.",
+            workflowTooltip: "Número de vezes que os fluxos de automação criados na plataforma Woopi AI foram executados.",
+            totalTokens: "Total de Tokens Consumidos",
+            totalPages: "Total de Páginas Processadas",
+            totalWorkflowAutomatic: "Total de Execuções Woopi AI",
+            totalWorkflow: "Total de Execuções de Automação de IA",
+            unitValue: "Valor unitário no plano atual:",
+            periodTotal: "Totalizador no Período",
+        },
+    },
+    plan: {
+        current: "Plano Atual",
+        enterprise: "Plano Enterprise",
     },
 };
 

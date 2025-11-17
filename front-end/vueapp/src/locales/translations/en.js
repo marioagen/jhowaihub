@@ -702,6 +702,37 @@
     dashboard: {
         title: "Consumption and Ticketing Dashboard",
         subtitle: "Woopi AI",
+        exportBtn: "Export CSV",
+        totalWTC: "Total WTC",
+        WTCText: "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan’s multipliers. This is not a financial value.",
+        filters: {
+            currentMonth: "This Month",
+            lastMonth: "Last Month",
+            previousSeven: "Last 7 Days",
+            previousNinety: "Last 90 Days",
+        },
+        graphs: {
+            tokenGraphTitle: "AI Token Consumption",
+            tokenGraphSubtitle: "Daily Token Consumption",
+            pagesGraphTitle: "Processed Document Pages (OCR)",
+            pagesGraphSubtitle: "Daily Consumption",
+            workflowsAutomaticGraphTitle: "AI Automation Workflow Executions",
+            workflowsGraphTitle: "Woopi AI Workflow Executions",
+            tokensTooltip: "View of token consumption for different Artificial Intelligence models. Tokens are the text processing units used by the models.",
+            pagesTooltip: "Number of document pages processed through Optical Character Recognition (OCR), which converts text images into editable text.",
+            workflowAutomaticTooltip: "Number of times AI automation workflows were executed.",
+            workflowTooltip: "Number of times workflows created in the Woopi AI platform were executed.",
+            totalTokens: "Total Tokens Consumed",
+            totalPages: "Total Pages Processed",
+            totalWorkflowAutomatic: "Total Woopi AI Executions",
+            totalWorkflow: "Total AI Automation Executions",
+            unitValue: "Unit value in the current plan:",
+            periodTotal: "Period Total",
+        },
+    },
+    plan: {
+        current: "Current Plan",
+        enterprise: "Enterprise Plan",
     },
 };
 

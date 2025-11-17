@@ -705,6 +705,37 @@
     dashboard: {
         title: "Panel de Consumo y Ticketing",
         subtitle: "Woopi AI",
+        exportBtn: "Exportar CSV",
+        totalWTC: "Total WTC",
+        WTCText: "WTC (Woopi Total Cost) es la suma ponderada del consumo en el período seleccionado, basada en los multiplicadores de tu plan. No es un valor financiero.",
+        filters: {
+            currentMonth: "Este Mes",
+            lastMonth: "Mes Pasado",
+            previousSeven: "Últimos 7 Días",
+            previousNinety: "Últimos 90 Días",
+        },
+        graphs: {
+            tokenGraphTitle: "Consumo de Tokens de IA",
+            tokenGraphSubtitle: "Consumo Diario de Tokens",
+            pagesGraphTitle: "Páginas de Documentos Procesadas (OCR)",
+            pagesGraphSubtitle: "Consumo Diario",
+            workflowsAutomaticGraphTitle: "Ejecuciones de Workflows de Automatización de IA",
+            workflowsGraphTitle: "Ejecuciones de Workflows Woopi AI",
+            tokensTooltip: "Visualización del consumo de tokens para los diferentes modelos de Inteligencia Artificial. Los tokens son las unidades de procesamiento de texto utilizadas por los modelos.",
+            pagesTooltip: "Cantidad de páginas procesadas mediante Reconocimiento Óptico de Caracteres (OCR), que convierte imágenes de texto en texto editable.",
+            workflowAutomaticTooltip: "Número de veces que se ejecutaron los flujos de automatización de IA.",
+            workflowTooltip: "Número de veces que se ejecutaron los flujos creados en la plataforma Woopi AI.",
+            totalTokens: "Total de Tokens Consumidos",
+            totalPages: "Total de Páginas Procesadas",
+            totalWorkflowAutomatic: "Total de Ejecuciones Woopi AI",
+            totalWorkflow: "Total de Ejecuciones de Automatización de IA",
+            unitValue: "Valor unitario en el plan actual:",
+            periodTotal: "Total del Período",
+        },
+    },
+    plan: {
+        current: "Plan Actual",
+        enterprise: "Plan Enterprise",
     },
 };
 
