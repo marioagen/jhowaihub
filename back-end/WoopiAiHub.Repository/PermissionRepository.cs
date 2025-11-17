@@ -51,7 +51,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public ICollection<PermissionDto> FindWorkflowPermissions()
         {
-            return FindAll()
+            return _context.Permissions
                 .Where(p => p.Group == WorkflowStepGroup)
                 .Select(p => new PermissionDto
                 {
