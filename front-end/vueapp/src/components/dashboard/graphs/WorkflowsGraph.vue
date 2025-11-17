@@ -2,42 +2,58 @@
     <div class="card mb-3">
         <div class="card-body">
             <div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="mb-0 fw-bold">Execuções de Workflows de Automação de IA</h6>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <h6 class="mb-0 fw-bold">{{ $t("dashboard.graphs.workflowsAutomaticGraphTitle") }}</h6>
+                    <LucideIcon 
+                        v-tooltip.right="$t('dashboard.graphs.workflowAutomaticTooltip')" 
+                        icon="Info" 
+                        :size="17" 
+                    />
                 </div>
                 <div class="card ms-4 me-4 mb-3">
                     <div class="card-body">
-                        <h6>Total de Execuções de Automação de IA</h6>
+                        <h6>{{ $t("dashboard.graphs.workflowsAutomaticGraphTitle") }}</h6>
                         <h4 class="mb-0 fw-bold">4896,11</h4>
-                        <span>Valor unitário no plano atual: 0,08</span>
+                        <span> {{ $t("dashboard.graphs.unitValue") }} 0,008</span>
                         <hr/>
-                        <span class="mt-1">Totalizador no período</span>
+                        <span class="mt-1">{{ $t("dashboard.graphs.periodTotal") }}</span>
                         <h4 class="mb-0 fw-bold text-primary">0,15</h4>
                     </div>
                 </div>
-                <h6>Consumo Diário de Tokens</h6>
+                <LoadingComponent
+                    v-if="isLoadingWorkflows"
+                />
                 <BarGraphComponent
+                    v-else
                     :options="graph.options"
                     :series="graph.series"
                 />
             </div>
             <hr/>
             <div>
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="mb-0 fw-bold">Execuções de Workflows Woopi AI</h6>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <h6 class="mb-0 fw-bold">{{ $t("dashboard.graphs.workflowsGraphTitle") }}</h6>
+                    <LucideIcon 
+                        v-tooltip.right="$t('dashboard.graphs.pagesTooltip')" 
+                        icon="Info" 
+                        :size="17" 
+                    />
                 </div>
                 <div class="card ms-4 me-4 mb-3">
                     <div class="card-body">
-                        <h6>Total de Execuções Woopi AI</h6>
+                        <h6>{{ $t("dashboard.graphs.workflowsGraphTitle") }}</h6>
                         <h4 class="mb-0 fw-bold">4896,11</h4>
-                        <span>Valor unitário no plano atual: 0,08</span>
+                        <span> {{ $t("dashboard.graphs.unitValue") }} 0,008</span>
                         <hr/>
-                        <span class="mt-1">Totalizador no período</span>
+                        <span class="mt-1">{{ $t("dashboard.graphs.periodTotal") }}</span>
                         <h4 class="mb-0 fw-bold text-primary">0,15</h4>
                     </div>
                 </div>
-                <h6>Consumo Diário de Tokens</h6>
+                <LoadingComponent
+                    v-if="isLoadingAutomation"
+                />
                 <BarGraphComponent
+                    v-else
                     :options="graph2.options"
                     :series="graph2.series"
                 />
@@ -48,11 +64,20 @@
 
 <script>
     import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
+    import LoadingComponent from '@/components/global/LoadingComponent.vue';
     export default {
         components: {
             BarGraphComponent,
+            LoadingComponent,
+        },
+        props: {
+            rangeDates: {
+                type: Object,
+                required: true,
+            },
         },
         data: () => ({
+            isLoadingWorkflows: false,
             graph: {
                 options: {
                     chart: {
@@ -76,7 +101,7 @@
                             '11/11', '12/11', '13/11', '14/11', '15/11'
                         ]
                     },
-                    colors: ['#0060c7']
+                    colors: ['#10315B']
                 },
                 series: [
                     {
@@ -85,6 +110,7 @@
                     }
                 ]
             },
+            isLoadingAutomation: false,
             graph2: {
                 options: {
                     chart: {
@@ -108,7 +134,7 @@
                             '11/11', '12/11', '13/11', '14/11', '15/11'
                         ]
                     },
-                    colors: ['#0060c7']
+                    colors: ['#10315B']
                 },
                 series: [
                     {
@@ -117,6 +143,9 @@
                     }
                 ]
             },
-        })
+        }),
+        created() {
+            console.log(this.rangeDates)
+        },
     }
 </script>

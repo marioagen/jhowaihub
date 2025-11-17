@@ -10,8 +10,8 @@
                         </p>
                     </div>
                     <div class="plan-box plan-right">
-                        <small class="text-muted">Plano Atual</small><br>
-                        <span class="plan-title">Plano Enterprise</span>
+                        <small class="text-muted">{{ $t("plan.current") }}</small><br>
+                        <span class="plan-title">{{ $t("plan.enterprise") }}</span>
                     </div>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                             style="width: 200px;"
                             @click="toggleDateFilter"
                         >
-                            {{ filters.preset }}
+                            {{ presetDate() }}
                             <LucideIcon v-if="showDateFilter" icon="ChevronUp" :size="17" />
                             <LucideIcon v-else icon="ChevronDown" :size="17" />
                         </button>
@@ -47,21 +47,30 @@
                 </div>
                 <button class="btn btn-outlined-primary btn-sm">
                     <LucideIcon icon="ArrowDownToLine" :size="17" />
-                    Exportar CSV
+                    {{ $t("dashboard.exportBtn") }}
                 </button>
             </div>
             <div class="card mb-3">
                 <div class="card-body text-center">
                     <div class="d-inline-flex align-items-center justify-content-center gap-1 mb-2">
-                        <span class="me-1">Total WTC</span>
-                        <LucideIcon icon="Info" :size="17" />
+                        <span class="me-1">{{ $t("dashboard.totalWTC") }}</span>
+                        <LucideIcon v-tooltip.right="$t('dashboard.WTCText')" icon="Info" :size="17" />
                     </div>
-                    <h2 class="mb-0 fw-bold text-primary">444,31</h2>
+                    <h2 class="mb-0 fw-bold text-primary">{{ totalWTC }}</h2>
                 </div>
             </div>
-            <TokensGraph />
-            <PagesProcessedGraph />
-            <WorkflowsGraph />
+            <TokensGraph
+                :key="datesChange"
+                :rangeDates="dateRange"
+            />
+            <PagesProcessedGraph
+                :key="datesChange"
+                :rangeDates="dateRange"
+            />
+            <WorkflowsGraph
+                :key="datesChange"
+                :rangeDates="dateRange"
+            />
         </div>
     </main>
 </template>
@@ -80,23 +89,37 @@
         },
         data: () => ({
             showDateFilter: false,
+            datesChange: 0,
             filters: {
                 preset: "currentMonth",
                 start: "",
                 end: "",
-            }
+            },
+            totalWTC: 0,
         }),
+        computed: {
+            dateRange() {
+                return {
+                    start: this.filters.start,
+                    end: this.filters.end,
+                }
+            },
+        },
         methods: {
             toggleDateFilter() {
                 this.showDateFilter = !this.showDateFilter;
             },
             filterData(filters) {
                 this.filters = filters;
+                this.datesChange++;
             },
             handleOutsideClick() {
                 if (this.showDateFilter) {
                     this.showDateFilter = false;
                 }
+            },
+            presetDate() {
+                return this.$t(`dashboard.filters.${this.filters.preset}`);
             },
         }
     }
