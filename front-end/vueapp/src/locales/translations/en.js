@@ -686,6 +686,29 @@
         nextStep: "Next Step",
         noDataInDocument: "No data available",
         failedLoadDocument: "Failed to load document",
+    },
+    home: {
+        title: "Welcome to AI HUB, Woopi AI!",
+        subtitle: "Your journey to automate and optimize processes with artificial intelligence starts now.",
+        planLabel: "You have acquired the",
+        planName: "Enterprise Plan",
+        planThankYou: "Thank you for choosing our platform!",
+        quickStartTitle: "Quick Start Guide",
+        platformCard: {
+            title: "Discover the Platform",
+            description: "Watch a 5-minute guided tour about the main features.",
+            button: "Watch video"
+        },
+        workflowCard: {
+            title: "Your First Workflow",
+            description: "Follow our step-by-step guide to create your first automation in minutes.",
+            button: "Start guide"
+        },
+        docsCard: {
+            title: "Explore the Documentation",
+            description: "Check our complete documentation to explore all the potential of AI HUB.",
+            button: "Access docs"
+        }
     }
 };
 

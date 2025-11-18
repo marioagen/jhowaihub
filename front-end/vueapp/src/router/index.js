@@ -28,6 +28,7 @@ import NewFlow from "@/pages/flows/newFlow.vue";
 import EditFlow from "@/pages/flows/editFlow.vue";
 import PromptPage from "@/pages/prompts/index.vue";
 import PromptNew from "@/pages/prompts/newPrompt.vue";
+import HomePage from "@/pages/home.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -72,6 +73,15 @@ const routes = [
         meta: { 
             layout: "auth",
         },
+    },
+    {
+        path: "/home",
+        name: "Home",
+        component: HomePage,
+        meta: { 
+            layout: "default",
+        },
+        beforeEnter: authenticate,
     },
     {
         path: "/documents",
