@@ -663,5 +663,193 @@ namespace WoopiAiHub.Application.Services
             return stepToolOutput;
         }
 
+        /// <summary>
+        /// Phase 1: Creates a workflow with name and team associations only.
+        /// Returns the ID of the created workflow to be used in subsequent phases.
+        /// </summary>
+        /// <param name="workflowPhase1Dto"></param>
+        /// <returns>The ID of the created workflow</returns>
+        public async Task<int> CreatePhase1(WorkflowPhase1Dto workflowPhase1Dto)
+        {
+            if (string.IsNullOrWhiteSpace(workflowPhase1Dto.Name))
+            {
+                throw new AppException(ErrorCode.RequiredField, "Workflow name is required", WorkflowLabel.InvalidName);
+            }
+
+            if (workflowPhase1Dto.Teams == null || workflowPhase1Dto.Teams.Count == 0)
+            {
+                throw new AppException(ErrorCode.RequiredField, "At least one team must be selected", WorkflowLabel.InvalidTeams);
+            }
+
+            var teamsList = _teamRepository.FindByIds(workflowPhase1Dto.Teams);
+            if (teamsList.Count != workflowPhase1Dto.Teams.Count)
+            {
+                throw new AppException(ErrorCode.NotFound, "One or more teams not found", TeamLabel.NotFound);
+            }
+
+            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name);
+            await _workflowRepository.Create(workflow);
+
+            return workflow.Id;
+        }
+
+        /// <summary>
+        /// Phase 2: Updates a workflow with steps information (without step tools).
+        /// Validates and creates/updates steps with their profiles and statuses.
+        /// </summary>
+        /// <param name="workflowPhase2Dto"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdatePhase2(WorkflowPhase2Dto workflowPhase2Dto)
+        {
+            var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase2Dto.WorkflowId);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                // Clear existing steps to replace with new ones
+                workflow.Steps.Clear();
+
+                foreach (var stepDto in workflowPhase2Dto.Steps.OrderBy(s => s.Order))
+                {
+                    // Validate profile and status exist
+                    var profile = await _profileRepository.FindById(stepDto.ProfileId);
+                    if (profile == null)
+                    {
+                        throw new AppException(ErrorCode.NotFound, "Profile not found", ProfileLabel.NotFound);
+                    }
+
+                    var status = await _statusRepository.FindById(stepDto.StatusId);
+                    if (status == null)
+                    {
+                        throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
+                    }
+
+                    var step = new Step(
+                        stepDto.Id > 0 ? stepDto.Id : 0,
+                        DateTime.UtcNow,
+                        workflow.Id,
+                        stepDto.Name,
+                        stepDto.Order,
+                        stepDto.ProfileId,
+                        stepDto.StatusId
+                    );
+
+                    workflow.AddStep(step);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                _unitOfWork.Commit();
+
+                return true;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Phase 3: Updates workflow steps with their tool flows (step tools).
+        /// Handles dependencies between step tools.
+        /// </summary>
+        /// <param name="workflowPhase3Dto"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto)
+        {
+            var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase3Dto.WorkflowId);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                StepTool? lastGlobalStepTool = null;
+                var stepToolMap = new Dictionary<(int stepId, int order), StepTool>();
+
+                // Process each step's tools
+                foreach (var stepDto in workflowPhase3Dto.Steps.OrderBy(s => s.Order))
+                {
+                    var existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
+                    if (existingStep == null)
+                    {
+                        throw new AppException(ErrorCode.NotFound, $"Step with order {stepDto.Order} not found", StepLabel.NotFound);
+                    }
+
+                    // Clear existing step tools
+                    var stepToolIdsToRemove = existingStep.StepTools.Select(st => st.Id).ToList();
+                    if (stepToolIdsToRemove.Any())
+                    {
+                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepToolIdsToRemove);
+                    }
+                    existingStep.StepTools.Clear();
+
+                    StepTool? previousStepToolInStep = null;
+
+                    foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                    {
+                        var stepTool = CreateStepToolUpdate(stepToolDto);
+                        stepTool.Step = existingStep;
+                        stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+
+                        stepToolMap[(existingStep.Id, stepToolDto.Order)] = stepTool;
+
+                        existingStep.AddStepTool(stepTool);
+                        previousStepToolInStep = stepTool;
+                        lastGlobalStepTool = stepTool;
+                    }
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+
+                // Second pass: Resolve dependencies with actual IDs
+                foreach (var stepDto in workflowPhase3Dto.Steps.OrderBy(s => s.Order))
+                {
+                    var existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
+                    if (existingStep == null) continue;
+
+                    foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                    {
+                        if (!stepToolMap.TryGetValue((existingStep.Id, stepToolDto.Order), out var stepTool))
+                            continue;
+
+                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
+
+                        if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count > 0)
+                        {
+                            foreach (var dependsOn in stepToolDto.Dependencies)
+                            {
+                                var dependsOnStepTool = workflow.Steps
+                                    .SelectMany(s => s.StepTools)
+                                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
+
+                                if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
+                                {
+                                    var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
+                                    await _stepToolDependencyRepository.CreateAsync(dependency);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                _unitOfWork.Commit();
+
+                return true;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
     }
 }

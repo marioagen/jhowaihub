@@ -18,5 +18,10 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task UpdateTeamProfileRelationshipToWorkflow(List<int> steps, Profile profile);
         PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
         Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto);
+        
+        // Phased workflow creation methods
+        Task<int> CreatePhase1(WorkflowPhase1Dto workflowPhase1Dto);
+        Task<bool> UpdatePhase2(WorkflowPhase2Dto workflowPhase2Dto);
+        Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto);
     }
 }

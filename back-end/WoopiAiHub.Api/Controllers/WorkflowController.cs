@@ -147,5 +147,47 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _workflowServices.UpdateStepToolOutput(outputUpdateDto);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Phase 1: Creates a workflow with name and team associations.
+        /// </summary>
+        /// <param name="workflowPhase1Dto"></param>
+        /// <returns>The ID of the created workflow</returns>
+        [HttpPost("Phase1")]
+        [SwaggerOperation("Endpoint for Phase 1 of workflow creation: Name and Team Associations")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreatePhase1([FromBody] WorkflowPhase1Dto workflowPhase1Dto)
+        {
+            var workflowId = await _workflowServices.CreatePhase1(workflowPhase1Dto);
+            return Ok(workflowId);
+        }
+
+        /// <summary>
+        /// Phase 2: Updates workflow with steps information.
+        /// </summary>
+        /// <param name="workflowPhase2Dto"></param>
+        /// <returns></returns>
+        [HttpPut("Phase2")]
+        [SwaggerOperation("Endpoint for Phase 2 of workflow creation: Steps Management")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdatePhase2([FromBody] WorkflowPhase2Dto workflowPhase2Dto)
+        {
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Phase 3: Updates workflow steps with tool flows.
+        /// </summary>
+        /// <param name="workflowPhase3Dto"></param>
+        /// <returns></returns>
+        [HttpPut("Phase3")]
+        [SwaggerOperation("Endpoint for Phase 3 of workflow creation: Tool Flows Configuration")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdatePhase3([FromBody] WorkflowPhase3Dto workflowPhase3Dto)
+        {
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            return Ok(result);
+        }
     }
 }
