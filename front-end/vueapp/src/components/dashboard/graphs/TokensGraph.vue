@@ -11,9 +11,15 @@
                     />
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <LucideIcon icon="ChevronLeft" :size="17" />
-                    <span class="mb-0">IA Número 2</span>
-                    <LucideIcon icon="ChevronRight" :size="17" />
+                    <button class="btn btn-outlined-primary btn-sm" @click="previousIA">
+                        <LucideIcon icon="ChevronLeft" :size="17" />
+                    </button>
+                    <span class="mb-0">
+                        IA Número 2
+                    </span>
+                    <button class="btn btn-outlined-primary btn-sm" @click="nextIA">
+                        <LucideIcon icon="ChevronRight" :size="17" />
+                    </button>
                 </div>
             </div>
             <div class="card ms-4 me-4 mb-3">
@@ -56,6 +62,7 @@
         },
         data: () => ({
             isLoading: true,
+            IAList: [],
             graph: {
                 options: {
                     chart: {
@@ -91,6 +98,7 @@
         }),
         created() {
             this.getTokensData();
+            this.getIAList();
             console.log(this.rangeDates)
         },
         methods: {
@@ -103,6 +111,15 @@
                     .finally(() => {
                         this.isLoading = false;
                     });
+            },
+            getIAList() {
+                this.IAList = [];
+            },
+            nextIA() {
+                console.log("Next IA");
+            },
+            previousIA() {
+                console.log("Previous IA");
             },
         },
     }
