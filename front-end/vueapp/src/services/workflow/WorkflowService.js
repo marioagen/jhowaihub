@@ -109,4 +109,38 @@ export default {
                 }
             });
     },
+    // Phased workflow creation methods
+    createPhase1(params) {
+        return api.post("/Workflow/Phase1", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    updatePhase2(params) {
+        return api.put("/Workflow/Phase2", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    updatePhase3(params) {
+        return api.put("/Workflow/Phase3", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
 }
