@@ -520,6 +520,36 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Creates workflow relationships for all teams associated with the given profile.
+        /// It retrieves workflows based on the provided step IDs, then links each workflow
+        /// to every team that belongs to the profile.
+        /// </summary>
+        public async Task CreateWorkflowRelationship(Domain.Models.Profile profile, List<int> stepsIds)
+        {
+            var profileTeams = profile.Teams;
+            var workflows = await _workflowRepository.FindByStep(stepsIds);
+
+            foreach (var team in profileTeams)
+            {
+                await CreateRelationshipBetweenTeamWorkfloFromProfile(team.Id, workflows.ToList());
+            }
+        }
+
+        /// <summary>
+        /// Creates the relationship between a single team and a list of workflows.
+        /// It loads the team, adds each workflow to it, and persists the update.
+        /// </summary>
+        private async Task CreateRelationshipBetweenTeamWorkfloFromProfile(int teamId, List<Workflow> workflows)
+        {
+            var team = _teamRepository.FindByIdReturnModel(teamId);
+            foreach(var workflow in workflows)
+            {
+                team.AddWorkflow(workflow);
+            }
+            _teamRepository.Update(team);
+        }
+
+        /// <summary>
         /// Update team-profiles with its workflows.
         /// </summary>
         /// <param name="list<int>"></param>
