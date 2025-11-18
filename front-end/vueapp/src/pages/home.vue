@@ -132,9 +132,9 @@ export default {
         };
     },
     async mounted() {
-        // Load config from public/config/config.js
+        // Load config from src/config/config.js
         try {
-            const configModule = await import('/config/config.js');
+            const configModule = await import('@/config/config.js');
             this.config = configModule.default;
         } catch (error) {
             console.warn('Config file not found or error loading it:', error);

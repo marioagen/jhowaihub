@@ -49,6 +49,20 @@ function authenticate(to, from, next) {
     return next();
 }
 
+function authenticateBasic(to, from, next) {
+    const userStr = window.localStorage.getItem("project");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) {
+        return next({ path: "/" });
+    }
+
+    if (user.isLogged !== true) {
+        return next({ path: "/" });
+    }
+
+    return next();
+}
+
 const routes = [
     {
         path: "/",
@@ -81,7 +95,7 @@ const routes = [
         meta: { 
             layout: "default",
         },
-        beforeEnter: authenticate,
+        beforeEnter: authenticateBasic,
     },
     {
         path: "/documents",
