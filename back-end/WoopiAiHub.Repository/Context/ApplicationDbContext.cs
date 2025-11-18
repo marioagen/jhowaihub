@@ -47,7 +47,6 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<StepToolDependency> StepToolDependencies { get; set; }
         public DbSet<StepProfilePermission> StepProfilePermissions { get; set; }
         public DbSet<Prompt> Prompts { get; set; }
-        public DbSet<Tenant> Tenants { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -87,7 +86,6 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<StepToolDependency>(new StepToolDependencyMap().Configure);
             modelBuilder.Entity<StepProfilePermission>(new StepProfilePermissionMap().Configure);
             modelBuilder.Entity<Prompt>(new PromptMap().Configure);
-            modelBuilder.Entity<Tenant>(new TenantMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }

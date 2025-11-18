@@ -76,6 +76,7 @@ namespace WoopiAiHub.Application.Services
                 await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
                 await _tenantContextService.TrySetTenantConnectionAsync(httpContext,
                                                                         userAccess.Tenant);
+
                 var user = await _userRepository.FindByEmailAsync(loginDto.Email);
                 if (user == null)
                     throw new AppException(null,

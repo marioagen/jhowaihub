@@ -1,12 +1,21 @@
-﻿using WoopiAiHub.Application.Services;
-using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.Interfaces.Refit;
-using WoopiAiHub.Domain.Interfaces.Utils;
-using WoopiAiHub.UnitTests.Fixture;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Moq.AutoMock;
+using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository.Context;
+using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -106,5 +115,6 @@ namespace WoopiAiHub.UnitTests.Services
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _tenantServices.InitializeTenant(tenant));
             Assert.Equal("KeyAccess is not configured in the application settings.", exception.Message);
         }
+
     }
 }

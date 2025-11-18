@@ -1,8 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Migrations;
-using System.Text.RegularExpressions;
-using WoopiAiHub.Domain.Models;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
