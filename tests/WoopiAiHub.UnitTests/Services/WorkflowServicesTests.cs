@@ -512,5 +512,164 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.Equal(workflowList, result);
         }
+
+        // Phased Workflow Creation Tests
+
+        [Fact(DisplayName = "CreatePhase1 should throw AppException when name is empty")]
+        [Trait("CreatePhase1", "Fail")]
+        public async Task CreatePhase1_EmptyName_ThrowsAppException()
+        {
+            // Arrange
+            var phase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "",
+                Teams = new List<int> { 1 }
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CreatePhase1(phase1Dto));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.InvalidName, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CreatePhase1 should throw AppException when teams list is empty")]
+        [Trait("CreatePhase1", "Fail")]
+        public async Task CreatePhase1_EmptyTeams_ThrowsAppException()
+        {
+            // Arrange
+            var phase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "Test Workflow",
+                Teams = new List<int>()
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CreatePhase1(phase1Dto));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.InvalidTeams, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CreatePhase1 should throw AppException when teams not found")]
+        [Trait("CreatePhase1", "Fail")]
+        public async Task CreatePhase1_TeamsNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var phase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "Test Workflow",
+                Teams = new List<int> { 1, 2 }
+            };
+
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { new Team("Team 1", 1, DateTime.Now) });
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CreatePhase1(phase1Dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(TeamLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CreatePhase1 should return workflow ID when successful")]
+        [Trait("CreatePhase1", "Success")]
+        public async Task CreatePhase1_ValidData_ReturnsWorkflowId()
+        {
+            // Arrange
+            var phase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "Test Workflow",
+                Teams = new List<int> { 1 }
+            };
+
+            var team = new Team("Team 1", 1, DateTime.Now);
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team });
+
+            _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _workflowServices.CreatePhase1(phase1Dto);
+
+            // Assert
+            Assert.True(result >= 0);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Once);
+            _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase2 should throw AppException when workflow not found")]
+        [Trait("UpdatePhase2", "Fail")]
+        public async Task UpdatePhase2_WorkflowNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var phase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = 1,
+                Steps = new List<StepPhase2Dto>()
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>()))
+                .ReturnsAsync((Workflow?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "UpdatePhase2 should throw AppException when profile not found")]
+        [Trait("UpdatePhase2", "Fail")]
+        public async Task UpdatePhase2_ProfileNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var teamFixture = new TeamFixture();
+            var team = teamFixture.CreateValidTeam();
+            var workflow = new Workflow(1, DateTime.Now, new List<Team> { team }, "Test Workflow");
+
+            var phase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = 1,
+                Steps = new List<StepPhase2Dto>
+                {
+                    new StepPhase2Dto
+                    {
+                        Id = 0,
+                        Name = "Step 1",
+                        Order = 1,
+                        ProfileId = 1,
+                        StatusId = 1
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>()))
+                .ReturnsAsync(workflow);
+            _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>()))
+                .ReturnsAsync((ProfileDto?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(ProfileLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should throw AppException when workflow not found")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task UpdatePhase3_WorkflowNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var phase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = new List<StepPhase3Dto>()
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>()))
+                .ReturnsAsync((Workflow?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(phase3Dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
+        }
     }
 }
