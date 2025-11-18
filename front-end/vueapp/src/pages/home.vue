@@ -131,14 +131,11 @@ export default {
             }
         };
     },
-    async mounted() {
-        // Load config from src/config/config.js
-        try {
-            const configModule = await import('@/config/config.js');
-            this.config = configModule.default;
-        } catch (error) {
-            console.warn('Config file not found or error loading it:', error);
-        }
+    mounted() {
+        // Load URLs from global ENV_CONFIG (loaded from public/config/appsettings.js)
+        this.config.links.videoUrl = ENV_CONFIG.VUE_APP_HOME_VIDEO_URL || "";
+        this.config.links.guideUrl = ENV_CONFIG.VUE_APP_HOME_GUIDE_URL || "";
+        this.config.links.docsUrl = ENV_CONFIG.VUE_APP_HOME_DOCS_URL || "";
     }
 };
 </script>
