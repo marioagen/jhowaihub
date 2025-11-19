@@ -511,12 +511,66 @@ namespace WoopiAiHub.Application.Services
         public async Task<ICollection<Workflow>> FindByProfileStep(ICollection<Domain.Models.Profile> profiles)
         {
             var steps = profiles
-                .SelectMany(p => p.Steps)
-                .Select(s => s.Id)
+                .SelectMany(p => p.StepProfilePermissions)
+                .Select(s => s.StepId)
                 .Distinct()
                 .ToList();
 
             return await _workflowRepository.FindByStep(steps);
+        }
+
+        /// <summary>
+        /// Creates workflow relationships for all teams associated with the given profile.
+        /// It retrieves workflows based on the provided step IDs, then links each workflow
+        /// to every team that belongs to the profile.
+        /// </summary>
+        public async Task CreateWorkflowRelationship(Domain.Models.Profile profile, List<int> stepsIds)
+        {
+            var profileTeams = profile.Teams;
+            var workflows = await _workflowRepository.FindByStep(stepsIds);
+
+            foreach (var team in profileTeams)
+            {
+                await CreateRelationshipBetweenTeamWorkfloFromProfile(team.Id, workflows.ToList());
+            }
+        }
+
+        /// <summary>
+        /// Creates the relationship between a single team and a list of workflows.
+        /// It loads the team, adds each workflow to it, and persists the update.
+        /// </summary>
+        private async Task CreateRelationshipBetweenTeamWorkfloFromProfile(int teamId, List<Workflow> workflows)
+        {
+            var team = _teamRepository.FindByIdReturnModel(teamId);
+            foreach(var workflow in workflows)
+            {
+                team.AddWorkflow(workflow);
+            }
+            _teamRepository.Update(team);
+        }
+
+        public async Task UpdateTeamWorkflowRelationship(Team team, List<Workflow> workflows, List<Domain.Models.Profile> profiles)
+        {
+            var workflowsToRemove = new List<TeamsWorkflowsDto>();
+            foreach (var profile in profiles)
+            {
+                var teamsWorkflows = await VerifyWorkflowMatchInOtherTeamProfile(profile.Id, team.Id, workflows);
+                workflowsToRemove.Add(teamsWorkflows);
+            }            
+            
+            var filterEmptyWorkflows = workflowsToRemove
+                .Where(w => w.Workflows.Count > 0)
+                .Select(w => new TeamsWorkflowsDto
+                {
+                    TeamId = w.TeamId,
+                    Workflows = w.Workflows.Distinct().ToList()
+                })
+                .ToList();
+
+            if (filterEmptyWorkflows.Count() > 0)
+            {
+                await RemoveTeamWorkflowRelationship(filterEmptyWorkflows);
+            }
         }
 
         /// <summary>
