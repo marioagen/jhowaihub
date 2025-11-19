@@ -511,8 +511,8 @@ namespace WoopiAiHub.Application.Services
         public async Task<ICollection<Workflow>> FindByProfileStep(ICollection<Domain.Models.Profile> profiles)
         {
             var steps = profiles
-                .SelectMany(p => p.Steps)
-                .Select(s => s.Id)
+                .SelectMany(p => p.StepProfilePermissions)
+                .Select(s => s.StepId)
                 .Distinct()
                 .ToList();
 
@@ -547,6 +547,30 @@ namespace WoopiAiHub.Application.Services
                 team.AddWorkflow(workflow);
             }
             _teamRepository.Update(team);
+        }
+
+        public async Task UpdateTeamWorkflowRelationship(Team team, List<Workflow> workflows, List<Domain.Models.Profile> profiles)
+        {
+            var workflowsToRemove = new List<TeamsWorkflowsDto>();
+            foreach (var profile in profiles)
+            {
+                var teamsWorkflows = await VerifyWorkflowMatchInOtherTeamProfile(profile.Id, team.Id, workflows);
+                workflowsToRemove.Add(teamsWorkflows);
+            }            
+            
+            var filterEmptyWorkflows = workflowsToRemove
+                .Where(w => w.Workflows.Count > 0)
+                .Select(w => new TeamsWorkflowsDto
+                {
+                    TeamId = w.TeamId,
+                    Workflows = w.Workflows.Distinct().ToList()
+                })
+                .ToList();
+
+            if (filterEmptyWorkflows.Count() > 0)
+            {
+                await RemoveTeamWorkflowRelationship(filterEmptyWorkflows);
+            }
         }
 
         /// <summary>
