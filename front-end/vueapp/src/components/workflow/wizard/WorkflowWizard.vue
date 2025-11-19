@@ -198,9 +198,54 @@ export default {
                 await this.savePhase2();
             }
         },
-        previousPhase() {
+        async previousPhase() {
             if (this.currentPhase > 1) {
                 this.currentPhase--;
+                // Reload data from backend when navigating back
+                await this.reloadCurrentPhaseData();
+            }
+        },
+        async reloadCurrentPhaseData() {
+            // Only reload if we have a workflow ID (data exists in database)
+            if (!this.workflowIdInternal) return;
+
+            this.isLoading = true;
+            try {
+                const workflow = await WorkflowService.getWorkflowById(this.workflowIdInternal);
+                if (workflow.error) {
+                    throw new Error(workflow.error);
+                }
+
+                // Update all phase data from database
+                this.phase1Data = {
+                    name: workflow.name,
+                    teams: workflow.teams.map(t => t.id),
+                };
+                this.phase2Data = {
+                    steps: workflow.steps.map(step => ({
+                        id: step.id,
+                        name: step.name,
+                        order: step.order,
+                        profileId: String(step.profile?.id || ''),
+                        statusId: String(step.status?.id || ''),
+                        stepTools: step.stepTools || []
+                    }))
+                };
+                this.phase3Data = {
+                    steps: this.phase2Data.steps.map(step => ({
+                        ...step,
+                        stepTools: step.stepTools || []
+                    }))
+                };
+            } catch (error) {
+                this.$notify({
+                    title: 'workflow.index',
+                    message: 'workflow.loadError',
+                    variant: 'danger',
+                    icon: 'CircleX',
+                });
+            } finally {
+                this.isLoading = false;
             }
         },
         async savePhase1() {
@@ -269,13 +314,10 @@ export default {
                 }
 
                 this.phase2Data = data;
-                // Prepare phase 3 data with the steps from phase 2
-                this.phase3Data.steps = data.steps.map(step => ({
-                    ...step,
-                    stepTools: step.stepTools || []
-                }));
                 this.currentPhase = 3;
-                this.loadWorkflowData();
+                // Reload data from database to get fresh step data with IDs
+                await this.reloadCurrentPhaseData();
+                
                 this.$notify({
                     title: 'workflow.index',
                     message: 'workflow.phase2Success',
@@ -403,8 +445,15 @@ export default {
             }
         },
     },
-    created() {
+    async created() {
         this.loadProfiles();
+        await this.loadWorkflowData();
+    },
+    async mounted() {
+        // Reload data when returning from flow editor or when component is mounted
+        if (this.workflowIdInternal || this.isEdit) {
+            await this.reloadCurrentPhaseData();
+        }
     },
 };
 </script>

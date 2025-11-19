@@ -150,4 +150,46 @@ export default {
     border-top: 1px solid #e5e7eb;
     padding-top: 12px;
 }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .phase-container {
+        padding: 15px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+    
+    .card-header .text-muted {
+        width: 100%;
+    }
+    
+    .step-badge {
+        width: 28px;
+        height: 28px;
+        margin-right: 8px;
+    }
+    
+    .btn-sm {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .phase-container {
+        padding: 10px;
+    }
+    
+    .section-title {
+        font-size: 12px;
+    }
+    
+    h6 {
+        font-size: 0.9rem;
+    }
+}
 </style>

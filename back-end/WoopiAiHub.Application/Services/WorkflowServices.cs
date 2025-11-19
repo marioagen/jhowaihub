@@ -770,74 +770,8 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                StepTool? lastGlobalStepTool = null;
-                var stepToolMap = new Dictionary<(int stepId, int order), StepTool>();
-
-                // Process each step's tools
-                foreach (var stepDto in workflowPhase3Dto.Steps.OrderBy(s => s.Order))
-                {
-                    var existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
-                    if (existingStep == null)
-                    {
-                        throw new AppException(ErrorCode.NotFound, $"Step with order {stepDto.Order} not found", StepLabel.NotFound);
-                    }
-
-                    // Clear existing step tools
-                    var stepToolIdsToRemove = existingStep.StepTools.Select(st => st.Id).ToList();
-                    if (stepToolIdsToRemove.Any())
-                    {
-                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepToolIdsToRemove);
-                    }
-                    existingStep.StepTools.Clear();
-
-                    StepTool? previousStepToolInStep = null;
-
-                    foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
-                    {
-                        var stepTool = CreateStepToolUpdate(stepToolDto);
-                        stepTool.Step = existingStep;
-                        stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
-
-                        stepToolMap[(existingStep.Id, stepToolDto.Order)] = stepTool;
-
-                        existingStep.AddStepTool(stepTool);
-                        previousStepToolInStep = stepTool;
-                        lastGlobalStepTool = stepTool;
-                    }
-                }
-
-                await _unitOfWork.SaveChangesAsync();
-
-                // Second pass: Resolve dependencies with actual IDs
-                foreach (var stepDto in workflowPhase3Dto.Steps.OrderBy(s => s.Order))
-                {
-                    var existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
-                    if (existingStep == null) continue;
-
-                    foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
-                    {
-                        if (!stepToolMap.TryGetValue((existingStep.Id, stepToolDto.Order), out var stepTool))
-                            continue;
-
-                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
-
-                        if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count > 0)
-                        {
-                            foreach (var dependsOn in stepToolDto.Dependencies)
-                            {
-                                var dependsOnStepTool = workflow.Steps
-                                    .SelectMany(s => s.StepTools)
-                                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
-
-                                if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
-                                {
-                                    var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
-                                    await _stepToolDependencyRepository.CreateAsync(dependency);
-                                }
-                            }
-                        }
-                    }
-                }
+                var stepToolMap = await ProcessStepTools(workflow, workflowPhase3Dto.Steps);
+                await ResolveDependencies(workflow, workflowPhase3Dto.Steps, stepToolMap);
 
                 await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
@@ -848,6 +782,134 @@ namespace WoopiAiHub.Application.Services
             {
                 _unitOfWork.Rollback();
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Processes step tools for each step in the workflow.
+        /// </summary>
+        private async Task<Dictionary<(int stepId, int order), StepTool>> ProcessStepTools(
+            Workflow workflow, 
+            ICollection<StepPhase3Dto> steps)
+        {
+            StepTool? lastGlobalStepTool = null;
+            var stepToolMap = new Dictionary<(int stepId, int order), StepTool>();
+
+            foreach (var stepDto in steps.OrderBy(s => s.Order))
+            {
+                var existingStep = FindStepInWorkflow(workflow, stepDto);
+                await ClearExistingStepTools(existingStep);
+
+                StepTool? previousStepToolInStep = null;
+
+                foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                {
+                    var stepTool = CreateAndConfigureStepTool(
+                        stepToolDto, 
+                        existingStep, 
+                        previousStepToolInStep, 
+                        lastGlobalStepTool);
+
+                    stepToolMap[(existingStep.Id, stepToolDto.Order)] = stepTool;
+                    existingStep.AddStepTool(stepTool);
+                    
+                    previousStepToolInStep = stepTool;
+                    lastGlobalStepTool = stepTool;
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return stepToolMap;
+        }
+
+        /// <summary>
+        /// Resolves dependencies between step tools.
+        /// </summary>
+        private async Task ResolveDependencies(
+            Workflow workflow,
+            ICollection<StepPhase3Dto> steps,
+            Dictionary<(int stepId, int order), StepTool> stepToolMap)
+        {
+            foreach (var stepDto in steps.OrderBy(s => s.Order))
+            {
+                var existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
+                if (existingStep == null) continue;
+
+                foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                {
+                    if (!stepToolMap.TryGetValue((existingStep.Id, stepToolDto.Order), out var stepTool))
+                        continue;
+
+                    await CreateDependenciesForStepTool(workflow, stepTool, stepToolDto);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds a step in the workflow by ID or order.
+        /// </summary>
+        private Step FindStepInWorkflow(Workflow workflow, StepPhase3Dto stepDto)
+        {
+            var step = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
+            if (step == null)
+            {
+                throw new AppException(ErrorCode.NotFound, $"Step with order {stepDto.Order} not found", StepLabel.NotFound);
+            }
+            return step;
+        }
+
+        /// <summary>
+        /// Clears existing step tools and their dependencies.
+        /// </summary>
+        private async Task ClearExistingStepTools(Step step)
+        {
+            var stepToolIdsToRemove = step.StepTools.Select(st => st.Id).ToList();
+            if (stepToolIdsToRemove.Any())
+            {
+                await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepToolIdsToRemove);
+            }
+            step.StepTools.Clear();
+        }
+
+        /// <summary>
+        /// Creates and configures a step tool with its dependencies.
+        /// </summary>
+        private StepTool CreateAndConfigureStepTool(
+            StepToolUpdateDto stepToolDto,
+            Step step,
+            StepTool? previousStepToolInStep,
+            StepTool? lastGlobalStepTool)
+        {
+            var stepTool = CreateStepToolUpdate(stepToolDto);
+            stepTool.Step = step;
+            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+            return stepTool;
+        }
+
+        /// <summary>
+        /// Creates dependencies for a step tool based on the DTO.
+        /// </summary>
+        private async Task CreateDependenciesForStepTool(
+            Workflow workflow,
+            StepTool stepTool,
+            StepToolUpdateDto stepToolDto)
+        {
+            await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
+
+            if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count > 0)
+            {
+                foreach (var dependsOn in stepToolDto.Dependencies)
+                {
+                    var dependsOnStepTool = workflow.Steps
+                        .SelectMany(s => s.StepTools)
+                        .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
+
+                    if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
+                    {
+                        var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
+                        await _stepToolDependencyRepository.CreateAsync(dependency);
+                    }
+                }
             }
         }
 
