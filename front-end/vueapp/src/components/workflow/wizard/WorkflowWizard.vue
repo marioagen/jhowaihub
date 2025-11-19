@@ -64,6 +64,7 @@
                             ref="phase3"
                             :workflowSteps="phase3Data.steps"
                             :profilesList="profilesList"
+                            :phase="currentPhase"
                             @add-tool-flow="handleAddToolFlow"
                             @edit-tool-flow="handleEditToolFlow"
                             @remove-tool-flow="handleRemoveToolFlow"
@@ -141,29 +142,36 @@ export default {
         const { validate } = useForm();
         return { validate };
     },
-    data() {
-        return {
-            currentPhase: 1,
-            phases: [
-                this.$t("workflow.nameAndAssociations"),
-                this.$t("workflow.steps"),
-                this.$t("workflow.tools"),
-            ],
-            isLoading: false,
-            workflowIdInternal: this.workflowId,
-            phase1Data: {
-                name: "",
-                teams: [],
-            },
-            phase2Data: {
-                steps: [],
-            },
-            phase3Data: {
-                steps: [],
-            },
-            profilesList: [],
-        };
-    },
+        data() {
+            return {
+                currentPhase: Number(this.$route.params.phase ?? 1),
+                phases: [
+                    this.$t("workflow.nameAndAssociations"),
+                    this.$t("workflow.steps"),
+                    this.$t("workflow.tools"),
+                ],
+                isLoading: false,
+                workflowIdInternal: this.workflowId,
+                phase1Data: {
+                    name: "",
+                    teams: [],
+                },
+                phase2Data: {
+                    steps: [],
+                },
+                phase3Data: {
+                    steps: [],
+                },
+                profilesList: [],
+            };
+        },
+        //watch: {
+        //    currentPhase(currentPhase) {
+        //        if (currentPhase === 3) {
+        //            loadWorkflowData();
+        //        }
+        //    }
+        //},
     computed: {
         formTitle() {
             return this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title";
@@ -267,7 +275,7 @@ export default {
                     stepTools: step.stepTools || []
                 }));
                 this.currentPhase = 3;
-
+                this.loadWorkflowData();
                 this.$notify({
                     title: 'workflow.index',
                     message: 'workflow.phase2Success',
@@ -323,18 +331,19 @@ export default {
         redirectToIndex() {
             this.$router.push({ name: "WorkflowManagement" });
         },
-        handleAddToolFlow(step) {
+        handleAddToolFlow(step,phase) {
             // Navigate to flow editor for this step
             this.$router.push({
                 name: "NewFlow",
-                params: { stepOrder: step.order }
+                params: { stepOrder: step.order, phase: this.currentPhase  }
+
             });
         },
-        handleEditToolFlow(step) {
+        handleEditToolFlow(step,phase) {
             // Navigate to flow editor for this step
             this.$router.push({
                 name: "EditFlow",
-                params: { stepOrder: step.order }
+                params: { stepOrder: step.order, phase: this.currentPhase }
             });
         },
         handleRemoveToolFlow(step) {
@@ -396,7 +405,6 @@ export default {
     },
     created() {
         this.loadProfiles();
-        this.loadWorkflowData();
     },
 };
 </script>

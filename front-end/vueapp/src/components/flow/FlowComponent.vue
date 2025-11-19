@@ -159,6 +159,11 @@
                 type: Number,
                 required: false,
                 default: 0,
+            },
+            phase: {
+                type: Number,
+                required: false,
+                default: 0,
             }
         },
         data() {
@@ -188,10 +193,21 @@
         },
         methods: {
             redirectToIndex() {
+                console.log(this.phase)
                 if (this.isEdit) {
-                    return this.$router.push({ name: "EditWorkflow" });
+                    return this.$router.push({
+                        name: "EditWorkflow",
+                        params: {
+                            phase: this.phase
+                        }
+                    });
                 }
-                return this.$router.push({ name: "NewWorkflow" });
+                return this.$router.push({
+                    name: "NewWorkflow",
+                    params: {
+                        phase: this.phase
+                    }
+                });
             },
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;

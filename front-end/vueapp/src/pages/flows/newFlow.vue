@@ -1,6 +1,7 @@
 <template>
     <FlowComponent 
         :stepOrder="routeStepOrder"
+        :phase="routePhase"
     />
 </template>
 
@@ -15,6 +16,9 @@
             routeStepOrder() {
                 return parseInt(this.$route.params.stepOrder);
             },
+            routePhase() {
+                return parseInt(this.$route.params.phase);
+            }
         },
     }
 </script>

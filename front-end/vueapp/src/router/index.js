@@ -255,7 +255,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/workflow/management",
+        path: "/workflow/management/:phase?",
         name: "WorkflowManagement",
         component: WorkflowManagement,
         meta: { 
@@ -264,7 +264,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/workflow/new",
+        path: "/workflow/new/:phase?",
         name: "NewWorkflow",
         component: NewWorkflow,
         meta: { 
@@ -291,7 +291,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow/:stepOrder",
+        path: "/flow/:stepOrder/:phase",
         name: "NewFlow",
         component: NewFlow,
         meta: { 
@@ -300,7 +300,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow/:id/:stepId/:stepOrder",
+        path: "/flow/:id/:stepId/:stepOrder/:phase",
         name: "EditFlow",
         component: EditFlow,
         meta: { 

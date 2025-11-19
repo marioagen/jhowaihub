@@ -79,6 +79,11 @@ export default {
         profilesList: {
             type: Array,
             default: () => []
+        },
+        phase: {
+            type: Number,
+            required: false,
+            default: 0,
         }
     },
     methods: {
@@ -87,10 +92,10 @@ export default {
             return profile ? profile.text : 'N/A';
         },
         addToolFlow(step) {
-            this.$emit('add-tool-flow', step);
+            this.$emit('add-tool-flow', step, this.phase);
         },
         editToolFlow(step) {
-            this.$emit('edit-tool-flow', step);
+            this.$emit('edit-tool-flow', step, this.phase);
         },
         removeToolFlow(step) {
             this.$emit('remove-tool-flow', step);
