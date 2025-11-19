@@ -15,7 +15,7 @@
                         <LucideIcon icon="ChevronLeft" :size="17" />
                     </button>
                     <span class="mb-0">
-                        IA Número 2
+                        {{ currentIA.name }}
                     </span>
                     <button class="btn btn-outlined-primary btn-sm" @click="nextIA">
                         <LucideIcon icon="ChevronRight" :size="17" />
@@ -63,6 +63,7 @@
         data: () => ({
             isLoading: true,
             IAList: [],
+            currentIAIndex: 0,
             graph: {
                 options: {
                     chart: {
@@ -101,6 +102,11 @@
             this.getIAList();
             console.log(this.rangeDates)
         },
+        computed: {
+            currentIA() {
+                return this.IAList[this.currentIAIndex] || null;
+            },
+        },
         methods: {
             getTokensData() {
                 this.isLoading = true;
@@ -113,13 +119,22 @@
                     });
             },
             getIAList() {
-                this.IAList = [];
+                this.IAList = [
+                    { id: 0, name: "GPT-5" },
+                    { id: 1, name: "GPT-4 Mini" },
+                    { id: 2, name: "Claude 4" },
+                    { id: 3, name: "Grok 3" },
+                    { id: 4, name: "Grok 4" },
+                    { id: 5, name: "Gemini" },
+                ];
             },
             nextIA() {
-                console.log("Next IA");
+                this.currentIAIndex = (this.currentIAIndex + 1) % this.IAList.length;
+                this.getTokensData();
             },
             previousIA() {
-                console.log("Previous IA");
+                this.currentIAIndex = (this.currentIAIndex - 1 + this.IAList.length) % this.IAList.length;
+                this.getTokensData();
             },
         },
     }
