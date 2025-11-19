@@ -164,6 +164,11 @@
                 type: Number,
                 required: false,
                 default: 0,
+            },
+            workflowId: {
+                type: Number,
+                required: false,
+                default: null,
             }
         },
         data() {
@@ -443,10 +448,28 @@
                         this.promptlist = response;
                     });
             },
-            loadPreviousStepTools(node) {
-                const tempWorkflowList = this.$store.state.tempWorkflow.list || [];
+            async loadPreviousStepTools(node) {
+                let workflowSteps = [];
+
+                // Try to load from database if workflowId is available
+                if (this.workflowId) {
+                    try {
+                        const WorkflowService = (await import('@/services/workflow/WorkflowService')).default;
+                        const workflow = await WorkflowService.getWorkflowById(this.workflowId);
+                        if (!workflow.error) {
+                            workflowSteps = workflow.steps || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading workflow steps:', error);
+                    }
+                }
+
+                // Fallback to Vuex store if no workflowId or if database fetch failed
+                if (workflowSteps.length === 0) {
+                    workflowSteps = this.$store.state.tempWorkflow.list || [];
+                }
                 
-                const relevantSteps = tempWorkflowList.filter(step => 
+                const relevantSteps = workflowSteps.filter(step => 
                     step.order <= this.stepOrder
                 );
                 
@@ -460,9 +483,9 @@
                 
                 this.previousStepTools = relevantSteps.map(step => ({
                     id: step.id,
-                    name: step?.name || 'Unnamed Tool',
+                    name: step?.name || step.name || 'Unnamed Tool',
                     order: step.order,
-                    stepTools: step.stepTools.filter(stepTool => 
+                    stepTools: (step.stepTools || []).filter(stepTool => 
                         step.order < maxOrder || 
                         (step.order === maxOrder && stepTool.order < node.data.order && nodesToolIds.includes(stepTool.tool?.id))
                     )

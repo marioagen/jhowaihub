@@ -374,18 +374,25 @@ export default {
             this.$router.push({ name: "WorkflowManagement" });
         },
         handleAddToolFlow(step,phase) {
-            // Navigate to flow editor for this step
+            // Navigate to flow editor for this step, passing workflow ID
             this.$router.push({
                 name: "NewFlow",
-                params: { stepOrder: step.order, phase: this.currentPhase  }
-
+                params: { 
+                    stepOrder: step.order, 
+                    phase: this.currentPhase,
+                    workflowId: this.workflowIdInternal
+                }
             });
         },
         handleEditToolFlow(step,phase) {
-            // Navigate to flow editor for this step
+            // Navigate to flow editor for this step, passing workflow ID
             this.$router.push({
                 name: "EditFlow",
-                params: { stepOrder: step.order, phase: this.currentPhase }
+                params: { 
+                    stepOrder: step.order, 
+                    phase: this.currentPhase,
+                    workflowId: this.workflowIdInternal
+                }
             });
         },
         handleRemoveToolFlow(step) {

@@ -5,6 +5,7 @@
         :stepId="routeStepId"
         :stepOrder="routeStepOrder"
         :phase="routePhase"
+        :workflowId="routeWorkflowId"
     />
 </template>
 
@@ -27,6 +28,9 @@
             },
             routePhase() {
                 return parseInt(this.$route.params.phase);
+            },
+            routeWorkflowId() {
+                return this.$route.params.workflowId ? parseInt(this.$route.params.workflowId) : null;
             }
         },
     }

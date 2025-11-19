@@ -2,13 +2,14 @@
     <FlowComponent 
         :stepOrder="routeStepOrder"
         :phase="routePhase"
+        :workflowId="routeWorkflowId"
     />
 </template>
 
 <script>
     import FlowComponent from '@/components/flow/FlowComponent.vue';
     export default {
-        name: "EditFlow",
+        name: "NewFlow",
         components: {
             FlowComponent
         },
@@ -18,6 +19,9 @@
             },
             routePhase() {
                 return parseInt(this.$route.params.phase);
+            },
+            routeWorkflowId() {
+                return this.$route.params.workflowId ? parseInt(this.$route.params.workflowId) : null;
             }
         },
     }
