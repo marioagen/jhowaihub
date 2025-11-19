@@ -294,7 +294,7 @@ export default {
                 });
         },
         redirectToDocument() {
-            this.$router.push({ name: "Documents" });
+            this.$router.push({ name: "Home" });
         },
         getPermissions(token) {
             return getJWTPermissions(token);
@@ -307,7 +307,7 @@ export default {
         let login = this.$store.state.userProfile.login;
         let tenant = this.$store.state.userProfile.tenant;
         if (login !== "" || tenant !== "") {
-            this.$router.push({ name: "Documents" });
+            this.$router.push({ name: "Home" });
         }
     },
 };

@@ -61,7 +61,7 @@
     labelFailedToLoadHistory: "No se pudo cargar el historial.",
     labelFailedToApplyQuestionnaire: "No se pudo aplicar el cuestionario.",
     labelGeneralInformation: "Cargar documento",
-    labelGoHome: "Ir a home",
+    labelGoHome: "Home",
     labelHistoric: "Registro de respuestas",
     labelInclusionDate: "Fecha de inclusión",
     labelListing: "Listado",

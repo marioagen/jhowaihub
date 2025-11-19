@@ -61,7 +61,7 @@
     labelFailedNoResponse: "Falha, sem resposta do servidor.",
     labelFailedToLoadHistory: "Falha ao carregar histórico.",
     labelFailedToApplyQuestionnaire: "Falha ao aplicar questionário.",    
-    labelGoHome: "Ir para Home",
+    labelGoHome: "Home",
     labelHistoric: "Registro de respostas",
     labelInclusionDate: "Data de inclusão",
     labelListing: "Listagem",

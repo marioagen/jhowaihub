@@ -171,7 +171,7 @@
     labelYouAreAboutToDeleteDocumentQuery: "You are about to delete <br/> the query history from the system",
     labelYouAreAboutToDeleteQuestion: "You are about to delete <br/> a question from the system",
     labelYouAreAboutToDeleteQuestionnaire: "You are about to delete <br/> a questionnaire from the system",
-    labelGoHome: "Go to home",
+    labelGoHome: "Home",
     labelRemoveAllDropzone: "Remove files from dropzone",
     labelRemoveAllFilesDropzone: "Remove all files from the queue?",
     labelThisActionRemoveAllFiles: "This action will remove all files selected for upload",

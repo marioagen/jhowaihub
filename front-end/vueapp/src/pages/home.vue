@@ -11,9 +11,9 @@
                 <!-- Plan Card -->
                 <div class="card plan-card mb-4">
                     <div class="card-body text-center">
-                        <p class="mb-1">{{ $t("home.planLabel") }}</p>
+                        <p class="plan-label mb-1">{{ $t("home.planLabel") }}</p>
                         <h3 class="plan-name mb-1">{{ $t("home.planName") }}</h3>
-                        <p class="text-muted mb-0">{{ $t("home.planThankYou") }}</p>
+                        <p class="plan-thanks mb-0">{{ $t("home.planThankYou") }}</p>
                     </div>
                 </div>
 
@@ -160,9 +160,8 @@ export default {
 }
 
 .plan-card {
-    background: linear-gradient(135deg, #0073e6 0%, #005bb5 100%);
-    color: white;
-    border: none;
+    background: white;
+    border: 1px solid #dee2e6;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -171,10 +170,19 @@ export default {
     padding: 2rem;
 }
 
+.plan-label {
+    color: #212529;
+    margin-bottom: 0.5rem;
+}
+
 .plan-name {
-    color: white;
+    color: #005ebc;
     font-weight: bold;
     font-size: 1.5rem;
+}
+
+.plan-thanks {
+    color: #6c757d;
 }
 
 .quick-start-section {
