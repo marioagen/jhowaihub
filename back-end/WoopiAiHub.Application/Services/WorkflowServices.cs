@@ -549,6 +549,16 @@ namespace WoopiAiHub.Application.Services
             _teamRepository.Update(team);
         }
 
+        /// <summary>
+        /// Updates the relationship between a team and a collection of workflows based on the specified profiles.
+        /// </summary>
+        /// <remarks>This method verifies if the specified workflows are associated with other profiles
+        /// within the team and removes any conflicting relationships. Only workflows that are distinct and relevant to
+        /// the team are retained.</remarks>
+        /// <param name="team">The team for which the workflow relationships are being updated.</param>
+        /// <param name="workflows">A list of workflows to associate with the team.</param>
+        /// <param name="profiles">A list of profiles used to verify and adjust workflow relationships.</param>
+        /// <returns></returns>
         public async Task UpdateTeamWorkflowRelationship(Team team, List<Workflow> workflows, List<Domain.Models.Profile> profiles)
         {
             var workflowsToRemove = new List<TeamsWorkflowsDto>();
