@@ -78,6 +78,8 @@
                     types: hasPermission("Types", "View"),
                     quizzes: hasPermission("Quizzes", "View"),
                     workflow: hasPermission("Workflow", "View"),
+                    tools: hasPermission("Tools", "View"),
+                    prompts: hasPermission("Prompts", "View"),
                 },
                 menuItems: [
                     {

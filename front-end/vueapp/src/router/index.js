@@ -251,6 +251,8 @@ const routes = [
         component: WorkflowPage,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -260,6 +262,8 @@ const routes = [
         component: WorkflowManagement,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -269,6 +273,8 @@ const routes = [
         component: NewWorkflow,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -278,6 +284,8 @@ const routes = [
         component: EditWorkflow,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -287,6 +295,8 @@ const routes = [
         component: ToolsPage,
         meta: { 
             layout: "default",
+            module: "Tools",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -296,6 +306,8 @@ const routes = [
         component: NewFlow,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -305,6 +317,8 @@ const routes = [
         component: EditFlow,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -314,6 +328,8 @@ const routes = [
         component: PromptPage,
         meta: {
             layout: "default",
+            module: "Prompts",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -323,6 +339,8 @@ const routes = [
         component: PromptNew,
         meta: {
             layout: "default",
+            module: "Prompts",
+            action: "View",
         },
         beforeEnter: authenticate,
         props: true,

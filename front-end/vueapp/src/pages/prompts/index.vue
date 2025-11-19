@@ -27,8 +27,6 @@
     </main>
 </template>
 <script>
-    import SearchBar from '@/components/common/search-bar';
-    import api from "@/services/api";
     import Pagination from '@/components/common/pagination';
     import TruncateText from "@/components/common/truncate-text.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
