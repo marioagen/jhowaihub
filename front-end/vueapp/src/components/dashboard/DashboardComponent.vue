@@ -45,10 +45,10 @@
                         </button>
                     </div>
                 </div>
-                <button class="btn btn-outlined-primary btn-sm">
+                <!-- <button class="btn btn-outlined-primary btn-sm">
                     <LucideIcon icon="ArrowDownToLine" :size="17" />
                     {{ $t("dashboard.exportBtn") }}
-                </button>
+                </button> -->
             </div>
             <div class="card mb-3">
                 <div class="card-body text-center">
