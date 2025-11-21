@@ -23,6 +23,7 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly AutoMocker _mocker;
         private readonly Mock<IWorkflowRepository> _workflowRepositoryMock;
+        private readonly Mock<IWorkflowServices> _workflowServicesMock;
         private readonly Mock<IStepRepository> _stepRepositoryMock;
         private readonly Mock<ICardRepository> _cardRepositoryMock;
         private readonly Mock<IProfileRepository> _profileRepositoryMock;
@@ -38,6 +39,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker = new AutoMocker();
 
             _workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            _workflowServicesMock = _mocker.GetMock<IWorkflowServices>();
             _stepRepositoryMock = _mocker.GetMock<IStepRepository>();
             _cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             _profileRepositoryMock = _mocker.GetMock<IProfileRepository>();
@@ -593,6 +595,52 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Verify(r => r.FindByIdsAsync(It.Is<ICollection<int>>(ids => ids.SequenceEqual(dto[0].Workflows))), Times.Once);
             _teamRepositoryMock.Verify(r => r.Update(team), Times.Once);
         }
+
+        [Fact(DisplayName = "UpdateTeamProfileRelationshipToWorkflow should exit early when no workflows to remove")]
+        [Trait("UpdateTeamProfileRelationshipToWorkflow", "EarlyExit")]
+        public async Task UpdateTeamProfileRelationshipToWorkflow_ShouldStopEarly_WhenNoWorkflowsToRemove()
+        {
+            // Arrange
+            var profile = new Profile("Wayne Corp", 1, DateTime.UtcNow);
+            var steps = new List<int> { 1, 2, 3 };
+
+            var team = new Team("Teen Titans", 1, DateTime.UtcNow);
+            profile.Teams = new List<Team>();
+            profile.AddTeam(team);
+
+            var workflowA = new Workflow(10, DateTime.UtcNow, new List<Team>(), "WF 10");
+            var workflowB = new Workflow(20, DateTime.UtcNow, new List<Team>(), "WF 20");
+            var workflowsFromSteps = new List<Workflow> { workflowA, workflowB };
+
+            _workflowRepositoryMock
+                .Setup(r => r.FindByStep(steps))
+                .ReturnsAsync(workflowsFromSteps);
+
+            _teamRepositoryMock
+                .Setup(r => r.FindByIdReturnModel(team.Id))
+                .Returns(team);
+
+            _workflowServicesMock
+                .Setup(s => s.VerifyWorkflowMatchInOtherTeamProfile(
+                    profile.Id,
+                    team.Id,
+                    It.IsAny<List<Workflow>>()
+                ))
+                .ReturnsAsync(new TeamsWorkflowsDto
+                {
+                    TeamId = team.Id,
+                    Workflows = new List<int>()
+                });
+
+            // Act
+            await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(steps, profile);
+
+            // Assert
+            _workflowRepositoryMock.Verify(r => r.FindByStep(steps), Times.Once);
+            _teamRepositoryMock.Verify(r => r.FindByIdReturnModel(team.Id), Times.AtLeastOnce);
+        }
+
+
 
     }
 }

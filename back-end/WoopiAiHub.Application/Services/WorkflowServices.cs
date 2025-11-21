@@ -559,7 +559,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private async Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows)
+        public async Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows)
         {
             var team = _teamRepository.FindByIdReturnModel(teamId);
             var profiles = team.Profiles.Where(p => p.Id != profileId).ToList();

@@ -19,5 +19,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
         Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto);
         Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto);
+        Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows);
     }
 }
