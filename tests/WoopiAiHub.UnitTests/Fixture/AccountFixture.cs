@@ -77,7 +77,7 @@ namespace WoopiAiHub.UnitTests.Fixtures
             .CustomInstantiator(f => new ResponseCheckAccessDto
             {
                 HasAccess = true,
-                Tenants = $"{f.Company.CompanyName()}_{f.Internet.Email()}"
+                Tenants = [$"{f.Company.CompanyName()}_{f.Internet.Email()}"]
             });
             return response;
         }

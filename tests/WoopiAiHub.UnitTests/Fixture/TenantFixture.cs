@@ -1,5 +1,4 @@
 ﻿using Bogus;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Repository.Context;
@@ -38,21 +37,6 @@ namespace WoopiAiHub.UnitTests.Fixture
               });
 
             return faker;
-        }
-
-        public static ApplicationDbContext CreateInMemoryDbContext()
-        {
-            var connection = new SqliteConnection("DataSource=:memory:");
-            connection.Open();
-
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlite(connection)
-                .Options;
-
-            var context = new ApplicationDbContext(options);
-            context.Database.EnsureCreated();
-
-            return context;
         }
     }
 
