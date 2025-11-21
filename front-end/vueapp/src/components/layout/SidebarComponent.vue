@@ -11,12 +11,12 @@
                 />
                 <img
                     v-else
-                    src="./../../assets/img/woopi-ai-text-logo.svg"
+                    src="./../../assets/img/woopi-ai-text-logo-sidebar.svg"
                     :title="$t('labelGoHome')"
                     width="140"
                     height="40"
                     alt="WOOPI AI"
-                    style="margin-left: -70px;"
+                    style="margin-left: 0px;"
                 />
             </router-link>
         </div>        
