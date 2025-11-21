@@ -1,8 +1,11 @@
-﻿using Moq;
+﻿using Bogus.DataSets;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Moq;
 using Moq.AutoMock;
 using System;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -550,6 +553,45 @@ namespace WoopiAiHub.UnitTests.Services
             var returnedWorkflow = result.First();
             Assert.Equal(123, returnedWorkflow.Id);
             Assert.Equal("Workflow Test I", returnedWorkflow.Name);
+        }
+
+        [Fact(DisplayName = "RemoveTeamWorkflowRelationship should remove workflows and update team when successful")]
+        [Trait("RemoveTeamWorkflowRelationship", "Success")]
+        public async Task RemoveTeamWorkflowRelationship_ShouldRemoveWorkflows_AndUpdateTeam_WhenSuccessful()
+        {
+            // Arrange
+            var team = new Team("Teen Titans", 1, DateTime.UtcNow);
+            var workflowX = new Workflow(10, DateTime.UtcNow, new List<Team>(), "WF X");
+            var workflowXIX = new Workflow(20, DateTime.UtcNow, new List<Team>(), "WF XIX");
+            var workflows = new List<Workflow>();
+            workflows.Add(workflowXIX);
+
+            workflowX.AddTeam(team);
+            var dto = new List<TeamsWorkflowsDto>
+            {
+                new TeamsWorkflowsDto
+                {
+                    TeamId = 1,
+                    Workflows = new List<int> { 10, 20 }
+                }
+            };
+
+            _teamRepositoryMock
+                .Setup(r => r.FindByIdReturnModel(1))
+                .Returns(team);
+
+            _workflowRepositoryMock
+                .Setup(r => r.FindByIdsAsync(It.IsAny<ICollection<int>>()))
+                .ReturnsAsync(workflows);
+
+            // Act
+            await _workflowServices.RemoveTeamWorkflowRelationship(dto);
+
+            // Assert
+            Assert.Empty(team.Workflows);
+            _teamRepositoryMock.Verify(r => r.FindByIdReturnModel(1), Times.Once);
+            _workflowRepositoryMock.Verify(r => r.FindByIdsAsync(It.Is<ICollection<int>>(ids => ids.SequenceEqual(dto[0].Workflows))), Times.Once);
+            _teamRepositoryMock.Verify(r => r.Update(team), Times.Once);
         }
 
     }
