@@ -1,7 +1,7 @@
 <template>
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
-        <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
-            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Home' }">
+        <div class="sidebar-header d-flex align-items-center" :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'" style="height: 60px; padding: 0 10px;">
+            <router-link class="d-flex align-items-center text-decoration-none" :class="isCollapsed ? 'justify-content-center' : 'w-100'" :to="{ name: 'Home' }">
                 <img
                     v-if="isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
