@@ -4,7 +4,7 @@
             <div class="row justify-content-center">
                 <div class="text-center">
                     <img src="../../assets/img/woopi-ai-text-logo.svg"
-                        style="padding-bottom: 10px" width="200" height="60" alt="WOOPI AI" />
+                        style="padding-bottom: 10px" width="300" height="80" alt="WOOPI AI" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
                     <div class="text-center mt-3">
