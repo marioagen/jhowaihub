@@ -511,11 +511,10 @@ namespace WoopiAiHub.Application.Services
         public async Task<ICollection<Workflow>> FindByProfileStep(ICollection<Domain.Models.Profile> profiles)
         {
             var steps = profiles
-                .SelectMany(p => p.Steps)
-                .Select(s => s.Id)
+                .SelectMany(p => p.StepProfilePermissions)
+                .Select(s => s.StepId)
                 .Distinct()
                 .ToList();
-
             return await _workflowRepository.FindByStep(steps);
         }
 

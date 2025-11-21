@@ -512,5 +512,45 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.Equal(workflowList, result);
         }
+
+        [Fact(DisplayName = "FindByProfileStep should return workflows when successful")]
+        [Trait("FindByProfileStep", "Success")]
+        public async Task FindByProfileStep_ShouldReturnWorkflows_WhenSuccessful()
+        {
+            // Arrange
+            var profile = new Profile("Test Profile I", 1, DateTime.UtcNow);
+            var profiles = new List<Profile>();
+
+            var step = new Step(1, DateTime.UtcNow, 123, "Step Test I", 1, 1, 1);
+            var permission = new Permission("Desc", "Permission Name I", "Group", 1, DateTime.UtcNow);
+
+            var stepPermissions = new List<StepProfilePermission>
+            {
+                new StepProfilePermission(1, 1, 1),
+                new StepProfilePermission(1, 2, 1),
+            };
+
+            profile.StepProfilePermissions = stepPermissions;
+            profiles.Add(profile);
+            var workflows = new List<Workflow>
+            {
+                new Workflow(123, DateTime.UtcNow, new List<Team>(), "Workflow Test I"),
+                new Workflow(125, DateTime.UtcNow, new List<Team>(), "Workflow Test II"),
+            };
+
+            _workflowRepositoryMock
+                .Setup(r => r.FindByStep(It.IsAny<List<int>>()))
+                .ReturnsAsync(workflows);
+
+            // Act
+            var result = await _workflowServices.FindByProfileStep(profiles);
+
+            // Assert
+            Assert.NotNull(result);
+            var returnedWorkflow = result.First();
+            Assert.Equal(123, returnedWorkflow.Id);
+            Assert.Equal("Workflow Test I", returnedWorkflow.Name);
+        }
+
     }
 }
