@@ -2,13 +2,10 @@
     <main>
         <div class="container-fluid scroll-area mx-2">
             <div class="home-container">
-                <!-- Header Section -->
                 <div class="text-center mt-4 mb-4">
                     <h1 class="home-title">{{ $t("home.title") }}</h1>
                     <p class="home-subtitle text-muted">{{ $t("home.subtitle") }}</p>
                 </div>
-
-                <!-- Plan Card -->
                 <div class="card plan-card mb-4">
                     <div class="card-body text-center">
                         <p class="plan-label mb-1">{{ $t("home.planLabel") }}</p>
@@ -16,12 +13,9 @@
                         <p class="plan-thanks mb-0">{{ $t("home.planThankYou") }}</p>
                     </div>
                 </div>
-
-                <!-- Quick Start Section -->
                 <div class="quick-start-section">
                     <h2 class="quick-start-title text-center mb-4">{{ $t("home.quickStartTitle") }}</h2>
                     <div class="row">
-                        <!-- Video Card -->
                         <div class="col-md-4 mb-3">
                             <div class="card quick-start-card h-100">
                                 <div class="card-body text-center d-flex flex-column">
@@ -50,8 +44,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Guide Card -->
                         <div class="col-md-4 mb-3">
                             <div class="card quick-start-card h-100">
                                 <div class="card-body text-center d-flex flex-column">
@@ -80,8 +72,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Docs Card -->
                         <div class="col-md-4 mb-3">
                             <div class="card quick-start-card h-100">
                                 <div class="card-body text-center d-flex flex-column">
