@@ -457,9 +457,28 @@ export default {
         await this.loadWorkflowData();
     },
     async mounted() {
+        // Set phase from route if available
+        if (this.$route.params.phase) {
+            this.currentPhase = Number(this.$route.params.phase);
+        }
+        
         // Reload data when returning from flow editor or when component is mounted
         if (this.workflowIdInternal || this.isEdit) {
             await this.reloadCurrentPhaseData();
+        }
+    },
+    watch: {
+        '$route.params.phase': {
+            handler(newPhase) {
+                if (newPhase) {
+                    this.currentPhase = Number(newPhase);
+                    // Reload data when phase changes via route
+                    if (this.workflowIdInternal) {
+                        this.reloadCurrentPhaseData();
+                    }
+                }
+            },
+            immediate: false
         }
     },
 };
