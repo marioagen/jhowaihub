@@ -515,7 +515,6 @@ namespace WoopiAiHub.Application.Services
                 .Select(s => s.StepId)
                 .Distinct()
                 .ToList();
-
             return await _workflowRepository.FindByStep(steps);
         }
 
