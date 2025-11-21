@@ -161,6 +161,7 @@ namespace WoopiAiHub.Repository
         public ICollection<Domain.Models.Profile> FindByIds(IEnumerable<int> ids)
         {
             return _context.Profiles
+                .Include(p => p.StepProfilePermissions)
                 .Include(p => p.Steps)
                 .Where(t => ids.Contains(t.Id))
                 .ToList();
