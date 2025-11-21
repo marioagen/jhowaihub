@@ -640,7 +640,56 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock.Verify(r => r.FindByIdReturnModel(team.Id), Times.AtLeastOnce);
         }
 
+        [Fact(DisplayName = "VerifyWorkflowMatchInOtherTeamProfile should return only workflows not matched by other profiles")]
+        [Trait("VerifyWorkflowMatchInOtherTeamProfile", "PartialMatch")]
+        public async Task VerifyWorkflowMatchInOtherTeamProfile_ShouldReturnOnlyWorkflowsNotFoundInOtherProfiles()
+        {
+            // Arrange
+            int profileId = 100;
+            int teamId = 10;
 
+            // Team
+            var team = new Team("Justice League", teamId, DateTime.UtcNow)
+            {
+                Profiles = new List<Profile>()
+            };
 
+            var workflowA = new Workflow(1, DateTime.UtcNow, new List<Team>(), "WF 1");
+            var workflowB = new Workflow(2, DateTime.UtcNow, new List<Team>(), "WF 2");
+            var workflowC = new Workflow(3, DateTime.UtcNow, new List<Team>(), "WF 3");
+
+            var inputWorkflows = new List<Workflow> { workflowA, workflowB, workflowC };
+
+            var anotherProfile = new Profile("Gotham Ops", 200, DateTime.UtcNow)
+            {
+                StepProfilePermissions = new List<StepProfilePermission>()
+            };
+
+            anotherProfile.StepProfilePermissions.Add(new StepProfilePermission(1, 999, 1));
+            anotherProfile.StepProfilePermissions.Add(new StepProfilePermission(2, 888, 1));
+
+            team.Profiles.Add(anotherProfile);
+
+            _teamRepositoryMock
+                .Setup(r => r.FindByIdReturnModel(teamId))
+                .Returns(team);
+
+            var workflowsFromSteps = new List<Workflow> { workflowA, workflowC };
+
+            _workflowRepositoryMock
+                .Setup(r => r.FindByStep(It.IsAny<List<int>>()))
+                .ReturnsAsync(workflowsFromSteps);
+
+            // Act
+            var result = await _workflowServices.VerifyWorkflowMatchInOtherTeamProfile(
+                profileId,
+                teamId,
+                inputWorkflows
+            );
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(teamId, result.TeamId);
+        }
     }
 }
