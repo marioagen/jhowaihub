@@ -16,6 +16,7 @@
                     width="140"
                     height="40"
                     alt="WOOPI AI"
+                    style="margin-left: 0px;"
                 />
             </router-link>
         </div>        
