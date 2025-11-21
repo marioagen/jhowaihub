@@ -4,17 +4,19 @@
             <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Home' }">
                 <img
                     v-if="isCollapsed"
-                    src="./../../assets/img/woopiai-hub-small-logo.png"
+                    src="./../../assets/img/woopi-ai-icon-only.svg"
                     :title="$t('labelGoHome')"
-                    width="30"
-                    height="30"
+                    width="35"
+                    height="35"
+                    alt="WOOPI AI"
                 />
                 <img
                     v-else
-                    src="./../../assets/img/woopiai-hub-logo.png"
+                    src="./../../assets/img/woopi-ai-text-logo.svg"
                     :title="$t('labelGoHome')"
-                    width="120"
+                    width="140"
                     height="40"
+                    alt="WOOPI AI"
                 />
             </router-link>
         </div>        
