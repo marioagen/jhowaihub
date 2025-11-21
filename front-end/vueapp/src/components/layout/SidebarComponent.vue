@@ -4,11 +4,10 @@
             <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Home' }">
                 <img
                     v-if="isCollapsed"
-                    src="./../../assets/img/woopi-ai-icon-only.svg"
+                    src="./../../assets/img/woopiai-hub-small-logo.png"
                     :title="$t('labelGoHome')"
-                    width="35"
-                    height="35"
-                    alt="WOOPI AI"
+                    width="30"
+                    height="30"
                 />
                 <img
                     v-else
