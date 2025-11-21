@@ -171,7 +171,7 @@
     labelYouAreAboutToDeleteDocumentQuery: "You are about to delete <br/> the query history from the system",
     labelYouAreAboutToDeleteQuestion: "You are about to delete <br/> a question from the system",
     labelYouAreAboutToDeleteQuestionnaire: "You are about to delete <br/> a questionnaire from the system",
-    labelGoHome: "Go to home",
+    labelGoHome: "Home",
     labelRemoveAllDropzone: "Remove files from dropzone",
     labelRemoveAllFilesDropzone: "Remove all files from the queue?",
     labelThisActionRemoveAllFiles: "This action will remove all files selected for upload",
@@ -734,6 +734,29 @@
         current: "Current Plan",
         enterprise: "Enterprise Plan",
     },
+    home: {
+        title: "Welcome to AI HUB, Woopi AI!",
+        subtitle: "Your journey to automate and optimize processes with artificial intelligence starts now.",
+        planLabel: "You have acquired the",
+        planName: "Enterprise Plan",
+        planThankYou: "Thank you for choosing our platform!",
+        quickStartTitle: "Quick Start Guide",
+        platformCard: {
+            title: "Discover the Platform",
+            description: "Watch a 5-minute guided tour about the main features.",
+            button: "Watch video"
+        },
+        workflowCard: {
+            title: "Your First Workflow",
+            description: "Follow our step-by-step guide to create your first automation in minutes.",
+            button: "Start guide"
+        },
+        docsCard: {
+            title: "Explore the Documentation",
+            description: "Check our complete documentation to explore all the potential of AI HUB.",
+            button: "Access docs"
+        }
+    }
 };
 
 export default english;

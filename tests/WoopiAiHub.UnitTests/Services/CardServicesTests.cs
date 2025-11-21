@@ -222,14 +222,12 @@ namespace WoopiAiHub.UnitTests.Services
             var headers = DocumentFixture.FindValidHeadersDto();
             var document = DocumentFixture.FindValidDocument();
 
-            // Create workflow with steps
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
-            var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null); // ToolTypeId=2 (not OCR)
+            var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
             var toolType = new ToolType(2, DateTime.Now, "Prompt", true);
             var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
 
-            // Set up relationships using reflection
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
             typeof(StepTool).GetProperty("Tool")!.SetValue(stepTool, tool);
             typeof(Step).GetProperty("StepTools")!.SetValue(step, new List<StepTool> { stepTool });
@@ -247,6 +245,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
+
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -288,6 +291,11 @@ namespace WoopiAiHub.UnitTests.Services
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
 
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
+
             // Act / Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.FindByIdAnalyzeWithSteps(cardId, headers));
             cardRepository.Verify(a => a.FindById(cardId), Times.Once);
@@ -306,6 +314,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
+
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
 
             // Act / Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.FindByIdAnalyzeWithSteps(cardId, headers));
@@ -344,6 +357,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
+
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -388,6 +406,11 @@ namespace WoopiAiHub.UnitTests.Services
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
 
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
+
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
 
@@ -430,6 +453,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
+
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -474,6 +502,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
+
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -525,6 +558,11 @@ namespace WoopiAiHub.UnitTests.Services
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
 
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
+
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
 
@@ -564,6 +602,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
+
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -608,6 +651,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
+
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepository
+                .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolExecution>());
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);

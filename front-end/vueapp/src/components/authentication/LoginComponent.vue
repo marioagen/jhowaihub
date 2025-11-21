@@ -3,8 +3,8 @@
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <img src="../../assets/img/woopiai-hub-logo.png"
-                        style="padding-bottom: 10px" width="160" height="61" />
+                    <img src="../../assets/img/woopi-ai-text-logo.svg"
+                        style="padding-bottom: 10px" width="300" height="80" alt="WOOPI AI" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
                     <div class="text-center mt-3">
@@ -294,7 +294,7 @@ export default {
                 });
         },
         redirectToDocument() {
-            this.$router.push({ name: "Documents" });
+            this.$router.push({ name: "Home" });
         },
         getPermissions(token) {
             return getJWTPermissions(token);
@@ -307,7 +307,7 @@ export default {
         let login = this.$store.state.userProfile.login;
         let tenant = this.$store.state.userProfile.tenant;
         if (login !== "" || tenant !== "") {
-            this.$router.push({ name: "Documents" });
+            this.$router.push({ name: "Home" });
         }
     },
 };

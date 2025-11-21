@@ -173,16 +173,12 @@
                                                         class="form-check-input me-2"
                                                         type="checkbox"
                                                         :id="`permission-${profileId ?? 'new'}-${step.id}-${permission.id}`"
-                                                        :value="{
-                                                            profileId: id || null,
-                                                            stepId: step.id,
-                                                            permissionId: permission.id
-                                                        }"
+                                                        :value="`${step.id}:${permission.id}`"
                                                         v-model="selectedWorkflowPermissions"
                                                     />
                                                     <label
                                                         class="form-check-label"
-                                                        :for="`permission-${workflow.id}-${step.id}-${permission.id}`"
+                                                        :for="`permission-${profileId ?? 'new'}-${step.id}-${permission.id}`"
                                                     >
                                                         {{ permission.description }}
                                                     </label>
@@ -193,9 +189,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-if="permissionError" class="invalid-feedback d-block">
-                            {{ permissionError }}
-                        </div>
+                    </div>
+                    <div v-if="permissionError" class="invalid-feedback d-block">
+                        {{ permissionError }}
                     </div>
                 </div>
             </div>
@@ -321,18 +317,29 @@
                     .then((response) => {
                         this.profileData = response;
                         this.selectedPermissions = response.permissions.map(p => p.id);
-                        this.selectedWorkflowPermissions = response.workflowPermission;
+                        // this.selectedWorkflowPermissions = response.workflowPermission;
+                        this.selectedWorkflowPermissions = response.workflowPermission.map(
+                            wp => `${wp.stepId}:${wp.permissionId}`
+                        );
                     });
             },
             validateForm() {
                 let valid = true;
+
                 if (!this.profileData.name || this.profileData.name.length < 2) {
                     this.nameError = this.$t("validation.required");
                     valid = false;
-                } else if (this.selectedPermissions.length == 0) {
+                } else {
+                    this.nameError = "";
+                }
+
+                if (this.selectedPermissions.length === 0) {
                     this.permissionError = this.$t("validation.required");
                     valid = false;
+                } else {
+                    this.permissionError = "";
                 }
+
                 return valid;
             },
             selectAll() {
@@ -353,7 +360,7 @@
                 var paramsReq = {
                     name: this.profileData.name,
                     permissionsIds: this.selectedPermissions,
-                    permissionsWorkflow: this.selectedWorkflowPermissions,
+                    permissionsWorkflow: this.formatWorkflowPermissions(),
                 };
 
                 ProfilesService.addProfile(paramsReq)
@@ -386,7 +393,7 @@
                     id: this.profileData.id,
                     name: this.profileData.name,
                     permissionsIds: this.selectedPermissions,
-                    permissionsWorkflow: this.selectedWorkflowPermissions,
+                    permissionsWorkflow: this.formatWorkflowPermissions(),
                 };
                 ProfilesService.updateProfile(paramsReq)
                     .then((result) => {
@@ -410,6 +417,16 @@
                     .finally(() => {
                         this.isLoading = false;
                     });
+            },
+            formatWorkflowPermissions() {
+                return this.selectedWorkflowPermissions.map(v => {
+                    const [stepId, permissionId] = v.split(":");
+                    return {
+                        profileId: this.isEdit ? this.profileData.id : null, 
+                        stepId: parseInt(stepId),
+                        permissionId: parseInt(permissionId),
+                    };
+                });
             },
             resetForm() {
                 this.profileData = { 

@@ -103,6 +103,7 @@ namespace WoopiAiHub.Application.Services
             if (profileCreateDto.PermissionsWorkflow.Count() > 0)
             {
                 await _stepProfilePermissionsServices.Create(profile.Id, profileCreateDto.PermissionsWorkflow);
+                await _workflowServices.CreateWorkflowRelationship(profile, profileCreateDto.PermissionsWorkflow.Select(x => x.StepId).ToList());
             }
 
             return createResult;
@@ -158,6 +159,7 @@ namespace WoopiAiHub.Application.Services
                     .Where(x => addedStepIds.Contains(x.StepId))
                     .ToList();
                 await _stepProfilePermissionsServices.Create(profileId, newPermissionsOnly);
+                await _workflowServices.CreateWorkflowRelationship(profile, addedStepIds);
             }
 
             if(removedStepIds.Count() > 0)

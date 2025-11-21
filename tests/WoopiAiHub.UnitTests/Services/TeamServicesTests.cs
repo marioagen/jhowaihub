@@ -8,6 +8,7 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixture;
 using WoopiAiHub.UnitTests.Helpers;
@@ -22,6 +23,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly TeamFixture _fixture;
         private readonly Mock<ITeamRepository> _teamRepositoryMock;
         private readonly Mock<IUserRepository> _userRepositoryMock;
+        private readonly Mock<IWorkflowServices> _workflowServicesMock;
         private readonly TeamServices _service;
 
         public TeamServicesTests()
@@ -31,6 +33,7 @@ namespace WoopiAiHub.UnitTests.Services
             _service = _mocker.CreateInstance<TeamServices>();
             _teamRepositoryMock = _mocker.GetMock<ITeamRepository>();
             _userRepositoryMock = _mocker.GetMock<IUserRepository>();
+            _workflowServicesMock = _mocker.GetMock<IWorkflowServices>();
         }
 
         [Fact(DisplayName = "FindById should return TeamDto when ID exists")]
@@ -153,7 +156,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             var team = new Team("Antigo Nome", teamId, DateTime.Now)
             {
-                Users = new List<User>()
+                Users = new List<User>(),
+                Profiles = new List<Profile>()  
             };
 
             var users = new List<User>
@@ -162,9 +166,12 @@ namespace WoopiAiHub.UnitTests.Services
                 new User(teamUpdateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
             };
 
+            var workflows = new List<Workflow>();
+
             _teamRepositoryMock.Setup(r => r.FindByIdReturnModel(teamId)).Returns(team);
             _userRepositoryMock.Setup(r => r.FindByIdsAsync(teamUpdateDto.UserIds)).ReturnsAsync(users);
             _teamRepositoryMock.Setup(r => r.Update(team)).Returns(true);
+            _workflowServicesMock.Setup(r => r.FindByProfileStep(team.Profiles.ToList())).ReturnsAsync(workflows);
 
             // Act
             var result = await _service.Update(teamUpdateDto);
@@ -196,9 +203,9 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
-        [Fact(DisplayName = "Update should throw exception when team is duplicated")]
+        [Fact(DisplayName = "Update should throw exception when create relationship to Users")]
         [Trait("Update", "Fail")]
-        public async Task Update_ShouldThrowArgumentException_WhenDuplicatedTeam()
+        public async Task Update_ShouldThrowArgumentException_WhenCreateRelationshipUsers()
         {
             // Arrange
             var teamId = 1;
@@ -225,8 +232,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _service.Update(teamUpdateDto));
-            Assert.Equal("Duplicated Team Name", ex.Message);
-            Assert.Equal(ErrorCode.Duplicated, ex.ErrorCode);
+            Assert.Equal("Error creating relationship to Users", ex.Message);
+            Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
         }
 
         [Fact(DisplayName = "DeleteByIds should return true when IDs are valid")]

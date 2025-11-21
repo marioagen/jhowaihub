@@ -18,6 +18,9 @@
                         <i class="fas fa-pen"></i>
                         {{ $t("labelEdited") }}
                     </span>
+                    <span @click="open(fields[index].value, field.label)">
+                        <LucideIcon icon="Eye" :size="16" />
+                    </span>
                 </div>
                 <div class="field-value-container" v-if="field.outputType == 'N8N'">
                     <input type="text"
@@ -25,14 +28,28 @@
                            @input="(e) => handleFieldEdit(index, e.target.value)"
                            :readonly="!isEditing[index]"
                            v-model="fields[index].value" />
+                    <button v-if="!isEditing[index]"
+                            class="edit-button mb-2"
+                            @click="startEditing(index)"
+                            :title="$t('labelEdit')">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                    <div v-else class="edit-actions">
+                        <button class="save-button" @click="saveEdit(index, field.outputId)" :title="$t('labelSave')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="cancel-button" @click="cancelEdit(index)" :title="$t('labelCancel')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
                 <div v-if=" field.outputType == 'Prompt'">
                     <textarea type="text"
-                           class="form-control mb-2"
-                           @input="(e) => handleFieldEdit(index, e.target.value)"
-                           :readonly="!isEditing[index]"
-                           v-model="fields[index].value" 
-                           rows="5"></textarea>
+                              class="form-control mb-2"
+                              @input="(e) => handleFieldEdit(index, e.target.value)"
+                              :readonly="!isEditing[index]"
+                              v-model="fields[index].value"
+                              rows="5"></textarea>
                     <button v-if="!isEditing[index]"
                             class="edit-button mb-2"
                             @click="startEditing(index)"
@@ -51,9 +68,10 @@
             </div>
         </div>
     </div>
+    <ExtractDataModal ref="ExtractModal" />
 </template>
-
 <script>
+    import ExtractDataModal from "@/components/analyze/ExtractDataModal.vue";
     export default {
         name: "ExtractedFields",
         props: {
@@ -66,8 +84,19 @@
                 type: String,
                 default: "Dados Extraídos",
             },
+            value: {
+                type: String,
+                default: "",
+            },
+            label: {
+                type: String,
+                default: "",
+            },
         },
         emits: ["field-updated"],
+        components: {
+            ExtractDataModal
+        },
         data() {
             return {
                 isEditing: {},
@@ -84,13 +113,19 @@
                 this.$emit("field-changed", { index, field: updatedField });
             },
             saveEdit(index, id) {
-                const field = {
-                    ...this.fields[index],
-                    value: this.isEditing[index] ? this.fields[index].value : "",
-                    isEdited: true
-                };
                 this.isEditing[index] = false;
-                this.$emit("field-updated", { id, field });
+                this.fields[index].isEdited = true;
+                if (this.fields[index].outputType === 'N8N') {
+                    const outputsObj = {};
+                    this.fields.forEach(field => {
+                        outputsObj[field.label] = field.value;
+                    });
+                    const outputsJson = JSON.stringify(outputsObj);
+
+                    this.$emit("field-updated", { id, field: this.fields[index], outputsJson });
+                    return;
+                }
+                this.$emit("field-updated", { id, field: this.fields[index] });
             },
             cancelEdit(index) {
                 const restoredField = { ...this.fields[index], value: this.originalValues[index] };
@@ -98,6 +133,9 @@
                 this.isEditing[index] = false;
                 delete this.originalValues[index];
             },
+            open(value, label) {
+                this.$refs.ExtractModal.open(value,label);
+            }
         }
     };
 </script>
