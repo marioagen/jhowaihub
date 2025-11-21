@@ -411,14 +411,33 @@
                     
                     // Save to database if workflowId is available (new wizard flow)
                     if (this.workflowId) {
-                        // Build Phase3 payload with the current step's tools
+                        // First, fetch the current workflow to get ALL steps
+                        const workflow = await WorkflowService.getWorkflowById(this.workflowId);
+                        if (workflow.error) {
+                            throw new Error('Failed to load workflow data');
+                        }
+                        
+                        // Build Phase3 payload with ALL steps, updating only the current step's tools
+                        const allSteps = workflow.steps.map(step => {
+                            // If this is the step we're editing, update its stepTools
+                            if (step.order === this.stepOrder) {
+                                return {
+                                    id: step.id || 0,
+                                    order: step.order,
+                                    stepTools: nodesList
+                                };
+                            }
+                            // Otherwise, keep existing stepTools
+                            return {
+                                id: step.id || 0,
+                                order: step.order,
+                                stepTools: step.stepTools || []
+                            };
+                        });
+                        
                         const params = {
                             workflowId: this.workflowId,
-                            steps: [{
-                                id: this.stepId || 0,
-                                order: this.stepOrder,
-                                stepTools: nodesList
-                            }]
+                            steps: allSteps
                         };
                         
                         const result = await WorkflowService.updatePhase3(params);
