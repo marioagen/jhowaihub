@@ -35,5 +35,4 @@ namespace WoopiAiHub.Domain.Models
             NameType = nameType;
         }
     }
-
 }

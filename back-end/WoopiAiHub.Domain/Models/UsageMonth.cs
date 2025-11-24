@@ -33,5 +33,4 @@ namespace WoopiAiHub.Domain.Models
             UserId = userId;
         }
     }
-
 }

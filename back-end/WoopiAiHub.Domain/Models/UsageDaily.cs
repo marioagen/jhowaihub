@@ -38,5 +38,4 @@ namespace WoopiAiHub.Domain.Models
             ModelEmbeddingId = modelEmbeddingId;
         }
     }
-
 }
