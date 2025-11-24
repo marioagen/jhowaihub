@@ -25,6 +25,11 @@ namespace WoopiAiHub.Repository.Mappings
                    .HasColumnType("datetime")
                    .IsRequired();
 
+            builder.Property(u => u.Value)
+                   .HasColumnName("Value")
+                   .HasColumnType("decimal(5,5)")
+                   .IsRequired();
+
             builder.HasOne(u => u.UsageType)
                    .WithMany(ut => ut.Units)
                    .HasForeignKey(u => u.UsageTypeId);

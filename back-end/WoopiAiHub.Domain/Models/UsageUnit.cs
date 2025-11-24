@@ -8,6 +8,8 @@ namespace WoopiAiHub.Domain.Models
         public string Name { get; private set; }
         [Column("UsageTypeId", TypeName = "int")]
         public int UsageTypeId { get; private set; }
+        [Column("Value", TypeName = "decimal(5,5)")]
+        public decimal Value { get; set; }
 
         public virtual UsageType? UsageType { get; set; }
 

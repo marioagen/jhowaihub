@@ -154,6 +154,7 @@ namespace WoopiAiHub.Repository.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "varchar(100)", nullable: false),
                     UsageTypeId = table.Column<int>(type: "int", nullable: false),
+                    Value = table.Column<decimal>(type: "decimal(5,5)", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>

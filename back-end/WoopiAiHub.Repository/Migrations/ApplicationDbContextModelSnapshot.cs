@@ -1098,6 +1098,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("int")
                         .HasColumnName("UsageTypeId");
 
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(5,5)")
+                        .HasColumnName("Value");
+
                     b.HasKey("Id");
 
                     b.HasIndex("UsageTypeId");

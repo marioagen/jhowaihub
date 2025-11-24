@@ -12,7 +12,7 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251124170215_AddDashboardTables")]
+    [Migration("20251124173813_AddDashboardTables")]
     partial class AddDashboardTables
     {
         /// <inheritdoc />
@@ -1100,6 +1100,10 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Property<int>("UsageTypeId")
                         .HasColumnType("int")
                         .HasColumnName("UsageTypeId");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(5,5)")
+                        .HasColumnName("Value");
 
                     b.HasKey("Id");
 
