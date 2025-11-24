@@ -10,6 +10,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<UsageUnit>? Units { get; set; }
         public virtual ICollection<UsageDaily>? UsageDaily { get; set; }
         public virtual ICollection<UsageMonth>? UsageMonth { get; set; }
+        public virtual ICollection<UsageLog>? UsageLog { get; set; }
 
         public UsageType(int id,
                          DateTime created,

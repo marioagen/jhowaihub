@@ -9,6 +9,7 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual ICollection<UsageDaily>? UsageDaily { get; set; }
         public virtual ICollection<UsageMonth>? UsageMonth { get; set; }
+        public virtual ICollection<UsageLog>? UsageLog { get; set; }
 
         public ModelEmbedding(int id,
                          DateTime created,

@@ -9,37 +9,45 @@ namespace WoopiAiHub.Repository.Mappings
         public void Configure(EntityTypeBuilder<UsageLog> builder)
         {
 
-            builder.HasKey(ul => ul.Id);
+            builder.HasKey(ud => ud.Id);
 
-            builder.Property(ul => ul.NameTenant)
-                   .HasColumnName("NameTenant")
-                   .HasColumnType("varchar(150)")
+            builder.Property(ud => ud.UserId)
+                   .HasColumnName("UserId")
+                   .HasColumnType("uniqueidentifier")
                    .IsRequired();
 
-            builder.Property(ul => ul.PeriodStart)
-                   .HasColumnName("PeriodStart")
-                   .HasColumnType("datetime")
-                   .IsRequired();
-
-            builder.Property(ul => ul.PeriodEnd)
-                   .HasColumnName("PeriodEnd")
-                   .HasColumnType("datetime")
-                   .IsRequired();
-
-            builder.Property(ul => ul.TotalUsage)
-                   .HasColumnName("TotalUsage")
+            builder.Property(ud => ud.UsageTypeId)
+                   .HasColumnName("UsageTypeId")
                    .HasColumnType("int")
                    .IsRequired();
 
-            builder.Property(ul => ul.NameType)
-                   .HasColumnName("NameType")
-                   .HasColumnType("varchar(100)")
+            builder.Property(ud => ud.UsageCount)
+                   .HasColumnName("UsageCount")
+                   .HasColumnType("int")
                    .IsRequired();
 
-            builder.Property(ul => ul.Created)
+            builder.Property(ud => ud.Processed)
+                   .HasColumnName("Processed")
+                   .HasColumnType("bit")
+                   .IsRequired();
+
+            builder.Property(ud => ud.ModelEmbeddingId)
+                   .HasColumnName("ModelEmbeddingId")
+                   .HasColumnType("int")
+                   .IsRequired();
+
+            builder.Property(ud => ud.Created)
                    .HasColumnName("Created")
                    .HasColumnType("datetime")
                    .IsRequired();
+
+            builder.HasOne(ud => ud.UsageType)
+                   .WithMany(ut => ut.UsageLog)
+                   .HasForeignKey(ud => ud.UsageTypeId);
+
+            builder.HasOne(ud => ud.ModelEmbedding)
+                   .WithMany(me => me.UsageLog)
+                   .HasForeignKey(ud => ud.ModelEmbeddingId);
         }
     }
 }
