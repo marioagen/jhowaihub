@@ -18,6 +18,7 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual UsageType? UsageType { get; set; }
         public virtual ModelEmbedding? ModelEmbedding { get; set; }
+        public virtual User? User { get; set; }
 
         public UsageMonth(int id,
                           DateTime created,

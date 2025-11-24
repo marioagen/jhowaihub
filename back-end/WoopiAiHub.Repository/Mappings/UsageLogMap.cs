@@ -9,45 +9,49 @@ namespace WoopiAiHub.Repository.Mappings
         public void Configure(EntityTypeBuilder<UsageLog> builder)
         {
 
-            builder.HasKey(ud => ud.Id);
+            builder.HasKey(ul => ul.Id);
 
-            builder.Property(ud => ud.UserId)
+            builder.Property(ul => ul.UserId)
                    .HasColumnName("UserId")
                    .HasColumnType("uniqueidentifier")
                    .IsRequired();
 
-            builder.Property(ud => ud.UsageTypeId)
+            builder.Property(ul => ul.UsageTypeId)
                    .HasColumnName("UsageTypeId")
                    .HasColumnType("int")
                    .IsRequired();
 
-            builder.Property(ud => ud.UsageCount)
+            builder.Property(ul => ul.UsageCount)
                    .HasColumnName("UsageCount")
                    .HasColumnType("int")
                    .IsRequired();
 
-            builder.Property(ud => ud.Processed)
+            builder.Property(ul => ul.Processed)
                    .HasColumnName("Processed")
                    .HasColumnType("bit")
                    .IsRequired();
 
-            builder.Property(ud => ud.ModelEmbeddingId)
+            builder.Property(ul => ul.ModelEmbeddingId)
                    .HasColumnName("ModelEmbeddingId")
                    .HasColumnType("int")
                    .IsRequired();
 
-            builder.Property(ud => ud.Created)
+            builder.Property(ul => ul.Created)
                    .HasColumnName("Created")
                    .HasColumnType("datetime")
                    .IsRequired();
 
-            builder.HasOne(ud => ud.UsageType)
+            builder.HasOne(ul => ul.UsageType)
                    .WithMany(ut => ut.UsageLog)
-                   .HasForeignKey(ud => ud.UsageTypeId);
+                   .HasForeignKey(ul => ul.UsageTypeId);
 
-            builder.HasOne(ud => ud.ModelEmbedding)
+            builder.HasOne(ul => ul.ModelEmbedding)
                    .WithMany(me => me.UsageLog)
-                   .HasForeignKey(ud => ud.ModelEmbeddingId);
+                   .HasForeignKey(ul => ul.ModelEmbeddingId);
+
+            builder.HasOne(ul => ul.User)
+                   .WithMany(u => u.UsageLogs)
+                   .HasForeignKey(ul => ul.UserId);
         }
     }
 }

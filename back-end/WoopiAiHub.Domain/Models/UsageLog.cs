@@ -21,6 +21,7 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual UsageType? UsageType { get; set; }
         public virtual ModelEmbedding? ModelEmbedding { get; set; }
+        public virtual User? User { get; set; }
 
         public UsageLog(int id,
                           DateTime created,

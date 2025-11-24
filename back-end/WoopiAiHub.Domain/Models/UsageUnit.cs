@@ -5,7 +5,7 @@ namespace WoopiAiHub.Domain.Models
     public class UsageUnit: BaseEntity
     {
         [Column("Name", TypeName = "varchar(100)")]
-        public string Name { get; private set; } = string.Empty;
+        public string Name { get; private set; }
         [Column("UsageTypeId", TypeName = "int")]
         public int UsageTypeId { get; private set; }
 
