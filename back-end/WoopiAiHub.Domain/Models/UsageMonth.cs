@@ -13,8 +13,8 @@ namespace WoopiAiHub.Domain.Models
         [Column("ModelEmbeddingId", TypeName = "int")]
         public int ModelEmbeddingId { get; private set; }
 
-        [Column("UserId", TypeName = "int")]
-        public int UserId { get; private set; }
+        [Column("UserId", TypeName = "uniqueidentifier")]
+        public Guid UserId { get; private set; }
 
         public virtual UsageType? UsageType { get; set; }
         public virtual ModelEmbedding? ModelEmbedding { get; set; }
@@ -24,7 +24,7 @@ namespace WoopiAiHub.Domain.Models
                           int usageTypeId,
                           int total,
                           int modelEmbeddingId,
-                          int userId)
+                          Guid userId)
             : base(id, created)
         {
             UsageTypeId = usageTypeId;

@@ -32,7 +32,7 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(um => um.Created)
                    .HasColumnName("Created")
-                   .HasColumnType("datetime2")
+                   .HasColumnType("datetime")
                    .IsRequired();
 
             builder.HasOne(um => um.UsageType)
