@@ -6,6 +6,9 @@ const ENV_CONFIG = (() => {
         VUE_APP_TIMER_REQ: "1",
         VUE_APP_GTAG_ID: "G-XXXXXXXXXX",
         VUE_APP_ENV_TYPE: "Development",
+        VUE_APP_HOME_VIDEO_URL: "",
+        VUE_APP_HOME_GUIDE_URL: "",
+        VUE_APP_HOME_DOCS_URL: "",
     };
 })();
 

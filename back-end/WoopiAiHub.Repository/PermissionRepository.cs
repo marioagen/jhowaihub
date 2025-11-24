@@ -70,22 +70,31 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Dictionary<string, List<string>>> FindUserPermissionsAsync(string email)
         {
-            var result = await _context.Users
-                              .AsNoTracking()
-                              .Where(u => u.Email == email)
-                              .SelectMany(p => p.Permissions)
-                              .Where(p => !string.IsNullOrWhiteSpace(p.Group) &&
-                                          !string.IsNullOrWhiteSpace(p.Name))
-                              .GroupBy(p => p.Group!.Trim())
-                              .ToDictionaryAsync(
-                                  g => g.Key!,
-                                  g => g.Select(p => p.Name!.Trim())
-                                        .Where(n => n.Length > 0)
-                                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                                        .ToList(),
-                                  StringComparer.OrdinalIgnoreCase);
+            var permissions = await _context.Users
+                                            .AsNoTracking()
+                                            .Where(u => u.Email == email)
+                                            .SelectMany(u => u.Teams)
+                                            .SelectMany(t => t.Profiles)
+                                            .SelectMany(p => p.Permissions)
+                                            .Where(p => p.Group != null && 
+                                                        p.Name != null)
+                                            .Select(p => new
+                                            {
+                                                Group = p.Group,
+                                                Name = p.Name
+                                            })
+                                            .ToListAsync();
 
-            return result;
+            return permissions
+                .GroupBy(p => p.Group.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.Name.Trim())
+                          .Where(n => n.Length > 0)
+                          .Distinct(StringComparer.OrdinalIgnoreCase)
+                          .ToList(),
+                    StringComparer.OrdinalIgnoreCase
+                );
         }
     }
 }

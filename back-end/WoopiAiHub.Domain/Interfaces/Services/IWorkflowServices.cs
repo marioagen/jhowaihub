@@ -15,6 +15,8 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         ICollection<WorkflowDto> FindAllByUser(string email);
         ICollection<WorkflowDto> FindAll();
         Task<ICollection<Workflow>> FindByProfileStep(ICollection<Profile> profiles);
+        Task CreateWorkflowRelationship(Profile profile, List<int> stepId);
+        Task UpdateTeamWorkflowRelationship(Team team, List<Workflow> workflows, List<Domain.Models.Profile> profiles);
         Task UpdateTeamProfileRelationshipToWorkflow(List<int> steps, Profile profile);
         PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
         Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto);

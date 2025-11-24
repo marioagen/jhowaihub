@@ -28,6 +28,7 @@ import NewFlow from "@/pages/flows/newFlow.vue";
 import EditFlow from "@/pages/flows/editFlow.vue";
 import PromptPage from "@/pages/prompts/index.vue";
 import PromptNew from "@/pages/prompts/newPrompt.vue";
+import HomePage from "@/pages/home.vue";
 
 import { hasPermission } from "@/utils/permissions";
 function authenticate(to, from, next) {
@@ -43,6 +44,20 @@ function authenticate(to, from, next) {
 
     if (!hasPermission(to.meta.module, to.meta.action)) {
         return next({ path: "/unauthorized" });
+    }
+
+    return next();
+}
+
+function authenticateBasic(to, from, next) {
+    const userStr = window.localStorage.getItem("project");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) {
+        return next({ path: "/" });
+    }
+
+    if (user.isLogged !== true) {
+        return next({ path: "/" });
     }
 
     return next();
@@ -72,6 +87,15 @@ const routes = [
         meta: { 
             layout: "auth",
         },
+    },
+    {
+        path: "/home",
+        name: "Home",
+        component: HomePage,
+        meta: { 
+            layout: "default",
+        },
+        beforeEnter: authenticateBasic,
     },
     {
         path: "/documents",
@@ -251,6 +275,8 @@ const routes = [
         component: WorkflowPage,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -260,6 +286,8 @@ const routes = [
         component: WorkflowManagement,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -269,6 +297,8 @@ const routes = [
         component: NewWorkflow,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -278,6 +308,8 @@ const routes = [
         component: EditWorkflow,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -287,6 +319,8 @@ const routes = [
         component: ToolsPage,
         meta: { 
             layout: "default",
+            module: "Tools",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -296,6 +330,8 @@ const routes = [
         component: NewFlow,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -305,6 +341,8 @@ const routes = [
         component: EditFlow,
         meta: { 
             layout: "default",
+            module: "Workflow",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -314,6 +352,8 @@ const routes = [
         component: PromptPage,
         meta: {
             layout: "default",
+            module: "Prompts",
+            action: "View",
         },
         beforeEnter: authenticate,
     },
@@ -323,6 +363,8 @@ const routes = [
         component: PromptNew,
         meta: {
             layout: "default",
+            module: "Prompts",
+            action: "View",
         },
         beforeEnter: authenticate,
         props: true,

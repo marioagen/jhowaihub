@@ -144,8 +144,9 @@ namespace WoopiAiHub.Application.Services
                 }
             }
 
-            ICollection<Profile> profiles = new List<Profile>();
-            if (teamCreateDto.ProfileIds.Count() > 0)
+            ICollection<Domain.Models.Profile> profiles = new List<Domain.Models.Profile>();
+            var profilesListCount = teamCreateDto.ProfileIds.Count() > 0;
+            if (profilesListCount)
             {
                 team.Profiles.Clear();
                 profiles = _profileRepository.FindByIds(teamCreateDto.ProfileIds);
@@ -162,7 +163,7 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
             }
 
-            if(profiles.Count() > 0)
+            if (profilesListCount)
             {
                 var workflows = await _workflowServices.FindByProfileStep(profiles);
                 foreach (var workflow in workflows)
@@ -171,7 +172,7 @@ namespace WoopiAiHub.Application.Services
                 }
                 await _workflowRepository.UpdateRange(workflows);
             }
-            
+
             return createResult;
         }
 
@@ -187,44 +188,59 @@ namespace WoopiAiHub.Application.Services
             if (team == null)
                 return false;
 
+            var teamsOldProfiles = team.Profiles.ToList();
             team.Update(teamUpdateDto.Name);
             if (teamUpdateDto.UserIds != null)
             {
                 team.Users.Clear();
                 var users = await _userRepository.FindByIdsAsync(teamUpdateDto.UserIds);
-
                 foreach (var user in users)
                 {
                     team.AddUser(user);
                 }
+
+                var updateUser = _teamRepository.Update(team);
+                if (!updateUser)
+                {
+                    throw new AppException(Domain.Enum.ErrorCode.DefaultError, "Error creating relationship to Users", null);
+                }
             }
 
-            ICollection<Profile> profiles = new List<Profile>();
-            if (teamUpdateDto.ProfileIds.Count() > 0)
+            ICollection<Domain.Models.Profile> profiles = new List<Domain.Models.Profile>();
+            var profilesListCount = teamUpdateDto.ProfileIds.Count() > 0;
+            team.Profiles.Clear();
+            if (profilesListCount)
             {
-                team.Workflows.Clear();
-                team.Profiles.Clear();
                 profiles = _profileRepository.FindByIds(teamUpdateDto.ProfileIds);
-
                 foreach (var profile in profiles)
                 {
                     team.AddProfile(profile);
                 }
-
-                var workflows = await _workflowServices.FindByProfileStep(profiles);
-                foreach (var workflow in workflows)
-                {
-                    team.AddWorkflow(workflow);
-                }
             }
 
-            var updateResult = _teamRepository.Update(team);
-            if (!updateResult)
+            var updateTeam = _teamRepository.Update(team);
+            if (!updateTeam)
             {
                 throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
             }
 
-            return updateResult;
+            if (teamUpdateDto.UserIds != null)
+            {
+                var oldWorkflows = await _workflowServices.FindByProfileStep(teamsOldProfiles);
+                await _workflowServices.UpdateTeamWorkflowRelationship(team, oldWorkflows.ToList(), teamsOldProfiles);
+            }
+
+            if (profilesListCount)
+            {
+                var workflows = await _workflowServices.FindByProfileStep(profiles);
+                foreach (var workflow in workflows)
+                {
+                    workflow.AddTeam(team);
+                }
+                await _workflowRepository.UpdateRange(workflows);
+            }
+
+            return updateTeam;
         }
 
         /// <summary>

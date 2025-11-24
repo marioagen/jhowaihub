@@ -61,7 +61,7 @@
     labelFailedToLoadHistory: "No se pudo cargar el historial.",
     labelFailedToApplyQuestionnaire: "No se pudo aplicar el cuestionario.",
     labelGeneralInformation: "Cargar documento",
-    labelGoHome: "Ir a home",
+    labelGoHome: "Home",
     labelHistoric: "Registro de respuestas",
     labelInclusionDate: "Fecha de inclusión",
     labelListing: "Listado",
@@ -689,6 +689,29 @@
         nextStep: "Siguiente paso",
         noDataInDocument: "No hay datos disponibles",
         failedLoadDocument: "No se pudo cargar el documento.",
+    },
+    home: {
+        title: "¡Bienvenido a AI HUB, Woopi AI!",
+        subtitle: "Su viaje para automatizar y optimizar procesos con inteligencia artificial comienza ahora.",
+        planLabel: "Usted ha adquirido el",
+        planName: "Plan Enterprise",
+        planThankYou: "¡Gracias por elegir nuestra plataforma!",
+        quickStartTitle: "Guía de Inicio Rápido",
+        platformCard: {
+            title: "Conozca la Plataforma",
+            description: "Vea un tour guiado de 5 minutos sobre las principales funcionalidades.",
+            button: "Ver video"
+        },
+        workflowCard: {
+            title: "Su Primer Workflow",
+            description: "Siga nuestra guía paso a paso para crear su primera automatización en minutos.",
+            button: "Iniciar guía"
+        },
+        docsCard: {
+            title: "Explore la Documentación",
+            description: "Consulte nuestra documentación completa para explorar todo el potencial de AI HUB.",
+            button: "Acceder docs"
+        }
     }
 };
 
