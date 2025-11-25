@@ -87,6 +87,15 @@ namespace WoopiAiHub.Application.Services
                                    Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
         }
 
+        /// <summary>
+        /// Proceed login
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <param name="tenant"></param>
+        /// <param name="checkPassword"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="AppException"></exception>
         private async Task<AccessDataAuthDto> ProceedLogin(LoginDto loginDto, string tenant, bool checkPassword)
         {
             var httpContext = _httpContextAccessor.HttpContext ??
@@ -158,30 +167,6 @@ namespace WoopiAiHub.Application.Services
                         Password = string.Empty
                     };
                     return await ProceedLogin(loginDto, tenant, false);
-                    //var tenant = string.IsNullOrEmpty(authenticateDto.Tenant) ? 
-                    //             userAccess.Tenants.First() : 
-                    //             authenticateDto.Tenant;
-                    //var httpContext = _httpContextAccessor.HttpContext ??
-                    //            throw new InvalidOperationException(_messageHttpContextNotAvailable);
-
-                    //await _tenantContextService.InitializeTenantAsync(tenant);
-                    //await _tenantContextService.TrySetTenantConnectionAsync(httpContext, tenant);
-
-                    //var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
-                    //if (user == null)
-                    //    throw new AppException(null,
-                    //                           "User not found.",
-                    //                           Domain.Utils.ErrorLabels.Login.UserNotFound);
-
-                    //var permissions = await _permissionRepository.FindUserPermissionsAsync(authenticateDto.Login);
-                    //var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
-                    //this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
-
-                    //return new AccessDataAuthDto
-                    //{
-                    //    Tenant = tenant,
-                    //    Token = tokenJWT.AccessToken
-                    //};
                 }
 
                 throw new AppException(null,
