@@ -11,6 +11,7 @@ using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
@@ -32,6 +33,9 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IStepRepository _stepRepository;
         private readonly IHubNotifier _hubNotifier;
         private readonly IEncryptionService _encryptionService;
+        private readonly IUsageDailyServices _usageDailyServices;
+        private readonly IUsageTypeServices _usageTypeServices;
+        private readonly IUserServices _userServices;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -45,7 +49,10 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IApiClientFactory apiClientFactory,
                                   IStepRepository stepRepository,
                                   IHubNotifier hubNotifier,
-                                  IEncryptionService encryptionService)
+                                  IEncryptionService encryptionService,
+                                  IUsageDailyServices usageDailyServices,
+                                  IUsageTypeServices usageTypeServices,
+                                  IUserServices userServices)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -60,6 +67,9 @@ namespace WoopiAiHub.Application.Services.Automation
             _stepRepository = stepRepository;
             _hubNotifier = hubNotifier;
             _encryptionService = encryptionService;
+            _usageDailyServices = usageDailyServices;
+            _usageTypeServices = usageTypeServices;
+            _userServices = userServices;
         }
 
         /// <summary>
@@ -163,6 +173,12 @@ namespace WoopiAiHub.Application.Services.Automation
         public async Task StartExecutionByWorkflowsAsync(AutomationServicesDto automationServicesDto, ICollection<Workflow> workflows)
         {
             var firstSteps = workflows.SelectMany(wf => wf.Steps.Where(s => s.Order == 1)).ToList();
+
+            if (firstSteps.Count > 0)
+            {
+                await _usageDailyServices.AddByValuesAsync("Execution", automationServicesDto.Email, firstSteps.Count);
+            }
+
             foreach (var step in firstSteps)
             {
                 try

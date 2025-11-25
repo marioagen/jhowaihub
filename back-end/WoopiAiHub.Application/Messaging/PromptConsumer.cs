@@ -56,6 +56,11 @@ namespace WoopiAiHub.Application.Messaging
                     await promptServices.ProcessChatCompletionResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
+                    var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
+
+                    var tokens = message.Usage?.TotalTokens ?? 0;
+                    await usageDailyServices.AddByValuesAsync("Prompt", message.Email, tokens);
+
                     var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto
                     (

@@ -54,6 +54,13 @@ namespace WoopiAiHub.Application.Messaging
                     var result = await documentServices.ProcessOcrResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
+                    var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
+
+                    var pages = message.AnalyzeResult?.Pages?.Count() ?? 0;
+                    if (pages == 0) pages = 1;
+
+                    await usageDailyServices.AddByValuesAsync("Ocr", message.Email, pages);
+
                     var automationServicesDto = new AutomationServicesDto
                     (
                         result.StepToolId,

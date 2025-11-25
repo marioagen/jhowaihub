@@ -31,6 +31,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
         private readonly Mock<IMessageConsumer<ChatCompletionResponseDto>> _consumerMock;
         private readonly Mock<ILogger<PromptConsumer>> _loggerMock;
+        private readonly Mock<IUsageDailyServices> _usageDailyServices;
 
         public PromptConsumerTests()
         {
@@ -57,6 +58,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
             _documentServices = new Mock<IDocumentServices>();
             _promptServices = new Mock<IPromptServices>();
+            _usageDailyServices = new Mock<IUsageDailyServices>();
 
             _tenantCacheServices = new Mock<ITenantCacheServices>();
             _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
@@ -84,6 +86,8 @@ namespace WoopiAiHub.UnitTests.Consumers
                                .Returns(_tenantCacheServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
                                .Returns(httpContextAccessorMock.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IUsageDailyServices)))
+                               .Returns(_usageDailyServices.Object);
 
             _loggerMock = new Mock<ILogger<PromptConsumer>>();
             _consumerMock = new Mock<IMessageConsumer<ChatCompletionResponseDto>>();

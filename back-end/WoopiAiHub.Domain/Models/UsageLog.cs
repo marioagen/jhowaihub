@@ -17,19 +17,19 @@ namespace WoopiAiHub.Domain.Models
         public bool Processed { get; private set; }
 
         [Column("ModelEmbeddingId", TypeName = "int")]
-        public int ModelEmbeddingId { get; private set; }
+        public int? ModelEmbeddingId { get; private set; }
 
         public virtual UsageType? UsageType { get; set; }
         public virtual ModelEmbedding? ModelEmbedding { get; set; }
         public virtual User? User { get; set; }
 
         public UsageLog(int id,
-                          DateTime created,
-                          Guid userId,
-                          int usageTypeId,
-                          int usageCount,
-                          bool processed,
-                          int modelEmbeddingId)
+                        DateTime created,
+                        Guid userId,
+                        int usageTypeId,
+                        int usageCount,
+                        bool processed,
+                        int? modelEmbeddingId)
             : base(id, created)
         {
             UserId = userId;

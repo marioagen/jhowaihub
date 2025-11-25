@@ -32,8 +32,7 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(ud => ud.ModelEmbeddingId)
                    .HasColumnName("ModelEmbeddingId")
-                   .HasColumnType("int")
-                   .IsRequired();
+                   .HasColumnType("int");
 
             builder.Property(ud => ud.Created)
                    .HasColumnName("Created")
