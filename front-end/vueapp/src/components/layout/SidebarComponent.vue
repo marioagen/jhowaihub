@@ -11,10 +11,10 @@
                 />
                 <img
                     v-else
-                    src="./../../assets/img/woopi-ai-text-logo-sidebar.svg"
+                    src="./../../assets/img/woopiai-hub-logo.png"
                     :title="$t('labelGoHome')"
-                    width="140"
-                    height="40"
+                    width="100"
+                    height="30" 
                     alt="WOOPI AI"
                     style="margin-left: 0px;"
                 />

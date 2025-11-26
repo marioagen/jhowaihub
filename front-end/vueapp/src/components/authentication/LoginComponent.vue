@@ -3,8 +3,8 @@
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <img src="../../assets/img/woopi-ai-text-logo.svg"
-                        style="padding-bottom: 10px" width="300" height="80" alt="WOOPI AI" />
+                    <img src="../../assets/img/woopiai-hub-logo.png"
+                        style="padding-bottom: 10px" width="150" height="50" alt="WOOPI AI" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
                     <div class="text-center mt-3">
