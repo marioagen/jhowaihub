@@ -56,10 +56,8 @@ namespace WoopiAiHub.Application.Messaging
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
-                    var pages = message.TotalPages;
-                    if (pages == 0) pages = 1;
 
-                    await usageDailyServices.AddByValuesAsync("DocumentEmbeddings", message.Email!, pages, "gtp-4o");
+                    await usageDailyServices.AddByValuesAsync("DocumentEmbeddings", message.Email!, message.TotalUsage, message.EmbeddingModelName);
 
                     var continueExecutionDto = new AutomationServicesDto
                     (

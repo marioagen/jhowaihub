@@ -59,7 +59,7 @@ namespace WoopiAiHub.Application.Services
             var userId = _userServices.FindIdByEmail(email);
             if (userId == Guid.Empty) return false;
 
-            var modelEmbeddingId = 0;
+            int? modelEmbeddingId = null;
             if (!string.IsNullOrEmpty(modelEmbedding))
             {
                 var modelEmbeddingEntity = await _modelEmbeddingRepository.FindByNameAsync(modelEmbedding);

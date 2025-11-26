@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;

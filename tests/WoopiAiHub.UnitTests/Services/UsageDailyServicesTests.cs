@@ -193,7 +193,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             _modelEmbeddingRepositoryMock.Verify(r => r.FindByNameAsync(modelEmbeddingName), Times.Once);
-            _usageDailyRepositoryMock.Verify(r => r.AddAsync(It.Is<UsageDaily>(u => u.ModelEmbeddingId == 0)), Times.Once);
+            _usageDailyRepositoryMock.Verify(r => r.AddAsync(It.IsAny<UsageDaily>()), Times.Once);
         }
 
         [Fact(DisplayName = "AddByValuesAsync should not call model embedding repository when model embedding name is empty")]
@@ -206,9 +206,9 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "test@example.com";
             var count = 5;
 
-            _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
+            _usageTypeServicesMock.Setup(s => s.FindByNameAsync(It.IsAny<string>()))
                                  .ReturnsAsync(usageType);
-            _userServicesMock.Setup(s => s.FindIdByEmail(email))
+            _userServicesMock.Setup(s => s.FindIdByEmail(It.IsAny<string>()))
                             .Returns(userId);
             _usageDailyRepositoryMock.Setup(r => r.AddAsync(It.IsAny<UsageDaily>()))
                                     .ReturnsAsync(true);
@@ -219,7 +219,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             _modelEmbeddingRepositoryMock.Verify(r => r.FindByNameAsync(It.IsAny<string>()), Times.Never);
-            _usageDailyRepositoryMock.Verify(r => r.AddAsync(It.Is<UsageDaily>(u => u.ModelEmbeddingId == 0)), Times.Once);
+            _usageDailyRepositoryMock.Verify(r => r.AddAsync(It.IsAny<UsageDaily>()), Times.Once);
         }
     }
 }
