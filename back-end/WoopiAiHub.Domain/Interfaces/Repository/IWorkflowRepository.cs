@@ -21,5 +21,9 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         IQueryable<WorkflowDto> FindAllWithFilter(WorkflowPagedDto workflowPagedDto);
         Task<bool> UpdateStepToolOutput(StepToolOutput stepToolOutput);
         StepToolOutput FindByStepToolOutputById(int id);
+        Task<List<StepDto>> FindPhase2ById(int id);
+        Task<List<StepDto>> FindPhase3ById(int id);
+        Task<Phase1Dto> FindPhase1ById(int id);
+        StepDto FindStepById(int id);
     }
 }

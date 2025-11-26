@@ -1,5 +1,6 @@
 <template>
-    <WorkflowWizard />
+    <WorkflowWizard
+     :workflowId="routeId"/>
 </template>
 
 <script>
@@ -8,6 +9,12 @@
         name: "NewWorkflow",
         components: {
             WorkflowWizard,
+        },
+         computed: {
+            routeId() {
+                const id = this.$route.params.id;
+                return id ? parseInt(id) : undefined;
+            }
         }
     }
 </script>

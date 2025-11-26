@@ -163,6 +163,22 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
+        /// Phase 1: Updates workflow with teams ans name information.
+        /// </summary>
+        /// <param name="WorkflowUpdatePhase1Dto"></param>
+        /// <returns></returns>
+        [HttpPut("Phase1")]
+        [SwaggerOperation("Endpoint for Phase 2 of workflow creation: Steps Management")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdatePhase1([FromBody] WorkflowUpdatePhase1Dto workflowUpdatePhase1Dto)
+        {
+            var result = await _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto);
+            return Ok(result);
+        }
+
+
+
+        /// <summary>
         /// Phase 2: Updates workflow with steps information.
         /// </summary>
         /// <param name="workflowPhase2Dto"></param>
@@ -187,6 +203,62 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> UpdatePhase3([FromBody] WorkflowPhase3Dto workflowPhase3Dto)
         {
             var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get phase 3 data from id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("Phase3/{id}")]
+        [SwaggerOperation("Endpoint for Phase 3 of workflow creation: Tool Flows Configuration")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindPhase3ById(int id)
+        {
+            var result =  await _workflowServices.FindPhase3ById(id);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get phase 2 data from id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("Phase2/{id}")]
+        [SwaggerOperation("Endpoint for Phase 3 of workflow creation: Tool Flows Configuration")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindPhase2ById(int id)
+        {
+            var result =  await _workflowServices.FindPhase2ById(id);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get phase 1 data from id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("Phase1/{id}")]
+        [SwaggerOperation("Endpoint for Phase 3 of workflow creation: Tool Flows Configuration")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindPhase1ById(int id)
+        {
+            var result =  await _workflowServices.FindPhase1ById(id);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get phase 1 data from id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("Step/{id}")]
+        [SwaggerOperation("Endpoint for Phase 3 of workflow creation: Tool Flows Configuration")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public IActionResult FindStepById(int id)
+        {
+            var result = _workflowServices.FindStepById(id);
             return Ok(result);
         }
     }

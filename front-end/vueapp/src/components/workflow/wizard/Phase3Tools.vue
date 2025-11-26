@@ -35,8 +35,8 @@
                                 <span>{{ getProfileName(step.profileId) }}</span>
                             </div>
                         </div>
-                        <div v-if="step.stepTools && step.stepTools.length > 0" class="tools-list">
-                            <p class="small text-muted mb-2">{{ $t("workflow.configuredTools") }}: {{ step.stepTools.length }}</p>
+                        <div v-if="isEdit" class="tools-list">
+                            <p class="small text-muted mb-2">{{ $t("workflow.configuredTools") }}: {{ step.length }}</p>
                             <button
                                 class="btn btn-outline-primary btn-sm w-100 mb-2"
                                 @click="editToolFlow(step)"
@@ -84,6 +84,10 @@ export default {
             type: Number,
             required: false,
             default: 0,
+        },
+        isEdit: {
+            type: Boolean,
+            required: true,
         }
     },
     methods: {

@@ -204,7 +204,7 @@
                     const routeName = this.isEdit ? "EditWorkflow" : "NewWorkflow";
                     const params = this.isEdit 
                         ? { id: this.workflowId, phase: 3 }
-                        : { phase: 3 };
+                        : { phase: 3, workflowId: this.workflowId };
                     
                     return this.$router.push({
                         name: routeName,
@@ -408,16 +408,12 @@
             async save() {
                 try {
                     let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
-                    
-                    // Save to database if workflowId is available (new wizard flow)
                     if (this.workflowId) {
                         // First, fetch the current workflow to get ALL steps
                         const workflow = await WorkflowService.getWorkflowById(this.workflowId);
                         if (workflow.error) {
                             throw new Error('Failed to load workflow data');
                         }
-                        
-                        // Build Phase3 payload with ALL steps, updating only the current step's tools
                         const allSteps = workflow.steps.map(step => {
                             // If this is the step we're editing, update its stepTools
                             if (step.order === this.stepOrder) {
@@ -427,32 +423,23 @@
                                     stepTools: nodesList
                                 };
                             }
-                            // Otherwise, keep existing stepTools
                             return {
                                 id: step.id || 0,
                                 order: step.order,
                                 stepTools: step.stepTools || []
                             };
                         });
-                        
+
                         const params = {
                             workflowId: this.workflowId,
                             steps: allSteps
                         };
-                        
+
                         const result = await WorkflowService.updatePhase3(params);
                         if (result.error) {
                             throw new Error(result.error);
                         }
-                    } else {
-                        // Fallback to Vuex store for backward compatibility (old workflow form)
-                        this.$store.commit('setFlowByStep', {
-                            stepOrder: this.stepOrder,
-                            flowData: nodesList,
-                            stepId: this.stepId
-                        });
                     }
-                    
                     this.redirectToIndex();
                     return this.$notify({
                         title: 'flow.title',
@@ -462,7 +449,6 @@
                     });
                 }
                 catch (e) {
-                    console.error('Error saving flow:', e);
                     this.$notify({
                         title: 'flow.title',
                         message: 'flow.formFlow.progressFlowFail',
@@ -505,8 +491,6 @@
             },
             async loadPreviousStepTools(node) {
                 let workflowSteps = [];
-
-                // Try to load from database if workflowId is available
                 if (this.workflowId) {
                     try {
                         const workflow = await WorkflowService.getWorkflowById(this.workflowId);
@@ -569,6 +553,12 @@
                 return this.isTargetTool(ToolType.Prompt);
             }
         },
+        created() {
+            console.log(this.phase3data);
+        },
+        mounted() {
+            console.log(this.phase3data);
+        }
     };
 </script>
 

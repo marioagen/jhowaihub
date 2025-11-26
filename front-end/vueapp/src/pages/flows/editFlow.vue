@@ -6,15 +6,24 @@
         :stepOrder="routeStepOrder"
         :phase="routePhase"
         :workflowId="routeWorkflowId"
+
     />
 </template>
 
 <script>
     import FlowComponent from '@/components/flow/FlowComponent.vue';
+    import { useRoute } from 'vue-router';
+    import WorkflowService from "@/services/workflow/WorkflowService";
     export default {
         name: "EditFlow",
         components: {
             FlowComponent
+        },
+        data() {
+            return {
+                persistData: {
+                },
+            };
         },
         computed: {
             routeId() {

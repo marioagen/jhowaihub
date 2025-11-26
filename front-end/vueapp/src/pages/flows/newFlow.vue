@@ -8,10 +8,16 @@
 
 <script>
     import FlowComponent from '@/components/flow/FlowComponent.vue';
+    import { useRoute } from 'vue-router';
     export default {
         name: "NewFlow",
         components: {
             FlowComponent
+        },
+        data() {
+            return {
+                persistData: {},
+            };
         },
         computed: {
             routeStepOrder() {

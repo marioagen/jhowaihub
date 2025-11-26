@@ -264,6 +264,54 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Retrieves a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<Phase1Dto> FindPhase1ById(int id)
+        {
+            var phase1 = await _workflowRepository.FindPhase1ById(id);
+            if (phase1 == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+            return phase1;
+        }
+
+        /// <summary>
+        /// Retrieves a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<List<StepDto>> FindPhase2ById(int id)
+        {
+            var workflow = await _workflowRepository.FindPhase2ById(id);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+            return workflow;
+        }
+
+        /// <summary>
+        /// Retrieves a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<List<StepDto>> FindPhase3ById(int id)
+        {
+            var workflow = await _workflowRepository.FindPhase3ById(id);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+            return workflow;
+        }
+
+        /// <summary>
         /// Retrieves a workflow associated with a specific team ID.
         /// </summary>
         /// <param name="teamId"></param>
@@ -693,6 +741,12 @@ namespace WoopiAiHub.Application.Services
             return workflow.Id;
         }
 
+        public StepDto FindStepById(int id)
+        {
+            var step = _workflowRepository.FindStepById(id);
+            return step;
+        }
+
         /// <summary>
         /// Phase 2: Updates a workflow with steps information (without step tools).
         /// Validates and creates/updates steps with their profiles and statuses.
@@ -710,35 +764,65 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                // Clear existing steps to replace with new ones
-                workflow.Steps.Clear();
+                // Obter steps existentes
+                var existingSteps = workflow.Steps.ToList();
+                // Criar dicionário dos novos steps do DTO
+                var newStepsDict = workflowPhase2Dto.Steps
+                    .Where(s => s.Id > 0)
+                    .ToDictionary(s => s.Id);
 
-                foreach (var stepDto in workflowPhase2Dto.Steps.OrderBy(s => s.Order))
+                // Identificar steps para remover (existem no banco mas não no DTO)
+                var stepsToRemove = existingSteps
+                    .Where(es => !newStepsDict.ContainsKey(es.Id))
+                    .ToList();
+
+                // Identificar steps para atualizar
+                var stepsToUpdate = existingSteps
+                    .Where(es => newStepsDict.ContainsKey(es.Id))
+                    .ToList();
+
+                // Identificar steps para adicionar (ID = 0 ou não existem no banco)
+                var stepsToAdd = workflowPhase2Dto.Steps
+                    .Where(s => s.Id == 0 || !existingSteps.Any(es => es.Id == s.Id))
+                    .ToList();
+
+                // Remover steps
+                foreach (var step in stepsToRemove)
                 {
-                    // Validate profile and status exist
-                    var profile = await _profileRepository.FindById(stepDto.ProfileId);
-                    if (profile == null)
-                    {
-                        throw new AppException(ErrorCode.NotFound, "Profile not found", ProfileLabel.NotFound);
-                    }
+                    workflow.Steps.Remove(step);
+                    // Ou se você tiver um repositório de steps:
+                    // await _stepRepository.DeleteAsync(step.Id);
+                }
 
-                    var status = await _statusRepository.FindById(stepDto.StatusId);
-                    if (status == null)
+                // Atualizar steps existentes
+                foreach (var stepDto in workflowPhase2Dto.Steps.Where(s => s.Id > 0))
+                {
+                    var existingStep = stepsToUpdate.FirstOrDefault(s => s.Id == stepDto.Id);
+                    if (existingStep != null)
                     {
-                        throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
-                    }
+                        // Validar profile e status
+                        await ValidateProfileAndStatus(stepDto);
 
-                    var step = new Step(
-                        stepDto.Id > 0 ? stepDto.Id : 0,
-                        DateTime.UtcNow,
-                        workflow.Id,
-                        stepDto.Name,
-                        stepDto.Order,
-                        stepDto.ProfileId,
-                        stepDto.StatusId
+                        existingStep.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
+                    }
+                }
+
+                // Adicionar novos steps
+                foreach (var stepDto in stepsToAdd.OrderBy(s => s.Order))
+                {
+                    await ValidateProfileAndStatus(stepDto);
+
+                    var newStep = new Step(
+                        id: 0, // Será gerado pelo banco
+                        created: DateTime.Now,
+                        workflowId: workflow.Id,
+                        name: stepDto.Name,
+                        order: stepDto.Order,
+                        profileId: stepDto.ProfileId,
+                        statusId: stepDto.StatusId
                     );
 
-                    workflow.AddStep(step);
+                    workflow.AddStep(newStep);
                 }
 
                 await _unitOfWork.SaveChangesAsync();
@@ -750,6 +834,57 @@ namespace WoopiAiHub.Application.Services
             {
                 _unitOfWork.Rollback();
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Phase 2: Updates a workflow with steps information (without step tools).
+        /// Validates and creates/updates steps with their profiles and statuses.
+        /// </summary>
+        /// <param name="workflowPhase2Dto"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdatePhase1(WorkflowUpdatePhase1Dto workflowUpdatePhase1Dto)
+        {
+            var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdatePhase1Dto.Id);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var teamsList = _teamRepository.FindByIds(workflowUpdatePhase1Dto.Teams);
+                foreach (var team in teamsList)
+                {
+                    workflow.AddTeam(team);
+                }
+
+                workflow.Update(workflowUpdatePhase1Dto.Name);
+                await _unitOfWork.SaveChangesAsync();
+                _unitOfWork.Commit();
+
+                return true;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        private async Task ValidateProfileAndStatus(StepPhase2Dto stepDto)
+        {
+            var profile = await _profileRepository.FindById(stepDto.ProfileId);
+            if (profile == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Profile not found", ProfileLabel.NotFound);
+            }
+
+            var status = await _statusRepository.FindById(stepDto.StatusId);
+            if (status == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
             }
         }
 
