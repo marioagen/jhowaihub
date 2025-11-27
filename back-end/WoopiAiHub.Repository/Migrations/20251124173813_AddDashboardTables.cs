@@ -112,14 +112,14 @@ namespace WoopiAiHub.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "usageMonths",
+                name: "UsageMonths",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UsageTypeId = table.Column<int>(type: "int", nullable: false),
                     Total = table.Column<int>(type: "int", nullable: false),
-                    ModelEmbeddingId = table.Column<int>(type: "int", nullable: false),
+                    ModelEmbeddingId = table.Column<int>(type: "int", nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
@@ -200,17 +200,17 @@ namespace WoopiAiHub.Repository.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_usageMonths_ModelEmbeddingId",
-                table: "usageMonths",
+                table: "UsageMonths",
                 column: "ModelEmbeddingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_usageMonths_UsageTypeId",
-                table: "usageMonths",
+                table: "UsageMonths",
                 column: "UsageTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_usageMonths_UserId",
-                table: "usageMonths",
+                table: "UsageMonths",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -229,7 +229,7 @@ namespace WoopiAiHub.Repository.Migrations
                 name: "UsageLogs");
 
             migrationBuilder.DropTable(
-                name: "usageMonths");
+                name: "UsageMonths");
 
             migrationBuilder.DropTable(
                 name: "UsageUnits");

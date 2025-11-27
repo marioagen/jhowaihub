@@ -11,7 +11,7 @@ namespace WoopiAiHub.Domain.Models
         public int Total { get; private set; }
 
         [Column("ModelEmbeddingId", TypeName = "int")]
-        public int ModelEmbeddingId { get; private set; }
+        public int? ModelEmbeddingId { get; private set; }
 
         [Column("UserId", TypeName = "uniqueidentifier")]
         public Guid UserId { get; private set; }
@@ -24,7 +24,7 @@ namespace WoopiAiHub.Domain.Models
                           DateTime created,
                           int usageTypeId,
                           int total,
-                          int modelEmbeddingId,
+                          int? modelEmbeddingId,
                           Guid userId)
             : base(id, created)
         {
