@@ -59,6 +59,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();
             services.AddHostedService<PromptConsumer>();
+            services.AddHostedService<SubscriptionConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();
