@@ -20,22 +20,13 @@
                     <div class="col" v-outsideClick="handleOutsideClick">
                         <button
                             class="btn btn-outlined-light btn-sm border d-flex align-items-center justify-content-between"
-                            style="width: 200px;"
-                            @click="toggleDateFilter"
-                        >
+                            style="width: 200px;" @click="toggleDateFilter">
                             {{ presetDate() }}
                             <LucideIcon v-if="showDateFilter" icon="ChevronUp" :size="17" />
                             <LucideIcon v-else icon="ChevronDown" :size="17" />
                         </button>
-                        <div 
-                            v-if="showDateFilter" 
-                            class="position-absolute" 
-                            style="z-index: 1050; width: 500px;"
-                        >
-                            <DashboardDateFilter 
-                                @close="showDateFilter = false"
-                                @filterData="filterData"
-                            />
+                        <div v-if="showDateFilter" class="position-absolute" style="z-index: 1050; width: 500px;">
+                            <DashboardDateFilter @close="showDateFilter = false" @filterData="filterData" />
                         </div>
                     </div>
                     <div class="col">
@@ -59,101 +50,102 @@
                     <h2 class="mb-0 fw-bold text-primary">{{ totalWTC }}</h2>
                 </div>
             </div>
-            <TokensGraph
-                :key="datesChange"
-                :rangeDates="dateRange"
-            />
-            <PagesProcessedGraph
-                :key="datesChange"
-                :rangeDates="dateRange"
-            />
-            <WorkflowsGraph
-                :key="datesChange"
-                :rangeDates="dateRange"
-            />
+            <TokensGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
+                @setTotalTokens="setTotalWTC" />
+            <PagesProcessedGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
+                @setTotalPages="setTotalWTC" />
+            <WorkflowsGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
+                @setTotalExecution="setTotalWTC" />
         </div>
     </main>
 </template>
 
 <script>
-    import TokensGraph from '@/components/dashboard/graphs/TokensGraph.vue';
-    import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGraph.vue';
-    import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
-    import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
-    import DashboardServices from '@/services/dashboard/DashboardServices';
-    export default {
-        components: {
-            DashboardDateFilter,
-            TokensGraph,
-            WorkflowsGraph,
-            PagesProcessedGraph,
+import TokensGraph from '@/components/dashboard/graphs/TokensGraph.vue';
+import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGraph.vue';
+import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
+import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
+import DashboardServices from '@/services/dashboard/DashboardServices';
+export default {
+    components: {
+        DashboardDateFilter,
+        TokensGraph,
+        WorkflowsGraph,
+        PagesProcessedGraph,
+    },
+    data: () => ({
+        showDateFilter: false,
+        datesChange: 0,
+        filters: {
+            preset: "currentMonth",
+            start: "",
+            end: "",
         },
-        data: () => ({
-            showDateFilter: false,
-            datesChange: 0,
-            filters: {
-                preset: "currentMonth",
-                start: "",
-                end: "",
-            },
-            totalWTC: 0,
-        }),
-        computed: {
-            dateRange() {
-                return {
-                    start: this.filters.start,
-                    end: this.filters.end,
-                }
-            },
-        },
-        methods: {
-            toggleDateFilter() {
-                this.showDateFilter = !this.showDateFilter;
-            },
-            filterData(filters) {
-                this.filters = filters;
-                this.datesChange++;
-            },
-            handleOutsideClick() {
-                if (this.showDateFilter) {
-                    this.showDateFilter = false;
-                }
-            },
-            presetDate() {
-                return this.$t(`dashboard.filters.${this.filters.preset}`);
-            },
-            getDashboardData() {
-                DashboardServices.getMainDashboardData()
-                    .then((response) => {
-                        console.log(response)
-                    });
+        totalWTC: 0,
+        usageUnits: [],
+    }),
+    computed: {
+        dateRange() {
+            return {
+                start: this.filters.start,
+                end: this.filters.end,
             }
         },
-        created() {
-            this.getDashboardData();
-        }
+    },
+    methods: {
+        toggleDateFilter() {
+            this.showDateFilter = !this.showDateFilter;
+        },
+        filterData(filters) {
+            this.filters = filters;
+            this.datesChange++;
+        },
+        handleOutsideClick() {
+            if (this.showDateFilter) {
+                this.showDateFilter = false;
+            }
+        },
+        presetDate() {
+            return this.$t(`dashboard.filters.${this.filters.preset}`);
+        },
+        getDashboardData() {
+            DashboardServices.findUsageUnits()
+                .then((response) => {
+                    this.usageUnits = response;
+                });
+        },
+        setTotalWTC(total) {
+            console.log('subtotal', total)
+            this.totalWTC += total;
+            console.log('total', this.totalWTC)
+        },
+    },
+    created() {
+        this.getDashboardData();
     }
+}
 </script>
 
 <style scoped>
-    .plan-box {
-        background: #eef3ff;
-        border-radius: 12px;
-        padding: 12px 20px;
-        display: inline-block;
-        text-align: right;
-        border: 1px solid #d5e0ff;
-    }
+.plan-box {
+    background: #eef3ff;
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: inline-block;
+    text-align: right;
+    border: 1px solid #d5e0ff;
+}
 
-    .plan-title {
-        color: #0056d2;
-        font-weight: 600;
-        font-size: 1rem;
-    }
+.plan-title {
+    color: #0056d2;
+    font-weight: 600;
+    font-size: 1rem;
+}
 
-    .plan-right {
-        margin-left: auto;
-        display: block; /* auto funciona apenas com block ou flex item */
-        width: fit-content;
-    }
+.plan-right {
+    margin-left: auto;
+    display: block;
+    /* auto funciona apenas com block ou flex item */
+    width: fit-content;
+}
 </style>

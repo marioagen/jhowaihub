@@ -63,7 +63,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
             var tenantInfo = new TenantInfoDto { EmbeddingModelName = "test-model" };
             var keyAccess = "test-key-access";
-            var keyMongoAccess = "test-key-mongo-access";
+
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
@@ -73,16 +73,12 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockConfig
                 .Setup(config => config[It.IsAny<string>()])
                 .Returns(keyAccess);
-            _mockKeyGeneratorApi
-                .Setup(api => api.GetKey(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(keyMongoAccess);
 
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, null, [output]);
 
             // Assert
             _mockTenantCacheServices.Verify(repo => repo.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once);
-            _mockKeyGeneratorApi.Verify(repo => repo.GetKey(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             Assert.Equal(_messageQueues.EmbeddingQueue, result.Queue);
         }
     }

@@ -1,5 +1,4 @@
 import api from "@/services/api";
-// import store from "@/store";
 
 export default {
     getMainDashboardData() {
@@ -54,6 +53,50 @@ export default {
         return api.get(`/Dashboard/Workflows/Automatic`, { params: filters })
             .then(({ data }) => {
                 console.log(data);
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    findUsedModels() {
+        return api.get(`/UsageMonth/FindUsedModels`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    findByUsageType(usageType) {
+        return api.get(`/UsageMonth/${usageType}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    findByModel(modelEmbeddingId) {
+        return api.get(`/UsageMonth/FindByModel/${modelEmbeddingId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    findUsageUnits() {
+        return api.get(`/Dashboard/UsageUnits`)
+            .then(({ data }) => {
                 return data;
             })
             .catch((error) => {

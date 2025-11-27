@@ -17,8 +17,11 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(u => u.UsageTypeId)
                    .HasColumnName("UsageTypeId")
-                   .HasColumnType("int")
-                   .IsRequired();
+                   .HasColumnType("int");
+
+            builder.Property(u => u.ModelEmbeddingId)
+                   .HasColumnName("ModelEmbeddingId")
+                   .HasColumnType("int");
 
             builder.Property(u => u.Created)
                    .HasColumnName("Created")
@@ -33,6 +36,10 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasOne(u => u.UsageType)
                    .WithMany(ut => ut.Units)
                    .HasForeignKey(u => u.UsageTypeId);
+
+            builder.HasOne(u => u.ModelEmbedding)
+                   .WithMany(ut => ut.UsageUnits)
+                   .HasForeignKey(u => u.ModelEmbeddingId);
         }
     }
 }

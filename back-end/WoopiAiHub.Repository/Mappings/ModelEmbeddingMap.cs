@@ -27,6 +27,15 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasMany(me => me.UsageMonth)
                    .WithOne(um => um.ModelEmbedding)
                    .HasForeignKey(um => um.ModelEmbeddingId);
+
+            builder.HasMany(me => me.UsageUnits)
+                   .WithOne(um => um.ModelEmbedding)
+                   .HasForeignKey(um => um.ModelEmbeddingId);
+
+            builder.HasMany(me => me.UsageLog)
+                   .WithOne(um => um.ModelEmbedding)
+                   .HasForeignKey(um => um.ModelEmbeddingId);
+
         }
     }
 }
