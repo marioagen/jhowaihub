@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoopiAiHub.UnitTests", "tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoopiAiHub.Infrastructure", "back-end\WoopiAiHub.Infrastructure\WoopiAiHub.Infrastructure.csproj", "{6EC8220E-62FE-4C54-BBEF-7E35416CDC56}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WoopiAiHub.Functions", "back-end\WoopiAiHub.Functions\WoopiAiHub.Functions.csproj", "{25E1BFFE-3181-1B8A-EBE5-11CAA518B5F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{6EC8220E-62FE-4C54-BBEF-7E35416CDC56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EC8220E-62FE-4C54-BBEF-7E35416CDC56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EC8220E-62FE-4C54-BBEF-7E35416CDC56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25E1BFFE-3181-1B8A-EBE5-11CAA518B5F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25E1BFFE-3181-1B8A-EBE5-11CAA518B5F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25E1BFFE-3181-1B8A-EBE5-11CAA518B5F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25E1BFFE-3181-1B8A-EBE5-11CAA518B5F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,6 +107,7 @@ Global
 		{6C674DA8-EFEC-718E-14B3-B16852563175} = {1F36CC50-40C0-407C-8568-D81801C31907}
 		{4FA09E56-0359-4B47-278E-96D3343EC547} = {4C934728-AD81-487E-94CF-8D19052B3A77}
 		{6EC8220E-62FE-4C54-BBEF-7E35416CDC56} = {1F36CC50-40C0-407C-8568-D81801C31907}
+		{25E1BFFE-3181-1B8A-EBE5-11CAA518B5F1} = {1F36CC50-40C0-407C-8568-D81801C31907}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DA9A9B81-B6D5-49E3-898E-AF1666ABD260}

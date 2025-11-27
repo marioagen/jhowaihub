@@ -49,5 +49,13 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         [Delete("/user/DeactivateUsers")]
         Task<bool> DeactivateUsersEnabledByReference([Header("KeyAccess")] string KeyAccess,
                                                     [FromBody] DeactivateUsersDto deactivateUsersDto);
+
+        [Post("/Consumption/Charge")]
+        Task<bool> PostChargeAsync([Header("KeyAccess")] string KeyAccess,
+                                   ChargeRequestDto request);
+
+        [Get("/api/Tenant/all/{module}")]
+        Task<List<TenantListDto>> FindAllTenantsByModuleAsync([Header("KeyAccess")] string KeyAccess,
+                                                              [AliasAs("module")] ColTypeModule module);
     }
 }
