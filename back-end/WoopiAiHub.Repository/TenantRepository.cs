@@ -17,14 +17,12 @@ namespace WoopiAiHub.Repository
         public TenantRepository(IServiceProvider serviceProvider,
                                 IHostingEnvironment environment,
                                 IConfiguration config,
-                                ILogger<TenantRepository> logger,
-                                ApplicationDbContext context)
+                                ILogger<TenantRepository> logger)
         {
             this.serviceProvider = serviceProvider;
             this._environment = environment;
             this._config = config;
             this._logger = logger;
-            _context = context;
         }
 
         /// <summary>
