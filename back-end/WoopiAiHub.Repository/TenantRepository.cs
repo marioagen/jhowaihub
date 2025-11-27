@@ -13,7 +13,6 @@ namespace WoopiAiHub.Repository
         private readonly IHostingEnvironment _environment;
         private readonly IConfiguration _config;
         private readonly ILogger<TenantRepository> _logger;
-        private readonly ApplicationDbContext _context;
 
         public TenantRepository(IServiceProvider serviceProvider,
                                 IHostingEnvironment environment,

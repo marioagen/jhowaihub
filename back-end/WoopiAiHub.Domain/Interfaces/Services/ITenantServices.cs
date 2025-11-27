@@ -8,6 +8,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         Task<string> InitializeTenant(string tenant);
 
-        void ProcessSubscription(TenantSubscriptionDto tenantActivationDto);
+        void ProcessSubscription(TenantSubscriptionDto tenantSubscriptionDto);
     }
 }
