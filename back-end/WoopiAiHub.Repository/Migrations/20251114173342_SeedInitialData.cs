@@ -49,8 +49,6 @@ namespace WoopiAiHub.Repository.Migrations
                     { 13, "View",   DateTime.Now, "View Dashboard",       "Dashboard" },
                 }
             );
-
-
         }
 
         /// <inheritdoc />

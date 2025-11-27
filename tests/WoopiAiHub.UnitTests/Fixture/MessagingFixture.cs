@@ -11,6 +11,24 @@ namespace WoopiAiHub.UnitTests.Fixture
 {
     public class MessagingFixture
     {
+        public static TenantSubscriptionDto FindValidTenantSubscriptionDto()
+        {
+            var faker = new Faker<TenantSubscriptionDto>("pt_BR")
+              .CustomInstantiator(f => new TenantSubscriptionDto
+              {
+                  Name = f.Random.String(),
+                  Email = f.Random.String(),
+                  MarketplaceId = f.Random.Guid(),
+                  IsActive = f.Random.Bool(),
+                  PlanName = f.Random.String(),
+                  DataBaseName = f.Random.String(),
+                  DateStart = f.Date.Past(),
+                  DateEnd = f.Date.Past(),
+                  DateRenew = f.Date.Future()
+              });
+            return faker;
+        }
+
         public static ProcessOcrResultDto FindValidProcessOcrResultDto()
         {
             var faker = new Faker<ProcessOcrResultDto>("pt_BR")
