@@ -461,7 +461,6 @@
         removeSuccess: "Workflow removido com sucesso",
         removeError: "Erro ao remover workflow",
         stepFlow: "Automação de documentos",
-        // Wizard-specific translations
         nameAndAssociations: "Nome e Associações",
         tools: "Ferramentas",
         basicInfo: "Informações Básicas",
@@ -489,11 +488,11 @@
         phase3Error: "Erro ao salvar ferramentas",
         loadError: "Erro ao carregar workflow",
         formCreate: {
-            title: "Criar / Editar Workflow",
+            title: "Criar Workflow",
             subtitle: "Siga as etapas para configurar seu workflow.",
         },
         formEdit: {
-            title: "Criar / Editar Workflow",
+            title: "Editar Workflow",
             subtitle: "Siga as etapas para configurar seu workflow.",
         },
         sidebar: {

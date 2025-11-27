@@ -200,10 +200,10 @@ export default {
             return this.stepsList.length === 0;
         },
         formTitle() {
-            return this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title";
+            return this.isEdit ? this.$t("workflow.formEdit.title") : this.$t("workflow.formCreate.title");
         },
         formSubtitle() {
-            return this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle";
+            return this.isEdit ? this.$t("workflow.formEdit.subtitle") : this.$t("workflow.formCreate.subtitle");
         },
         activeStepsList() {
             return this.stepsList.filter(s => s.isActive !== false);

@@ -117,6 +117,11 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Retrieves a step by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public StepDto FindStepById(int id)
         {
             var step = _context.Steps
@@ -297,6 +302,11 @@ namespace WoopiAiHub.Repository
             return workflow!;
         }
 
+        /// <summary>
+        /// Find phase2 data by workflow id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<List<StepDto>> FindPhase2ById(int id)
         {
             var steps = await _context.Workflows
@@ -326,6 +336,12 @@ namespace WoopiAiHub.Repository
             return steps;
         }
 
+
+        /// <summary>
+        /// Find phase3 data by workflow id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<List<StepDto>> FindPhase3ById(int id)
         {
             var steps = await _context.Workflows
@@ -336,7 +352,7 @@ namespace WoopiAiHub.Repository
                 {
                     Id = s.Id,
                     Name = s.Name,
-                    Order = s.Order, // isso determina as dependencias , pegar da ordem abaixo do step q vc tá
+                    Order = s.Order,
                     WorkflowId = s.WorkflowId,
                     Profile = new ProfileDto
                     {
@@ -424,7 +440,7 @@ namespace WoopiAiHub.Repository
                     Name = t.Name,
                 }).ToList(),
                 Steps = w.Steps.Select(s => new StepDto
-                { //phase 2 retias os cards e steptools phase 3 os steps com stepstools
+                { 
                     Id = s.Id,
                     Name = s.Name,
                     Order = s.Order,
@@ -638,6 +654,11 @@ namespace WoopiAiHub.Repository
             });
         }
 
+        /// <summary>
+        /// Finds a StepToolOutput by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public StepToolOutput FindByStepToolOutputById(int id)
         {
             var stepToolOutput = _context.StepToolOutputs.Where(p => p.Id == id)

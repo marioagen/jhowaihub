@@ -143,10 +143,14 @@
         },
         computed: {
             formTitle() {
-                return this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title";
+                return this.$t(
+                    this.isEdit
+                        ? "workflow.formEdit.title"
+                        : "workflow.formCreate.title"
+                );
             },
             formSubtitle() {
-                return this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle";
+               return this.$t(this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle");
             },
         },
         methods: {
@@ -193,12 +197,10 @@
                 this.isLoading = true;
                 const phase1Component = this.$refs.phase1;
                 const data = phase1Component.getData();
-                console.log(this.isEdit);
                 try {
                     if (this.isEdit) {
                         this.phase1Data = data;
                         this.currentPhase = 2;
-                        console.log(data.teams);
                         const params = {
                             id: this.workflowIdInternal,
                             name: data.name,
@@ -265,7 +267,6 @@
 
                 this.phase2Data = data;
                 this.currentPhase = 3;
-                // Reload data from database to get fresh step data with IDs
                 await this.reloadCurrentPhaseData();
 
                 this.$notify({
@@ -329,7 +330,6 @@
         },
         async loadWorkflowData() {
             if (!this.workflowIdInternal) return;
-            console.log(this.currentPhase);
             this.isLoading = true;
             try {
                 if (this.currentPhase == 1) {
@@ -352,17 +352,6 @@
                     };
                 }
                 else if (this.currentPhase == 3) {
-                    //let result = await this.getPhase3Data();
-                    //this.phase3Data = {
-                    //    steps: result.map(step => ({
-                    //        id: step.id,
-                    //        name: step.name,
-                    //        order: step.order,
-                    //        profileId: String(step.profile?.id || ''),
-                    //        statusId: String(step.status?.id || ''),
-                    //        stepTools: step.stepTools || []
-                    //    }))
-                    //};
                     this.phase3Data = this.phase2Data;
                 }
             } catch (error) {

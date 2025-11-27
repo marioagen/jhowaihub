@@ -249,7 +249,7 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Get phase 1 data from id
+        /// Get step data from id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>

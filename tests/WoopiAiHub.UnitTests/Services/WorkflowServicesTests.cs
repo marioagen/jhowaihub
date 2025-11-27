@@ -11,6 +11,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
+using WoopiAiHub.Repository;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
@@ -670,6 +671,274 @@ namespace WoopiAiHub.UnitTests.Services
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(phase3Dto));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "UpdatePhase1 should throw AppException when workflow not found")]
+        [Trait("UpdatePhase1", "Fail")]
+        public async Task UpdatePhase1_WorkflowNotFound_ThrowsException()
+        {
+            // Arrange
+            var workflowUpdatePhase1Dto = new WorkflowUpdatePhase1Dto { Id = 1, Name = "Updated Workflow" };
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(1)).ReturnsAsync((Workflow)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+        }
+
+        [Fact(DisplayName = "UpdatePhase1 success")]
+        [Trait("UpdatePhase1", "Success")]
+        public async Task UpdatePhase1_WorkflowExists_UpdatesSuccessfully()
+        {
+            // Arrange
+            var workflowUpdatePhase1Dto = new WorkflowUpdatePhase1Dto { Id = 1, Name = "Updated Workflow", Teams = new List<int> { 1, 2 } };
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(1)).ReturnsAsync(workflow);
+            _teamRepositoryMock.Setup(x => x.FindByIds(It.IsAny<List<int>>())).Returns(new List<Team>{ });
+
+            // Act
+            var result = await _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto);
+
+            // Assert
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindPhase1ById success")]
+        [Trait("FindPhase1ById", "Success")]
+        public async Task FindPhase1ById_WorkflowExists_ReturnsPhase1Dto()
+        {
+            // Arrange
+            var teamDto = WorkflowFixture.FindValidTeamDto();
+            var phase1Dto = new Phase1Dto { Name = "Workflow 1", Teams = [teamDto] };
+            _workflowRepositoryMock.Setup(x => x.FindPhase1ById(1)).ReturnsAsync(phase1Dto);
+
+            // Act
+            var result = await _workflowServices.FindPhase1ById(1);
+
+            // Assert
+            Assert.Equal(phase1Dto, result);
+        }
+
+        [Fact(DisplayName = "FindPhase1ById should throw exception")]
+        [Trait("FindPhase1ById", "Fail")]
+        public async Task FindPhase1ById_WorkflowNotFound_ThrowsException()
+        {
+            // Arrange
+            _workflowRepositoryMock.Setup(x => x.FindPhase1ById(1)).ReturnsAsync((Phase1Dto)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindPhase1ById(1));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 success")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_WorkflowExists_UpdatesSuccessfully()
+        {
+            // Arrange
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto
+                    {
+                        Id = stepDto.Id,
+                        Order = stepDto.Order,
+                        StepTools = []
+                    }
+                }
+            };
+            
+            var workflow = WorkflowFixture.FindValidWorkflow();
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase3Dto.WorkflowId))
+                .ReturnsAsync(workflow);
+
+            var stepToolMap = new Dictionary<int, int>(); 
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            // Assert
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.AtLeastOnce);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreatePhase1 success")]
+        [Trait("CreatePhase1", "Success")]
+        public async Task CreatePhase1_ValidDto_CreatesWorkflowSuccessfully()
+        {
+            // Arrange
+            var workflowPhase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "New Workflow",
+                Teams = new List<int> { 2 }
+            };
+
+            var teamsList = new List<Team>
+            {
+                new Team("nome",2,DateTime.Now),
+            };
+
+            _teamRepositoryMock.Setup(x => x.FindByIds(workflowPhase1Dto.Teams))
+                .Returns(teamsList);
+
+            var createdWorkflow = new Workflow(1, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name);
+            _workflowRepositoryMock.Setup(x => x.Create(It.IsAny<Workflow>())).ReturnsAsync(true)
+                .Callback<Workflow>(wf => createdWorkflow = wf);
+
+            // Act
+            var result = await _workflowServices.CreatePhase1(workflowPhase1Dto);
+
+            // Assert
+            Assert.Equal(createdWorkflow.Id, result);
+            _teamRepositoryMock.Verify(x => x.FindByIds(workflowPhase1Dto.Teams), Times.Once);
+            _workflowRepositoryMock.Verify(x => x.Create(It.IsAny<Workflow>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase2 success")]
+        [Trait("UpdatePhase2", "Success")]
+        public async Task UpdatePhase2_ValidDto_UpdatesWorkflowSuccessfully()
+        {
+            // Arrange
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var step = WorkflowFixture.FindValidStep();
+            _profileRepositoryMock.Setup(x => x.FindById(stepDto.Profile.Id)).ReturnsAsync(WorkflowFixture.FindValidProfileDto());
+            _statusRepositoryMock.Setup(x => x.FindById(stepDto.Status.Id)).ReturnsAsync(WorkflowFixture.FindValidStatus());
+            var workflowPhase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase2Dto
+                    {
+                        Id = 1,
+                        Name = "Updated Step 1",
+                        Order = 1,
+                        ProfileId = stepDto.Profile.Id,
+                        StatusId = stepDto.Status.Id
+                    }
+                }
+            };
+
+            var existingSteps = new List<Step>
+            {
+                step
+            };
+
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Test Workflow")
+            {
+                Steps = existingSteps
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase2Dto.WorkflowId))
+                .ReturnsAsync(workflow);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(1, workflow.Steps.Count); 
+            Assert.DoesNotContain(workflow.Steps, s => s.Id == 3); 
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "FindPhase2ById success")]
+        [Trait("FindPhase2ById", "Success")]
+        public async Task FindPhase2ById_WorkflowExists_ReturnsStepDtoList()
+        {
+            // Arrange
+            var workflowId = 1;
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var expectedSteps = new List<StepDto> { stepDto };
+           
+
+            _workflowRepositoryMock.Setup(x => x.FindPhase2ById(workflowId))
+                .ReturnsAsync(expectedSteps);
+
+            // Act
+            var result = await _workflowServices.FindPhase2ById(workflowId);
+
+            // Assert
+            Assert.Equal(expectedSteps, result);
+            _workflowRepositoryMock.Verify(x => x.FindPhase2ById(workflowId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindPhase2ById should throw exception")]
+        [Trait("FindPhase2ById", "Fail")]
+        public async Task FindPhase2ById_WorkflowNotFound_ThrowsException()
+        {
+            // Arrange
+            var workflowId = 1;
+            _workflowRepositoryMock.Setup(x => x.FindPhase2ById(workflowId))
+                .ReturnsAsync((List<StepDto>)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindPhase2ById(workflowId));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+        }
+
+        [Fact(DisplayName = "FindPhase3ById Success")]
+        [Trait("FindPhase3ById", "Success")]
+        public async Task FindPhase3ById_WorkflowExists_ReturnsStepDtoList()
+        {
+            // Arrange
+            var workflowId = 1;
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var expectedSteps = new List<StepDto> { stepDto };
+            _workflowRepositoryMock.Setup(x => x.FindPhase3ById(workflowId))
+                .ReturnsAsync(expectedSteps);
+
+            // Act
+            var result = await _workflowServices.FindPhase3ById(workflowId);
+
+            // Assert
+            Assert.Equal(expectedSteps, result);
+            _workflowRepositoryMock.Verify(x => x.FindPhase3ById(workflowId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindPhase3ById should throw exception")]
+        [Trait("FindPhase3ById", "Fail")]
+        public async Task FindPhase3ById_WorkflowNotFound_ThrowsException()
+        {
+            // Arrange
+            var workflowId = 1;
+            _workflowRepositoryMock.Setup(x => x.FindPhase3ById(workflowId))
+                .ReturnsAsync((List<StepDto>)null); 
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindPhase3ById(workflowId));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+        }
+
+        [Fact(DisplayName = "FindStepById Success")]
+        [Trait("FindStepById", "Success")]
+        public void FindStepById_StepExists_ReturnsStepDto()
+        {
+            // Arrange
+            var stepId = 1;
+            var expectedStep = WorkflowFixture.FindValidStepDto();
+
+            _workflowRepositoryMock.Setup(x => x.FindStepById(stepId))
+                .Returns(expectedStep);
+
+            // Act
+            var result = _workflowServices.FindStepById(stepId);
+
+            // Assert
+            Assert.Equal(expectedStep, result);
+            _workflowRepositoryMock.Verify(x => x.FindStepById(stepId), Times.Once);
         }
     }
 }

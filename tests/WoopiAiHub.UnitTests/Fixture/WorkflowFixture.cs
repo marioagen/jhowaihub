@@ -71,7 +71,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<ProfileDto>("pt_BR")
                 .CustomInstantiator(f => new ProfileDto
                 {
-                    Id = f.Random.Int(1, 100),
+                    Id = 1,
                     Name = f.Lorem.Sentence(2)
                 });
             return faker;
@@ -106,7 +106,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 {
                     Id = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(2),
-                    Order = f.Random.Int(1, 10),
+                    Order = 1,
                     Profile = FindValidProfileDto(),
                     Status = FindValidStatusDto()
                 });
@@ -244,7 +244,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 workflowId ?? f.Random.Int(1, 5),
                 f.Person.FirstName,
                 1,
-                f.Random.Int(1, 5),
+                1,
                 f.Random.Int(1, 5))
             {
                 Cards = new List<Card> { FindValidCard() },

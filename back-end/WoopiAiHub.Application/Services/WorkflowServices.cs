@@ -741,6 +741,11 @@ namespace WoopiAiHub.Application.Services
             return workflow.Id;
         }
 
+        /// <summary>
+        /// Find stepDto by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public StepDto FindStepById(int id)
         {
             var step = _workflowRepository.FindStepById(id);
@@ -764,56 +769,46 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                // Obter steps existentes
                 var existingSteps = workflow.Steps.ToList();
-                // Criar dicionário dos novos steps do DTO
+
                 var newStepsDict = workflowPhase2Dto.Steps
                     .Where(s => s.Id > 0)
                     .ToDictionary(s => s.Id);
 
-                // Identificar steps para remover (existem no banco mas não no DTO)
                 var stepsToRemove = existingSteps
                     .Where(es => !newStepsDict.ContainsKey(es.Id))
                     .ToList();
 
-                // Identificar steps para atualizar
                 var stepsToUpdate = existingSteps
                     .Where(es => newStepsDict.ContainsKey(es.Id))
                     .ToList();
 
-                // Identificar steps para adicionar (ID = 0 ou não existem no banco)
                 var stepsToAdd = workflowPhase2Dto.Steps
                     .Where(s => s.Id == 0 || !existingSteps.Any(es => es.Id == s.Id))
                     .ToList();
 
-                // Remover steps
                 foreach (var step in stepsToRemove)
                 {
                     workflow.Steps.Remove(step);
-                    // Ou se você tiver um repositório de steps:
-                    // await _stepRepository.DeleteAsync(step.Id);
                 }
 
-                // Atualizar steps existentes
                 foreach (var stepDto in workflowPhase2Dto.Steps.Where(s => s.Id > 0))
                 {
                     var existingStep = stepsToUpdate.FirstOrDefault(s => s.Id == stepDto.Id);
                     if (existingStep != null)
                     {
-                        // Validar profile e status
                         await ValidateProfileAndStatus(stepDto);
 
                         existingStep.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
                     }
                 }
 
-                // Adicionar novos steps
                 foreach (var stepDto in stepsToAdd.OrderBy(s => s.Order))
                 {
                     await ValidateProfileAndStatus(stepDto);
 
                     var newStep = new Step(
-                        id: 0, // Será gerado pelo banco
+                        id: 0, 
                         created: DateTime.Now,
                         workflowId: workflow.Id,
                         name: stepDto.Name,
@@ -873,6 +868,12 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Validates that the profile and status associated with a step DTO exist.
+        /// </summary>
+        /// <param name="stepDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
         private async Task ValidateProfileAndStatus(StepPhase2Dto stepDto)
         {
             var profile = await _profileRepository.FindById(stepDto.ProfileId);
