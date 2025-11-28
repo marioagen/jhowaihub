@@ -1,7 +1,7 @@
 <template>
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
         <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
-            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Documents' }">
+            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Home' }">
                 <img
                     v-if="isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
@@ -80,6 +80,12 @@
                     workflow: hasPermission("Workflow", "View"),
                 },
                 menuItems: [
+                    {
+                        activeKey: 'Home',
+                        to: '/home',
+                        icon: { name: 'Home', color: '#0d6efd' },
+                        labelKey: 'labelGoHome'
+                    },
                     {
                         permission: 'Management',
                         activeKey: 'DocumentList',
