@@ -2,7 +2,7 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <div class="navbar-main-area d-flex align-items-center flex-grow-1 ps-4">
-              <AvatarComponent :name="initials" :size="30" />
+              <span class="badge bg-light text-dark border">{{this.selectedTenant}}</span>
                 <div class="dropdown nav-buttons">
                     <button
                         class="btn btn-outline-primary table-btn btn-sm"

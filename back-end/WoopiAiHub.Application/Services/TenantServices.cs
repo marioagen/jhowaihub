@@ -1,15 +1,14 @@
-﻿using AutoMapper;
-using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Interfaces.Refit;
-using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Utils;
-using WoopiAiHub.Domain.Utils;
-using WoopiAiHub.Repository.Context;
-using WoopiAiHub.Repository.Util;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Repository.Context;
+using WoopiAiHub.Repository.Util;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -21,7 +20,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IMapper _mapper;
 
         public TenantServices(ITenantRepository tenantRepository,
                               IServiceProvider serviceProvider,
@@ -35,7 +33,65 @@ namespace WoopiAiHub.Application.Services
             _marketPlaceApi = apiDependencies.MarketPlaceApi;
             _keyGeneratorApi = apiDependencies.KeyGeneratorApi;
             _serviceProvider = serviceProvider;
-            _mapper = coreDependencies.Mapper;
+        }
+
+        /// <summary>
+        /// Process Marketplace sub
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        /// <exception cref="ArgumentException"></exception>
+        public void ProcessSubscription(TenantSubscriptionDto tenantSubscriptionDto)
+        {
+            var connectionString = SetConnectionString(tenantSubscriptionDto);
+
+            var result = _tenantRepository.CreateDatabase();
+            if (result)
+            {
+                SeedInitialData(tenantSubscriptionDto, connectionString);
+            }
+        }
+
+        /// <summary>
+        /// Set connection string and return it 
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        /// <returns></returns>
+        private string? SetConnectionString(TenantSubscriptionDto tenantSubscriptionDto)
+        {
+            var template = _configuration.GetConnectionString("TemplateConnection");
+            var connectionString = template?.Replace("___NEWDB___", tenantSubscriptionDto.DataBaseName);
+
+            _httpContextAcessor!.HttpContext ??= new DefaultHttpContext();
+            _httpContextAcessor.HttpContext.Items["TenantConnection"] = connectionString;
+            return connectionString;
+        }
+
+        /// <summary>
+        /// Initialize data
+        /// </summary>
+        /// <param name="tenantSubscriptionDto"></param>
+        /// <param name="connectionString"></param>
+        private void SeedInitialData(TenantSubscriptionDto tenantSubscriptionDto, string? connectionString)
+        {
+            var scope = _serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+
+            var userCreateDto = new UserCreateDto
+            {
+                Name = tenantSubscriptionDto.Name!,
+                Email = tenantSubscriptionDto.Email,
+                Password = tenantSubscriptionDto.Name,
+                TeamIds = new List<int> { 1 }
+            };
+            var headerDto = new HeadersDto
+            {
+                Tenant = tenantSubscriptionDto.Name!
+            };
+
+            var userService = scope.ServiceProvider.GetRequiredService<IUserServices>();
+            userService.Create(userCreateDto, headerDto);
         }
 
         /// <summary>
@@ -74,9 +130,7 @@ namespace WoopiAiHub.Application.Services
 
             string result = await _keyGeneratorApi.GetKey(keyAccess, tenant);
 
-            await ApplyMigrations(keyAccess,
-                                  tenant,
-                                  ColTypeModule.WoopiAiHub);
+            await ApplyMigrations(keyAccess, tenant);
 
             return result;
         }
@@ -84,18 +138,14 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Apply ApplicationDbContext Migrations
         /// </summary>
-        private async Task ApplyMigrations(string keyAccess,
-                                           string tenantName,
-                                           ColTypeModule module)
+        private async Task ApplyMigrations(string keyAccess, string tenantName)
         {
             if (string.IsNullOrEmpty(tenantName))
             {
                 throw new ArgumentException("Tenant name cannot be null or empty.", nameof(tenantName));
             }
 
-            var tenant = await _marketPlaceApi.FindTenantByNameAndModule(keyAccess,
-                                                                         tenantName,
-                                                                         module);
+            var tenant = await _marketPlaceApi.FindTenantByName(keyAccess,tenantName);
 
             if (tenant == null)
             {
@@ -109,19 +159,11 @@ namespace WoopiAiHub.Application.Services
                 _httpContextAcessor.HttpContext.Items["TenantConnection"] = connectionString;
             }
 
-            var result = _tenantRepository.CreateDatabase();
-            if (result)
-            {
-                using var scope = _serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            using var scope = _serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                dbContext.Database.GetDbConnection().ConnectionString = connectionString;
-                InitApplicationDb.RunApplicationMigration(dbContext);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Tenant '{tenantName}' not found.");
-            }
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+            InitApplicationDb.RunApplicationMigration(dbContext);
         }
     }
 }

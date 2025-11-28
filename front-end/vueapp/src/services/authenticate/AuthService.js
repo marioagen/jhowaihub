@@ -6,15 +6,7 @@ export default {
             headers: { 'Authorization': "" }
         })
             .then(({ data }) => {
-                return {
-                    id: "",
-                    name: data.name,
-                    login: data.email,
-                    isAdmin: "",
-                    tokenAzure: "",
-                    tokenApi: data.token,
-                    tenant: data.tenant,
-                };
+                return data;
             })
             .catch((error) => {
                 throw error;
@@ -25,10 +17,7 @@ export default {
             headers: { Authorization: `Bearer ${userAzure}` },
         })
             .then(({ data }) => {
-                return {
-                    tokenApi: data.token,
-                    tenant: data.tenant,
-                };
+                return data;
             })
             .catch((error) => {
                 throw error;
