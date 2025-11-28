@@ -1,10 +1,6 @@
 ﻿using WoopiAiHub.Domain.DTOs.Messaging;
 
-using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
-
-namespace WoopiAiHub.Domain.Interfaces.Services
+namespace WoopiAiHub.Domain.Interfaces.Services { 
     public interface ITenantServices
     {
         Task<IEnumerable<string>> FindAllByUserEmail(string email);

@@ -28,13 +28,13 @@ namespace WoopiAiHub.Repository
         /// considered.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the matching <see
         /// cref="UsageMonth"/> if found; otherwise, <see langword="null"/>.</returns>
-        public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int modelEmbeddingId, Guid userId, DateTime month)
+        public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int? modelEmbeddingId, Guid userId, DateTime month)
         {
             // For daily records, we need to match the exact day
             var dayStart = month.Date;
             var dayEnd = dayStart.AddDays(1);
 
-            return await _context.usageMonths
+            return await _context.UsageMonths
                 .FirstOrDefaultAsync(um =>
                     um.UsageTypeId == usageTypeId &&
                     um.ModelEmbeddingId == modelEmbeddingId &&
@@ -64,7 +64,7 @@ namespace WoopiAiHub.Repository
             if (existing != null)
             {
                 // Update existing record
-                await _context.usageMonths
+                await _context.UsageMonths
                     .Where(um => um.Id == existing.Id)
                     .ExecuteUpdateAsync(setters => setters
                         .SetProperty(um => um.Total, existing.Total + entity.Total));
@@ -72,7 +72,7 @@ namespace WoopiAiHub.Repository
             else
             {
                 // Insert new record
-                await _context.usageMonths.AddAsync(entity);
+                await _context.UsageMonths.AddAsync(entity);
                 await _context.SaveChangesAsync();
             }
         }
@@ -87,7 +87,7 @@ namespace WoopiAiHub.Repository
         /// <returns>A task that represents the asynchronous operation. The task result contains the total usage as an integer.</returns>
         public async Task<int> FindTotalUsageAsync(DateTime periodStart, DateTime periodEnd)
         {
-            var total = await _context.usageMonths
+            var total = await _context.UsageMonths
                 .Where(um => um.Created >= periodStart && um.Created < periodEnd)
                 .SumAsync(um => um.Total);
 
