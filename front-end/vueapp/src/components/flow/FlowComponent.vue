@@ -409,13 +409,11 @@
                 try {
                     let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
                     if (this.workflowId) {
-                        // First, fetch the current workflow to get ALL steps
                         const workflow = await WorkflowService.getWorkflowById(this.workflowId);
                         if (workflow.error) {
                             throw new Error('Failed to load workflow data');
                         }
                         const allSteps = workflow.steps.map(step => {
-                            // If this is the step we're editing, update its stepTools
                             if (step.order === this.stepOrder) {
                                 return {
                                     id: step.id || 0,
@@ -502,7 +500,6 @@
                     }
                 }
 
-                // Fallback to Vuex store if no workflowId or if database fetch failed
                 if (workflowSteps.length === 0) {
                     workflowSteps = this.$store.state.tempWorkflow.list || [];
                 }

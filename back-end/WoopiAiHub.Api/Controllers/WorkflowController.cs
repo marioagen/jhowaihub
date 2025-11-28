@@ -176,8 +176,6 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(result);
         }
 
-
-
         /// <summary>
         /// Phase 2: Updates workflow with steps information.
         /// </summary>

@@ -155,7 +155,6 @@ export default {
     padding-top: 12px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .phase-container {
         padding: 15px;

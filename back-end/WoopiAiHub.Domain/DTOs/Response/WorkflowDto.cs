@@ -2,7 +2,7 @@
 {
     public record class WorkflowDto
     {
-        public int Id { get; set; } //etapa 1 apenas trazer id nome e times etapa 2 steps 3
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public DateTime Created { get; set; }
         public ICollection<TeamDto> Teams { get; set; } = [];

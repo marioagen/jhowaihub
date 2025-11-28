@@ -272,7 +272,6 @@ namespace WoopiAiHub.Repository
                  .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
         }
 
-
         /// <summary>
         /// Update output of step in a workflow.
         /// </summary>
@@ -335,7 +334,6 @@ namespace WoopiAiHub.Repository
 
             return steps;
         }
-
 
         /// <summary>
         /// Find phase3 data by workflow id
@@ -418,7 +416,6 @@ namespace WoopiAiHub.Repository
 
             return steps;
         }
-
 
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
