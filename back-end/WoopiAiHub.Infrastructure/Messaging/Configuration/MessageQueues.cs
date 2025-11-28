@@ -15,6 +15,7 @@
         public string OcrAnonimizationQueueConsumer { get; set; } = string.Empty;
         public string DeleteQueueConsumer { get; set; } = string.Empty;
         public string DeleteQueuePublisher { get; set; } = string.Empty;
+        public string MarketplaceSubscriptionQueue { get; set; } = string.Empty;
 
         public IEnumerable<string> Queues()
         {
@@ -32,7 +33,8 @@
               ChatCompletionQueueAiHubResponse,
               OcrAnonimizationQueueConsumer,
               DeleteQueueConsumer,
-              DeleteQueuePublisher
+              DeleteQueuePublisher,
+              MarketplaceSubscriptionQueue
             ];
         }
     }

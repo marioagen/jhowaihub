@@ -14,6 +14,9 @@
         public int ChunkSize { get; set; }
         public string SearchMode { get; set; } = string.Empty;
         public string OcrModel { get; set; } = string.Empty;
+        public DateTime? DateStart { get; set; }
+        public DateTime? DateEnd { get; set; }
+        public DateTime? DateRenew { get; set; }
         public string Plan { get; set; } = string.Empty;
         public string AiGatewayKey { get; set; } = string.Empty;
     }

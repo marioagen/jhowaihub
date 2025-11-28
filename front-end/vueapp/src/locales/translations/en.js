@@ -257,7 +257,9 @@
         userNotFound: "User not found.",
         userWithoutAccess: "User does not have access permission.",
         userIncorrectPassword: "The entered password is incorrect.",
-        userTokenMicrosoftInvalid: "Could not validate your authentication. Please log in again."
+        userTokenMicrosoftInvalid: "Could not validate your authentication. Please log in again.",
+        selectTenant: "Select the tenant to continue",
+        continue: "Continue"
     },
     validation: {
         required: "Required field",
