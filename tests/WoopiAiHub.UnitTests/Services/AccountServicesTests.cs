@@ -277,6 +277,7 @@ namespace WoopiAiHub.UnitTests.Services
             var expectedRefreshToken = "new-refresh-token";
             var responseCheckAccess = _fixture.FindValidResponseCheckAccessDto();
             var profiles = new List<string> { "admin", "profile2" };
+            var tenant = "tenant-123";
 
             var _mockUserRepository = _mocker.GetMock<IUserRepository>();
             var _mockRefreshTokenServices = _mocker.GetMock<IRefreshTokenServices>();
@@ -335,7 +336,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Verifiable();
 
             // Act
-            var result = await _accountServices.RefreshTokenAsync(refreshToken);
+            var result = await _accountServices.RefreshTokenAsync(refreshToken, tenant);
 
             // Assert
             Assert.NotNull(result);

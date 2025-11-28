@@ -247,7 +247,9 @@
         userNotFound: "Usuário não encontrado.",
         userWithoutAccess: "Usuário sem permissão de acesso.",
         userIncorrectPassword: "A senha informada está incorreta.",
-        userTokenMicrosoftInvalid: "Não foi possível validar sua autenticação. Por favor, faça login novamente."
+        userTokenMicrosoftInvalid: "Não foi possível validar sua autenticação. Por favor, faça login novamente.",
+        selectTenant: "Selecione o tenant para continuar",
+        continue: "Continuar"
     },
     validation: {
         required: "Campo obrigatório",

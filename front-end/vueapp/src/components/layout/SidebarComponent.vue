@@ -1,7 +1,7 @@
 <template>
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
-        <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
-            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Home' }">
+        <div class="sidebar-header d-flex align-items-center" :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'" style="height: 60px; padding: 0 10px;">
+            <router-link class="d-flex align-items-center text-decoration-none" :class="isCollapsed ? 'justify-content-center' : 'w-100'" :to="{ name: 'Home' }">
                 <img
                     v-if="isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
@@ -11,10 +11,12 @@
                 />
                 <img
                     v-else
-                    src="./../../assets/img/woopiai-hub-logo.png"
+                    src="./../../assets/img/woopi-ai-text-logo-sidebar.svg"
                     :title="$t('labelGoHome')"
-                    width="120"
+                    width="140"
                     height="40"
+                    alt="WOOPI AI"
+                    style="margin-left: 0px;"
                 />
             </router-link>
         </div>        
@@ -78,6 +80,8 @@
                     types: hasPermission("Types", "View"),
                     quizzes: hasPermission("Quizzes", "View"),
                     workflow: hasPermission("Workflow", "View"),
+                    tools: hasPermission("Tools", "View"),
+                    prompts: hasPermission("Prompts", "View"),
                 },
                 menuItems: [
                     {
