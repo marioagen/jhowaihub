@@ -24,28 +24,27 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
-        public async Task<List<UsageDaily>> GetOldRecordsAsync(DateTime cutoffDate, int batchSize, CancellationToken ct = default)
+        public async Task<List<UsageDaily>> FindOldRecordsAsync(DateTime cutoffDate)
         {
             return await _context.UsageDailies
                 .Where(ud => ud.Created <= cutoffDate)
                 .OrderBy(ud => ud.Created)
-                .Take(batchSize)
                 .AsNoTracking()
-                .ToListAsync(ct);
+                .ToListAsync();
         }
 
-        public async Task MarkAsProcessedAsync(IEnumerable<int> ids, CancellationToken ct = default)
+        public async Task MarkAsProcessedAsync(IEnumerable<int> ids)
         {
             await _context.UsageDailies
                 .Where(ud => ids.Contains(ud.Id))
-                .ExecuteUpdateAsync(setters => setters.SetProperty(ud => ud.Processed, true), ct);
+                .ExecuteUpdateAsync(setters => setters.SetProperty(ud => ud.Processed, true));
         }
 
-        public async Task BulkDeleteAsync(IEnumerable<int> ids, CancellationToken ct = default)
+        public async Task BulkDeleteAsync(IEnumerable<int> ids)
         {
             await _context.UsageDailies
                 .Where(ud => ids.Contains(ud.Id))
-                .ExecuteDeleteAsync(ct);
+                .ExecuteDeleteAsync();
         }
     }
 }

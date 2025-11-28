@@ -17,28 +17,21 @@ namespace WoopiAiHub.Application.Services
 {
     public class UsageAggregationService : IUsageAggregationService
     {
-        private readonly IUsageDailyRepository _usageDailyRepository;
-        private readonly IUsageMonthRepository _usageMonthRepository;
-        private readonly ITenantCacheServices _tenantCacheService;
         private readonly IMarketPlaceApi _marketPlaceApi;
+        private readonly ITenantCacheServices _tenantCacheService;
         private readonly IConfiguration _configuration;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<UsageAggregationService> _logger;
         private readonly ResiliencePipeline _resiliencePipeline;
 
-        public UsageAggregationService(
-            IUsageDailyRepository usageDailyRepository,
-            IUsageMonthRepository usageMonthRepository,
-            ITenantCacheServices tenantCacheService,
-            IMarketPlaceApi marketPlaceApi,
-            IConfiguration configuration,
-            IServiceScopeFactory scopeFactory,
-            ILogger<UsageAggregationService> logger)
+        public UsageAggregationService(IMarketPlaceApi marketPlaceApi,
+                                       ITenantCacheServices tenantCacheService,
+                                       IConfiguration configuration,
+                                       IServiceScopeFactory scopeFactory,
+                                       ILogger<UsageAggregationService> logger)
         {
-            _usageDailyRepository = usageDailyRepository ?? throw new ArgumentNullException(nameof(usageDailyRepository));
-            _usageMonthRepository = usageMonthRepository ?? throw new ArgumentNullException(nameof(usageMonthRepository));
-            _tenantCacheService = tenantCacheService ?? throw new ArgumentNullException(nameof(tenantCacheService));
             _marketPlaceApi = marketPlaceApi ?? throw new ArgumentNullException(nameof(marketPlaceApi));
+            _tenantCacheService = tenantCacheService ?? throw new ArgumentNullException(nameof(tenantCacheService));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -72,6 +65,15 @@ namespace WoopiAiHub.Application.Services
                 .Build();
         }
 
+        /// <summary>
+        /// Processes unprocessed usage data for all tenants associated with the specified module.
+        /// </summary>
+        /// <remarks>This method retrieves all tenants associated with the module and processes their
+        /// metrics.  If no tenants are found, the method logs the information and exits. For each tenant, it 
+        /// processes tenant metrics by aggregating daily usage into monthly summaries.</remarks>
+        /// <param name="ct">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if the required configuration value for "KeyAccess" is not set.</exception>
         public async Task ProcessUnprocessedUsageAsync(CancellationToken ct = default)
         {
             var correlationId = Guid.NewGuid().ToString();
@@ -80,8 +82,7 @@ namespace WoopiAiHub.Application.Services
                 var keyAccess = _configuration["KeyAccess"] ??
                     throw new InvalidOperationException("KeyAccess not configured");
 
-                var tenants = await _marketPlaceApi.FindAllTenantsByModuleAsync(keyAccess, ColTypeModule.WoopiAiHub);
-
+                var tenants = await _tenantCacheService.FindAllTenantsAsync(ColTypeModule.WoopiAiHub);
 
                 if (!tenants.Any())
                 {
@@ -100,6 +101,8 @@ namespace WoopiAiHub.Application.Services
                 throw;
             }
         }
+
+
 
         /// <summary>
         /// Process metrics for a specific tenant using its database connection
@@ -161,84 +164,6 @@ namespace WoopiAiHub.Application.Services
             var connectionString = template?.Replace("___NEWDB___", tenant!.DatabaseName);
 
             return connectionString!;
-        }
-
-        public async Task ChargeExpiredTenantsAsync(string tenantName, CancellationToken ct = default)
-        {
-            var correlationId = Guid.NewGuid().ToString();
-            var startTime = DateTime.UtcNow;
-
-            _logger.LogInformation("[{CorrelationId}] Starting charge process for tenant: {TenantName}",
-                correlationId, tenantName);
-
-            try
-            {
-                // Get tenant information
-                var tenant = await _tenantCacheService.FindTenantAsync(tenantName, ColTypeModule.WoopiAiHub);
-
-                if (tenant == null)
-                {
-                    _logger.LogWarning("[{CorrelationId}] Tenant not found: {TenantName}", correlationId, tenantName);
-                    return;
-                }
-
-                // Check if subscription is expired
-                if (tenant.DateEnd.HasValue && tenant.DateEnd.Value < DateTime.UtcNow)
-                {
-                    _logger.LogInformation("[{CorrelationId}] Tenant {TenantName} has expired subscription (DateEnd: {DateEnd})",
-                        correlationId, tenantName, tenant.DateEnd.Value);
-
-                    // Calculate period
-                    var periodStart = tenant.DateStart ?? DateTime.UtcNow.AddMonths(-1);
-                    var periodEnd = tenant.DateEnd.Value;
-
-                    // Get total usage for the tenant
-                    var usageByTenant = await _usageMonthRepository.GetTotalUsageByTenantsAsync(periodStart, periodEnd, ct);
-                    var totalUsage = usageByTenant.Values.Sum();
-
-                    if (totalUsage > 0)
-                    {
-                        var chargeRequest = new ChargeRequestDto
-                        {
-                            TenantName = tenantName,
-                            PeriodStart = periodStart,
-                            PeriodEnd = periodEnd,
-                            TotalUsage = totalUsage
-                        };
-
-                        // Call MarketplaceApi with resilience
-                        var keyAccess = _configuration["KeyAccess"] ?? throw new InvalidOperationException("KeyAccess not configured");
-
-                        await _resiliencePipeline.ExecuteAsync(async token =>
-                        {
-                            var result = await _marketPlaceApi.PostChargeAsync(keyAccess, chargeRequest);
-                            _logger.LogInformation("[{CorrelationId}] Charge posted successfully for tenant {TenantName}, Total: {TotalUsage}",
-                                correlationId, tenantName, totalUsage);
-                            return result;
-                        }, ct);
-                    }
-                    else
-                    {
-                        _logger.LogInformation("[{CorrelationId}] No usage to charge for tenant {TenantName}",
-                            correlationId, tenantName);
-                    }
-                }
-                else
-                {
-                    _logger.LogInformation("[{CorrelationId}] Tenant {TenantName} subscription is still active",
-                        correlationId, tenantName);
-                }
-
-                var duration = (DateTime.UtcNow - startTime).TotalSeconds;
-                _logger.LogInformation("[{CorrelationId}] Charge process completed for tenant {TenantName}, Duration: {Duration}s",
-                    correlationId, tenantName, duration);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[{CorrelationId}] Error during charge process for tenant {TenantName}",
-                    correlationId, tenantName);
-                // Don't rethrow - we don't want one tenant failure to block others
-            }
         }
     }
 }

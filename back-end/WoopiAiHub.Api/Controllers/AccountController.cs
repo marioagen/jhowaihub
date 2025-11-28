@@ -100,7 +100,10 @@ namespace WoopiAiHub.Api.Controllers
             if (!Request.Cookies.TryGetValue("refreshToken", out var refreshToken))
                 return BadRequest("Refresh token missing.");
 
-            var accessToken = await _accountServices.RefreshTokenAsync(refreshToken);
+            if (!Request.Headers.TryGetValue("X-Tenant", out var tenant))
+                return BadRequest("X-Tenant header missing.");
+
+            var accessToken = await _accountServices.RefreshTokenAsync(refreshToken, tenant);
 
             if (string.IsNullOrEmpty(accessToken))
                 return Unauthorized("Invalid refresh token.");

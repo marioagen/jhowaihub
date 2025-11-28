@@ -14,7 +14,7 @@ namespace WoopiAiHub.Repository
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int modelEmbeddingId, Guid userId, DateTime month, CancellationToken ct = default)
+        public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int modelEmbeddingId, Guid userId, DateTime month)
         {
             // For daily records, we need to match the exact day
             var dayStart = month.Date;
@@ -26,18 +26,17 @@ namespace WoopiAiHub.Repository
                     um.ModelEmbeddingId == modelEmbeddingId &&
                     um.UserId == userId &&
                     um.Created >= dayStart &&
-                    um.Created < dayEnd, ct);
+                    um.Created < dayEnd);
         }
 
 
-        public async Task UpsertAsync(UsageMonth entity, CancellationToken ct = default)
+        public async Task UpsertAsync(UsageMonth entity)
         {
             var existing = await FindByKeyAsync(
                 entity.UsageTypeId,
                 entity.ModelEmbeddingId,
                 entity.UserId,
-                entity.Created,
-                ct);
+                entity.Created);
 
             if (existing != null)
             {
@@ -45,27 +44,23 @@ namespace WoopiAiHub.Repository
                 await _context.usageMonths
                     .Where(um => um.Id == existing.Id)
                     .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(um => um.Total, existing.Total + entity.Total), ct);
+                        .SetProperty(um => um.Total, existing.Total + entity.Total));
             }
             else
             {
                 // Insert new record
-                await _context.usageMonths.AddAsync(entity, ct);
-                await _context.SaveChangesAsync(ct);
+                await _context.usageMonths.AddAsync(entity);
+                await _context.SaveChangesAsync();
             }
         }
 
-        public async Task<Dictionary<string, int>> GetTotalUsageByTenantsAsync(DateTime periodStart, DateTime periodEnd, CancellationToken ct = default)
+        public async Task<int> FindTotalUsageAsync(DateTime periodStart, DateTime periodEnd)
         {
-            // This method will aggregate usage by tenant
-            // Since tenant info is in a separate database per tenant architecture,
-            // we'll return the total for the current tenant context
             var total = await _context.usageMonths
                 .Where(um => um.Created >= periodStart && um.Created < periodEnd)
-                .SumAsync(um => um.Total, ct);
+                .SumAsync(um => um.Total);
 
-            // Return with a placeholder key - the calling service will know the tenant name from context
-            return new Dictionary<string, int> { { "current_tenant", total } };
+            return total;
         }
     }
 }

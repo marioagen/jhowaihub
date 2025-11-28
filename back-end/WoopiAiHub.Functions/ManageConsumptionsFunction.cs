@@ -27,11 +27,6 @@ namespace WoopiAiHub.Functions
             try
             {
                 await _usageAggregationService.ProcessUnprocessedUsageAsync();
-
-                // NOTE: For charging expired tenants, we need tenant context
-                // In a multi-tenant architecture, this would typically be called per tenant
-                // For now, we'll need to iterate through tenants or have this triggered per tenant
-                // This is a placeholder - actual implementation would need tenant enumeration
             }
             catch (Exception ex)
             {

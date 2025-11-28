@@ -1,4 +1,5 @@
 ﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
@@ -45,9 +46,7 @@ namespace WoopiAiHub.Repository.Cache
                 return new TenantInfoDto();
             }
 
-            var tenant = await _marketplace.FindTenantByNameAndModule(apiKey,
-                                                                      tenantName,
-                                                                      module);
+            var tenant = await _marketplace.FindTenantByName(apiKey, tenantName);
             if (tenant != null)
             {
                 var json = JsonSerializer.Serialize(tenant);
@@ -58,6 +57,39 @@ namespace WoopiAiHub.Repository.Cache
             }
 
             return tenant;
+        }
+
+        /// <summary>
+        /// Search for all tenants by module. Check if it is cached or search the Marketplace
+        /// </summary>
+        /// <param name="module"></param>
+        /// <returns></returns>
+        public async Task<List<TenantListDto>> FindAllTenantsAsync(ColTypeModule module)
+        {
+            var cacheKey = $"tenants:all:{module}";
+            var cached = await _cache.GetStringAsync(cacheKey);
+            var apiKey = _configuration["KeyAccess"];
+
+            if (!string.IsNullOrWhiteSpace(cached))
+            {
+                var cachedTenants = JsonSerializer.Deserialize<List<TenantListDto>>(cached);
+                if (cachedTenants != null)
+                    return cachedTenants;
+            }
+
+            // Fetch from API if not in cache
+            var tenants = await _marketplace.FindAllTenantsByModuleAsync(apiKey, module);
+            
+            if (tenants != null && tenants.Any())
+            {
+                var json = JsonSerializer.Serialize(tenants);
+                await _cache.SetStringAsync(cacheKey, json, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = _expiration
+                });
+            }
+
+            return tenants ?? new List<TenantListDto>();
         }
     }
 }

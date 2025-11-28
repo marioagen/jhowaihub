@@ -38,10 +38,9 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<ResponseCheckAccessDto> CheckAccessKey([Header("KeyAccess")] string KeyAccess,
                                                     RequestCheckAcessKeyDto request);
 
-        [Get("/api/Tenant/{tenantName}/{module}")]
-        Task<TenantInfoDto> FindTenantByNameAndModule([Header("KeyAccess")] string KeyAccess,
-                                                      [AliasAs("tenantName")] string tenantName,
-                                                      [AliasAs("module")] ColTypeModule module);
+        [Get("/api/Tenant/{tenantName}")]
+        Task<TenantInfoDto> FindTenantByName([Header("KeyAccess")] string KeyAccess,
+                                                      [AliasAs("tenantName")] string tenantName);
         [Post("/user/AssignByHub")]
         Task<Guid> AssignLicensesByHub([Header("KeyAccess")] string KeyAccess,
                                        RequestAssignLicensesByHub requestAssignLicensesByHub);
@@ -50,9 +49,9 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<bool> DeactivateUsersEnabledByReference([Header("KeyAccess")] string KeyAccess,
                                                     [FromBody] DeactivateUsersDto deactivateUsersDto);
 
-        [Post("/Consumption/Charge")]
-        Task<bool> PostChargeAsync([Header("KeyAccess")] string KeyAccess,
-                                   ChargeRequestDto request);
+        [Post("/api/Tenant/ProcessConsumption")]
+        Task<bool> ProcessConsumption([Header("KeyAccess")] string KeyAccess,
+                                      ExcessManagementTenantDto request);
 
         [Get("/api/Tenant/all/{module}")]
         Task<List<TenantListDto>> FindAllTenantsByModuleAsync([Header("KeyAccess")] string KeyAccess,
