@@ -11,7 +11,7 @@
                     </div>
                     <div class="plan-box plan-right">
                         <small class="text-muted">{{ $t("plan.current") }}</small><br>
-                        <span class="plan-title">{{ $t("plan.enterprise") }}</span>
+                        <span class="plan-title">{{ plan }}</span>
                     </div>
                 </div>
             </div>
@@ -30,16 +30,12 @@
                         </div>
                     </div>
                     <div class="col">
-                        <button class="btn btn-primary btn-sm" @click="updateGraph(dateRange.start, dateRange.end)">
+                        <button class="btn btn-primary btn-sm">
                             <LucideIcon icon="RefreshCcw" :size="17" />
                             Atualizar
                         </button>
                     </div>
                 </div>
-                <!-- <button class="btn btn-outlined-primary btn-sm">
-                    <LucideIcon icon="ArrowDownToLine" :size="17" />
-                    {{ $t("dashboard.exportBtn") }}
-                </button> -->
             </div>
             <div class="card mb-3">
                 <div class="card-body text-center">
@@ -47,15 +43,14 @@
                         <span class="me-1">{{ $t("dashboard.totalWTC") }}</span>
                         <LucideIcon v-tooltip.right="$t('dashboard.WTCText')" icon="Info" :size="17" />
                     </div>
-                    <h2 class="mb-0 fw-bold text-primary">{{ totalWTC }}</h2>
+                    <h2 class="mb-0 fw-bold text-primary">{{ totalWTC.toFixed(5) }}</h2>
                 </div>
             </div>
-            <TokensGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
-                @setTotalTokens="setTotalWTC" ref="TokensGraph" />
-            <PagesProcessedGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
-                @setTotalPages="setTotalWTC" ref="PagesProcessedGraph" />
-            <WorkflowsGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
-                @setTotalExecution="setTotalWTC" ref="WorkflowsGraph" />
+            <TokensGraph :key="datesChange" :usageUnits="usageUnits" @setTotalTokens="setTotalWTC" ref="TokensGraph" />
+            <PagesProcessedGraph :key="datesChange" :usageUnits="usageUnits" @setTotalPages="setTotalWTC"
+                ref="PagesProcessedGraph" />
+            <WorkflowsGraph :key="datesChange" :usageUnits="usageUnits" @setTotalExecution="setTotalWTC"
+                ref="WorkflowsGraph" />
         </div>
     </main>
 </template>
@@ -66,6 +61,7 @@ import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGra
 import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
 import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
 import DashboardServices from '@/services/dashboard/DashboardServices';
+import store from "@/store";
 export default {
     components: {
         DashboardDateFilter,
@@ -83,22 +79,18 @@ export default {
         },
         totalWTC: 0,
         usageUnits: [],
+        plan: "",
     }),
-    computed: {
-        dateRange() {
-            return {
-                start: this.filters.start,
-                end: this.filters.end,
-            }
-        },
-    },
     methods: {
         toggleDateFilter() {
             this.showDateFilter = !this.showDateFilter;
         },
         filterData(filters) {
             this.filters = filters;
-            this.datesChange++;
+            this.totalWTC = 0;
+            this.$refs.TokensGraph.updateGraph(this.filters.start, this.filters.end);
+            this.$refs.WorkflowsGraph.updateGraph(this.filters.start, this.filters.end);
+            this.$refs.PagesProcessedGraph.updateGraph(this.filters.start, this.filters.end);
         },
         handleOutsideClick() {
             if (this.showDateFilter) {
@@ -114,17 +106,19 @@ export default {
                     this.usageUnits = response;
                 });
         },
+        getPlan() {
+            DashboardServices.GetPlan(store.state.userProfile.tenant)
+                .then((response) => {
+                    this.plan = response.toUpperCase();
+                });
+        },
         setTotalWTC(total) {
             this.totalWTC += total;
         },
-        updateGraph(start, end) {
-            this.$refs.TokensGraph.updateGraph(start, end);
-            this.$refs.WorkflowsGraph.updateGraph(start, end);
-            this.$refs.PagesProcessedGraph.updateGraph(start, end);
-        }
     },
     created() {
         this.getDashboardData();
+        this.getPlan();
     }
 }
 </script>

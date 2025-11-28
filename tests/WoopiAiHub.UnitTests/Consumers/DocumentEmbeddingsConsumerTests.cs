@@ -57,7 +57,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             _usageDailyServices = new Mock<IUsageDailyServices>();
 
             _tenantCacheServices = new Mock<ITenantCacheServices>();
-            _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+            _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                              .ReturnsAsync(tenant);
 
             var serviceProviderMock = new Mock<IServiceProvider>();

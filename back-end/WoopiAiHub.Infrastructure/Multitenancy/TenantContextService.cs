@@ -35,8 +35,7 @@ namespace WoopiAiHub.Infrastructure.Multitenancy
             if (string.IsNullOrWhiteSpace(tenantIdentifier))
                 throw new ArgumentException("Tenant identifier cannot be null or empty.", nameof(tenantIdentifier));
 
-            var tenant = await _tenantCacheService.FindTenantAsync(tenantIdentifier,
-                                                                   ColTypeModule.WoopiAiHub);
+            var tenant = await _tenantCacheService.FindTenantAsync(tenantIdentifier);
             if (tenant == null)
                 throw new InvalidOperationException($"Tenant '{tenantIdentifier}' not found.");
 
@@ -67,7 +66,7 @@ namespace WoopiAiHub.Infrastructure.Multitenancy
         {
             if (string.IsNullOrWhiteSpace(tenantIdentifier)) return false;
 
-            var tenant = await _tenantCacheService.FindTenantAsync(tenantIdentifier, ColTypeModule.WoopiAiHub);
+            var tenant = await _tenantCacheService.FindTenantAsync(tenantIdentifier);
             if (tenant == null) return false;
 
             var connectionString = BuildConnectionString(tenant.DatabaseName);

@@ -149,7 +149,7 @@ namespace WoopiAiHub.UnitTests.Services
             teamServicesMock.Setup(a => a.FindByIdsAndUser(It.IsAny<List<int>>(), It.IsAny<string>())).Returns(teams);
 
             var tenantCache = _mocker.GetMock<ITenantCacheServices>();
-            tenantCache.Setup(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>())).ReturnsAsync(tenant);
+            tenantCache.Setup(a => a.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenant);
 
             var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
             workflowRepositoryMock.Setup(a => a.FindByIdsAsync(requestCreateDocumentDto.Workflows)).ReturnsAsync(workflows);
@@ -391,7 +391,7 @@ namespace WoopiAiHub.UnitTests.Services
             var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             marketPlaceApi.Setup(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>())).ReturnsAsync(true);
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                                .ReturnsAsync(tenant);
 
             //Act
@@ -403,7 +403,7 @@ namespace WoopiAiHub.UnitTests.Services
             questionnaireRepository.Verify(a => a.FindById(1), Times.Once);
             embeddingsApi.Verify(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()), Times.Once);
             marketPlaceApi.Verify(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>()), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
+            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
         }
 
         [Fact(DisplayName = "InputQuestionnaire")]
@@ -487,7 +487,7 @@ namespace WoopiAiHub.UnitTests.Services
                          .ReturnsAsync(httpResponseMessage);
             var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             marketPlaceApi.Setup(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>())).ReturnsAsync(true);
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                                .ReturnsAsync(tenant);
 
             //Act
@@ -499,7 +499,7 @@ namespace WoopiAiHub.UnitTests.Services
             embeddingsApi.Verify(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()), Times.Once);
             marketPlaceApi.Verify(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>()), Times.Once);
             documentHistoryServices.Verify(a => a.Create(It.IsAny<DocumentHistory>()), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
+            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
         }
 
         [Fact(DisplayName = "InputDocument")]
@@ -599,7 +599,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile)).Returns(idDocument);
             
             stepToolExecutionRepositoryMock.Setup(e => e.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(execution);
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                                .ReturnsAsync(tenant);
             var documentServices = _mocker.CreateInstance<DocumentServices>();
             stepToolRepositoryMock.Setup(s=> s.FindDependentAsync(processOcrResultDto.Data.StepToolId)).ReturnsAsync(stepTool);
@@ -613,7 +613,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ProcessOcrDataAutomationDto.StepToolId, result.StepToolId);
 
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once());
+            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
         }
 
         [Fact(DisplayName = "ProcessEmbeddingsResult should successfully process embeddings result")]

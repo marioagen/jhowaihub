@@ -1,5 +1,6 @@
 using Moq;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -23,24 +24,30 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindDataByUsageType_ShouldReturnData()
         {
             // Arrange
-            var usageType = ColTypeUsage.Ocr;
+            var usageType = (int)ColTypeUsage.Ocr;
+            var usageFilterDto = new UsageTypeFilterDto
+            {
+                Id = usageType,
+                Start = null,
+                End = null
+            };
             var expectedData = new List<DashboardUsageDto>
             {
                 new DashboardUsageDto("2023-10-01", 10),
                 new DashboardUsageDto("2023-10-02", 20)
             };
 
-            _usageMonthRepositoryMock.Setup(x => x.FindDataByUsageType((int)usageType))
+            _usageMonthRepositoryMock.Setup(x => x.FindDataByUsageType(It.IsAny<int>(), It.IsAny<DateTime?>(),It.IsAny<DateTime?>()))
                 .ReturnsAsync(expectedData);
 
             // Act
-            var result = await _usageMonthServices.FindDataByUsageType(usageType);
+            var result = await _usageMonthServices.FindDataByUsageType(usageFilterDto);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(expectedData.Count, result.Count);
             Assert.Equal(expectedData, result);
-            _usageMonthRepositoryMock.Verify(x => x.FindDataByUsageType((int)usageType), Times.Once);
+            _usageMonthRepositoryMock.Verify(x => x.FindDataByUsageType(It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()), Times.Once);
         }
 
         [Fact(DisplayName = "Test FindDataByModelEmbedding and returns a list of DashboardUsageDto")]
@@ -49,23 +56,29 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var modelEmbeddingId = 1;
+            var modelEmbeddingFilterDto = new ModelEmbeddingFilterDto
+            {
+                Id = modelEmbeddingId,
+                Start = null,
+                End = null
+            };
             var expectedData = new List<DashboardUsageDto>
             {
                 new DashboardUsageDto("2023-10-01", 5),
                 new DashboardUsageDto("2023-10-02", 15)
             };
 
-            _usageMonthRepositoryMock.Setup(x => x.FindDataByModelEmbedding(modelEmbeddingId))
+            _usageMonthRepositoryMock.Setup(x => x.FindDataByModelEmbedding(It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
                 .ReturnsAsync(expectedData);
 
             // Act
-            var result = await _usageMonthServices.FindDataByModelEmbedding(modelEmbeddingId);
+            var result = await _usageMonthServices.FindDataByModelEmbedding(modelEmbeddingFilterDto);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(expectedData.Count, result.Count);
             Assert.Equal(expectedData, result);
-            _usageMonthRepositoryMock.Verify(x => x.FindDataByModelEmbedding(modelEmbeddingId), Times.Once);
+            _usageMonthRepositoryMock.Verify(x => x.FindDataByModelEmbedding(It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()), Times.Once);
         }
 
         [Fact(DisplayName = "Test FindUsedModelEmbeddings and returns a list of used ModelEmbeddingDto")]

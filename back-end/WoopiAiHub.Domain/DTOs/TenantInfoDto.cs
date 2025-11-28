@@ -14,5 +14,7 @@
         public int ChunkSize { get; set; }
         public string SearchMode { get; set; } = string.Empty;
         public string OcrModel { get; set; } = string.Empty;
+        public string Plan { get; set; } = string.Empty;
+        public string AiGatewayKey { get; set; } = string.Empty;
     }
 }

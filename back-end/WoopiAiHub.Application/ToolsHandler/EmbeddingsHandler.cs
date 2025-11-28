@@ -45,7 +45,7 @@ public class EmbeddingsHandler : IToolHandler
     {
         var output = outputs.FirstOrDefault()?.Value ?? string.Empty;
         
-        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
+        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant);
         if (string.IsNullOrEmpty(tenantInfo!.EmbeddingModelName))
         {
             throw new ArgumentException("Embeddings not found");

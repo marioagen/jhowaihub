@@ -1,15 +1,16 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
 using WoopiAiHub.Repository.Util;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -21,12 +22,14 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ITenantCacheServices _tenantCacheService;
         private readonly IMapper _mapper;
 
         public TenantServices(ITenantRepository tenantRepository,
                               IServiceProvider serviceProvider,
                               ICoreDependencies coreDependencies,
-                              IApiDependencies apiDependencies
+                              IApiDependencies apiDependencies,
+                              ITenantCacheServices tenantCacheService
                             )
         {
             _configuration = coreDependencies.Configuration;
@@ -35,6 +38,7 @@ namespace WoopiAiHub.Application.Services
             _marketPlaceApi = apiDependencies.MarketPlaceApi;
             _keyGeneratorApi = apiDependencies.KeyGeneratorApi;
             _serviceProvider = serviceProvider;
+            _tenantCacheService = tenantCacheService;
             _mapper = coreDependencies.Mapper;
         }
 
@@ -49,6 +53,18 @@ namespace WoopiAiHub.Application.Services
                                                                        email);
 
             return tenants;
+        }
+
+        /// <summary>
+        /// Finds the plan associated with the tenant
+        /// </summary>
+        /// <param name="tenant"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<string> FindPlanByName(string tenant)
+        {
+            var tenantInfo = await _tenantCacheService.FindTenantAsync(tenant);
+            return tenantInfo?.Plan?? string.Empty;
         }
 
         /// <summary>
@@ -75,8 +91,7 @@ namespace WoopiAiHub.Application.Services
             string result = await _keyGeneratorApi.GetKey(keyAccess, tenant);
 
             await ApplyMigrations(keyAccess,
-                                  tenant,
-                                  ColTypeModule.WoopiAiHub);
+                                  tenant);
 
             return result;
         }
@@ -85,8 +100,7 @@ namespace WoopiAiHub.Application.Services
         /// Apply ApplicationDbContext Migrations
         /// </summary>
         private async Task ApplyMigrations(string keyAccess,
-                                           string tenantName,
-                                           ColTypeModule module)
+                                           string tenantName)
         {
             if (string.IsNullOrEmpty(tenantName))
             {
@@ -94,8 +108,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             var tenant = await _marketPlaceApi.FindTenantByNameAndModule(keyAccess,
-                                                                         tenantName,
-                                                                         module);
+                                                                         tenantName);
 
             if (tenant == null)
             {

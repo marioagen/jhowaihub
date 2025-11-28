@@ -12,7 +12,7 @@
                     <span> {{ $t("dashboard.graphs.unitValue") }} {{ usageUnitPages }}</span>
                     <hr />
                     <span class="mt-1">{{ $t("dashboard.graphs.periodTotal") }}</span>
-                    <h4 class="mb-0 fw-bold text-primary">{{ totalPages * usageUnitPages }}</h4>
+                    <h4 class="mb-0 fw-bold text-primary">{{ (totalPages * usageUnitPages).toFixed(5) }}</h4>
                 </div>
             </div>
             <h6>{{ $t("dashboard.graphs.pagesGraphSubtitle") }}</h6>
@@ -33,10 +33,6 @@ export default {
         LoadingComponent
     },
     props: {
-        rangeDates: {
-            type: Object,
-            required: true,
-        },
         usageUnits: {
             type: Array,
             required: true,

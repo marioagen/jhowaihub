@@ -48,7 +48,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
             _mockTenantCacheServices
-                .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
                 .ReturnsAsync(tenantInfo);
 
             // Act & Assert
@@ -68,7 +68,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
             _mockTenantCacheServices
-                .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
                 .ReturnsAsync(tenantInfo);
             _mockConfig
                 .Setup(config => config[It.IsAny<string>()])
@@ -78,7 +78,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var result = await _handler.BuildPayload(automationServicesDto, null, [output]);
 
             // Assert
-            _mockTenantCacheServices.Verify(repo => repo.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once);
+            _mockTenantCacheServices.Verify(repo => repo.FindTenantAsync(It.IsAny<string>()), Times.Once);
             Assert.Equal(_messageQueues.EmbeddingQueue, result.Queue);
         }
     }

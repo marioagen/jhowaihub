@@ -13,54 +13,6 @@ export default {
                 }
             });
     },
-    getTokensData(filters) {
-        return api.get(`/Dashboard/Tokens`, { params: filters })
-            .then(({ data }) => {
-                console.log(data);
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                }
-            });
-    },
-    getPagesData(filters) {
-        return api.get(`/Dashboard/Ocr`, { params: filters })
-            .then(({ data }) => {
-                console.log(data);
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                }
-            });
-    },
-    getWorkflowsData(filters) {
-        return api.get(`/Dashboard/Workflows`, { params: filters })
-            .then(({ data }) => {
-                console.log(data);
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                }
-            });
-    },
-    getWorkflowsAutomaticData(filters) {
-        return api.get(`/Dashboard/Workflows/Automatic`, { params: filters })
-            .then(({ data }) => {
-                console.log(data);
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                }
-            });
-    },
     GetUsedModels() {
         return api.get(`/UsageMonth/FindUsedModels`)
             .then(({ data }) => {
@@ -96,6 +48,17 @@ export default {
     },
     GetUsageUnits() {
         return api.get(`/Dashboard/UsageUnits`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    GetPlan(tenantName) {
+        return api.get(`/Tenant/FindPlanByName/${tenantName}`)
             .then(({ data }) => {
                 return data;
             })

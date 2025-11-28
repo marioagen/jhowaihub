@@ -26,10 +26,10 @@ namespace WoopiAiHub.Repository
                     .Where(x => x.UsageTypeId == usageTypeId);
 
             if (start.HasValue)
-                query = query.Where(x => x.Created >= start.Value);
+                query = query.Where(x => x.Created.Date >= start.Value.Date);
 
             if (end.HasValue)
-                query = query.Where(x => x.Created <= end.Value);
+                query = query.Where(x => x.Created.Date <= end.Value.Date);
 
             var result = await query.GroupBy(x => x.Created.Date)
                 .Select(g => new DashboardUsageDto(g.Key.Date.ToString("dd/MM"), g.Sum(x => x.Total)))
@@ -49,10 +49,10 @@ namespace WoopiAiHub.Repository
                                 .Where(x => x.ModelEmbeddingId == modelEmbeddingId);
 
             if (start.HasValue)
-                query = query.Where(x => x.Created >= start.Value);
+                query = query.Where(x => x.Created.Date >= start.Value.Date);
 
             if (end.HasValue)
-                query = query.Where(x => x.Created <= end.Value);
+                query = query.Where(x => x.Created.Date <= end.Value.Date);
 
             var result = await query
                 .GroupBy(x => x.Created.Date)

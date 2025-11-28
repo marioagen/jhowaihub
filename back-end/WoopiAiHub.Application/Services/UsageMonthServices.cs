@@ -60,7 +60,7 @@ namespace WoopiAiHub.Application.Services
             DateTime? convertedDate = null;
             if (string.IsNullOrEmpty(date) is false)
             {
-                convertedDate = DateTime.ParseExact(date, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                convertedDate = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             }
 
             return convertedDate;

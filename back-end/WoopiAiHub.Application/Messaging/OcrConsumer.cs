@@ -45,7 +45,7 @@ namespace WoopiAiHub.Application.Messaging
                 using var scope = _scopeFactory.CreateScope();
                 try
                 {
-                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant, ColTypeModule.WoopiAiHub);
+                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant);
                     var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
                     httpAccessor.HttpContext ??= new DefaultHttpContext();
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;

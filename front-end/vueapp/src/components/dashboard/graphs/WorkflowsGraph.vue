@@ -34,7 +34,7 @@
                         <span> {{ $t("dashboard.graphs.unitValue") }} {{ usageUnitWorkflow }}</span>
                         <hr />
                         <span class="mt-1">{{ $t("dashboard.graphs.periodTotal") }}</span>
-                        <h4 class="mb-0 fw-bold text-primary">{{ totalWorkflows * usageUnitWorkflow }}</h4>
+                        <h4 class="mb-0 fw-bold text-primary">{{ (totalWorkflows * usageUnitWorkflow).toFixed(5) }}</h4>
                     </div>
                 </div>
                 <LoadingComponent v-if="isLoadingAutomation" />
@@ -55,10 +55,6 @@ export default {
         LoadingComponent,
     },
     props: {
-        rangeDates: {
-            type: Object,
-            required: true,
-        },
         usageUnits: {
             type: Array,
             required: true,
@@ -130,7 +126,6 @@ export default {
     created() {
         this.getWorkflowsData();
         this.getWorkflowsAutomaticData();
-        console.log(this.usageUnits)
     },
     watch: {
         usageUnits() {

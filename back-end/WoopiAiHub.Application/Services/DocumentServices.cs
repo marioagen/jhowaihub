@@ -575,8 +575,7 @@ namespace WoopiAiHub.Application.Services
                                                                                    string tenantName,
                                                                                    string language)
         {
-            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName,
-                                                                    ColTypeModule.WoopiAiHub);
+            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName);
 
             return new CustomQueryRequestRefitDto
             {
@@ -911,7 +910,6 @@ namespace WoopiAiHub.Application.Services
                 var documentEmbeddingsAddDto = await CreateAddDocumentsEmbeddingsDtoAsync(processOcrResultDto,
                                                                                           pageText.ToString(),
                                                                                           page,
-                                                                                          ColTypeModule.WoopiAiHub,
                                                                                           apikey);
                 listDocument.Add(documentEmbeddingsAddDto);
             }
@@ -949,11 +947,9 @@ namespace WoopiAiHub.Application.Services
         private async Task<DocumentEmbeddingsAddDto> CreateAddDocumentsEmbeddingsDtoAsync(ProcessOcrResultDto processOcrResultDto,
                                                                                           string text,
                                                                                           CustomDocumentPage page,
-                                                                                          ColTypeModule module,
                                                                                           string keyMongoAccess)
         {
-            var tenant = await _tenantCacheServices.FindTenantAsync(processOcrResultDto.Tenant,
-                                                                    module);
+            var tenant = await _tenantCacheServices.FindTenantAsync(processOcrResultDto.Tenant);
             return new DocumentEmbeddingsAddDto
             {
                 ReferenceFile = processOcrResultDto.ReferenceFile,
