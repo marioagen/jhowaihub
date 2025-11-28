@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyModel;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -34,8 +33,6 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IHubNotifier _hubNotifier;
         private readonly IEncryptionService _encryptionService;
         private readonly IUsageDailyServices _usageDailyServices;
-        private readonly IUsageTypeServices _usageTypeServices;
-        private readonly IUserServices _userServices;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -50,9 +47,7 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IStepRepository stepRepository,
                                   IHubNotifier hubNotifier,
                                   IEncryptionService encryptionService,
-                                  IUsageDailyServices usageDailyServices,
-                                  IUsageTypeServices usageTypeServices,
-                                  IUserServices userServices)
+                                  IUsageDailyServices usageDailyServices)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -68,8 +63,6 @@ namespace WoopiAiHub.Application.Services.Automation
             _hubNotifier = hubNotifier;
             _encryptionService = encryptionService;
             _usageDailyServices = usageDailyServices;
-            _usageTypeServices = usageTypeServices;
-            _userServices = userServices;
         }
 
         /// <summary>

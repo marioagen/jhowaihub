@@ -8,7 +8,7 @@ namespace WoopiAiHub.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DashboardController : Controller
+    public class DashboardController : ControllerBase
     {
         private readonly IUsageUnitServices _usageUnitServices;
         public DashboardController(IUsageUnitServices usageUnitServices)
