@@ -3,12 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
-using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
 using WoopiAiHub.Repository.Util;
 
@@ -23,7 +21,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly IServiceProvider _serviceProvider;
         private readonly ITenantCacheServices _tenantCacheService;
-        private readonly IMapper _mapper;
 
         public TenantServices(ITenantRepository tenantRepository,
                               IServiceProvider serviceProvider,
@@ -39,7 +36,6 @@ namespace WoopiAiHub.Application.Services
             _keyGeneratorApi = apiDependencies.KeyGeneratorApi;
             _serviceProvider = serviceProvider;
             _tenantCacheService = tenantCacheService;
-            _mapper = coreDependencies.Mapper;
         }
 
         /// <summary>
