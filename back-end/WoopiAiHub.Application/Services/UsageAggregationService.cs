@@ -62,7 +62,7 @@ namespace WoopiAiHub.Application.Services
         private async Task ProcessTenantMetricsAsync(TenantListDto tenant)
         {
             using var scope = _scopeFactory.CreateScope();
-            var connectionString = FormatConnectionStringAsync(scope, tenant);
+            var connectionString = FormatConnectionStringAsync(tenant);
             var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;

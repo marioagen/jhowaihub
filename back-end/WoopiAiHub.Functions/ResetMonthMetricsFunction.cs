@@ -21,6 +21,17 @@ namespace WoopiAiHub.Functions
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        /// <summary>
+        /// Executes the ResetMonthMetrics function, triggered by a timer, to archive old usage metrics.
+        /// </summary>
+        /// <remarks>This function is triggered based on the cron expression specified in the
+        /// <c>UsageManagement:ResetMetricsCron</c> configuration. It generates a unique correlation ID for logging
+        /// purposes and archives old usage metrics using the <c>_usageArchiveService</c>. Logs are recorded for the
+        /// start time, completion time, and duration of the operation. Any exceptions encountered during execution are
+        /// logged and rethrown.</remarks>
+        /// <param name="myTimer">The timer trigger information, including the schedule defined by the <c>UsageManagement:ResetMetricsCron</c>
+        /// configuration setting.</param>
+        /// <returns></returns>
         [Function("ResetMonthMetrics")]
         public async Task Run([TimerTrigger("%UsageManagement:ResetMetricsCron%")] TimerInfo myTimer)
         {
