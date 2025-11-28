@@ -176,6 +176,7 @@
                         order: index + 1,
                         profileId: parseInt(step.profileId),
                         statusId: parseInt(step.statusId),
+                        hasStepTools: step.hasStepTools || false,
                     }))
                 };
             }

@@ -35,7 +35,7 @@
                                 <span>{{ getProfileName(step.profileId) }}</span>
                             </div>
                         </div>
-                        <div v-if="isEdit" class="tools-list">
+                        <div v-if="hasStepTools" class="tools-list">
                             <p class="small text-muted mb-2">{{ $t("workflow.configuredTools") }}: {{ step.length }}</p>
                             <button
                                 class="btn btn-outline-primary btn-sm w-100 mb-2"
@@ -85,10 +85,12 @@ export default {
             required: false,
             default: 0,
         },
-        isEdit: {
+        hasStepTools: {
             type: Boolean,
-            required: true,
+            required: false,
+            default: false,
         }
+
     },
     methods: {
         getProfileName(profileId) {
@@ -96,6 +98,7 @@ export default {
             return profile ? profile.text : 'N/A';
         },
         addToolFlow(step) {
+            console.log(step);
             this.$emit('add-tool-flow', step, this.phase);
         },
         editToolFlow(step) {
@@ -103,16 +106,17 @@ export default {
         },
         removeToolFlow(step) {
             this.$emit('remove-tool-flow', step);
-        },
-        getData() {
-            return {
-                steps: this.workflowSteps.map(step => ({
-                    id: step.id,
-                    order: step.order,
-                    stepTools: step.stepTools || []
-                }))
-            };
         }
+        //getData() {
+        //    return {
+        //        steps: this.workflowSteps.map(step => ({
+        //            id: step.id,
+        //            order: step.order,
+        //            stepTools: step.stepTools || [],
+        //            has
+        //        }))
+        //    };
+        //}
     }
 };
 </script>

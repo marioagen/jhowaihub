@@ -272,6 +272,7 @@ namespace WoopiAiHub.Repository
                  .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
         }
 
+
         /// <summary>
         /// Update output of step in a workflow.
         /// </summary>
@@ -328,12 +329,14 @@ namespace WoopiAiHub.Repository
                         Id = s.Status!.Id,
                         Name = s.Status.Name,
                         Color = s.Status.Color,
-                    }
+                    },
+                    HasStepTools = s.StepTools.Any()
                 })
                 .ToListAsync();
 
             return steps;
         }
+
 
         /// <summary>
         /// Find phase3 data by workflow id
@@ -363,6 +366,7 @@ namespace WoopiAiHub.Repository
                         Name = s.Status.Name,
                         Color = s.Status.Color,
                     },
+                    HasStepTools = s.StepTools.Any(),
                     StepTools = s.StepTools
                         .Select(st => new StepToolDto
                         {
@@ -417,6 +421,7 @@ namespace WoopiAiHub.Repository
             return steps;
         }
 
+
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
         /// </summary>
@@ -453,6 +458,7 @@ namespace WoopiAiHub.Repository
                         Name = s.Status.Name,
                         Color = s.Status.Color,
                     },
+                    HasStepTools = s.StepTools.Any(),
                     Cards = s.Cards
                         .Where(c => c.Enable &&
                             (
@@ -540,6 +546,7 @@ namespace WoopiAiHub.Repository
                                 StepOrder = d.DependsOnStepTool.Step!.Order
                             }).ToList(),
                         })
+
                         .ToList()
                 }).ToList()
             };

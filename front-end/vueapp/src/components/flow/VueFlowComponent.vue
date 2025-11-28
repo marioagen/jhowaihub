@@ -84,6 +84,11 @@ export default {
             type: Boolean,
             required: false,
             default: false
+        },
+        hasStepTools: {
+            type: Boolean,
+            required: false,
+            default: false,
         }
     },
     data() {
@@ -132,13 +137,11 @@ export default {
         },
         async getFlow() {
             try {
-                if (this.isEdit && this.stepId != 0) {
-                    console.log("Here");
+                if (hasStepTools && this.stepId != 0) {
                     this.step = await WorkflowService.getStepById(this.stepId);
                 } 
 
                 let stepTools = this.step ? this.step.stepTools : [];
-                console.log(this.step);
                 const mappedNodes = stepTools.map(stepTool => ({
                     id: stepTool.id.toString(),
                     position: { x: stepTool.positionX, y: stepTool.positionY },

@@ -26,7 +26,7 @@
             </div>
             <hr />
             <VueFlowComponent :isEdit="isEdit" :stepId="stepId" :stepOrder="stepOrder" @openNodeConfig="openNodeConfig"
-                              ref="VueflowComponent" />
+                              ref="VueflowComponent" :hasStepTools="hasStepTools" />
 
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
                  ref="sidebar">
@@ -170,6 +170,11 @@
                 type: Number,
                 required: false,
                 default: null,
+            },
+            hasStepTools: {
+                type: Boolean,
+                required: false,
+                default: false,
             }
         },
         data() {
@@ -418,7 +423,7 @@
                                 return {
                                     id: step.id || 0,
                                     order: step.order,
-                                    stepTools: nodesList
+                                    stepTools: nodesList,
                                 };
                             }
                             return {

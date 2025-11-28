@@ -57,7 +57,7 @@
                                      @add-tool-flow="handleAddToolFlow"
                                      @edit-tool-flow="handleEditToolFlow"
                                      @remove-tool-flow="handleRemoveToolFlow"
-                                     :isEdit="isEdit"/>
+                                     :hasStepsTools="phase3Data?.steps.hasStepTools"/>
                     </div>
                 </div>
             </div>
@@ -174,7 +174,6 @@
             async previousPhase() {
                 if (this.currentPhase > 1) {
                     this.currentPhase--;
-                    // Reload data from backend when navigating back
                     await this.reloadCurrentPhaseData();
                 }
             },
@@ -197,8 +196,9 @@
                 this.isLoading = true;
                 const phase1Component = this.$refs.phase1;
                 const data = phase1Component.getData();
+                let workflowIdInternal = this.workflowIdInternal;
                 try {
-                    if (this.isEdit) {
+                    if (workflowIdInternal != null || this.isEdit) {
                         this.phase1Data = data;
                         this.currentPhase = 2;
                         const params = {
@@ -303,7 +303,9 @@
                 params: {
                     stepOrder: step.order,
                     phase: this.currentPhase,
-                    workflowId: this.workflowIdInternal
+                    workflowId: this.workflowIdInternal,
+                    stepId: step.id,
+                    hasStepTools: step.hasStepTools,
                 }
             });
         },
@@ -317,7 +319,8 @@
                     stepOrder: step.order,
                     phase: this.currentPhase,
                     workflowId: this.workflowIdInternal,
-                    stepId: step.id
+                    stepId: step.id,
+                    hasStepTools: step.hasStepTools,
                 }
             });
         },
@@ -328,7 +331,7 @@
                 this.phase3Data.steps[stepIndex].stepTools = [];
             }
         },
-        async loadWorkflowData() {
+            async loadWorkflowData() {
             if (!this.workflowIdInternal) return;
             this.isLoading = true;
             try {
@@ -348,10 +351,23 @@
                             order: step.order,
                             profileId: String(step.profile?.id || ''),
                             statusId: String(step.status?.id || ''),
+                            hasStepTools: step.hasStepTools,
                         }))
                     };
+                    console.log(this.phase2Data);
                 }
                 else if (this.currentPhase == 3) {
+                    let result = await this.getPhase2Data();
+                    this.phase2Data = {
+                        steps: result.map(step => ({
+                            id: step.id,
+                            name: step.name,
+                            order: step.order,
+                            profileId: String(step.profile?.id || ''),
+                            statusId: String(step.status?.id || ''),
+                            hasStepTools: step.hasStepTools,
+                        }))
+                    };
                     this.phase3Data = this.phase2Data;
                 }
             } catch (error) {
@@ -390,13 +406,13 @@
             }
             return phase2DataReturn;
         },
-        async getPhase3Data() {
-            const phase3DataReturn = await WorkflowService.getPhase3ById(this.workflowIdInternal);
-            if (phase3DataReturn.error) {
-                throw new Error(phase3DataReturn.error);
-            }
-            return phase3DataReturn;
-        },
+        //async getPhase3Data() {
+        //    const phase3DataReturn = await WorkflowService.getPhase3ById(this.workflowIdInternal);
+        //    if (phase3DataReturn.error) {
+        //        throw new Error(phase3DataReturn.error);
+        //    }
+        //    return phase3DataReturn;
+        //},
     },
     created() {
         this.loadProfiles();

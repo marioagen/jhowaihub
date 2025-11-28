@@ -6,7 +6,7 @@
         :stepOrder="routeStepOrder"
         :phase="routePhase"
         :workflowId="routeWorkflowId"
-
+        :hasStepTools="hasStepTools"
     />
 </template>
 
@@ -40,7 +40,10 @@
             },
             routeWorkflowId() {
                 return this.$route.params.workflowId ? parseInt(this.$route.params.workflowId) : null;
-            }
+            },
+            routeHasStepTools() {
+                return parseInt(this.$route.params.hasStepTools);
+            },
         },
     }
 </script>

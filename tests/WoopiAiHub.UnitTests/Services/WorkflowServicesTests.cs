@@ -514,14 +514,9 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(workflowList, result);
         }
 
-
         [Fact(DisplayName = "FindByProfileStep should return workflows when successful")]
-        [Fact(DisplayName = "CreatePhase1 should throw AppException when name is empty")]
         [Trait("FindByProfileStep", "Success")]
-        [Trait("CreatePhase1", "Fail")]
         public async Task FindByProfileStep_ShouldReturnWorkflows_WhenSuccessful()
-        public async Task CreatePhase1_EmptyName_ThrowsAppException()
-        {
         {
             // Arrange
             var profile = new Profile("Test Profile I", 1, DateTime.UtcNow);
@@ -558,6 +553,10 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Workflow Test I", returnedWorkflow.Name);
         }
 
+        [Fact(DisplayName = "CreatePhase1 should throw AppException when name is empty")]
+        [Trait("CreatePhase1", "Fail")]
+        public async Task CreatePhase1_EmptyName_ThrowsAppException()
+        {
             // Arrange
             var phase1Dto = new WorkflowPhase1Dto
             {
@@ -785,7 +784,8 @@ namespace WoopiAiHub.UnitTests.Services
                     {
                         Id = stepDto.Id,
                         Order = stepDto.Order,
-                        StepTools = []
+                        StepTools = [],
+                        HasStepToolFlows = false
                     }
                 }
             };
