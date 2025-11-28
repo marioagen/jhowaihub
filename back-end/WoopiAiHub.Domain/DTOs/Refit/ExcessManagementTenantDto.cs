@@ -7,7 +7,7 @@ namespace WoopiAiHub.Domain.DTOs.Refit
         [JsonProperty("tenant")]
         public string Tenant { get; set; } = string.Empty;
 
-        [JsonProperty("UsageCount")]
+        [JsonProperty("usageCount")]
         public int UsageCount { get; set; }
     }
 }

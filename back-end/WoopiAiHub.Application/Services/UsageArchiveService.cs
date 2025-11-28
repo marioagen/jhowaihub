@@ -185,7 +185,7 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Get connection string for a specific tenant
         /// </summary>
-        private string FormatConnectionStringAsync(IServiceScope scope, TenantListDto tenant)
+        private string FormatConnectionStringAsync(TenantListDto tenant)
         {
             var template = _configuration.GetConnectionString("TemplateConnection");
             var connectionString = template?.Replace("___NEWDB___", tenant!.DatabaseName);
