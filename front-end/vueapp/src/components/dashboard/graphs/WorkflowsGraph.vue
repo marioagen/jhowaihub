@@ -66,6 +66,8 @@ export default {
     },
     emits: ['setTotalExecution'],
     data: () => ({
+        start: null,
+        end: null,
         isLoadingWorkflows: false,
         graph: {
             options: {
@@ -157,8 +159,13 @@ export default {
     },
     methods: {
         getWorkflowsData() {
+            let params = {
+                start: this.start,
+                end: this.end,
+                id: ColTypeUsage.Execution
+            };
             this.isLoadingWorkflows = true;
-            DashboardServices.findByUsageType(ColTypeUsage.Execution)
+            DashboardServices.GetByUsageType(params)
                 .then((response) => {
                     if (response && !response.error) {
                         this.graph.options = {
@@ -184,8 +191,13 @@ export default {
             this.$emit('setTotalExecution', totalExecution);
         },
         getWorkflowsAutomaticData() {
+            let params = {
+                start: this.start,
+                end: this.end,
+                id: ColTypeUsage.N8N
+            };
             this.isLoadingAutomation = true;
-            DashboardServices.findByUsageType(ColTypeUsage.N8N)
+            DashboardServices.GetByUsageType(params)
                 .then((response) => {
                     if (response && !response.error) {
                         this.graph2.options = {
@@ -204,6 +216,12 @@ export default {
                     this.isLoadingAutomation = false;
                 });
         },
+        updateGraph(start, end) {
+            this.start = start;
+            this.end = end;
+            this.getWorkflowsData();
+            this.getWorkflowsAutomaticData();
+        }
     },
 }
 </script>

@@ -61,7 +61,7 @@ export default {
                 }
             });
     },
-    findUsedModels() {
+    GetUsedModels() {
         return api.get(`/UsageMonth/FindUsedModels`)
             .then(({ data }) => {
                 return data;
@@ -72,8 +72,8 @@ export default {
                 }
             });
     },
-    findByUsageType(usageType) {
-        return api.get(`/UsageMonth/${usageType}`)
+    GetByUsageType(filters) {
+        return api.get(`/UsageMonth`, { params: filters })
             .then(({ data }) => {
                 return data;
             })
@@ -83,8 +83,8 @@ export default {
                 }
             });
     },
-    findByModel(modelEmbeddingId) {
-        return api.get(`/UsageMonth/FindByModel/${modelEmbeddingId}`)
+    GetTokensByModel(filters) {
+        return api.get(`/UsageMonth/FindByModel`, { params: filters })
             .then(({ data }) => {
                 return data;
             })
@@ -94,7 +94,7 @@ export default {
                 }
             });
     },
-    findUsageUnits() {
+    GetUsageUnits() {
         return api.get(`/Dashboard/UsageUnits`)
             .then(({ data }) => {
                 return data;

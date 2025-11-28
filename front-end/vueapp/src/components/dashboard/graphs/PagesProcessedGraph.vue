@@ -44,6 +44,8 @@ export default {
     },
     emits: ['setTotalPages'],
     data: () => ({
+        start: null,
+        end: null,
         isLoading: true,
         graph: {
             options: {
@@ -96,7 +98,12 @@ export default {
     methods: {
         getPagesData() {
             this.isLoading = true;
-            DashboardServices.findByUsageType(ColTypeUsage.Ocr)
+            let params = {
+                start: this.start,
+                end: this.end,
+                id: ColTypeUsage.Ocr
+            };
+            DashboardServices.GetByUsageType(params)
                 .then((response) => {
                     if (response && !response.error) {
                         this.graph.options = {
@@ -119,6 +126,11 @@ export default {
         setTotalPages() {
             this.$emit('setTotalPages', this.usageUnitPages * this.totalPages);
         },
+        updateGraph(start, end) {
+            this.start = start;
+            this.end = end;
+            this.getPagesData();
+        }
     },
 }
 </script>

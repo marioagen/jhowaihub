@@ -30,7 +30,7 @@
                         </div>
                     </div>
                     <div class="col">
-                        <button class="btn btn-primary btn-sm">
+                        <button class="btn btn-primary btn-sm" @click="updateGraph(dateRange.start, dateRange.end)">
                             <LucideIcon icon="RefreshCcw" :size="17" />
                             Atualizar
                         </button>
@@ -51,11 +51,11 @@
                 </div>
             </div>
             <TokensGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
-                @setTotalTokens="setTotalWTC" />
+                @setTotalTokens="setTotalWTC" ref="TokensGraph" />
             <PagesProcessedGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
-                @setTotalPages="setTotalWTC" />
+                @setTotalPages="setTotalWTC" ref="PagesProcessedGraph" />
             <WorkflowsGraph :key="datesChange" :rangeDates="dateRange" :usageUnits="usageUnits"
-                @setTotalExecution="setTotalWTC" />
+                @setTotalExecution="setTotalWTC" ref="WorkflowsGraph" />
         </div>
     </main>
 </template>
@@ -109,16 +109,19 @@ export default {
             return this.$t(`dashboard.filters.${this.filters.preset}`);
         },
         getDashboardData() {
-            DashboardServices.findUsageUnits()
+            DashboardServices.GetUsageUnits()
                 .then((response) => {
                     this.usageUnits = response;
                 });
         },
         setTotalWTC(total) {
-            console.log('subtotal', total)
             this.totalWTC += total;
-            console.log('total', this.totalWTC)
         },
+        updateGraph(start, end) {
+            this.$refs.TokensGraph.updateGraph(start, end);
+            this.$refs.WorkflowsGraph.updateGraph(start, end);
+            this.$refs.PagesProcessedGraph.updateGraph(start, end);
+        }
     },
     created() {
         this.getDashboardData();

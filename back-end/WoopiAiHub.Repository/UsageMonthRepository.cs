@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -19,11 +20,18 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="usageTypeId"></param>
         /// <returns></returns>
-        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(int usageTypeId)
+        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(int usageTypeId, DateTime? start, DateTime? end)
         {
-            var result = await _context.UsageMonths
-                .Where(x => x.UsageTypeId == usageTypeId)
-                .GroupBy(x => x.Created.Date)
+            var query = _context.UsageMonths
+                    .Where(x => x.UsageTypeId == usageTypeId);
+
+            if (start.HasValue)
+                query = query.Where(x => x.Created >= start.Value);
+
+            if (end.HasValue)
+                query = query.Where(x => x.Created <= end.Value);
+
+            var result = await query.GroupBy(x => x.Created.Date)
                 .Select(g => new DashboardUsageDto(g.Key.Date.ToString("dd/MM"), g.Sum(x => x.Total)))
                 .ToListAsync();
 
@@ -35,10 +43,18 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="modelEmbeddingId"></param>
         /// <returns></returns>
-        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId)
+        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId, DateTime? start, DateTime? end)
         {
-            var result = await _context.UsageMonths
-                .Where(x => x.ModelEmbeddingId == modelEmbeddingId)
+            var query = _context.UsageMonths
+                                .Where(x => x.ModelEmbeddingId == modelEmbeddingId);
+
+            if (start.HasValue)
+                query = query.Where(x => x.Created >= start.Value);
+
+            if (end.HasValue)
+                query = query.Where(x => x.Created <= end.Value);
+
+            var result = await query
                 .GroupBy(x => x.Created.Date)
                 .Select(g => new DashboardUsageDto(g.Key.Date.ToString("dd/MM"), g.Sum(x => x.Total)))
                 .ToListAsync();

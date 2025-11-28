@@ -56,6 +56,8 @@ export default {
     },
     emits: ['setTotalTokens'],
     data: () => ({
+        start: null,
+        end: null,
         isLoading: true,
         IAList: [],
         currentIAIndex: 0,
@@ -114,7 +116,12 @@ export default {
         getTokensData() {
             if (!this.currentIA) return;
             this.isLoading = true;
-            DashboardServices.findByModel(this.currentIA.id)
+            let params = {
+                start: this.start,
+                end: this.end,
+                id: this.currentIA.id
+            };
+            DashboardServices.GetTokensByModel(params)
                 .then((response) => {
                     if (response && !response.error) {
                         this.graph.options = {
@@ -138,7 +145,7 @@ export default {
             this.$emit('setTotalTokens', this.usageUnitTokens * this.totalTokens);
         },
         getIAList() {
-            DashboardServices.findUsedModels()
+            DashboardServices.GetUsedModels()
                 .then((response) => {
                     if (response && !response.error) {
                         this.IAList = response;
@@ -159,6 +166,11 @@ export default {
             this.currentIAIndex = (this.currentIAIndex - 1 + this.IAList.length) % this.IAList.length;
             this.getTokensData();
         },
+        updateGraph(start, end) {
+            this.start = start;
+            this.end = end;
+            this.getTokensData();
+        }
     },
 }
 </script>

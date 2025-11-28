@@ -1,3 +1,5 @@
+using System.Globalization;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -19,9 +21,12 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="usageType"></param>
         /// <returns></returns>
-        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(ColTypeUsage usageType)
+        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(UsageTypeFilterDto usageMonthFilterDto)
         {
-            return await _usageMonthRepository.FindDataByUsageType((int)usageType);
+            var startDate = GetDate(usageMonthFilterDto.Start);
+            var endDate = GetDate(usageMonthFilterDto.End);
+
+            return await _usageMonthRepository.FindDataByUsageType(usageMonthFilterDto.Id, startDate, endDate);
         }
 
         /// <summary>
@@ -29,9 +34,11 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="modelEmbeddingId"></param>
         /// <returns></returns>
-        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId)
+        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(ModelEmbeddingFilterDto modelEmbeddingFilterDto)
         {
-            return await _usageMonthRepository.FindDataByModelEmbedding(modelEmbeddingId);
+            var startDate = GetDate(modelEmbeddingFilterDto.Start);
+            var endDate = GetDate(modelEmbeddingFilterDto.End);
+            return await _usageMonthRepository.FindDataByModelEmbedding(modelEmbeddingFilterDto.Id, startDate, endDate);
         }
 
         /// <summary>
@@ -41,6 +48,22 @@ namespace WoopiAiHub.Application.Services
         public async Task<ICollection<ModelEmbeddingDto>> FindUsedModelEmbeddings()
         {
             return await _usageMonthRepository.FindUsedModelEmbeddings();
+        }
+
+        /// <summary>
+        /// Converts a string date to DateTime?.
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        private static DateTime? GetDate(string? date)
+        {
+            DateTime? convertedDate = null;
+            if (string.IsNullOrEmpty(date) is false)
+            {
+                convertedDate = DateTime.ParseExact(date, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+            }
+
+            return convertedDate;
         }
     }
 }
