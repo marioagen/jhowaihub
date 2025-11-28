@@ -1,4 +1,5 @@
 ﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository.Cache
@@ -7,5 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository.Cache
     {
         Task<TenantInfoDto?> FindTenantAsync(string tenantName,
                                              ColTypeModule module);
+
+        Task<List<TenantListDto>> FindAllTenantsAsync(ColTypeModule module);
     }
 }
