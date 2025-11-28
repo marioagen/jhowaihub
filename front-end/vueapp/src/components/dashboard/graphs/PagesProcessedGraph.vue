@@ -3,100 +3,130 @@
         <div class="card-body">
             <div class="d-flex align-items-center gap-2 mb-3">
                 <h6 class="mb-0 fw-bold">{{ $t("dashboard.graphs.pagesGraphTitle") }}</h6>
-                <LucideIcon 
-                    v-tooltip.right="$t('dashboard.graphs.pagesTooltip')" 
-                    icon="Info" 
-                    :size="17" 
-                />
+                <LucideIcon v-tooltip.right="$t('dashboard.graphs.pagesTooltip')" icon="Info" :size="17" />
             </div>
             <div class="card ms-4 me-4 mb-3">
                 <div class="card-body">
                     <h6>{{ $t("dashboard.graphs.totalPages") }}</h6>
-                    <h4 class="mb-0 fw-bold">4896,11</h4>
-                    <span> {{ $t("dashboard.graphs.unitValue") }} 0,0081</span>
-                    <hr/>
+                    <h4 class="mb-0 fw-bold">{{ totalPages }}</h4>
+                    <span> {{ $t("dashboard.graphs.unitValue") }} {{ usageUnitPages }}</span>
+                    <hr />
                     <span class="mt-1">{{ $t("dashboard.graphs.periodTotal") }}</span>
-                    <h4 class="mb-0 fw-bold text-primary">0,15</h4>
+                    <h4 class="mb-0 fw-bold text-primary">{{ (totalPages * usageUnitPages).toFixed(5) }}</h4>
                 </div>
             </div>
             <h6>{{ $t("dashboard.graphs.pagesGraphSubtitle") }}</h6>
-            <LoadingComponent
-                v-if="isLoading"
-            />
-            <BarGraphComponent
-                v-else
-                :options="graph.options"
-                :series="graph.series"
-            />
+            <LoadingComponent v-if="isLoading" />
+            <BarGraphComponent v-else :options="graph.options" :series="graph.series" />
         </div>
     </div>
 </template>
 
 <script>
-    import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
-    import LoadingComponent from '@/components/global/LoadingComponent.vue';
-    import DashboardServices from '@/services/dashboard/DashboardServices';
-    export default {
-        components: {
-            BarGraphComponent,
-            LoadingComponent
+import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
+import LoadingComponent from '@/components/global/LoadingComponent.vue';
+import DashboardServices from '@/services/dashboard/DashboardServices';
+import { ColTypeUsage } from '@/constants/ColTypeUsage';
+export default {
+    components: {
+        BarGraphComponent,
+        LoadingComponent
+    },
+    props: {
+        usageUnits: {
+            type: Array,
+            required: true,
         },
-        props: {
-            rangeDates: {
-                type: Object,
-                required: true,
-            },
-        },
-        data: () => ({
-            isLoading: true,
-            graph: {
-                options: {
-                    chart: {
-                        id: 'sales-bar',
-                        toolbar: { 
-                            show: false
-                        },
+    },
+    emits: ['setTotalPages'],
+    data: () => ({
+        start: null,
+        end: null,
+        isLoading: true,
+        graph: {
+            options: {
+                chart: {
+                    id: 'sales-bar',
+                    toolbar: {
+                        show: false
                     },
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 5,
-                        },
-                    },
-                    dataLabels: {
-                        enabled: false,
-                    },
-                    xaxis: {
-                        categories: [
-                            '01/11', '02/11', '03/11', '04/11', '05/11',
-                            '06/11', '07/11', '08/11', '09/11', '10/11',
-                            '11/11', '12/11', '13/11', '14/11', '15/11'
-                        ]
-                    },
-                    colors: ['#10315B']
                 },
-                series: [
-                    {
-                        name: 'Online Sales',
-                        data: [74, 39, 91, 62, 83, 46, 89, 57, 71, 64, 37, 94, 52, 86, 58]
+                plotOptions: {
+                    bar: {
+                        borderRadius: 5,
+                    },
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+                xaxis: {
+                    categories: []
+                },
+                colors: ['#10315B']
+            },
+            series: [
+                {
+                    name: 'Pages',
+                    data: []
+                }
+            ]
+        },
+    }),
+    computed: {
+        totalPages() {
+            return this.graph.series[0].data.reduce((a, b) => a + b, 0);
+        },
+        usageUnitPages() {
+            if (this.usageUnits.length === 0) {
+                return 0;
+            }
+            return this.usageUnits.find(item => item.usageTypeId === ColTypeUsage.Ocr)?.value ?? 0;
+        }
+    },
+    created() {
+        this.getPagesData();
+    },
+    watch: {
+        usageUnits() {
+            this.setTotalPages();
+        }
+    },
+    methods: {
+        getPagesData() {
+            this.isLoading = true;
+            let params = {
+                start: this.start,
+                end: this.end,
+                id: ColTypeUsage.Ocr
+            };
+            DashboardServices.GetByUsageType(params)
+                .then((response) => {
+                    if (response && !response.error) {
+                        this.graph.options = {
+                            ...this.graph.options,
+                            xaxis: {
+                                categories: response.map(item => item.date)
+                            }
+                        };
+                        this.graph.series = [{
+                            name: 'Pages',
+                            data: response.map(item => item.value)
+                        }];
                     }
-                ]
-            },
-        }),
-        created() {
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                    this.setTotalPages();
+                });
+        },
+        setTotalPages() {
+            this.$emit('setTotalPages', this.usageUnitPages * this.totalPages);
+        },
+        updateGraph(start, end) {
+            this.start = start;
+            this.end = end;
             this.getPagesData();
-            console.log(this.rangeDates)
-        },
-        methods: {
-            getPagesData() {
-                this.isLoading = true;
-                DashboardServices.getPagesData()
-                    .then((response) => {
-                        console.log(response)
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            },
-        },
-    }
+        }
+    },
+}
 </script>

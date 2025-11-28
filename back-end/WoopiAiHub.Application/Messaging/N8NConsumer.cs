@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
@@ -43,7 +44,7 @@ namespace WoopiAiHub.Application.Messaging
                using var scope = _scopeFactory.CreateScope();
                 try
                 {
-                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant!, ColTypeModule.WoopiAiHub);
+                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant!);
                     var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
                     httpAccessor.HttpContext ??= new DefaultHttpContext();
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
@@ -52,6 +53,9 @@ namespace WoopiAiHub.Application.Messaging
                     var automationServicesDto = await n8nServices.ProcessMessage(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
+                    var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
+
+                    await usageDailyServices.AddByValuesAsync("N8N", message.Email!, 1);
 
                     await automationServices.ContinueExecution(automationServicesDto);
                 }

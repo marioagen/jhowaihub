@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
@@ -11,7 +12,7 @@ namespace WoopiAiHub.Repository
 
         public UsageMonthRepository(ApplicationDbContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context;
         }
 
         /// <summary>
@@ -27,13 +28,13 @@ namespace WoopiAiHub.Repository
         /// considered.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the matching <see
         /// cref="UsageMonth"/> if found; otherwise, <see langword="null"/>.</returns>
-        public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int modelEmbeddingId, Guid userId, DateTime month)
+        public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int? modelEmbeddingId, Guid userId, DateTime month)
         {
             // For daily records, we need to match the exact day
             var dayStart = month.Date;
             var dayEnd = dayStart.AddDays(1);
 
-            return await _context.usageMonths
+            return await _context.UsageMonths
                 .FirstOrDefaultAsync(um =>
                     um.UsageTypeId == usageTypeId &&
                     um.ModelEmbeddingId == modelEmbeddingId &&
@@ -63,7 +64,7 @@ namespace WoopiAiHub.Repository
             if (existing != null)
             {
                 // Update existing record
-                await _context.usageMonths
+                await _context.UsageMonths
                     .Where(um => um.Id == existing.Id)
                     .ExecuteUpdateAsync(setters => setters
                         .SetProperty(um => um.Total, existing.Total + entity.Total));
@@ -71,7 +72,7 @@ namespace WoopiAiHub.Repository
             else
             {
                 // Insert new record
-                await _context.usageMonths.AddAsync(entity);
+                await _context.UsageMonths.AddAsync(entity);
                 await _context.SaveChangesAsync();
             }
         }
@@ -86,11 +87,74 @@ namespace WoopiAiHub.Repository
         /// <returns>A task that represents the asynchronous operation. The task result contains the total usage as an integer.</returns>
         public async Task<int> FindTotalUsageAsync(DateTime periodStart, DateTime periodEnd)
         {
-            var total = await _context.usageMonths
+            var total = await _context.UsageMonths
                 .Where(um => um.Created >= periodStart && um.Created < periodEnd)
                 .SumAsync(um => um.Total);
 
             return total;
+        }
+
+        /// <summary>
+        /// Finds usage data by usage type.
+        /// </summary>
+        /// <param name="usageTypeId"></param>
+        /// <returns></returns>
+        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(int usageTypeId, DateTime? start, DateTime? end)
+        {
+            var query = _context.UsageMonths
+                    .Where(x => x.UsageTypeId == usageTypeId);
+
+            if (start.HasValue)
+                query = query.Where(x => x.Created.Date >= start.Value.Date);
+
+            if (end.HasValue)
+                query = query.Where(x => x.Created.Date <= end.Value.Date);
+
+            var result = await query.GroupBy(x => x.Created.Date)
+                .Select(g => new DashboardUsageDto(g.Key.Date.ToString("dd/MM"), g.Sum(x => x.Total)))
+                .ToListAsync();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Finds usage data by model embedding ID.
+        /// </summary>
+        /// <param name="modelEmbeddingId"></param>
+        /// <returns></returns>
+        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId, DateTime? start, DateTime? end)
+        {
+            var query = _context.UsageMonths
+                                .Where(x => x.ModelEmbeddingId == modelEmbeddingId);
+
+            if (start.HasValue)
+                query = query.Where(x => x.Created.Date >= start.Value.Date);
+
+            if (end.HasValue)
+                query = query.Where(x => x.Created.Date <= end.Value.Date);
+
+            var result = await query
+                .GroupBy(x => x.Created.Date)
+                .Select(g => new DashboardUsageDto(g.Key.Date.ToString("dd/MM"), g.Sum(x => x.Total)))
+                .ToListAsync();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Finds used model embeddings.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ICollection<ModelEmbeddingDto>> FindUsedModelEmbeddings()
+        {
+            var result = await _context.UsageMonths
+                .Where(x => x.ModelEmbeddingId != null)
+                .Select(x => x.ModelEmbedding)
+                .Distinct()
+                .Select(x => new ModelEmbeddingDto { Id = x!.Id, Name = x.Name })
+                .ToListAsync();
+
+            return result;
         }
     }
 }

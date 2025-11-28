@@ -47,7 +47,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IMemoryCache _cache;
         private readonly IQuestionnaireRepository _questionnaireRepository;
         private readonly ITenantCacheServices _tenantCacheServices;
-        private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly MessageQueues _messageQueues;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHubNotifier _hubNotifier;
@@ -55,6 +54,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IWorkflowRepository _workflowRepository;
+        private readonly IUsageDailyServices _usageDailyServices;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
@@ -73,7 +73,6 @@ namespace WoopiAiHub.Application.Services
                                 IQuestionnaireRepository questionnaireRepository,
                                 ITenantCacheServices tenantCacheServices,
                                 ITeamServices teamServices,
-                                IKeyGeneratorApi keyGeneratorApi,
                                 IOptions<MessageQueues> messageQueues,
                                 IHubNotifier documentNotifier,
                                 IUnitOfWork unitOfWork,
@@ -81,7 +80,8 @@ namespace WoopiAiHub.Application.Services
                                 IAutomationServices automationServices,
                                 IWorkflowRepository workflowRepository,
                                 IStepToolOutputRepository stepToolOutputRepository,
-                                IStepToolRepository stepToolRepository)
+                                IStepToolRepository stepToolRepository,
+                                IUsageDailyServices usageDailyServices)
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
@@ -98,13 +98,13 @@ namespace WoopiAiHub.Application.Services
             _cache = cache;
             _questionnaireRepository = questionnaireRepository;
             _tenantCacheServices = tenantCacheServices;
-            _keyGeneratorApi = keyGeneratorApi;
             _messageQueues = messageQueues.Value;
             _hubNotifier = documentNotifier;
             _automationServices = automationServices;
             _workflowRepository = workflowRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolRepository = stepToolRepository;
+            _usageDailyServices = usageDailyServices;
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace WoopiAiHub.Application.Services
                 var deleted = _documentRepository.Delete(ids);
 
                 await Task.WhenAll(hashList.Select(hash =>
-                    DeleteHash(hash, headersDto.Tenant, headersDto.KeyMongoAccess)));
+                    DeleteHash(hash, headersDto.Tenant)));
 
                 await _cardRepository.DeleteByDocumentIds(ids);
 
@@ -211,9 +211,6 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> InputQuestionnaire(DocumentQuestionnaireDto documentQuestionnaireDto,
                                                    HeadersDto headersDto)
         {
-            if (string.IsNullOrEmpty(headersDto.KeyMongoAccess))
-                throw new ArgumentNullException(headersDto.KeyMongoAccess, KeyMongoAccessNotFoundMessage);
-
             var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
             var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
 
@@ -227,14 +224,17 @@ namespace WoopiAiHub.Application.Services
                     var customQueryRequestDto = await this.CreateCustomQueryRequestDto(description,
                                                                                       headersDto.Tenant,
                                                                                       headersDto.Language);
+                    var apikey = _config["IndexerApiKey"]!;
 
-                    var resultRequest = await _embbedingsApi.CustomQuery(documentDb.ReferenceFile.ToString(),
+                    var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
+                                                                         documentDb.ReferenceFile.ToString(),
                                                                          customQueryRequestDto,
-                                                                         headersDto.KeyMongoAccess);
+                                                                         apikey);
 
                     await this.ProcessRequestCustomQuery(resultRequest,
                                                          documentQuestionnaireDto.IdDocument,
-                                                         description);
+                                                         description,
+                                                         headersDto.EmailCreator);
                 }
                 else
                 {
@@ -328,9 +328,6 @@ namespace WoopiAiHub.Application.Services
         public async Task<string> InputDocument(DocumentInputDto documentInputDto,
                                                 HeadersDto headersDto)
         {
-            if (string.IsNullOrEmpty(headersDto.KeyMongoAccess))
-                throw new ArgumentNullException(headersDto.KeyMongoAccess, KeyMongoAccessNotFoundMessage);
-
             bool availableBalanceToQuestion = await ManagerConsumptionQuestions(headersDto.EmailCreator,
                                                                                 headersDto.Tenant,
                                                                                 false);
@@ -342,13 +339,17 @@ namespace WoopiAiHub.Application.Services
                                                                                    headersDto.Tenant,
                                                                                    headersDto.Language);
 
-                var resultRequest = await _embbedingsApi.CustomQuery(documentDb.ReferenceFile.ToString(),
+                var apikey = _config["IndexerApiKey"]!;
+
+                var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
+                                                                     documentDb.ReferenceFile.ToString(),
                                                                      customQueryRequestDto,
-                                                                     headersDto.KeyMongoAccess);
+                                                                     apikey);
 
                 var textResponse = await this.ProcessRequestCustomQuery(resultRequest,
                                                                         documentInputDto.Id,
-                                                                        documentInputDto.Input);
+                                                                        documentInputDto.Input,
+                                                                        headersDto.EmailCreator);
 
                 return textResponse;
             }
@@ -511,7 +512,8 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="Exception"></exception>
         private async Task<string> ProcessRequestCustomQuery(HttpResponseMessage resultRequest,
                                                              int id,
-                                                             string input)
+                                                             string input,
+                                                             string emailCreator)
         {
             if (resultRequest.IsSuccessStatusCode)
             {
@@ -521,6 +523,10 @@ namespace WoopiAiHub.Application.Services
                 var documentHistoryForDb = CreateDocumentHistoryForDb(id,
                                                                       queryResponseModel!.response,
                                                                       input);
+                foreach (var usage in queryResponseModel.Usage)
+                {
+                    await _usageDailyServices.AddByValuesAsync("DocumentQuery", emailCreator, usage.Total_usage??0, usage.Model);
+                }
 
                 _documentHistoryServices.Create(documentHistoryForDb);
 
@@ -569,8 +575,7 @@ namespace WoopiAiHub.Application.Services
                                                                                    string tenantName,
                                                                                    string language)
         {
-            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName,
-                                                                    ColTypeModule.WoopiAiHub);
+            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName);
 
             return new CustomQueryRequestRefitDto
             {
@@ -639,13 +644,13 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public async Task DeleteHash(string hash,
-                                     string tenant,
-                                     string keyMongo)
+                                     string tenant)
         {
-
-            var resultRequest = await _embbedingsApi.DeleteHash(hash,
+            var apikey = _config["IndexerApiKey"]!;
+            var resultRequest = await _embbedingsApi.DeleteHash(tenant,
+                                                                hash,
                                                                 tenant,
-                                                                keyMongo);
+                                                                apikey);
 
             if (!resultRequest.IsSuccessStatusCode && resultRequest.StatusCode != HttpStatusCode.NotFound)
             {
@@ -867,12 +872,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private async Task<List<DocumentEmbeddingsAddDto>> ExtractDocumentEmbeddingsAddDto(ProcessOcrResultDto processOcrResultDto)
         {
-            var keyAccess = _config[ConfigKeyAccessName]!;
-            var apiEmbbeddingsKeyAuth = await _keyGeneratorApi.GetKey(keyAccess, processOcrResultDto.Tenant);
-
-            if (string.IsNullOrEmpty(apiEmbbeddingsKeyAuth))
-                throw new ArgumentNullException(apiEmbbeddingsKeyAuth, KeyMongoAccessNotFoundMessage);
-
+            var apikey = _config["IndexerApiKey"]!;
             List<DocumentEmbeddingsAddDto> listDocument = new List<DocumentEmbeddingsAddDto>();
 
             var tablesByPage = processOcrResultDto.AnalyzeResult.Tables
@@ -910,8 +910,7 @@ namespace WoopiAiHub.Application.Services
                 var documentEmbeddingsAddDto = await CreateAddDocumentsEmbeddingsDtoAsync(processOcrResultDto,
                                                                                           pageText.ToString(),
                                                                                           page,
-                                                                                          ColTypeModule.WoopiAiHub,
-                                                                                          apiEmbbeddingsKeyAuth);
+                                                                                          apikey);
                 listDocument.Add(documentEmbeddingsAddDto);
             }
 
@@ -948,11 +947,9 @@ namespace WoopiAiHub.Application.Services
         private async Task<DocumentEmbeddingsAddDto> CreateAddDocumentsEmbeddingsDtoAsync(ProcessOcrResultDto processOcrResultDto,
                                                                                           string text,
                                                                                           CustomDocumentPage page,
-                                                                                          ColTypeModule module,
                                                                                           string keyMongoAccess)
         {
-            var tenant = await _tenantCacheServices.FindTenantAsync(processOcrResultDto.Tenant,
-                                                                    module);
+            var tenant = await _tenantCacheServices.FindTenantAsync(processOcrResultDto.Tenant);
             return new DocumentEmbeddingsAddDto
             {
                 ReferenceFile = processOcrResultDto.ReferenceFile,

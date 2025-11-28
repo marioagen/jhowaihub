@@ -31,10 +31,9 @@ namespace WoopiAiHub.Repository.Cache
         /// <param name="tenantName"></param>
         /// <param name="module"></param>
         /// <returns></returns>
-        public async Task<TenantInfoDto?> FindTenantAsync(string tenantName,
-                                                          ColTypeModule module)
+        public async Task<TenantInfoDto?> FindTenantAsync(string tenantName)
         {
-            var cacheKey = $"tenant:{tenantName}:{module}";
+            var cacheKey = $"tenant:{tenantName}";
             var cached = await _cache.GetStringAsync(cacheKey);
             var apiKey = _configuration["KeyAccess"];
 

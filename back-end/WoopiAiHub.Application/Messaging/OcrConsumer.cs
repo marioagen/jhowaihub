@@ -45,7 +45,7 @@ namespace WoopiAiHub.Application.Messaging
                 using var scope = _scopeFactory.CreateScope();
                 try
                 {
-                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant, ColTypeModule.WoopiAiHub);
+                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant);
                     var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
                     httpAccessor.HttpContext ??= new DefaultHttpContext();
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
@@ -54,6 +54,13 @@ namespace WoopiAiHub.Application.Messaging
                     var result = await documentServices.ProcessOcrResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
+                    var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
+
+                    var pages = message.AnalyzeResult?.Pages?.Count() ?? 0;
+                    if (pages == 0) pages = 1;
+
+                    await usageDailyServices.AddByValuesAsync("Ocr", message.Email, pages);
+
                     var automationServicesDto = new AutomationServicesDto
                     (
                         result.StepToolId,

@@ -48,7 +48,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<StepProfilePermission> StepProfilePermissions { get; set; }
         public DbSet<Prompt> Prompts { get; set; }
         public DbSet<UsageLog> UsageLogs { get; set; }
-        public DbSet<UsageMonth> usageMonths { get; set; }
+        public DbSet<UsageMonth> UsageMonths { get; set; }
         public DbSet<ModelEmbedding> ModelEmbeddings { get; set; }
         public DbSet<UsageType> UsageTypes { get; set; }
         public DbSet<UsageUnit> UsageUnits { get; set; }

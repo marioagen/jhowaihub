@@ -1,5 +1,4 @@
 import api from "@/services/api";
-// import store from "@/store";
 
 export default {
     getMainDashboardData() {
@@ -14,10 +13,9 @@ export default {
                 }
             });
     },
-    getTokensData(filters) {
-        return api.get(`/Dashboard/Tokens`, { params: filters })
+    GetUsedModels() {
+        return api.get(`/UsageMonth/FindUsedModels`)
             .then(({ data }) => {
-                console.log(data);
                 return data;
             })
             .catch((error) => {
@@ -26,10 +24,9 @@ export default {
                 }
             });
     },
-    getPagesData(filters) {
-        return api.get(`/Dashboard/Ocr`, { params: filters })
+    GetByUsageType(filters) {
+        return api.get(`/UsageMonth`, { params: filters })
             .then(({ data }) => {
-                console.log(data);
                 return data;
             })
             .catch((error) => {
@@ -38,10 +35,9 @@ export default {
                 }
             });
     },
-    getWorkflowsData(filters) {
-        return api.get(`/Dashboard/Workflows`, { params: filters })
+    GetTokensByModel(filters) {
+        return api.get(`/UsageMonth/FindByModel`, { params: filters })
             .then(({ data }) => {
-                console.log(data);
                 return data;
             })
             .catch((error) => {
@@ -50,10 +46,20 @@ export default {
                 }
             });
     },
-    getWorkflowsAutomaticData(filters) {
-        return api.get(`/Dashboard/Workflows/Automatic`, { params: filters })
+    GetUsageUnits() {
+        return api.get(`/Dashboard/UsageUnits`)
             .then(({ data }) => {
-                console.log(data);
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    GetPlan(tenantName) {
+        return api.get(`/Tenant/FindPlanByName/${tenantName}`)
+            .then(({ data }) => {
                 return data;
             })
             .catch((error) => {

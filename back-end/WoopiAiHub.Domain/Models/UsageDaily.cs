@@ -17,7 +17,7 @@ namespace WoopiAiHub.Domain.Models
         public bool Processed { get; private set; }
 
         [Column("ModelEmbeddingId", TypeName = "int")]
-        public int ModelEmbeddingId { get; private set; }
+        public int? ModelEmbeddingId { get; private set; }
 
         public virtual UsageType? UsageType { get; set; }
         public virtual ModelEmbedding? ModelEmbedding { get; set; }
@@ -29,7 +29,7 @@ namespace WoopiAiHub.Domain.Models
                           int usageTypeId,
                           int usageCount,
                           bool processed,
-                          int modelEmbeddingId)
+                          int? modelEmbeddingId)
             : base(id, created)
         {
             UserId = userId;

@@ -15,8 +15,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             var externalSettingsSection = configuration.GetSection(nameof(RefitExternalSettings));
             var externalSettings = externalSettingsSection.Get<RefitExternalSettings>();
 
-            if (string.IsNullOrWhiteSpace(externalSettings.EmbeddingsApiBaseAddress))
-                throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.EmbeddingsApiBaseAddress)}");
+            if (string.IsNullOrWhiteSpace(externalSettings.IndexerApiBaseAddress))
+                throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.IndexerApiBaseAddress)}");
 
             else if (string.IsNullOrWhiteSpace(externalSettings.FileRepositoryApiBaseAddress))
                 throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.FileRepositoryApiBaseAddress)}");
@@ -34,7 +34,7 @@ namespace WoopiAiHub.Application.DependencyInjection
                 throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.KeyGeneratorApiBaseAddress)}");
 
 
-            services.AddRefitClient<IEmbeddingsApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.EmbeddingsApiBaseAddress));
+            services.AddRefitClient<IEmbeddingsApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.IndexerApiBaseAddress));
             services.AddRefitClient<IFileRepositoryApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.FileRepositoryApiBaseAddress));
             services.AddRefitClient<IFunctionFileRetriever>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.FunctionGetFileBaseAddress));
             services.AddRefitClient<IGraphApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.GraphApiBaseAddress));

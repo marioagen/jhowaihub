@@ -11,7 +11,7 @@
                     </div>
                     <div class="plan-box plan-right">
                         <small class="text-muted">{{ $t("plan.current") }}</small><br>
-                        <span class="plan-title">{{ $t("plan.enterprise") }}</span>
+                        <span class="plan-title">{{ plan }}</span>
                     </div>
                 </div>
             </div>
@@ -20,22 +20,13 @@
                     <div class="col" v-outsideClick="handleOutsideClick">
                         <button
                             class="btn btn-outlined-light btn-sm border d-flex align-items-center justify-content-between"
-                            style="width: 200px;"
-                            @click="toggleDateFilter"
-                        >
+                            style="width: 200px;" @click="toggleDateFilter">
                             {{ presetDate() }}
                             <LucideIcon v-if="showDateFilter" icon="ChevronUp" :size="17" />
                             <LucideIcon v-else icon="ChevronDown" :size="17" />
                         </button>
-                        <div 
-                            v-if="showDateFilter" 
-                            class="position-absolute" 
-                            style="z-index: 1050; width: 500px;"
-                        >
-                            <DashboardDateFilter 
-                                @close="showDateFilter = false"
-                                @filterData="filterData"
-                            />
+                        <div v-if="showDateFilter" class="position-absolute" style="z-index: 1050; width: 500px;">
+                            <DashboardDateFilter @close="showDateFilter = false" @filterData="filterData" />
                         </div>
                     </div>
                     <div class="col">
@@ -45,10 +36,6 @@
                         </button>
                     </div>
                 </div>
-                <!-- <button class="btn btn-outlined-primary btn-sm">
-                    <LucideIcon icon="ArrowDownToLine" :size="17" />
-                    {{ $t("dashboard.exportBtn") }}
-                </button> -->
             </div>
             <div class="card mb-3">
                 <div class="card-body text-center">
@@ -56,104 +43,106 @@
                         <span class="me-1">{{ $t("dashboard.totalWTC") }}</span>
                         <LucideIcon v-tooltip.right="$t('dashboard.WTCText')" icon="Info" :size="17" />
                     </div>
-                    <h2 class="mb-0 fw-bold text-primary">{{ totalWTC }}</h2>
+                    <h2 class="mb-0 fw-bold text-primary">{{ totalWTC.toFixed(5) }}</h2>
                 </div>
             </div>
-            <TokensGraph
-                :key="datesChange"
-                :rangeDates="dateRange"
-            />
-            <PagesProcessedGraph
-                :key="datesChange"
-                :rangeDates="dateRange"
-            />
-            <WorkflowsGraph
-                :key="datesChange"
-                :rangeDates="dateRange"
-            />
+            <TokensGraph :key="datesChange" :usageUnits="usageUnits" @setTotalTokens="setTotalWTC" ref="TokensGraph" />
+            <PagesProcessedGraph :key="datesChange" :usageUnits="usageUnits" @setTotalPages="setTotalWTC"
+                ref="PagesProcessedGraph" />
+            <WorkflowsGraph :key="datesChange" :usageUnits="usageUnits" @setTotalExecution="setTotalWTC"
+                ref="WorkflowsGraph" />
         </div>
     </main>
 </template>
 
 <script>
-    import TokensGraph from '@/components/dashboard/graphs/TokensGraph.vue';
-    import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGraph.vue';
-    import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
-    import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
-    import DashboardServices from '@/services/dashboard/DashboardServices';
-    export default {
-        components: {
-            DashboardDateFilter,
-            TokensGraph,
-            WorkflowsGraph,
-            PagesProcessedGraph,
+import TokensGraph from '@/components/dashboard/graphs/TokensGraph.vue';
+import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGraph.vue';
+import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
+import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
+import DashboardServices from '@/services/dashboard/DashboardServices';
+import store from "@/store";
+export default {
+    components: {
+        DashboardDateFilter,
+        TokensGraph,
+        WorkflowsGraph,
+        PagesProcessedGraph,
+    },
+    data: () => ({
+        showDateFilter: false,
+        datesChange: 0,
+        filters: {
+            preset: "currentMonth",
+            start: "",
+            end: "",
         },
-        data: () => ({
-            showDateFilter: false,
-            datesChange: 0,
-            filters: {
-                preset: "currentMonth",
-                start: "",
-                end: "",
-            },
-            totalWTC: 0,
-        }),
-        computed: {
-            dateRange() {
-                return {
-                    start: this.filters.start,
-                    end: this.filters.end,
-                }
-            },
+        totalWTC: 0,
+        usageUnits: [],
+        plan: "",
+    }),
+    methods: {
+        toggleDateFilter() {
+            this.showDateFilter = !this.showDateFilter;
         },
-        methods: {
-            toggleDateFilter() {
-                this.showDateFilter = !this.showDateFilter;
-            },
-            filterData(filters) {
-                this.filters = filters;
-                this.datesChange++;
-            },
-            handleOutsideClick() {
-                if (this.showDateFilter) {
-                    this.showDateFilter = false;
-                }
-            },
-            presetDate() {
-                return this.$t(`dashboard.filters.${this.filters.preset}`);
-            },
-            getDashboardData() {
-                DashboardServices.getMainDashboardData()
-                    .then((response) => {
-                        console.log(response)
-                    });
+        filterData(filters) {
+            this.filters = filters;
+            this.totalWTC = 0;
+            this.$refs.TokensGraph.updateGraph(this.filters.start, this.filters.end);
+            this.$refs.WorkflowsGraph.updateGraph(this.filters.start, this.filters.end);
+            this.$refs.PagesProcessedGraph.updateGraph(this.filters.start, this.filters.end);
+        },
+        handleOutsideClick() {
+            if (this.showDateFilter) {
+                this.showDateFilter = false;
             }
         },
-        created() {
-            this.getDashboardData();
-        }
+        presetDate() {
+            return this.$t(`dashboard.filters.${this.filters.preset}`);
+        },
+        getDashboardData() {
+            DashboardServices.GetUsageUnits()
+                .then((response) => {
+                    this.usageUnits = response;
+                });
+        },
+        getPlan() {
+            DashboardServices.GetPlan(store.state.userProfile.tenant)
+                .then((response) => {
+                    this.plan = response.toUpperCase();
+                });
+        },
+        setTotalWTC(total) {
+            this.totalWTC += total;
+        },
+    },
+    created() {
+        this.getDashboardData();
+        this.getPlan();
     }
+}
 </script>
 
 <style scoped>
-    .plan-box {
-        background: #eef3ff;
-        border-radius: 12px;
-        padding: 12px 20px;
-        display: inline-block;
-        text-align: right;
-        border: 1px solid #d5e0ff;
-    }
+.plan-box {
+    background: #eef3ff;
+    border-radius: 12px;
+    padding: 12px 20px;
+    display: inline-block;
+    text-align: right;
+    border: 1px solid #d5e0ff;
+}
 
-    .plan-title {
-        color: #0056d2;
-        font-weight: 600;
-        font-size: 1rem;
-    }
+.plan-title {
+    color: #0056d2;
+    font-weight: 600;
+    font-size: 1rem;
+}
 
-    .plan-right {
-        margin-left: auto;
-        display: block; /* auto funciona apenas com block ou flex item */
-        width: fit-content;
-    }
+.plan-right {
+    margin-left: auto;
+    display: block;
+    /* auto funciona apenas com block ou flex item */
+    width: fit-content;
+}
 </style>

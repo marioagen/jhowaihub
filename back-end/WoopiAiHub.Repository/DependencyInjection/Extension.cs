@@ -46,8 +46,10 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IStepProfilePermissionsRepository, StepProfilePermissionsRepository>();
             services.AddScoped<IPromptRepository, PromptRepository>();
             services.AddScoped<IUsageDailyRepository, UsageDailyRepository>();
+            services.AddScoped<IUsageTypeRepository, UsageTypeRepository>();
+            services.AddScoped<IModelEmbeddingRepository, ModelEmbeddingRepository>();
             services.AddScoped<IUsageMonthRepository, UsageMonthRepository>();
-            services.AddScoped<IUsageLogRepository, UsageLogRepository>();
+            services.AddScoped<IUsageUnitRepository, UsageUnitRepository>();
 
             services.AddStackExchangeRedisCache(options =>
             {

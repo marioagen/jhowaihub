@@ -11,7 +11,7 @@ namespace WoopiAiHub.Repository
 
         public UsageDailyRepository(ApplicationDbContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context;
         }
 
         /// <summary>
@@ -81,6 +81,52 @@ namespace WoopiAiHub.Repository
             await _context.UsageDailies
                 .Where(ud => ids.Contains(ud.Id))
                 .ExecuteDeleteAsync();
+        }
+
+        /// <summary>
+        /// Find usage daily by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<UsageDaily?> FindByIdAsync(int id)
+        {
+            return await _context.UsageDailies.FindAsync(id);
+        }
+
+        /// <summary>
+        /// Add a new usage daily record
+        /// </summary>
+        /// <param name="usageDaily"></param>
+        /// <returns></returns>
+        public async Task<bool> AddAsync(UsageDaily usageDaily)
+        {
+            await _context.UsageDailies.AddAsync(usageDaily);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
+        /// Update an existing usage daily record
+        /// </summary>
+        /// <param name="usageDaily"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateAsync(UsageDaily usageDaily)
+        {
+            _context.UsageDailies.Update(usageDaily);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
+        /// Delete a usage daily record by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var usageDaily = await FindByIdAsync(id);
+            if (usageDaily == null) return false;
+
+            _context.UsageDailies.Remove(usageDaily);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

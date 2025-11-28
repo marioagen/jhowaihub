@@ -10,62 +10,22 @@ namespace WoopiAiHub.Api.Controllers
     [ApiController]
     public class DashboardController : ControllerBase
     {
-        private readonly IDashboardServices _dashboardServices;
-
-        public DashboardController(IDashboardServices dashboardServices)
+        private readonly IUsageUnitServices _usageUnitServices;
+        public DashboardController(IUsageUnitServices usageUnitServices)
         {
-            _dashboardServices = dashboardServices;
+            _usageUnitServices = usageUnitServices;
         }
 
         /// <summary>
-        /// Returns dashboard basic data
+        /// Returns usage units
         /// </summary>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet("UsageUnits")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [SwaggerOperation("Returns dashboard basic data")]
-        public IActionResult FindDashboardData()
+        [SwaggerOperation("Returns usage units")]
+        public async Task<IActionResult> FindAllUsageUnits()
         {
-            var result = _dashboardServices.FindDashboardData();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Returns dashboard tokens data
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("Tokens")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [SwaggerOperation("Returns dashboard tokens data")]
-        public IActionResult FindTokensData()
-        {
-            var result = _dashboardServices.FindTokensData();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Returns dashboard ocrs data
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("/Ocr")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [SwaggerOperation("Returns dashboard ocr data")]
-        public IActionResult FindOcrData()
-        {
-            var result = _dashboardServices.FindOCRData();
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Returns dashboard workflows data
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("/Workflows")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [SwaggerOperation("Returns dashboard workflows data")]
-        public IActionResult FindWorkflowsData()
-        {
-            var result = _dashboardServices.FindWorkflowsData();
+            var result = await _usageUnitServices.FindAllAsync();
             return Ok(result);
         }
     }

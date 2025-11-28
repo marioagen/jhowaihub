@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Repository.Context;
@@ -20,11 +21,13 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ITenantCacheServices _tenantCacheService;
 
         public TenantServices(ITenantRepository tenantRepository,
                               IServiceProvider serviceProvider,
                               ICoreDependencies coreDependencies,
-                              IApiDependencies apiDependencies
+                              IApiDependencies apiDependencies,
+                              ITenantCacheServices tenantCacheService
                             )
         {
             _configuration = coreDependencies.Configuration;
@@ -33,6 +36,7 @@ namespace WoopiAiHub.Application.Services
             _marketPlaceApi = apiDependencies.MarketPlaceApi;
             _keyGeneratorApi = apiDependencies.KeyGeneratorApi;
             _serviceProvider = serviceProvider;
+            _tenantCacheService = tenantCacheService;
         }
 
         /// <summary>
@@ -105,6 +109,18 @@ namespace WoopiAiHub.Application.Services
                                                                        email);
 
             return tenants;
+        }
+
+        /// <summary>
+        /// Finds the plan associated with the tenant
+        /// </summary>
+        /// <param name="tenant"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<string> FindPlanByName(string tenant)
+        {
+            var tenantInfo = await _tenantCacheService.FindTenantAsync(tenant);
+            return tenantInfo?.Plan?? string.Empty;
         }
 
         /// <summary>

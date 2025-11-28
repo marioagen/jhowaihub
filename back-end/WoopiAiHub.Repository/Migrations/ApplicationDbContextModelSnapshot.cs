@@ -995,7 +995,7 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
-                    b.Property<int>("ModelEmbeddingId")
+                    b.Property<int?>("ModelEmbeddingId")
                         .HasColumnType("int")
                         .HasColumnName("ModelEmbeddingId");
 
@@ -1039,7 +1039,7 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
-                    b.Property<int>("ModelEmbeddingId")
+                    b.Property<int?>("ModelEmbeddingId")
                         .HasColumnType("int")
                         .HasColumnName("ModelEmbeddingId");
 
@@ -1083,7 +1083,7 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
-                    b.Property<int>("ModelEmbeddingId")
+                    b.Property<int?>("ModelEmbeddingId")
                         .HasColumnType("int")
                         .HasColumnName("ModelEmbeddingId");
 
@@ -1107,7 +1107,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("usageMonths");
+                    b.ToTable("UsageMonths");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageType", b =>
@@ -1146,12 +1146,16 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
+                    b.Property<int?>("ModelEmbeddingId")
+                        .HasColumnType("int")
+                        .HasColumnName("ModelEmbeddingId");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("varchar(100)")
                         .HasColumnName("Name");
 
-                    b.Property<int>("UsageTypeId")
+                    b.Property<int?>("UsageTypeId")
                         .HasColumnType("int")
                         .HasColumnName("UsageTypeId");
 
@@ -1160,6 +1164,8 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnName("Value");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ModelEmbeddingId");
 
                     b.HasIndex("UsageTypeId");
 
@@ -1604,9 +1610,7 @@ namespace WoopiAiHub.Repository.Migrations
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.ModelEmbedding", "ModelEmbedding")
                         .WithMany("UsageDaily")
-                        .HasForeignKey("ModelEmbeddingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ModelEmbeddingId");
 
                     b.HasOne("WoopiAiHub.Domain.Models.UsageType", "UsageType")
                         .WithMany("UsageDaily")
@@ -1631,9 +1635,7 @@ namespace WoopiAiHub.Repository.Migrations
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.ModelEmbedding", "ModelEmbedding")
                         .WithMany("UsageLog")
-                        .HasForeignKey("ModelEmbeddingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ModelEmbeddingId");
 
                     b.HasOne("WoopiAiHub.Domain.Models.UsageType", "UsageType")
                         .WithMany("UsageLog")
@@ -1658,9 +1660,7 @@ namespace WoopiAiHub.Repository.Migrations
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.ModelEmbedding", "ModelEmbedding")
                         .WithMany("UsageMonth")
-                        .HasForeignKey("ModelEmbeddingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ModelEmbeddingId");
 
                     b.HasOne("WoopiAiHub.Domain.Models.UsageType", "UsageType")
                         .WithMany("UsageMonth")
@@ -1683,11 +1683,15 @@ namespace WoopiAiHub.Repository.Migrations
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageUnit", b =>
                 {
+                    b.HasOne("WoopiAiHub.Domain.Models.ModelEmbedding", "ModelEmbedding")
+                        .WithMany("UsageUnits")
+                        .HasForeignKey("ModelEmbeddingId");
+
                     b.HasOne("WoopiAiHub.Domain.Models.UsageType", "UsageType")
                         .WithMany("Units")
-                        .HasForeignKey("UsageTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UsageTypeId");
+
+                    b.Navigation("ModelEmbedding");
 
                     b.Navigation("UsageType");
                 });
@@ -1745,6 +1749,8 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("UsageLog");
 
                     b.Navigation("UsageMonth");
+
+                    b.Navigation("UsageUnits");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Permission", b =>

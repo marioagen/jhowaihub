@@ -7,20 +7,27 @@ namespace WoopiAiHub.Domain.Models
         [Column("Name", TypeName = "varchar(100)")]
         public string Name { get; private set; }
         [Column("UsageTypeId", TypeName = "int")]
-        public int UsageTypeId { get; private set; }
+        public int? UsageTypeId { get; private set; }
+        [Column("ModelEmbeddingId", TypeName = "int")]
+        public int? ModelEmbeddingId { get; private set; }
         [Column("Value", TypeName = "decimal(5,5)")]
-        public decimal Value { get; set; }
+        public decimal Value { get; private set; }
 
         public virtual UsageType? UsageType { get; set; }
+        public virtual ModelEmbedding? ModelEmbedding { get; set; }
 
         public UsageUnit(int id,
                          DateTime created,
                          string name,
-                         int usageTypeId)
+                         int? usageTypeId,
+                         int? modelEmbeddingId,
+                         decimal value)
             : base(id, created)
         {
             Name = name;
             UsageTypeId = usageTypeId;
+            ModelEmbeddingId = modelEmbeddingId;
+            Value = value;
         }
     }
 }
