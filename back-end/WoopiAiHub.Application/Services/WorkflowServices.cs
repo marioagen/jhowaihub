@@ -850,7 +850,14 @@ namespace WoopiAiHub.Application.Services
                     .Where(s => s.Id == 0 || !existingSteps.Any(es => es.Id == s.Id))
                     .ToList();
 
-                    _stepRepository.DeleteByIds(stepsToRemove.Select(s => s.Id));
+
+                var stepcards =_stepRepository.FindByIdsWithCards(stepsToRemove.Select(s => s.Id));
+                if(stepcards.Any(s => s.Cards.Count > 0))
+                {
+                    throw new AppException(ErrorCode.DefaultError, "Can't delete with cards related", null);
+                }
+
+                 _stepRepository.DeleteByIds(stepsToRemove.Select(s => s.Id));
 
                 foreach (var stepDto in workflowPhase2Dto.Steps.Where(s => s.Id > 0))
                 {

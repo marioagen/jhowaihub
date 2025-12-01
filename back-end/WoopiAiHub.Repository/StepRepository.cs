@@ -62,7 +62,21 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public ICollection<Step> FindByIds(IEnumerable<int> ids)
         {
-            return _context.Steps.AsNoTracking().Where(t => ids.Contains(t.Id)).ToList();
+            return _context.Steps.AsNoTracking().Where(t => ids.Contains(t.Id))
+                .ToList();
+        }
+
+        /// <summary>
+        /// Retrieves all steps with cards associated with a specific workflow ID.
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public ICollection<Step> FindByIdsWithCards(IEnumerable<int> ids)
+        {
+            return _context.Steps.AsNoTracking().Where
+                (t => ids.Contains(t.Id))
+                .Include(t => t.Cards)
+                .ToList();
         }
 
         /// <summary>
