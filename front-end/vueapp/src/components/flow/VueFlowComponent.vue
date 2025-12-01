@@ -137,7 +137,8 @@ export default {
         },
         async getFlow() {
             try {
-                if (hasStepTools && this.stepId != 0) {
+                console.log(this.hasStepTools, this.stepId);
+                if (this.hasStepTools && this.stepId != 0) {
                     this.step = await WorkflowService.getStepById(this.stepId);
                 } 
 

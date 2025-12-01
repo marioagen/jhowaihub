@@ -35,7 +35,7 @@
                                 <span>{{ getProfileName(step.profileId) }}</span>
                             </div>
                         </div>
-                        <div v-if="hasStepTools" class="tools-list">
+                        <div v-if="step.hasStepTools" class="tools-list">
                             <p class="small text-muted mb-2">{{ $t("workflow.configuredTools") }}: {{ step.length }}</p>
                             <button
                                 class="btn btn-outline-primary btn-sm w-100 mb-2"
@@ -106,17 +106,17 @@ export default {
         },
         removeToolFlow(step) {
             this.$emit('remove-tool-flow', step);
+        },
+        getData() {
+            return {
+                steps: this.workflowSteps.map(step => ({
+                    id: step.id,
+                    order: step.order,
+                    stepTools: step.stepTools || [],
+                    hasStepTools: step.hasStepTools || false
+                }))
+            };
         }
-        //getData() {
-        //    return {
-        //        steps: this.workflowSteps.map(step => ({
-        //            id: step.id,
-        //            order: step.order,
-        //            stepTools: step.stepTools || [],
-        //            has
-        //        }))
-        //    };
-        //}
     }
 };
 </script>

@@ -336,7 +336,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow/:id/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
+        path: "/flow/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
         name: "EditFlow",
         component: EditFlow,
         meta: { 

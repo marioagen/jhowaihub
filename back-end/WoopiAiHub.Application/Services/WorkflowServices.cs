@@ -850,10 +850,7 @@ namespace WoopiAiHub.Application.Services
                     .Where(s => s.Id == 0 || !existingSteps.Any(es => es.Id == s.Id))
                     .ToList();
 
-                foreach (var step in stepsToRemove)
-                {
-                    workflow.Steps.Remove(step);
-                }
+                    _stepRepository.DeleteByIds(stepsToRemove.Select(s => s.Id));
 
                 foreach (var stepDto in workflowPhase2Dto.Steps.Where(s => s.Id > 0))
                 {

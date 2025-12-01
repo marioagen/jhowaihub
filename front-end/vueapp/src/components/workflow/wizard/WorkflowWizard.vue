@@ -57,7 +57,7 @@
                                      @add-tool-flow="handleAddToolFlow"
                                      @edit-tool-flow="handleEditToolFlow"
                                      @remove-tool-flow="handleRemoveToolFlow"
-                                     :hasStepsTools="phase3Data?.steps.hasStepTools"/>
+                                     :hasStepsTools="phase3Data?.steps.hasStepTools" />
                     </div>
                 </div>
             </div>
@@ -150,7 +150,7 @@
                 );
             },
             formSubtitle() {
-               return this.$t(this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle");
+                return this.$t(this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle");
             },
         },
         methods: {
@@ -226,231 +226,266 @@
                         });
                     }
                 }
-              catch(error) {
-                this.$notify({
-                    title: 'workflow.index',
-                    message: 'workflow.phase1Error',
-                    variant: 'danger',
-                    icon: 'CircleX',
-                });
-            } finally {
-                this.isLoading = false;
+                catch (error) {
+                    this.$notify({
+                        title: 'workflow.index',
+                        message: 'workflow.phase1Error',
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                } finally {
+                    this.isLoading = false;
 
-            }
-        },
-        async savePhase2() {
-            this.isLoading = true;
-            const phase2Component = this.$refs.phase2;
-            const data = phase2Component.getData();
-
-            if (data.steps.length === 0) {
-                this.$notify({
-                    title: 'workflow.index',
-                    message: 'validation.oneStep',
-                    variant: 'warning',
-                    icon: 'CircleAlert',
-                });
-                this.isLoading = false;
-                return;
-            }
-
-            try {
-                const params = {
-                    workflowId: this.workflowIdInternal,
-                    steps: data.steps,
-                };
-
-                const result = await WorkflowService.updatePhase2(params);
-                if (result.error) {
-                    throw new Error(result.error);
-                }
-
-                this.phase2Data = data;
-                this.currentPhase = 3;
-                await this.reloadCurrentPhaseData();
-
-                this.$notify({
-                    title: 'workflow.index',
-                    message: 'workflow.phase2Success',
-                    variant: 'success',
-                    icon: 'CircleCheckBig',
-                });
-            } catch (error) {
-                this.$notify({
-                    title: 'workflow.index',
-                    message: 'workflow.phase2Error',
-                    variant: 'danger',
-                    icon: 'CircleX',
-                });
-            } finally {
-                this.isLoading = false;
-            }
-        },
-        finalize() {
-            this.redirectToIndex();
-        },
-        redirectToIndex() {
-            this.$router.push({ name: "WorkflowManagement" });
-        },
-        handleAddToolFlow(step, phase) {
-            // Salva dados locais antes de sair
-            localStorage.setItem('wizardPhase1Data', JSON.stringify(this.phase1Data));
-            localStorage.setItem('wizardPhase2Data', JSON.stringify(this.phase2Data));
-            localStorage.setItem('wizardPhase3Data', JSON.stringify(this.phase3Data));
-            // Redireciona normalmente
-            this.$router.push({
-                name: "NewFlow",
-                params: {
-                    stepOrder: step.order,
-                    phase: this.currentPhase,
-                    workflowId: this.workflowIdInternal,
-                    stepId: step.id,
-                    hasStepTools: step.hasStepTools,
-                }
-            });
-        },
-        handleEditToolFlow(step, phase) {
-            localStorage.setItem('wizardPhase1Data', JSON.stringify(this.phase1Data));
-            localStorage.setItem('wizardPhase2Data', JSON.stringify(this.phase2Data));
-            localStorage.setItem('wizardPhase3Data', JSON.stringify(this.phase3Data));
-            this.$router.push({
-                name: "EditFlow",
-                params: {
-                    stepOrder: step.order,
-                    phase: this.currentPhase,
-                    workflowId: this.workflowIdInternal,
-                    stepId: step.id,
-                    hasStepTools: step.hasStepTools,
-                }
-            });
-        },
-
-        handleRemoveToolFlow(step) {
-            const stepIndex = this.phase3Data.steps.findIndex(s => s.id === step.id);
-            if (stepIndex !== -1) {
-                this.phase3Data.steps[stepIndex].stepTools = [];
-            }
-        },
-            async loadWorkflowData() {
-            if (!this.workflowIdInternal) return;
-            this.isLoading = true;
-            try {
-                if (this.currentPhase == 1) {
-                    let result = await this.getPhase1Data();
-                    this.phase1Data = {
-                        name: result.name,
-                        teams: result.teams.map(t => t.id),
-                    };
-                }
-                else if (this.currentPhase == 2) {
-                    let result = await this.getPhase2Data();
-                    this.phase2Data = {
-                        steps: result.map(step => ({
-                            id: step.id,
-                            name: step.name,
-                            order: step.order,
-                            profileId: String(step.profile?.id || ''),
-                            statusId: String(step.status?.id || ''),
-                            hasStepTools: step.hasStepTools,
-                        }))
-                    };
-                    console.log(this.phase2Data);
-                }
-                else if (this.currentPhase == 3) {
-                    let result = await this.getPhase2Data();
-                    this.phase2Data = {
-                        steps: result.map(step => ({
-                            id: step.id,
-                            name: step.name,
-                            order: step.order,
-                            profileId: String(step.profile?.id || ''),
-                            statusId: String(step.status?.id || ''),
-                            hasStepTools: step.hasStepTools,
-                        }))
-                    };
-                    this.phase3Data = this.phase2Data;
-                }
-            } catch (error) {
-                this.$notify({
-                    title: 'workflow.index',
-                    message: error.message || 'workflow.loadError',
-                    variant: 'danger',
-                    icon: 'CircleX',
-                });
-                this.redirectToIndex();
-            } finally {
-                this.isLoading = false;
-            }
-        },
-        async loadProfiles() {
-            try {
-                const response = await ProfilesService.getProfilesList();
-                if (response.error === undefined) {
-                    this.profilesList = response.map(r => ({ id: r.id, text: r.name }));
-                }
-            } catch (error) {
-                console.error("Error loading profiles:", error);
-            }
-        },
-        async getPhase1Data() {
-            const phase1DataReturn = await WorkflowService.getPhase1ById(this.workflowIdInternal);
-            if (phase1DataReturn.error) {
-                throw new Error(phase1DataReturn.error);
-            }
-            return phase1DataReturn;
-        },
-        async getPhase2Data() {
-            const phase2DataReturn = await WorkflowService.getPhase2ById(this.workflowIdInternal);
-            if (phase2DataReturn.error) {
-                throw new Error(phase2DataReturn.error);
-            }
-            return phase2DataReturn;
-        },
-        //async getPhase3Data() {
-        //    const phase3DataReturn = await WorkflowService.getPhase3ById(this.workflowIdInternal);
-        //    if (phase3DataReturn.error) {
-        //        throw new Error(phase3DataReturn.error);
-        //    }
-        //    return phase3DataReturn;
-        //},
-    },
-    created() {
-        this.loadProfiles();
-        this.loadWorkflowData();
-    },
-        async mounted() {
-        // Restaura dados do localStorage, se existirem
-        const phase1 = localStorage.getItem('wizardPhase1Data');
-        const phase2 = localStorage.getItem('wizardPhase2Data');
-        const phase3 = localStorage.getItem('wizardPhase3Data');
-        if (phase1 && phase2 && phase3) {
-            this.phase1Data = JSON.parse(phase1);
-            this.phase2Data = JSON.parse(phase2);
-            this.phase3Data = JSON.parse(phase3);
-            // Limpa o localStorage após restaurar
-            localStorage.removeItem('wizardPhase1Data');
-            localStorage.removeItem('wizardPhase2Data');
-            localStorage.removeItem('wizardPhase3Data');
-        } else if (this.workflowIdInternal || this.isEdit) {
-            await this.reloadCurrentPhaseData();
-        }
-    },
-
-    watch: {
-        '$route.params.phase': {
-            handler(newPhase) {
-                if (newPhase) {
-                    this.currentPhase = Number(newPhase);
-                    // Reload data when phase changes via route
-                    if (this.workflowIdInternal) {
-                        this.reloadCurrentPhaseData();
-                    }
                 }
             },
-            immediate: false
+            async savePhase2() {
+                this.isLoading = true;
+                const phase2Component = this.$refs.phase2;
+                const data = phase2Component.getData();
+
+                if (data.steps.length === 0) {
+                    this.$notify({
+                        title: 'workflow.index',
+                        message: 'validation.oneStep',
+                        variant: 'warning',
+                        icon: 'CircleAlert',
+                    });
+                    this.isLoading = false;
+                    return;
+                }
+
+                try {
+                    const params = {
+                        workflowId: this.workflowIdInternal,
+                        steps: data.steps,
+                    };
+
+                    const result = await WorkflowService.updatePhase2(params);
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+
+                    this.phase2Data = data;
+                    this.currentPhase = 3;
+                    await this.reloadCurrentPhaseData();
+
+                    this.$notify({
+                        title: 'workflow.index',
+                        message: 'workflow.phase2Success',
+                        variant: 'success',
+                        icon: 'CircleCheckBig',
+                    });
+                } catch (error) {
+                    this.$notify({
+                        title: 'workflow.index',
+                        message: 'workflow.phase2Error',
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            finalize() {
+                this.redirectToIndex();
+            },
+            redirectToIndex() {
+                this.$router.push({ name: "WorkflowManagement" });
+            },
+            handleAddToolFlow(step, phase) {
+                // Salva dados locais antes de sair
+                localStorage.setItem('wizardPhase1Data', JSON.stringify(this.phase1Data));
+                localStorage.setItem('wizardPhase2Data', JSON.stringify(this.phase2Data));
+                localStorage.setItem('wizardPhase3Data', JSON.stringify(this.phase3Data));
+                // Redireciona normalmente
+                this.$router.push({
+                    name: "NewFlow",
+                    params: {
+                        stepOrder: step.order,
+                        phase: this.currentPhase,
+                        workflowId: this.workflowIdInternal,
+                        stepId: step.id,
+                        hasStepTools: step.hasStepTools,
+                    }
+                });
+            },
+            handleEditToolFlow(step, phase) {
+                localStorage.setItem('wizardPhase1Data', JSON.stringify(this.phase1Data));
+                localStorage.setItem('wizardPhase2Data', JSON.stringify(this.phase2Data));
+                localStorage.setItem('wizardPhase3Data', JSON.stringify(this.phase3Data));
+                this.$router.push({
+                    name: "EditFlow",
+                    params: {
+                        stepOrder: step.order,
+                        phase: this.currentPhase,
+                        workflowId: this.workflowIdInternal,
+                        stepId: step.id,
+                        hasStepTools: step.hasStepTools,
+                    }
+                });
+            },
+
+            async handleRemoveToolFlow(step) {
+                const phase3Component = this.$refs.phase3;
+                let phase3DataResult = await this.getPhase3Data()
+
+                const stepIndex = phase3DataResult.findIndex(s => s.id === step.id);
+                if (stepIndex !== -1) {
+                    phase3DataResult[stepIndex].stepTools = [];
+                }
+                console.log(phase3DataResult);
+                try {
+                    const params = {
+                        workflowId: this.workflowId ?? this.$route.params.workflowId,
+                        steps: phase3DataResult
+                    };
+                    const result = await WorkflowService.updatePhase3(params);
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+                    await this.reloadCurrentPhaseData();
+                    return this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.progressFlowSuccess',
+                        variant: 'success',
+                        icon: 'CircleCheckBig',
+                    });
+                }
+                catch (e) {
+                    this.$notify({
+                        title: 'flow.title',
+                        message: 'flow.formFlow.progressFlowFail',
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                }
+                
+            },
+            async loadWorkflowData() {
+                console.log(this.$route.params);
+                this.workflowIdInternal = this.workflowIdInternal ?? this.$route.params.workflowId;
+                this.currentPhase = this.currentPhase ?? this.$route.params.phase;
+                if (!this.workflowIdInternal) return;
+                this.isLoading = true;
+                try {
+                    if (this.currentPhase == 1) {
+                        let result = await this.getPhase1Data();
+                        this.phase1Data = {
+                            name: result.name,
+                            teams: result.teams.map(t => t.id),
+                        };
+                    }
+                    else if (this.currentPhase == 2) {
+                        let result = await this.getPhase2Data();
+                        this.phase2Data = {
+                            steps: result.map(step => ({
+                                id: step.id,
+                                name: step.name,
+                                order: step.order,
+                                profileId: String(step.profile?.id || ''),
+                                statusId: String(step.status?.id || ''),
+                                hasStepTools: step.hasStepTools,
+                            }))
+                        };
+                        console.log(this.phase2Data);
+                    }
+                    else if (this.currentPhase == 3) {
+                        console.log("test");
+                        let result = await this.getPhase2Data();
+                        this.phase2Data = {
+                            steps: result.map(step => ({
+                                id: step.id,
+                                name: step.name,
+                                order: step.order,
+                                profileId: String(step.profile?.id || ''),
+                                statusId: String(step.status?.id || ''),
+                                hasStepTools: step.hasStepTools,
+                            }))
+                        };
+                        this.phase3Data = this.phase2Data;
+                        console.log(this.phase3Data);
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: 'workflow.index',
+                        message: error.message || 'workflow.loadError',
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                    this.redirectToIndex();
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            async loadProfiles() {
+                try {
+                    const response = await ProfilesService.getProfilesList();
+                    if (response.error === undefined) {
+                        this.profilesList = response.map(r => ({ id: r.id, text: r.name }));
+                    }
+                } catch (error) {
+                    console.error("Error loading profiles:", error);
+                }
+            },
+            async getPhase1Data() {
+                const phase1DataReturn = await WorkflowService.getPhase1ById(this.workflowIdInternal);
+                if (phase1DataReturn.error) {
+                    throw new Error(phase1DataReturn.error);
+                }
+                return phase1DataReturn;
+            },
+            async getPhase2Data() {
+                const phase2DataReturn = await WorkflowService.getPhase2ById(this.workflowIdInternal);
+                if (phase2DataReturn.error) {
+                    throw new Error(phase2DataReturn.error);
+                }
+                return phase2DataReturn;
+            },
+            async getPhase3Data() {
+                const phase3DataReturn = await WorkflowService.getPhase3ById(this.workflowIdInternal);
+                if (phase3DataReturn.error) {
+                    throw new Error(phase3DataReturn.error);
+                }
+                return phase3DataReturn;
+            },
+        },
+        created() {
+            this.loadProfiles();
+            this.loadWorkflowData();
+        },
+        async mounted() {
+            // Restaura dados do localStorage, se existirem
+            const phase1 = localStorage.getItem('wizardPhase1Data');
+            const phase2 = localStorage.getItem('wizardPhase2Data');
+            const phase3 = localStorage.getItem('wizardPhase3Data');
+            if (phase1 && phase2 && phase3) {
+                this.phase1Data = JSON.parse(phase1);
+                this.phase2Data = JSON.parse(phase2);
+                this.phase3Data = JSON.parse(phase3);
+                // Limpa o localStorage após restaurar
+                localStorage.removeItem('wizardPhase1Data');
+                localStorage.removeItem('wizardPhase2Data');
+                localStorage.removeItem('wizardPhase3Data');
+            } else if (this.workflowIdInternal || this.isEdit) {
+                await this.reloadCurrentPhaseData();
+            }
+        },
+
+        watch: {
+            '$route.params.phase': {
+                handler(newPhase) {
+                    if (newPhase) {
+                        this.currentPhase = Number(newPhase);
+                        // Reload data when phase changes via route
+                        if (this.workflowIdInternal) {
+                            this.reloadCurrentPhaseData();
+                        }
+                    }
+                },
+                immediate: false
+            }
         }
-    }
-};
+    };
 </script>
 
 <style scoped>
