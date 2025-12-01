@@ -1,9 +1,9 @@
-using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs.Response.Automation;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface IUsageUnitRepository
     {
-        Task<IEnumerable<UsageUnit>> FindAllAsync();
+        Task<IEnumerable<UsageUnitDto>> FindAllAsync();
     }
 }

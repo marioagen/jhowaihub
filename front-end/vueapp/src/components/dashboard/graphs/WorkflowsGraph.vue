@@ -134,22 +134,22 @@ export default {
     },
     computed: {
         totalWorkflows() {
-            return this.graph.series[0].data.reduce((a, b) => a + b, 0);
+            return this.graph2.series[0].data.reduce((a, b) => a + b, 0);
         },
         totalWorkflowsAutomatic() {
-            return this.graph2.series[0].data.reduce((a, b) => a + b, 0);
+            return this.graph.series[0].data.reduce((a, b) => a + b, 0);
         },
         usageUnitWorkflowAutomatic() {
             if (this.usageUnits.length === 0) {
                 return 0;
             }
-            return this.usageUnits.find(item => item.usageTypeId === ColTypeUsage.Execution)?.value ?? 0;
+            return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.N8N)?.value ?? 0;
         },
         usageUnitWorkflow() {
             if (this.usageUnits.length === 0) {
                 return 0;
             }
-            return this.usageUnits.find(item => item.usageTypeId === ColTypeUsage.N8N)?.value ?? 0;
+            return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.Execution)?.value ?? 0;
         }
     },
     methods: {
@@ -157,19 +157,19 @@ export default {
             let params = {
                 start: this.start,
                 end: this.end,
-                id: ColTypeUsage.Execution
+                usageType: ColTypeUsage.Execution
             };
             this.isLoadingWorkflows = true;
             DashboardServices.GetByUsageType(params)
                 .then((response) => {
                     if (response && !response.error) {
-                        this.graph.options = {
-                            ...this.graph.options,
+                        this.graph2.options = {
+                            ...this.graph2.options,
                             xaxis: {
                                 categories: response.map(item => item.date)
                             }
                         };
-                        this.graph.series = [{
+                        this.graph2.series = [{
                             name: 'Workflows',
                             data: response.map(item => item.value)
                         }];
@@ -189,19 +189,19 @@ export default {
             let params = {
                 start: this.start,
                 end: this.end,
-                id: ColTypeUsage.N8N
+                usageType: ColTypeUsage.N8N
             };
             this.isLoadingAutomation = true;
             DashboardServices.GetByUsageType(params)
                 .then((response) => {
                     if (response && !response.error) {
-                        this.graph2.options = {
-                            ...this.graph2.options,
+                        this.graph.options = {
+                            ...this.graph.options,
                             xaxis: {
                                 categories: response.map(item => item.date)
                             }
                         };
-                        this.graph2.series = [{
+                        this.graph.series = [{
                             name: 'Automatic Workflows',
                             data: response.map(item => item.value)
                         }];

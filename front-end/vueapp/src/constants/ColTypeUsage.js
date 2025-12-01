@@ -1,8 +1,8 @@
 export const ColTypeUsage = {
-    Ocr: 1,
-    N8N: 2,
-    Execution: 3,
-    Prompt: 4,
-    DocumentEmbeddings: 5,
-    DocumentQuery: 6
+    Ocr: 'Ocr',
+    N8N: 'N8N',
+    Execution: 'Execution',
+    Prompt: 'Prompt',
+    DocumentEmbeddings: 'Document Embeddings',
+    DocumentQuery: 'Document Query'
 };

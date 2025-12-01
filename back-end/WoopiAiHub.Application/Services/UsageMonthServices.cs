@@ -26,7 +26,7 @@ namespace WoopiAiHub.Application.Services
             var startDate = GetDate(usageMonthFilterDto.Start);
             var endDate = GetDate(usageMonthFilterDto.End);
 
-            return await _usageMonthRepository.FindDataByUsageType(usageMonthFilterDto.Id, startDate, endDate);
+            return await _usageMonthRepository.FindDataByUsageType(usageMonthFilterDto.UsageType, startDate, endDate);
         }
 
         /// <summary>

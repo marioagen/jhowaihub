@@ -99,10 +99,10 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="usageTypeId"></param>
         /// <returns></returns>
-        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(int usageTypeId, DateTime? start, DateTime? end)
+        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(string usageType, DateTime? start, DateTime? end)
         {
             var query = _context.UsageMonths
-                    .Where(x => x.UsageTypeId == usageTypeId);
+                    .Where(x => x.UsageType!.Name.Equals(usageType));
 
             if (start.HasValue)
                 query = query.Where(x => x.Created.Date >= start.Value.Date);
