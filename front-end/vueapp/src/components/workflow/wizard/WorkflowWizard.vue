@@ -333,7 +333,6 @@
                 if (stepIndex !== -1) {
                     phase3DataResult[stepIndex].stepTools = [];
                 }
-                console.log(phase3DataResult);
                 try {
                     const params = {
                         workflowId: this.workflowId ?? this.$route.params.workflowId,
@@ -362,7 +361,6 @@
                 
             },
             async loadWorkflowData() {
-                console.log(this.$route.params);
                 this.workflowIdInternal = this.workflowIdInternal ?? this.$route.params.workflowId;
                 this.currentPhase = this.currentPhase ?? this.$route.params.phase;
                 if (!this.workflowIdInternal) return;
@@ -385,12 +383,11 @@
                                 profileId: String(step.profile?.id || ''),
                                 statusId: String(step.status?.id || ''),
                                 hasStepTools: step.hasStepTools,
+                                isActive: true,
                             }))
                         };
-                        console.log(this.phase2Data);
                     }
                     else if (this.currentPhase == 3) {
-                        console.log("test");
                         let result = await this.getPhase2Data();
                         this.phase2Data = {
                             steps: result.map(step => ({
@@ -403,7 +400,6 @@
                             }))
                         };
                         this.phase3Data = this.phase2Data;
-                        console.log(this.phase3Data);
                     }
                 } catch (error) {
                     this.$notify({
@@ -454,7 +450,6 @@
             this.loadWorkflowData();
         },
         async mounted() {
-            // Restaura dados do localStorage, se existirem
             const phase1 = localStorage.getItem('wizardPhase1Data');
             const phase2 = localStorage.getItem('wizardPhase2Data');
             const phase3 = localStorage.getItem('wizardPhase3Data');
@@ -462,7 +457,6 @@
                 this.phase1Data = JSON.parse(phase1);
                 this.phase2Data = JSON.parse(phase2);
                 this.phase3Data = JSON.parse(phase3);
-                // Limpa o localStorage após restaurar
                 localStorage.removeItem('wizardPhase1Data');
                 localStorage.removeItem('wizardPhase2Data');
                 localStorage.removeItem('wizardPhase3Data');
@@ -476,7 +470,6 @@
                 handler(newPhase) {
                     if (newPhase) {
                         this.currentPhase = Number(newPhase);
-                        // Reload data when phase changes via route
                         if (this.workflowIdInternal) {
                             this.reloadCurrentPhaseData();
                         }

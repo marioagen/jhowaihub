@@ -18,7 +18,7 @@
         </div>
         <div v-else class="row">
             <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
-                <div v-for="(step, index) in steps"
+                <div v-for="(step, index) in activeStepsList"
                      :key="step.id || step.tempId || index"
                      class="step-card card shadow-sm rounded-3">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -43,7 +43,7 @@
                         </div>
                         <button type="button"
                                 class="btn btn-link btn-sm"
-                                @click="removeStep(index)">
+                                @click="removeStep(index, step)">
                             <LucideIcon icon="X" />
                         </button>
                     </div>
@@ -128,6 +128,11 @@
                 tempStepCounter: 1,
             };
         },
+        computed: {
+            activeStepsList() {
+                return this.steps.filter(s => s.isActive !== false);
+            },
+        },
         methods: {
             getProfiles() {
                 this.isLoadingProfiles = true;
@@ -159,14 +164,21 @@
                     order: this.steps.length + 1,
                     profileId: '',
                     statusId: '',
+                    isActive: true,
                 });
             },
-            removeStep(index) {
-                this.steps.splice(index, 1);
-                // Reorder remaining steps
-                this.steps.forEach((step, idx) => {
-                    step.order = idx + 1;
+            reorderList() {
+                this.activeStepsList.forEach((step, index) => {
+                    step.order = index + 1;
                 });
+            },
+            removeStep(order2, step) {
+                const i = this.steps.map(s => {
+                    if ( s.id === step.id) {
+                        step.isActive = false;
+                    }
+                });
+                this.reorderList();
             },
             getData() {
                 return {
@@ -177,6 +189,7 @@
                         profileId: parseInt(step.profileId),
                         statusId: parseInt(step.statusId),
                         hasStepTools: step.hasStepTools || false,
+                        isActive:true,
                     }))
                 };
             }
@@ -184,7 +197,6 @@
         created() {
             this.getProfiles();
             this.getStatus();
-            console.log(this.initialSteps);
         },
         watch: {
             initialSteps: {

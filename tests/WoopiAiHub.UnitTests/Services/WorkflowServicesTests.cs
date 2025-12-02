@@ -662,7 +662,8 @@ namespace WoopiAiHub.UnitTests.Services
             var teamFixture = new TeamFixture();
             var team = teamFixture.CreateValidTeam();
             var workflow = new Workflow(1, DateTime.Now, new List<Team> { team }, "Test Workflow");
-
+            var step = new Step(1, DateTime.Now, workflow.Id, "Step 1", 1, 1, 1);
+            var steps = new List<Step> { step };
             var phase2Dto = new WorkflowPhase2Dto
             {
                 WorkflowId = 1,
@@ -683,6 +684,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(workflow);
             _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>()))
                 .ReturnsAsync((ProfileDto?)null);
+            _stepRepositoryMock.Setup(r => r.FindByIdsWithCards(It.IsAny<IEnumerable<int>>()))
+                .Returns(steps);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto));
@@ -784,8 +787,7 @@ namespace WoopiAiHub.UnitTests.Services
                     {
                         Id = stepDto.Id,
                         Order = stepDto.Order,
-                        StepTools = [],
-                        HasStepToolFlows = false
+                        StepTools = []
                     }
                 }
             };
@@ -848,8 +850,13 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var stepDto = WorkflowFixture.FindValidStepDto();
             var step = WorkflowFixture.FindValidStep();
+            var stepWithCards = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var steps = new List<Step> { stepWithCards };
             _profileRepositoryMock.Setup(x => x.FindById(stepDto.Profile.Id)).ReturnsAsync(WorkflowFixture.FindValidProfileDto());
             _statusRepositoryMock.Setup(x => x.FindById(stepDto.Status.Id)).ReturnsAsync(WorkflowFixture.FindValidStatus());
+
+            _stepRepositoryMock.Setup(r => r.FindByIdsWithCards(It.IsAny<IEnumerable<int>>()))
+            .Returns(steps);
             var workflowPhase2Dto = new WorkflowPhase2Dto
             {
                 WorkflowId = 1,
@@ -884,13 +891,55 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            Assert.Equal(1, workflow.Steps.Count); 
+            Assert.Equal(2, workflow.Steps.Count); 
             Assert.DoesNotContain(workflow.Steps, s => s.Id == 3); 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
         }
+
+        [Fact(DisplayName = "UpdatePhase2 should throw exception when steps to remove have cards")]
+        [Trait("UpdatePhase2", "Fail")]
+        public async Task UpdatePhase2_ShouldThrowException_WhenStepsToRemoveHaveCards()
+        {
+            // Arrange
+            var workflowId = 1;
+            var step = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var card = new Card(1, DateTime.Now,1,1,"Name",1,true,null);
+            step.AddCard(card);
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var steps = new List<Step> { step };
+            var workflowPhase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase2Dto
+                    {
+                        Id = 1,
+                        Name = "Updated Step 1",
+                        Order = 1,
+                        ProfileId = stepDto.Profile.Id,
+                        StatusId = stepDto.Status.Id
+                    }
+                }
+            };
+            var existingWorkflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Test Workflow")
+            {
+                Steps = new List<Step> { step }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(existingWorkflow);
+
+            _stepRepositoryMock.Setup(x => x.FindByIdsWithCards(It.IsAny<IEnumerable<int>>()))
+                .Returns(steps);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(workflowPhase2Dto));
+            Assert.Equal(ErrorCode.DefaultError, exception.ErrorCode);
+            Assert.Equal("Can't delete with cards related", exception.Message);
+        }
+        
 
         [Fact(DisplayName = "FindPhase2ById success")]
         [Trait("FindPhase2ById", "Success")]

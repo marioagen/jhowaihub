@@ -98,7 +98,6 @@ export default {
             return profile ? profile.text : 'N/A';
         },
         addToolFlow(step) {
-            console.log(step);
             this.$emit('add-tool-flow', step, this.phase);
         },
         editToolFlow(step) {
