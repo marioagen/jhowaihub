@@ -8,13 +8,14 @@
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <button class="btn btn-outlined-primary btn-sm" @click="previousIA">
-                        <LucideIcon icon="ChevronLeft" :size="17" />
+                        <LucideIcon icon="ChevronLeft" :size="17" :class="currentIAIndex === 0 ? 'disabled' : ''" />
                     </button>
                     <span class="mb-0">
                         {{ currentIA.name }}
                     </span>
                     <button class="btn btn-outlined-primary btn-sm" @click="nextIA">
-                        <LucideIcon icon="ChevronRight" :size="17" />
+                        <LucideIcon icon="ChevronRight" :size="17"
+                            :class="currentIAIndex === IAList.length - 1 ? 'disabled' : ''" />
                     </button>
                 </div>
             </div>
@@ -57,6 +58,7 @@ export default {
         isLoading: true,
         IAList: [],
         currentIAIndex: 0,
+        previousTotalTokens: 0,
         graph: {
             options: {
                 chart: {
@@ -138,7 +140,9 @@ export default {
                 });
         },
         setTotalTokens() {
-            this.$emit('setTotalTokens', this.usageUnitTokens * this.totalTokens);
+            var total = this.usageUnitTokens * this.totalTokens;
+            this.$emit('setTotalTokens', total - this.previousTotalTokens);
+            this.previousTotalTokens = total;
         },
         getIAList() {
             DashboardServices.GetUsedModels()
@@ -154,15 +158,20 @@ export default {
         },
         nextIA() {
             if (this.IAList.length === 0) return;
+            if (this.currentIAIndex >= this.IAList.length - 1) return;
+
             this.currentIAIndex = (this.currentIAIndex + 1) % this.IAList.length;
             this.getTokensData();
         },
         previousIA() {
             if (this.IAList.length === 0) return;
+            if (this.currentIAIndex <= 0) return;
+
             this.currentIAIndex = (this.currentIAIndex - 1 + this.IAList.length) % this.IAList.length;
             this.getTokensData();
         },
         updateGraph(start, end) {
+            this.previousTotalTokens = 0;
             this.start = start;
             this.end = end;
             this.getTokensData();
@@ -170,3 +179,8 @@ export default {
     },
 }
 </script>
+<style scoped>
+.disabled {
+    opacity: 0.3;
+}
+</style>

@@ -437,7 +437,7 @@
     transferListTitle: "Selection list",
     transferListPlaceholder: "Search in list",
     unexpectedError: "An unexpected error occurred. Please contact the system administrator.",
-     types: {
+    types: {
         title: "Types",
         subtitle: "Manage system document types",
         createBtn: "Create type",
@@ -501,7 +501,7 @@
             management: "Workflow Management",
         },
     },
-    card:{
+    card: {
         userAssigned: "Assigned",
         userApplicant: "Applicant",
         assignBtn: "Assign",
@@ -576,7 +576,7 @@
             subtitle: "Update the information of the selected tool",
         },
         sidebarTitle: "Configure I/O:",
-        sidebar:{
+        sidebar: {
             filter: "Select webhook",
             inputs: "Inputs",
             dependencies: "Dependencies",
@@ -670,7 +670,7 @@
         deleteError: "Prompts delete failed",
         removeAllPrompts: "Delete prompts"
     },
-    analyze:{
+    analyze: {
         title: "Analyze Document",
         errorLoadDocumentData: "Error loading document data",
         failedEditOutput: "The output could not be edited.",
@@ -678,7 +678,7 @@
         extractedData: "Extracted Data",
         askTheDoc: "Ask the Document",
         conversationWithDocument: "Conversation with the Document",
-        askAI:"ASK AI",
+        askAI: "ASK AI",
         typeYourQuestion: "Type your question about the document...",
         sendQuestion: "Send Question",
         output: "Output",
@@ -706,6 +706,7 @@
         subtitle: "Woopi AI",
         exportBtn: "Export CSV",
         totalWTC: "Total WTC",
+        update: "Update",
         WTCText: "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan’s multipliers. This is not a financial value.",
         filters: {
             currentMonth: "This Month",

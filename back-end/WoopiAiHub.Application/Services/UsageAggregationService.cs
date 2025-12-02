@@ -30,6 +30,28 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Processes unprocessed usage data by single tenant associated with the specified module.
+        /// </summary>
+        /// <param name="tenantName"></param>
+        /// <returns></returns>
+        public async Task ProcessUnprocessedUsageByTenantAsync(string tenantName)
+        {
+            var tenant = await _tenantCacheService.FindTenantAsync(tenantName);
+
+            if (tenant != null && !string.IsNullOrEmpty(tenant.DatabaseName))
+            {
+                await ProcessTenantMetricsAsync(new TenantListDto
+                {
+                    Name = tenant.Name,
+                    DatabaseName = tenant.DatabaseName,
+                    DateStart = tenant.DateStart,
+                    DateEnd = tenant.DateEnd,
+                    BillingId = tenant.BillingId
+                });
+            }
+        }
+
+        /// <summary>
         /// Processes unprocessed usage data for all tenants associated with the specified module.
         /// </summary>
         /// <remarks>This method retrieves all tenants associated with the module and processes their

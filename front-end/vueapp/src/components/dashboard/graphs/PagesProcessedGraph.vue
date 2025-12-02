@@ -80,7 +80,7 @@ export default {
             if (this.usageUnits.length === 0) {
                 return 0;
             }
-            return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.Ocr)?.value ?? 0;
+            return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.Page)?.value ?? 0;
         }
     },
     created() {
@@ -97,7 +97,7 @@ export default {
             let params = {
                 start: this.start,
                 end: this.end,
-                usageType: ColTypeUsage.Ocr
+                usageType: ColTypeUsage.Page
             };
             DashboardServices.GetByUsageType(params)
                 .then((response) => {

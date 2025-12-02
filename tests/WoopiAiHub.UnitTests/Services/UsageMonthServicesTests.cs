@@ -4,6 +4,7 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Utils;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -24,10 +25,10 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindDataByUsageType_ShouldReturnData()
         {
             // Arrange
-            var usageType = ColTypeUsage.Ocr;
+            var usageType = MetricNames.Page;
             var usageFilterDto = new UsageTypeFilterDto
             {
-                UsageType = usageType.ToString(),
+                UsageType = usageType,
                 Start = null,
                 End = null
             };

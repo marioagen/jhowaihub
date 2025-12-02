@@ -30,9 +30,9 @@
                         </div>
                     </div>
                     <div class="col">
-                        <button class="btn btn-primary btn-sm">
-                            <LucideIcon icon="RefreshCcw" :size="17" />
-                            Atualizar
+                        <button class="btn btn-primary btn-sm" @click="proccessTenantMetrics()">
+                            <LucideIcon icon="RefreshCcw" :size="17" :class="{ 'animate-spin': isLoading }" />
+                            {{ $t('dashboard.update') }}
                         </button>
                     </div>
                 </div>
@@ -46,7 +46,8 @@
                     <h2 class="mb-0 fw-bold text-primary">{{ totalWTC.toFixed(5) }}</h2>
                 </div>
             </div>
-            <TokensGraph :key="datesChange" :usageUnits="usageUnits" @setTotalTokens="setTotalWTC" ref="TokensGraph" />
+            <TokensGraph :key="datesChange" :usageUnits="usageUnits" @setTotalTokens="setTotalTokens"
+                ref="TokensGraph" />
             <PagesProcessedGraph :key="datesChange" :usageUnits="usageUnits" @setTotalPages="setTotalWTC"
                 ref="PagesProcessedGraph" />
             <WorkflowsGraph :key="datesChange" :usageUnits="usageUnits" @setTotalExecution="setTotalWTC"
@@ -70,6 +71,7 @@ export default {
         PagesProcessedGraph,
     },
     data: () => ({
+        isLoading: false,
         showDateFilter: false,
         datesChange: 0,
         filters: {
@@ -112,8 +114,20 @@ export default {
                     this.plan = response.toUpperCase();
                 });
         },
+        setTotalTokens(total) {
+            this.totalWTC += total;
+        },
         setTotalWTC(total) {
             this.totalWTC += total;
+        },
+        proccessTenantMetrics() {
+            this.isLoading = true;
+            DashboardServices.ProcessMetricsByTenant()
+                .then(() => {
+                    this.filterData(this.filters);
+                }).finally(() => {
+                    this.isLoading = false;
+                });
         },
     },
     created() {
@@ -142,7 +156,21 @@ export default {
 .plan-right {
     margin-left: auto;
     display: block;
-    /* auto funciona apenas com block ou flex item */
     width: fit-content;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+    color: white;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>

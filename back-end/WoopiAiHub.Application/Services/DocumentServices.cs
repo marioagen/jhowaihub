@@ -525,7 +525,7 @@ namespace WoopiAiHub.Application.Services
                                                                       input);
                 foreach (var usage in queryResponseModel.Usage)
                 {
-                    await _usageDailyServices.AddByValuesAsync("DocumentQuery", emailCreator, usage.Total_usage??0, usage.Model);
+                    await _usageDailyServices.AddByValuesAsync(MetricNames.Token, emailCreator, usage.Total_usage??0, usage.Model);
                 }
 
                 _documentHistoryServices.Create(documentHistoryForDb);

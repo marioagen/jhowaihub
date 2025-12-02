@@ -11,6 +11,7 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
 
@@ -59,7 +60,7 @@ namespace WoopiAiHub.Application.Messaging
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
                     var tokens = message.Usage?.TotalTokens ?? 0;
-                    await usageDailyServices.AddByValuesAsync("Prompt", message.Email, tokens);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens);
 
                     var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto

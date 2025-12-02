@@ -143,7 +143,7 @@ export default {
             if (this.usageUnits.length === 0) {
                 return 0;
             }
-            return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.N8N)?.value ?? 0;
+            return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.Automation)?.value ?? 0;
         },
         usageUnitWorkflow() {
             if (this.usageUnits.length === 0) {
@@ -189,7 +189,7 @@ export default {
             let params = {
                 start: this.start,
                 end: this.end,
-                usageType: ColTypeUsage.N8N
+                usageType: ColTypeUsage.Automation
             };
             this.isLoadingAutomation = true;
             DashboardServices.GetByUsageType(params)

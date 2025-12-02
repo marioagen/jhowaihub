@@ -786,63 +786,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Teams", (string)null);
                 });
 
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.Tenant", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Created");
-
-                    b.Property<DateTime?>("DateEndSubscription")
-                        .HasColumnType("datetime")
-                        .HasColumnName("DateEndSubscription");
-
-                    b.Property<DateTime?>("DateRenewSubscription")
-                        .HasColumnType("datetime")
-                        .HasColumnName("DateRenewSubscription");
-
-                    b.Property<DateTime?>("DateStartSubscription")
-                        .HasColumnType("datetime")
-                        .HasColumnName("DateStartSubscription");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsActive");
-
-                    b.Property<string>("KeyAiGateway")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("KeyAiGateway");
-
-                    b.Property<Guid>("MarketplaceSubscriptionId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("MarketplaceSubscriptionId");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("Name");
-
-                    b.Property<string>("PlanName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("PlanName");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name");
-
-                    b.ToTable("Tenants", (string)null);
-                });
-
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>
                 {
                     b.Property<int>("Id")

@@ -14,6 +14,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services.Automation
 {
@@ -169,7 +170,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             if (firstSteps.Count > 0)
             {
-                await _usageDailyServices.AddByValuesAsync("Execution", automationServicesDto.Email, firstSteps.Count);
+                await _usageDailyServices.AddByValuesAsync(MetricNames.Execution, automationServicesDto.Email, firstSteps.Count);
             }
 
             foreach (var step in firstSteps)
