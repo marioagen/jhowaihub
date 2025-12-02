@@ -826,7 +826,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase2Dto.WorkflowId);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
 
             _unitOfWork.BeginTransaction();
@@ -864,7 +864,7 @@ namespace WoopiAiHub.Application.Services
                     var existingStep = stepsToUpdate.FirstOrDefault(s => s.Id == stepDto.Id);
                     if (existingStep != null)
                     {
-                        await ValidateProfileAndStatus(stepDto);
+                        await ValidateProfileAndStatusStepPhase2(stepDto);
 
                         existingStep.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
                     }
@@ -872,7 +872,7 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var stepDto in stepsToAdd.OrderBy(s => s.Order))
                 {
-                    await ValidateProfileAndStatus(stepDto);
+                    await ValidateProfileAndStatusStepPhase2(stepDto);
 
                     var newStep = new Step(
                         id: 0, 
@@ -910,7 +910,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdatePhase1Dto.Id);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
 
             _unitOfWork.BeginTransaction();
@@ -941,7 +941,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepDto"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private async Task ValidateProfileAndStatus(StepPhase2Dto stepDto)
+        private async Task ValidateProfileAndStatusStepPhase2(StepPhase2Dto stepDto)
         {
             var profile = await _profileRepository.FindById(stepDto.ProfileId);
             if (profile == null)
@@ -967,7 +967,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase3Dto.WorkflowId);
             if (workflow == null)
             {
-                throw new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
 
             _unitOfWork.BeginTransaction();
