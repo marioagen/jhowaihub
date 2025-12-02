@@ -3,6 +3,7 @@ using Moq.AutoMock;
 using System;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -111,7 +112,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Fact(DisplayName = "Create should throw AppException when workflow has no step")]
         [Trait("Create", "Fail")]
         public async Task Create_ShouldThrowAppException_WhenWorkflowHasNoStep()
-        {        
+        {
             // Arrange
             var workflowCreateDto = WorkflowFixture.FindValidWorkflowCreateDtoNoSteps();
             var teamFixtrue = new TeamFixture();
@@ -734,7 +735,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflowUpdatePhase1Dto = new WorkflowUpdatePhase1Dto { Id = 1, Name = "Updated Workflow", Teams = new List<int> { 1, 2 } };
             var workflow = WorkflowFixture.FindValidWorkflow();
             _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(1)).ReturnsAsync(workflow);
-            _teamRepositoryMock.Setup(x => x.FindByIds(It.IsAny<List<int>>())).Returns(new List<Team>{ });
+            _teamRepositoryMock.Setup(x => x.FindByIds(It.IsAny<List<int>>())).Returns(new List<Team> { });
 
             // Act
             var result = await _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto);
@@ -791,13 +792,13 @@ namespace WoopiAiHub.UnitTests.Services
                     }
                 }
             };
-            
+
             var workflow = WorkflowFixture.FindValidWorkflow();
 
             _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase3Dto.WorkflowId))
                 .ReturnsAsync(workflow);
 
-            var stepToolMap = new Dictionary<int, int>(); 
+            var stepToolMap = new Dictionary<int, int>();
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
@@ -891,8 +892,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            Assert.Equal(2, workflow.Steps.Count); 
-            Assert.DoesNotContain(workflow.Steps, s => s.Id == 3); 
+            Assert.Equal(2, workflow.Steps.Count);
+            Assert.DoesNotContain(workflow.Steps, s => s.Id == 3);
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
@@ -906,7 +907,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var workflowId = 1;
             var step = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
-            var card = new Card(1, DateTime.Now,1,1,"Name",1,true,null);
+            var card = new Card(1, DateTime.Now, 1, 1, "Name", 1, true, null);
             step.AddCard(card);
             var stepDto = WorkflowFixture.FindValidStepDto();
             var steps = new List<Step> { step };
@@ -939,7 +940,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.DefaultError, exception.ErrorCode);
             Assert.Equal("Can't delete with cards related", exception.Message);
         }
-        
+
 
         [Fact(DisplayName = "FindPhase2ById success")]
         [Trait("FindPhase2ById", "Success")]
@@ -949,7 +950,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflowId = 1;
             var stepDto = WorkflowFixture.FindValidStepDto();
             var expectedSteps = new List<StepDto> { stepDto };
-           
+
 
             _workflowRepositoryMock.Setup(x => x.FindPhase2ById(workflowId))
                 .ReturnsAsync(expectedSteps);
@@ -1002,7 +1003,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var workflowId = 1;
             _workflowRepositoryMock.Setup(x => x.FindPhase3ById(workflowId))
-                .ReturnsAsync((List<StepDto>)null); 
+                .ReturnsAsync((List<StepDto>)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindPhase3ById(workflowId));
@@ -1026,6 +1027,93 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.Equal(expectedStep, result);
             _workflowRepositoryMock.Verify(x => x.FindStepById(stepId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindByTeamId success")]
+        [Trait("FindByTeamId", "Success")]
+        public async Task FindByTeamId_ShouldReturnWorkflowDto_WhenWorkflowExists()
+        {
+            // Arrange
+            int teamId = 1;
+            var workflowFilterDto = new WorkflowFilterDto();
+            var workflow = new WorkflowDto
+            {
+                Id = 1,
+                Steps = new List<StepDto>
+            {
+                new StepDto { Id = 1, Name = "Step 1", Cards = new List<CardDto> { new CardDto(), new CardDto() } },
+                new StepDto { Id = 2, Name = "Step 2", Cards = new List<CardDto> { new CardDto() } }
+            }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByTeamId(teamId, workflowFilterDto))
+                .ReturnsAsync(workflow);
+
+            // Act
+            var result = await _workflowServices.FindByTeamId(teamId, workflowFilterDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(workflow.Id, result.Id);
+            Assert.Equal(3, result.NumDocuments);
+            _workflowRepositoryMock.Verify(x => x.FindByTeamId(teamId, workflowFilterDto), Times.Once);
+        }
+        [Fact(DisplayName = "UpdateStepToolOutput success")]
+        [Trait("UpdateStepToolOutput", "Success")]
+        public async Task UpdateStepToolOutput_ShouldReturnTrue_WhenUpdateIsSuccessful()
+        {
+            // Arrange
+            var outputUpdateDto = new OutputUpdateDto { Id = 1, Value = "New Value" };
+            var stepToolOutput = new StepToolOutput(1, DateTime.Now, 1, 1, "test");
+
+            _workflowRepositoryMock.Setup(x => x.FindByStepToolOutputById(outputUpdateDto.Id))
+                .Returns(stepToolOutput);
+
+            _workflowRepositoryMock.Setup(x => x.UpdateStepToolOutput(stepToolOutput))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _workflowServices.UpdateStepToolOutput(outputUpdateDto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal("New Value", stepToolOutput.Value); // Verifica se o valor foi alterado
+        }
+
+        [Fact(DisplayName = "FindByStepToolOutputById success")]
+        [Trait("FindByStepToolOutputById", "Success")]
+        public void FindByStepToolOutputById_ShouldReturnStepToolOutput_WhenFound()
+        {
+            // Arrange
+            int stepId = 1;
+            var stepToolOutput = new StepToolOutput(1, DateTime.Now, 1, 1, "test");
+
+            _workflowRepositoryMock.Setup(x => x.FindByStepToolOutputById(stepId))
+                .Returns(stepToolOutput);
+
+            // Act
+            var result = _workflowServices.FindByStepToolOutputById(stepId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(stepId, result.Id);
+        }
+
+        [Fact(DisplayName = "FindByStepToolOutputById should return null")]
+        [Trait("FindByStepToolOutputById", "Fail")]
+        public void FindByStepToolOutputById_ShouldReturnNull_WhenNotFound()
+        {
+            // Arrange
+            int stepId = 1;
+
+            _workflowRepositoryMock.Setup(x => x.FindByStepToolOutputById(stepId))
+                .Returns((StepToolOutput)null);
+
+            // Act
+            var result = _workflowServices.FindByStepToolOutputById(stepId);
+
+            // Assert
+            Assert.Null(result);
         }
     }
 }
