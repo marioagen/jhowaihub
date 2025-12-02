@@ -248,7 +248,7 @@
     labelProcessing: "Procesando",
     labelCreated: "Creado em:",
     Admin: "Admin",
-     login: {
+    login: {
         index: "Login",
         title: "Iniciar sesión",
         password: "Contraseña",
@@ -505,7 +505,7 @@
             management: "Gestión de flujos de trabajo",
         },
     },
-    card:{
+    card: {
         userAssigned: "Responsable",
         userApplicant: "Solicitante",
         assignBtn: "Asignar",
@@ -580,7 +580,7 @@
             subtitle: "Actualiza la información de la herramienta seleccionada",
         },
         sidebarTitle: "Configurar I/O:",
-        sidebar:{
+        sidebar: {
             filter: "Selecciona un webhook",
             inputs: "Entradas",
             dependencies: "Dependencias",
@@ -673,7 +673,7 @@
         deleteError: "No se pudieron eliminar los prompts",
         removeAllPrompts: "Eliminar prompts"
     },
-    analyze:{
+    analyze: {
         title: "Análisis de Documentos",
         errorLoadDocumentData: "Error al cargar datos del documento",
         failedEditOutput: "No se pudo editar el output.",
@@ -681,7 +681,7 @@
         extractedData: "Datos extraídos",
         askTheDoc: "Preguntar al documento",
         conversationWithDocument: "Escriba su pregunta sobre el documento...",
-        askAI:"Preguntar a la IA",
+        askAI: "Preguntar a la IA",
         typeYourQuestion: "Escriba su pregunta sobre el documento...",
         sendQuestion: "Enviar pregunta",
         output: "Salida",
@@ -709,6 +709,7 @@
         subtitle: "Woopi AI",
         exportBtn: "Exportar CSV",
         totalWTC: "Total WTC",
+        update: "Actualizar",
         WTCText: "WTC (Woopi Total Cost) es la suma ponderada del consumo en el período seleccionado, basada en los multiplicadores de tu plan. No es un valor financiero.",
         filters: {
             currentMonth: "Este Mes",

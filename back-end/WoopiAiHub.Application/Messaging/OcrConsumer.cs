@@ -9,6 +9,7 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
 
@@ -59,7 +60,7 @@ namespace WoopiAiHub.Application.Messaging
                     var pages = message.AnalyzeResult?.Pages?.Count() ?? 0;
                     if (pages == 0) pages = 1;
 
-                    await usageDailyServices.AddByValuesAsync("Ocr", message.Email, pages);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Page, message.Email, pages);
 
                     var automationServicesDto = new AutomationServicesDto
                     (

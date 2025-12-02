@@ -19,5 +19,6 @@
         public DateTime? DateRenew { get; set; }
         public string Plan { get; set; } = string.Empty;
         public string AiGatewayKey { get; set; } = string.Empty;
+        public string BillingId { get; set; } = string.Empty;
     }
 }

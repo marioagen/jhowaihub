@@ -8,6 +8,7 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
 
@@ -55,7 +56,7 @@ namespace WoopiAiHub.Application.Messaging
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
-                    await usageDailyServices.AddByValuesAsync("N8N", message.Email!, 1);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Automation, message.Email!, 1);
 
                     await automationServices.ContinueExecution(automationServicesDto);
                 }

@@ -68,4 +68,15 @@ export default {
                 }
             });
     },
+    ProcessMetricsByTenant() {
+        return api.put(`/Dashboard/ProcessMetricsByTenant`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
 }
