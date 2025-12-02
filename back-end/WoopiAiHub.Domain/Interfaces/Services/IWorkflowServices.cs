@@ -7,7 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface IWorkflowServices
     {
-        Task<bool> Create(WorkflowCreateDto workflowCreateDto);
         Task<WorkflowDto> FindByTeamId(int teamId, WorkflowFilterDto workflowFilterDto);
         Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto);
         Task<bool> DeleteById(int id);

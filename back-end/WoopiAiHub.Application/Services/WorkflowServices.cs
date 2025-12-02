@@ -54,27 +54,27 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Creates a new workflow for a specific team.
-        /// </summary>
-        /// <param name="workflowCreateDto"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        public async Task<bool> Create(WorkflowCreateDto workflowCreateDto)
-        {
-            await _validateWorkflow.ValidateCreateWorkflow(workflowCreateDto);
+        ///// Creates a new workflow for a specific team.
+        ///// </summary>
+        ///// <param name="workflowCreateDto"></param>
+        ///// <returns></returns>
+        ///// <exception cref="AppException"></exception>
+        //public async Task<bool> Create(WorkflowCreateDto workflowCreateDto)
+        //{
+        //    await _validateWorkflow.ValidateCreateWorkflow(workflowCreateDto);
 
-            _validateStep.ValidateCreateStep(workflowCreateDto.Steps);
+        //    _validateStep.ValidateCreateStep(workflowCreateDto.Steps);
 
-            var teamsList = _teamRepository.FindByIds(workflowCreateDto.Teams);
+        //    var teamsList = _teamRepository.FindByIds(workflowCreateDto.Teams);
 
-            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowCreateDto.Name);
+        //    var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowCreateDto.Name);
 
-            ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, 0);
+        //    ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, 0);
 
-            workflow.AddSteps(steps);
+        //    workflow.AddSteps(steps);
 
-            return await _workflowRepository.Create(workflow);
-        }
+        //    return await _workflowRepository.Create(workflow);
+        //}
 
         /// <summary>
         /// Retrieves a workflow by its ID.
