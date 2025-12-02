@@ -24,10 +24,10 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindDataByUsageType_ShouldReturnData()
         {
             // Arrange
-            var usageType = (int)ColTypeUsage.Ocr;
+            var usageType = ColTypeUsage.Ocr;
             var usageFilterDto = new UsageTypeFilterDto
             {
-                Id = usageType,
+                UsageType = usageType.ToString(),
                 Start = null,
                 End = null
             };
@@ -37,7 +37,7 @@ namespace WoopiAiHub.UnitTests.Services
                 new DashboardUsageDto("2023-10-02", 20)
             };
 
-            _usageMonthRepositoryMock.Setup(x => x.FindDataByUsageType(It.IsAny<int>(), It.IsAny<DateTime?>(),It.IsAny<DateTime?>()))
+            _usageMonthRepositoryMock.Setup(x => x.FindDataByUsageType(It.IsAny<string>(), It.IsAny<DateTime?>(),It.IsAny<DateTime?>()))
                 .ReturnsAsync(expectedData);
 
             // Act
@@ -47,7 +47,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             Assert.Equal(expectedData.Count, result.Count);
             Assert.Equal(expectedData, result);
-            _usageMonthRepositoryMock.Verify(x => x.FindDataByUsageType(It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()), Times.Once);
+            _usageMonthRepositoryMock.Verify(x => x.FindDataByUsageType(It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()), Times.Once);
         }
 
         [Fact(DisplayName = "Test FindDataByModelEmbedding and returns a list of DashboardUsageDto")]

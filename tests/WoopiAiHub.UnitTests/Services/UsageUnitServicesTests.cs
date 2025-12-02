@@ -1,5 +1,6 @@
 using Moq;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using Xunit;
@@ -22,11 +23,11 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindAllAsync_ShouldReturnUsageUnits_WhenCalled()
         {
             // Arrange
-            var usageUnits = new List<UsageUnit>
-            {
-                new UsageUnit(1, DateTime.Now, "Unit 1", null, null, (decimal)0.006),
-                new UsageUnit(2, DateTime.Now, "Unit 2", null, null, (decimal)0.006)
-            };
+            var usageUnits = new List<UsageUnitDto>
+                {
+                    new UsageUnitDto { Id = 1, Name = "Unit 1", Value = (decimal)0.006 },
+                    new UsageUnitDto { Id = 2, Name = "Unit 2", Value = (decimal)0.006 }
+                };
 
             _usageUnitRepositoryMock.Setup(repo => repo.FindAllAsync())
                 .ReturnsAsync(usageUnits);
@@ -45,7 +46,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             _usageUnitRepositoryMock.Setup(repo => repo.FindAllAsync())
-                .ReturnsAsync(new List<UsageUnit>());
+                .ReturnsAsync(Enumerable.Empty<UsageUnitDto>());
 
             // Act
             var result = await _usageUnitServices.FindAllAsync();

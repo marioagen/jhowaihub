@@ -21,6 +21,15 @@ namespace WoopiAiHub.Functions
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        /// <summary>
+        /// Executes the ManageConsumptions function, triggered by a timer, to process unprocessed usage data.
+        /// </summary>
+        /// <remarks>This function is triggered based on the cron expression specified in the application
+        /// configuration  under the key "UsageManagement:ManageConsumptionsCron". It processes unprocessed usage data
+        /// by  invoking the usage aggregation service. Any exceptions encountered during execution are logged  and
+        /// rethrown.</remarks>
+        /// <param name="myTimer">The timer trigger information, including the schedule and invocation details.</param>
+        /// <returns></returns>
         [Function("ManageConsumptions")]
         public async Task Run([TimerTrigger("%UsageManagement:ManageConsumptionsCron%")] TimerInfo myTimer)
         {

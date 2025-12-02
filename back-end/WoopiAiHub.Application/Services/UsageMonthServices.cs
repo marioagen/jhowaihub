@@ -23,8 +23,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(UsageTypeFilterDto usageMonthFilterDto)
         {
-            var startDate = GetDate(usageMonthFilterDto.Start);
-            var endDate = GetDate(usageMonthFilterDto.End);
+            var startDate = FindDate(usageMonthFilterDto.Start);
+            var endDate = FindDate(usageMonthFilterDto.End);
 
             return await _usageMonthRepository.FindDataByUsageType(usageMonthFilterDto.UsageType, startDate, endDate);
         }
@@ -36,8 +36,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(ModelEmbeddingFilterDto modelEmbeddingFilterDto)
         {
-            var startDate = GetDate(modelEmbeddingFilterDto.Start);
-            var endDate = GetDate(modelEmbeddingFilterDto.End);
+            var startDate = FindDate(modelEmbeddingFilterDto.Start);
+            var endDate = FindDate(modelEmbeddingFilterDto.End);
             return await _usageMonthRepository.FindDataByModelEmbedding(modelEmbeddingFilterDto.Id, startDate, endDate);
         }
 
@@ -55,7 +55,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="date"></param>
         /// <returns></returns>
-        private static DateTime? GetDate(string? date)
+        private static DateTime? FindDate(string? date)
         {
             DateTime? convertedDate = null;
             if (string.IsNullOrEmpty(date) is false)

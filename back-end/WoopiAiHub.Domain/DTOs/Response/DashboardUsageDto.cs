@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class DashboardUsageDto
+    public record class DashboardUsageDto
     {
         public string Date { get; set; }
         public int Value { get; set; }
