@@ -694,6 +694,48 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ProfileLabel.NotFound, exception.LabelError);
         }
 
+        [Fact(DisplayName = "UpdatePhase2 should throw AppException when status not found")]
+        [Trait("UpdatePhase2", "Fail")]
+        public async Task UpdatePhase2_StatusNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var teamFixture = new TeamFixture();
+            var team = teamFixture.CreateValidTeam();
+            var workflow = new Workflow(1, DateTime.Now, new List<Team> { team }, "Test Workflow");
+            var step = new Step(1, DateTime.Now, workflow.Id, "Step 1", 1, 1, 1);
+            var steps = new List<Step> { step };
+            var profileDto = WorkflowFixture.FindValidProfileDto();
+
+            var phase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = 1,
+                Steps = new List<StepPhase2Dto>
+                {
+                    new StepPhase2Dto
+                    {
+                        Id = 0,
+                        Name = "Step 1",
+                        Order = 1,
+                        ProfileId = 1,
+                        StatusId = 1
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(It.IsAny<int>()))
+                .ReturnsAsync(workflow);
+            _profileRepositoryMock.Setup(r => r.FindById(It.IsAny<int>()))
+                .ReturnsAsync(profileDto);
+            _statusRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync((Status?)null);
+            _stepRepositoryMock.Setup(r => r.FindByIdsWithCards(It.IsAny<IEnumerable<int>>()))
+                .Returns(steps);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(StatusLabel.NotFound, exception.LabelError);
+        }
+
         [Fact(DisplayName = "UpdatePhase3 should throw AppException when workflow not found")]
         [Trait("UpdatePhase3", "Fail")]
         public async Task UpdatePhase3_WorkflowNotFound_ThrowsAppException()
@@ -1114,6 +1156,83 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Fact(DisplayName = "CreateWorkflowRelationship should execute successfully")]
+        [Trait("CreateWorkflowRelationship", "Success")]
+        public async Task CreateWorkflowRelationship_ShouldExecuteSuccessfully()
+        {
+            // Arrange
+            var profile = new Profile("name", 1, DateTime.UtcNow);
+            var team = new Team("Team 1", 1, DateTime.UtcNow);
+            profile.Teams = new List<Team> { team };
+
+            var workflow = WorkflowFixture.FindValidWorkflow();
+
+            var stepsIds = new List<int> { 1, 2, 3 };
+
+            var workflows = new List<Workflow>
+            {
+                workflow
+            };
+            _teamRepositoryMock.Setup(x => x.FindByIdReturnModel(It.IsAny<int>()))
+                .Returns(team);
+            _workflowRepositoryMock.Setup(x => x.FindByStep(stepsIds))
+                .ReturnsAsync(workflows);
+
+            // Act
+            await _workflowServices.CreateWorkflowRelationship(profile, stepsIds);
+
+            Assert.True(true);
+        }
+        [Fact(DisplayName = "UpdateTeamWorkflowRelationship should execute successfully")]
+        [Trait("UpdateTeamWorkflowRelationship", "Success")]
+        public async Task UpdateTeamWorkflowRelationship_ShouldExecuteSuccessfully()
+        {
+            // Arrange
+            var team = new Team("Team 1", 1, DateTime.UtcNow);
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var workflows = new List<Workflow>
+            {
+                workflow
+            };
+            var profile = new Profile("name", 1, DateTime.UtcNow);
+            var profiles = new List<Profile>
+            {
+                profile
+            };
+            _teamRepositoryMock.Setup(x => x.FindByIdReturnModel(It.IsAny<int>()))
+                .Returns(team);
+            // Act
+            await _workflowServices.UpdateTeamWorkflowRelationship(team, workflows, profiles);
+
+            // Assert
+            Assert.True(true);
+        }
+
+        [Fact(DisplayName = "UpdateTeamProfileRelationshipToWorkflow should execute successfully")]
+        [Trait("UpdateTeamProfileRelationshipToWorkflow","Success")]
+        public async Task UpdateTeamProfileRelationshipToWorkflow_ShouldExecuteSuccessfully()
+        {
+            // Arrange
+            var steps = new List<int> { 1, 2, 3 };
+            var profile = new Profile("name", 1, DateTime.UtcNow);
+            var team = new Team("Team 1", 1, DateTime.UtcNow);
+            profile.Teams = new List<Team> { team };
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var workflows = new List<Workflow>
+            {
+                workflow
+            };
+            _teamRepositoryMock.Setup(x => x.FindByIdReturnModel(It.IsAny<int>()))
+                .Returns(team);
+            _workflowRepositoryMock.Setup(x => x.FindByStep(steps)).ReturnsAsync(workflows);
+
+            // Act
+            await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(steps, profile);
+
+            // Assert
+            Assert.True(true); 
         }
     }
 }
