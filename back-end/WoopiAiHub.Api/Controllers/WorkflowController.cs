@@ -36,20 +36,6 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Updates an existing workflow.
-        /// </summary>
-        /// <param name="workflowUpdateDto"></param>
-        /// <returns></returns>
-        [HttpPut]
-        [SwaggerOperation("Endpoint that receives the request to update a workflow")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Update([FromBody] WorkflowUpdateDto workflowUpdateDto)
-        {
-            var result = await _workflowServices.Update(workflowUpdateDto);
-            return Ok(result);
-        }
-
-        /// <summary>
         /// Endpoint that receives a team id and returns a valid workflow
         /// </summary>
         /// <param name="id"></param>
