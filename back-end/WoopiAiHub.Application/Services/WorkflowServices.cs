@@ -54,29 +54,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        ///// Creates a new workflow for a specific team.
-        ///// </summary>
-        ///// <param name="workflowCreateDto"></param>
-        ///// <returns></returns>
-        ///// <exception cref="AppException"></exception>
-        //public async Task<bool> Create(WorkflowCreateDto workflowCreateDto)
-        //{
-        //    await _validateWorkflow.ValidateCreateWorkflow(workflowCreateDto);
-
-        //    _validateStep.ValidateCreateStep(workflowCreateDto.Steps);
-
-        //    var teamsList = _teamRepository.FindByIds(workflowCreateDto.Teams);
-
-        //    var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowCreateDto.Name);
-
-        //    ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, 0);
-
-        //    workflow.AddSteps(steps);
-
-        //    return await _workflowRepository.Create(workflow);
-        //}
-
-        /// <summary>
         /// Retrieves a workflow by its ID.
         /// </summary>
         /// <param name="id"></param>
@@ -206,126 +183,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Validates that the profile and status associated with a step exist.
-        /// </summary>
-        /// <param name="step"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        private async Task<bool> ValidateProfileAndStatus(Step step)
-        {
-            var profile = await _profileRepository.FindById(step.ProfileId);
-            if (profile == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Profile not found", ProfileLabel.NotFound);
-            }
-            var status = await _statusRepository.FindById(step.StatusId);
-            if (status == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// Creates a collection of steps from the provided step DTOs, validates their profiles and statuses,  and
-        /// establishes dependencies between step tools.
-        /// </summary>
-        /// <remarks>This method processes the provided step DTOs to create corresponding <see
-        /// cref="Step"/> objects.  Each step is populated with its associated step tools, and dependencies between step
-        /// tools are established  based on their order. After creation, the method validates the profile and status of
-        /// each step.</remarks>
-        /// <typeparam name="T">The type of the step DTO, which must implement <see cref="IStepDto"/>.</typeparam>
-        /// <param name="stepsDto">A collection of step DTOs used to create the steps.</param>
-        /// <param name="workflowId">The identifier of the team to associate with the created steps.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of  <see
-        /// cref="Step"/> objects created and validated from the provided DTOs.</returns>
-        private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int workflowId) where T : IStepDto
-        {
-            var steps = new List<Step>();
-            StepTool? lastStepTool = null;
-            foreach (var stepDto in stepsDto)
-            {
-                var step = CreateStep(stepDto, workflowId);
-                StepTool? previousStepToolInSameStep = null;
-
-                foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
-                {
-                    var stepTool = CreateStepToolUpdate(stepToolDto);
-                    stepTool.Step = step;
-                    SetDependencies(stepTool, previousStepToolInSameStep, lastStepTool);
-
-                    SetOutputDependencies(steps, stepToolDto, stepTool);
-
-                    step.AddStepTool(stepTool);
-
-                    previousStepToolInSameStep = stepTool;
-                    lastStepTool = stepTool;
-                }
-
-                steps.Add(step);
-            }
-
-            foreach (var step in steps)
-            {
-                await ValidateProfileAndStatus(step);
-            }
-
-            return steps;
-        }
-
-        /// <summary>
-        /// Set output dependencies
-        /// </summary>
-        /// <param name="steps"></param>
-        /// <param name="stepToolDto"></param>
-        /// <param name="stepTool"></param>
-        private static void SetOutputDependencies(List<Step> steps, StepToolUpdateDto stepToolDto, StepTool stepTool)
-        {
-            var dependsOnStepTools = new List<StepTool>();
-            foreach (var dependsOn in stepToolDto.Dependencies)
-            {
-                var dependsOnStepTool = steps
-                    .SelectMany(s => s.StepTools)
-                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
-
-                if (dependsOnStepTool != null)
-                {
-                    dependsOnStepTools.Add(dependsOnStepTool);
-                }
-            }
-
-            if (dependsOnStepTools.Count > 0)
-            {
-                stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
-            }
-        }
-
-        /// <summary>
-        /// Sets the dependency for the specified <paramref name="stepTool"/> based on the provided context.
-        /// </summary>
-        /// <remarks>This method determines the dependency for <paramref name="stepTool"/> based on the
-        /// provided parameters. If <paramref name="previousStepToolInSameStep"/> is provided, it takes precedence as
-        /// the dependency. Otherwise, <paramref name="lastStepTool"/> is used if it is not null.</remarks>
-        /// <param name="stepTool">The step tool for which the dependency is being set. This parameter cannot be null.</param>
-        /// <param name="previousStepToolInSameStep">The previous step tool within the same step. If not null, this will be set as the dependency for <paramref
-        /// name="stepTool"/>.</param>
-        /// <param name="lastStepTool">The last step tool from a previous step. If <paramref name="previousStepToolInSameStep"/> is null and this
-        /// parameter is not null, this will be set as the dependency for <paramref name="stepTool"/>.</param>
-        private static void SetDependencies(StepTool stepTool,
-                                     StepTool? previousStepToolInSameStep,
-                                     StepTool? lastStepTool)
-        {
-            if (previousStepToolInSameStep == null && lastStepTool != null)
-            {
-                stepTool.DependsOnStepTool = lastStepTool;
-            }
-            else if (previousStepToolInSameStep != null)
-            {
-                stepTool.DependsOnStepTool = previousStepToolInSameStep;
-            }
-        }
-
-        /// <summary>
         /// Creates a new <see cref="StepTool"/> instance based on the provided update data.
         /// </summary>
         /// <remarks>If the <paramref name="stepToolDto"/> contains a non-empty <see
@@ -351,25 +208,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             return stepTool;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Step"/> instance with the specified details.
-        /// </summary>
-        /// <param name="stepDto">An object containing the data required to initialize the step, including its name, order, profile ID, and
-        /// status ID.</param>
-        /// <param name="workflowId">The identifier of the team associated with the step.</param>
-        /// <returns>A new <see cref="Step"/> instance initialized with the provided data.</returns>
-        private static Step CreateStep(IStepDto stepDto, int workflowId)
-        {
-            return new Step(
-                0,
-                DateTime.UtcNow,
-                workflowId,
-                stepDto.Name,
-                stepDto.Order,
-                stepDto.ProfileId,
-                stepDto.StatusId);
         }
 
         /// <summary>
