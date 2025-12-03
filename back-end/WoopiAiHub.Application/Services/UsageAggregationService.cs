@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 
@@ -13,17 +13,17 @@ namespace WoopiAiHub.Application.Services
 {
     public class UsageAggregationService : IUsageAggregationService
     {
-        private readonly ITenantCacheServices _tenantCacheService;
+        private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _configuration;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<UsageAggregationService> _logger;
 
-        public UsageAggregationService(ITenantCacheServices tenantCacheService,
+        public UsageAggregationService(IMarketPlaceApi marketPlaceApi,
                                        IConfiguration configuration,
                                        IServiceScopeFactory scopeFactory,
                                        ILogger<UsageAggregationService> logger)
         {
-            _tenantCacheService = tenantCacheService ?? throw new ArgumentNullException(nameof(tenantCacheService));
+            _marketPlaceApi = marketPlaceApi ?? throw new ArgumentNullException(nameof(marketPlaceApi));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -36,7 +36,10 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task ProcessUnprocessedUsageByTenantAsync(string tenantName)
         {
-            var tenant = await _tenantCacheService.FindTenantAsync(tenantName);
+            var keyAccess = _configuration["KeyAccess"] ??
+                throw new InvalidOperationException("KeyAccess not configured");
+
+            var tenant = await _marketPlaceApi.FindTenantByName(keyAccess, tenantName);
 
             if (tenant != null && !string.IsNullOrEmpty(tenant.DatabaseName))
             {
@@ -65,7 +68,7 @@ namespace WoopiAiHub.Application.Services
             var keyAccess = _configuration["KeyAccess"] ??
                 throw new InvalidOperationException("KeyAccess not configured");
 
-            var tenants = await _tenantCacheService.FindAllTenantsAsync(ColTypeModule.WoopiAiHub);
+            var tenants = await _marketPlaceApi.FindAllTenantsByModuleAsync(keyAccess, ColTypeModule.WoopiAiHub);
 
             if (!tenants.Any())
             {
