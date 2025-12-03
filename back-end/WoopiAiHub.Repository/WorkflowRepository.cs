@@ -118,6 +118,86 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Retrieves a step by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public StepDto FindStepById(int id)
+        {
+            var step = _context.Steps
+            .AsNoTracking()
+            .Where(s => s.Id == id && s.Workflow.Enable)
+            .Select(s => new StepDto
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Order = s.Order,
+                WorkflowId = s.WorkflowId,
+                Profile = new ProfileDto
+            {
+                Id = s.Profile!.Id,
+                Name = s.Profile.Name
+            },
+                Status = new StatusDto
+            {
+                Id = s.Status!.Id,
+                Name = s.Status.Name,
+                Color = s.Status.Color,
+            },
+            StepTools = s.StepTools
+            .Select(st => new StepToolDto
+            {
+                Id = st.Id,
+                ToolId = st.ToolId,
+                Order = st.Order,
+                PositionX = st.PositionX,
+                PositionY = st.PositionY,
+                DependsOnStepToolId = st.DependsOnStepToolId,
+                Parameters = st.Parameters.Select(p => new StepToolParameterDto
+                {
+                    Id = p.Id,
+                    Value = p.Value,
+                    WebhookId = p.WebhookId,
+                    RequiredFile = p.RequiredFile
+                }).ToList(),
+                Tool = new ToolDto
+                {
+                    Id = st.Tool!.Id,
+                    Name = st.Tool.Name,
+                    IsEditableInput = st.Tool.IsEditableInput,
+                    ToolType = st.Tool!.ToolType!.Name
+                },
+                Executions = st.Executions.Select(e => new StepToolExecutionDto(
+                    e.Id,
+                    e.StepToolId,
+                    e.CardId,
+                    e.Started,
+                    e.Completed,
+                    e.Status,
+                    null,
+                    null
+                )).ToList(),
+                Outputs = st.Outputs.Select(o => new StepToolOutputDto(
+                    o.Id,
+                    o.StepToolId,
+                    o.CardId,
+                    o.Value,
+                    null,
+                    null
+                )).ToList(),
+                Dependencies = st.Dependencies.Select(d => new StepToolDependencyDto
+                {
+                    StepToolOrder = d.DependsOnStepTool.Order,
+                    StepOrder = d.DependsOnStepTool.Step!.Order
+                }).ToList(),
+            })
+            .ToList()
+            })
+            .FirstOrDefault();
+            return step;
+        }
+
+        /// <summary>
         /// Retrieves a list of workflows by its team ids.
         /// </summary>
         /// <param name="List<int>"></param>
@@ -199,10 +279,135 @@ namespace WoopiAiHub.Repository
         /// <param name="stepToolOutput"></param>
         /// <returns></returns>
         public async Task<bool> UpdateStepToolOutput(StepToolOutput stepToolOutput)
-        { 
+        {
             _context.StepToolOutputs.Update(stepToolOutput);
             return await _context.SaveChangesAsync() > 0;
         }
+
+        /// <summary>
+        /// Find phase 1 data by workflow id
+        /// </summary>
+        /// <param name="id">Workflow id</param>
+        /// <returns>Phase1Dto containing workflow name and associated teams</returns>
+        public async Task<Phase1Dto> FindPhase1ById(int id)
+        {
+            var workflow = await _context.Workflows
+                .AsNoTracking()
+                .Where(w => w.Id == id && w.Enable)
+                .Select(w => new Phase1Dto
+                {
+                    Name = w.Name,
+                    Teams = w.Teams.Select(t => new TeamDto
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                    }).ToList(),
+                })
+                .FirstOrDefaultAsync();
+            return workflow!;
+        }
+
+        /// <summary>
+        /// Find phase2 data by workflow id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<List<StepDto>> FindPhase2ById(int id)
+        {
+            var steps = await _context.Workflows
+                .AsNoTracking()
+                .Where(w => w.Id == id && w.Enable)
+                .SelectMany(w => w.Steps)
+                .Select(s => new StepDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Order = s.Order,
+                    WorkflowId = s.WorkflowId,
+                    Profile = new ProfileDto
+                    {
+                        Id = s.Profile!.Id,
+                        Name = s.Profile.Name
+                    },
+                    Status = new StatusDto
+                    {
+                        Id = s.Status!.Id,
+                        Name = s.Status.Name,
+                        Color = s.Status.Color,
+                    },
+                    HasStepTools = s.StepTools.Any()
+                })
+                .ToListAsync();
+
+            return steps;
+        }
+
+
+        /// <summary>
+        /// Find phase3 data by workflow id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<List<StepDto>> FindPhase3ById(int id)
+        {
+            var steps = await _context.Workflows
+                .AsNoTracking()
+                .Where(w => w.Id == id && w.Enable)
+                .SelectMany(w => w.Steps)
+                .Select(s => new StepDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Order = s.Order,
+                    WorkflowId = s.WorkflowId,
+                    Profile = new ProfileDto
+                    {
+                        Id = s.Profile!.Id,
+                        Name = s.Profile.Name
+                    },
+                    Status = new StatusDto
+                    {
+                        Id = s.Status!.Id,
+                        Name = s.Status.Name,
+                        Color = s.Status.Color,
+                    },
+                    HasStepTools = s.StepTools.Any(),
+                    StepTools = s.StepTools
+                        .Select(st => new StepToolDto
+                        {
+                            Id = st.Id,
+                            ToolId = st.ToolId,
+                            Order = st.Order,
+                            PositionX = st.PositionX,
+                            PositionY = st.PositionY,
+                            DependsOnStepToolId = st.DependsOnStepToolId,
+                            Parameters = st.Parameters.Select(p => new StepToolParameterDto
+                            {
+                                Id = p.Id,
+                                Value = p.Value,
+                                WebhookId = p.WebhookId,
+                                RequiredFile = p.RequiredFile
+                            }).ToList(),
+                            Tool = new ToolDto
+                            {
+                                Id = st.Tool!.Id,
+                                Name = st.Tool.Name,
+                                IsEditableInput = st.Tool.IsEditableInput,
+                                ToolType = st!.Tool!.ToolType!.Name
+                            },
+                            Dependencies = st.Dependencies.Select(d => new StepToolDependencyDto
+                            {
+                                StepToolOrder = d.DependsOnStepTool.Order,
+                                StepOrder = d.DependsOnStepTool.Step!.Order
+                            }).ToList(),
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return steps;
+        }
+
 
         /// <summary>
         /// Creates a projection for the Workflow entity to WorkflowDto.
@@ -224,7 +429,7 @@ namespace WoopiAiHub.Repository
                     Name = t.Name,
                 }).ToList(),
                 Steps = w.Steps.Select(s => new StepDto
-                {
+                { 
                     Id = s.Id,
                     Name = s.Name,
                     Order = s.Order,
@@ -240,6 +445,7 @@ namespace WoopiAiHub.Repository
                         Name = s.Status.Name,
                         Color = s.Status.Color,
                     },
+                    HasStepTools = s.StepTools.Any(),
                     Cards = s.Cards
                         .Where(c => c.Enable &&
                             (
@@ -279,7 +485,7 @@ namespace WoopiAiHub.Repository
                                 Id = c.AssignedUser.Id
                             }
                             : null
-                    }).ToList(),                    
+                        }).ToList(),
                     StepTools = s.StepTools
                         .Select(st => new StepToolDto
                         {
@@ -327,6 +533,7 @@ namespace WoopiAiHub.Repository
                                 StepOrder = d.DependsOnStepTool.Step!.Order
                             }).ToList(),
                         })
+
                         .ToList()
                 }).ToList()
             };
@@ -437,13 +644,18 @@ namespace WoopiAiHub.Repository
                 }).ToList(),
             });
         }
-        
+
+        /// <summary>
+        /// Finds a StepToolOutput by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public StepToolOutput FindByStepToolOutputById(int id)
         {
             var stepToolOutput = _context.StepToolOutputs.Where(p => p.Id == id)
                                                          .FirstOrDefault();
             return stepToolOutput;
         }
-        
+
     }
 }

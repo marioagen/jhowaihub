@@ -12,5 +12,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public StatusDto Status { get; set; } = new();
         public ICollection<CardDto> Cards { get; set; } = [];
         public ICollection<StepToolDto> StepTools { get; set; } = [];
+        public bool HasStepTools { get; set; } = false;
     }
 }

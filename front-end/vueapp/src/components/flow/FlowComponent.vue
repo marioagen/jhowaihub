@@ -26,7 +26,7 @@
             </div>
             <hr />
             <VueFlowComponent :isEdit="isEdit" :stepId="stepId" :stepOrder="stepOrder" @openNodeConfig="openNodeConfig"
-                              ref="VueflowComponent" />
+                              ref="VueflowComponent" :hasStepTools="hasStepTools" />
 
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
                  ref="sidebar">
@@ -131,6 +131,8 @@
     import DependencySelector from '@/components/flow/DependencySelector.vue';
     import AutomationServices from '@/services/automation/AutomationServices';
     import PromptService from "@/services/prompts/PromptsService";
+    import WorkflowService from '@/services/workflow/WorkflowService';
+    import LogService from '@/services/log/logService';
     import ToolType from '@/constants/ToolType';
 
     export default {
@@ -159,6 +161,21 @@
                 type: Number,
                 required: false,
                 default: 0,
+            },
+            phase: {
+                type: Number,
+                required: false,
+                default: 0,
+            },
+            workflowId: {
+                type: Number,
+                required: false,
+                default: null,
+            },
+            hasStepTools: {
+                type: Boolean,
+                required: false,
+                default: false,
             }
         },
         data() {
@@ -188,10 +205,34 @@
         },
         methods: {
             redirectToIndex() {
-                if (this.isEdit) {
-                    return this.$router.push({ name: "EditWorkflow" });
+                // Navigate back to the workflow wizard at phase 3
+                if (this.workflowId) {
+                    const routeName = this.isEdit ? "EditWorkflow" : "NewWorkflow";
+                    const params = this.isEdit 
+                        ? { id: this.workflowId, phase: 3 }
+                        : { phase: 3, workflowId: this.workflowId };
+                    
+                    return this.$router.push({
+                        name: routeName,
+                        params: params
+                    });
                 }
-                return this.$router.push({ name: "NewWorkflow" });
+                
+                // Fallback for old workflow form (backward compatibility)
+                if (this.isEdit) {
+                    return this.$router.push({
+                        name: "EditWorkflow",
+                        params: {
+                            phase: this.phase
+                        }
+                    });
+                }
+                return this.$router.push({
+                    name: "NewWorkflow",
+                    params: {
+                        phase: this.phase
+                    }
+                });
             },
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;
@@ -370,14 +411,39 @@
                 this.closeSidebar();
                 this.showMessage();
             },
-            save() {
+            async save() {
                 try {
                     let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
-                    this.$store.commit('setFlowByStep', {
-                        stepOrder: this.stepOrder,
-                        flowData: nodesList,
-                        stepId: this.stepId
-                    });
+                    if (this.workflowId) {
+                        const workflow = await WorkflowService.getWorkflowById(this.workflowId);
+                        if (workflow.error) {
+                            throw new Error('Failed to load workflow data');
+                        }
+                        const allSteps = workflow.steps.map(step => {
+                            if (step.order === this.stepOrder) {
+                                return {
+                                    id: step.id || 0,
+                                    order: step.order,
+                                    stepTools: nodesList,
+                                };
+                            }
+                            return {
+                                id: step.id || 0,
+                                order: step.order,
+                                stepTools: step.stepTools || []
+                            };
+                        });
+
+                        const params = {
+                            workflowId: this.workflowId,
+                            steps: allSteps
+                        };
+
+                        const result = await WorkflowService.updatePhase3(params);
+                        if (result.error) {
+                            throw new Error(result.error);
+                        }
+                    }
                     this.redirectToIndex();
                     return this.$notify({
                         title: 'flow.title',
@@ -427,10 +493,24 @@
                         this.promptlist = response;
                     });
             },
-            loadPreviousStepTools(node) {
-                const tempWorkflowList = this.$store.state.tempWorkflow.list || [];
+            async loadPreviousStepTools(node) {
+                let workflowSteps = [];
+                if (this.workflowId) {
+                    try {
+                        const workflow = await WorkflowService.getWorkflowById(this.workflowId);
+                        if (!workflow.error) {
+                            workflowSteps = workflow.steps || [];
+                        }
+                    } catch (error) {
+                        LogService.showMessage('Error loading workflow steps: ' + error);
+                    }
+                }
+
+                if (workflowSteps.length === 0) {
+                    workflowSteps = this.$store.state.tempWorkflow.list || [];
+                }
                 
-                const relevantSteps = tempWorkflowList.filter(step => 
+                const relevantSteps = workflowSteps.filter(step => 
                     step.order <= this.stepOrder
                 );
                 
@@ -444,9 +524,9 @@
                 
                 this.previousStepTools = relevantSteps.map(step => ({
                     id: step.id,
-                    name: step?.name || 'Unnamed Tool',
+                    name: step?.name || step.name || 'Unnamed Tool',
                     order: step.order,
-                    stepTools: step.stepTools.filter(stepTool => 
+                    stepTools: (step.stepTools || []).filter(stepTool => 
                         step.order < maxOrder || 
                         (step.order === maxOrder && stepTool.order < node.data.order && nodesToolIds.includes(stepTool.tool?.id))
                     )
@@ -475,7 +555,7 @@
             isPromptTool(){
                 return this.isTargetTool(ToolType.Prompt);
             }
-        },
+        }
     };
 </script>
 

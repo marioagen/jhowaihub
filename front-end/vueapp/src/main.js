@@ -6,8 +6,9 @@ import store from "./store";
 import i18n from "./locales/i18n";
 import VueGtag from "vue-gtag";
 import tooltip from "@/directives/bootstrapTooltip";
+import outsideClick from '@/directives/outsideClick.js';
+import FloatingVue from 'floating-vue';
 import "@/validators/validationRules";
-import FloatingVue from 'floating-vue'
 import 'floating-vue/dist/style.css'
 
 import LucideIcon from "@/components/global/LucideIcon.vue";
@@ -44,6 +45,7 @@ app.use(
     router
 );
 
+app.directive('outsideClick', outsideClick);
 app.directive("tooltip", tooltip);
 app.component("NotificationComponent", NotificationComponent);
 app.component("LucideIcon", LucideIcon);
@@ -51,4 +53,5 @@ app.component("LucideIcon", LucideIcon);
 app.config.globalProperties.$notify = notify;
 app.config.globalProperties.$appName = ENV_CONFIG.VUE_APP_NAME;
 app.config.globalProperties.$clientIdAzure = ENV_CONFIG.VUE_APP_CLIENT_ID_AZURE;
+
 app.mount("#app");

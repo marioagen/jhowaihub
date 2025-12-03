@@ -12,5 +12,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<Step?> FindByOrderAndWorkflowId(int order,
                                              int workflowId);
         Task CreateRange(ICollection<Step> steps);
+        ICollection<Step> FindByIdsWithCards(IEnumerable<int> ids);
     }
 }
