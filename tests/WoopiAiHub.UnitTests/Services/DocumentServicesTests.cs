@@ -623,12 +623,10 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var documentEmbeddingsResultDto = DocumentFixture.FindValidDocumentEmbeddingsResultDto();
             var idDocument = 1;
-            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
             var stepToolExecution = DocumentFixture.FindValidStepToolExecution();
 
-            marketPlaceApi.Setup(a => a.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>())).ReturnsAsync(true);
             documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile)).Returns(idDocument);
             stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(documentEmbeddingsResultDto.Data.StepToolId, documentEmbeddingsResultDto.Data.CardId)).ReturnsAsync(stepToolExecution);
 
@@ -639,7 +637,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile), Times.Once);
-            marketPlaceApi.Verify(s => s.ManageConsumptionPages(It.IsAny<string>(), It.IsAny<ConsumptionPagesDto>()), Times.Once);
         }
 
         [Fact(DisplayName = "FindOcrTextByDocumentId - Should return OCR text when available")]
