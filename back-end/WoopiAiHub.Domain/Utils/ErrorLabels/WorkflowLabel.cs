@@ -6,5 +6,7 @@
         public const string AlreadyExists = "workflow.alreadyExists";
         public const string TeamIdMismatch = "workflow.TeamIdMismatch";
         public const string NameRequired = "workflow.nameRequired";
+        public const string InvalidName = "workflow.invalidName";
+        public const string InvalidTeams = "workflow.invalidTeams";
     }
 }

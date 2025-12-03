@@ -64,6 +64,39 @@ export default {
                 }
             });
     },
+    getPhase1ById(workflowId) {
+        return api.get(`/Workflow/Phase1/${workflowId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    getPhase2ById(workflowId) {
+        return api.get(`/Workflow/Phase2/${workflowId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    getPhase3ById(workflowId) {
+        return api.get(`/Workflow/Phase3/${workflowId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
     createWorkflow(params) {
         return api.post("/Workflow", params)
             .then(({ data }) => {
@@ -100,6 +133,62 @@ export default {
     },
     updateStepToolOutput(params) {
         return api.put("/Workflow/UpdateOutput", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    // Phased workflow creation methods
+    createPhase1(params) {
+        return api.post("/Workflow/Phase1", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    updatePhase1(params) {
+        return api.put("/Workflow/Phase1", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    updatePhase2(params) {
+        return api.put("/Workflow/Phase2", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    updatePhase3(params) {
+        return api.put("/Workflow/Phase3", params)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
+    getStepById(id) {
+        return api.get(`/Workflow/Step/${id}`)
             .then(({ data }) => {
                 return data;
             })
