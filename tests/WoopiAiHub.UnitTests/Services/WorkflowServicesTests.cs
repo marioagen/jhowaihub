@@ -536,6 +536,9 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var stepDto = WorkflowFixture.FindValidStepDto();
+            var stepTools = WorkflowFixture.FindValidStepTool();
+            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
             var workflowPhase3Dto = new WorkflowPhase3Dto
             {
                 WorkflowId = 1,
@@ -543,8 +546,8 @@ namespace WoopiAiHub.UnitTests.Services
                     {
                         Id = stepDto.Id,
                         Order = stepDto.Order,
-                        StepTools = []
-                    }
+                        StepTools = stepToolsList
+                }
                 }
             };
 
