@@ -5,9 +5,11 @@ using WoopiAiHub.Application.Services.Automation;
 using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Interfaces.Handlers;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.DependencyInjection
 {
@@ -60,6 +62,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IUsageTypeServices, UsageTypeServices>();
             services.AddScoped<IUsageUnitServices, UsageUnitServices>();
             services.AddScoped<IUsageAggregationService, UsageAggregationService>();
+            services.AddScoped<IUsageLogRepository, UsageLogRepository>();
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();

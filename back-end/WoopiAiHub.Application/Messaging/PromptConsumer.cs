@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -23,15 +24,18 @@ namespace WoopiAiHub.Application.Messaging
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<PromptConsumer> _logger;
         private readonly MessageQueues _queues;
+        private readonly ChatCompletionSettings _chatCompletionSettings;
 
         public PromptConsumer(IServiceScopeFactory scopeFactory,
                               IConfiguration configuration,
                               IMessageConsumer<ChatCompletionResponseDto> consumer,
                               ILogger<PromptConsumer> logger,
-                              IOptions<MessageQueues> queues) : base(configuration)
+                              IOptions<MessageQueues> queues,
+                              IOptions<ChatCompletionSettings> chatCompletionSettings) : base(configuration)
         {
             _scopeFactory = scopeFactory;
             _queues = queues.Value;
+            _chatCompletionSettings = chatCompletionSettings.Value;
             _consumer = consumer;
             _logger = logger;
         }
@@ -60,7 +64,7 @@ namespace WoopiAiHub.Application.Messaging
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
                     var tokens = message.Usage?.TotalTokens ?? 0;
-                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, _chatCompletionSettings.Model);
 
                     var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto
