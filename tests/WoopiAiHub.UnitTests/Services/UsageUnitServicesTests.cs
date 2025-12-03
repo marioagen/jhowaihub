@@ -36,7 +36,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(1, result.Count());
+            Assert.Single(result);
             _usageUnitRepositoryMock.Verify(repo => repo.FindAllAsync(), Times.Once);
         }
 
