@@ -536,8 +536,11 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var stepDto = WorkflowFixture.FindValidStepDto();
-            var stepTools = WorkflowFixture.FindValidStepTool();
+            var stepTools = WorkflowFixture.FindValidStepToolWithDependencies();
             var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var stepToolDependencyDto = new StepToolOutputDependencyDto{ StepOrder = 1, StepToolOrder = 1};
+            stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto> { stepToolDependencyDto };
             var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
             var workflowPhase3Dto = new WorkflowPhase3Dto
             {
@@ -555,6 +558,12 @@ namespace WoopiAiHub.UnitTests.Services
 
             _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase3Dto.WorkflowId))
                 .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
 
             var stepToolMap = new Dictionary<int, int>();
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);

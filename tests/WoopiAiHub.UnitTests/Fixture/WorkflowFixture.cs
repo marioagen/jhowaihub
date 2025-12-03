@@ -280,6 +280,27 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Decimal(1, 1000)
              );
         }
+
+        public static StepTool FindValidStepToolWithDependencies()
+        {
+            var _faker = new Faker("pt_BR");
+            var step =  new StepTool(
+                _faker.Random.Int(1, 1000),
+                 DateTime.UtcNow,
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Decimal(1, 1000),
+                _faker.Random.Decimal(1, 1000)
+             );
+            step.Dependencies.Add(new StepToolDependency(
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+                step.Id,
+                _faker.Random.Int(1, 1000)
+             ));
+            return step;
+        }
     }
 
     [CollectionDefinition(nameof(WorkflowCollection))]

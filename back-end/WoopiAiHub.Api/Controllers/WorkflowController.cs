@@ -21,20 +21,6 @@ namespace WoopiAiHub.Api.Controllers
             _workflowServices = workflowServices;
         }
 
-        ///// <summary>
-        ///// Creates a new workflow.
-        ///// </summary>
-        ///// <param name="workflowCreateDto"></param>
-        ///// <returns></returns>
-        //[HttpPost]
-        //[SwaggerOperation("Endpoint that receives the request to create a workflow")]
-        //[ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        //public async Task<IActionResult> Create([FromBody] WorkflowCreateDto workflowCreateDto)
-        //{
-        //    var result = await _workflowServices.Create(workflowCreateDto);
-        //    return Ok(result);
-        //}
-
         /// <summary>
         /// Endpoint that receives a team id and returns a valid workflow
         /// </summary>
