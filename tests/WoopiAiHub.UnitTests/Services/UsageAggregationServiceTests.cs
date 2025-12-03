@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
@@ -43,16 +44,16 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessUnprocessedUsageAsync_NoTenantsFound_ReturnsEarly()
         {
             // Arrange
-            _mocker.GetMock<ITenantCacheServices>()
-                .Setup(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub))
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
                 .ReturnsAsync(new List<TenantListDto>());
 
             // Act
             await _service.ProcessUnprocessedUsageAsync();
 
             // Assert
-            _mocker.GetMock<ITenantCacheServices>()
-                .Verify(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub), Times.Once);
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Verify(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once);
         }
 
         [Fact(DisplayName = "ProcessUnprocessedUsageAsync should process each tenant when tenants exist")]
@@ -66,8 +67,8 @@ namespace WoopiAiHub.UnitTests.Services
                 new TenantListDto { Name = "Tenant2", DatabaseName = "DB2" }
             };
 
-            _mocker.GetMock<ITenantCacheServices>()
-                .Setup(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub))
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
                 .ReturnsAsync(tenants);
 
             var mockScope = new Mock<IServiceScope>();
@@ -97,8 +98,8 @@ namespace WoopiAiHub.UnitTests.Services
             await _service.ProcessUnprocessedUsageAsync();
 
             // Assert
-            _mocker.GetMock<ITenantCacheServices>()
-                .Verify(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub), Times.Once);
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Verify(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()), Times.Once);
             _mocker.GetMock<IServiceScopeFactory>()
                 .Verify(x => x.CreateScope(), Times.Exactly(tenants.Count));
         }
@@ -140,8 +141,8 @@ namespace WoopiAiHub.UnitTests.Services
                 new UsageDaily(2, DateTime.UtcNow, Guid.NewGuid(), 1, 50, false, 1)
             };
 
-            _mocker.GetMock<ITenantCacheServices>()
-                .Setup(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub))
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
                 .ReturnsAsync(tenants);
 
             var mockScope = new Mock<IServiceScope>();

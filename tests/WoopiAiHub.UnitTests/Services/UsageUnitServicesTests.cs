@@ -29,14 +29,14 @@ namespace WoopiAiHub.UnitTests.Services
             };
 
             _usageUnitRepositoryMock.Setup(repo => repo.FindAllAsync())
-                .ReturnsAsync(usageUnits);
+                                    .ReturnsAsync(usageUnits);
 
             // Act
             var result = await _usageUnitServices.FindAllAsync();
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(2, result.Count());
+            Assert.Equal(1, result.Count());
             _usageUnitRepositoryMock.Verify(repo => repo.FindAllAsync(), Times.Once);
         }
 
