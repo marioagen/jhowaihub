@@ -55,7 +55,7 @@ export default {
     data: () => ({
         start: null,
         end: null,
-        isLoading: true,
+        isLoading: false,
         IAList: [],
         currentIAIndex: 0,
         previousTotalTokens: 0,

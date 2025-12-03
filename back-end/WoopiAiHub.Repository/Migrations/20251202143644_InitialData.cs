@@ -209,8 +209,8 @@ namespace WoopiAiHub.Repository.Migrations
 
                IF NOT EXISTS (SELECT 1 FROM Tools WHERE [Name] = 'Prompt')
                BEGIN
-                   INSERT INTO Tools (Name, IsActive, ToolTypeId, InputDataId, OutputDataId, Created)
-                   VALUES ('Prompt', 1, @ToolTypeIdPrompt, @ToolDataIdTexto, @ToolDataIdTexto,  GETDATE());
+                   INSERT INTO Tools (Name, IsActive, ToolTypeId, InputDataId, OutputDataId, Created, IsEditableInput)
+                   VALUES ('Prompt', 1, @ToolTypeIdPrompt, @ToolDataIdTexto, @ToolDataIdTexto,  GETDATE(), 1);
                END
            ");
 
