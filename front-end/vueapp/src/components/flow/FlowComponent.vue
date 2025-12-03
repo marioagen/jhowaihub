@@ -132,6 +132,7 @@
     import AutomationServices from '@/services/automation/AutomationServices';
     import PromptService from "@/services/prompts/PromptsService";
     import WorkflowService from '@/services/workflow/WorkflowService';
+    import LogService from '@/services/log/logService';
     import ToolType from '@/constants/ToolType';
 
     export default {
@@ -501,7 +502,7 @@
                             workflowSteps = workflow.steps || [];
                         }
                     } catch (error) {
-                        console.error('Error loading workflow steps:', error);
+                        LogService.showMessage('Error loading workflow steps: ' + error);
                     }
                 }
 
@@ -554,12 +555,6 @@
             isPromptTool(){
                 return this.isTargetTool(ToolType.Prompt);
             }
-        },
-        created() {
-            console.log(this.phase3data);
-        },
-        mounted() {
-            console.log(this.phase3data);
         }
     };
 </script>

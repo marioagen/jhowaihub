@@ -126,7 +126,7 @@ namespace WoopiAiHub.Repository
         {
             var step = _context.Steps
             .AsNoTracking()
-            .Where(s => s.Id == id && s.Workflow.Enable) // Filtra pelo StepId e verifica se o Workflow está habilitado
+            .Where(s => s.Id == id && s.Workflow.Enable)
             .Select(s => new StepDto
             {
                 Id = s.Id,
@@ -284,6 +284,11 @@ namespace WoopiAiHub.Repository
             return await _context.SaveChangesAsync() > 0;
         }
 
+        /// <summary>
+        /// Find phase 1 data by workflow id
+        /// </summary>
+        /// <param name="id">Workflow id</param>
+        /// <returns>Phase1Dto containing workflow name and associated teams</returns>
         public async Task<Phase1Dto> FindPhase1ById(int id)
         {
             var workflow = await _context.Workflows
@@ -390,24 +395,6 @@ namespace WoopiAiHub.Repository
                                 IsEditableInput = st.Tool.IsEditableInput,
                                 ToolType = st!.Tool!.ToolType!.Name
                             },
-                            Executions = st.Executions.Select(e => new StepToolExecutionDto(
-                                e.Id,
-                                e.StepToolId,
-                                e.CardId,
-                                e.Started,
-                                e.Completed,
-                                e.Status,
-                                null,
-                                null
-                            )).ToList(),
-                            Outputs = st.Outputs.Select(o => new StepToolOutputDto(
-                                o.Id,
-                                o.StepToolId,
-                                o.CardId,
-                                o.Value,
-                                null,
-                                null
-                            )).ToList(),
                             Dependencies = st.Dependencies.Select(d => new StepToolDependencyDto
                             {
                                 StepToolOrder = d.DependsOnStepTool.Order,
