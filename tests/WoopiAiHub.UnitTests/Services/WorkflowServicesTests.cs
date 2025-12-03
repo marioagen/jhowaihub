@@ -903,7 +903,8 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task UpdateTeamWorkflowRelationship_ShouldExecuteSuccessfully()
         {
             // Arrange
-            var team = new Team("Team 1", 1, DateTime.UtcNow);
+            var teamfixture = new TeamFixture();
+            var team = teamfixture.CreateValidTeam();
             var workflow = WorkflowFixture.FindValidWorkflow();
             var workflows = new List<Workflow>
             {
@@ -928,9 +929,12 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task UpdateTeamProfileRelationshipToWorkflow_ShouldExecuteSuccessfully()
         {
             // Arrange
+            var teamfixture = new TeamFixture();
             var steps = new List<int> { 1, 2, 3 };
             var profile = new Profile("name", 1, DateTime.UtcNow);
-            var team = new Team("Team 1", 1, DateTime.UtcNow);
+            var profile2 = new Profile("name", 2, DateTime.UtcNow);
+            var team = teamfixture.CreateValidTeam();
+            team.Profiles = new List<Profile> { profile2 };
             profile.Teams = new List<Team> { team };
             var workflow = WorkflowFixture.FindValidWorkflow();
             var workflows = new List<Workflow>
