@@ -221,6 +221,7 @@ namespace WoopiAiHub.Repository
                                              .ThenInclude(t => t!.ToolType)
                                            .Include(s => s.Step)
                                            .Include(d => d.DependsOnStepTool)
+                                           .Include(st => st.Dependencies)
                                            .FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
         }
 

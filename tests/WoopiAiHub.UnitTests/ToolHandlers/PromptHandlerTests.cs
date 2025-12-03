@@ -61,7 +61,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
             _mockTenantCacheServices
-                .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
                 .ReturnsAsync(tenantInfo);
 
             _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))

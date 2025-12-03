@@ -60,7 +60,7 @@
     labelFailedToNormalize: "Falha ao normalizar",
     labelFailedNoResponse: "Falha, sem resposta do servidor.",
     labelFailedToLoadHistory: "Falha ao carregar histórico.",
-    labelFailedToApplyQuestionnaire: "Falha ao aplicar questionário.",    
+    labelFailedToApplyQuestionnaire: "Falha ao aplicar questionário.",
     labelGoHome: "Home",
     labelHistoric: "Registro de respostas",
     labelInclusionDate: "Data de inclusão",
@@ -149,7 +149,7 @@
     labelDocumentTypeSuccess: "Tipo de documento inserido com sucesso",
     labelDocumentTypeEditSuccess: "Tipo de documento atualizado com sucesso",
     labelDocumentTypeRemoveSuccess: "Tipo de documento removido com sucesso",
-    labelDocumentTypeRemoveError: "Erro ao remover tipo de documento",    
+    labelDocumentTypeRemoveError: "Erro ao remover tipo de documento",
     labelTypeDocAlreadyExists: "Tipo duplicado",
     labelTypeDocError: "Tipo inválido",
     labelUpload: "Carregar",
@@ -164,7 +164,7 @@
     labelYouAreAboutToDeleteDocumentType: "Você está prestes a deletar <br/> um tipo de documento do sistema",
     labelYouAreAboutToDeleteDocumentQuery: "Você está prestes a deletar <br/> o histórico de consulta do sistema",
     labelYouAreAboutToDeleteQuestion: "Você está prestes a deletar <br/> uma pergunta do sistema",
-    labelYouAreAboutToDeleteQuestionnaire: "Você está prestes a deletar <br/> um questionário do sistema",    
+    labelYouAreAboutToDeleteQuestionnaire: "Você está prestes a deletar <br/> um questionário do sistema",
     labelRemoveAllFilesDropzone: "Remover todos os arquivos da fila?",
     labelThisActionRemoveAllFiles: "Essa ação removerá todos os arquivos selecionados para upload",
     labelCaution: "Atenção!",
@@ -202,7 +202,7 @@
     labelTypeTeamName: "Digite o nome do time",
     labelTypeUserName: "Digite o nome do usuário",
     labelTypeUserEmail: "Digite o email do usuário",
-    labelTypeProfileName: "Digite o nome do perfil",    
+    labelTypeProfileName: "Digite o nome do perfil",
     labelMaxLength: "Máximo de caracteres é {limit}",
     labelMinLength: "Mínimo de caracteres é {limit}",
     labelNewTeamUserMessage: "Crie um novo usuário que será automaticamente selecionado",
@@ -288,7 +288,7 @@
             none: "Selecione um workflow",
         },
     },
-    labelBackToListDocuments: "Voltar para documentos",    
+    labelBackToListDocuments: "Voltar para documentos",
     labelNoTeamsFound: "Nenhum time vinculado ao seu usuário",
     labelNoPermissionChosen: "Nenhuma permissão selecionada",
     labelDocumentsMessage: "Gerencie documentos e extraia informações",
@@ -542,7 +542,7 @@
             subtitle: "Atualize as informações da ferramenta selecionada",
         },
         sidebarTitle: "Configurar I/O:",
-        sidebar:{
+        sidebar: {
             filter: "Selecione um webhook",
             inputs: "Entradas",
             dependencies: "Dependências",
@@ -634,7 +634,7 @@
         deleteError: "Falha ao deletar prompt",
         removeAllPrompts: "Remover prompts",
     },
-    analyze:{
+    analyze: {
         title: "Análise de Documentos",
         errorLoadDocumentData: "Erro ao carregar dados do documento",
         failedEditOutput: "O output não pode ser editado",
@@ -652,6 +652,54 @@
         nextStep: "Próxima etapa",
         noDataInDocument: "Não há dados disponíveis",
         failedLoadDocument: "Falha ao carregar documento",
+    },
+    pages: {
+        dashboard: "Dashboard",
+        management: "Gestão de Usuários",
+        documents: "Documentos",
+        workflows: "Workflows de Documentos",
+        workflowManagement: "Gestão de Workflows",
+        types: "Tipos",
+        questions: "Perguntas",
+        quizzes: "Questionários",
+        tools: "Ferramentas",
+        prompts: "Prompts",
+    },
+    dashboard: {
+        title: "Dashboard de Consumo e Bilhetagem",
+        subtitle: "Woopi AI",
+        exportBtn: "Exportar CSV",
+        totalWTC: "Total WTC",
+        update: "Atualizar",
+        WTCText: "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
+        filters: {
+            currentMonth: "Este mês",
+            lastMonth: "Mês passado",
+            previousSeven: "Últimos 7 dias",
+            previousNinety: "Últimos 90 dias",
+        },
+        graphs: {
+            tokenGraphTitle: "Consumo de Tokens de IA",
+            tokenGraphSubtitle: "Consumo Diário de Tokens",
+            pagesGraphTitle: "Páginas de Documento Processadas (OCR)",
+            pagesGraphSubtitle: "Consumo Diário",
+            workflowsAutomaticGraphTitle: "Execuções de Workflows de Automação de IA",
+            workflowsGraphTitle: "Execuções de Workflows Woopi AI",
+            tokensTooltip: "Visualização do consumo de tokens para os diferentes modelos de Inteligência Artificial. Tokens são as unidades de processamento de texto utilizadas pelos modelos.",
+            pagesTooltip: "Quantidade de páginas de documentos que passaram pelo processo de Reconhecimento Óptico de Caracteres (OCR), que converte imagens de texto em texto editável.",
+            workflowAutomaticTooltip: "Número de vezes que os fluxos de automação de IA foram executados.",
+            workflowTooltip: "Número de vezes que os fluxos de automação criados na plataforma Woopi AI foram executados.",
+            totalTokens: "Total de Tokens Consumidos",
+            totalPages: "Total de Páginas Processadas",
+            totalWorkflowAutomatic: "Total de Execuções Woopi AI",
+            totalWorkflow: "Total de Execuções de Automação de IA",
+            unitValue: "Valor unitário no plano atual:",
+            periodTotal: "Totalizador no Período",
+        },
+    },
+    plan: {
+        current: "Plano Atual",
+        enterprise: "Plano Enterprise",
     },
     home: {
         title: "Bem-vindo ao AI HUB, Woopi AI!",
@@ -675,7 +723,7 @@
             description: "Consulte nossa documentação completa para explorar todo o potencial do AI HUB.",
             button: "Acessar docs"
         }
-    }    
+    }
 };
 
 export default portuguese;

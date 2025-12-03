@@ -437,7 +437,7 @@
     transferListTitle: "Selection list",
     transferListPlaceholder: "Search in list",
     unexpectedError: "An unexpected error occurred. Please contact the system administrator.",
-     types: {
+    types: {
         title: "Types",
         subtitle: "Manage system document types",
         createBtn: "Create type",
@@ -501,7 +501,7 @@
             management: "Workflow Management",
         },
     },
-    card:{
+    card: {
         userAssigned: "Assigned",
         userApplicant: "Applicant",
         assignBtn: "Assign",
@@ -576,7 +576,7 @@
             subtitle: "Update the information of the selected tool",
         },
         sidebarTitle: "Configure I/O:",
-        sidebar:{
+        sidebar: {
             filter: "Select webhook",
             inputs: "Inputs",
             dependencies: "Dependencies",
@@ -670,7 +670,7 @@
         deleteError: "Prompts delete failed",
         removeAllPrompts: "Delete prompts"
     },
-    analyze:{
+    analyze: {
         title: "Analyze Document",
         errorLoadDocumentData: "Error loading document data",
         failedEditOutput: "The output could not be edited.",
@@ -678,7 +678,7 @@
         extractedData: "Extracted Data",
         askTheDoc: "Ask the Document",
         conversationWithDocument: "Conversation with the Document",
-        askAI:"ASK AI",
+        askAI: "ASK AI",
         typeYourQuestion: "Type your question about the document...",
         sendQuestion: "Send Question",
         output: "Output",
@@ -688,6 +688,54 @@
         nextStep: "Next Step",
         noDataInDocument: "No data available",
         failedLoadDocument: "Failed to load document",
+    },
+    pages: {
+        dashboard: "Dashboard",
+        management: "User Management",
+        documents: "Documents",
+        workflows: "Document Workflows",
+        workflowManagement: "Workflow Management",
+        types: "Types",
+        questions: "Questions",
+        quizzes: "Quizzes",
+        tools: "Tools",
+        prompts: "Prompts",
+    },
+    dashboard: {
+        title: "Consumption and Ticketing Dashboard",
+        subtitle: "Woopi AI",
+        exportBtn: "Export CSV",
+        totalWTC: "Total WTC",
+        update: "Update",
+        WTCText: "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan’s multipliers. This is not a financial value.",
+        filters: {
+            currentMonth: "This Month",
+            lastMonth: "Last Month",
+            previousSeven: "Last 7 Days",
+            previousNinety: "Last 90 Days",
+        },
+        graphs: {
+            tokenGraphTitle: "AI Token Consumption",
+            tokenGraphSubtitle: "Daily Token Consumption",
+            pagesGraphTitle: "Processed Document Pages (OCR)",
+            pagesGraphSubtitle: "Daily Consumption",
+            workflowsAutomaticGraphTitle: "AI Automation Workflow Executions",
+            workflowsGraphTitle: "Woopi AI Workflow Executions",
+            tokensTooltip: "View of token consumption for different Artificial Intelligence models. Tokens are the text processing units used by the models.",
+            pagesTooltip: "Number of document pages processed through Optical Character Recognition (OCR), which converts text images into editable text.",
+            workflowAutomaticTooltip: "Number of times AI automation workflows were executed.",
+            workflowTooltip: "Number of times workflows created in the Woopi AI platform were executed.",
+            totalTokens: "Total Tokens Consumed",
+            totalPages: "Total Pages Processed",
+            totalWorkflowAutomatic: "Total Woopi AI Executions",
+            totalWorkflow: "Total AI Automation Executions",
+            unitValue: "Unit value in the current plan:",
+            periodTotal: "Period Total",
+        },
+    },
+    plan: {
+        current: "Current Plan",
+        enterprise: "Enterprise Plan",
     },
     home: {
         title: "Welcome to AI HUB, Woopi AI!",

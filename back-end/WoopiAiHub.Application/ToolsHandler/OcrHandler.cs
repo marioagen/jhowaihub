@@ -36,7 +36,7 @@ public class OcrHandler : IToolHandler
                                                         ICollection<StepToolOutput> outputs,
                                                         StepToolExecution? execution = null)
     {
-        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
+        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant);
         if (string.IsNullOrEmpty(tenantInfo!.OcrModel))
         {
             throw new ArgumentException("Ocr not found");

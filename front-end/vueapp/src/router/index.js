@@ -1,4 +1,5 @@
 ﻿import { createRouter, createWebHashHistory } from "vue-router";
+
 import DocumentsUpload from "@/pages/documents/uploads.vue";
 import DocumentsPage from "@/pages/documents/index.vue";
 import NormalizeIndex from "@/components/pages/normalize/loading";
@@ -7,25 +8,33 @@ import AnalyzerIndex from "@/components/pages/analyzer";
 import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
+
 import TypesPage from "@/pages/types.vue";
 import QuestionsPage from "@/pages/questions.vue";
 import ManagementPage from "@/pages/management/index.vue";
+import DashboardPage from "@/pages/dashboard.vue";
+
 import NewUser from "@/pages/management/users/newUser.vue";
 import EditUser from "@/pages/management/users/editUser.vue";
+
 import NewTeam from "@/pages/management/teams/newTeam.vue";
 import EditTeam from "@/pages/management/teams/editTeam.vue";
 import NewProfile from "@/pages/management/profiles/newProfile.vue";
 import EditProfile from "@/pages/management/profiles/editProfile.vue";
+
 import QuizzesPage from "@/pages/quizzes/index.vue";
 import NewQuizz from "@/pages/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/quizzes/editQuizz.vue";
+
 import WorkflowPage from "@/pages/workflow/index.vue";
 import WorkflowManagement from "@/pages/workflow/management.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
+
 import ToolsPage from "@/pages/tools.vue";
 import NewFlow from "@/pages/flows/newFlow.vue";
 import EditFlow from "@/pages/flows/editFlow.vue";
+
 import PromptPage from "@/pages/prompts/index.vue";
 import PromptNew from "@/pages/prompts/newPrompt.vue";
 import HomePage from "@/pages/home.vue";
@@ -96,6 +105,16 @@ const routes = [
             layout: "default",
         },
         beforeEnter: authenticateBasic,
+    },
+    {
+        path: "/dashboard",
+        name: "Dashboard",
+        component: DashboardPage,
+        meta: { 
+            layout: "default",
+            module: "Dashboard",
+            action: "View",
+        }
     },
     {
         path: "/documents",
