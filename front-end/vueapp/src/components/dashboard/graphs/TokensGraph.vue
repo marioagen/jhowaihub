@@ -174,7 +174,7 @@ export default {
             this.previousTotalTokens = 0;
             this.start = start;
             this.end = end;
-            this.getTokensData();
+            this.getIAList();
         }
     },
 }

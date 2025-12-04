@@ -13,8 +13,8 @@
                     v-else
                     src="./../../assets/img/woopiai-hub-logo.png"
                     :title="$t('labelGoHome')"
-                    width="100"
-                    height="30" 
+                    width="87"
+                    height="23" 
                     alt="WOOPI AI"
                     style="margin-left: 0px;"
                 />
