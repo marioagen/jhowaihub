@@ -1,6 +1,7 @@
 ﻿using Bogus;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Repository.Context;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Fixture

@@ -54,198 +54,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Creates a new workflow for a specific team.
-        /// </summary>
-        /// <param name="workflowCreateDto"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        public async Task<bool> Create(WorkflowCreateDto workflowCreateDto)
-        {
-            await _validateWorkflow.ValidateCreateWorkflow(workflowCreateDto);
-
-            _validateStep.ValidateCreateStep(workflowCreateDto.Steps);
-
-            var teamsList = _teamRepository.FindByIds(workflowCreateDto.Teams);
-
-            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowCreateDto.Name);
-
-            ICollection<Step> steps = await CreateStepsAndValidate(workflowCreateDto.Steps, 0);
-
-            workflow.AddSteps(steps);
-
-            return await _workflowRepository.Create(workflow);
-        }
-
-        /// <summary>
-        /// Updates an existing workflow and its steps and step tools based on the provided data transfer object (DTO).
-        /// <para>
-        /// For each step in the DTO:
-        /// - If the step exists, updates its properties and removes any step tools that are no longer present.
-        /// - Updates existing step tools or creates new ones, maintaining correct order and dependencies.
-        /// - If the step does not exist, creates it along with its step tools.
-        /// </para>
-        /// <para>
-        /// Dependencies are handled so that the first step tool in a step depends on the last global step tool,
-        /// and subsequent step tools in the same step depend on the previous step tool in the same step.
-        /// </para>
-        /// <para>
-        /// All changes are wrapped in a transaction. If an exception occurs, the transaction is rolled back.
-        /// </para>
-        /// </summary>
-        /// <param name="workflowUpdateDto">The DTO containing the workflow updates, including steps and step tools.</param>
-        /// <returns>Returns true if the update is successful; otherwise, the transaction is rolled back and an exception is thrown.</returns>
-        public async Task<bool> Update(WorkflowUpdateDto workflowUpdateDto)
-        {
-            _unitOfWork.BeginTransaction();
-            try
-            {
-                var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdateDto.Id);
-                _validateStep.ValidateUpdateStep(workflow, workflowUpdateDto.Steps);
-                workflow.Update(workflowUpdateDto.Name);
-
-                workflow.Teams.Clear();
-                var teamsList = _teamRepository.FindByIds(workflowUpdateDto.Teams);
-                foreach (var team in teamsList)
-                {
-                    workflow.AddTeam(team);
-                }
-
-                StepTool? lastGlobalStepTool = null;
-                
-                // Dictionary to track StepTool instances by their DTO IDs and order for dependency resolution
-                var stepToolMap = new Dictionary<(int? stepId, int order), StepTool>();
-
-                // First pass: Create/update all StepTools and parameters
-                foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
-                {
-                    Step? existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id && s.Order == stepDto.Order);
-                    StepTool? previousStepToolInStep = null;
-
-                    if (existingStep != null)
-                    {
-                        existingStep.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
-
-                        var stepToolIdsFromDto = stepDto.StepTools.Select(st => st.Id).ToHashSet();
-                        var stepToolsToRemove = existingStep.StepTools
-                                                            .Where(st => !stepToolIdsFromDto.Contains(st.Id))
-                                                            .ToList();
-                        // Delete existing dependencies explicitly via repository
-                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepToolsToRemove.Select(s=>s.Id).ToList());
-                        foreach (var stepToolToRemove in stepToolsToRemove)
-                        {
-                            var dependents = workflow.Steps.SelectMany(s => s.StepTools)
-                                                           .Where(st => st.DependsOnStepToolId == stepToolToRemove.Id)
-                                                           .ToList();
-
-                            foreach (var dependent in dependents)
-                                dependent.RemoveDependency();
-
-                            stepToolToRemove.RemoveDependency();
-                            existingStep.RemoveStepTool(stepToolToRemove);
-                        }
-                        await _unitOfWork.SaveChangesAsync();
-
-                        foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
-                        {
-                            var stepTool = existingStep.StepTools.FirstOrDefault(st => st.Id == stepToolDto.Id)
-                                           ?? CreateStepToolUpdate(stepToolDto);
-
-                            stepTool.Update(stepToolDto.ToolId, stepToolDto.Order, stepToolDto.PositionX, stepToolDto.PositionY, null);
-                            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
-
-                            // Store reference for later dependency resolution
-                            stepToolMap[(stepDto.Id, stepToolDto.Order)] = stepTool;
-
-                            if (stepToolDto.Parameters.Count > 0)
-                            {
-                                var parameterDto = stepToolDto.Parameters.First();
-                                var parameter = stepTool.Parameters.FirstOrDefault();
-                                if (parameter != null)
-                                {                                    
-                                    parameter.Update(parameterDto.RequiredFile, parameterDto.WebhookId, parameterDto.Value);
-                                }
-                                else
-                                {
-                                    parameter = new StepToolParameter(0, DateTime.Now, 0, parameterDto.RequiredFile, parameterDto.WebhookId, parameterDto.Value);
-                                    stepTool.Parameters.Add(parameter);
-                                }
-                            }
-                            else
-                            {
-                                stepTool.Parameters.Clear();
-                            }
-
-                            if (!existingStep.StepTools.Contains(stepTool))
-                                existingStep.AddStepTool(stepTool);
-
-                            previousStepToolInStep = stepTool;
-                            lastGlobalStepTool = stepTool;
-                        }
-                    }
-                    else
-                    {
-                        var newStep = CreateStep(stepDto, workflowUpdateDto.Id);
-                        foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
-                        {
-                            var stepTool = CreateStepToolUpdate(stepToolDto);
-                            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
-
-                            // Store reference for later dependency resolution
-                            stepToolMap[(stepDto.Id, stepToolDto.Order)] = stepTool;
-
-                            newStep.AddStepTool(stepTool);
-                            previousStepToolInStep = stepTool;
-                            lastGlobalStepTool = stepTool;
-                        }
-
-                        workflow.AddStep(newStep);
-                    }
-                }
-
-                await _unitOfWork.SaveChangesAsync();
-
-                // Second pass: Resolve and set up dependencies now that all StepTools have IDs
-                // Using explicit repository delete to avoid EF severed association errors
-                foreach (var stepDto in workflowUpdateDto.Steps.OrderBy(s => s.Order))
-                {
-                    foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
-                    {
-                        var stepTool = stepToolMap[(stepDto.Id, stepToolDto.Order)];
-                        
-                        // Delete existing dependencies explicitly via repository
-                        await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
-                        
-                        if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count > 0)
-                        {
-                            foreach (var dependsOn in stepToolDto.Dependencies)
-                            {
-                                var dependsOnStepTool = workflow.Steps
-                                    .SelectMany(s => s.StepTools)
-                                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
-                                
-                                if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
-                                {
-                                    var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
-                                    await _stepToolDependencyRepository.CreateAsync(dependency);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                await _unitOfWork.SaveChangesAsync();
-                _unitOfWork.Commit();
-
-                return true;
-            }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
-        }
-
-        /// <summary>
         /// Retrieves a workflow by its ID.
         /// </summary>
         /// <param name="id"></param>
@@ -260,6 +68,54 @@ namespace WoopiAiHub.Application.Services
             }
             int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
             workflow.NumDocuments = totalCards;
+            return workflow;
+        }
+
+        /// <summary>
+        /// Retrieves a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<Phase1Dto> FindPhase1ById(int id)
+        {
+            var phase1 = await _workflowRepository.FindPhase1ById(id);
+            if (phase1 == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+            return phase1;
+        }
+
+        /// <summary>
+        /// Retrieves a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<List<StepDto>> FindPhase2ById(int id)
+        {
+            var workflow = await _workflowRepository.FindPhase2ById(id);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+            return workflow;
+        }
+
+        /// <summary>
+        /// Retrieves a workflow by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<List<StepDto>> FindPhase3ById(int id)
+        {
+            var workflow = await _workflowRepository.FindPhase3ById(id);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
             return workflow;
         }
 
@@ -327,126 +183,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Validates that the profile and status associated with a step exist.
-        /// </summary>
-        /// <param name="step"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        private async Task<bool> ValidateProfileAndStatus(Step step)
-        {
-            var profile = await _profileRepository.FindById(step.ProfileId);
-            if (profile == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Profile not found", ProfileLabel.NotFound);
-            }
-            var status = await _statusRepository.FindById(step.StatusId);
-            if (status == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// Creates a collection of steps from the provided step DTOs, validates their profiles and statuses,  and
-        /// establishes dependencies between step tools.
-        /// </summary>
-        /// <remarks>This method processes the provided step DTOs to create corresponding <see
-        /// cref="Step"/> objects.  Each step is populated with its associated step tools, and dependencies between step
-        /// tools are established  based on their order. After creation, the method validates the profile and status of
-        /// each step.</remarks>
-        /// <typeparam name="T">The type of the step DTO, which must implement <see cref="IStepDto"/>.</typeparam>
-        /// <param name="stepsDto">A collection of step DTOs used to create the steps.</param>
-        /// <param name="workflowId">The identifier of the team to associate with the created steps.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of  <see
-        /// cref="Step"/> objects created and validated from the provided DTOs.</returns>
-        private async Task<ICollection<Step>> CreateStepsAndValidate<T>(IEnumerable<T> stepsDto, int workflowId) where T : IStepDto
-        {
-            var steps = new List<Step>();
-            StepTool? lastStepTool = null;
-            foreach (var stepDto in stepsDto)
-            {
-                var step = CreateStep(stepDto, workflowId);
-                StepTool? previousStepToolInSameStep = null;
-
-                foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
-                {
-                    var stepTool = CreateStepToolUpdate(stepToolDto);
-                    stepTool.Step = step;
-                    SetDependencies(stepTool, previousStepToolInSameStep, lastStepTool);
-
-                    SetOutputDependencies(steps, stepToolDto, stepTool);
-
-                    step.AddStepTool(stepTool);
-
-                    previousStepToolInSameStep = stepTool;
-                    lastStepTool = stepTool;
-                }
-
-                steps.Add(step);
-            }
-
-            foreach (var step in steps)
-            {
-                await ValidateProfileAndStatus(step);
-            }
-
-            return steps;
-        }
-
-        /// <summary>
-        /// Set output dependencies
-        /// </summary>
-        /// <param name="steps"></param>
-        /// <param name="stepToolDto"></param>
-        /// <param name="stepTool"></param>
-        private static void SetOutputDependencies(List<Step> steps, StepToolUpdateDto stepToolDto, StepTool stepTool)
-        {
-            var dependsOnStepTools = new List<StepTool>();
-            foreach (var dependsOn in stepToolDto.Dependencies)
-            {
-                var dependsOnStepTool = steps
-                    .SelectMany(s => s.StepTools)
-                    .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
-
-                if (dependsOnStepTool != null)
-                {
-                    dependsOnStepTools.Add(dependsOnStepTool);
-                }
-            }
-
-            if (dependsOnStepTools.Count > 0)
-            {
-                stepTool.UpdateDependenciesWithStepTools(dependsOnStepTools);
-            }
-        }
-
-        /// <summary>
-        /// Sets the dependency for the specified <paramref name="stepTool"/> based on the provided context.
-        /// </summary>
-        /// <remarks>This method determines the dependency for <paramref name="stepTool"/> based on the
-        /// provided parameters. If <paramref name="previousStepToolInSameStep"/> is provided, it takes precedence as
-        /// the dependency. Otherwise, <paramref name="lastStepTool"/> is used if it is not null.</remarks>
-        /// <param name="stepTool">The step tool for which the dependency is being set. This parameter cannot be null.</param>
-        /// <param name="previousStepToolInSameStep">The previous step tool within the same step. If not null, this will be set as the dependency for <paramref
-        /// name="stepTool"/>.</param>
-        /// <param name="lastStepTool">The last step tool from a previous step. If <paramref name="previousStepToolInSameStep"/> is null and this
-        /// parameter is not null, this will be set as the dependency for <paramref name="stepTool"/>.</param>
-        private static void SetDependencies(StepTool stepTool,
-                                     StepTool? previousStepToolInSameStep,
-                                     StepTool? lastStepTool)
-        {
-            if (previousStepToolInSameStep == null && lastStepTool != null)
-            {
-                stepTool.DependsOnStepTool = lastStepTool;
-            }
-            else if (previousStepToolInSameStep != null)
-            {
-                stepTool.DependsOnStepTool = previousStepToolInSameStep;
-            }
-        }
-
-        /// <summary>
         /// Creates a new <see cref="StepTool"/> instance based on the provided update data.
         /// </summary>
         /// <remarks>If the <paramref name="stepToolDto"/> contains a non-empty <see
@@ -472,25 +208,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             return stepTool;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="Step"/> instance with the specified details.
-        /// </summary>
-        /// <param name="stepDto">An object containing the data required to initialize the step, including its name, order, profile ID, and
-        /// status ID.</param>
-        /// <param name="workflowId">The identifier of the team associated with the step.</param>
-        /// <returns>A new <see cref="Step"/> instance initialized with the provided data.</returns>
-        private static Step CreateStep(IStepDto stepDto, int workflowId)
-        {
-            return new Step(
-                0,
-                DateTime.UtcNow,
-                workflowId,
-                stepDto.Name,
-                stepDto.Order,
-                stepDto.ProfileId,
-                stepDto.StatusId);
         }
 
         /// <summary>
@@ -723,6 +440,348 @@ namespace WoopiAiHub.Application.Services
         {
             var stepToolOutput = _workflowRepository.FindByStepToolOutputById(id);
             return stepToolOutput;
+        }
+
+        /// <summary>
+        /// Phase 1: Creates a workflow with name and team associations only.
+        /// Returns the ID of the created workflow to be used in subsequent phases.
+        /// </summary>
+        /// <param name="workflowPhase1Dto"></param>
+        /// <returns>The ID of the created workflow</returns>
+        public async Task<int> CreatePhase1(WorkflowPhase1Dto workflowPhase1Dto)
+        {
+            if (string.IsNullOrWhiteSpace(workflowPhase1Dto.Name))
+            {
+                throw new AppException(ErrorCode.RequiredField, "Workflow name is required", WorkflowLabel.InvalidName);
+            }
+
+            if (workflowPhase1Dto.Teams == null || workflowPhase1Dto.Teams.Count == 0)
+            {
+                throw new AppException(ErrorCode.RequiredField, "At least one team must be selected", WorkflowLabel.InvalidTeams);
+            }
+
+            var teamsList = _teamRepository.FindByIds(workflowPhase1Dto.Teams);
+            if (teamsList.Count != workflowPhase1Dto.Teams.Count)
+            {
+                throw new AppException(ErrorCode.NotFound, "One or more teams not found", TeamLabel.NotFound);
+            }
+
+            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name);
+            await _workflowRepository.Create(workflow);
+
+            return workflow.Id;
+        }
+
+        /// <summary>
+        /// Find stepDto by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public StepDto FindStepById(int id)
+        {
+            var step = _workflowRepository.FindStepById(id);
+            return step;
+        }
+
+        /// <summary>
+        /// Phase 2: Updates a workflow with steps information (without step tools).
+        /// Validates and creates/updates steps with their profiles and statuses.
+        /// </summary>
+        /// <param name="workflowPhase2Dto"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdatePhase2(WorkflowPhase2Dto workflowPhase2Dto)
+        {
+            var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase2Dto.WorkflowId);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var existingSteps = workflow.Steps.ToList();
+
+                var newStepsDict = workflowPhase2Dto.Steps
+                    .Where(s => s.Id > 0)
+                    .ToDictionary(s => s.Id);
+
+                var stepsToRemove = existingSteps
+                    .Where(es => !newStepsDict.ContainsKey(es.Id))
+                    .ToList();
+
+                var stepsToUpdate = existingSteps
+                    .Where(es => newStepsDict.ContainsKey(es.Id))
+                    .ToList();
+
+                var stepsToAdd = workflowPhase2Dto.Steps
+                    .Where(s => s.Id == 0 || !existingSteps.Any(es => es.Id == s.Id))
+                    .ToList();
+
+
+                var stepcards =_stepRepository.FindByIdsWithCards(stepsToRemove.Select(s => s.Id));
+                if(stepcards.Any(s => s.Cards.Count > 0))
+                {
+                    throw new AppException(ErrorCode.DefaultError, "Can't delete with cards related", null);
+                }
+
+                 _stepRepository.DeleteByIds(stepsToRemove.Select(s => s.Id));
+
+                foreach (var stepDto in workflowPhase2Dto.Steps.Where(s => s.Id > 0))
+                {
+                    var existingStep = stepsToUpdate.FirstOrDefault(s => s.Id == stepDto.Id);
+                    if (existingStep != null)
+                    {
+                        await ValidateProfileAndStatusStepPhase2(stepDto);
+
+                        existingStep.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
+                    }
+                }
+
+                foreach (var stepDto in stepsToAdd.OrderBy(s => s.Order))
+                {
+                    await ValidateProfileAndStatusStepPhase2(stepDto);
+
+                    var newStep = new Step(
+                        id: 0, 
+                        created: DateTime.Now,
+                        workflowId: workflow.Id,
+                        name: stepDto.Name,
+                        order: stepDto.Order,
+                        profileId: stepDto.ProfileId,
+                        statusId: stepDto.StatusId
+                    );
+
+                    workflow.AddStep(newStep);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                _unitOfWork.Commit();
+
+                return true;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Phase 2: Updates a workflow with steps information (without step tools).
+        /// Validates and creates/updates steps with their profiles and statuses.
+        /// </summary>
+        /// <param name="workflowPhase2Dto"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdatePhase1(WorkflowUpdatePhase1Dto workflowUpdatePhase1Dto)
+        {
+            var workflow = await _workflowRepository.FindByIdReturnModel(workflowUpdatePhase1Dto.Id);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var teamsList = _teamRepository.FindByIds(workflowUpdatePhase1Dto.Teams);
+                foreach (var team in teamsList)
+                {
+                    workflow.AddTeam(team);
+                }
+
+                workflow.Update(workflowUpdatePhase1Dto.Name);
+                await _unitOfWork.SaveChangesAsync();
+                _unitOfWork.Commit();
+
+                return true;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Validates that the profile and status associated with a step DTO exist.
+        /// </summary>
+        /// <param name="stepDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private async Task ValidateProfileAndStatusStepPhase2(StepPhase2Dto stepDto)
+        {
+            var profile = await _profileRepository.FindById(stepDto.ProfileId);
+            if (profile == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Profile not found", ProfileLabel.NotFound);
+            }
+
+            var status = await _statusRepository.FindById(stepDto.StatusId);
+            if (status == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
+            }
+        }
+
+        /// <summary>
+        /// Phase 3: Updates workflow steps with their tool flows (step tools).
+        /// Handles dependencies between step tools.
+        /// </summary>
+        /// <param name="workflowPhase3Dto"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto)
+        {
+            var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase3Dto.WorkflowId);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var stepToolMap = await ProcessStepTools(workflow, workflowPhase3Dto.Steps);
+                await ResolveDependencies(workflow, workflowPhase3Dto.Steps, stepToolMap);
+
+                await _unitOfWork.SaveChangesAsync();
+                _unitOfWork.Commit();
+
+                return true;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Processes step tools for each step in the workflow.
+        /// </summary>
+        private async Task<Dictionary<(int stepId, int order), StepTool>> ProcessStepTools(
+            Workflow workflow, 
+            ICollection<StepPhase3Dto> steps)
+        {
+            StepTool? lastGlobalStepTool = null;
+            var stepToolMap = new Dictionary<(int stepId, int order), StepTool>();
+
+            foreach (var stepDto in steps.OrderBy(s => s.Order))
+            {
+                var existingStep = FindStepInWorkflow(workflow, stepDto);
+                await ClearExistingStepTools(existingStep);
+
+                StepTool? previousStepToolInStep = null;
+
+                foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                {
+                    var stepTool = CreateAndConfigureStepTool(
+                        stepToolDto, 
+                        existingStep, 
+                        previousStepToolInStep, 
+                        lastGlobalStepTool);
+
+                    stepToolMap[(existingStep.Id, stepToolDto.Order)] = stepTool;
+                    existingStep.AddStepTool(stepTool);
+                    
+                    previousStepToolInStep = stepTool;
+                    lastGlobalStepTool = stepTool;
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return stepToolMap;
+        }
+
+        /// <summary>
+        /// Resolves dependencies between step tools.
+        /// </summary>
+        private async Task ResolveDependencies(
+            Workflow workflow,
+            ICollection<StepPhase3Dto> steps,
+            Dictionary<(int stepId, int order), StepTool> stepToolMap)
+        {
+            foreach (var stepDto in steps.OrderBy(s => s.Order))
+            {
+                var existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
+                if (existingStep == null) continue;
+
+                foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
+                {
+                    if (!stepToolMap.TryGetValue((existingStep.Id, stepToolDto.Order), out var stepTool))
+                        continue;
+
+                    await CreateDependenciesForStepTool(workflow, stepTool, stepToolDto);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds a step in the workflow by ID or order.
+        /// </summary>
+        private Step FindStepInWorkflow(Workflow workflow, StepPhase3Dto stepDto)
+        {
+            var step = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
+            if (step == null)
+            {
+                throw new AppException(ErrorCode.NotFound, $"Step with order {stepDto.Order} not found", StepLabel.NotFound);
+            }
+            return step;
+        }
+
+        /// <summary>
+        /// Clears existing step tools and their dependencies.
+        /// </summary>
+        private async Task ClearExistingStepTools(Step step)
+        {
+            var stepToolIdsToRemove = step.StepTools.Select(st => st.Id).ToList();
+            if (stepToolIdsToRemove.Any())
+            {
+                await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepToolIdsToRemove);
+            }
+            step.StepTools.Clear();
+        }
+
+        /// <summary>
+        /// Creates and configures a step tool with its dependencies.
+        /// </summary>
+        private StepTool CreateAndConfigureStepTool(
+            StepToolUpdateDto stepToolDto,
+            Step step,
+            StepTool? previousStepToolInStep,
+            StepTool? lastGlobalStepTool)
+        {
+            var stepTool = CreateStepToolUpdate(stepToolDto);
+            stepTool.Step = step;
+            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+            return stepTool;
+        }
+
+        /// <summary>
+        /// Creates dependencies for a step tool based on the DTO.
+        /// </summary>
+        private async Task CreateDependenciesForStepTool(
+            Workflow workflow,
+            StepTool stepTool,
+            StepToolUpdateDto stepToolDto)
+        {
+            await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
+
+            if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count > 0)
+            {
+                foreach (var dependsOn in stepToolDto.Dependencies)
+                {
+                    var dependsOnStepTool = workflow.Steps
+                        .SelectMany(s => s.StepTools)
+                        .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
+
+                    if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
+                    {
+                        var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
+                        await _stepToolDependencyRepository.CreateAsync(dependency);
+                    }
+                }
+            }
         }
 
     }

@@ -8,6 +8,9 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface IDashboardServices
     {
-        ICollection<int> FindAllCounters();
+        Task FindDashboardData();
+        Task FindTokensData();
+        Task FindOCRData();
+        Task FindWorkflowsData();
     }
 }

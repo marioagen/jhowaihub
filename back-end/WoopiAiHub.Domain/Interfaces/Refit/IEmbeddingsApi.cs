@@ -1,26 +1,20 @@
 ﻿using WoopiAiHub.Domain.DTOs.Refit;
 using Refit;
-using WoopiAiHub.Domain.DTOs;
 
 namespace WoopiAiHub.Domain.Interfaces.Refit
 {
     public interface IEmbeddingsApi
     {
-        [Post("/api/v3/index/{hash}/customquery")]
-        Task<HttpResponseMessage> CustomQuery([AliasAs("hash")] string hash,
+        [Post("/{tenant}/api/v5/index/{hash}/customquery")]
+        Task<HttpResponseMessage> CustomQuery([AliasAs("tenant")] string tenant,
+                                              [AliasAs("hash")] string hash,
                                               CustomQueryRequestRefitDto customQueryRequestDto,
-                                              [Header("ApiKey")] string authorization);
-        
-        [Post("/api/v3/index/{hash}/document")]
-        Task<string> AddDocuments([AliasAs("hash")] string hash,
-                                  AddDocumentsRequestRefitDto request,
-                                  [Header("ApiKey")] string authorization);
+                                              [Header("ApiKey")] string authorization);       
 
-        [Delete("/api/v3/index/{hash}")]
-        Task<HttpResponseMessage> DeleteHash([AliasAs("hash")] string hash,
-                                              string tenant,
-                                              [Header("ApiKey")] string authorization);
-
-
+        [Delete("/{tenantName}/api/v5/index/{hash}")]
+        Task<HttpResponseMessage> DeleteHash([AliasAs("tenantName")] string tenantName, 
+                                             [AliasAs("hash")] string hash,
+                                             string tenant,
+                                             [Header("ApiKey")] string authorization);
     }
 }

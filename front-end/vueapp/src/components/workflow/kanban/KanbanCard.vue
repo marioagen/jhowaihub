@@ -49,8 +49,11 @@
                 <div v-if="!isLastStep && dataCard.assignedUser && !showLoading" class="mb-2">
                     <LucideIcon icon="User" size="12" class="me-1" />
                     <small class="user">{{ $t("card.userApplicant") }}: {{dataCard.assignedUser.name}}</small>
-                    <button type="button" @click.stop="unassignUser" class="btn btn-sm btn-unlink ms-1 px-1"  
-                            v-tooltip.right="$t('card.unassignInfo')">
+                    <button 
+                        type="button" @click.stop="unassignUser" 
+                        class="btn btn-sm btn-unlink ms-1 px-1"  
+                        v-tooltip.right="$t('card.unassignInfo')"
+                    >
                         <LucideIcon v-if="isUnassigningUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
                         <LucideIcon v-else icon="Unlink" size="16" class="unlink-icon"/>
                     </button>

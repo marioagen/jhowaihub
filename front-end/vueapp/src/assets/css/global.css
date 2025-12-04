@@ -818,3 +818,8 @@ dropzone .dz-preview .dz-details {
 .mfs {
     font-size: 0.775rem;
 }
+
+.btn:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}

@@ -264,6 +264,29 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("DocumentNormalized", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ModelEmbedding", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ModelEmbeddings");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Permission", b =>
                 {
                     b.Property<int>("Id")
@@ -902,6 +925,196 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("TypeDoc", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageDaily", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int?>("ModelEmbeddingId")
+                        .HasColumnType("int")
+                        .HasColumnName("ModelEmbeddingId");
+
+                    b.Property<bool>("Processed")
+                        .HasColumnType("bit")
+                        .HasColumnName("Processed");
+
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("int")
+                        .HasColumnName("UsageCount");
+
+                    b.Property<int>("UsageTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("UsageTypeId");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModelEmbeddingId");
+
+                    b.HasIndex("UsageTypeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UsageDailies");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int?>("ModelEmbeddingId")
+                        .HasColumnType("int")
+                        .HasColumnName("ModelEmbeddingId");
+
+                    b.Property<bool>("Processed")
+                        .HasColumnType("bit")
+                        .HasColumnName("Processed");
+
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("int")
+                        .HasColumnName("UsageCount");
+
+                    b.Property<int>("UsageTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("UsageTypeId");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModelEmbeddingId");
+
+                    b.HasIndex("UsageTypeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UsageLogs");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageMonth", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int?>("ModelEmbeddingId")
+                        .HasColumnType("int")
+                        .HasColumnName("ModelEmbeddingId");
+
+                    b.Property<int>("Total")
+                        .HasColumnType("int")
+                        .HasColumnName("Total");
+
+                    b.Property<int>("UsageTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("UsageTypeId");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModelEmbeddingId");
+
+                    b.HasIndex("UsageTypeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UsageMonths");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UsageTypes");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageUnit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int?>("ModelEmbeddingId")
+                        .HasColumnType("int")
+                        .HasColumnName("ModelEmbeddingId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Name");
+
+                    b.Property<int?>("UsageTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("UsageTypeId");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(5,5)")
+                        .HasColumnName("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModelEmbeddingId");
+
+                    b.HasIndex("UsageTypeId");
+
+                    b.ToTable("UsageUnits");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1336,6 +1549,96 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("ToolType");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageDaily", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.ModelEmbedding", "ModelEmbedding")
+                        .WithMany("UsageDaily")
+                        .HasForeignKey("ModelEmbeddingId");
+
+                    b.HasOne("WoopiAiHub.Domain.Models.UsageType", "UsageType")
+                        .WithMany("UsageDaily")
+                        .HasForeignKey("UsageTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
+                        .WithMany("UsageDailies")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ModelEmbedding");
+
+                    b.Navigation("UsageType");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageLog", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.ModelEmbedding", "ModelEmbedding")
+                        .WithMany("UsageLog")
+                        .HasForeignKey("ModelEmbeddingId");
+
+                    b.HasOne("WoopiAiHub.Domain.Models.UsageType", "UsageType")
+                        .WithMany("UsageLog")
+                        .HasForeignKey("UsageTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
+                        .WithMany("UsageLogs")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ModelEmbedding");
+
+                    b.Navigation("UsageType");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageMonth", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.ModelEmbedding", "ModelEmbedding")
+                        .WithMany("UsageMonth")
+                        .HasForeignKey("ModelEmbeddingId");
+
+                    b.HasOne("WoopiAiHub.Domain.Models.UsageType", "UsageType")
+                        .WithMany("UsageMonth")
+                        .HasForeignKey("UsageTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
+                        .WithMany("UsageMonths")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ModelEmbedding");
+
+                    b.Navigation("UsageType");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageUnit", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.ModelEmbedding", "ModelEmbedding")
+                        .WithMany("UsageUnits")
+                        .HasForeignKey("ModelEmbeddingId");
+
+                    b.HasOne("WoopiAiHub.Domain.Models.UsageType", "UsageType")
+                        .WithMany("Units")
+                        .HasForeignKey("UsageTypeId");
+
+                    b.Navigation("ModelEmbedding");
+
+                    b.Navigation("UsageType");
+                });
+
             modelBuilder.Entity("WorkflowDocuments", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Document", null)
@@ -1380,6 +1683,17 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("DocumentHistories");
 
                     b.Navigation("DocumentNormalized");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ModelEmbedding", b =>
+                {
+                    b.Navigation("UsageDaily");
+
+                    b.Navigation("UsageLog");
+
+                    b.Navigation("UsageMonth");
+
+                    b.Navigation("UsageUnits");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Permission", b =>
@@ -1453,9 +1767,26 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Questionnaires");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageType", b =>
+                {
+                    b.Navigation("Units");
+
+                    b.Navigation("UsageDaily");
+
+                    b.Navigation("UsageLog");
+
+                    b.Navigation("UsageMonth");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>
                 {
                     b.Navigation("Prompts");
+
+                    b.Navigation("UsageDailies");
+
+                    b.Navigation("UsageLogs");
+
+                    b.Navigation("UsageMonths");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>

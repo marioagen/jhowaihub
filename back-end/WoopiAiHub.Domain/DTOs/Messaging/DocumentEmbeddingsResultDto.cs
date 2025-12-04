@@ -9,6 +9,8 @@ namespace WoopiAiHub.Domain.DTOs.Messaging
         public string Tenant { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public int TotalPages { get; set; }
+        public int TotalUsage { get; set; }
+        public string EmbeddingModelName { get; set; } = string.Empty;
         public MetaDataAutomationDto Data { get; set; }
     }
 }
