@@ -18,15 +18,18 @@ public class PromptHandler : IToolHandler
     public string Type => HandlersTypes.Prompt;
     private readonly MessageQueues _messageQueues;
     private readonly IPromptServices _promptServices;
+    private readonly ITenantCacheServices _tenantCacheServices;
     private readonly ChatCompletionSettings _chatCompletionSettings;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
-                         IOptions<ChatCompletionSettings> chatCompletionSettings)
+                         IOptions<ChatCompletionSettings> chatCompletionSettings,
+                         ITenantCacheServices tenantCacheServices)
     {
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
         _chatCompletionSettings = chatCompletionSettings.Value;
+        _tenantCacheServices = tenantCacheServices;
     }
 
     /// <summary>
@@ -43,11 +46,18 @@ public class PromptHandler : IToolHandler
                                                         ICollection<StepToolOutput> outputs,
                                                         StepToolExecution? execution = null)
     {
+        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant);
+        if (tenantInfo!.AiGatewayApplicationId.HasValue is false || string.IsNullOrEmpty(tenantInfo.AiGatewayKey))
+        {
+            throw new ArgumentException("AiGateway ApplicationId not found");
+        }
+
         var output = outputs.FirstOrDefault()?.Value ?? string.Empty;
         var promptId = int.Parse(input!.Value);
         var promptDto = _promptServices.FindById(promptId);
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
         var fullText = string.Join("\n", documents!.DocumentEmbeddings.Select(d => d.Text));
+
 
         return new ExecutionMessageDto
         {
@@ -60,6 +70,8 @@ public class PromptHandler : IToolHandler
                 Tenant = automationServicesDto.Tenant,
                 Model = _chatCompletionSettings.Model,
                 ApiVersion = _chatCompletionSettings.ApiVersion,
+                ApplicationId = tenantInfo!.AiGatewayApplicationId.Value.ToString(),
+                ApplicationKey = tenantInfo!.AiGatewayKey,
                 ChatCompletion = new ChatCompletionDto
                 {
                     Temperature = _chatCompletionSettings.Temperature,
