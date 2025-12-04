@@ -9,7 +9,7 @@
                 <div class="card plan-card mb-4">
                     <div class="card-body text-center">
                         <p class="plan-label mb-1">{{ $t("home.planLabel") }}</p>
-                        <h3 class="plan-name mb-1">{{ $t("home.planName") }}</h3>
+                        <h3 class="plan-name mb-1">{{ plan }}</h3>
                         <p class="plan-thanks mb-0">{{ $t("home.planThankYou") }}</p>
                     </div>
                 </div>
@@ -108,6 +108,9 @@
 </template>
 
 <script>
+import DashboardServices from '@/services/dashboard/DashboardServices';
+import store from "@/store";
+
 export default {
     name: "HomePage",
     data() {
@@ -118,13 +121,23 @@ export default {
                     guideUrl: "",
                     docsUrl: ""
                 }
-            }
+            },
+            plan: ""
         };
+    },
+    methods: {
+        getPlan() {
+            DashboardServices.GetPlan(store.state.userProfile.tenant)
+                .then((response) => {
+                    this.plan = response.toUpperCase();
+                });
+        }
     },
     mounted() {
         this.config.links.videoUrl = ENV_CONFIG.VUE_APP_HOME_VIDEO_URL || "";
         this.config.links.guideUrl = ENV_CONFIG.VUE_APP_HOME_GUIDE_URL || "";
         this.config.links.docsUrl = ENV_CONFIG.VUE_APP_HOME_DOCS_URL || "";
+        this.getPlan();
     }
 };
 </script>
