@@ -4,7 +4,7 @@
             <div class="row">
                 <div class="col-auto col-fix">
                     <form @submit="returnToPreviousPage" style="text-align: center">
-                        <img src="../assets/img/woopi-ai-text-logo.svg" style="padding-bottom: 10px" width="200"
+                        <img src="../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px" width="200"
                             height="60" alt="WOOPI AI" />
 
                         <h5 class="fw-bold">{{ $t("unauthorized.title") }}</h5>
