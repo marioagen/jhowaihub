@@ -65,23 +65,53 @@ namespace WoopiAiHub.Application.Services
         /// <param name="authenticateDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<AccessDataAuthDto> Login(LoginDto loginDto)
+        public async Task<object> Login(LoginDto loginDto)
         {
             var userAccess = await CheckMarketplaceAccess(loginDto.Email);
             if (userAccess != null && userAccess.HasAccess)
             {
-                var httpContext = _httpContextAccessor.HttpContext ??
-                                 throw new InvalidOperationException(_messageHttpContextNotAvailable);
+                if (string.IsNullOrEmpty(loginDto.Tenant) && userAccess.Tenants.Count > 1)
+                {
+                    return new
+                    {
+                        userAccess.Tenants
+                    };
+                }
+                var tenant = string.IsNullOrEmpty(loginDto.Tenant) ? userAccess.Tenants.First() : loginDto.Tenant;
 
-                await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
-                await _tenantContextService.TrySetTenantConnectionAsync(httpContext,
-                                                                        userAccess.Tenant);
-                var user = await _userRepository.FindByEmailAsync(loginDto.Email);
-                if (user == null)
-                    throw new AppException(null,
-                                           "User not found.",
-                                           Domain.Utils.ErrorLabels.Login.UserNotFound);
+                return await ProceedLogin(loginDto, tenant, true);
+            }
 
+            throw new AppException(null,
+                                   "User without access.",
+                                   Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
+        }
+
+        /// <summary>
+        /// Proceed login
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <param name="tenant"></param>
+        /// <param name="checkPassword"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="AppException"></exception>
+        private async Task<AccessDataAuthDto> ProceedLogin(LoginDto loginDto, string tenant, bool checkPassword)
+        {
+            var httpContext = _httpContextAccessor.HttpContext ??
+                             throw new InvalidOperationException(_messageHttpContextNotAvailable);
+
+            await _tenantContextService.InitializeTenantAsync(tenant);
+            await _tenantContextService.TrySetTenantConnectionAsync(httpContext,
+                                                                    tenant);
+
+            var user = await _userRepository.FindByEmailAsync(loginDto.Email);
+            if (user == null)
+                throw new AppException(null,
+                                       "User not found.",
+                                       Domain.Utils.ErrorLabels.Login.UserNotFound);
+            if (checkPassword)
+            {
                 bool isPasswordValid = _passwordHasher.Verify(loginDto.Password, user.PasswordHash, user.Salt);
                 if (!isPasswordValid)
                 {
@@ -89,23 +119,19 @@ namespace WoopiAiHub.Application.Services
                                            "Incorrect password.",
                                            Domain.Utils.ErrorLabels.Login.UserIncorrectPassword);
                 }
-
-                var permissions = await _permissionRepository.FindUserPermissionsAsync(user.Email);
-                var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
-                this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
-
-                return new AccessDataAuthDto
-                {
-                    Tenant = userAccess.Tenant,
-                    Token = tokenJWT.AccessToken,
-                    Email = user.Email,
-                    Name = user.Name
-                };
             }
 
-            throw new AppException(null,
-                                   "User without access.",
-                                   Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
+            var permissions = await _permissionRepository.FindUserPermissionsAsync(user.Email);
+            var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
+            this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
+
+            return new AccessDataAuthDto
+            {
+                Tenant = tenant,
+                Token = tokenJWT.AccessToken,
+                Email = user.Email,
+                Name = user.Name
+            };
         }
 
         /// <summary>
@@ -116,7 +142,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="authenticateHeaderDto"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<AccessDataAuthDto> LoginSSO(AuthenticateDto authenticateDto, AuthenticateHeaderDto authenticateHeaderDto)
+        public async Task<object> LoginSSO(AuthenticateDto authenticateDto, AuthenticateHeaderDto authenticateHeaderDto)
         {
             var emailUserAzureRequest = await _graphApi.FindEmailUserAzure(authenticateHeaderDto.Authorization);
 
@@ -127,27 +153,20 @@ namespace WoopiAiHub.Application.Services
                 var userAccess = await CheckMarketplaceAccess(authenticateDto.Login);
                 if (userAccess != null && userAccess.HasAccess)
                 {
-                    var httpContext = _httpContextAccessor.HttpContext ??
-                                throw new InvalidOperationException(_messageHttpContextNotAvailable);
-
-                    await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
-                    await _tenantContextService.TrySetTenantConnectionAsync(httpContext, userAccess.Tenant);
-
-                    var user = await _userRepository.FindByEmailAsync(authenticateDto.Login);
-                    if (user == null)
-                        throw new AppException(null,
-                                               "User not found.",
-                                               Domain.Utils.ErrorLabels.Login.UserNotFound);
-
-                    var permissions = await _permissionRepository.FindUserPermissionsAsync(authenticateDto.Login);
-                    var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
-                    this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
-
-                    return new AccessDataAuthDto
+                    if (string.IsNullOrEmpty(authenticateDto.Tenant) && userAccess.Tenants.Count > 1)
                     {
-                        Tenant = userAccess.Tenant,
-                        Token = tokenJWT.AccessToken
+                        return new
+                        {
+                            userAccess.Tenants
+                        };
+                    }
+                    var tenant = string.IsNullOrEmpty(authenticateDto.Tenant) ? userAccess.Tenants.First() : authenticateDto.Tenant;
+                    var loginDto = new LoginDto
+                    {
+                        Email = authenticateDto.Login,
+                        Password = string.Empty
                     };
+                    return await ProceedLogin(loginDto, tenant, false);
                 }
 
                 throw new AppException(null,
@@ -207,7 +226,7 @@ namespace WoopiAiHub.Application.Services
         /// not correspond to a user.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the HTTP context is not available during the operation.</exception>
         /// <exception cref="ArgumentException">Thrown if the user is not authorized to access the marketplace.</exception>
-        public async Task<string?> RefreshTokenAsync(string refreshToken)
+        public async Task<string?> RefreshTokenAsync(string refreshToken, string headerTenant)
         {
             var userEmail = await _refreshTokenServices.FindUserByRefreshTokenAsync(refreshToken);
             if (string.IsNullOrEmpty(userEmail))
@@ -216,12 +235,14 @@ namespace WoopiAiHub.Application.Services
             var userAccess = await CheckMarketplaceAccess(userEmail);
             if (userAccess != null && userAccess.HasAccess)
             {
+                var tenant = userAccess.Tenants.FirstOrDefault(t => t.Equals(headerTenant));
+
                 var httpContext = _httpContextAccessor.HttpContext ??
                                   throw new InvalidOperationException(_messageHttpContextNotAvailable);
 
-                await _tenantContextService.InitializeTenantAsync(userAccess.Tenant);
-                await _tenantContextService.TrySetTenantConnectionAsync(httpContext, 
-                                                                        userAccess.Tenant);
+                await _tenantContextService.InitializeTenantAsync(tenant);
+                await _tenantContextService.TrySetTenantConnectionAsync(httpContext,
+                                                                        tenant);
                 var permissions = await _permissionRepository.FindUserPermissionsAsync(userEmail);
 
                 var tokens = await GenerateTokensAsync(userEmail, permissions);

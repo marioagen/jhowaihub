@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Text.Json.Nodes;
 
 namespace WoopiAiHub.Domain.DTOs.Refit
 {
@@ -8,5 +7,7 @@ namespace WoopiAiHub.Domain.DTOs.Refit
         public string response { get; set; }
         public JObject metadata { get; set; }
         public JArray metadata_array { get; set; }
+        public ICollection<QueryUsageDto> Usage { get; set; } = [];
+
     }
 }

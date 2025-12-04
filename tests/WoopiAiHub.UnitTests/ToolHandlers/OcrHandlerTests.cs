@@ -41,7 +41,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var tenantInfo = new TenantInfoDto { OcrModel = string.Empty };
 
             _mockTenantCacheServices
-                .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
                 .ReturnsAsync(tenantInfo);
 
             // Act & Assert
@@ -58,7 +58,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var tenantInfo = new TenantInfoDto { OcrModel = "test-ocr-model" };
 
             _mockTenantCacheServices
-                .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
                 .ReturnsAsync(tenantInfo);
 
             // Act

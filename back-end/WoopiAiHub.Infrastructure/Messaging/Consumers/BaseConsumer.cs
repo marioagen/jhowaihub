@@ -24,11 +24,10 @@ namespace WoopiAiHub.Infrastructure.Messaging.Consumers
         /// <param name="tenantSelector"></param>
         /// <returns></returns>
         protected async Task<string> GetConnectionStringAsync(IServiceScope scope,
-                                                              string tenantName,
-                                                              ColTypeModule module)
+                                                              string tenantName)
         {
             var tenantCacheService = scope.ServiceProvider.GetRequiredService<ITenantCacheServices>();            
-            var tenant = await tenantCacheService.FindTenantAsync(tenantName, module);
+            var tenant = await tenantCacheService.FindTenantAsync(tenantName);
             var template = _configuration.GetConnectionString("TemplateConnection");
             var connectionString = template?.Replace("___NEWDB___", tenant!.DatabaseName);
 

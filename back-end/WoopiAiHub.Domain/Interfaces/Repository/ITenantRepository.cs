@@ -1,4 +1,6 @@
-﻿public interface ITenantRepository
+﻿using WoopiAiHub.Domain.Models;
+
+public interface ITenantRepository
 {
     bool CreateDatabase();
 }

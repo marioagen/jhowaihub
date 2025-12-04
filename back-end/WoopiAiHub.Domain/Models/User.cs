@@ -34,6 +34,10 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<Prompt> Prompts { get; set; } = [];
         public ICollection<Team> Teams { get; set; } = [];
 
+        public virtual ICollection<UsageDaily> UsageDailies { get; set; } = [];
+        public virtual ICollection<UsageLog> UsageLogs { get; set; } = [];
+        public virtual ICollection<UsageMonth> UsageMonths { get; set; } = [];
+
         public User(Guid id,
                     string name,
                     string email,

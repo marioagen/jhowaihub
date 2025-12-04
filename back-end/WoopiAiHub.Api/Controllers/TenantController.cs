@@ -45,6 +45,20 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
+        /// Searches for the tenants that the user has enabled in the Marketplace.
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [HttpGet("FindPlanByName/{tenant}")]
+        [SwaggerOperation("EndPoint that finds a tenants by an email")]
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindPlanByName(string tenant)
+        {
+            var result = await _tenantServices.FindPlanByName(tenant);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Obtains the tenant's mongo key and applies migrations if necessary
         /// </summary>
         /// <param name="tenant"></param>

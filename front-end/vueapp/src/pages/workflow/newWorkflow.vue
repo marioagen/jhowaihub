@@ -1,13 +1,20 @@
 <template>
-    <WorkflowForm />
+    <WorkflowWizard
+     :workflowId="routeId"/>
 </template>
 
 <script>
-    import WorkflowForm from "@/components/workflow/form/WorkflowForm.vue";
+    import WorkflowWizard from "@/components/workflow/wizard/WorkflowWizard.vue";
     export default {
-        name: "EditWorkflow",
+        name: "NewWorkflow",
         components: {
-            WorkflowForm,
+            WorkflowWizard,
+        },
+         computed: {
+            routeId() {
+                const id = this.$route.params.id;
+                return id ? parseInt(id) : undefined;
+            }
         }
     }
 </script>

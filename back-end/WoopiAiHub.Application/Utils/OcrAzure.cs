@@ -30,8 +30,7 @@ namespace WoopiAiHub.Application.Utils
         {
             var ApiKey = _config.GetValue<string>("OCRSettings:OCRApiKey");
             var Endpoint = _config.GetValue<string>("OCRSettings:OCREndpoint");
-            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName,
-                                                                    ColTypeModule.WoopiAiHub);
+            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName);
 
             AzureKeyCredential Credential = new(ApiKey);
             DocumentAnalysisClient client = new DocumentAnalysisClient(new Uri(Endpoint), Credential);

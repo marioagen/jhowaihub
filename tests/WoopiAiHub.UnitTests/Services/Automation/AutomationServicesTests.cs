@@ -14,6 +14,7 @@ using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
@@ -225,11 +226,16 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
             var messagePublisherMock = _mocker.GetMock<IMessagePublisher<string>>();
             var handlerMock = _mocker.GetMock<IToolHandler>();
+            var usageDailyServicesMock = _mocker.GetMock<IUsageDailyServices>();
+
+            usageDailyServicesMock.Setup(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                                  .ReturnsAsync(true);
 
             // Act
             await _service.StartExecutionByWorkflowsAsync(automationDto, workflows);
 
             // Assert
+            usageDailyServicesMock.Verify(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Never);
             messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Never);

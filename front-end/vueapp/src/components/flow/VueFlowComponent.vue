@@ -64,6 +64,7 @@ import HubNode from '@/components/flow/HubNode.vue';
 import SpecialEdge from '@/components/flow/SpecialEdge.vue';
 import LogService from '@/services/log/logService';
 import ToolsServices from '@/services/tools/ToolsServices';
+import WorkflowService from "@/services/workflow/WorkflowService";
 
 export default {
     name: "VueFlowComponent",
@@ -83,6 +84,11 @@ export default {
             type: Boolean,
             required: false,
             default: false
+        },
+        hasStepTools: {
+            type: Boolean,
+            required: false,
+            default: false,
         }
     },
     data() {
@@ -131,21 +137,10 @@ export default {
         },
         async getFlow() {
             try {
-                this.step = this.$store.state.tempWorkflow.list.find(item => {
-                    if (this.isEdit && this.stepId == 0) {
-                        if (item.order == this.stepOrder) {
-                            return item.stepTools;
-                        }
-                    } else if(this.isEdit) {
-                        if (item.id == this.stepId) {
-                            return item.stepTools;
-                        }
-                    } else {
-                        if (item.order == this.stepOrder) {
-                            return item.stepTools;
-                        }
-                    }
-                });
+                console.log(this.hasStepTools, this.stepId);
+                if (this.hasStepTools && this.stepId != 0) {
+                    this.step = await WorkflowService.getStepById(this.stepId);
+                } 
 
                 let stepTools = this.step ? this.step.stepTools : [];
                 const mappedNodes = stepTools.map(stepTool => ({
