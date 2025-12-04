@@ -7,8 +7,8 @@ using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Models;
 using Xunit;
 
@@ -45,16 +45,16 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ArchiveOldUsageAsync_NoTenantsFound_ReturnsEarly()
         {
             // Arrange
-            _mocker.GetMock<ITenantCacheServices>()
-                .Setup(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub))
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub))
                 .ReturnsAsync(new List<TenantListDto>());
 
             // Act
             await _service.ArchiveOldUsageAsync();
 
             // Assert
-            _mocker.GetMock<ITenantCacheServices>()
-                .Verify(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub), Times.Once);
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Verify(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub), Times.Once);
         }
 
         [Fact(DisplayName = "ArchiveOldUsageAsync should process each tenant when tenants exist")]
@@ -68,8 +68,8 @@ namespace WoopiAiHub.UnitTests.Services
                 new TenantListDto { Name = "Tenant2", DatabaseName = "DB2" }
             };
 
-            _mocker.GetMock<ITenantCacheServices>()
-                .Setup(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub))
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub))
                 .ReturnsAsync(tenants);
 
             var mockScope = new Mock<IServiceScope>();
@@ -93,8 +93,8 @@ namespace WoopiAiHub.UnitTests.Services
             await _service.ArchiveOldUsageAsync();
 
             // Assert
-            _mocker.GetMock<ITenantCacheServices>()
-                .Verify(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub), Times.Once);
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Verify(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub), Times.Once);
             _mocker.GetMock<IServiceScopeFactory>()
                 .Verify(x => x.CreateScope(), Times.Exactly(tenants.Count));
         }
@@ -135,8 +135,8 @@ namespace WoopiAiHub.UnitTests.Services
                 new UsageDaily(2, cutoffDate.AddDays(-5), Guid.NewGuid(), 1, 50, true, 1)
             };
 
-            _mocker.GetMock<ITenantCacheServices>()
-                .Setup(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub))
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub))
                 .ReturnsAsync(tenants);
 
             var mockScope = new Mock<IServiceScope>();
@@ -177,8 +177,8 @@ namespace WoopiAiHub.UnitTests.Services
                 new TenantListDto { Name = "Tenant1", DatabaseName = "DB1" }
             };
 
-            _mocker.GetMock<ITenantCacheServices>()
-                .Setup(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub))
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub))
                 .ReturnsAsync(tenants);
 
             var mockScope = new Mock<IServiceScope>();
@@ -224,8 +224,8 @@ namespace WoopiAiHub.UnitTests.Services
                 new UsageDaily(2, cutoffDate.AddDays(-5), Guid.NewGuid(), 1, 50, true, 1)
             };
 
-            _mocker.GetMock<ITenantCacheServices>()
-                .Setup(x => x.FindAllTenantsAsync(ColTypeModule.WoopiAiHub))
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub))
                 .ReturnsAsync(tenants);
 
             var mockScope = new Mock<IServiceScope>();
