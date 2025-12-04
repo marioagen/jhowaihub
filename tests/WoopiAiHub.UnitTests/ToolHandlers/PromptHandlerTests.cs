@@ -54,7 +54,10 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
 
-            var tenantInfo = new TenantInfoDto { };
+            var tenantInfo = new TenantInfoDto {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
 
             var stepToolParameter = new StepToolParameter(1,DateTime.Now,2,true,Guid.NewGuid(),"6");
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
@@ -79,6 +82,24 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Equal(automationServicesDto.ReferenceFile, message.ReferenceFile);
             Assert.Equal(automationServicesDto.CardId, message.Data.CardId);
             Assert.Equal(automationServicesDto.StepToolId, message.Data.StepToolId);
+        }
+
+        [Fact(DisplayName = "BuildPayload should throw ArgumentException when AiGateway info is null or empty")]
+        [Trait("BuildPayload", "Fail")]
+        public async Task BuildPayload_ShouldThrowArgumentException_WhenEmbeddingModelNameIsNullOrEmpty()
+        {
+            // Arrange
+            var automationServiceDto = AutomationFixture.FindValidAutomationServicesDto();
+            var tenantInfo = new TenantInfoDto { };
+            var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
+
+            _mockTenantCacheServices
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
+                .ReturnsAsync(tenantInfo);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _handler.BuildPayload(automationServiceDto, It.IsAny<StepToolParameter>(), [output]));
         }
     }
 }
