@@ -49,82 +49,82 @@ namespace WoopiAiHub.Repository.Migrations
            ");
 
             migrationBuilder.Sql(@"
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Question')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de questões')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Question', 'Questions');
+                   VALUES ('View', GETDATE(), 'Tela de questões', 'Questions');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Type')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de tipos')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Type', 'Types');
+                   VALUES ('View', GETDATE(), 'Tela de tipos', 'Types');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Quizz')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de questionários')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Quizz', 'Quizzes');
+                   VALUES ('View', GETDATE(), 'Tela de questionários', 'Quizzes');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Documents')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de documentos')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Documents', 'Documents');
+                   VALUES ('View', GETDATE(), 'Tela de documentos', 'Documents');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Management Tables')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de gestão')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Management Tables', 'Management');
+                   VALUES ('View', GETDATE(), 'Tela de gestão', 'Management');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Users')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de usuários')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Users', 'Users');
+                   VALUES ('View', GETDATE(), 'Tela de usuários', 'Users');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Teams')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de times')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Teams', 'Teams');
+                   VALUES ('View', GETDATE(), 'Tela de times', 'Teams');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Profiles')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de perfis')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Profiles', 'Profiles');
+                   VALUES ('View', GETDATE(), 'Tela de perfis', 'Profiles');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Workflow')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de workflows')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Workflow', 'Workflow');
+                   VALUES ('View', GETDATE(), 'Tela de workflows', 'Workflow');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Tools')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de Ferramentas')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Tools', 'Tools');
+                   VALUES ('View', GETDATE(), 'Tela de Ferramentas', 'Tools');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Step')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Somente Visualizar')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Step', 'Workflow-Step');
+                   VALUES ('View', GETDATE(), 'Somente Visualizar', 'Workflow-Step');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'Access' AND [Description] = 'Access Step')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'Access' AND [Description] = 'Acessar')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('Access', GETDATE(), 'Access Step', 'Workflow-Step');
+                   VALUES ('Access', GETDATE(), 'Acessar', 'Workflow-Step');
                END
            
-               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'View Dashboard')
+               IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'View' AND [Description] = 'Tela de dashboard')
                BEGIN
                    INSERT INTO Permissions (Name, Created, Description, [Group])
-                   VALUES ('View', GETDATE(), 'View Dashboard', 'Dashboard');
+                   VALUES ('View', GETDATE(), 'Tela de dashboard', 'Dashboard');
                END
            ");
 
