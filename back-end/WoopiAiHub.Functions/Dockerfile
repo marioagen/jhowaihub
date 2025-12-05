@@ -21,7 +21,8 @@ RUN dotnet build "WoopiAiHub.Functions.csproj" -c Release -o /app/build
 RUN dotnet publish "WoopiAiHub.Functions.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
-FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0
+# FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0
+FROM mcr.microsoft.com/azure-functions/dotnet:4
 WORKDIR /home/site/wwwroot
 
 # Copy published files
