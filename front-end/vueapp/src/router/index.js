@@ -77,7 +77,7 @@ const routes = [
         path: "/",
         name: "Login",
         component: LoginIndex,
-        meta: { 
+        meta: {
             layout: "auth",
         },
     },
@@ -93,7 +93,7 @@ const routes = [
         path: "/unauthorized",
         name: "Unauthorized",
         component: UnauthorizedPage,
-        meta: { 
+        meta: {
             layout: "auth",
         },
     },
@@ -101,7 +101,7 @@ const routes = [
         path: "/home",
         name: "Home",
         component: HomePage,
-        meta: { 
+        meta: {
             layout: "default",
         },
         beforeEnter: authenticateBasic,
@@ -110,31 +110,34 @@ const routes = [
         path: "/dashboard",
         name: "Dashboard",
         component: DashboardPage,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Dashboard",
             action: "View",
-        }
+        },
+        beforeEnter: authenticate,
     },
     {
         path: "/documents",
         name: "Documents",
         component: DocumentsPage,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Documents",
             action: "View",
         },
+        beforeEnter: authenticate,
     },
     {
         path: "/documents/upload",
         name: "DocumentsUpload",
         component: DocumentsUpload,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Documents",
             action: "View",
         },
+        beforeEnter: authenticate,
     },
     {
         path: "/types",
@@ -151,7 +154,7 @@ const routes = [
         path: "/questions",
         name: "Question",
         component: QuestionsPage,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Questions",
             action: "View",
@@ -162,7 +165,7 @@ const routes = [
         path: "/quizzes",
         name: "Quiz",
         component: QuizzesPage,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Quizzes",
             action: "View",
@@ -173,7 +176,7 @@ const routes = [
         path: "/quizzes/new",
         name: "NewQuizz",
         component: NewQuizz,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Quizzes",
             action: "View",
@@ -184,7 +187,7 @@ const routes = [
         path: "/quizzes/edit/:id",
         name: "EditQuizz",
         component: EditQuizz,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Quizzes",
             action: "View",
@@ -195,7 +198,7 @@ const routes = [
         path: "/normalize/:id",
         name: "Normalize",
         component: NormalizeIndex,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Documents",
             action: "View",
@@ -205,7 +208,7 @@ const routes = [
         path: "/analyzer/:documentId/:cardId",
         name: "Analyzer",
         component: AnalyzerIndex,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Documents",
             action: "View",
@@ -215,7 +218,7 @@ const routes = [
         path: "/management",
         name: "Management",
         component: ManagementPage,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Management",
             action: "View",
@@ -226,7 +229,7 @@ const routes = [
         path: "/management/users/new",
         name: "NewUser",
         component: NewUser,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Management",
             action: "View",
@@ -237,7 +240,7 @@ const routes = [
         path: "/management/users/edit/:email",
         name: "EditUser",
         component: EditUser,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Management",
             action: "View",
@@ -248,7 +251,7 @@ const routes = [
         path: "/management/teams/new",
         name: "NewTeam",
         component: NewTeam,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Management",
             action: "View",
@@ -259,7 +262,7 @@ const routes = [
         path: "/management/teams/edit/:id",
         name: "EditTeam",
         component: EditTeam,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Management",
             action: "View",
@@ -270,7 +273,7 @@ const routes = [
         path: "/management/profiles/new",
         name: "NewProfile",
         component: NewProfile,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Management",
             action: "View",
@@ -281,7 +284,7 @@ const routes = [
         path: "/management/profiles/edit/:id",
         name: "EditProfile",
         component: EditProfile,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Management",
             action: "View",
@@ -292,7 +295,7 @@ const routes = [
         path: "/workflow",
         name: "Workflow",
         component: WorkflowPage,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Workflow",
             action: "View",
@@ -303,7 +306,7 @@ const routes = [
         path: "/workflow/management/:phase?",
         name: "WorkflowManagement",
         component: WorkflowManagement,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Workflow",
             action: "View",
@@ -314,7 +317,7 @@ const routes = [
         path: "/workflow/new/:phase?/:workflowId?",
         name: "NewWorkflow",
         component: NewWorkflow,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Workflow",
             action: "View",
@@ -325,7 +328,7 @@ const routes = [
         path: "/workflow/edit/:id/:phase?",
         name: "EditWorkflow",
         component: EditWorkflow,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Workflow",
             action: "View",
@@ -336,7 +339,7 @@ const routes = [
         path: "/tools",
         name: "Tools",
         component: ToolsPage,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Tools",
             action: "View",
@@ -347,7 +350,7 @@ const routes = [
         path: "/flow/:stepOrder/:phase/:workflowId/:stepId/:hasStepTools",
         name: "NewFlow",
         component: NewFlow,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Workflow",
             action: "View",
@@ -358,7 +361,7 @@ const routes = [
         path: "/flow/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
         name: "EditFlow",
         component: EditFlow,
-        meta: { 
+        meta: {
             layout: "default",
             module: "Workflow",
             action: "View",

@@ -9,7 +9,6 @@ using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 
@@ -18,20 +17,17 @@ namespace WoopiAiHub.Application.Services
     public class UsageArchiveService : IUsageArchiveService
     {
         private readonly IMarketPlaceApi _marketPlaceApi;
-        private readonly ITenantCacheServices _tenantCacheService;
         private readonly IConfiguration _configuration;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<UsageArchiveService> _logger;
         private readonly ResiliencePipeline _resiliencePipeline;
 
         public UsageArchiveService(IMarketPlaceApi marketPlaceApi,
-                                   ITenantCacheServices tenantCacheService,
                                    IConfiguration configuration,
                                    IServiceScopeFactory scopeFactory,
                                    ILogger<UsageArchiveService> logger)
         {
             _marketPlaceApi = marketPlaceApi ?? throw new ArgumentNullException(nameof(marketPlaceApi));
-            _tenantCacheService = tenantCacheService ?? throw new ArgumentNullException(nameof(tenantCacheService));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -67,10 +63,10 @@ namespace WoopiAiHub.Application.Services
 
         public async Task ArchiveOldUsageAsync()
         {
-            var keyAccess = _configuration["KeyAccess"] ?? 
+            var keyAccess = _configuration["KeyAccess"] ??
                 throw new InvalidOperationException("KeyAccess not configured");
 
-            var tenants = await _tenantCacheService.FindAllTenantsAsync(ColTypeModule.WoopiAiHub);
+            var tenants = await _marketPlaceApi.FindAllTenantsByModuleAsync(keyAccess, ColTypeModule.WoopiAiHub);
 
             if (!tenants.Any())
             {
@@ -171,8 +167,8 @@ namespace WoopiAiHub.Application.Services
 
             var chargeRequest = new ExcessManagementTenantDto
             {
-               Tenant = tenant.Name,
-               UsageCount = usageByTenant,
+                Tenant = tenant.Name,
+                UsageCount = usageByTenant,
             };
 
             await _resiliencePipeline.ExecuteAsync(async token =>

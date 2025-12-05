@@ -80,7 +80,6 @@
     labelNewQuestion: "Criar pergunta",
     labelNewQuestionnaire: "Criar questionário",
     labelNotice: "Aviso",
-    labelNoFileChosen: "Nenhum arquivo escolhido",
     labelNoQuestionsRegistered: "Não existem perguntas cadastradas",
     labelNoMoreQuestionsAvailable: "Não existem mais perguntas disponíveis",
     labelNoDocumentsWereFound: "Nenhum documento foi localizado",
@@ -343,6 +342,8 @@
             noWorkflowFound: "Nenhum workflow vinculado ao seus times do usuário",
             selectionList: "Lista de seleção",
             warningWorkflowNotListed: "O workflow não apareceu na lista? É porque seus times não tem um workflow associado a eles.",
+            noFileChosen: "Nenhum arquivo escolhido",
+            noTeamChosen: "Nenhum time escolhido",
         }
     },
     questions: {
@@ -611,6 +612,7 @@
             title: "Times",
             subtitle: "Gerencie os times do sistema",
             createBtn: "Novo Time",
+            createTitle: "Novo Time",
             createSubtitle: "Crie um novo time para o sistema",
             editTitle: "Editar Time",
             editSubtitle: "Atualize as informações do time selecionado",
