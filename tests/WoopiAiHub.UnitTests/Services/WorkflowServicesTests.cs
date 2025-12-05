@@ -1095,7 +1095,12 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock.Setup(x => x.FindByIdReturnModel(It.IsAny<int>()))
                 .Returns(team);
             _workflowRepositoryMock.Setup(x => x.FindByStep(steps)).ReturnsAsync(workflows);
-             Assert.True(true);
+
+            // Act
+            await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(steps, profile);
+
+            // Assert
+            Assert.True(true); 
         }
     }
 }
