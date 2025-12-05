@@ -24,11 +24,7 @@ export default {
     name: "UnauthorizedPage",
     methods: {
         returnToPreviousPage() {
-            if (window.history.state && window.history.length > 1) {
-                this.$router.back();
-            } else {
-                this.$router.push({ name: 'DocumentList' });
-            }
+            this.$router.push({ name: 'Home' });
         }
     },
 };
