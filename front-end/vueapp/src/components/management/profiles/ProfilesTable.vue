@@ -20,7 +20,7 @@
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToForm(data.row)">
                             <LucideIcon icon="SquarePen" />
                             {{ $t("labelEdit") }}
                         </a>
@@ -38,11 +38,6 @@
             </template>
         </TableComponent>
     </div>
-    <ProfilesModal 
-        :isEdit="true" 
-        @reload="reload" 
-        ref="ProfilesModal" 
-    />
     <ConfirmModal
         id="deleteConfirm"
         title="labelYouAreAboutToDeleteProfile"
@@ -59,7 +54,6 @@
 <script>
     import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
-    import ProfilesModal from "@/components/management/profiles/modals/ProfilesModal.vue";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
@@ -70,7 +64,6 @@
         components: {
             DropdownComponent,
             TableComponent,
-            ProfilesModal,
             ConfirmModal,
         },
         data: () => ({
@@ -157,8 +150,13 @@
                 this.getProfiles({ search: "", page: this.queryPage, type: null });
                 this.closeModalTeam();
             },
-            openEditModal(profile) {
-                this.$refs.ProfilesModal.open(profile);
+            redirectToForm(profile) {
+                this.$router.push({
+                    name: 'EditProfile',
+                    params: {
+                        id: profile.id,
+                    }
+                });
             },
             openConfirmation(profile) {
                 this.selectedProfile = [profile.id];
@@ -176,14 +174,14 @@
                             this.getProfiles({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: "Profiles",
-                                message: this.$t("labelProfileRemoveSuccess"),
+                                message: "management.profiles.deleteSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "Profiles",
-                                message: this.$t("labelProfileRemoveError"),
+                                message: "management.profiles.deleteError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -196,7 +194,6 @@
                     });
             },
             reload() {
-                this.$refs.ProfilesModal.close();
                 this.getProfiles({ search: "", page: this.queryPage, type: null });
             },
         },

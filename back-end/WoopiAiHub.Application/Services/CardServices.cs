@@ -1,10 +1,16 @@
 ﻿using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
+using Newtonsoft.Json;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -13,14 +19,17 @@ namespace WoopiAiHub.Application.Services
         private readonly ICardRepository _cardRepository;
         private readonly IStepRepository _stepRepository;
         private readonly IAutomationServices _automationServices;
+        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
 
         public CardServices(ICardRepository cardRepository,
                             IStepRepository stepRepository,
-                            IAutomationServices automationServices)
+                            IAutomationServices automationServices,
+                            IStepToolExecutionRepository stepToolExecutionRepository)
         {
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
             _automationServices = automationServices;
+            _stepToolExecutionRepository = stepToolExecutionRepository;
         }
 
         /// <summary>
@@ -42,7 +51,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var isValidTeamUser = card.Step?.Workflow?.Team?.Users.Any(a => a.Id.Equals(updateAssingnedUserDto.UserId));
+            var isValidTeamUser = card.Step?.Workflow?.Teams?.Any(t => t.Users.Any(u => u.Id.Equals(updateAssingnedUserDto.UserId)));
             if (!isValidTeamUser.HasValue || !isValidTeamUser.Value)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found", CardLabel.UserCannotBeAssigned);
@@ -110,6 +119,240 @@ namespace WoopiAiHub.Application.Services
                 await _automationServices.StartExecutionByCardAsync(automationServicesDto);
 
             return true;
+        }
+        /// <summary>
+        /// Returns document information grouped by processing steps with extracted data.
+        /// </summary>
+        /// <param name="cardId">Card ID to analyze</param>
+        /// <param name="headersDto">Request headers</param>
+        /// <returns>Document with steps and extracted fields</returns>
+        /// <exception cref="ArgumentException">Thrown when card is not found</exception>
+        public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
+                                                                             HeadersDto headersDto)
+        {
+            var card = await FindCardWithRelationships(cardId);
+            var verifyAnswer = await VerifyCanAnswer(card);
+            var document = card.Document ?? throw new ArgumentException("Document not found for the card");
+            var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
+
+            var steps = BuildStepsFromWorkflow(workflow, card);
+            var lastProcessedStepId = GetLastProcessedStepId(steps);
+
+            return new DocumentAnalyzeStepsDto
+            {
+                DocumentId = $"doc-{document.Id}",
+                Name = document.Name,
+                Description = document.Description,
+                ReferenceFile = document.ReferenceFile,
+                LastProcessedStepId = lastProcessedStepId,
+                Steps = steps,
+                CanAnswer = verifyAnswer
+            };
+        }
+
+        /// <summary>
+        /// Verify if can answer after embeddings and OCR
+        /// </summary>
+        /// <param name="card"></param>
+        /// <returns></returns>
+        private async Task<bool> VerifyCanAnswer(Card card)
+        {
+           var executions =  await _stepToolExecutionRepository.FindByStepToolByCardIdAsync(card.Id);
+
+            bool hasOcrReady = executions.Any(execution =>
+            execution.StepTool.Tool.ToolType.Name.Equals(HandlersTypes.Ocr) &&
+            execution.Status == StatusExecution.Ready);
+
+            bool hasEmbeddingsReady = executions.Any(execution =>
+                execution.StepTool.Tool.ToolType.Name.Equals(HandlersTypes.Embeddings) &&
+                execution.Status == StatusExecution.Ready);
+
+            if(hasOcrReady && hasEmbeddingsReady)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Find card by id and returns the card with relationships
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
+        private async Task<Card> FindCardWithRelationships(int cardId)
+        {
+            var card = await _cardRepository.FindById(cardId);
+            if (card == null)
+            {
+                throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);
+            }
+            return card;
+        }
+
+        /// <summary>
+        /// Prepare steps from workflow
+        /// </summary>
+        /// <param name="workflow"></param>
+        /// <param name="card"></param>
+        /// <returns></returns>
+        private List<DocumentStepDto> BuildStepsFromWorkflow(Workflow workflow, Card card)
+        {
+            var steps = new List<DocumentStepDto>();
+            var workflowSteps = workflow.Steps.OrderBy(s => s.Order).ToList();
+
+            foreach (var step in workflowSteps)
+            {
+                var stepDto = CreateStepDto(step);
+                PopulateStepOutputs(stepDto, step, card);
+                steps.Add(stepDto);
+            }
+
+            return steps;
+        }
+
+        /// <summary>
+        /// Create a new DocumentStepDto
+        /// </summary>
+        /// <param name="step"></param>
+        /// <returns></returns>
+        private DocumentStepDto CreateStepDto(Step step)
+        {
+            return new DocumentStepDto
+            {
+                Id = step.Id.ToString(),
+                Name = step.Name,
+                Outputs = new List<ExtractedFieldDto>()
+            };
+        }
+
+        /// <summary>
+        /// Populate StepOutputs by stepDto, step and card
+        /// </summary>
+        /// <param name="stepDto"></param>
+        /// <param name="step"></param>
+        /// <param name="card"></param>
+        private void PopulateStepOutputs(DocumentStepDto stepDto, Step step, Card card)
+        {
+            foreach (var stepTool in step.StepTools.OrderBy(st => st.Order))
+            {
+                var outputs = card.Outputs
+                    .Where(o => o.StepToolId == stepTool.Id)
+                    .ToList();
+
+                foreach (var output in outputs)
+                {
+                    if (ShouldSkipOutput(output)) continue;
+
+                    var extractedFields = ParseOutput(output);
+                    stepDto.Outputs.AddRange(extractedFields);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Skips output if is OCR or Embeddings
+        /// </summary>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        private bool ShouldSkipOutput(StepToolOutput output)
+        {
+            if (output.StepTool?.Tool == null) return true;
+
+            var toolTypeName = output.StepTool.Tool.ToolType?.Name;
+            return toolTypeName == HandlersTypes.Ocr || toolTypeName == HandlersTypes.Embeddings;
+        }
+
+        /// <summary>
+        /// Parse output to Json or ExtractedFieldDto
+        /// </summary>
+        /// <param name="output"></param>
+        /// <returns></returns>
+        private List<ExtractedFieldDto> ParseOutput(StepToolOutput output)
+        {
+            var fields = new List<ExtractedFieldDto>();
+
+            if (string.IsNullOrWhiteSpace(output.Value))
+                return fields;
+
+            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType?.Name))
+            {
+                fields.AddRange(jsonFields);
+            }
+            else
+            {
+                fields.Add(new ExtractedFieldDto
+                {
+                    Label = output.StepTool?.Tool?.Name ?? "Unknown",
+                    Value = output.Value,
+                    IsEdited = false,
+                    OutputId = output.Id,
+                    OutputType = output.StepTool?.Tool?.ToolType?.Name ?? "None",
+                });
+            }
+
+            return fields;
+        }
+
+        /// <summary>
+        /// Parse output to json
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="fields"></param>
+        /// <param name="id"></param>
+        /// <param name="outputType"></param>
+        /// <returns></returns>
+        private bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
+                                        int id,
+                                        string outputType)
+        {
+            fields = new List<ExtractedFieldDto>();
+
+            if (!value.TrimStart().StartsWith("{") || !value.TrimEnd().EndsWith("}"))
+                return false;
+
+            try
+            {
+                var settings = new JsonSerializerSettings
+                {
+                    MaxDepth = 5,
+                    DateParseHandling = DateParseHandling.None
+                };
+
+                var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(value, settings);
+                if (jsonObject != null && jsonObject.Count > 0)
+                {
+                    foreach (var kvp in jsonObject)
+                    {
+                        fields.Add(new ExtractedFieldDto
+                        {
+                            Label = kvp.Key,
+                            Value = kvp.Value?.ToString() ?? string.Empty,
+                            IsEdited = false,
+                            OutputId = id,
+                            OutputType = outputType,
+                        });
+                    }
+                    return true;
+                }
+            }
+            catch (JsonException ex)
+            {
+                throw new AppException(ErrorCode.DefaultError, ex.Message.ToString(), null);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Get the last proccesd step id from stop
+        /// </summary>
+        /// <param name="steps"></param>
+        /// <returns></returns>
+        private string GetLastProcessedStepId(List<DocumentStepDto> steps)
+        {
+            if (!steps.Any()) return string.Empty;
+
+            return steps.LastOrDefault()?.Id ?? string.Empty;
         }
     }
 }

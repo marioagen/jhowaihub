@@ -5,9 +5,11 @@ using WoopiAiHub.Application.Services.Automation;
 using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Interfaces.Handlers;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.DependencyInjection
 {
@@ -45,6 +47,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IToolDataServices, ToolDataServices>();
             services.AddScoped<IToolFactoryHandler, ToolFactoryHandler>();
             services.AddScoped<IAutomationServices, AutomationServices>();
+            services.AddScoped<IStepProfilePermissionsServices, StepProfilePermissionsServices>();
             services.AddScoped<IApiClientFactory, ApiClientFactory>();
             services.AddScoped<IN8NServices, N8NServices>();
             services.AddScoped<IPromptServices, PromptServices>();
@@ -53,11 +56,18 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IToolHandler, OcrHandler>();
             services.AddScoped<IToolHandler, PromptHandler>();
             services.AddScoped<IToolHandler, N8NHandler>();
-            services.AddScoped<IKeyVaultServices, AzureKeyVaultServices>();
+            services.AddScoped<IEncryptionService, AesGcmEncryptionService>();
+            services.AddScoped<IUsageDailyServices, UsageDailyServices>();
+            services.AddScoped<IUsageMonthServices, UsageMonthServices>();
+            services.AddScoped<IUsageTypeServices, UsageTypeServices>();
+            services.AddScoped<IUsageUnitServices, UsageUnitServices>();
+            services.AddScoped<IUsageAggregationService, UsageAggregationService>();
+            services.AddScoped<IUsageLogRepository, UsageLogRepository>();
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();
             services.AddHostedService<PromptConsumer>();
+            services.AddHostedService<SubscriptionConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

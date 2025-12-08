@@ -61,6 +61,11 @@ namespace WoopiAiHub.Repository
                     RequiredFile = sp.RequiredFile,
                     WebhookId = sp.WebhookId
                 }).ToList(),
+                Dependencies = q.Dependencies.Select(d => new StepToolDependencyDto
+                {
+                    StepToolOrder = d.DependsOnStepTool.Order,
+                    StepOrder = d.DependsOnStepTool.Step!.Order
+                }).ToList(),
                 Step = new StepDto
                 {
                     Name = q.Step!.Name,
@@ -196,6 +201,7 @@ namespace WoopiAiHub.Repository
                 return new List<StepTool>();
 
             return await _context.StepTools
+                .Include(st => st.Step)
                 .AsNoTracking()
                 .Where(st => stepIds.Contains(st.StepId))
                 .OrderBy(st => st.StepId)
@@ -215,6 +221,7 @@ namespace WoopiAiHub.Repository
                                              .ThenInclude(t => t!.ToolType)
                                            .Include(s => s.Step)
                                            .Include(d => d.DependsOnStepTool)
+                                           .Include(st => st.Dependencies)
                                            .FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
         }
 
@@ -231,6 +238,7 @@ namespace WoopiAiHub.Repository
             return await _context.StepTools.Include(u => u.DependsOnStepTool)
                                            .Include(t => t.Tool)
                                             .ThenInclude(s => s!.ToolType)
+                                           .Include(st => st.Dependencies)
                                            .FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
         }
 

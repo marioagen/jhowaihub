@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-9">
+        <div class="col-8">
             <div class="input-group">
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
@@ -21,20 +21,20 @@
                 </span>
             </div>
         </div>
-        <div class="col-2">
+        <div class="col-3">
             <select
-                v-model="filters.teamId"
+                v-model="filters.workflowId"
                 class="form-select form-select-sm w-auto"
                 @change="filterData"
             >
-                <option value="" disabled>{{ $t("filters.teamsSelect.none") }}</option>
-                <option :value="0">{{ $t("filters.teamsSelect.all") }}</option>
+                <option value="" disabled>{{ $t("filters.workflowSelect.none") }}</option>
+                <option :value="0">{{ $t("filters.workflowSelect.all") }}</option>
                 <option 
-                    v-for="team in teamsList" 
-                    :key="team.id" 
-                    :value="team.id"
+                    v-for="workflow in workflowsList"
+                    :key="workflow.id" 
+                    :value="workflow.id"
                 >
-                    {{ team.name }}
+                    {{ workflow.name }}
                 </option>
             </select>
         </div>
@@ -57,7 +57,7 @@
     export default {
         name: "DocumentFilters",
         props: {
-            teamsList: { 
+            workflowsList: { 
                 type: [Object, Array], 
                 required: true 
             } 
@@ -66,20 +66,21 @@
             return {
                 filters: {
                     input: "",
-                    teamId: "",
-                    teams: [],
+                    workflowId: "",
+                    workflows: [],
                     isAllUsers: true,
-                    login: this.$store.state.userProfile.login
+                    login: this.$store.state.userProfile.login,
+                    colType: 2,
                 }
             };
         },
         watch: {
-            teamsList: {
+            workflowsList: {
                 immediate: true, 
                 handler(newVal) {
                     if (newVal.length) {
-                        this.filters.teams = this.filters.teamId
-                            ? [this.filters.teamId]
+                        this.filters.workflows = this.filters.workflowId
+                            ? [this.filters.workflowId]
                             : newVal.map(t => t.id);
                             
                         this.$emit("filter", { ...this.filters });
@@ -89,9 +90,9 @@
         },
         methods: {
             filterData() {
-                this.filters.teams = this.filters.teamId
-                    ? [this.filters.teamId]                
-                    : this.teamsList.map(t => t.id);      
+                this.filters.workflows = this.filters.workflowId
+                    ? [this.filters.workflowId]                
+                    : this.workflowsList.map(t => t.id);  
                 this.$emit("filter", { ...this.filters });
             },
             filterUsers() {

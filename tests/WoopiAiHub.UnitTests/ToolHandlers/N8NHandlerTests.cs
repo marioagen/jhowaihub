@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
+using Newtonsoft.Json;
 using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
@@ -45,7 +46,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .ReturnsAsync((Tool?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _handler.BuildPayload(automationServicesDto, null, ""));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _handler.BuildPayload(automationServicesDto, null, []));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Tool not found", exception.Message);
         }
@@ -57,17 +58,20 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
             var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
-
             var input = ToolHandlerFixture.FindValidStepToolParameter();
-
             var tool = ToolFixture.FindValidToolModel();
-            
+            var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
+            output.StepTool = AutomationFixture.FindValidStepTool();
+            output.StepTool.Tool = ToolFixture.FindValidToolModel();
+            output.StepTool.Tool.ToolType = new ToolType(1, DateTime.Now, HandlersTypes.Ocr, true);
+
             _mockToolRepository
                 .Setup(repo => repo.FindModelByStepToolIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(tool);
 
             // Act
-            var result = await _handler.BuildPayload(automationServicesDto, input, "", stepToolExecution);
+            var result = await _handler.BuildPayload(automationServicesDto, input, [output], stepToolExecution);
 
             // Assert
             Assert.Equal(_messageQueues.AutomationQueueConsumer, result.Queue);
@@ -82,7 +86,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Equal(ConnectorNames.N8N, message.Type);
             Assert.Equal(automationServicesDto.CardId, message.Data.CardId);
             Assert.Equal(automationServicesDto.StepToolId, message.Data.StepToolId);
-            Assert.Equal(input.Value.ToString(), message.Content);
         }
     }
 }

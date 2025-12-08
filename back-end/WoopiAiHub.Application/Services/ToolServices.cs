@@ -15,20 +15,17 @@ namespace WoopiAiHub.Application.Services
         private readonly IToolRepository _toolRepository;
         private readonly IToolTypeRepository _toolTypeRepository;
         private readonly IApiClientFactory _apiClientFactory;
-        private readonly IKeyVaultServices _keyVaultServices;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEncryptionService _encryptionService;
 
         public ToolServices(IToolRepository toolRepository,
                             IToolTypeRepository toolTypeRepository,
                             IApiClientFactory apiClientFactory,
-                            IKeyVaultServices keyVaultServices,
-                            IUnitOfWork unitOfWork)
+                            IEncryptionService encryptionService)
         {
             _toolRepository = toolRepository;
             _toolTypeRepository = toolTypeRepository;
             _apiClientFactory = apiClientFactory;
-            _keyVaultServices = keyVaultServices;
-            _unitOfWork = unitOfWork;
+            _encryptionService = encryptionService;
         }
 
         /// <summary>
@@ -44,15 +41,15 @@ namespace WoopiAiHub.Application.Services
         {
             var toolType = await _toolTypeRepository.FindModelByIdAsync(toolCreateDto.ToolTypeId)
                 ?? throw new AppException(ErrorCode.NotFound, "ToolType not found", null);
-            
-            string keyVaultName = string.Empty;
+
+            string encryptedApiKey = string.Empty;
             if (toolType.IsN8nTool())
             {
                 if (string.IsNullOrEmpty(toolCreateDto.ConnectorUrl) || string.IsNullOrEmpty(toolCreateDto.ConnectorApiKey))
                 {
-                    throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
+                    throw new AppException(ErrorCode.RequiredField, "Connector Url and Connector Api Key are required", null);
                 }
-                keyVaultName = _keyVaultServices.CreateKeyName();
+                encryptedApiKey = _encryptionService.Encrypt(toolCreateDto.ConnectorApiKey);
             }
 
             var tool = new Tool(
@@ -65,28 +62,16 @@ namespace WoopiAiHub.Application.Services
                 toolCreateDto.OutputDataId,
                 toolCreateDto.IsEditableInput,
                 toolCreateDto.ConnectorUrl,
-                keyVaultName
+                encryptedApiKey
              );
 
-            _unitOfWork.BeginTransaction();
-            try
+            var result = await _toolRepository.CreateUniqueAsync(tool);
+            if (!result)
             {
-                var result = await _toolRepository.CreateUniqueAsync(tool);
-                if (!result)
-                {
-                    throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
-                }
-
-                await SetSecret(keyVaultName, toolCreateDto.ConnectorApiKey);
-
-                _unitOfWork.Commit();
-                return result;
+                throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
             }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+
+            return result;
         }
 
         /// <summary>
@@ -162,7 +147,7 @@ namespace WoopiAiHub.Application.Services
 
             ValidateConnector(toolUpdateDto, tool, toolType);
 
-            string keyVaultName = FindOrCreateKeyName(tool, toolType);
+            string encryptedApiKey = GetEncryptedApiKey(tool, toolType, toolUpdateDto.ConnectorApiKey);
 
             tool.Update(toolUpdateDto.Name,
                         toolUpdateDto.ToolTypeId,
@@ -170,46 +155,19 @@ namespace WoopiAiHub.Application.Services
                         toolUpdateDto.OutputDataId,
                         toolUpdateDto.IsEditableInput,
                         toolUpdateDto.ConnectorUrl,
-                        keyVaultName);
+                        encryptedApiKey);
 
-            _unitOfWork.BeginTransaction();
-            try
+            var result = await _toolRepository.UpdateAsync(tool);
+            if (!result)
             {
-                var result = await _toolRepository.UpdateAsync(tool);
-                if (!result)
-                {
-                    throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
-                }
-
-                await SetSecret(keyVaultName, toolUpdateDto.ConnectorApiKey);
-
-                _unitOfWork.Commit();
-                return result;
+                throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
             }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
-            }
+
+            return result;
         }
 
         /// <summary>
-        /// Set secret in key vault
-        /// </summary>
-        /// <param name="keyVaultName"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
-        private async Task SetSecret(string keyVaultName, string? key)
-        {
-            if (!string.IsNullOrEmpty(key))
-            {
-                await _keyVaultServices.SetSecretAsync(keyVaultName, key);
-            }
-        }
-
-        /// <summary>
-        /// Validadte connetor url and conenctor api key
+        /// Validate connector url and connector api key
         /// </summary>
         /// <param name="toolUpdateDto"></param>
         /// <param name="tool"></param>
@@ -221,28 +179,35 @@ namespace WoopiAiHub.Application.Services
             {
                 if (string.IsNullOrEmpty(toolUpdateDto.ConnectorUrl))
                 {
-                    throw new AppException(ErrorCode.RequiredField, "Coonector Url is required", null);
+                    throw new AppException(ErrorCode.RequiredField, "Connector Url is required", null);
                 }
 
                 if (string.IsNullOrEmpty(tool.ConnectorApiKey) && string.IsNullOrEmpty(toolUpdateDto.ConnectorApiKey))
                 {
-                    throw new AppException(ErrorCode.RequiredField, "Coonector Api Key is required", null);
+                    throw new AppException(ErrorCode.RequiredField, "Connector Api Key is required", null);
                 }
             }
         }
 
         /// <summary>
-        /// Find or create key name
+        /// Get encrypted API key for storage
         /// </summary>
         /// <param name="tool"></param>
         /// <param name="toolType"></param>
+        /// <param name="newApiKey"></param>
         /// <returns></returns>
-        private string FindOrCreateKeyName(Tool tool, ToolType toolType)
+        private string GetEncryptedApiKey(Tool tool, ToolType toolType, string? newApiKey)
         {
-            if (toolType!.IsN8nTool() && string.IsNullOrEmpty(tool.ConnectorApiKey))
+            if (!toolType!.IsN8nTool())
             {
-                return _keyVaultServices.CreateKeyName();
+                return string.Empty;
             }
+
+            if (!string.IsNullOrEmpty(newApiKey))
+            {
+                return _encryptionService.Encrypt(newApiKey);
+            }
+
             return tool.ConnectorApiKey ?? string.Empty;
         }
 
@@ -307,7 +272,7 @@ namespace WoopiAiHub.Application.Services
         {
             if (string.IsNullOrEmpty(toolConnectorDto.ConnectorUrl) || string.IsNullOrEmpty(toolConnectorDto.ConnectorApiKey))
             {
-                throw new AppException(ErrorCode.RequiredField, "Coonector Url and Connector Api Key are required", null);
+                throw new AppException(ErrorCode.RequiredField, "Connector Url and Connector Api Key are required", null);
             }
 
             var api = _apiClientFactory.Create(toolConnectorDto.ConnectorUrl);

@@ -1,7 +1,6 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
 using Microsoft.AspNetCore.Http;
-using PdfSharp.Pdf.IO;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Dto;
@@ -19,17 +18,20 @@ namespace WoopiAiHub.UnitTests.Fixture
 {
     public class DocumentFixture
     {
-        public Document FindValidDocument()
+        public static Document FindValidDocument()
         {
             Document Document = new Faker<Document>("pt_BR")
-            .CustomInstantiator(f => new Document(f.Random.AlphaNumeric(10), 
-                                                  f.Lorem.Paragraph(), 
-                                                  f.Random.AlphaNumeric(10), 
-                                                  0, 
-                                                  true, 
-                                                  f.Person.Email, 
-                                                  f.IndexFaker, 
-                                                  f.Date.Past()));
+            .CustomInstantiator(f => new Document(
+                f.Random.AlphaNumeric(10),
+                f.Lorem.Paragraph(),
+                f.Random.AlphaNumeric(10),
+                Domain.Enum.DocumentStatus.ReadyForAnalysis,
+                true,
+                f.Person.Email,
+                f.IndexFaker,
+                new List<Workflow>(),
+                f.Date.Past())
+            );
             return Document;
         }
 
@@ -176,7 +178,7 @@ namespace WoopiAiHub.UnitTests.Fixture
              .RuleFor(a => a.IdDocument, f => f.IndexFaker)
              .RuleFor(a => a.OldOutput, f => f.Lorem.Text())
              .RuleFor(a => a.UpdatedOutput, f => f.Lorem.Text());
-            
+
             return updateHistoryDto;
         }
 
@@ -185,11 +187,11 @@ namespace WoopiAiHub.UnitTests.Fixture
             var typeDoc = new TypeDoc("name", "email", 1, DateTime.Now);
             QuestionnaireDto questionnaireDto = new Faker<QuestionnaireDto>("pt_BR")
              .RuleFor(a => a.Id, f => f.IndexFaker)
-             .RuleFor(a => a.Title,"title" )
+             .RuleFor(a => a.Title, "title")
              .RuleFor(a => a.TypeDocId, 1)
              .RuleFor(a => a.EmailCreator, f => f.Person.Email)
              .RuleFor(a => a.TypeDoc, typeDoc)
-             .RuleFor(a => a.TypeDocName,"name")
+             .RuleFor(a => a.TypeDocName, "name")
              .RuleFor(a => a.Questions, FindValidQuestion());
 
             return questionnaireDto;
@@ -223,7 +225,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Name: "idea",
                 Description: "desc",
                 EmailCreator: faker.Internet.Email(),
-                TeamsIds: new List<int> { 10 }
+                Workflows: new List<int> { 10 }
             );
 
             return dto;
@@ -236,7 +238,7 @@ namespace WoopiAiHub.UnitTests.Fixture
              .RuleFor(a => a.GuidId, "test")
              .RuleFor(a => a.FileName, "test");
 
-             return fileUploadSummaryDto;
+            return fileUploadSummaryDto;
         }
 
         public DocumentAnalysisResponseDto FindValidDocumentAnalysisResponseDto()
@@ -251,7 +253,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return documentAnalysisResponseDto;
         }
 
-        public HeadersDto FindValidHeadersDto()
+        public static HeadersDto FindValidHeadersDto()
         {
             HeadersDto headersDto = new Faker<HeadersDto>("pt_BR")
             .RuleFor(a => a.EmailCreator, f => f.Person.Email)
@@ -284,11 +286,19 @@ namespace WoopiAiHub.UnitTests.Fixture
         {
             Team team = new Faker<Team>("pt_BR")
             .CustomInstantiator(f => new Team(
-                f.Company.CompanyName(), 
-                f.IndexFaker, 
+                f.Company.CompanyName(),
+                f.IndexFaker,
                 f.Date.Past()
-                )
-            );
+            ));
+
+            var user = new User(
+                        Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec"),
+                        "Name",
+                        "Mail",
+                        true,
+                        DateTime.Now
+                );
+            team.AddUser(user);
             return team;
         }
 
@@ -298,8 +308,21 @@ namespace WoopiAiHub.UnitTests.Fixture
             .CustomInstantiator(f => new Workflow(
                     f.IndexFaker,
                     f.Date.Past(),
+                    new List<Team> { FindValidTeam() },
+                    f.Lorem.Word()
+                )
+            );
+            return workflow;
+        }
+
+        public static Workflow FindValidWorkflowList()
+        {
+            Workflow workflow = new Faker<Workflow>("pt_BR")
+            .CustomInstantiator(f => new Workflow(
                     f.IndexFaker,
-                    f.Lorem.Word()                 
+                    f.Date.Past(),
+                    new List<Team> { FindValidTeam() },
+                    f.Lorem.Word()
                 )
             );
             return workflow;
@@ -313,7 +336,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     f.Date.Past(),
                     f.IndexFaker,
                     f.Lorem.Word(),
-                    f.Random.Int(1,1),
+                    f.Random.Int(1, 1),
                     f.IndexFaker,
                     f.IndexFaker
                 )
@@ -362,7 +385,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             )
             {
                 Card = card,
-                StepTool = stepTool 
+                StepTool = stepTool
             };
             return execution;
         }
@@ -417,10 +440,10 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Email = f.Random.String(),
                     KeyMongoAccess = f.Random.String(),
                     TotalPages = f.Random.Int(1, 100),
-                    Data  = new MetaDataAutomationDto(361, 456)
+                    Data = new MetaDataAutomationDto(361, 456)
                 });
             return faker;
-        }  
+        }
     }
 
     [CollectionDefinition(nameof(DocumentCollection))]

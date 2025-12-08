@@ -18,47 +18,45 @@ public class EmbeddingsHandler : IToolHandler
     public string Type => HandlersTypes.Embeddings;
     private readonly MessageQueues _messageQueues;
     private readonly ITenantCacheServices _tenantCacheServices;
-    private readonly IKeyGeneratorApi _keyGeneratorApi;
     private readonly IConfiguration _config;
-    private const string ConfigKeyAccessName = "keyAccess";
 
     public EmbeddingsHandler(ITenantCacheServices tenantCacheServices,
                              IOptions<MessageQueues> messageQueues,
-                             IKeyGeneratorApi keyGeneratorApi,
                              IConfiguration config)
     {
         _tenantCacheServices = tenantCacheServices;
         _messageQueues = messageQueues.Value;
-        _keyGeneratorApi = keyGeneratorApi;
         _config = config;
     }
 
     /// <summary>
-    /// Builds an execution payload for processing OCR tasks based on the provided automation service details.
+    /// Builds an execution payload for processing OCR tasks with multiple outputs from dependent StepTools.
+    /// This overload allows handling outputs from multiple dependencies.
     /// </summary>
     /// <param name="automationServicesDto"></param>
     /// <param name="input"></param>
-    /// <param name="output"></param>
+    /// <param name="outputs">Collection of outputs from dependent StepTools</param>
+    /// <param name="execution"></param>
     /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                         StepToolParameter? input,
-                                                        string output,
+                                                        ICollection<StepToolOutput> outputs,
                                                         StepToolExecution? execution = null)
     {
-        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
+        var output = outputs.FirstOrDefault()?.Value ?? string.Empty;
+        
+        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant);
         if (string.IsNullOrEmpty(tenantInfo!.EmbeddingModelName))
         {
             throw new ArgumentException("Embeddings not found");
         }
 
-        var keyAccess = _config[ConfigKeyAccessName]!;
-        var keyMongoAcces = await _keyGeneratorApi.GetKey(keyAccess, automationServicesDto.Tenant);
+        var apikey = _config["IndexerApiKey"]!;
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
 
         foreach (var item in documents!.DocumentEmbeddings)
         {
-            item.KeyMongoAccess = keyMongoAcces;
+            item.KeyMongoAccess = apikey;
         }
 
         return new ExecutionMessageDto

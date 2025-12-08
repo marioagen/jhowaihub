@@ -37,11 +37,11 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="userEmail"></param>
         /// <returns></returns>
-        public IQueryable<TeamDto> FindAllByUser(string userEmail)
+        public IQueryable<TeamDto> FindAll()
         {
             return _context.Teams
                            .Include(u => u.Users)
-                           .Include(w => w.Workflow)
+                           .Include(w => w.Workflows)
                            .Select(t => new TeamDto
                            {
                                Id = t.Id,
@@ -58,15 +58,15 @@ namespace WoopiAiHub.Repository
                                            Created = u.Created
                                        })
                                        .ToList(),
-                               Workflow = t.Workflow != null ? new WorkflowDto
-                               {
-                                   Id = t.Workflow.Id,
-                                   Name = t.Workflow.Name,
-                                   TeamId = t.Workflow.TeamId,
-                                   Created = t.Created                                  
-                               } : null
+                               Workflows = t.Workflows != null
+                                    ? t.Workflows.Select(w => new WorkflowDto
+                                    {
+                                        Id = w.Id,
+                                        Name = w.Name,
+                                        Created = w.Created
+                                    }).ToList()
+                                    : new List<WorkflowDto>()
                            })
-                           .Where(t => t.Users.Any(u => u.Email == userEmail && u.IsActive))
                            .AsNoTracking();
         }
 
@@ -79,6 +79,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams
                 .Include(t => t.Users)
+                .Include(t => t.Profiles)
                 .Select(t => new TeamDto
                 {
                     Id = t.Id,
@@ -94,7 +95,14 @@ namespace WoopiAiHub.Repository
                             IsActive = u.IsActive,
                             Created = u.Created
                         })
-                        .ToList()
+                        .ToList(),
+                    Profiles = t.Profiles!
+                        .Select( p => new ProfileDto
+                        {
+                            Id = p.Id,
+                            Name = p.Name,
+                        })
+                        .ToList(),
                 })
                 .AsNoTracking()
                 .FirstOrDefault(t => t.Id == id);
@@ -109,6 +117,8 @@ namespace WoopiAiHub.Repository
         {
             return _context.Teams.Where(u => u.Id == id)
                                         .Include(t => t.Users)
+                                        .Include(T => T.Profiles)
+                                            .ThenInclude(p => p.StepProfilePermissions)
                                         .FirstOrDefault();
         }
 
@@ -131,7 +141,8 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool DeleteByIds(List<int> ids)
         {
-            var teams = _context.Teams.Where(a => ids.Contains(a.Id));
+            var teams = _context.Teams
+                .Where(a => ids.Contains(a.Id));
 
             if (teams.Any())
             {
@@ -178,6 +189,45 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Retrieve all teams associated with a specific user email, including their active users.
+        /// </summary>
+        /// <param name="userEmail"></param>
+        /// <returns></returns>
+        public IQueryable<TeamDto> FindAllByUser(string userEmail)
+        {
+            return _context.Teams
+                           .Include(u => u.Users)
+                           .Include(w => w.Workflows)
+                           .Select(t => new TeamDto
+                           {
+                               Id = t.Id,
+                               Name = t.Name,
+                               Created = t.Created,
+                               Users = t.Users!
+                                       .Where(u => u.IsActive)
+                                       .Select(u => new UserDto
+                                       {
+                                           Id = u.Id,
+                                           Name = u.Name,
+                                           Email = u.Email,
+                                           IsActive = u.IsActive,
+                                           Created = u.Created
+                                       })
+                                       .ToList(),
+                               Workflows = t.Workflows != null
+                                    ? t.Workflows.Select(w => new WorkflowDto
+                                    {
+                                        Id = w.Id,
+                                        Name = w.Name,
+                                        Created = w.Created
+                                    }).ToList()
+                                    : new List<WorkflowDto>()
+                           })
+                           .Where(t => t.Users.Any(u => u.Email == userEmail && u.IsActive))
+                           .AsNoTracking();
+        }
+
+        /// <summary>
         /// Retrieves a list of teams that match the specified identifiers.
         /// </summary>
         /// <param name="ids">A collection of team identifiers to search for. Each identifier must correspond to a valid team.</param>
@@ -186,8 +236,9 @@ namespace WoopiAiHub.Repository
         public List<Team> FindByIds(IEnumerable<int> ids)
         {
             return _context.Teams.Where(t => ids.Contains(t.Id))
-                                  .Include(t => t.Documents)
-                                  .ToList();
+                    .Include(t => t.Profiles)
+                    .Include(t => t.Workflows)
+                    .ToList();
         }
 
         /// <summary>
@@ -200,7 +251,7 @@ namespace WoopiAiHub.Repository
                                                   string emailUser)
         {
             return _context.Teams
-                           .Include(t => t.Workflow)
+                           .Include(t => t.Workflows)
                            .ThenInclude(w => w!.Steps)
                            .ThenInclude(s => s.StepTools)
                            .ThenInclude(st => st.Tool)

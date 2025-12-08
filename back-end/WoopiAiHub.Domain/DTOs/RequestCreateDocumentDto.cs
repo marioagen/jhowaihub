@@ -10,7 +10,7 @@ namespace WoopiAiHub.Application.Dto
         string Name,
         string Description,
         string EmailCreator,
-        ICollection<int> TeamsIds
+        ICollection<int> Workflows
     );
 }
 

@@ -6,6 +6,9 @@ namespace WoopiAiHub.Repository.Mappings
 {
     public class PermissionMap : IEntityTypeConfiguration<Permission>
     {
+        private const string PermissionIdColumn = "PermissionId";
+        private const string ProfileIdColumn = "ProfileId";
+        private const string StepIdColumn = "StepId";
         public void Configure(EntityTypeBuilder<Permission> builder)
         {
             builder.ToTable("Permissions");

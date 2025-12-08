@@ -7,6 +7,7 @@ namespace WoopiAiHub.Repository
 {
     public class PermissionRepository : IPermissionRepository
     {
+        private const string WorkflowStepGroup = "Workflow-Step";
         private readonly Context.ApplicationDbContext _context;
         public PermissionRepository(Context.ApplicationDbContext context)
         {
@@ -31,6 +32,7 @@ namespace WoopiAiHub.Repository
         public ICollection<PermissionDto> FindAll()
         {
             return _context.Permissions
+                .Where(p => p.Group != WorkflowStepGroup)
                 .Select(q => new PermissionDto
                 {
                     Id = q.Id,
@@ -44,29 +46,55 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Find workflow permissions and convert to a PermissionDto list
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<PermissionDto> FindWorkflowPermissions()
+        {
+            return _context.Permissions
+                .Where(p => p.Group == WorkflowStepGroup)
+                .Select(p => new PermissionDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Group = p.Group,
+                    Description = p.Description
+                })
+                .ToList();
+        }
+
+        /// <summary>
         /// Search the database for user permissions
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
         public async Task<Dictionary<string, List<string>>> FindUserPermissionsAsync(string email)
         {
-            var result = await _context.Users
-                              .AsNoTracking()
-                              .Where(u => u.Email == email)
-                              .SelectMany(u => u.Profiles)
-                              .SelectMany(p => p.Permissions)
-                              .Where(p => !string.IsNullOrWhiteSpace(p.Group) &&
-                                          !string.IsNullOrWhiteSpace(p.Name))
-                              .GroupBy(p => p.Group!.Trim())
-                              .ToDictionaryAsync(
-                                  g => g.Key!,
-                                  g => g.Select(p => p.Name!.Trim())
-                                        .Where(n => n.Length > 0)
-                                        .Distinct(StringComparer.OrdinalIgnoreCase)
-                                        .ToList(),
-                                  StringComparer.OrdinalIgnoreCase);
+            var permissions = await _context.Users
+                                            .AsNoTracking()
+                                            .Where(u => u.Email == email)
+                                            .SelectMany(u => u.Teams)
+                                            .SelectMany(t => t.Profiles)
+                                            .SelectMany(p => p.Permissions)
+                                            .Where(p => p.Group != null && 
+                                                        p.Name != null)
+                                            .Select(p => new
+                                            {
+                                                Group = p.Group,
+                                                Name = p.Name
+                                            })
+                                            .ToListAsync();
 
-            return result;
+            return permissions
+                .GroupBy(p => p.Group.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.Name.Trim())
+                          .Where(n => n.Length > 0)
+                          .Distinct(StringComparer.OrdinalIgnoreCase)
+                          .ToList(),
+                    StringComparer.OrdinalIgnoreCase
+                );
         }
     }
 }

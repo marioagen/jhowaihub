@@ -4,7 +4,7 @@
             <div class="row justify-content-center">
                 <div class="text-center">
                     <img src="../../assets/img/woopiai-hub-logo.png"
-                        style="padding-bottom: 10px" width="160" height="61" />
+                        style="padding-bottom: 10px; height: 50px;" alt="WOOPI AI" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
                     <div class="text-center mt-3">
@@ -86,17 +86,20 @@
             </div>
         </div>
     </main>
+    <TenantModal :tenants="tenants" :typeLogin="typeLogin" @continueLogin="continueLogin" ref="TenantModal" />
 </template>
 
 <script>
 import { Field, useForm } from "vee-validate";
 import { getJWTPermissions } from "@/utils/permissions";
 import AuthService from "@/services/authenticate/AuthService";
+import TenantModal from "@/components/authentication/TenantModal.vue";
 
 export default {
     name: "LoginIndex",
     components: {
-        Field
+        Field,
+        TenantModal
     },
     setup() {
         const { validate, values } = useForm();
@@ -118,11 +121,26 @@ export default {
                 username: "", 
                 password: "" 
             },
-            errorMessage: ""
+            errorMessage: "",
+            tenants: [],
+            typeLogin: ""
         };
     },
-    methods: {
+    methods: { 
+        continueLogin(tenant, typeLogin) {
+            this.credentials.tenant = tenant;
+            if (typeLogin === "SSO") {
+                this.authenticateUser(
+                    this.$store.state.userProfile.name,
+                    this.$store.state.userProfile.login,
+                    this.$store.state.userProfile.tokenAzure
+                );
+            } else {
+                this.login();
+            }
+        },
         async login() {
+            this.typeLogin = "STANDARD";
             const result = await this.validate();
             if (!result.valid) {
                 return this.$notify({
@@ -137,15 +155,22 @@ export default {
             this.credentials.email = this.values.email;
             AuthService.Login(this.credentials)
                 .then((response) => {
-                    let tokenData = this.getPermissions(response.tokenApi);
+
+                    if (response?.tenants?.length > 0) {
+                        this.tenants = response.tenants;
+                        this.$refs.TenantModal.open();
+                        return;
+                    }
+
+                    let tokenData = this.getPermissions(response.token);
                     this.$store.commit("updatePermissions", tokenData.permissions);
                     let dataUser = {
                         language: this.$store.state.userProfile.language,
                         image: "",
                         name: response.name,
-                        login: response.login,
+                        login: response.email,
                         tokenAzure: "",
-                        tokenApi: response.tokenApi,
+                        tokenApi: response.token,
                         tenant: response.tenant,
                         keyMongoAccess: "",
                         isAdmin: tokenData.isAdmin
@@ -172,6 +197,7 @@ export default {
                 })
         },
         loginSSO() {
+            this.typeLogin = "SSO";
             this.isLoadingSSO = true;
             AuthService.GetClientId()
                 .then((response) => {
@@ -255,10 +281,17 @@ export default {
         authenticateUser(userName, userEmail, userAzure) {
             var formData = new FormData();
             formData.append("login", userEmail);
+            formData.append("tenant", this.credentials.tenant ?? "");
 
             AuthService.LoginSSO(formData, userAzure)
                 .then((response) => {
-                    let tokenData = this.getPermissions(response.tokenApi);
+                    if (response?.tenants?.length > 0) {
+                        this.tenants = response.tenants;
+                        this.$refs.TenantModal.open();
+                        return;
+                    }
+
+                    let tokenData = this.getPermissions(response.token);
                     this.$store.commit("updatePermissions", tokenData.permissions);
 
                     let dataUser = {
@@ -267,12 +300,12 @@ export default {
                         name: userName,
                         login: userEmail,
                         tokenAzure: userAzure,
-                        tokenApi: response.tokenApi,
+                        tokenApi: response.token,
                         tenant: response.tenant,
                         keyMongoAccess: "",
                         isAdmin: tokenData.isAdmin
                     };
-
+                    
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
@@ -294,7 +327,7 @@ export default {
                 });
         },
         redirectToDocument() {
-            this.$router.push({ name: "Documents" });
+            this.$router.push({ name: "Home" });
         },
         getPermissions(token) {
             return getJWTPermissions(token);
@@ -307,7 +340,7 @@ export default {
         let login = this.$store.state.userProfile.login;
         let tenant = this.$store.state.userProfile.tenant;
         if (login !== "" || tenant !== "") {
-            this.$router.push({ name: "Documents" });
+            this.$router.push({ name: "Home" });
         }
     },
 };

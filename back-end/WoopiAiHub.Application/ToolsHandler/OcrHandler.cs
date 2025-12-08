@@ -23,23 +23,20 @@ public class OcrHandler : IToolHandler
     }
 
     /// <summary>
-    /// Builds an execution payload for processing OCR tasks based on the provided automation service details.
+    /// Builds an execution payload for processing OCR tasks with multiple outputs from dependent StepTools.
+    /// This overload allows handling outputs from multiple dependencies.
     /// </summary>
-    /// <remarks>This method retrieves tenant-specific OCR model information and constructs a payload for
-    /// processing OCR tasks. The payload includes metadata about the automation service, tenant details, and the
-    /// appropriate message queues.</remarks>
-    /// <param name="automationServicesDto">The automation service details, including tenant, card ID, step tool ID, and other metadata.</param>
-    /// <param name="input">The input data required for the payload. This parameter is currently unused but reserved for future use.</param>
-    /// <param name="output">The output data required for the payload. This parameter is currently unused but reserved for future use.</param>
-    /// <returns>An <see cref="ExecutionMessageDto"/> containing the payload for the OCR processing task, including metadata,
-    /// tenant information, and queue details.</returns>
-    /// <exception cref="ArgumentException">Thrown if the OCR model for the specified tenant cannot be found.</exception>
+    /// <param name="automationServicesDto"></param>
+    /// <param name="input"></param>
+    /// <param name="outputs">Collection of outputs from dependent StepTools</param>
+    /// <param name="execution"></param>
+    /// <returns></returns>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
                                                         StepToolParameter? input,
-                                                        string output,
+                                                        ICollection<StepToolOutput> outputs,
                                                         StepToolExecution? execution = null)
     {
-        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant, ColTypeModule.WoopiAiHub);
+        var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant);
         if (string.IsNullOrEmpty(tenantInfo!.OcrModel))
         {
             throw new ArgumentException("Ocr not found");

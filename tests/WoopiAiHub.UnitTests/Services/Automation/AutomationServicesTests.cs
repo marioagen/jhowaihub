@@ -14,6 +14,7 @@ using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
@@ -39,14 +40,18 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         public async Task PrepareExecutionAsync_Success_ShouldCreateExecutions()
         {
             // Arrange
-            var workflows = WorkflowFixture.FindValidWorkflows(); ; // Crie um fixture que retorna workflows válidos
+            var workflows = WorkflowFixture.FindValidWorkflows();
             var stepIds = workflows.SelectMany(wf => wf.Steps.Select(s => s.Id)).ToList();
-            var stepTools = new List<StepTool> { new StepTool(1, DateTime.UtcNow, 1, 1, 1, 0, 0) };
+            var stepTool = WorkflowFixture.FindValidStepTool();
+            stepTool.Step = WorkflowFixture.FindValidStep(workflows.First().Id);
+
+            var stepTools = new List<StepTool> { stepTool };
             var activeCardIds = new List<int> { 10, 20 };
             var existingExecutions = new List<(int StepToolId, int CardId)>
             {
-                (10,20)
-            }; 
+                (1, 10),
+                (1, 20)
+            };
 
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
@@ -95,8 +100,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var workflows = WorkflowFixture.FindValidWorkflows();
             var stepIds = workflows.SelectMany(wf => wf.Steps.Select(s => s.Id)).ToList();
-            var stepTools = new List<StepTool> { new StepTool(1, DateTime.UtcNow, 1, 1, 1, 0, 0) };
-            var activeCardIds = new List<int> { 10, 20 };
+            var stepTool = WorkflowFixture.FindValidStepTool();
+            stepTool.Step = WorkflowFixture.FindValidStep();
+            var stepTools = new List<StepTool> { stepTool };
+            var activeCardIds = new List<int>();
             var existingExecutions = new List<(int StepToolId, int CardId)>
             {
                 (1, 10),
@@ -144,7 +151,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var handlerMock = _mocker.GetMock<IToolHandler>();
 
             toolFactoryHandlerServicesMock.Setup(s => s.GetHandler(It.IsAny<string>())).Returns(handlerMock.Object);
-            handlerMock.Setup(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>())).ReturnsAsync(payload);
+            handlerMock.Setup(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>())).ReturnsAsync(payload);
             stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
             stepToolExecutionRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<StepToolExecution>()));
             messagePublisherMock.Setup(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<string>()));
@@ -156,7 +163,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Once);
-            handlerMock.Verify(h => h.BuildPayload(automationDto,It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Once);
+            handlerMock.Verify(h => h.BuildPayload(automationDto,It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()), Times.Once);
             messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message!), Times.Once);
         }
 
@@ -173,7 +180,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var messagePublisherMock = _mocker.GetMock<IMessagePublisher<string>>();
             var handlerMock = _mocker.GetMock<IToolHandler>();
 
-
             // Act
             await _service.StartExecutionByStepAsync(step, automationDto);
 
@@ -181,7 +187,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Never);
             messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Never);
-            handlerMock.Verify(h => h.BuildPayload(automationDto,It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Never);
+            handlerMock.Verify(h => h.BuildPayload(automationDto,It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()), Times.Never);
         }
 
         [Fact(DisplayName = "StartExecutionByStep fail when there is no StepTools")]
@@ -220,15 +226,20 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
             var messagePublisherMock = _mocker.GetMock<IMessagePublisher<string>>();
             var handlerMock = _mocker.GetMock<IToolHandler>();
+            var usageDailyServicesMock = _mocker.GetMock<IUsageDailyServices>();
+
+            usageDailyServicesMock.Setup(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                                  .ReturnsAsync(true);
 
             // Act
             await _service.StartExecutionByWorkflowsAsync(automationDto, workflows);
 
             // Assert
+            usageDailyServicesMock.Verify(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Never);
             messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Never);
-            handlerMock.Verify(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Never);
+            handlerMock.Verify(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()), Times.Never);
         }
 
         [Fact(DisplayName = "StartExecutionByCardAsync should execute StepTool for valid Step and Card")]
@@ -255,7 +266,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
             stepToolExecutionRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<StepToolExecution>())).Returns(Task.CompletedTask);
             toolFactoryHandlerServicesMock.Setup(s => s.GetHandler(It.IsAny<string>())).Returns(handlerMock.Object);
-            handlerMock.Setup(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>())).ReturnsAsync(payload);
+            handlerMock.Setup(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>())).ReturnsAsync(payload);
             messagePublisherMock.Setup(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>())).Returns(Task.CompletedTask);
 
             // Act
@@ -266,7 +277,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(stepTool.Id, It.IsAny<int>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Once);
-            handlerMock.Verify(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Once);
+            handlerMock.Verify(h => h.BuildPayload(automationDto, It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()), Times.Once);
             messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message!), Times.Once);
         }
 
@@ -315,7 +326,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(stepToolExecution);
             stepToolExecutionRepositoryMock.Setup(r => r.UpdateAsync(It.IsAny<StepToolExecution>())).Returns(Task.CompletedTask);
             toolFactoryHandlerMock.Setup(s => s.GetHandler(It.IsAny<string>())).Returns(handlerMock.Object);
-            handlerMock.Setup(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>())).ReturnsAsync(payload);
+            handlerMock.Setup(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>())).ReturnsAsync(payload);
             messagePublisherMock.Setup(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>())).Returns(Task.CompletedTask);
 
             // Act
@@ -326,7 +337,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, It.IsAny<int>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             toolFactoryHandlerMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Once);
-            handlerMock.Verify(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<string>(), It.IsAny<StepToolExecution>()), Times.Once);
+            handlerMock.Verify(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()), Times.Once);
             messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
         }
 
@@ -400,14 +411,17 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             var apiClientFactoryMock = _mocker.GetMock<IApiClientFactory>();
             apiClientFactoryMock.Setup(factory => factory.Create(It.IsAny<string>()))
-                .Returns(apiClientMock.Object);
+                                .Returns(apiClientMock.Object);
 
-            var keyVaultServices = _mocker.GetMock<IKeyVaultServices>();
-            keyVaultServices.Setup(k => k.GetSecretAsync(It.IsAny<string>()))
-                .ReturnsAsync(keyVaultValue);
+            var encryptionService = _mocker.GetMock<IEncryptionService>();
+            encryptionService.Setup(k => k.Decrypt(It.IsAny<string>()))
+                             .Returns(keyVaultValue);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _service.FindN8nWorkflowsByToolId(1));
+            toolRepositoryMock.Verify(repo => repo.FindModelByIdAsync(It.IsAny<int>()), Times.Once);
+            apiClientMock.Verify(x => x.FindWorkflows(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            encryptionService.Verify(k => k.Decrypt(It.IsAny<string>()), Times.Once);
             Assert.Equal(ErrorCode.RefitApiError, exception.ErrorCode);
         }
 
@@ -436,9 +450,9 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             apiClientFactoryMock.Setup(factory => factory.Create(It.IsAny<string>()))
                 .Returns(apiClientMock.Object);
 
-            var keyVaultServices = _mocker.GetMock<IKeyVaultServices>();
-            keyVaultServices.Setup(k => k.GetSecretAsync(It.IsAny<string>()))
-                .ReturnsAsync(keyVaultValue);
+            var encryptionService = _mocker.GetMock<IEncryptionService>();
+            encryptionService.Setup(k => k.Decrypt(It.IsAny<string>()))
+                             .Returns(keyVaultValue);
 
             // Act
             var result = await _service.FindN8nWorkflowsByToolId(1);

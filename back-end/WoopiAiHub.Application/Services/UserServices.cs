@@ -112,8 +112,7 @@ namespace WoopiAiHub.Application.Services
                     Name = userUpdateDto.Name,
                     Email = userUpdateDto.Email,
                     Password = userUpdateDto.Password,
-                    TeamIds =  userUpdateDto.TeamIds,
-                    ProfileIds = userUpdateDto.ProfileIds,
+                    TeamIds = userUpdateDto.TeamIds,
                 };
                 return await ReactivateUser(existingUser, userCreateDto, headersDto);
             }
@@ -166,6 +165,23 @@ namespace WoopiAiHub.Application.Services
         public async Task<ICollection<UserDto>> FindByTeamId(int teamId)
         {
             return await _userRepository.FindByTeamIdAsync(teamId);
+        }
+
+        /// <summary>
+        /// Retrieves a collection of users associated with the specified team IDs.
+        /// </summary>
+        /// <param name="teamIds">An array of team IDs for which to retrieve the associated users.  The array must not be null or empty.</param>
+        /// <returns>A collection of <see cref="UserDto"/> objects representing the users associated with the specified team IDs.
+        /// If no users are found for the provided team IDs, an empty collection is returned.</returns>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="teamIds"/> is null or empty.</exception>
+        public async Task<ICollection<UserDto>> FindByTeamIds(int[] teamIds)
+        {
+            if (teamIds == null || teamIds.Length == 0)
+                throw new ArgumentException("Team IDs cannot be null or empty", nameof(teamIds));
+
+            var users = await _userRepository.FindByTeamIdsAsync(teamIds);
+
+            return users;
         }
 
         /// <summary>
@@ -241,21 +257,19 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Adds profiles to the user based on the provided profileIds.
+        /// Retrieves a user by its email.
         /// </summary>
-        /// <param name="profileIds"></param>
-        /// <param name="user"></param>
-        private void AddProfiles(ICollection<int>? profileIds, User user)
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<UserDto> FindUserByEmail(string email)
         {
-            if (profileIds != null)
+            var user = await _userRepository.FindUserByEmail(email);
+            if (user == null)
             {
-                user.Profiles.Clear();
-                var profiles = _profileRepository.FindByIds(profileIds);
-                foreach (var profile in profiles)
-                {
-                    user.AddProfile(profile);
-                }
+                throw new ArgumentException("User not found");
             }
+            return user;
         }
 
         /// <summary>
@@ -267,7 +281,6 @@ namespace WoopiAiHub.Application.Services
         {
             if (teamIds != null)
             {
-                user.Teams.Clear();
                 var teams = _teamRepository.FindByIds(teamIds);
                 foreach (var team in teams)
                 {
@@ -287,11 +300,6 @@ namespace WoopiAiHub.Application.Services
             if (userCreateDto.TeamIds.Count > 0)
             {
                 AddTeams(userCreateDto.TeamIds, user);
-            }
-
-            if (userCreateDto.ProfileIds.Count > 0)
-            {
-                AddProfiles(userCreateDto.ProfileIds, user);
             }
         }
 
@@ -374,31 +382,31 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         private async Task<bool> UpdateUser(UserUpdateDto userUpdateDto)
         {
-                var user = await _userRepository.FindByReferenceAsync(userUpdateDto.Id);
-                if (user == null)
-                    return false;
+            var user = await _userRepository.FindByReferenceAsync(userUpdateDto.Id);
+            if (user == null)
+                return false;
 
-                user.Update(userUpdateDto.Name,
-                            userUpdateDto.Email);
+            user.Update(userUpdateDto.Name,
+                        userUpdateDto.Email);
 
-                if (!string.IsNullOrEmpty(userUpdateDto.Password))
-                {
-                    SetSaltAndPassword(userUpdateDto.Password, user, user.Salt);
-                }
+            if (!string.IsNullOrEmpty(userUpdateDto.Password))
+            {
+                SetSaltAndPassword(userUpdateDto.Password, user, user.Salt);
+            }
             
-                var userCreateDto = new UserCreateDto
-                {
-                    Name = userUpdateDto.Name,
-                    Email = userUpdateDto.Email,
-                    Password = userUpdateDto.Password,
-                    TeamIds =  userUpdateDto.TeamIds,
-                    ProfileIds = userUpdateDto.ProfileIds,
-                };
+            var userCreateDto = new UserCreateDto
+            {
+                Name = userUpdateDto.Name,
+                Email = userUpdateDto.Email,
+                Password = userUpdateDto.Password,
+                TeamIds =  userUpdateDto.TeamIds,
+            };
 
-                UpdateTeamsAndProfiles(userCreateDto, user);
+            user.Teams.Clear();
+            UpdateTeamsAndProfiles(userCreateDto, user);
 
-             var updateResult = _userRepository.Update(user);
-                return updateResult;
+            var updateResult = _userRepository.Update(user);
+            return updateResult;
         }
 
         /// <summary>

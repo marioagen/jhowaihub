@@ -26,7 +26,6 @@
                         />
                     </div>
                 </div>
-
                 <QuizzesTable 
                     ref="QuizzesTable"
                 />

@@ -4,8 +4,8 @@
             <div class="row">
                 <div class="col-auto col-fix">
                     <form @submit="returnToPreviousPage" style="text-align: center">
-                        <img src="../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px" width="160"
-                            height="61" />
+                        <img src="../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px" width="200"
+                            height="60" alt="WOOPI AI" />
 
                         <h5 class="fw-bold">{{ $t("unauthorized.title") }}</h5>
                         <button class="btn btn-outline-primary" @click="returnToPreviousPage">
@@ -24,11 +24,7 @@ export default {
     name: "UnauthorizedPage",
     methods: {
         returnToPreviousPage() {
-            if (window.history.state && window.history.length > 1) {
-                this.$router.back();
-            } else {
-                this.$router.push({ name: 'DocumentList' });
-            }
+            this.$router.push({ name: 'Home' });
         }
     },
 };

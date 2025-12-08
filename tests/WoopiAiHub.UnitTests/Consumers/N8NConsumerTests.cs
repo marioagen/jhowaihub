@@ -10,6 +10,7 @@ using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.UnitTests.Fixture;
@@ -26,6 +27,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly Mock<IMessageConsumer<AutomationOutputDto>> _consumerMock;
         private readonly Mock<ILogger<N8NConsumer>> _loggerMock;
         private readonly Mock<IAutomationServices> _automationServices;
+        private readonly Mock<IUsageDailyServices> _usageDailyServices;
 
         public N8NConsumerTests()
         {
@@ -52,9 +54,10 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
             _n8NServices = new Mock<IN8NServices>();
             _automationServices = new Mock<IAutomationServices>();
+            _usageDailyServices = new Mock<IUsageDailyServices>();
 
             _tenantCacheServices = new Mock<ITenantCacheServices>();
-            _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+            _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                                 .ReturnsAsync(tenant);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
@@ -62,6 +65,8 @@ namespace WoopiAiHub.UnitTests.Consumers
                                .Returns(_n8NServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IAutomationServices)))
                                .Returns(_automationServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IUsageDailyServices)))
+                               .Returns(_usageDailyServices.Object);
 
             var serviceScopeMock = new Mock<IServiceScope>();
             serviceScopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);

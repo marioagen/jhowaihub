@@ -7,7 +7,13 @@
                     <small class="text-muted">{{ $t("labelTeamsMessage") }}</small>
                 </p>
             </div>
-            <button class="btn btn-primary btn-sm" @click="openModalTeam">+ {{ $t("labelNewTeam") }}</button>
+            <button 
+                class="btn btn-primary btn-sm" 
+                @click="redirectToForm"
+            >
+                <LucideIcon icon="Plus" />
+                {{ $t("management.teams.createBtn") }}
+            </button>
         </div>
         <div class="card mb-3">
             <div class="card-body">
@@ -16,16 +22,9 @@
         </div>
         <teams-table ref="TeamsTable" />
     </div>
-    <modal-team
-        v-if="modalTeamShow"
-        @teamCreated="handleTeamCreated"
-        @close="closeModalTeam"
-        :teamEditing="teamEditing"
-    />
 </template>
 
 <script>
-    import ModalTeam from "@/components/management/teams/modals/TeamModal.vue";
     import paginationDivider from "@/utils/paginationDivider";
     import TeamsTable from "@/components/management/teams/TeamsTable.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
@@ -64,11 +63,15 @@
             },
         },
         components: {
-            ModalTeam,
             TeamsTable,
             SearchComponent,
         },
         methods: {
+            redirectToForm() {
+                this.$router.push({
+                    name: 'NewTeam',
+                });
+            },
             setMenuActions: function () {
                 this.menuActions = {
                     options: [
@@ -95,26 +98,9 @@
                     this.confirmationDialog(item);
                 }
             },
-            confirmationDialog: function (item) {
-                this.modalEntity = item;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal: function () {
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
             handleTeamCreated() {
                 this.$refs.TeamsTable.getTeams({ search: "", page: this.queryPage, type: null });
                 this.closeModalTeam();
-            },
-            openModalTeam: function () {
-                this.modalTeamShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModalTeam: function () {
-                this.modalTeamShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             filterList(obj) {
                 this.$refs.TeamsTable.filterList(obj.search);

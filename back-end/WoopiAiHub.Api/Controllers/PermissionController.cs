@@ -35,5 +35,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = _permissionServices.FindAll();
             return Ok(result);
         }
+
+        /// <summary>
+        /// Endpoint that receives the request to return workflow permissions paginated.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Workflow")]
+        [SwaggerOperation("Endpoint that receives the request to return workflow permissions paginated")]
+        [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
+        public IActionResult FindWorkflowPermissions()
+        {
+            var result = _permissionServices.FindWorkflowPermissions();
+            return Ok(result);
+        }
     }
 }

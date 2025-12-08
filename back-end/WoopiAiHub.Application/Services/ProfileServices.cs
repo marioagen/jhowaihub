@@ -1,8 +1,10 @@
-﻿using WoopiAiHub.Domain.DTOs.Response;
+﻿using AutoMapper;
+using System.Linq;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
@@ -10,13 +12,19 @@ namespace WoopiAiHub.Application.Services
     public class ProfileServices : IProfileServices
     {
         private readonly IProfileRepository _profileRepository;
+        private readonly IWorkflowServices _workflowServices;
         private readonly IPermissionRepository _permissionRepository;
+        private readonly IStepProfilePermissionsServices _stepProfilePermissionsServices;
 
         public ProfileServices(IProfileRepository profileRepository,
-                               IPermissionRepository permissionRepository)
+                               IPermissionRepository permissionRepository,
+                               IWorkflowServices workflowServices,
+                               IStepProfilePermissionsServices stepProfilePermissionsServices)
         {
             _profileRepository = profileRepository;
             _permissionRepository = permissionRepository;
+            _workflowServices = workflowServices;
+            _stepProfilePermissionsServices = stepProfilePermissionsServices;
         }
 
         /// <summary>
@@ -27,12 +35,12 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<ProfileDto> FindById(int id)
         {
-            var team = await _profileRepository.FindById(id);
-            if (team == null)
+            var profile = await _profileRepository.FindById(id);
+            if (profile == null)
             {
                 throw new ArgumentException("Profile not found");
             }
-            return team;
+            return profile;
         }
 
         /// <summary>
@@ -71,7 +79,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Profile name cannot be empty");
             }
 
-            var profile = new Profile(profileCreateDto.Name, 0, DateTime.Now)
+            var profile = new Domain.Models.Profile(profileCreateDto.Name, 0, DateTime.Now)
             {
                 Permissions = new List<Permission>()
             };
@@ -91,6 +99,13 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new InvalidOperationException("Duplicated Profile");
             }
+
+            if (profileCreateDto.PermissionsWorkflow.Count() > 0)
+            {
+                await _stepProfilePermissionsServices.Create(profile.Id, profileCreateDto.PermissionsWorkflow);
+                await _workflowServices.CreateWorkflowRelationship(profile, profileCreateDto.PermissionsWorkflow.Select(x => x.StepId).ToList());
+            }
+
             return createResult;
         }
 
@@ -102,12 +117,11 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<bool> Update(ProfileUpdateDto profileUpdateDto)
         {
-
             var profile = _profileRepository.FindByIdReturnModel(profileUpdateDto.Id);
             if (profile == null)
                 return false;
 
-            profile.Update(profileUpdateDto.Name);
+            profile.Update(profileUpdateDto.Name);            
 
             if (profileUpdateDto.PermissionsIds != null)
             {
@@ -125,6 +139,38 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new InvalidOperationException("Duplicated Profile");
             }
+
+            var oldStepsIds = (profile.StepProfilePermissions ?? Enumerable.Empty<StepProfilePermission>())
+                .Select(spp => spp.StepId)
+                .ToList();
+
+            var newStepsIds = profileUpdateDto.PermissionsWorkflow?
+                .Select(x => x.StepId)
+                .ToList()
+                ?? new List<int>();
+
+            var addedStepIds = newStepsIds.Except(oldStepsIds).ToList();
+            var removedStepIds = oldStepsIds.Except(newStepsIds).ToList();
+
+            var profileId = profile.Id;
+            if (addedStepIds.Count() > 0)
+            {
+                var newPermissionsOnly = profileUpdateDto.PermissionsWorkflow
+                    .Where(x => addedStepIds.Contains(x.StepId))
+                    .ToList();
+                await _stepProfilePermissionsServices.Create(profileId, newPermissionsOnly);
+                await _workflowServices.CreateWorkflowRelationship(profile, addedStepIds);
+            }
+
+            if(removedStepIds.Count() > 0)
+            {
+                var toRemovePermissions = profile.StepProfilePermissions
+                    .Where(x => removedStepIds.Contains(x.StepId))
+                    .ToList();
+                await _stepProfilePermissionsServices.DeleteRow(toRemovePermissions);
+                await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(removedStepIds, profile);
+            }
+
             return updateResult;
         }
 
@@ -133,9 +179,10 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        public bool DeleteByIds(List<int> ids)
+        public async Task<bool> DeleteByIds(List<int> ids)
         {
-            return _profileRepository.DeleteByIds(ids);
+            await _stepProfilePermissionsServices.DeleteByIds(ids);
+            return await _profileRepository.DeleteByIdsAsync(ids);
         }
 
         /// <summary>

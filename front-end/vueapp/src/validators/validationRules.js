@@ -80,3 +80,10 @@ defineRule("custom_password", (value) => {
     }
     return true;
 });
+
+defineRule('requiredArray', (value) => {
+    if (Array.isArray(value) && value.length > 0) {
+        return true;
+    }
+    return i18n.global.t("validation.oneElementArray");
+});

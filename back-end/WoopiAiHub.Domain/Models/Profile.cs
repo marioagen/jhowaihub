@@ -9,9 +9,10 @@ namespace WoopiAiHub.Domain.Models
         [Column("Name", TypeName = "varchar(100)")]
         public string Name { get; private set; } = string.Empty;
 
-        public virtual ICollection<User> Users { get; set; }
         public virtual ICollection<Permission> Permissions { get; set; }
         public virtual ICollection<Step> Steps { get; set; }
+        public virtual ICollection<Team> Teams { get; set; }
+        public virtual ICollection<StepProfilePermission> StepProfilePermissions { get; set; }
 
         public Profile(string name,
                        int id,
@@ -29,6 +30,28 @@ namespace WoopiAiHub.Domain.Models
                 return;
 
             Permissions.Add(permission);
+        }
+
+        public void AddTeam(Team team)
+        {
+            if (team == null)
+                throw new ArgumentNullException(nameof(team));
+
+            if (this.Teams.Any(t => t.Id == team.Id))
+                return;
+
+            Teams.Add(team);
+        }
+
+        public void RemoveTeam(Team team)
+        {
+            if (team == null)
+                throw new ArgumentNullException(nameof(team));
+
+            if (this.Teams.Any(t => t.Id == team.Id))
+                return;
+
+            Teams.Remove(team);
         }
 
         public void Update(string name)

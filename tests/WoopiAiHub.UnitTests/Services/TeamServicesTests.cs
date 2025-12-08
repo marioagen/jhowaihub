@@ -1,5 +1,6 @@
 using Moq;
 using Moq.AutoMock;
+using System.Collections.Generic;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -7,6 +8,7 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixture;
 using WoopiAiHub.UnitTests.Helpers;
@@ -21,6 +23,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly TeamFixture _fixture;
         private readonly Mock<ITeamRepository> _teamRepositoryMock;
         private readonly Mock<IUserRepository> _userRepositoryMock;
+        private readonly Mock<IWorkflowServices> _workflowServicesMock;
         private readonly TeamServices _service;
 
         public TeamServicesTests()
@@ -30,6 +33,7 @@ namespace WoopiAiHub.UnitTests.Services
             _service = _mocker.CreateInstance<TeamServices>();
             _teamRepositoryMock = _mocker.GetMock<ITeamRepository>();
             _userRepositoryMock = _mocker.GetMock<IUserRepository>();
+            _workflowServicesMock = _mocker.GetMock<IWorkflowServices>();
         }
 
         [Fact(DisplayName = "FindById should return TeamDto when ID exists")]
@@ -68,14 +72,14 @@ namespace WoopiAiHub.UnitTests.Services
             var teamCreateDto = new TeamCreateDto
             {
                 Name = "Equipe Teste",
-                UserIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() }
+                UserIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
             };
 
             var users = new List<User>
-        {
-            new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
-            new User(teamCreateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
-        };
+            {
+                new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
+                new User(teamCreateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
+            };
 
             _userRepositoryMock
                 .Setup(repo => repo.FindByIdsAsync(teamCreateDto.UserIds))
@@ -120,9 +124,9 @@ namespace WoopiAiHub.UnitTests.Services
             };
 
             var users = new List<User>
-        {
-            new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now)
-        };
+            {
+                new User(teamCreateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now)
+            };
 
             _userRepositoryMock
                 .Setup(repo => repo.FindByIdsAsync(teamCreateDto.UserIds))
@@ -152,18 +156,22 @@ namespace WoopiAiHub.UnitTests.Services
 
             var team = new Team("Antigo Nome", teamId, DateTime.Now)
             {
-                Users = new List<User>()
+                Users = new List<User>(),
+                Profiles = new List<Profile>()  
             };
 
             var users = new List<User>
-        {
-            new User(teamUpdateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
-            new User(teamUpdateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
-        };
+            {
+                new User(teamUpdateDto.UserIds[0], "User1", "user1@email.com", true, DateTime.Now),
+                new User(teamUpdateDto.UserIds[1], "User2", "user2@email.com", true, DateTime.Now)
+            };
+
+            var workflows = new List<Workflow>();
 
             _teamRepositoryMock.Setup(r => r.FindByIdReturnModel(teamId)).Returns(team);
             _userRepositoryMock.Setup(r => r.FindByIdsAsync(teamUpdateDto.UserIds)).ReturnsAsync(users);
             _teamRepositoryMock.Setup(r => r.Update(team)).Returns(true);
+            _workflowServicesMock.Setup(r => r.FindByProfileStep(team.Profiles.ToList())).ReturnsAsync(workflows);
 
             // Act
             var result = await _service.Update(teamUpdateDto);
@@ -195,9 +203,9 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
-        [Fact(DisplayName = "Update should throw exception when team is duplicated")]
+        [Fact(DisplayName = "Update should throw exception when create relationship to Users")]
         [Trait("Update", "Fail")]
-        public async Task Update_ShouldThrowArgumentException_WhenDuplicatedTeam()
+        public async Task Update_ShouldThrowArgumentException_WhenCreateRelationshipUsers()
         {
             // Arrange
             var teamId = 1;
@@ -224,8 +232,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _service.Update(teamUpdateDto));
-            Assert.Equal("Duplicated Team Name", ex.Message);
-            Assert.Equal(ErrorCode.Duplicated, ex.ErrorCode);
+            Assert.Equal("Error creating relationship to Users", ex.Message);
+            Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
         }
 
         [Fact(DisplayName = "DeleteByIds should return true when IDs are valid")]
@@ -260,24 +268,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.False(result);
-        }
-
-        [Fact(DisplayName = "DeleteByIds should thrown excpetion when has documents")]
-        [Trait("DeleteByIds", "Exception")]
-        public void DeleteByIds_InvalidIds_ShouldThrowException()
-        {
-            // Arrange
-            var ids = new List<int> { 999 };
-            var team = new Team("Team with Docs", 999, DateTime.Now);
-            var document = new Document("Doc1", "Content", "Reference", DocumentStatus.Analyzed, true, "email", 1, DateTime.Now);
-            team.Documents = new List<Document> {document};
-            var teams = new List<Team> {team};
-
-            _teamRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(teams);
-            _teamRepositoryMock.Setup(r => r.DeleteByIds(ids)).Returns(false);
-
-            // Act & Assert
-            Assert.Throws<AppException>(() => _service.DeleteByIds(ids));
         }
 
         [Fact(DisplayName = "FindAllPaged should return paged result correctly (first page, ascending)")]
@@ -465,9 +455,9 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Some teams were not found", ex.Message);
         }
 
-        [Fact(DisplayName = "Tests FindByUser and returns a list os teams")]
-        [Trait("FindByUser", "Success")]
-        public async Task FindByUser_ShouldReturnTeamsForUser()
+        [Fact(DisplayName = "Tests FindAll and returns a list of teams")]
+        [Trait("FindAll", "Success")]
+        public async Task FindByUser_ShouldReturnTeamsForUser() // Mudou para void sem async
         {
             // Arrange
             var emailUser = "user@example.com";
@@ -479,34 +469,36 @@ namespace WoopiAiHub.UnitTests.Services
 
             var asyncTeams = new TestAsyncEnumerable<TeamDto>(teams);
 
-            _teamRepositoryMock.Setup(repo => repo.FindAllByUser(It.IsAny<string>())).Returns(asyncTeams);
+            _teamRepositoryMock.Setup(repo => repo.FindAll())
+                              .Returns(asyncTeams);
 
             // Act
-            var result = await _service.FindByUser(emailUser);
+            var result = await _service.FindAll(); // Removido await
 
             // Assert
             Assert.Equal(teams.ToList(), result);
-            _teamRepositoryMock.Verify(repo => repo.FindAllByUser(It.IsAny<string>()), Times.Once);
+            Assert.Equal(2, result.Count);
+            _teamRepositoryMock.Verify(repo => repo.FindAll(), Times.Once);
         }
 
-        [Fact(DisplayName = "Tests FindByUser and returns an empty list os teams")]
-        [Trait("FindByUser", "Success")]
-        public async Task FindByUser_ShouldReturnEmptyList_WhenNoTeamsExistForUser()
+        [Fact(DisplayName = "Tests FindAll and returns an empty list of teams")]
+        [Trait("FindAll", "Success")]
+        public async Task FindByUser_ShouldReturnEmptyList_WhenNoTeamsExistForUser() // Mudou para void sem async
         {
             // Arrange
-            var emailUser = "user@example.com";
             var teams = new List<TeamDto>().AsQueryable();
 
             var asyncTeams = new TestAsyncEnumerable<TeamDto>(teams);
 
-            _teamRepositoryMock.Setup(repo => repo.FindAllByUser(It.IsAny<string>())).Returns(asyncTeams);
+            _teamRepositoryMock.Setup(repo => repo.FindAll())
+                              .Returns(asyncTeams);
 
             // Act
-            var result = await _service.FindByUser(emailUser);
+            var result = await _service.FindAll(); // Removido await
 
             // Assert
             Assert.Empty(result);
-            _teamRepositoryMock.Verify(repo => repo.FindAllByUser(It.IsAny<string>()), Times.Once);
+            _teamRepositoryMock.Verify(repo => repo.FindAll(), Times.Once);
         }
     }
 }

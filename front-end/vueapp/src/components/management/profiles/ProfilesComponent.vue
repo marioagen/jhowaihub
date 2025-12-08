@@ -7,7 +7,13 @@
                     <small class="text-muted">{{ $t("labelProfilesMessage") }}</small>
                 </p>
             </div>
-            <button class="btn btn-primary btn-sm" @click="openModalProfile">+ {{ $t("labelNewProfile") }}</button>
+            <button 
+                class="btn btn-primary btn-sm"
+                @click="redirectToForm"
+            >
+                <LucideIcon icon="Plus" />
+                {{ $t("management.profiles.createBtn") }}
+            </button>
         </div>
         <div class="card mb-3">
             <div class="card-body">
@@ -16,11 +22,9 @@
         </div>
         <profiles-table ref="ProfilesTable" />
     </div>
-    <ProfilesModal :isEdit="false" :type="modalType" @reload="reloadTable" ref="ProfilesModal" />
 </template>
 
 <script>
-    import ProfilesModal from "@/components/management/profiles/modals/ProfilesModal.vue";
     import ProfilesTable from "@/components/management/profiles/ProfilesTable.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import editIcon from "@/assets/img/edit-outlined.svg";
@@ -57,9 +61,13 @@
         components: {
             ProfilesTable,
             SearchComponent,
-            ProfilesModal,
         },
         methods: {
+            redirectToForm() {
+                this.$router.push({
+                    name: 'NewProfile',
+                });
+            },
             setMenuActions: function () {
                 this.menuActions = {
                     options: [
@@ -73,9 +81,6 @@
                     ],
                 };
             },
-            openModalProfile() {
-                this.$refs.ProfilesModal.open();
-            },
             filterList(obj) {
                 this.$refs.ProfilesTable.filterList(obj.search);
             },
@@ -87,7 +92,6 @@
                 };
             },
             reloadTable() {
-                this.$refs.ProfilesModal.close();
                 this.$refs.ProfilesTable.reload();
             },
         },

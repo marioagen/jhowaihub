@@ -13,7 +13,7 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public Team CreateValidTeam()
         {
-            return new Team(_faker.Company.CompanyName(), _faker.Random.Int(1, 1000), _faker.Date.Past())
+            return new Team(_faker.Company.CompanyName(), 2, _faker.Date.Past())
             {
                 Users = new List<User>
             {
@@ -45,7 +45,7 @@ namespace WoopiAiHub.UnitTests.Fixture
         {
             return new TeamDto
             {
-                Id = _faker.Random.Int(1, 1000),
+                Id = 2,
                 Name = _faker.Company.CompanyName(),
                 Created = _faker.Date.Past(),
                 Users = new List<UserDto>

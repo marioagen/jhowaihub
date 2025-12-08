@@ -41,11 +41,11 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var tenantInfo = new TenantInfoDto { OcrModel = string.Empty };
 
             _mockTenantCacheServices
-                .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
                 .ReturnsAsync(tenantInfo);
 
             // Act & Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _handler.BuildPayload(automationServiceDto, It.IsAny<StepToolParameter>(), It.IsAny<string>()));
+            await Assert.ThrowsAsync<ArgumentException>(() => _handler.BuildPayload(automationServiceDto, It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>()));
         }
 
         [Fact(DisplayName = "BuildPayload should return ExecutionMessageDto with correct queue and message")]
@@ -58,11 +58,11 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var tenantInfo = new TenantInfoDto { OcrModel = "test-ocr-model" };
 
             _mockTenantCacheServices
-                .Setup(service => service.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
                 .ReturnsAsync(tenantInfo);
 
             // Act
-            var result = await _handler.BuildPayload(automationServicesDto, null, "");
+            var result = await _handler.BuildPayload(automationServicesDto, null, []);
 
             // Assert
             Assert.Equal(_messageQueues.OcrQueue, result.Queue);

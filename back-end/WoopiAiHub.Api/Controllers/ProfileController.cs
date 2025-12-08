@@ -30,10 +30,10 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("{id}")]
         [SwaggerOperation("Endpoint that receive an id and return a valid profile")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
-        public ActionResult<ProfileDto> FindById(int id)
+        public async Task<ActionResult<ProfileDto>> FindById(int id)
         {
-            var team = _profileServices.FindById(id);
-            return Ok(team);
+            var profile = await _profileServices.FindById(id);
+            return Ok(profile);
         }
 
         /// <summary>
@@ -87,9 +87,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpDelete]
         [SwaggerOperation("EndPoint that delete profiles by ids")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult DeleteByIds(List<int> ids)
+        public async Task<IActionResult> DeleteByIds(List<int> ids)
         {
-            var deleted = _profileServices.DeleteByIds(ids);
+            var deleted = await _profileServices.DeleteByIds(ids);
             return Ok(deleted);
         }
 

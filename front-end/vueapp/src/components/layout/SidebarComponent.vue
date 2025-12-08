@@ -1,7 +1,7 @@
 <template>
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
-        <div class="sidebar-header d-flex align-items-center justify-content-start px-3" style="height: 60px">
-            <router-link class="d-flex align-items-center text-decoration-none w-100" :to="{ name: 'Documents' }">
+        <div class="sidebar-header d-flex align-items-center" :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'" style="height: 60px; padding: 0 10px;">
+            <router-link class="d-flex align-items-center text-decoration-none" :class="isCollapsed ? 'justify-content-center' : 'w-100'" :to="{ name: 'Home' }">
                 <img
                     v-if="isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
@@ -13,8 +13,9 @@
                     v-else
                     src="./../../assets/img/woopiai-hub-logo.png"
                     :title="$t('labelGoHome')"
-                    width="120"
-                    height="40"
+                    height="23" 
+                    alt="WOOPI AI"
+                    style="margin-left: 0px;"
                 />
             </router-link>
         </div>        
@@ -78,14 +79,29 @@
                     types: hasPermission("Types", "View"),
                     quizzes: hasPermission("Quizzes", "View"),
                     workflow: hasPermission("Workflow", "View"),
+                    tools: hasPermission("Tools", "View"),
+                    prompts: hasPermission("Prompts", "View"),
                 },
                 menuItems: [
+                    {
+                        activeKey: 'Home',
+                        to: '/home',
+                        icon: { name: 'Home', color: '#0d6efd' },
+                        labelKey: 'labelGoHome'
+                    },    
+                    {   
+                        permission: 'Dashboard',
+                        activeKey: 'Dashboard',
+                        to: '/dashboard',
+                        icon: { name: 'LayoutGrid', color: '#f43f5e' },
+                        labelKey: 'pages.dashboard'
+                    },
                     {
                         permission: 'Management',
                         activeKey: 'DocumentList',
                         to: '/management',
                         icon: { name: 'Users', color: '#ff6900' },
-                        labelKey: 'labelManageUsers'
+                        labelKey: 'pages.management'
                     },
                     {
                         activeKey: 'DocumentList',
@@ -94,7 +110,7 @@
                             name: 'FileText', 
                             color: '#2f80ed' 
                         },
-                        labelKey: 'labelDocuments'
+                        labelKey: 'pages.documents'
                     },
                     {
                         permission: 'Workflow',
@@ -104,17 +120,17 @@
                             name: 'Workflow', 
                             color: '#615FFF' 
                         },
-                        labelKey: 'workflow.index'
+                        labelKey: 'pages.workflows'
                     },
                     {
                         permission: 'Workflow',
-                        activeKey: 'WorkflowEditor',
-                        to: '/workflow/editor',
+                        activeKey: 'WorkflowManagement',
+                        to: '/workflow/management',
                         icon: { 
                             name: 'Workflow', 
                             color: '#00bba7' 
                         },
-                        labelKey: 'workflow.editTitle'
+                        labelKey: 'pages.workflowManagement'
                     },
                     {
                         permission: 'Types',
@@ -124,7 +140,7 @@
                             name: 'BookmarkCheck', 
                             color: '#f2c94c' 
                         },
-                        labelKey: 'labelTypes'
+                        labelKey: 'pages.types'
                     },
                     {
                         permission: 'Questions',
@@ -134,7 +150,7 @@
                             name: 'MessageSquare', 
                             color: '#3fd67b' 
                         },
-                        labelKey: 'labelQuestions'
+                        labelKey: 'pages.questions'
                     },
                     {
                         permission: 'Quizzes',
@@ -144,7 +160,7 @@
                             name: 'ClipboardList', 
                             color: '#a259ff' 
                         },
-                        labelKey: 'quizzes.title'
+                        labelKey: 'pages.quizzes'
                     },
                     {
                         permission: 'Tools',
@@ -154,7 +170,7 @@
                             name: 'PocketKnife', 
                             color: '#f59e0b'
                         },
-                        labelKey: 'tools.title'
+                        labelKey: 'pages.tools'
                     },
                     {
                         permission: 'Prompts',
@@ -164,7 +180,7 @@
                             name: 'Braces',
                             color: '#8e51ff'
                         },
-                        labelKey: 'prompts.title'
+                        labelKey: 'pages.prompts'
                     },
                 ]
             };

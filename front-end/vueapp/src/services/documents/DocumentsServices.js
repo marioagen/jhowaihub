@@ -8,9 +8,9 @@ export default {
                 content: [],
                 pagination: {
                     currentPage: 1,
-                    totalPages: 100,
+                    totalPages: 0,
                     itemsPerPage: 10,
-                    totalItems: 2000,
+                    totalItems: 0,
                 }
             });
         }
@@ -94,4 +94,40 @@ export default {
                 };
             });
     },
+    getOcrText(docId) {
+        return api
+            .get(`/Document/OcrText/${docId}`)
+            .then((result) => {
+                return result.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
+    async inputDocument(params) {
+        return await api
+            .post("/Document/Input/", params)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
+    async findByIdAnalyze(id) {
+        return await api
+            .get(`/Document/Analyze/${id}`)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    }
 };

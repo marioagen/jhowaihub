@@ -14,7 +14,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<int>(),
                     Name = f.Lorem.Sentence(3),
                     Steps = new List<StepCreateDto>() { FindValidStepCreateDto() }
                 });
@@ -26,7 +26,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<int>(),
                     Name = f.Lorem.Sentence(3)
                 });
             return faker;
@@ -37,7 +37,6 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<WorkflowCreateDto>("pt_BR")
                 .CustomInstantiator(f => new WorkflowCreateDto
                 {
-                    TeamId = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(3),
                     Steps = new List<StepCreateDto>()
                     {
@@ -48,7 +47,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                             ProfileId = f.Random.Int(1, 100),
                             StatusId = f.Random.Int(1, 5)
                         }
-                    }
+                    },
+                    Teams = new List<int> { 2 }
                 });
             return faker;
         }
@@ -60,7 +60,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                 {
                     Id = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(3),
-                    Steps = new List<StepUpdateDto>() { FindValidStepUpdateDto() }
+                    Steps = new List<StepUpdateDto>() { FindValidStepUpdateDto() },
+                    Teams = new List<int> { f.Random.Int(1, 100) },
                 });
             return faker;
         }
@@ -70,7 +71,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<ProfileDto>("pt_BR")
                 .CustomInstantiator(f => new ProfileDto
                 {
-                    Id = f.Random.Int(1, 100),
+                    Id = 1,
                     Name = f.Lorem.Sentence(2)
                 });
             return faker;
@@ -105,7 +106,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 {
                     Id = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(2),
-                    Order = f.Random.Int(1, 10),
+                    Order = 1,
                     Profile = FindValidProfileDto(),
                     Status = FindValidStatusDto()
                 });
@@ -119,22 +120,33 @@ namespace WoopiAiHub.UnitTests.Fixture
                 {
                     Id = f.Random.Int(1, 1000),
                     Name = f.Lorem.Sentence(3),
-                    TeamId = f.Random.Int(1, 1000),
+                    Teams = new List<TeamDto>() { FindValidTeamDto() },
                     Steps = new List<StepDto>() { FindValidStepDto() }
                 });
             return faker;
         }
 
-        public static StepUpdateDto FindValidStepUpdateDto()
+        public static StepToolUpdateDto FindValidStepToolUpdateDto()
         {
-            var stepToolUpdateDto = new StepToolUpdateDto
+            return  new StepToolUpdateDto
             {
                 Id = 0,
                 ToolId = 1,
                 Order = 1,
                 PositionX = 2,
-                PositionY = 2                
+                PositionY = 2,
+                Parameters = new List<StepToolParameterUpdateDto>
+                {
+                    new StepToolParameterUpdateDto
+                    {
+                        Value = "value1"
+                    }
+                },
             };
+        }
+
+        public static StepUpdateDto FindValidStepUpdateDto()
+        {
             var f = new Faker("pt_BR");
             return new StepUpdateDto
             {
@@ -143,7 +155,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Order = f.Random.Int(1, 10),
                 ProfileId = f.Random.Int(1, 100),
                 StatusId = f.Random.Int(1, 5),
-                StepTools = new List<StepToolUpdateDto>() { stepToolUpdateDto }
+                StepTools = new List<StepToolUpdateDto>() { FindValidStepToolUpdateDto() }
             };
         }
 
@@ -196,22 +208,22 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new Workflow(
                 f.IndexFaker,
                 f.Date.Past(),
-                f.Random.Int(1, 5),
+                new List<Team>() { DocumentFixture.FindValidTeam() },
                 f.Person.FirstName)
             {
                 Steps = new List<Step> { FindValidStep() }
             };
         }
 
-        public static ICollection<Workflow> FindValidWorkflows()
+        public static List<Workflow> FindValidWorkflows()
         {
             var f = new Faker("pt_BR");
-            ICollection<Workflow> workflow = new Faker<Workflow>("pt_BR")
+            List<Workflow> workflow = new Faker<Workflow>("pt_BR")
            .CustomInstantiator(f => new Workflow
            (
                f.IndexFaker,
                f.Date.Past(),
-               f.Random.Int(1, 5),
+               new List<Team>() { DocumentFixture.FindValidTeam() },
                f.Person.FirstName
 
            )
@@ -223,16 +235,16 @@ namespace WoopiAiHub.UnitTests.Fixture
             return workflow;
         }
 
-        public static Step FindValidStep()
+        public static Step FindValidStep(int? workflowId = null)
         {
             var f = new Faker("pt_BR");
             return new Step(
                 f.IndexFaker,
                 f.Date.Past(),
-                f.Random.Int(1, 5),
+                workflowId ?? f.Random.Int(1, 5),
                 f.Person.FirstName,
                 1,
-                f.Random.Int(1, 5),
+                1,
                 f.Random.Int(1, 5))
             {
                 Cards = new List<Card> { FindValidCard() },
@@ -267,6 +279,27 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Decimal(1, 1000),
                 _faker.Random.Decimal(1, 1000)
              );
+        }
+
+        public static StepTool FindValidStepToolWithDependencies()
+        {
+            var _faker = new Faker("pt_BR");
+            var step =  new StepTool(
+                _faker.Random.Int(1, 1000),
+                 DateTime.UtcNow,
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Int(1, 1000),
+                _faker.Random.Decimal(1, 1000),
+                _faker.Random.Decimal(1, 1000)
+             );
+            step.Dependencies.Add(new StepToolDependency(
+                _faker.Random.Int(1, 1000),
+                DateTime.UtcNow,
+                step.Id,
+                _faker.Random.Int(1, 1000)
+             ));
+            return step;
         }
     }
 

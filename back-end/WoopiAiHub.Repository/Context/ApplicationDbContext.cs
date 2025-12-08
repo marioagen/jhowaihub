@@ -44,7 +44,15 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<StepToolExecution> StepToolExecutions { get; set; }
         public DbSet<StepToolOutput> StepToolOutputs { get; set; }
         public DbSet<StepToolParameter> StepToolParameters { get; set; }
+        public DbSet<StepToolDependency> StepToolDependencies { get; set; }
+        public DbSet<StepProfilePermission> StepProfilePermissions { get; set; }
         public DbSet<Prompt> Prompts { get; set; }
+        public DbSet<UsageLog> UsageLogs { get; set; }
+        public DbSet<UsageMonth> UsageMonths { get; set; }
+        public DbSet<ModelEmbedding> ModelEmbeddings { get; set; }
+        public DbSet<UsageType> UsageTypes { get; set; }
+        public DbSet<UsageUnit> UsageUnits { get; set; }
+        public DbSet<UsageDaily> UsageDailies { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -81,7 +89,15 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<StepToolExecution>(new StepToolExecutionMap().Configure);
             modelBuilder.Entity<StepToolParameter>(new StepToolParameterMap().Configure);
             modelBuilder.Entity<StepToolOutput>(new StepToolOutputMap().Configure);
+            modelBuilder.Entity<StepToolDependency>(new StepToolDependencyMap().Configure);
+            modelBuilder.Entity<StepProfilePermission>(new StepProfilePermissionMap().Configure);
             modelBuilder.Entity<Prompt>(new PromptMap().Configure);
+            modelBuilder.Entity<UsageDaily>(new UsageDailyMap().Configure);
+            modelBuilder.Entity<UsageMonth>(new UsageMonthMap().Configure);
+            modelBuilder.Entity<UsageLog>(new UsageLogMap().Configure);
+            modelBuilder.Entity<ModelEmbedding>(new ModelEmbeddingsMap().Configure);
+            modelBuilder.Entity<UsageUnit>(new UsageUnitMap().Configure);
+            modelBuilder.Entity<UsageType>(new UsageTypeMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }

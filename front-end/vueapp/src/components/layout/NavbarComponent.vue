@@ -2,15 +2,10 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <div class="navbar-main-area d-flex align-items-center flex-grow-1 ps-4">
-              <AvatarComponent :name="initials" :size="30" />
+                <span class="badge bg-light text-dark border">{{ this.selectedTenant }}</span>
                 <div class="dropdown nav-buttons">
-                    <button
-                        class="btn btn-outline-primary table-btn btn-sm"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        style="display: flex; align-items: center; justify-content: center;"
-                    >
+                    <button class="btn btn-outline-primary table-btn btn-sm" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false" style="display: flex; align-items: center; justify-content: center;">
                         <LucideIcon icon="Globe" />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-button text-small shadow">
@@ -57,10 +52,10 @@
                             <img :src="profileImage" alt="Imagem do perfil" width="32" height="32"
                                 class="rounded-circle me-2" v-if="profileImage !== ''" />
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-sidebar text-small shadow"
+                        <ul class="dropdown-menu dropdown-menu-sidebar text-small shadow menu-right"
                             aria-labelledby="dropdownUser1" id="dropdown-menu-button">
                             <li class="remove-hover mt-2">
-                                <router-link class="dropdown-item mx-2 my-2" :to="{
+                                <router-link class="dropdown-item px-2 my-2" :to="{
                                     name: 'Logout'
                                 }" title="Sair">
                                     <LucideIcon icon="LogOut" />
@@ -158,14 +153,14 @@ export default {
                 },
                 responseType: "blob",
             })
-            .then((response) => {
-                this.profileImage = window.URL.createObjectURL(
-                    new Blob([response.data], { type: "image/jpeg" })
-                );
-                this.$store.commit("updateUserProfileImage", {
-                    amount: self.profileImage,
+                .then((response) => {
+                    this.profileImage = window.URL.createObjectURL(
+                        new Blob([response.data], { type: "image/jpeg" })
+                    );
+                    this.$store.commit("updateUserProfileImage", {
+                        amount: self.profileImage,
+                    });
                 });
-            });
         },
         setBreakWord(str) {
             const strSplit = str.trim().split(" ");
@@ -212,11 +207,11 @@ export default {
 </script>
 
 <style scoped>
-    .navbar {
-        padding: 1;
-        padding-top: 0.9rem;
-        padding-bottom: 0.8rem;
-    }
+.navbar {
+    padding: 1;
+    padding-top: 0.9rem;
+    padding-bottom: 0.8rem;
+}
 
 .navbar-light {
     background-color: #ffffff;
@@ -417,5 +412,10 @@ export default {
     #tenantDropdownLabel {
         font-size: 0.8rem;
     }
+}
+
+.menu-right {
+    right: 0 !important;
+    left: auto !important;
 }
 </style>

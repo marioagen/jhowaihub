@@ -75,7 +75,7 @@ namespace WoopiAiHub.Application.Utils
             var existingStepsInUse = await _cardRepository.ExistsStepsInUse(stepIds);
             if (existingStepsInUse)
             {
-                throw new AppException(ErrorCode.Conflict, "Cannot delete steps that are in use by cards", StepLabel.StepsInUse);
+                throw new AppException(ErrorCode.Conflict, "Cannot delete steps that are in use by cards", CardLabel.CardsOpened);
             }
         }
 

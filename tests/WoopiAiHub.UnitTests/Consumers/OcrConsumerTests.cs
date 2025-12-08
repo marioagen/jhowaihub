@@ -27,6 +27,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly Mock<IDocumentServices> _documentServices;
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
         private readonly Mock<IAutomationServices> _automationServices;
+        private readonly Mock<IUsageDailyServices> _usageDailyServices;
         private readonly Mock<IMessagePublisher<DocumentEmbeddingsDataDto>> _publisherMock;
         private readonly Mock<IMessageConsumer<ProcessOcrResultDto>> _consumerMock;
         private readonly Mock<ILogger<OcrConsumer>> _loggerMock;
@@ -58,9 +59,10 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
             _documentServices = new Mock<IDocumentServices>();
             _automationServices = new Mock<IAutomationServices>();
+            _usageDailyServices = new Mock<IUsageDailyServices>();
 
             _tenantCacheServices = new Mock<ITenantCacheServices>();
-            _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+            _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                              .ReturnsAsync(tenant);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
@@ -68,6 +70,8 @@ namespace WoopiAiHub.UnitTests.Consumers
                                .Returns(_documentServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IAutomationServices)))
                                .Returns(_automationServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IUsageDailyServices)))
+                               .Returns(_usageDailyServices.Object);
 
             var serviceScopeMock = new Mock<IServiceScope>();
             serviceScopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);

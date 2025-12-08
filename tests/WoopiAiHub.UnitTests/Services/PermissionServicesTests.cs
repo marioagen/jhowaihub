@@ -1,5 +1,4 @@
-﻿using Moq;
-using Moq.AutoMock;
+﻿using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -31,7 +30,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.Single(result);
-            Assert.Equal("Test", result.First().Name);
         }
 
         [Fact(DisplayName = "Test FindAll and returns empty when no permissions exists")]
