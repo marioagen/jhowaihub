@@ -154,6 +154,7 @@
                         throw new Error("Failed to load questionnaire details");
                     }
                     const questions = questionnaireDetails.questions || [];
+                    const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
 
                     const params = {
                         idDocument: this.documentId,
@@ -165,19 +166,47 @@
                         throw new Error("Failed to apply questionnaire");
                     }
                     
-                    // Wait a moment for the backend to process and save the results
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    // Poll for results with smart retry logic
+                    const results = await this.pollForQuestionnaireResults(questionTexts, questions.length);
                     
-                    // Fetch the document history to get the Q&A results
+                    this.questionnaireResults = results;
+                    
+                    if (results.length === 0) {
+                        console.warn("No results found after polling", {
+                            expectedQuestions: questionTexts
+                        });
+                    }
+                    
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.successApplyingQuestionnaire",
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
+                } catch (error) {
+                    console.error("Error applying questionnaire:", error);
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.errorApplyingQuestionnaire",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isApplyingQuestionnaire = false;
+                }
+            },
+            async pollForQuestionnaireResults(questionTexts, expectedCount, maxAttempts = 15, intervalMs = 1000) {
+                // Poll for results with smart retry - stops as soon as all results are found
+                for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                    await new Promise(resolve => setTimeout(resolve, intervalMs));
+                    
                     const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
                     if (historyResponse.error) {
-                        throw new Error("Failed to load document history");
+                        console.warn(`Polling attempt ${attempt + 1} failed:`, historyResponse.error);
+                        continue;
                     }
                     
                     if (historyResponse.data && Array.isArray(historyResponse.data)) {
-                        // Get the most recent entries that match our questions
-                        const questionTexts = questions.map(q => q.description?.trim());
-                        
                         // Sort history by date descending to get the most recent entries first
                         const sortedHistory = [...historyResponse.data].sort((a, b) => {
                             const dateA = new Date(a.created || a.createdAt || 0);
@@ -202,33 +231,48 @@
                             }
                         }
                         
-                        this.questionnaireResults = results;
+                        // Stop polling if we found all expected results
+                        if (results.length >= expectedCount) {
+                            console.log(`Found all ${results.length} results after ${attempt + 1} attempts`);
+                            return results;
+                        }
                         
-                        if (results.length === 0) {
-                            console.warn("No matching results found in history", {
-                                questions: questionTexts,
-                                historySize: historyResponse.data.length
+                        // Also return if we found at least some results and have waited enough
+                        if (results.length > 0 && attempt >= 5) {
+                            console.log(`Found ${results.length}/${expectedCount} results after ${attempt + 1} attempts`);
+                            return results;
+                        }
+                    }
+                }
+                
+                // Final attempt after all retries
+                const finalResponse = await DocumentServices.getDocumentHistory(this.documentId);
+                if (!finalResponse.error && finalResponse.data) {
+                    const sortedHistory = [...finalResponse.data].sort((a, b) => {
+                        const dateA = new Date(a.created || a.createdAt || 0);
+                        const dateB = new Date(b.created || b.createdAt || 0);
+                        return dateB - dateA;
+                    });
+                    
+                    const results = [];
+                    for (const questionText of questionTexts) {
+                        if (!questionText) continue;
+                        const matchingEntry = sortedHistory.find(item => {
+                            const itemInput = item.input?.trim();
+                            return itemInput && itemInput === questionText;
+                        });
+                        if (matchingEntry) {
+                            results.push({
+                                question: matchingEntry.input,
+                                answer: matchingEntry.output,
+                                confirmed: matchingEntry.confirmed
                             });
                         }
                     }
-                    
-                    this.$notify({
-                        title: "analyze.title",
-                        message: "analyze.successApplyingQuestionnaire",
-                        variant: "success",
-                        icon: "CircleCheckBig",
-                    });
-                } catch (error) {
-                    console.error("Error applying questionnaire:", error);
-                    this.$notify({
-                        title: "analyze.title",
-                        message: "analyze.errorApplyingQuestionnaire",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
-                } finally {
-                    this.isApplyingQuestionnaire = false;
+                    return results;
                 }
+                
+                return [];
             },
             async sendQuestion() {
                 if (!this.question.trim()) return;
