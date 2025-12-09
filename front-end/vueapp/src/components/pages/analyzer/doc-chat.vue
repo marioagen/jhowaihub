@@ -23,7 +23,7 @@
                         <option v-for="questionnaire in questionnaires" 
                                 :key="questionnaire.id" 
                                 :value="questionnaire.id">
-                            {{ questionnaire.name }}
+                            {{ questionnaire.title }}
                         </option>
                     </select>
                     <button class="apply-button"
@@ -165,28 +165,51 @@
                         throw new Error("Failed to apply questionnaire");
                     }
                     
+                    // Wait a moment for the backend to process and save the results
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
                     // Fetch the document history to get the Q&A results
                     const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
                     if (historyResponse.error) {
                         throw new Error("Failed to load document history");
                     }
                     
-                    if (historyResponse.data) {
-                        // Filter history to only show items from this questionnaire
-                        const questionTexts = questions.map(q => q.description?.trim().toLowerCase());
-                        const filteredHistory = historyResponse.data.filter(item => {
-                            const inputText = item.input?.trim().toLowerCase();
-                            return questionTexts.some(qText => 
-                                qText === inputText || 
-                                (qText && inputText && (qText.includes(inputText) || inputText.includes(qText)))
-                            );
+                    if (historyResponse.data && Array.isArray(historyResponse.data)) {
+                        // Get the most recent entries that match our questions
+                        const questionTexts = questions.map(q => q.description?.trim());
+                        
+                        // Sort history by date descending to get the most recent entries first
+                        const sortedHistory = [...historyResponse.data].sort((a, b) => {
+                            const dateA = new Date(a.created || a.createdAt || 0);
+                            const dateB = new Date(b.created || b.createdAt || 0);
+                            return dateB - dateA;
                         });
                         
-                        this.questionnaireResults = filteredHistory.map(item => ({
-                            question: item.input,
-                            answer: item.output,
-                            confirmed: item.confirmed
-                        }));
+                        // Find matching entries for each question
+                        const results = [];
+                        for (const questionText of questionTexts) {
+                            if (!questionText) continue;
+                            const matchingEntry = sortedHistory.find(item => {
+                                const itemInput = item.input?.trim();
+                                return itemInput && itemInput === questionText;
+                            });
+                            if (matchingEntry) {
+                                results.push({
+                                    question: matchingEntry.input,
+                                    answer: matchingEntry.output,
+                                    confirmed: matchingEntry.confirmed
+                                });
+                            }
+                        }
+                        
+                        this.questionnaireResults = results;
+                        
+                        if (results.length === 0) {
+                            console.warn("No matching results found in history", {
+                                questions: questionTexts,
+                                historySize: historyResponse.data.length
+                            });
+                        }
                     }
                     
                     this.$notify({
@@ -196,6 +219,7 @@
                         icon: "CircleCheckBig",
                     });
                 } catch (error) {
+                    console.error("Error applying questionnaire:", error);
                     this.$notify({
                         title: "analyze.title",
                         message: "analyze.errorApplyingQuestionnaire",
