@@ -115,7 +115,13 @@
             },
             async loadQuestionnaires() {
                 try {
-                    const result = await QuizzesService.getQuizzes({ pageSize: 100, pageNumber: 1 });
+                    const result = await QuizzesService.getQuizzes({ 
+                        page: 1, 
+                        pageSize: 100,
+                        search: "",
+                        isAscending: false,
+                        colType: 2
+                    });
                     if (result.content) {
                         this.questionnaires = result.content;
                     }
