@@ -36,7 +36,13 @@
             </div>
 
             <div v-if="questionnaireResults.length > 0" class="results-section">
-                <label class="input-label">{{ $t("analyze.questionnaireResults") }}</label>
+                <div class="results-header">
+                    <label class="input-label">{{ $t("analyze.questionnaireResults") }}</label>
+                    <button class="close-results-button" @click="clearResults" :title="$t('analyze.closeResults')">
+                        <i class="fas fa-times"></i>
+                        {{ $t("analyze.closeResults") }}
+                    </button>
+                </div>
                 <div class="results-list">
                     <div v-for="(result, index) in questionnaireResults" 
                          :key="index" 
@@ -113,11 +119,16 @@
         methods: {
             toggleChat() {
                 this.isExpanded = !this.isExpanded;
-                // Clear results when closing the chat panel
+                // Clear all state when closing the chat panel
                 if (!this.isExpanded) {
-                    this.questionnaireResults = [];
-                    this.appliedQuestionnaireId = null;
+                    this.clearResults();
+                    this.selectedQuestionnaireId = null; // Reset select dropdown
                 }
+            },
+            clearResults() {
+                // Clear only the results area, keep the section open
+                this.questionnaireResults = [];
+                this.appliedQuestionnaireId = null;
             },
             handleInput() {
             },
@@ -583,12 +594,65 @@
         border-bottom: 1px solid #e0e0e0;
     }
 
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .close-results-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        color: #666;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .close-results-button:hover {
+        background: #e9ecef;
+        border-color: #ccc;
+        color: #333;
+    }
+
+    .close-results-button i {
+        font-size: 0.75rem;
+    }
+
     .results-list {
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
         margin-top: 0.75rem;
         margin-bottom: 1.5rem;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    /* Scrollbar styling */
+    .results-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .results-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .results-list::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+
+    .results-list::-webkit-scrollbar-thumb:hover {
+        background: #999;
     }
 
     .result-card {
@@ -653,6 +717,21 @@
         .apply-button {
             width: 44px;
             height: 44px;
+        }
+
+        .results-list {
+            max-height: 50vh;
+        }
+
+        .results-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .close-results-button {
+            align-self: stretch;
+            justify-content: center;
         }
 
         .result-card {

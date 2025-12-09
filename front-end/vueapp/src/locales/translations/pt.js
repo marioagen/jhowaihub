@@ -694,6 +694,7 @@
         successApplyingQuestionnaire: "Questionário aplicado com sucesso",
         pleaseSelectQuestionnaire: "Por favor, selecione um questionário",
         confirmed: "Confirmado",
+        closeResults: "Fechar Respostas",
     },
     pages: {
         dashboard: "Dashboard",
