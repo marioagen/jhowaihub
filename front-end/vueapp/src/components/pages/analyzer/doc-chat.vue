@@ -144,6 +144,9 @@
                 try {
                     // Get the questionnaire details to know which questions to display
                     const questionnaireDetails = await QuizzesService.getQuizzById(this.selectedQuestionnaireId);
+                    if (questionnaireDetails.error) {
+                        throw new Error("Failed to load questionnaire details");
+                    }
                     const questions = questionnaireDetails.questions || [];
 
                     const params = {
@@ -152,29 +155,40 @@
                     };
 
                     const response = await DocumentServices.applyQuestionnaire(params);
-                    if (response && response.data) {
-                        // Fetch the document history to get the Q&A results
-                        const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
-                        if (historyResponse && historyResponse.data) {
-                            // Filter history to only show items from this questionnaire
-                            const questionTexts = questions.map(q => q.description);
-                            const filteredHistory = historyResponse.data.filter(item => 
-                                questionTexts.includes(item.input)
-                            );
-                            
-                            this.questionnaireResults = filteredHistory.map(item => ({
-                                question: item.input,
-                                answer: item.output,
-                                confirmed: item.confirmed
-                            }));
-                        }
-                        this.$notify({
-                            title: "analyze.title",
-                            message: "analyze.successApplyingQuestionnaire",
-                            variant: "success",
-                            icon: "CircleCheckBig",
-                        });
+                    if (response.error) {
+                        throw new Error("Failed to apply questionnaire");
                     }
+                    
+                    // Fetch the document history to get the Q&A results
+                    const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
+                    if (historyResponse.error) {
+                        throw new Error("Failed to load document history");
+                    }
+                    
+                    if (historyResponse.data) {
+                        // Filter history to only show items from this questionnaire
+                        const questionTexts = questions.map(q => q.description?.trim().toLowerCase());
+                        const filteredHistory = historyResponse.data.filter(item => {
+                            const inputText = item.input?.trim().toLowerCase();
+                            return questionTexts.some(qText => 
+                                qText === inputText || 
+                                (qText && inputText && (qText.includes(inputText) || inputText.includes(qText)))
+                            );
+                        });
+                        
+                        this.questionnaireResults = filteredHistory.map(item => ({
+                            question: item.input,
+                            answer: item.output,
+                            confirmed: item.confirmed
+                        }));
+                    }
+                    
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.successApplyingQuestionnaire",
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
                 } catch (error) {
                     this.$notify({
                         title: "analyze.title",
