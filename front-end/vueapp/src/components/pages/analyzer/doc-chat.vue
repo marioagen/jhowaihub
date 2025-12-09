@@ -86,6 +86,7 @@
 <script>
     import DocumentServices from "@/services/documents/DocumentsServices";
     import QuizzesService from "@/services/quizzes/QuizzesService";
+    import signalRService from "@/services/signalR/signalRServices.js";
     export default {
         name: "DocChat",
         props: {
@@ -105,6 +106,7 @@
                 selectedQuestionnaireId: null,
                 isApplyingQuestionnaire: false,
                 questionnaireResults: [],
+                signalrEventQuestionnaireCompleted: "QuestionnaireCompleted",
             };
         },
         methods: {
@@ -154,28 +156,20 @@
                         throw new Error("Failed to load questionnaire details");
                     }
                     const questions = questionnaireDetails.questions || [];
-                    const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
 
                     const params = {
                         idDocument: this.documentId,
                         idQuestionnaire: this.selectedQuestionnaireId,
                     };
 
+                    // Apply questionnaire - backend will process asynchronously
                     const response = await DocumentServices.applyQuestionnaire(params);
                     if (response.error) {
                         throw new Error("Failed to apply questionnaire");
                     }
                     
-                    // Poll for results with smart retry logic
-                    const results = await this.pollForQuestionnaireResults(questionTexts, questions.length);
-                    
-                    this.questionnaireResults = results;
-                    
-                    if (results.length === 0) {
-                        console.warn("No results found after polling", {
-                            expectedQuestions: questionTexts
-                        });
-                    }
+                    // Wait for SignalR event or fallback to fetching history
+                    await this.fetchQuestionnaireResults(questions);
                     
                     this.$notify({
                         title: "analyze.title",
@@ -195,19 +189,24 @@
                     this.isApplyingQuestionnaire = false;
                 }
             },
-            async pollForQuestionnaireResults(questionTexts, expectedCount, maxAttempts = 15, intervalMs = 1000) {
-                // Poll for results with smart retry - stops as soon as all results are found
+            async fetchQuestionnaireResults(questions) {
+                // Fetch results from document history
+                // Backend saves Q&A to history as it processes each question
+                const maxAttempts = 20;
+                const intervalMs = 1000;
+                const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
+                
                 for (let attempt = 0; attempt < maxAttempts; attempt++) {
                     await new Promise(resolve => setTimeout(resolve, intervalMs));
                     
                     const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
                     if (historyResponse.error) {
-                        console.warn(`Polling attempt ${attempt + 1} failed:`, historyResponse.error);
+                        console.warn(`Attempt ${attempt + 1} failed:`, historyResponse.error);
                         continue;
                     }
                     
                     if (historyResponse.data && Array.isArray(historyResponse.data)) {
-                        // Sort history by date descending to get the most recent entries first
+                        // Sort by date descending to get most recent entries
                         const sortedHistory = [...historyResponse.data].sort((a, b) => {
                             const dateA = new Date(a.created || a.createdAt || 0);
                             const dateB = new Date(b.created || b.createdAt || 0);
@@ -231,48 +230,33 @@
                             }
                         }
                         
-                        // Stop polling if we found all expected results
-                        if (results.length >= expectedCount) {
-                            console.log(`Found all ${results.length} results after ${attempt + 1} attempts`);
-                            return results;
+                        // Update results immediately as they come in
+                        if (results.length > 0) {
+                            this.questionnaireResults = results;
+                            console.log(`Found ${results.length}/${questionTexts.length} results after ${attempt + 1} attempts`);
                         }
                         
-                        // Also return if we found at least some results and have waited enough
-                        if (results.length > 0 && attempt >= 5) {
-                            console.log(`Found ${results.length}/${expectedCount} results after ${attempt + 1} attempts`);
-                            return results;
+                        // Stop if we found all expected results
+                        if (results.length >= questionTexts.length) {
+                            console.log(`✓ All ${results.length} results found`);
+                            return;
                         }
                     }
                 }
                 
-                // Final attempt after all retries
-                const finalResponse = await DocumentServices.getDocumentHistory(this.documentId);
-                if (!finalResponse.error && finalResponse.data) {
-                    const sortedHistory = [...finalResponse.data].sort((a, b) => {
-                        const dateA = new Date(a.created || a.createdAt || 0);
-                        const dateB = new Date(b.created || b.createdAt || 0);
-                        return dateB - dateA;
-                    });
-                    
-                    const results = [];
-                    for (const questionText of questionTexts) {
-                        if (!questionText) continue;
-                        const matchingEntry = sortedHistory.find(item => {
-                            const itemInput = item.input?.trim();
-                            return itemInput && itemInput === questionText;
-                        });
-                        if (matchingEntry) {
-                            results.push({
-                                question: matchingEntry.input,
-                                answer: matchingEntry.output,
-                                confirmed: matchingEntry.confirmed
-                            });
-                        }
-                    }
-                    return results;
+                // If we didn't find all results, log what we got
+                if (this.questionnaireResults.length === 0) {
+                    console.warn("No results found after all attempts");
+                } else {
+                    console.log(`Partial results: ${this.questionnaireResults.length}/${questionTexts.length}`);
                 }
-                
-                return [];
+            },
+            handleQuestionnaireCompleted(data) {
+                // SignalR event handler for when backend completes questionnaire processing
+                console.log("SignalR: Questionnaire completed", data);
+                if (data.documentId === this.documentId) {
+                    this.fetchQuestionnaireResults(data.questions || []);
+                }
             },
             async sendQuestion() {
                 if (!this.question.trim()) return;
@@ -311,8 +295,23 @@
                 this.output = ''
             },
         },
-        mounted() {
+        async mounted() {
             this.loadQuestionnaires();
+            
+            // Setup SignalR connection for real-time updates
+            try {
+                await signalRService.startConnection();
+                signalRService.on(this.signalrEventQuestionnaireCompleted, this.handleQuestionnaireCompleted);
+                console.log("SignalR connected for questionnaire updates");
+            } catch (error) {
+                console.warn("SignalR connection failed, will use polling fallback", error);
+            }
+        },
+        beforeUnmount() {
+            // Clean up SignalR listeners
+            if (signalRService.connection) {
+                signalRService.off(this.signalrEventQuestionnaireCompleted);
+            }
         },
     };
 </script>
