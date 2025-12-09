@@ -61,7 +61,7 @@
                             </option>
                         </select>
                         <div v-for="field in formFields" :key="field.name">
-                            <div class="mb-3" v-if="field.type === 'string' || field.type === 'integer'" :type="field.type === 'integer' ? 'number' : 'text'">
+                            <div class="mb-3" v-if="field.type === 'string' || field.type === 'integer'" :type="field.type === 'integer' ? 'number' : 'string'">
                                 <label :for="field.name" class="form-label">{{ field.label }}</label>
                                 <input class="form-control form-control-sm" :id="field.name" v-model="formData[field.name]" />
                             </div>
@@ -82,6 +82,10 @@
                                         <input :id="child.name" v-model="formData[field.name][index][child.name]" class="form-control form-control-sm" />
                                     </div>
                                 </div>
+                            </div>
+                            <div v-else-if="field.type === 'text'">
+                                <label :for="field.name" class="form-label">{{ field.label }}</label>
+                                <textarea class="form-control form-control-sm text-long" :id="field.name" v-model="formData[field.name]" rows="4"/>
                             </div>
                         </div>
                         
@@ -554,7 +558,8 @@
             },
             isPromptTool(){
                 return this.isTargetTool(ToolType.Prompt);
-            }
+            },
+
         }
     };
 </script>
@@ -595,5 +600,8 @@
         z-index: 10;
         background-color: var(--color-card-content);
         opacity: 0.8;
+    }
+    .text-long{
+        resize:none;
     }
 </style>
