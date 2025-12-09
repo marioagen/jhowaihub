@@ -14,6 +14,46 @@
                 </button>
             </div>
 
+            <div class="questionnaire-section">
+                <label class="input-label">{{ $t("analyze.questionnaireToApply") }}</label>
+                <div class="questionnaire-controls">
+                    <select v-model="selectedQuestionnaireId" 
+                            class="questionnaire-select">
+                        <option :value="null">{{ $t("analyze.selectQuestionnaire") }}</option>
+                        <option v-for="questionnaire in questionnaires" 
+                                :key="questionnaire.id" 
+                                :value="questionnaire.id">
+                            {{ questionnaire.name }}
+                        </option>
+                    </select>
+                    <button class="apply-button"
+                            @click="applyQuestionnaire"
+                            :disabled="!selectedQuestionnaireId || isApplyingQuestionnaire">
+                        <div v-if="isApplyingQuestionnaire" class="spinner-border spinner-border-sm text-light" role="status"></div>
+                        <i v-else class="fas fa-arrow-up"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="questionnaireResults.length > 0" class="results-section">
+                <label class="input-label">{{ $t("analyze.questionnaireResults") }}</label>
+                <div class="results-list">
+                    <div v-for="(result, index) in questionnaireResults" 
+                         :key="index" 
+                         class="result-card">
+                        <div class="result-question">
+                            <strong>{{ result.question }}</strong>
+                        </div>
+                        <div class="result-answer">
+                            {{ result.answer }}
+                            <span v-if="result.confirmed" class="confirmed-badge">
+                                <i class="fas fa-check-circle"></i> {{ $t("analyze.confirmed") }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="chat-input-section">
                 <label class="input-label">{{ $t("analyze.askAI") }}</label>
                 <textarea v-model="question"
@@ -45,6 +85,7 @@
 
 <script>
     import DocumentServices from "@/services/documents/DocumentsServices";
+    import QuizzesService from "@/services/quizzes/QuizzesService";
     export default {
         name: "DocChat",
         props: {
@@ -60,6 +101,10 @@
                 question: "",
                 isSending: false,
                 output: "",
+                questionnaires: [],
+                selectedQuestionnaireId: null,
+                isApplyingQuestionnaire: false,
+                questionnaireResults: [],
             };
         },
         methods: {
@@ -67,6 +112,60 @@
                 this.isExpanded = !this.isExpanded;
             },
             handleInput() {
+            },
+            async loadQuestionnaires() {
+                try {
+                    const result = await QuizzesService.getQuizzes({ pageSize: 100, pageNumber: 1 });
+                    if (result.content) {
+                        this.questionnaires = result.content;
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.errorLoadingQuestionnaires",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                }
+            },
+            async applyQuestionnaire() {
+                if (!this.selectedQuestionnaireId) {
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.pleaseSelectQuestionnaire",
+                        variant: "warning",
+                        icon: "AlertTriangle",
+                    });
+                    return;
+                }
+
+                this.isApplyingQuestionnaire = true;
+                const params = {
+                    idDocument: this.documentId,
+                    idQuestionnaire: this.selectedQuestionnaireId,
+                };
+
+                try {
+                    const response = await DocumentServices.applyQuestionnaire(params);
+                    if (response && response.data) {
+                        this.questionnaireResults = response.data;
+                        this.$notify({
+                            title: "analyze.title",
+                            message: "analyze.successApplyingQuestionnaire",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.errorApplyingQuestionnaire",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isApplyingQuestionnaire = false;
+                }
             },
             async sendQuestion() {
                 if (!this.question.trim()) return;
@@ -104,6 +203,9 @@
             clear() {
                 this.output = ''
             },
+        },
+        mounted() {
+            this.loadQuestionnaires();
         },
     };
 </script>
@@ -245,6 +347,117 @@
         cursor: not-allowed;
     }
 
+    .questionnaire-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .questionnaire-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .questionnaire-select {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+    }
+
+    .questionnaire-select:focus {
+        outline: none;
+        border-color: #0073e6;
+    }
+
+    .apply-button {
+        width: 48px;
+        height: 48px;
+        background: #0073e6;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .apply-button:hover:not(:disabled) {
+        background: #005bb5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
+    }
+
+    .apply-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .results-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .result-card {
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 1rem;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .result-card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-question {
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .result-answer {
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .confirmed-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-left: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
     @media (max-width: 768px) {
         .chat-panel {
             padding: 0.75rem;
@@ -258,6 +471,20 @@
         .send-button {
             padding: 0.65rem 1.25rem;
             font-size: 0.9rem;
+        }
+
+        .questionnaire-select {
+            font-size: 0.85rem;
+            padding: 0.6rem;
+        }
+
+        .apply-button {
+            width: 44px;
+            height: 44px;
+        }
+
+        .result-card {
+            padding: 0.75rem;
         }
     }
 </style>
