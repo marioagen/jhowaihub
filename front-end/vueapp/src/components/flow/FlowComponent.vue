@@ -53,8 +53,7 @@
                             </option>
                         </select>
                         <div v-for="field in formFields" :key="field.name">
-                            <div class="mb-3" v-if="field.type === 'string' || field.type === 'integer'"
-                                :type="field.type === 'integer' ? 'number' : 'text'">
+                            <div class="mb-3" v-if="field.type === 'string' || field.type === 'integer'" :type="field.type === 'integer' ? 'number' : 'string'">
                                 <label :for="field.name" class="form-label">{{ field.label }}</label>
                                 <input class="form-control form-control-sm" :id="field.name"
                                     v-model="formData[field.name]" />
@@ -78,8 +77,12 @@
                                     </div>
                                 </div>
                             </div>
+                            <div v-else-if="field.type === 'text'">
+                                <label :for="field.name" class="form-label">{{ field.label }}</label>
+                                <textarea class="form-control form-control-sm text-long" :id="field.name" v-model="formData[field.name]" rows="4"/>
+                            </div>
                         </div>
-
+                        
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary" @click="updateNodeWithForm">{{ $t("labelSave")
                                 }}</button>
@@ -505,57 +508,58 @@ export default {
                 }
             }
 
-            if (workflowSteps.length === 0) {
-                workflowSteps = this.$store.state.tempWorkflow.list || [];
-            }
+                if (workflowSteps.length === 0) {
+                    workflowSteps = this.$store.state.tempWorkflow.list || [];
+                }
+                
+                const relevantSteps = workflowSteps.filter(step => 
+                    step.order <= this.stepOrder
+                );
+                
+                if (!relevantSteps || relevantSteps.length === 0) {
+                    this.previousStepTools = [];
+                    return;
+                }
+                
+                const maxOrder = Math.max(...relevantSteps.map(step => step.order));
+                const nodesToolIds = this.nodes.map(n => n.data?.toolId).filter(Boolean);
+                
+                this.previousStepTools = relevantSteps.map(step => ({
+                    id: step.id,
+                    name: step?.name || step.name || 'Unnamed Tool',
+                    order: step.order,
+                    stepTools: (step.stepTools || []).filter(stepTool => 
+                        step.order < maxOrder || 
+                        (step.order === maxOrder && stepTool.order < node.data.order && nodesToolIds.includes(stepTool.tool?.id))
+                    )
+                }));
+            },
+            resetFormConnector(){
+                this.connectors = [];
+                this.parameters = [];
+                this.formFields = [];
+                this.formData = [];
+                this.connector = "";
+            },
+            isTargetTool(targetToolType){
+                return this.toolType?.toLowerCase().includes(targetToolType.toLowerCase()) || false
+            },
+        },
+        computed: {
+            selectedItem() {
+                if (this.idSelected != 0)
+                    return this.promptlist.find(item => item.id === this.idSelected)
+                return null;
+            },
+            isN8NTool(){
+                return this.isTargetTool(ToolType.N8N);
+            },
+            isPromptTool(){
+                return this.isTargetTool(ToolType.Prompt);
+            },
 
-            const relevantSteps = workflowSteps.filter(step =>
-                step.order <= this.stepOrder
-            );
-
-            if (!relevantSteps || relevantSteps.length === 0) {
-                this.previousStepTools = [];
-                return;
-            }
-
-            const maxOrder = Math.max(...relevantSteps.map(step => step.order));
-            const nodesToolIds = this.nodes.map(n => n.data?.toolId).filter(Boolean);
-
-            this.previousStepTools = relevantSteps.map(step => ({
-                id: step.id,
-                name: step?.name || step.name || 'Unnamed Tool',
-                order: step.order,
-                stepTools: (step.stepTools || []).filter(stepTool =>
-                    step.order < maxOrder ||
-                    (step.order === maxOrder && stepTool.order < node.data.order && nodesToolIds.includes(stepTool.tool?.id))
-                )
-            }));
-        },
-        resetFormConnector() {
-            this.connectors = [];
-            this.parameters = [];
-            this.formFields = [];
-            this.formData = [];
-            this.connector = "";
-        },
-        isTargetTool(targetToolType) {
-            return this.toolType?.toLowerCase().includes(targetToolType.toLowerCase()) || false
-        },
-    },
-    computed: {
-        selectedItem() {
-            if (this.idSelected != 0)
-                return this.promptlist.find(item => item.id === this.idSelected)
-            return null;
-        },
-        isN8NTool() {
-            return this.isTargetTool(ToolType.N8N);
-        },
-        isPromptTool() {
-            return this.isTargetTool(ToolType.Prompt);
         }
-    }
-};
+    };
 </script>
 
 <style>
@@ -585,14 +589,17 @@ export default {
     color: var(--color-bg-icon-active);
 }
 
-.spinner-cover {
-    position: absolute;
-    inset: calc(.25rem * 0);
-    align-items: center;
-    display: flex;
-    justify-content: center;
-    z-index: 10;
-    background-color: var(--color-card-content);
-    opacity: 0.8;
-}
+    .spinner-cover {
+        position: absolute;
+        inset: calc(.25rem * 0);
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        z-index: 10;
+        background-color: var(--color-card-content);
+        opacity: 0.8;
+    }
+    .text-long{
+        resize:none;
+    }
 </style>

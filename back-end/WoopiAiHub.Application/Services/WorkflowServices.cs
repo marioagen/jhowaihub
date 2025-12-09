@@ -251,8 +251,8 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         public async Task CreateWorkflowRelationship(Domain.Models.Profile profile, List<int> stepsIds)
         {
-            var profileTeams = profile.Teams;
             var workflows = await _workflowRepository.FindByStep(stepsIds);
+            var profileTeams = workflows.SelectMany(w => w.Teams);
 
             foreach (var team in profileTeams)
             {

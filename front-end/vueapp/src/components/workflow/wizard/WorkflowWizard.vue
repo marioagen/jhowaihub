@@ -37,9 +37,15 @@
                 <div class="col-12">
                     <div class="main-div shadow-sm">
                         <!-- Phase 1: Name and Teams -->
-                        <Phase1NameAndTeams v-if="currentPhase === 1" ref="phase1" :initialData="phase1Data ?? null" />
+                        <Phase1NameAndTeams v-if="currentPhase === 1"
+                                            ref="phase1"
+                                            :initialData="phase1Data ?? null"
+                                            />
 
-                        <Phase2Steps v-if="currentPhase === 2" ref="phase2" :initialSteps="phase2Data?.steps ?? []" />
+                        <Phase2Steps v-if="currentPhase === 2"
+                                     ref="phase2"
+                                     :initialSteps="phase2Data?.steps ?? []"
+                                     :key="phase2Data?.steps.length"/>
 
                         <Phase3Tools v-if="currentPhase === 3" ref="phase3" :workflowSteps="phase3Data?.steps ?? []"
                             :profilesList="profilesList ?? []" :phase="currentPhase" @add-tool-flow="handleAddToolFlow"

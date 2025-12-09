@@ -80,7 +80,6 @@
     labelNewQuestion: "Crear pregunta",
     labelNewQuestionnaire: "Crear cuestionario",
     labelNotice: "Aviso",
-    labelNoFileChosen: "Ningún archivo elegido",
     labelNoQuestionsRegistered: "No hay preguntas registradas",
     labelNoMoreQuestionsAvailable: "No hay más preguntas disponibles",
     labelNoDocumentsWereFound: "No se encontraron documentos",
@@ -364,6 +363,8 @@
             noWorkflowFound: "No se encontró ningún flujo de trabajo vinculado a los equipos del usuario",
             selectionList: "Lista de selección",
             warningWorkflowNotListed: "¿El flujo de trabajo no aparece en la lista? Es porque tus equipos no tienen uno asociado.",
+            noFileChosen: "Ningún archivo seleccionado",
+            noTeamChosen: "Ningún equipo seleccionado",
         },
     },
     questions: {

@@ -89,7 +89,6 @@
     labelNewQuestion: "Create question",
     labelNewQuestionnaire: "Create questionnaire",
     labelNotice: "Notice",
-    labelNoFileChosen: "No file chosen",
     labelNoQuestionsRegistered: "There are no questions registered",
     labelNoMoreQuestionsAvailable: "There are no more questions available",
     labelNoDocumentsWereFound: "No documents were found",
@@ -360,6 +359,8 @@
             noWorkflowFound: "No workflow linked to your user teams",
             selectionList: "Selection list",
             warningWorkflowNotListed: "Workflow not listed? That’s because your teams don’t have one associated.",
+            noFileChosen: "No file chosen",
+            noTeamChosen: "No team chosen",
         },
     },
     questions: {
