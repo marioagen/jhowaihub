@@ -106,12 +106,18 @@
                 selectedQuestionnaireId: null,
                 isApplyingQuestionnaire: false,
                 questionnaireResults: [],
+                appliedQuestionnaireId: null, // Track which questionnaire was applied
                 signalrEventQuestionnaireCompleted: "QuestionnaireCompleted",
             };
         },
         methods: {
             toggleChat() {
                 this.isExpanded = !this.isExpanded;
+                // Clear results when closing the chat panel
+                if (!this.isExpanded) {
+                    this.questionnaireResults = [];
+                    this.appliedQuestionnaireId = null;
+                }
             },
             handleInput() {
             },
@@ -173,50 +179,71 @@
                     
                     console.log("Backend completed, fetching results from history");
                     
+                    // Store the applied questionnaire ID for filtering
+                    this.appliedQuestionnaireId = this.selectedQuestionnaireId;
+                    
                     // Backend has finished processing, fetch the results from history
                     const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
                     if (historyResponse.error) {
                         throw new Error("Failed to load document history");
                     }
                     
-                    if (historyResponse.data && Array.isArray(historyResponse.data)) {
-                        console.log(`History loaded with ${historyResponse.data.length} entries`);
-                        
+                    // Handle both .data and .data.value structures
+                    let historyData = null;
+                    if (historyResponse.data && historyResponse.data.value && Array.isArray(historyResponse.data.value)) {
+                        historyData = historyResponse.data.value;
+                        console.log(`History loaded with ${historyData.length} entries (from .value)`);
+                    } else if (historyResponse.data && Array.isArray(historyResponse.data)) {
+                        historyData = historyResponse.data;
+                        console.log(`History loaded with ${historyData.length} entries (from .data)`);
+                    }
+                    
+                    if (historyData) {
                         // Sort by date descending to get most recent entries
-                        const sortedHistory = [...historyResponse.data].sort((a, b) => {
+                        const sortedHistory = [...historyData].sort((a, b) => {
                             const dateA = new Date(a.created || a.createdAt || 0);
                             const dateB = new Date(b.created || b.createdAt || 0);
                             return dateB - dateA;
                         });
                         
-                        // Find matching entries for each question
+                        // Find matching entries for each question from THIS questionnaire
+                        // Filter by questionnaireId if available, otherwise use question text matching
                         const results = [];
                         for (const questionText of questionTexts) {
                             if (!questionText) continue;
                             const matchingEntry = sortedHistory.find(item => {
                                 const itemInput = item.input?.trim();
-                                return itemInput && itemInput === questionText;
+                                // Match by question text AND optionally verify questionnaireId if available
+                                const textMatches = itemInput && itemInput === questionText;
+                                // If the history entry has questionnaireId, verify it matches
+                                const idMatches = !item.questionnaireId || item.questionnaireId === this.appliedQuestionnaireId;
+                                return textMatches && idMatches;
                             });
                             if (matchingEntry) {
                                 results.push({
                                     question: matchingEntry.input,
                                     answer: matchingEntry.output,
-                                    confirmed: matchingEntry.confirmed
+                                    confirmed: matchingEntry.confirmed,
+                                    questionnaireId: matchingEntry.questionnaireId
                                 });
                             }
                         }
                         
-                        console.log(`Found ${results.length}/${questionTexts.length} results`);
+                        console.log(`Found ${results.length}/${questionTexts.length} results for questionnaire ${this.appliedQuestionnaireId}`);
                         this.questionnaireResults = results;
                         
                         if (results.length === 0) {
                             console.error("No matching results found", {
                                 expectedQuestions: questionTexts,
-                                historyInputs: sortedHistory.slice(0, 5).map(h => h.input)
+                                questionnaireId: this.appliedQuestionnaireId,
+                                historyInputs: sortedHistory.slice(0, 5).map(h => ({ 
+                                    input: h.input, 
+                                    qId: h.questionnaireId 
+                                }))
                             });
                         }
                     } else {
-                        console.error("Invalid history response", historyResponse);
+                        console.error("Invalid history response structure", historyResponse);
                     }
                     
                     this.$notify({
@@ -246,16 +273,29 @@
                 }
             },
             async loadQuestionnaireHistory(questions) {
-                // Load questionnaire results from document history
+                // Load questionnaire results from document history (SignalR handler)
                 const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
                 
                 const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
-                if (historyResponse.error || !historyResponse.data) {
+                if (historyResponse.error) {
                     console.error("Failed to load history", historyResponse.error);
                     return;
                 }
                 
-                const sortedHistory = [...historyResponse.data].sort((a, b) => {
+                // Handle both .data and .data.value structures
+                let historyData = null;
+                if (historyResponse.data && historyResponse.data.value && Array.isArray(historyResponse.data.value)) {
+                    historyData = historyResponse.data.value;
+                } else if (historyResponse.data && Array.isArray(historyResponse.data)) {
+                    historyData = historyResponse.data;
+                }
+                
+                if (!historyData) {
+                    console.error("Invalid history data structure");
+                    return;
+                }
+                
+                const sortedHistory = [...historyData].sort((a, b) => {
                     const dateA = new Date(a.created || a.createdAt || 0);
                     const dateB = new Date(b.created || b.createdAt || 0);
                     return dateB - dateA;
@@ -266,13 +306,16 @@
                     if (!questionText) continue;
                     const matchingEntry = sortedHistory.find(item => {
                         const itemInput = item.input?.trim();
-                        return itemInput && itemInput === questionText;
+                        const textMatches = itemInput && itemInput === questionText;
+                        const idMatches = !item.questionnaireId || item.questionnaireId === this.appliedQuestionnaireId;
+                        return textMatches && idMatches;
                     });
                     if (matchingEntry) {
                         results.push({
                             question: matchingEntry.input,
                             answer: matchingEntry.output,
-                            confirmed: matchingEntry.confirmed
+                            confirmed: matchingEntry.confirmed,
+                            questionnaireId: matchingEntry.questionnaireId
                         });
                     }
                 }
@@ -535,8 +578,8 @@
     }
 
     .results-section {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
         border-bottom: 1px solid #e0e0e0;
     }
 
@@ -545,6 +588,7 @@
         flex-direction: column;
         gap: 0.75rem;
         margin-top: 0.75rem;
+        margin-bottom: 1.5rem;
     }
 
     .result-card {
