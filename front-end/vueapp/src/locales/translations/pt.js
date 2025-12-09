@@ -584,6 +584,7 @@
         formFlow: {
             progressFlowSuccess: "Fluxo inserido com sucesso",
             progressFlowFail: "Não foi possível inserir fluxo",
+            progressFlowUpdateFail: "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
             editFlowNodeSuccess: "Nodo editado com sucesso",
             editFlowNodeFail: "Falha ao editar o nodo",
             connectorWorkflowFail: "Conector do workflow não respondeu. Verifique a URL e a chave da API da ferramenta",

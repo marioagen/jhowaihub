@@ -618,6 +618,7 @@
         formFlow: {
             progressFlowSuccess: "Flow inserted successfully",
             progressFlowFail: "Failed to insert flow",
+            progressFlowUpdateFail: "Failed to update flow. Flow already contains output data for tools.",
             editFlowNodeSuccess: "Node edited successfully",
             editFlowNodeFail: "Failed to edit node",
             connectorWorkflowFail: "Workflow connector did not respond. Check tool URL and API key",
