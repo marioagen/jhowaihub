@@ -1,7 +1,6 @@
 <template>
     <div class="step-analysis-container">
         <doc-chat :document-id="documentId"
-                  @question-sent="handleQuestionSent"
                   v-if="documentData && documentData.canAnswer"/>
         <step-stepper v-if="documentData && documentData.steps && documentData.steps.length > 0"
                       :steps="documentData.steps"
@@ -73,10 +72,6 @@
             },
             handleStepChange(step) {
                 this.currentStepData = step;
-            },
-            handleQuestionSent() {
-                // Handler for question-sent event from doc-chat component
-                // Can be used for tracking or analytics if needed
             },
             handleFieldUpdate({ id, field, outputsJson }) {
                 let params = {}

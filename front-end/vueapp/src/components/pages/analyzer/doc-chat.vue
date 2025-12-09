@@ -100,7 +100,6 @@
                 required: true,
             },
         },
-        emits: ["question-sent"],
         data() {
             return {
                 isExpanded: false,
@@ -117,14 +116,12 @@
         methods: {
             toggleChat() {
                 this.isExpanded = !this.isExpanded;
-                // Clear all state when closing the chat panel
                 if (!this.isExpanded) {
                     this.clearResults();
-                    this.selectedQuestionnaireId = null; // Reset select dropdown
+                    this.selectedQuestionnaireId = null; 
                 }
             },
             clearResults() {
-                // Clear only the results area, keep the section open
                 this.questionnaireResults = [];
                 this.appliedQuestionnaireId = null;
             },
@@ -164,8 +161,7 @@
 
                 this.isApplyingQuestionnaire = true;
                 
-                try {
-                    // Get the questionnaire details to know which questions to display
+                try 
                     const questionnaireDetails = await QuizzesService.getQuizzById(this.selectedQuestionnaireId);
                     if (questionnaireDetails.error) {
                         throw new Error("Failed to load questionnaire details");
@@ -178,22 +174,17 @@
                         idQuestionnaire: this.selectedQuestionnaireId,
                     };
 
-                    // Apply questionnaire - backend processes synchronously and returns when done
                     const response = await DocumentServices.applyQuestionnaire(params);
                     if (response.error) {
                         throw new Error("Failed to apply questionnaire");
                     }
-                    
-                    // Store the applied questionnaire ID for filtering
+                   
                     this.appliedQuestionnaireId = this.selectedQuestionnaireId;
-                    
-                    // Backend has finished processing, fetch the results from history
                     const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
                     if (historyResponse.error) {
                         throw new Error("Failed to load document history");
                     }
-                    
-                    // Handle both .data and .data.value structures
+
                     let historyData = null;
                     if (historyResponse.data && historyResponse.data.value && Array.isArray(historyResponse.data.value)) {
                         historyData = historyResponse.data.value;
@@ -202,23 +193,18 @@
                     }
                     
                     if (historyData) {
-                        // Sort by date descending to get most recent entries
                         const sortedHistory = [...historyData].sort((a, b) => {
                             const dateA = new Date(a.created || a.createdAt || 0);
                             const dateB = new Date(b.created || b.createdAt || 0);
                             return dateB - dateA;
                         });
                         
-                        // Find matching entries for each question from THIS questionnaire
-                        // Filter by questionnaireId if available, otherwise use question text matching
                         const results = [];
                         for (const questionText of questionTexts) {
                             if (!questionText) continue;
                             const matchingEntry = sortedHistory.find(item => {
                                 const itemInput = item.input?.trim();
-                                // Match by question text AND optionally verify questionnaireId if available
                                 const textMatches = itemInput && itemInput === questionText;
-                                // If the history entry has questionnaireId, verify it matches
                                 const idMatches = !item.questionnaireId || item.questionnaireId === this.appliedQuestionnaireId;
                                 return textMatches && idMatches;
                             });
