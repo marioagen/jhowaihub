@@ -156,67 +156,31 @@
                         throw new Error("Failed to load questionnaire details");
                     }
                     const questions = questionnaireDetails.questions || [];
+                    const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
 
                     const params = {
                         idDocument: this.documentId,
                         idQuestionnaire: this.selectedQuestionnaireId,
                     };
 
-                    // Apply questionnaire - backend will process asynchronously
+                    console.log(`Applying questionnaire with ${questionTexts.length} questions`);
+
+                    // Apply questionnaire - backend processes synchronously and returns when done
                     const response = await DocumentServices.applyQuestionnaire(params);
                     if (response.error) {
                         throw new Error("Failed to apply questionnaire");
                     }
                     
-                    // Wait for SignalR event or fallback to fetching history
-                    await this.fetchQuestionnaireResults(questions);
+                    console.log("Backend completed, fetching results from history");
                     
-                    this.$notify({
-                        title: "analyze.title",
-                        message: "analyze.successApplyingQuestionnaire",
-                        variant: "success",
-                        icon: "CircleCheckBig",
-                    });
-                } catch (error) {
-                    console.error("Error applying questionnaire:", error);
-                    this.$notify({
-                        title: "analyze.title",
-                        message: "analyze.errorApplyingQuestionnaire",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
-                } finally {
-                    this.isApplyingQuestionnaire = false;
-                }
-            },
-            async fetchQuestionnaireResults(questions) {
-                // Fetch results from document history
-                // Backend saves Q&A to history as it processes each question
-                const maxAttempts = 20;
-                const intervalMs = 1000;
-                const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
-                
-                console.log(`Looking for ${questionTexts.length} questions:`, questionTexts);
-                
-                for (let attempt = 0; attempt < maxAttempts; attempt++) {
-                    await new Promise(resolve => setTimeout(resolve, intervalMs));
-                    
+                    // Backend has finished processing, fetch the results from history
                     const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
                     if (historyResponse.error) {
-                        console.warn(`Attempt ${attempt + 1} failed:`, historyResponse.error);
-                        continue;
+                        throw new Error("Failed to load document history");
                     }
                     
                     if (historyResponse.data && Array.isArray(historyResponse.data)) {
-                        // Log sample of history for debugging
-                        if (attempt === 0 && historyResponse.data.length > 0) {
-                            console.log(`History has ${historyResponse.data.length} entries. Sample:`, 
-                                historyResponse.data.slice(0, 3).map(h => ({ 
-                                    input: h.input, 
-                                    created: h.created || h.createdAt 
-                                }))
-                            );
-                        }
+                        console.log(`History loaded with ${historyResponse.data.length} entries`);
                         
                         // Sort by date descending to get most recent entries
                         const sortedHistory = [...historyResponse.data].sort((a, b) => {
@@ -242,39 +206,79 @@
                             }
                         }
                         
-                        // Update results immediately as they come in
-                        if (results.length > 0) {
-                            this.questionnaireResults = results;
-                            console.log(`✓ Found ${results.length}/${questionTexts.length} results after ${attempt + 1} attempts`);
-                        }
+                        console.log(`Found ${results.length}/${questionTexts.length} results`);
+                        this.questionnaireResults = results;
                         
-                        // Stop if we found all expected results
-                        if (results.length >= questionTexts.length) {
-                            console.log(`✓ All ${results.length} results found!`);
-                            return;
+                        if (results.length === 0) {
+                            console.error("No matching results found", {
+                                expectedQuestions: questionTexts,
+                                historyInputs: sortedHistory.slice(0, 5).map(h => h.input)
+                            });
                         }
+                    } else {
+                        console.error("Invalid history response", historyResponse);
                     }
-                }
-                
-                // If we didn't find all results, log detailed info
-                if (this.questionnaireResults.length === 0) {
-                    console.error("❌ No results found after all attempts", {
-                        expectedQuestions: questionTexts,
-                        documentId: this.documentId
+                    
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.successApplyingQuestionnaire",
+                        variant: "success",
+                        icon: "CircleCheckBig",
                     });
-                } else {
-                    console.warn(`⚠️ Partial results: ${this.questionnaireResults.length}/${questionTexts.length}`, {
-                        found: this.questionnaireResults.map(r => r.question),
-                        expected: questionTexts
+                } catch (error) {
+                    console.error("Error applying questionnaire:", error);
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.errorApplyingQuestionnaire",
+                        variant: "danger",
+                        icon: "CircleX",
                     });
+                } finally {
+                    this.isApplyingQuestionnaire = false;
                 }
             },
             handleQuestionnaireCompleted(data) {
                 // SignalR event handler for when backend completes questionnaire processing
                 console.log("SignalR: Questionnaire completed", data);
                 if (data.documentId === this.documentId) {
-                    this.fetchQuestionnaireResults(data.questions || []);
+                    // Reload the results when SignalR notification is received
+                    this.loadQuestionnaireHistory(data.questions || []);
                 }
+            },
+            async loadQuestionnaireHistory(questions) {
+                // Load questionnaire results from document history
+                const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
+                
+                const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
+                if (historyResponse.error || !historyResponse.data) {
+                    console.error("Failed to load history", historyResponse.error);
+                    return;
+                }
+                
+                const sortedHistory = [...historyResponse.data].sort((a, b) => {
+                    const dateA = new Date(a.created || a.createdAt || 0);
+                    const dateB = new Date(b.created || b.createdAt || 0);
+                    return dateB - dateA;
+                });
+                
+                const results = [];
+                for (const questionText of questionTexts) {
+                    if (!questionText) continue;
+                    const matchingEntry = sortedHistory.find(item => {
+                        const itemInput = item.input?.trim();
+                        return itemInput && itemInput === questionText;
+                    });
+                    if (matchingEntry) {
+                        results.push({
+                            question: matchingEntry.input,
+                            answer: matchingEntry.output,
+                            confirmed: matchingEntry.confirmed
+                        });
+                    }
+                }
+                
+                this.questionnaireResults = results;
+                console.log(`SignalR: Loaded ${results.length}/${questionTexts.length} results`);
             },
             async sendQuestion() {
                 if (!this.question.trim()) return;
