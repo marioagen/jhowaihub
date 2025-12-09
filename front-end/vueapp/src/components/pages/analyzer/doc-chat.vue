@@ -92,7 +92,6 @@
 <script>
     import DocumentServices from "@/services/documents/DocumentsServices";
     import QuizzesService from "@/services/quizzes/QuizzesService";
-    import signalRService from "@/services/signalR/signalRServices.js";
     export default {
         name: "DocChat",
         props: {
@@ -112,8 +111,7 @@
                 selectedQuestionnaireId: null,
                 isApplyingQuestionnaire: false,
                 questionnaireResults: [],
-                appliedQuestionnaireId: null, // Track which questionnaire was applied
-                signalrEventQuestionnaireCompleted: "QuestionnaireCompleted",
+                appliedQuestionnaireId: null,
             };
         },
         methods: {
@@ -180,15 +178,11 @@
                         idQuestionnaire: this.selectedQuestionnaireId,
                     };
 
-                    console.log(`Applying questionnaire with ${questionTexts.length} questions`);
-
                     // Apply questionnaire - backend processes synchronously and returns when done
                     const response = await DocumentServices.applyQuestionnaire(params);
                     if (response.error) {
                         throw new Error("Failed to apply questionnaire");
                     }
-                    
-                    console.log("Backend completed, fetching results from history");
                     
                     // Store the applied questionnaire ID for filtering
                     this.appliedQuestionnaireId = this.selectedQuestionnaireId;
@@ -203,10 +197,8 @@
                     let historyData = null;
                     if (historyResponse.data && historyResponse.data.value && Array.isArray(historyResponse.data.value)) {
                         historyData = historyResponse.data.value;
-                        console.log(`History loaded with ${historyData.length} entries (from .value)`);
                     } else if (historyResponse.data && Array.isArray(historyResponse.data)) {
                         historyData = historyResponse.data;
-                        console.log(`History loaded with ${historyData.length} entries (from .data)`);
                     }
                     
                     if (historyData) {
@@ -240,21 +232,7 @@
                             }
                         }
                         
-                        console.log(`Found ${results.length}/${questionTexts.length} results for questionnaire ${this.appliedQuestionnaireId}`);
                         this.questionnaireResults = results;
-                        
-                        if (results.length === 0) {
-                            console.error("No matching results found", {
-                                expectedQuestions: questionTexts,
-                                questionnaireId: this.appliedQuestionnaireId,
-                                historyInputs: sortedHistory.slice(0, 5).map(h => ({ 
-                                    input: h.input, 
-                                    qId: h.questionnaireId 
-                                }))
-                            });
-                        }
-                    } else {
-                        console.error("Invalid history response structure", historyResponse);
                     }
                     
                     this.$notify({
@@ -264,7 +242,6 @@
                         icon: "CircleCheckBig",
                     });
                 } catch (error) {
-                    console.error("Error applying questionnaire:", error);
                     this.$notify({
                         title: "analyze.title",
                         message: "analyze.errorApplyingQuestionnaire",
@@ -274,65 +251,6 @@
                 } finally {
                     this.isApplyingQuestionnaire = false;
                 }
-            },
-            handleQuestionnaireCompleted(data) {
-                // SignalR event handler for when backend completes questionnaire processing
-                console.log("SignalR: Questionnaire completed", data);
-                if (data.documentId === this.documentId) {
-                    // Reload the results when SignalR notification is received
-                    this.loadQuestionnaireHistory(data.questions || []);
-                }
-            },
-            async loadQuestionnaireHistory(questions) {
-                // Load questionnaire results from document history (SignalR handler)
-                const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
-                
-                const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
-                if (historyResponse.error) {
-                    console.error("Failed to load history", historyResponse.error);
-                    return;
-                }
-                
-                // Handle both .data and .data.value structures
-                let historyData = null;
-                if (historyResponse.data && historyResponse.data.value && Array.isArray(historyResponse.data.value)) {
-                    historyData = historyResponse.data.value;
-                } else if (historyResponse.data && Array.isArray(historyResponse.data)) {
-                    historyData = historyResponse.data;
-                }
-                
-                if (!historyData) {
-                    console.error("Invalid history data structure");
-                    return;
-                }
-                
-                const sortedHistory = [...historyData].sort((a, b) => {
-                    const dateA = new Date(a.created || a.createdAt || 0);
-                    const dateB = new Date(b.created || b.createdAt || 0);
-                    return dateB - dateA;
-                });
-                
-                const results = [];
-                for (const questionText of questionTexts) {
-                    if (!questionText) continue;
-                    const matchingEntry = sortedHistory.find(item => {
-                        const itemInput = item.input?.trim();
-                        const textMatches = itemInput && itemInput === questionText;
-                        const idMatches = !item.questionnaireId || item.questionnaireId === this.appliedQuestionnaireId;
-                        return textMatches && idMatches;
-                    });
-                    if (matchingEntry) {
-                        results.push({
-                            question: matchingEntry.input,
-                            answer: matchingEntry.output,
-                            confirmed: matchingEntry.confirmed,
-                            questionnaireId: matchingEntry.questionnaireId
-                        });
-                    }
-                }
-                
-                this.questionnaireResults = results;
-                console.log(`SignalR: Loaded ${results.length}/${questionTexts.length} results`);
             },
             async sendQuestion() {
                 if (!this.question.trim()) return;
@@ -371,23 +289,8 @@
                 this.output = ''
             },
         },
-        async mounted() {
+        mounted() {
             this.loadQuestionnaires();
-            
-            // Setup SignalR connection for real-time updates
-            try {
-                await signalRService.startConnection();
-                signalRService.on(this.signalrEventQuestionnaireCompleted, this.handleQuestionnaireCompleted);
-                console.log("SignalR connected for questionnaire updates");
-            } catch (error) {
-                console.warn("SignalR connection failed, will use polling fallback", error);
-            }
-        },
-        beforeUnmount() {
-            // Clean up SignalR listeners
-            if (signalRService.connection) {
-                signalRService.off(this.signalrEventQuestionnaireCompleted);
-            }
         },
     };
 </script>
