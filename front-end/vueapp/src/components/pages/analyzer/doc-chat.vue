@@ -140,15 +140,34 @@
                 }
 
                 this.isApplyingQuestionnaire = true;
-                const params = {
-                    idDocument: this.documentId,
-                    idQuestionnaire: this.selectedQuestionnaireId,
-                };
-
+                
                 try {
+                    // Get the questionnaire details to know which questions to display
+                    const questionnaireDetails = await QuizzesService.getQuizzById(this.selectedQuestionnaireId);
+                    const questions = questionnaireDetails.questions || [];
+
+                    const params = {
+                        idDocument: this.documentId,
+                        idQuestionnaire: this.selectedQuestionnaireId,
+                    };
+
                     const response = await DocumentServices.applyQuestionnaire(params);
                     if (response && response.data) {
-                        this.questionnaireResults = response.data;
+                        // Fetch the document history to get the Q&A results
+                        const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
+                        if (historyResponse && historyResponse.data) {
+                            // Filter history to only show items from this questionnaire
+                            const questionTexts = questions.map(q => q.description);
+                            const filteredHistory = historyResponse.data.filter(item => 
+                                questionTexts.includes(item.input)
+                            );
+                            
+                            this.questionnaireResults = filteredHistory.map(item => ({
+                                question: item.input,
+                                answer: item.output,
+                                confirmed: item.confirmed
+                            }));
+                        }
                         this.$notify({
                             title: "analyze.title",
                             message: "analyze.successApplyingQuestionnaire",
