@@ -74,6 +74,10 @@
             handleStepChange(step) {
                 this.currentStepData = step;
             },
+            handleQuestionSent() {
+                // Handler for question-sent event from doc-chat component
+                // Can be used for tracking or analytics if needed
+            },
             handleFieldUpdate({ id, field, outputsJson }) {
                 let params = {}
                 if (outputsJson) {

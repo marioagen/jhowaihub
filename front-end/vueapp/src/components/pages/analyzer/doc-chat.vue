@@ -196,6 +196,8 @@
                 const intervalMs = 1000;
                 const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
                 
+                console.log(`Looking for ${questionTexts.length} questions:`, questionTexts);
+                
                 for (let attempt = 0; attempt < maxAttempts; attempt++) {
                     await new Promise(resolve => setTimeout(resolve, intervalMs));
                     
@@ -206,6 +208,16 @@
                     }
                     
                     if (historyResponse.data && Array.isArray(historyResponse.data)) {
+                        // Log sample of history for debugging
+                        if (attempt === 0 && historyResponse.data.length > 0) {
+                            console.log(`History has ${historyResponse.data.length} entries. Sample:`, 
+                                historyResponse.data.slice(0, 3).map(h => ({ 
+                                    input: h.input, 
+                                    created: h.created || h.createdAt 
+                                }))
+                            );
+                        }
+                        
                         // Sort by date descending to get most recent entries
                         const sortedHistory = [...historyResponse.data].sort((a, b) => {
                             const dateA = new Date(a.created || a.createdAt || 0);
@@ -233,22 +245,28 @@
                         // Update results immediately as they come in
                         if (results.length > 0) {
                             this.questionnaireResults = results;
-                            console.log(`Found ${results.length}/${questionTexts.length} results after ${attempt + 1} attempts`);
+                            console.log(`✓ Found ${results.length}/${questionTexts.length} results after ${attempt + 1} attempts`);
                         }
                         
                         // Stop if we found all expected results
                         if (results.length >= questionTexts.length) {
-                            console.log(`✓ All ${results.length} results found`);
+                            console.log(`✓ All ${results.length} results found!`);
                             return;
                         }
                     }
                 }
                 
-                // If we didn't find all results, log what we got
+                // If we didn't find all results, log detailed info
                 if (this.questionnaireResults.length === 0) {
-                    console.warn("No results found after all attempts");
+                    console.error("❌ No results found after all attempts", {
+                        expectedQuestions: questionTexts,
+                        documentId: this.documentId
+                    });
                 } else {
-                    console.log(`Partial results: ${this.questionnaireResults.length}/${questionTexts.length}`);
+                    console.warn(`⚠️ Partial results: ${this.questionnaireResults.length}/${questionTexts.length}`, {
+                        found: this.questionnaireResults.map(r => r.question),
+                        expected: questionTexts
+                    });
                 }
             },
             handleQuestionnaireCompleted(data) {
