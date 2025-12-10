@@ -129,5 +129,29 @@ export default {
                     error: error,
                 };
             });
+    },
+    async applyQuestionnaire(params) {
+        return await api
+            .post("/Document/InputQuestionnaire", params)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
+    async getDocumentHistory(id) {
+        return await api
+            .get(`/Document/History/${id}`)
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
     }
 };

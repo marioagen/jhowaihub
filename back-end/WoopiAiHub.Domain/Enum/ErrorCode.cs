@@ -12,5 +12,6 @@
         NoCreditsAvailable = 7,
         RefitApiError = 8,
         KeyVaultError = 9,
+        ExistingStepToolOutput = 10
     }
 }
