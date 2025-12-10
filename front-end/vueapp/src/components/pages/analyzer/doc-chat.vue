@@ -61,7 +61,8 @@
                     rows="4" @input="handleInput"></textarea>
 
                 <button v-if="question.trim()" class="send-button" @click="sendQuestion" :disabled="isSending">
-                    <i class="fas fa-paper-plane"></i>
+                    <LucideIcon icon="RefreshCcw" :size="17" :class="{ 'animate-spin': isSending }" v-if="isSending" />
+                    <LucideIcon icon="SendHorizontal" :size="17" v-if="!isSending" />
                     {{ $t("analyze.sendQuestion") }}
                 </button>
                 <div v-if="output != ''">
@@ -405,7 +406,6 @@ export default {
 
 .send-button:disabled {
     opacity: 0.6;
-    cursor: not-allowed;
 }
 
 .questionnaire-section {
@@ -615,6 +615,21 @@ export default {
 
     .result-card {
         padding: 0.75rem;
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+    color: white;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
     }
 }
 </style>
