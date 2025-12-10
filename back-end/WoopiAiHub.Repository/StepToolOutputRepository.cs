@@ -35,13 +35,13 @@ namespace WoopiAiHub.Repository
         /// <param name="stepToolId">The identifier of the step tool whose value is to be retrieved.</param>
         /// <returns>A string representing the value associated with the specified step tool identifier,  or <see
         /// langword="null"/> if no matching record is found.</returns>
-        public async Task<string> FindByStepToolId(int stepToolId, 
-                                                   int cardId)
+        public async Task<string> FindByStepToolId(int stepToolId,
+            int cardId)
         {
             var output = await _context.StepToolOutputs.Where(u => u.StepToolId.Equals(stepToolId) &&
                                                                    u.CardId.Equals(cardId))
-                                                       .Select(v => v.Value)
-                                                       .FirstOrDefaultAsync();
+                .Select(v => v.Value)
+                .FirstOrDefaultAsync();
             return output ?? string.Empty;
         }
 
@@ -54,13 +54,13 @@ namespace WoopiAiHub.Repository
         public async Task<List<StepToolOutput>> FindAllByStepToolListIdsAsync(IEnumerable<int> stepToolIds, int cardId)
         {
             return await _context.StepToolOutputs
-                                 .AsNoTracking()
-                                 .Include(sto => sto.StepTool)
-                                    .ThenInclude(st => st.Tool)
-                                        .ThenInclude(t => t!.ToolType)
-                                 .Where(u => stepToolIds!.Contains(u.StepToolId) && 
-                                             u.CardId.Equals(cardId))
-                                 .ToListAsync();
+                .AsNoTracking()
+                .Include(sto => sto.StepTool)
+                .ThenInclude(st => st.Tool)
+                .ThenInclude(t => t!.ToolType)
+                .Where(u => stepToolIds!.Contains(u.StepToolId) &&
+                            u.CardId.Equals(cardId))
+                .ToListAsync();
         }
 
         /// <summary>
@@ -93,8 +93,22 @@ namespace WoopiAiHub.Repository
             return await _context.StepToolOutputs
                 .Where(o => o.CardId == cardId)
                 .Include(o => o.StepTool)
-                    .ThenInclude(st => st.Tool)
+                .ThenInclude(st => st.Tool)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Checks if any of the specified StepTools have associated output data.
+        /// </summary>
+        /// <param name="stepToolIds">The collection of StepTool IDs to check.</param>
+        /// <returns>True if any StepTool has outputs; otherwise, false.</returns>
+        public async Task<bool> HasOutputsByStepToolIds(IEnumerable<int> stepToolIds)
+        {
+            if (!stepToolIds?.Any() ?? true)
+                return false;
+
+            return await _context.StepToolOutputs
+                .AnyAsync(o => stepToolIds!.Contains(o.StepToolId));
         }
     }
 }

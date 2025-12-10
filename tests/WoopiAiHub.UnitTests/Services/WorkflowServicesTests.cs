@@ -668,7 +668,6 @@ namespace WoopiAiHub.UnitTests.Services
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindPhase1ById(1));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
         }
-
         [Fact(DisplayName = "UpdatePhase3 success")]
         [Trait("UpdatePhase3", "Success")]
         public async Task UpdatePhase3_WorkflowExists_UpdatesSuccessfully()
@@ -678,7 +677,7 @@ namespace WoopiAiHub.UnitTests.Services
             var stepTools = WorkflowFixture.FindValidStepToolWithDependencies();
             var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
             var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            var stepToolDependencyDto = new StepToolOutputDependencyDto{ StepOrder = 1, StepToolOrder = 1};
+            var stepToolDependencyDto = new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 };
             stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto> { stepToolDependencyDto };
             var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
             var workflowPhase3Dto = new WorkflowPhase3Dto
@@ -716,6 +715,54 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.AtLeastOnce);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should throw AppException when existing StepTools output")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task UpdatePhase3_ExistingStepToolsOutput_ThrowsAppException()
+        {
+            // Arrange
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var stepTools = WorkflowFixture.FindValidStepToolWithDependencies();
+            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            var stepToolDependencyDto = new StepToolOutputDependencyDto{ StepOrder = 1, StepToolOrder = 1};
+            stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto> { stepToolDependencyDto };
+            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto
+                    {
+                        Id = stepDto.Id,
+                        Order = stepDto.Order,
+                        StepTools = stepToolsList
+                }
+                }
+            };
+
+            var workflow = WorkflowFixture.FindValidWorkflow();
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase3Dto.WorkflowId))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolOutputRepositoryMock.Setup(sto => sto.HasOutputsByStepToolIds(It.IsAny<List<int>>())).ReturnsAsync(true);
+
+            // Act / Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+            Assert.Equal(ErrorCode.ExistingStepToolOutput, exception.ErrorCode);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _stepToolOutputRepositoryMock.Verify(sto => sto.HasOutputsByStepToolIds(It.IsAny<List<int>>()), Times.Once);
         }
 
         [Fact(DisplayName = "CreatePhase1 success")]
