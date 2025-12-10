@@ -57,7 +57,6 @@
             </div>
 
             <div class="chat-input-section">
-                <label class="input-label">{{ $t("analyze.askAI") }}</label>
                 <textarea v-model="question" class="chat-textarea" :placeholder="$t('analyze.typeYourQuestion')"
                     rows="4" @input="handleInput"></textarea>
 

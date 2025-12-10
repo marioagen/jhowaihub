@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
@@ -8,6 +9,7 @@ namespace WoopiAiHub.Repository
     public class CardRepository : ICardRepository
     {
         private readonly ApplicationDbContext _context;
+
         public CardRepository(ApplicationDbContext context)
         {
             _context = context;
@@ -20,7 +22,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<bool> ExistsStepsInUse(ICollection<int> ids)
         {
-           return await _context.Cards.Where(a => ids.Contains(a.StepId)).AnyAsync();
+            return await _context.Cards.Where(a => ids.Contains(a.StepId)).AnyAsync();
         }
 
         /// <summary>
@@ -31,25 +33,25 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindById(int id)
         {
             return await _context.Cards
-                                 .Where(c => c.Id == id)
-                                 .Include(d => d.Document)
-                                 .Include(s => s.Step)
-                                    .ThenInclude(p => p!.Profile)
-                                 .Include(s => s.Step)
-                                    .ThenInclude(w => w!.Workflow)
-                                    .ThenInclude(w => w!.Teams)
-                                    .ThenInclude(w => w!.Users)
-                                    .Include(s => s.Step)
-                                    .ThenInclude(w => w!.Workflow)
-                                        .ThenInclude(ws => ws!.Steps)
-                                            .ThenInclude(st => st.StepTools)
-                                                .ThenInclude(t => t.Tool)
-                                                    .ThenInclude(tt => tt!.ToolType)
-                                 .Include(c => c.Outputs)
-                                    .ThenInclude(o => o.StepTool)
-                                        .ThenInclude(st => st!.Tool)
-                                            .ThenInclude(t => t!.ToolType)
-                                 .FirstOrDefaultAsync();
+                .Where(c => c.Id == id)
+                .Include(d => d.Document)
+                .Include(s => s.Step)
+                .ThenInclude(p => p!.Profile)
+                .Include(s => s.Step)
+                .ThenInclude(w => w!.Workflow)
+                .ThenInclude(w => w!.Teams)
+                .ThenInclude(w => w!.Users)
+                .Include(s => s.Step)
+                .ThenInclude(w => w!.Workflow)
+                .ThenInclude(ws => ws!.Steps)
+                .ThenInclude(st => st.StepTools)
+                .ThenInclude(t => t.Tool)
+                .ThenInclude(tt => tt!.ToolType)
+                .Include(c => c.Outputs)
+                .ThenInclude(o => o.StepTool)
+                .ThenInclude(st => st!.Tool)
+                .ThenInclude(t => t!.ToolType)
+                .FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -75,10 +77,11 @@ namespace WoopiAiHub.Repository
             if (await cards.AnyAsync())
             {
                 await cards.ExecuteUpdateAsync(b => b
-                           .SetProperty(u => u.Enable, false));
+                    .SetProperty(u => u.Enable, false));
 
                 return await _context.SaveChangesAsync() > 0;
             }
+
             return false;
         }
 
@@ -109,9 +112,9 @@ namespace WoopiAiHub.Repository
             return await _context.Cards
                 .Where(c => c.DocumentId == documentId && c.Enable)
                 .Include(c => c.Executions)
-                    .ThenInclude(e => e.StepTool)
-                        .ThenInclude(st => st!.Tool)
-                            .ThenInclude(t => t!.ToolType)
+                .ThenInclude(e => e.StepTool)
+                .ThenInclude(st => st!.Tool)
+                .ThenInclude(t => t!.ToolType)
                 .OrderByDescending(c => c.Created)
                 .FirstOrDefaultAsync();
         }
@@ -127,10 +130,28 @@ namespace WoopiAiHub.Repository
                 .Where(c => c.DocumentId == documentId && c.Enable)
                 .Include(c => c.Step)
                 .Include(c => c.Outputs)
-                    .ThenInclude(o => o.StepTool)
-                        .ThenInclude(st => st!.Tool)
+                .ThenInclude(o => o.StepTool)
+                .ThenInclude(st => st!.Tool)
                 .OrderBy(c => c.Step!.Order)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Finds card header info (CardName and WorkflowName) by cardId.
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
+        public async Task<CardHeaderDto?> FindCardHeaderInfoAsync(int cardId)
+        {
+            return await _context.Cards
+                .AsNoTracking()
+                .Where(c => c.Id == cardId)
+                .Select(c => new CardHeaderDto
+                {
+                    CardName = c.Name,
+                    WorkflowName = c.Step != null && c.Step.Workflow != null ? c.Step.Workflow.Name : string.Empty
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }
