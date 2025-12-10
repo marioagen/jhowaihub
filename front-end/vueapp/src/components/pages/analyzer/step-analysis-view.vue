@@ -1,7 +1,6 @@
 <template>
     <div class="step-analysis-container">
         <doc-chat :document-id="documentId"
-                  @question-sent="handleQuestionSent"
                   v-if="documentData && documentData.canAnswer"/>
         <step-stepper v-if="documentData && documentData.steps && documentData.steps.length > 0"
                       :steps="documentData.steps"

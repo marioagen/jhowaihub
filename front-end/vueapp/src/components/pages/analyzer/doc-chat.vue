@@ -14,6 +14,52 @@
                 </button>
             </div>
 
+            <div class="questionnaire-section">
+                <label class="input-label">{{ $t("analyze.questionnaireToApply") }}</label>
+                <div class="questionnaire-controls">
+                    <select v-model="selectedQuestionnaireId" 
+                            class="questionnaire-select">
+                        <option :value="null">{{ $t("analyze.selectQuestionnaire") }}</option>
+                        <option v-for="questionnaire in questionnaires" 
+                                :key="questionnaire.id" 
+                                :value="questionnaire.id">
+                            {{ questionnaire.title }}
+                        </option>
+                    </select>
+                    <button class="apply-button"
+                            @click="applyQuestionnaire"
+                            :disabled="!selectedQuestionnaireId || isApplyingQuestionnaire">
+                        <div v-if="isApplyingQuestionnaire" class="spinner-border spinner-border-sm text-light" role="status"></div>
+                        <i v-else class="fas fa-arrow-up"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="questionnaireResults.length > 0" class="results-section">
+                <div class="results-header">
+                    <label class="input-label">{{ $t("analyze.questionnaireResults") }}</label>
+                    <button class="close-results-button" @click="clearResults" :title="$t('analyze.closeResults')">
+                        <i class="fas fa-times"></i>
+                        {{ $t("analyze.closeResults") }}
+                    </button>
+                </div>
+                <div class="results-list">
+                    <div v-for="(result, index) in questionnaireResults" 
+                         :key="index" 
+                         class="result-card">
+                        <div class="result-question">
+                            <strong>{{ result.question }}</strong>
+                        </div>
+                        <div class="result-answer">
+                            {{ result.answer }}
+                            <span v-if="result.confirmed" class="confirmed-badge">
+                                <i class="fas fa-check-circle"></i> {{ $t("analyze.confirmed") }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="chat-input-section">
                 <label class="input-label">{{ $t("analyze.askAI") }}</label>
                 <textarea v-model="question"
@@ -45,6 +91,7 @@
 
 <script>
     import DocumentServices from "@/services/documents/DocumentsServices";
+    import QuizzesService from "@/services/quizzes/QuizzesService";
     export default {
         name: "DocChat",
         props: {
@@ -53,20 +100,143 @@
                 required: true,
             },
         },
-        emits: ["question-sent"],
         data() {
             return {
                 isExpanded: false,
                 question: "",
                 isSending: false,
                 output: "",
+                questionnaires: [],
+                selectedQuestionnaireId: null,
+                isApplyingQuestionnaire: false,
+                questionnaireResults: [],
+                appliedQuestionnaireId: null,
             };
         },
         methods: {
             toggleChat() {
                 this.isExpanded = !this.isExpanded;
+                if (!this.isExpanded) {
+                    this.clearResults();
+                    this.selectedQuestionnaireId = null; 
+                }
+            },
+            clearResults() {
+                this.questionnaireResults = [];
+                this.appliedQuestionnaireId = null;
             },
             handleInput() {
+            },
+            async loadQuestionnaires() {
+                try {
+                    const result = await QuizzesService.getQuizzes({ 
+                        page: 1, 
+                        pageSize: 100,
+                        search: "",
+                        isAscending: false,
+                        colType: 2
+                    });
+                    if (result.content) {
+                        this.questionnaires = result.content;
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.errorLoadingQuestionnaires",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                }
+            },
+            async applyQuestionnaire() {
+                if (!this.selectedQuestionnaireId) {
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.pleaseSelectQuestionnaire",
+                        variant: "warning",
+                        icon: "AlertTriangle",
+                    });
+                    return;
+                }
+
+                this.isApplyingQuestionnaire = true;
+                
+                try 
+                    const questionnaireDetails = await QuizzesService.getQuizzById(this.selectedQuestionnaireId);
+                    if (questionnaireDetails.error) {
+                        throw new Error("Failed to load questionnaire details");
+                    }
+                    const questions = questionnaireDetails.questions || [];
+                    const questionTexts = questions.map(q => q.description?.trim()).filter(q => q);
+
+                    const params = {
+                        idDocument: this.documentId,
+                        idQuestionnaire: this.selectedQuestionnaireId,
+                    };
+
+                    const response = await DocumentServices.applyQuestionnaire(params);
+                    if (response.error) {
+                        throw new Error("Failed to apply questionnaire");
+                    }
+                   
+                    this.appliedQuestionnaireId = this.selectedQuestionnaireId;
+                    const historyResponse = await DocumentServices.getDocumentHistory(this.documentId);
+                    if (historyResponse.error) {
+                        throw new Error("Failed to load document history");
+                    }
+
+                    let historyData = null;
+                    if (historyResponse.data && historyResponse.data.value && Array.isArray(historyResponse.data.value)) {
+                        historyData = historyResponse.data.value;
+                    } else if (historyResponse.data && Array.isArray(historyResponse.data)) {
+                        historyData = historyResponse.data;
+                    }
+                    
+                    if (historyData) {
+                        const sortedHistory = [...historyData].sort((a, b) => {
+                            const dateA = new Date(a.created || a.createdAt || 0);
+                            const dateB = new Date(b.created || b.createdAt || 0);
+                            return dateB - dateA;
+                        });
+                        
+                        const results = [];
+                        for (const questionText of questionTexts) {
+                            if (!questionText) continue;
+                            const matchingEntry = sortedHistory.find(item => {
+                                const itemInput = item.input?.trim();
+                                const textMatches = itemInput && itemInput === questionText;
+                                const idMatches = !item.questionnaireId || item.questionnaireId === this.appliedQuestionnaireId;
+                                return textMatches && idMatches;
+                            });
+                            if (matchingEntry) {
+                                results.push({
+                                    question: matchingEntry.input,
+                                    answer: matchingEntry.output,
+                                    confirmed: matchingEntry.confirmed,
+                                    questionnaireId: matchingEntry.questionnaireId
+                                });
+                            }
+                        }
+                        
+                        this.questionnaireResults = results;
+                    }
+                    
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.successApplyingQuestionnaire",
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
+                } catch (error) {
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.errorApplyingQuestionnaire",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isApplyingQuestionnaire = false;
+                }
             },
             async sendQuestion() {
                 if (!this.question.trim()) return;
@@ -104,6 +274,9 @@
             clear() {
                 this.output = ''
             },
+        },
+        mounted() {
+            this.loadQuestionnaires();
         },
     };
 </script>
@@ -245,6 +418,171 @@
         cursor: not-allowed;
     }
 
+    .questionnaire-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .questionnaire-controls {
+        display: flex;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .questionnaire-select {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+    }
+
+    .questionnaire-select:focus {
+        outline: none;
+        border-color: #0073e6;
+    }
+
+    .apply-button {
+        width: 48px;
+        height: 48px;
+        background: #0073e6;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .apply-button:hover:not(:disabled) {
+        background: #005bb5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
+    }
+
+    .apply-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .results-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .close-results-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        color: #666;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .close-results-button:hover {
+        background: #e9ecef;
+        border-color: #ccc;
+        color: #333;
+    }
+
+    .close-results-button i {
+        font-size: 0.75rem;
+    }
+
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+        margin-bottom: 1.5rem;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    /* Scrollbar styling */
+    .results-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .results-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .results-list::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+
+    .results-list::-webkit-scrollbar-thumb:hover {
+        background: #999;
+    }
+
+    .result-card {
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 1rem;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .result-card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-question {
+        color: #333;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .result-answer {
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .confirmed-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-left: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
     @media (max-width: 768px) {
         .chat-panel {
             padding: 0.75rem;
@@ -258,6 +596,35 @@
         .send-button {
             padding: 0.65rem 1.25rem;
             font-size: 0.9rem;
+        }
+
+        .questionnaire-select {
+            font-size: 0.85rem;
+            padding: 0.6rem;
+        }
+
+        .apply-button {
+            width: 44px;
+            height: 44px;
+        }
+
+        .results-list {
+            max-height: 50vh;
+        }
+
+        .results-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .close-results-button {
+            align-self: stretch;
+            justify-content: center;
+        }
+
+        .result-card {
+            padding: 0.75rem;
         }
     }
 </style>
