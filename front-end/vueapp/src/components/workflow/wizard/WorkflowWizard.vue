@@ -37,15 +37,10 @@
                 <div class="col-12">
                     <div class="main-div shadow-sm">
                         <!-- Phase 1: Name and Teams -->
-                        <Phase1NameAndTeams v-if="currentPhase === 1"
-                                            ref="phase1"
-                                            :initialData="phase1Data ?? null"
-                                            />
+                        <Phase1NameAndTeams v-if="currentPhase === 1" ref="phase1" :initialData="phase1Data ?? null" />
 
-                        <Phase2Steps v-if="currentPhase === 2"
-                                     ref="phase2"
-                                     :initialSteps="phase2Data?.steps ?? []"
-                                     :key="phase2Data?.steps.length"/>
+                        <Phase2Steps v-if="currentPhase === 2" ref="phase2" :initialSteps="phase2Data?.steps ?? []"
+                            :key="phase2Data?.steps.length" />
 
                         <Phase3Tools v-if="currentPhase === 3" ref="phase3" :workflowSteps="phase3Data?.steps ?? []"
                             :profilesList="profilesList ?? []" :phase="currentPhase" @add-tool-flow="handleAddToolFlow"
@@ -318,7 +313,7 @@ export default {
             if (stepIndex !== -1) {
                 phase3DataResult[stepIndex].stepTools = [];
             }
-            //try {
+
             const params = {
                 workflowId: this.workflowId ?? this.$route.params.workflowId,
                 steps: phase3DataResult
@@ -352,17 +347,6 @@ export default {
                         icon: 'CircleX',
                     });
                 })
-
-            // }
-            // catch (e) {
-            //     this.$notify({
-            //         title: 'flow.title',
-            //         message: e.message || 'flow.formFlow.progressFlowFail',
-            //         variant: 'danger',
-            //         icon: 'CircleX',
-            //     });
-            // }
-
         },
         async loadWorkflowData() {
             this.workflowIdInternal = this.workflowIdInternal ?? this.$route.params.workflowId;
