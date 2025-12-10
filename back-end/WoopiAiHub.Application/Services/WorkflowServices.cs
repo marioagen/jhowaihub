@@ -340,7 +340,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private async Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows)
+        public async Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows)
         {
             var team = _teamRepository.FindByIdReturnModel(teamId);
             var profiles = team.Profiles.Where(p => p.Id != profileId).ToList();
@@ -391,7 +391,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private async Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto)
+        public async Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto)
         {
             foreach (var teamsWorkflows in teamsWorkflowsDto)
             {
@@ -438,7 +438,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public StepToolOutput FindByStepToolOutputById(int id)
         {
-
             var stepToolOutput = _workflowRepository.FindByStepToolOutputById(id);
             return stepToolOutput;
         }
