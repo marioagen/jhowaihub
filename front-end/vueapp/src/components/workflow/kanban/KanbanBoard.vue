@@ -107,6 +107,7 @@
             },
         },
         mounted() {
+            console.log(this.kanbanData);
             this.setCard();
         }
     };

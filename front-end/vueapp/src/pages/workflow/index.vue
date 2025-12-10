@@ -252,7 +252,7 @@ export default {
         await signalRService.startConnection();
         signalRService.on(this.signalrEventExecutionChanged, (message) => {
             if (!this.kanbanCards.steps) return;
-
+            console.log(message);
             let foundCard = null;
 
             for (let i = 0; i < this.kanbanCards.steps.length; i++) {
