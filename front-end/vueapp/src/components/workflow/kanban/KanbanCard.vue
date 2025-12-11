@@ -75,7 +75,7 @@
                     <div v-if="showLoading"
                          class="progress-content">
                         <div class="mb-2">
-                            {{ $t("labelProcessing") }} 
+                            {{ $t("labelProcessing")}} {{ truncatedToolName }}
                             <span class="float-end">
                                 {{ dataCard.percentage || 0 }}%
                             </span>
@@ -249,6 +249,11 @@
             loggedUserId(){
                 const user = this.users.find(u=> u.email === this.$store.state.userProfile.login);
                 return user ? user.id : null;
+            },
+            truncatedToolName() {
+                if (!this.dataCard?.toolName) return '';
+                const toolName = this.dataCard.toolName.trim();
+                return toolName.length > 10 ? toolName.substring(0, 10) + '...' : toolName;
             }
         }
     };

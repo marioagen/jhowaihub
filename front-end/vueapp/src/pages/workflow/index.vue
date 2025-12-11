@@ -261,6 +261,7 @@ export default {
                     const card = step.cards.find(c => c.id === message.cardId);
                     if (card) {
                         foundCard = card;
+                        foundCard.toolName = message.toolName;
                         break;
                     }
                 }

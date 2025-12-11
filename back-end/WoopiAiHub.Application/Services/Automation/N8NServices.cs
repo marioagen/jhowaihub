@@ -15,6 +15,7 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
         private readonly IHubNotifier _hubNotifier;
+        private readonly IWorkflowRepository _workflowRepository;
 
         public N8NServices(IStepToolOutputRepository stepToolOutputRepository,
                            IStepToolExecutionRepository stepToolExecutionRepository,
@@ -79,7 +80,7 @@ namespace WoopiAiHub.Application.Services.Automation
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, execution?.StepTool?.Tool?.Name);
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId,  string.Empty);
         }
     }
 }

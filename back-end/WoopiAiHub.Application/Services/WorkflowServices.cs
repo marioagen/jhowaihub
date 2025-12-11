@@ -784,6 +784,5 @@ namespace WoopiAiHub.Application.Services
                 }
             }
         }
-
     }
 }

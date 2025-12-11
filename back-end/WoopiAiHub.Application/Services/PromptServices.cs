@@ -10,6 +10,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -23,7 +24,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IHubNotifier _hubNotifier;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
-
+        private readonly IWorkflowRepository _workflowRepository;
         public PromptServices(IUnitOfWork unitOfWork,
                               IPromptRepository promptRepository,
                               IValidatePrompt validatePrompt,
@@ -31,7 +32,8 @@ namespace WoopiAiHub.Application.Services
                               IStepToolExecutionRepository stepToolExecutionRepository,
                               IStepToolOutputRepository stepToolOutputRepository,
                               IHubNotifier hubNotifier,
-                              IDocumentHistoryRepository documentHistoryRepository)
+                              IDocumentHistoryRepository documentHistoryRepository,
+                              IWorkflowRepository workflowRepository)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
@@ -41,6 +43,7 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _hubNotifier = hubNotifier;
             _documentHistoryRepository = documentHistoryRepository;
+            _workflowRepository=workflowRepository;
         }
 
         /// <summary>
@@ -336,7 +339,9 @@ namespace WoopiAiHub.Application.Services
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, execution?.StepTool?.Tool?.Name);
+            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepTool.Id);
+
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, tool != null ? tool.Name : string.Empty);
         }
 
         /// <summary>
