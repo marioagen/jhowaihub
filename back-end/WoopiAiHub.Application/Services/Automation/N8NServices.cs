@@ -15,7 +15,6 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
         private readonly IHubNotifier _hubNotifier;
-        private readonly IWorkflowRepository _workflowRepository;
 
         public N8NServices(IStepToolOutputRepository stepToolOutputRepository,
                            IStepToolExecutionRepository stepToolExecutionRepository,
