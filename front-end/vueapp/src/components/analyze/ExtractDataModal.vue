@@ -47,7 +47,6 @@ export default {
     }),
     methods: {
         open(value, label) {
-            console.log("Here 2", value, label);
             this.value = value;
             this.currentValue = value;
             this.label = label;
