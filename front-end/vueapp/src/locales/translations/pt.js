@@ -668,6 +668,7 @@
     },
     analyze: {
         title: "Análise de Documentos",
+        subtitle: "Gerencia análises de documentos",
         errorLoadDocumentData: "Erro ao carregar dados do documento",
         failedEditOutput: "O output não pode ser editado",
         successEditOutput: "Output editado com sucesso",
@@ -696,6 +697,8 @@
         pleaseSelectQuestionnaire: "Por favor, selecione um questionário",
         confirmed: "Confirmado",
         closeResults: "Fechar Respostas",
+        workflow: "Workflow",
+        document: "Documento",
     },
     pages: {
         dashboard: "Dashboard",

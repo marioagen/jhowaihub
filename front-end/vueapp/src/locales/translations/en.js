@@ -703,6 +703,7 @@
     },
     analyze: {
         title: "Analyze Document",
+        subtitle: "Manage document analysis",
         errorLoadDocumentData: "Error loading document data",
         failedEditOutput: "The output could not be edited.",
         successEditOutput: "Output edited successfully",
@@ -731,6 +732,8 @@
         pleaseSelectQuestionnaire: "Please select a questionnaire",
         confirmed: "Confirmed",
         closeResults: "Close Results",
+        workflow: "Workflow",
+        document: "Document",
     },
     pages: {
         dashboard: "Dashboard",

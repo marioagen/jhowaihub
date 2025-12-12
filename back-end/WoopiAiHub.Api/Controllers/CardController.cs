@@ -30,11 +30,11 @@ namespace WoopiAiHub.Api.Controllers
         [SwaggerOperation("EndPoint that update a step and status of card")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto,
-                                                             [FromHeader] HeadersDto headersDto)
+            [FromHeader] HeadersDto headersDto)
         {
-            var result = await _cardServices.UpdateStepAndStatus(updateCardStepStatusDto, 
-                                                                 headersDto.Tenant, 
-                                                                 headersDto.EmailCreator);
+            var result = await _cardServices.UpdateStepAndStatus(updateCardStepStatusDto,
+                headersDto.Tenant,
+                headersDto.EmailCreator);
             return Ok(result);
         }
 
@@ -73,13 +73,28 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="headersDto"></param>
         /// <returns></returns>
         [HttpGet("AnalyzeSteps/{id}")]
-        [SwaggerOperation("It receives a card id and returns a DocumentAnalyzeStepsDto with the document's information grouped by steps")]
+        [SwaggerOperation(
+            "It receives a card id and returns a DocumentAnalyzeStepsDto with the document's information grouped by steps")]
         [ProducesResponseType(typeof(DocumentAnalyzeStepsDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindByIdAnalyzeWithSteps(int id,
-                                                                   [FromHeader] HeadersDto headersDto)
+            [FromHeader] HeadersDto headersDto)
         {
             var result = await _cardServices.FindByIdAnalyzeWithSteps(id,
-                                                                      headersDto);
+                headersDto);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// It receives a card id and returns header information (card name, workflow name).
+        /// </summary>
+        /// <param name="id">Card ID</param>
+        /// <returns></returns>
+        [HttpGet("HeaderInfo/{id}")]
+        [SwaggerOperation("It receives a card id and returns a CardHeaderDto with the card and workflow names")]
+        [ProducesResponseType(typeof(CardHeaderDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindHeaderInfoAsync(int id)
+        {
+            var result = await _cardServices.FindHeaderInfoAsync(id);
             return Ok(result);
         }
     }

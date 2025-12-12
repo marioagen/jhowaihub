@@ -3,7 +3,7 @@ import api from "@/services/api";
 export default {
     updateStepAndStatus(params) {
         return api
-            .put(`/Card`,params)
+            .put(`/Card`, params)
             .then((result) => {
                 return result.data;
             })
@@ -13,7 +13,7 @@ export default {
                 };
             });
     },
-    assignUser(params){
+    assignUser(params) {
         return api
             .put(`/Card/AssignUser`, params)
             .then((result) => {
@@ -25,7 +25,7 @@ export default {
                 };
             });
     },
-    unassignUser(cardId){
+    unassignUser(cardId) {
         return api
             .put(`/Card/UnassignUser/${cardId}`)
             .then((result) => {
@@ -48,5 +48,17 @@ export default {
                     error: error,
                 };
             });
-    }    
+    },
+    async findCardHeaderInfo(id) {
+        return await api
+            .get(`/Card/HeaderInfo/${id}`)
+            .then((response) => {
+                return response.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    }
 };

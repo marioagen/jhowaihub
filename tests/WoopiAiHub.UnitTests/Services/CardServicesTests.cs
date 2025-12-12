@@ -3,6 +3,7 @@ using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -33,7 +34,6 @@ namespace WoopiAiHub.UnitTests.Services
             _automationServices = _mocker.GetMock<IAutomationServices>();
 
             _cardServices = _mocker.CreateInstance<CardServices>();
-
         }
 
         [Fact(DisplayName = "Tests update Step and Status and throws an AppException when Card not found")]
@@ -45,7 +45,8 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync((Card?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto, It.IsAny<string>(), It.IsAny<string>()));
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _cardServices.UpdateStepAndStatus(updateDto, It.IsAny<string>(), It.IsAny<string>()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(CardLabel.NotFound, exception.LabelError);
         }
@@ -59,10 +60,11 @@ namespace WoopiAiHub.UnitTests.Services
             var card = CardFixture.FindValidCard();
             _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
-                                                                            updateDto.WorkflowId)).ReturnsAsync((Step?)null);
+                updateDto.WorkflowId)).ReturnsAsync((Step?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStepAndStatus(updateDto, It.IsAny<string>(), It.IsAny<string>()));
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _cardServices.UpdateStepAndStatus(updateDto, It.IsAny<string>(), It.IsAny<string>()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(StepLabel.NotFound, exception.LabelError);
         }
@@ -81,13 +83,13 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync(card);
             _automationServices.Setup(s => s.StartExecutionByCardAsync(automationDto)).Returns(Task.CompletedTask);
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
-                                                                            updateDto.WorkflowId)).ReturnsAsync(step);
+                updateDto.WorkflowId)).ReturnsAsync(step);
 
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
-            
 
 
-            _stepToolRepositoryMock.Setup(repo=> repo.FindByStepIdAndOrderAsync(1,1)).ReturnsAsync(It.IsAny<StepTool>());
+            _stepToolRepositoryMock.Setup(repo => repo.FindByStepIdAndOrderAsync(1, 1))
+                .ReturnsAsync(It.IsAny<StepTool>());
 
             // Act
             var result = await _cardServices.UpdateStepAndStatus(updateDto, "tenant", "email");
@@ -104,7 +106,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             _cardRepositoryMock.Setup(repo => repo.FindById(cardId))
-                               .ReturnsAsync((Card?)null);
+                .ReturnsAsync((Card?)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.UnassignUser(cardId));
@@ -121,7 +123,7 @@ namespace WoopiAiHub.UnitTests.Services
             var card = CardFixture.FindValidCard();
 
             _cardRepositoryMock.Setup(repo => repo.FindById(cardId))
-                               .ReturnsAsync(card);
+                .ReturnsAsync(card);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
 
             //Act
@@ -140,10 +142,11 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
             _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
-                               .ReturnsAsync((Card?)null);
+                .ReturnsAsync((Card?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignUser(updateAssignedUserDto));
+            var exception =
+                await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignUser(updateAssignedUserDto));
             Assert.Equal(Domain.Enum.ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Card not found", exception.Message);
         }
@@ -158,11 +161,12 @@ namespace WoopiAiHub.UnitTests.Services
             updateAssignedUserDto.UserId = Guid.Empty;
 
             _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
-                               .ReturnsAsync(card);
+                .ReturnsAsync(card);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
 
             // Act
-            var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.AssignUser(updateAssignedUserDto));
+            var exception =
+                await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.AssignUser(updateAssignedUserDto));
 
             // Assert
             _cardRepositoryMock.Verify(repo => repo.FindById(updateAssignedUserDto.CardId), Times.Once);
@@ -174,15 +178,16 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var card = CardFixture.FindValidCard();
-            card.Step = new Step(1,DateTime.Now, 1, "Step", 1, 1, 1);
+            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1);
             card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
 
             _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
-                               .ReturnsAsync(card);
+                .ReturnsAsync(card);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignUser(updateAssignedUserDto));
+            var exception =
+                await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignUser(updateAssignedUserDto));
             Assert.Equal(Domain.Enum.ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("User not found", exception.Message);
         }
@@ -202,7 +207,7 @@ namespace WoopiAiHub.UnitTests.Services
             updateAssignedUserDto.UserId = userId;
 
             _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
-                               .ReturnsAsync(card);
+                .ReturnsAsync(card);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
 
             // Act
@@ -667,6 +672,47 @@ namespace WoopiAiHub.UnitTests.Services
             // Should fall back to plain text display
             Assert.Equal("Test Tool", result.Steps[0].Outputs[0].Label);
             Assert.Equal(outputValue, result.Steps[0].Outputs[0].Value);
+        }
+
+        [Fact(DisplayName = "FindCardHeaderInfoAsync_Success")]
+        [Trait("FindCardHeaderInfoAsync", "Success")]
+        public async Task FindCardHeaderInfoAsync_Success()
+        {
+            // Arrange
+            var cardId = 1;
+            var expectedDto = new CardHeaderDto
+            {
+                CardName = "Test Card",
+                WorkflowName = "Test Workflow"
+            };
+
+            _cardRepositoryMock.Setup(repo => repo.FindHeaderInfoAsync(cardId))
+                .ReturnsAsync(expectedDto);
+
+            // Act
+            var result = await _cardServices.FindHeaderInfoAsync(cardId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedDto.CardName, result.CardName);
+            Assert.Equal(expectedDto.WorkflowName, result.WorkflowName);
+            _cardRepositoryMock.Verify(repo => repo.FindHeaderInfoAsync(cardId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindCardHeaderInfoAsync_CardNotFound_ThrowsAppException")]
+        [Trait("FindCardHeaderInfoAsync", "Fail")]
+        public async Task FindCardHeaderInfoAsync_CardNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var cardId = 1;
+            _cardRepositoryMock.Setup(repo => repo.FindHeaderInfoAsync(cardId))
+                .ReturnsAsync((CardHeaderDto?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.FindHeaderInfoAsync(cardId));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, exception.LabelError);
+            _cardRepositoryMock.Verify(repo => repo.FindHeaderInfoAsync(cardId), Times.Once);
         }
     }
 }
