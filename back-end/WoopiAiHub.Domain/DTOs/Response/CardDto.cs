@@ -16,5 +16,7 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public DocumentStatus StatusDocument { get; set; } = new();
         public StatusDto Status { get; set; } = new();
         public DateTime Created { get; set; }
+
+        public string ToolName { get; set; } = string.Empty;
     }
 }

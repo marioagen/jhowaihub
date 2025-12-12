@@ -5,6 +5,6 @@ namespace WoopiAiHub.Domain.Interfaces.Hubs
     public interface IHubNotifier
     {
         Task DocumentStatusChangedAsync(string userEmail, int documentId, DocumentStatus newStatus);
-        Task CardProgessAsync(string userEmail, int cardId, double percentage, int stepId);
+        Task CardProgessAsync(string userEmail, int cardId, double percentage, int stepId, string toolName);
     }
 }
