@@ -476,6 +476,10 @@ namespace WoopiAiHub.Repository
                                 c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
                               )
                             : 100,
+                            ToolName = c.Step!.StepTools
+                                              .Where(st => st.Executions.Any(e => e.CardId == c.Id && e.Status == StatusExecution.Running))
+                                              .Select(st => st.Tool.Name)
+                                              .FirstOrDefault(),
                             AssignedUser = c.AssignedUser != null ?
                             new UserDto
                             {
@@ -655,6 +659,21 @@ namespace WoopiAiHub.Repository
             var stepToolOutput = _context.StepToolOutputs.Where(p => p.Id == id)
                                                          .FirstOrDefault();
             return stepToolOutput;
+        }
+
+        /// <summary>
+        /// Finds a Tool by its StepTool ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<ToolDto> FindToolByStepToolId(int id)
+        {
+            return await _context.StepTools.Where(p => p.Id == id)
+                                            .Select(s => new ToolDto
+                                            {
+                                                Id = s.Tool.Id,
+                                                Name = s.Tool.Name,
+                                            }).FirstOrDefaultAsync();
         }
 
     }

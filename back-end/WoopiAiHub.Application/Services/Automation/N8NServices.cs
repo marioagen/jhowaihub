@@ -14,16 +14,19 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
+        private readonly IWorkflowRepository _workflowRepository;
         private readonly IHubNotifier _hubNotifier;
 
         public N8NServices(IStepToolOutputRepository stepToolOutputRepository,
                            IStepToolExecutionRepository stepToolExecutionRepository,
                            IDocumentHistoryRepository documentHistoryRepository,
+                           IWorkflowRepository workflowRepository,
                            IHubNotifier hubNotifier)
         {
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _documentHistoryRepository = documentHistoryRepository;
+            _workflowRepository = workflowRepository;
             _hubNotifier = hubNotifier;
         }
 
@@ -79,7 +82,8 @@ namespace WoopiAiHub.Application.Services.Automation
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId);
+            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepToolId);
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, tool != null ? tool.Name : string.Empty);
         }
     }
 }
