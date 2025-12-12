@@ -240,7 +240,6 @@
         },
         computed: {
             showLoading() {
-                console.log(this.dataStep);
                 return this.dataCard.percentage < 100;
             },
             isAdmin() {
