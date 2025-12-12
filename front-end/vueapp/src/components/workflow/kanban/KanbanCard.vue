@@ -48,7 +48,7 @@
                                     <LucideIcon icon="ChevronRight" size="20" class="ml-2 icon-closed" />
                                     <LucideIcon icon="ChevronDown" size="20" class="ml-2 icon-open" />
                                 </button>
-                                <ul class="dropdown-menu p-2">
+                                <ul class="dropdown-menu p-2 users-list">
                                     <li v-if="users.length > 5" class="mb-1">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text p-1">
@@ -432,6 +432,11 @@
     .unlink-icon{
         vertical-align: sub;
         color: white;
+    }
+
+    .users-list {
+        max-height: 300px;
+        overflow-y: auto;
     }
 
     .padding-loading {

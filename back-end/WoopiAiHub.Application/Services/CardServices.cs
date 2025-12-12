@@ -22,9 +22,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
 
         public CardServices(ICardRepository cardRepository,
-                            IStepRepository stepRepository,
-                            IAutomationServices automationServices,
-                            IStepToolExecutionRepository stepToolExecutionRepository)
+            IStepRepository stepRepository,
+            IAutomationServices automationServices,
+            IStepToolExecutionRepository stepToolExecutionRepository)
         {
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
@@ -51,10 +51,12 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var isValidTeamUser = card.Step?.Workflow?.Teams?.Any(t => t.Users.Any(u => u.Id.Equals(updateAssingnedUserDto.UserId)));
+            var isValidTeamUser =
+                card.Step?.Workflow?.Teams?.Any(t => t.Users.Any(u => u.Id.Equals(updateAssingnedUserDto.UserId)));
             if (!isValidTeamUser.HasValue || !isValidTeamUser.Value)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found", CardLabel.UserCannotBeAssigned);
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found",
+                    CardLabel.UserCannotBeAssigned);
             }
 
             card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
@@ -88,16 +90,17 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
         public async Task<bool> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto,
-                                                    string tenant,
-                                                    string email)
+            string tenant,
+            string email)
         {
             var card = await _cardRepository.FindById(updateCardStepStatusDto.CardId);
             if (card == null)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             }
+
             var step = await _stepRepository.FindByOrderAndWorkflowId(updateCardStepStatusDto.NextStepOrder,
-                                                                      updateCardStepStatusDto.WorkflowId);
+                updateCardStepStatusDto.WorkflowId);
             if (step == null)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
@@ -120,6 +123,7 @@ namespace WoopiAiHub.Application.Services
 
             return true;
         }
+
         /// <summary>
         /// Returns document information grouped by processing steps with extracted data.
         /// </summary>
@@ -128,7 +132,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns>Document with steps and extracted fields</returns>
         /// <exception cref="ArgumentException">Thrown when card is not found</exception>
         public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
-                                                                             HeadersDto headersDto)
+            HeadersDto headersDto)
         {
             var card = await FindCardWithRelationships(cardId);
             var verifyAnswer = await VerifyCanAnswer(card);
@@ -157,20 +161,21 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private async Task<bool> VerifyCanAnswer(Card card)
         {
-           var executions =  await _stepToolExecutionRepository.FindByStepToolByCardIdAsync(card.Id);
+            var executions = await _stepToolExecutionRepository.FindByStepToolByCardIdAsync(card.Id);
 
             bool hasOcrReady = executions.Any(execution =>
-            execution.StepTool.Tool.ToolType.Name.Equals(HandlersTypes.Ocr) &&
-            execution.Status == StatusExecution.Ready);
+                execution.StepTool.Tool.ToolType.Name.Equals(HandlersTypes.Ocr) &&
+                execution.Status == StatusExecution.Ready);
 
             bool hasEmbeddingsReady = executions.Any(execution =>
                 execution.StepTool.Tool.ToolType.Name.Equals(HandlersTypes.Embeddings) &&
                 execution.Status == StatusExecution.Ready);
 
-            if(hasOcrReady && hasEmbeddingsReady)
+            if (hasOcrReady && hasEmbeddingsReady)
             {
                 return true;
             }
+
             return false;
         }
 
@@ -186,6 +191,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);
             }
+
             return card;
         }
 
@@ -302,8 +308,8 @@ namespace WoopiAiHub.Application.Services
         /// <param name="outputType"></param>
         /// <returns></returns>
         private bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
-                                        int id,
-                                        string outputType)
+            int id,
+            string outputType)
         {
             fields = new List<ExtractedFieldDto>();
 
@@ -332,6 +338,7 @@ namespace WoopiAiHub.Application.Services
                             OutputType = outputType,
                         });
                     }
+
                     return true;
                 }
             }
@@ -353,6 +360,22 @@ namespace WoopiAiHub.Application.Services
             if (!steps.Any()) return string.Empty;
 
             return steps.LastOrDefault()?.Id ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Helper Method that returns a headerdto with card name and workflow name
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
+        public async Task<CardHeaderDto> FindHeaderInfoAsync(int cardId)
+        {
+            var dto = await _cardRepository.FindHeaderInfoAsync(cardId);
+            if (dto == null)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            }
+
+            return dto;
         }
     }
 }
