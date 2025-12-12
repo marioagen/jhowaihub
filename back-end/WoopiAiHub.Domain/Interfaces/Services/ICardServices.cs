@@ -15,6 +15,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto);
 
-        Task<CardHeaderDto> FindCardHeaderInfoAsync(int cardId);
+        Task<CardHeaderDto> FindHeaderInfoAsync(int cardId);
     }
 }

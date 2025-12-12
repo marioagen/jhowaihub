@@ -92,9 +92,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("HeaderInfo/{id}")]
         [SwaggerOperation("It receives a card id and returns a CardHeaderDto with the card and workflow names")]
         [ProducesResponseType(typeof(CardHeaderDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindCardHeaderInfoAsync(int id)
+        public async Task<IActionResult> FindHeaderInfoAsync(int id)
         {
-            var result = await _cardServices.FindCardHeaderInfoAsync(id);
+            var result = await _cardServices.FindHeaderInfoAsync(id);
             return Ok(result);
         }
     }

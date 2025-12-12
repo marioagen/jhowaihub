@@ -59,6 +59,7 @@ import ToastAlert from "@/components/common/toast-alert";
 import api from "@/services/api";
 import NormalizeIndex from "@/components/pages/normalize/loading";
 import CardsServices from "@/services/cards/CardsServices";
+import LogService from '@/services/log/logService';
 
 export default {
     name: "AnalyzerIndex",
@@ -131,21 +132,17 @@ export default {
             let self = this;
             api.get("/Document/Analyze/" + this.idAnalyzer)
                 .then(function (result) {
-                    // Handle success
                     self.hashDocument = result.data.referenceFile;
                 })
                 .catch(function (e) {
-                    // Handle error
-                    console.log(e);
+                    LogService.showMessage('Error loading document: ' + e);
                 })
                 .finally(function () {
-                    // Always executed
-                    console.log("Finished request.");
+                    LogService.showMessage("Finished request.");
                 });
         },
         async getCardHeaderInfo() {
             const result = await CardsServices.findCardHeaderInfo(this.idCard);
-            console.log(result);
             if (result && !result.error) {
                 this.workflowName = result.workflowName;
                 this.documentName = result.cardName;

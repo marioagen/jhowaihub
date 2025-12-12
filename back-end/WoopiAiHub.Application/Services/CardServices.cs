@@ -367,9 +367,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="cardId"></param>
         /// <returns></returns>
-        public async Task<CardHeaderDto> FindCardHeaderInfoAsync(int cardId)
+        public async Task<CardHeaderDto> FindHeaderInfoAsync(int cardId)
         {
-            var dto = await _cardRepository.FindCardHeaderInfoAsync(cardId);
+            var dto = await _cardRepository.FindHeaderInfoAsync(cardId);
             if (dto == null)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);

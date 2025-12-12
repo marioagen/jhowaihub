@@ -33,25 +33,25 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindById(int id)
         {
             return await _context.Cards
-                .Where(c => c.Id == id)
-                .Include(d => d.Document)
-                .Include(s => s.Step)
-                .ThenInclude(p => p!.Profile)
-                .Include(s => s.Step)
-                .ThenInclude(w => w!.Workflow)
-                .ThenInclude(w => w!.Teams)
-                .ThenInclude(w => w!.Users)
-                .Include(s => s.Step)
-                .ThenInclude(w => w!.Workflow)
-                .ThenInclude(ws => ws!.Steps)
-                .ThenInclude(st => st.StepTools)
-                .ThenInclude(t => t.Tool)
-                .ThenInclude(tt => tt!.ToolType)
-                .Include(c => c.Outputs)
-                .ThenInclude(o => o.StepTool)
-                .ThenInclude(st => st!.Tool)
-                .ThenInclude(t => t!.ToolType)
-                .FirstOrDefaultAsync();
+                                 .Where(c => c.Id == id)
+                                 .Include(d => d.Document)
+                                 .Include(s => s.Step)
+                                    .ThenInclude(p => p!.Profile)
+                                 .Include(s => s.Step)
+                                    .ThenInclude(w => w!.Workflow)
+                                    .ThenInclude(w => w!.Teams)
+                                    .ThenInclude(w => w!.Users)
+                                    .Include(s => s.Step)
+                                    .ThenInclude(w => w!.Workflow)
+                                        .ThenInclude(ws => ws!.Steps)
+                                            .ThenInclude(st => st.StepTools)
+                                                .ThenInclude(t => t.Tool)
+                                                    .ThenInclude(tt => tt!.ToolType)
+                                 .Include(c => c.Outputs)
+                                    .ThenInclude(o => o.StepTool)
+                                        .ThenInclude(st => st!.Tool)
+                                            .ThenInclude(t => t!.ToolType)
+                                 .FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="cardId"></param>
         /// <returns></returns>
-        public async Task<CardHeaderDto?> FindCardHeaderInfoAsync(int cardId)
+        public async Task<CardHeaderDto?> FindHeaderInfoAsync(int cardId)
         {
             return await _context.Cards
                 .AsNoTracking()

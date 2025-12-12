@@ -686,17 +686,17 @@ namespace WoopiAiHub.UnitTests.Services
                 WorkflowName = "Test Workflow"
             };
 
-            _cardRepositoryMock.Setup(repo => repo.FindCardHeaderInfoAsync(cardId))
+            _cardRepositoryMock.Setup(repo => repo.FindHeaderInfoAsync(cardId))
                 .ReturnsAsync(expectedDto);
 
             // Act
-            var result = await _cardServices.FindCardHeaderInfoAsync(cardId);
+            var result = await _cardServices.FindHeaderInfoAsync(cardId);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(expectedDto.CardName, result.CardName);
             Assert.Equal(expectedDto.WorkflowName, result.WorkflowName);
-            _cardRepositoryMock.Verify(repo => repo.FindCardHeaderInfoAsync(cardId), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.FindHeaderInfoAsync(cardId), Times.Once);
         }
 
         [Fact(DisplayName = "FindCardHeaderInfoAsync_CardNotFound_ThrowsAppException")]
@@ -705,14 +705,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var cardId = 1;
-            _cardRepositoryMock.Setup(repo => repo.FindCardHeaderInfoAsync(cardId))
+            _cardRepositoryMock.Setup(repo => repo.FindHeaderInfoAsync(cardId))
                 .ReturnsAsync((CardHeaderDto?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.FindCardHeaderInfoAsync(cardId));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _cardServices.FindHeaderInfoAsync(cardId));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(CardLabel.NotFound, exception.LabelError);
-            _cardRepositoryMock.Verify(repo => repo.FindCardHeaderInfoAsync(cardId), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.FindHeaderInfoAsync(cardId), Times.Once);
         }
     }
 }
