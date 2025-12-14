@@ -699,7 +699,17 @@
         updateError: "Prompts update failed",
         deleteSuccess: "Prompts deleted successfully",
         deleteError: "Prompts delete failed",
-        removeAllPrompts: "Delete prompts"
+        removeAllPrompts: "Delete prompts",
+        importTitle: "Import prompt",
+        importSubtitle: "Select prompts predefinidos del sistema",
+        importButton: "Importar",
+        mostRecent: "Mas reciente",
+        mostOld: "Mas antiguo",
+        nameAZ: "Nombre (A-Z)",
+        nameZA: "Nombre (Z-A)",
+        selectAllTemplates: "Seleccionar todos los templates",
+        viewComplete: "Ver completo",
+        importPredefined: "Importar predefinidos",
     },
     analyze: {
         title: "Analyze Document",

@@ -1,4 +1,4 @@
-﻿using System.Linq.Dynamic.Core;
+using System.Linq.Dynamic.Core;
 using System.Text.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -10,6 +10,9 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.Interfaces.Refit.Functions;
+using Microsoft.Extensions.Configuration;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -23,6 +26,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IHubNotifier _hubNotifier;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
+        private readonly IFunctionFileRetriever _functionFileRetriever;
+        private readonly IConfiguration _config;
 
         public PromptServices(IUnitOfWork unitOfWork,
                               IPromptRepository promptRepository,
@@ -31,7 +36,9 @@ namespace WoopiAiHub.Application.Services
                               IStepToolExecutionRepository stepToolExecutionRepository,
                               IStepToolOutputRepository stepToolOutputRepository,
                               IHubNotifier hubNotifier,
-                              IDocumentHistoryRepository documentHistoryRepository)
+                              IDocumentHistoryRepository documentHistoryRepository,
+                              IFunctionFileRetriever functionFileRetriever,
+                              IConfiguration config)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
@@ -41,6 +48,135 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _hubNotifier = hubNotifier;
             _documentHistoryRepository = documentHistoryRepository;
+            _functionFileRetriever = functionFileRetriever;
+            _config = config;
+        }
+
+
+        /// <summary>
+        /// Find prompt templates from external source
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        public async Task<List<PromptTemplateDto>> FindPromptTemplates(string? query, string? orderBy)
+        {
+            var templates = await FindAllTemplates();
+
+            if (!string.IsNullOrEmpty(query))
+            {
+                var lowerQuery = query.ToLower();
+                templates = templates.Where(t =>
+                    t.Name.ToLower().Contains(lowerQuery) ||
+                    t.Description.ToLower().Contains(lowerQuery) ||
+                    t.Text.ToLower().Contains(lowerQuery)
+                ).ToList();
+            }
+
+
+            templates = orderBy?.ToLower() switch
+            {
+                "name_asc" => templates.OrderBy(t => t.Name).ToList(),
+                "name_desc" => templates.OrderByDescending(t => t.Name).ToList(),
+                "created_asc" => templates.OrderBy(t => t.Created).ToList(),
+                _ => templates.OrderByDescending(t => t.Created).ToList()
+            };
+
+            return templates;
+        }
+
+        private async Task<List<PromptTemplateDto>> FindAllTemplates()
+        {
+            var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
+            var response = await _functionFileRetriever.Get("templates.json",
+                                                            functionApiKeyAuth,
+                                                            "Prompt");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new AppException(ErrorCode.DefaultError, "Failed to retrieve prompt templates", null);
+            }
+
+            var jsonContent = await response.Content.ReadAsStringAsync();
+            var items = JsonSerializer.Deserialize<PromptTemplatesResponse>(
+                jsonContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            var templates = items?.Prompts;
+            if (templates == null)
+            {
+                return new List<PromptTemplateDto>();
+            }
+
+            return templates;
+        }
+
+        /// <summary>
+        /// Import prompts from template IDs
+        /// </summary>
+        /// <param name="templateIds"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<bool> ImportPromptsByIds(List<Guid> templateIds, string email)
+        {
+            if (templateIds == null || templateIds.Count == 0)
+            {
+                return false;
+            }
+
+            var allTemplates = await FindAllTemplates();
+
+            var selectedTemplates = allTemplates.Where(t => templateIds.Contains(t.Id)).ToList();
+
+            if (selectedTemplates.Count == 0)
+            {
+                throw new ArgumentException("Selected templates not found");
+            }
+
+            var importedPrompts = selectedTemplates.Select(t => new ImportedPromptDto
+            {
+                TemplateId = t.Id,
+                Name = t.Name,
+                Description = t.Description,
+                Text = t.Text,
+                Created = t.Created
+            }).ToList();
+
+            return ImportPrompts(importedPrompts, email);
+        }        
+        
+        /// <summary>
+        /// Import prompts from templates
+        /// </summary>
+        /// <param name="importedPrompts"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public bool ImportPrompts(List<ImportedPromptDto> importedPrompts, string email)
+        {
+            if (importedPrompts == null || importedPrompts.Count == 0)
+            {
+                return false;
+            }
+
+            var idUser = _userServices.FindIdByEmail(email);
+            if (idUser == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid user id");
+            }
+
+            var prompts = importedPrompts.Select(dto => new Prompt(
+                0,
+                dto.Created,
+                dto.Name,
+                dto.Description,
+                dto.Text,
+                idUser,
+                isEdited: false,
+                isImported: true
+            )).ToList();
+
+            return _promptRepository.CreateByRange(prompts);
         }
 
         /// <summary>
@@ -271,15 +407,16 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="promptDto"></param>
         /// <param name="promptUpdateDto"></param>
-        private static Domain.Models.Prompt GeneratePromptToUpdate(PromptDto promptDto, PromptUpdateDto promptUpdateDto)
+        private static Prompt GeneratePromptToUpdate(PromptDto promptDto, PromptUpdateDto promptUpdateDto)
         {
-            var prompt = new Domain.Models.Prompt(
+            var prompt = new Prompt(
                 promptDto.Id,
                 promptDto.Created,
                 promptUpdateDto.Name,
                 promptUpdateDto.Description,
                 promptUpdateDto.Text,
-                promptDto.IdUser);
+                promptDto.IdUser,
+                true);
 
             return prompt;
         }
@@ -359,3 +496,7 @@ namespace WoopiAiHub.Application.Services
         }
     }
 }
+
+
+
+

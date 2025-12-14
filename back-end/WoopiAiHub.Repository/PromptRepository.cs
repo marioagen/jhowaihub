@@ -30,7 +30,24 @@ namespace WoopiAiHub.Repository
 
                 return true;
             }
+
             return false;
+        }
+
+        /// <summary>
+        /// Create multiple prompts at once
+        /// </summary>
+        /// <param name="prompts"></param>
+        /// <returns></returns>
+        public bool CreateByRange(List<Prompt> prompts)
+        {
+            if (prompts == null || prompts.Count == 0)
+            {
+                return false;
+            }
+
+            _context.Prompts.AddRange(prompts);
+            return _context.SaveChanges() > 0;
         }
 
         /// <summary>
@@ -68,8 +85,9 @@ namespace WoopiAiHub.Repository
                     Text = p.Text,
                     Created = p.Created,
                     IsOwner = p.IdUser.Equals(idUser),
-                    IdUser = p.IdUser
-                    
+                    IdUser = p.IdUser,
+                    IsEdited = p.IsEdited,
+                    IsImported = p.IsImported
                 }).AsNoTracking();
 
             return query;
@@ -93,8 +111,9 @@ namespace WoopiAiHub.Repository
                     Text = p.Text,
                     Created = p.Created,
                     IsOwner = true,
-                    IdUser = p.IdUser
-
+                    IdUser = p.IdUser,
+                    IsEdited = p.IsEdited,
+                    IsImported = p.IsImported
                 });
 
             return query;
@@ -116,6 +135,8 @@ namespace WoopiAiHub.Repository
                     Text = p.Text,
                     Created = p.Created,
                     IdUser = p.IdUser,
+                    IsEdited = p.IsEdited,
+                    IsImported = p.IsImported
                 }).FirstOrDefault(p => p.Id == id);
         }
 
@@ -134,6 +155,7 @@ namespace WoopiAiHub.Repository
 
                 return true;
             }
+
             return false;
         }
     }

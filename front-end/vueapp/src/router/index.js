@@ -37,6 +37,7 @@ import EditFlow from "@/pages/flows/editFlow.vue";
 
 import PromptPage from "@/pages/prompts/index.vue";
 import PromptNew from "@/pages/prompts/newPrompt.vue";
+import PromptImport from "@/pages/prompts/import.vue";
 import HomePage from "@/pages/home.vue";
 
 import { hasPermission } from "@/utils/permissions";
@@ -372,6 +373,17 @@ const routes = [
         path: "/prompts",
         name: "Prompt",
         component: PromptPage,
+        meta: {
+            layout: "default",
+            module: "Prompts",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/prompts/import",
+        name: "PromptImport",
+        component: PromptImport,
         meta: {
             layout: "default",
             module: "Prompts",
