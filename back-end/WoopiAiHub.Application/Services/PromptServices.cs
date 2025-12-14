@@ -1,18 +1,20 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Linq.Dynamic.Core;
 using System.Text.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
+using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.Interfaces.Refit.Functions;
-using Microsoft.Extensions.Configuration;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -28,6 +30,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
         private readonly IFunctionFileRetriever _functionFileRetriever;
         private readonly IConfiguration _config;
+        private readonly PromptSettings _promptSettings;
 
         public PromptServices(IUnitOfWork unitOfWork,
                               IPromptRepository promptRepository,
@@ -38,6 +41,7 @@ namespace WoopiAiHub.Application.Services
                               IHubNotifier hubNotifier,
                               IDocumentHistoryRepository documentHistoryRepository,
                               IFunctionFileRetriever functionFileRetriever,
+                              IOptions<PromptSettings> promptSettingsOptions,
                               IConfiguration config)
         {
             _unitOfWork = unitOfWork;
@@ -50,6 +54,7 @@ namespace WoopiAiHub.Application.Services
             _documentHistoryRepository = documentHistoryRepository;
             _functionFileRetriever = functionFileRetriever;
             _config = config;
+            _promptSettings = promptSettingsOptions.Value;
         }
 
 
@@ -85,12 +90,18 @@ namespace WoopiAiHub.Application.Services
             return templates;
         }
 
+        /// <summary>
+        /// Find all prompt templates
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
         private async Task<List<PromptTemplateDto>> FindAllTemplates()
         {
             var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
-            var response = await _functionFileRetriever.Get("templates.json",
-                                                            functionApiKeyAuth,
-                                                            "Prompt");
+            var promptTemplateFileName = _config["Chat:FunctionApiKey"];
+            var response = await _functionFileRetriever.Get(_promptSettings.TemplateFileName,
+                                                            functionApiKeyAuth!,
+                                                            _promptSettings.Folder);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -256,8 +267,8 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Invalid user id");
 
             query = pagedDataDto.IsAscending ?
-                query.OrderBy(nameof(Domain.Models.Prompt.Name)) :
-                query.OrderBy(nameof(Domain.Models.Prompt.Name) + " descending");
+                query.OrderBy(nameof(Prompt.Name)) :
+                query.OrderBy(nameof(Prompt.Name) + " descending");
 
             var result = PromptPagination(query, new PagedDataDto());
 
@@ -279,8 +290,8 @@ namespace WoopiAiHub.Application.Services
                 var query = _promptRepository.FindAllWithOwnerStatus(idUser);
 
                 query = pagedDataDto.IsAscending ?
-                    query.OrderBy(nameof(Domain.Models.Prompt.Name)) :
-                    query.OrderBy(nameof(Domain.Models.Prompt.Name) + " descending");
+                    query.OrderBy(nameof(Prompt.Name)) :
+                    query.OrderBy(nameof(Prompt.Name) + " descending");
 
                 var result = PromptPagination(query, pagedDataDto);
                 return result;
