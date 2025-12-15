@@ -1,3 +1,4 @@
+using Google.Api;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -28,7 +29,8 @@ namespace WoopiAiHub.Repository
         /// considered.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the matching <see
         /// cref="UsageMonth"/> if found; otherwise, <see langword="null"/>.</returns>
-        public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int? modelEmbeddingId, Guid userId, DateTime month)
+        public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int? modelEmbeddingId, Guid userId,
+            DateTime month)
         {
             // For daily records, we need to match the exact day
             var dayStart = month.Date;
@@ -99,10 +101,11 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="usageTypeId"></param>
         /// <returns></returns>
-        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(string usageType, DateTime? start, DateTime? end)
+        public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(string usageType, DateTime? start,
+            DateTime? end)
         {
             var query = _context.UsageMonths
-                    .Where(x => x.UsageType!.Name.Equals(usageType));
+                .Where(x => x.UsageType!.Name.Equals(usageType));
 
             if (start.HasValue)
                 query = query.Where(x => x.Created.Date >= start.Value.Date);
@@ -122,10 +125,11 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="modelEmbeddingId"></param>
         /// <returns></returns>
-        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId, DateTime? start, DateTime? end)
+        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId,
+            DateTime? start, DateTime? end)
         {
             var query = _context.UsageMonths
-                                .Where(x => x.ModelEmbeddingId == modelEmbeddingId);
+                .Where(x => x.ModelEmbeddingId == modelEmbeddingId);
 
             if (start.HasValue)
                 query = query.Where(x => x.Created.Date >= start.Value.Date);

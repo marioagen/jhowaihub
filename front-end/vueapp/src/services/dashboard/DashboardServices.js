@@ -79,4 +79,15 @@ export default {
                 }
             });
     },
+    GetTotalUsageCost(filters) {
+        return api.get(`/UsageMonth/FindTotalUsageCost`, { params: filters })
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    }
 }

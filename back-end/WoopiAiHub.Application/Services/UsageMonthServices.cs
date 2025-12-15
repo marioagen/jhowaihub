@@ -1,7 +1,6 @@
 using System.Globalization;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 
@@ -10,16 +9,19 @@ namespace WoopiAiHub.Application.Services
     public class UsageMonthServices : IUsageMonthServices
     {
         private readonly IUsageMonthRepository _usageMonthRepository;
+        private readonly IUsageUnitRepository _usageUnitRepository;
 
-        public UsageMonthServices(IUsageMonthRepository usageMonthRepository)
+        public UsageMonthServices(IUsageMonthRepository usageMonthRepository, 
+                                  IUsageUnitRepository usageUnitRepository)
         {
             _usageMonthRepository = usageMonthRepository;
+            _usageUnitRepository = usageUnitRepository;
         }
 
         /// <summary>
         /// Returns usage data filtered by usage type.
         /// </summary>
-        /// <param name="usageType"></param>
+        /// <param name="usageMonthFilterDto"></param>
         /// <returns></returns>
         public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(UsageTypeFilterDto usageMonthFilterDto)
         {
@@ -32,7 +34,7 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Finds usage data by model embedding ID.
         /// </summary>
-        /// <param name="modelEmbeddingId"></param>
+        /// <param name="modelEmbeddingFilterDto"></param>
         /// <returns></returns>
         public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(ModelEmbeddingFilterDto modelEmbeddingFilterDto)
         {
@@ -64,6 +66,20 @@ namespace WoopiAiHub.Application.Services
             }
 
             return convertedDate;
+        }
+
+        /// <summary>
+        /// Finds total usage cost.
+        /// </summary>
+        /// <param name="dateFilterDto"></param>
+        /// <returns></returns>
+        public async Task<decimal> FindTotalUsageCostAsync(DateFilterDto dateFilterDto)
+        {
+            var startDate = FindDate(dateFilterDto.Start);
+            var endDate = FindDate(dateFilterDto.End);
+            var itens = await _usageUnitRepository.FindTotalUsageCostAsync(startDate, endDate);
+
+            return itens.Sum(s => s.Total);
         }
     }
 }

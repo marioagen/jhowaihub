@@ -28,7 +28,8 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet]
         [SwaggerOperation("Endpoint that receives the request to list usage month by usage type")]
         [ProducesResponseType(typeof(ICollection<DashboardUsageDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ICollection<DashboardUsageDto>>> FindByUsageType([FromQuery] UsageTypeFilterDto usageMonthFilterDto)
+        public async Task<ActionResult<ICollection<DashboardUsageDto>>> FindByUsageType(
+            [FromQuery] UsageTypeFilterDto usageMonthFilterDto)
         {
             var result = await _usageMonthServices.FindDataByUsageType(usageMonthFilterDto);
             return Ok(result);
@@ -42,7 +43,8 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("FindByModel")]
         [SwaggerOperation("Endpoint that receives the request to list usage month by model embeddings")]
         [ProducesResponseType(typeof(ICollection<DashboardUsageDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ICollection<DashboardUsageDto>>> FindByModelEmbedding([FromQuery] ModelEmbeddingFilterDto modelEmbeddingFilterDto)
+        public async Task<ActionResult<ICollection<DashboardUsageDto>>> FindByModelEmbedding(
+            [FromQuery] ModelEmbeddingFilterDto modelEmbeddingFilterDto)
         {
             var result = await _usageMonthServices.FindDataByModelEmbedding(modelEmbeddingFilterDto);
             return Ok(result);
@@ -58,6 +60,20 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<ActionResult<ICollection<ModelEmbeddingDto>>> FindUsedModelEmbeddings()
         {
             var result = await _usageMonthServices.FindUsedModelEmbeddings();
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to find total usage cost
+        /// </summary>
+        /// <param name="dateFilterDto"></param>
+        /// <returns></returns>
+        [HttpGet("FindTotalUsageCost")]
+        [SwaggerOperation("Endpoint that receives the request to find total usage cost")]
+        [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
+        public async Task<ActionResult<decimal>> FindTotalUsageCost([FromQuery] DateFilterDto dateFilterDto)
+        {
+            var result = await _usageMonthServices.FindTotalUsageCostAsync(dateFilterDto);
             return Ok(result);
         }
     }

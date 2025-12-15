@@ -12,12 +12,15 @@ namespace WoopiAiHub.UnitTests.Services
     public class UsageMonthServicesTests
     {
         private readonly Mock<IUsageMonthRepository> _usageMonthRepositoryMock;
+        private readonly Mock<IUsageUnitRepository> _usageUnitRepositoryMock;
         private readonly UsageMonthServices _usageMonthServices;
 
         public UsageMonthServicesTests()
         {
             _usageMonthRepositoryMock = new Mock<IUsageMonthRepository>();
-            _usageMonthServices = new UsageMonthServices(_usageMonthRepositoryMock.Object);
+            _usageUnitRepositoryMock = new Mock<IUsageUnitRepository>();
+
+            _usageMonthServices = new UsageMonthServices(_usageMonthRepositoryMock.Object, _usageUnitRepositoryMock.Object);
         }
 
         [Fact(DisplayName = "Test FindDataByUsageType and returns a list of DashboardUsageDto")]
