@@ -60,6 +60,7 @@
                                 :items="filteredUsers"
                                 :loading="isLoadingUsers"
                                 :type="'user-list'"
+                                :listHeight="'300px'"
                                 v-model:selectedItems="selectedUsers"
                                 ref="SelectionListComponent"
                             >
