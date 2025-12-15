@@ -35,7 +35,7 @@
                         />
                     </div>
                 </div>
-                <div class="selection-list">
+                <div class="selection-list" :style="{ maxHeight: listHeight, minHeight: listHeight }">
                     <div v-if="loading" class="text-center">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">{{ $t("labelLoading") }}</span>
@@ -118,6 +118,10 @@
                 type: String,
                 default: "simple-list",
             },
+            listHeight: {
+                type: String,
+                default: "80px",
+            },
         },
         emits: ["update:selectedItems"],
         data() {
@@ -163,8 +167,6 @@
 
 <style scoped>
     .selection-list {
-        max-height: 80px;
-        min-height: 80px;
         overflow-y: auto;
     }
 

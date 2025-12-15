@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -32,7 +32,6 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [HttpPost]
         [SwaggerOperation("Endpoint that receives the request to create a Prompt in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-
         public IActionResult Create([FromBody] PromptCreateDto promptCreateDto,
                                     [FromHeader] HeadersDto headersDto)
         {
@@ -52,7 +51,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
                                     [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.Update(promptUpdateDto,
-                                                headersDto.EmailCreator);
+                headersDto.EmailCreator);
             return Ok(result);
         }
 
@@ -70,7 +69,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
                                                [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.FindByIdUserPaged(pagedDataDto,
-                                                           headersDto.EmailCreator);
+                headersDto.EmailCreator);
             return Ok(result);
         }
 
@@ -102,7 +101,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
                                           [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.FindAllPaged(pagedDataDto,
-                                                      headersDto.EmailCreator);
+                headersDto.EmailCreator);
             return Ok(result);
         }
 
@@ -134,7 +133,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
                                                [FromHeader] HeadersDto headersDto)
         {
             _validatePrompt.ValidateOwnership(id,
-                                              headersDto.EmailCreator);
+                headersDto.EmailCreator);
             return NoContent();
         }
 
@@ -149,6 +148,45 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         public IActionResult FindAllByEmail([FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.FindAll(headersDto.EmailCreator);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Find prompt templates from external source
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Templates")]
+        [SwaggerOperation("Endpoint that retrieves prompt templates from external source")]
+        [ProducesResponseType(typeof(List<PromptTemplateDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindPromptTemplates([FromQuery] string? query, 
+                                                             [FromQuery] string? orderBy)
+        {
+            var result = await _promptServices.FindPromptTemplates(query, orderBy);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Import selected prompts from templates
+        /// </summary>
+        /// <param name="templateIds"></param>
+        /// <param name="headersDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Import")]
+        [SwaggerOperation("Endpoint that imports selected prompt templates")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ImportPrompts([FromBody] List<Guid> templateIds,
+                                                       [FromHeader] HeadersDto headersDto)
+        {
+            if (templateIds == null || templateIds.Count == 0)
+            {
+                return BadRequest("No templates selected for import");
+            }
+
+            var result = await _promptServices.ImportPromptsByIds(templateIds, headersDto.EmailCreator);
             return Ok(result);
         }
     }

@@ -21,15 +21,23 @@ namespace WoopiAiHub.Domain.Models
         [Column("IdUser", TypeName = "uniqueIdentifier")]
         public Guid IdUser { get; private set; } = Guid.Empty;
 
+        [Column("IsEdited", TypeName = "bit")] public bool IsEdited { get; private set; } = false;
+
+        [Column("IsImported", TypeName = "bit")]
+        public bool IsImported { get; private set; } = false;
+
         public virtual User User { get; set; }
 
-        public Prompt(int id, DateTime created, string name, string description, string text, Guid idUser)
+        public Prompt(int id, DateTime created, string name, string description, string text, Guid idUser,
+            bool isEdited = false, bool isImported = false)
             : base(id, created)
         {
             Name = name;
             Description = description;
             Text = text;
             IdUser = idUser;
+            IsEdited = isEdited;
+            IsImported = isImported;
         }
 
         /// <summary>

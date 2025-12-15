@@ -15,5 +15,7 @@ namespace WoopiAiHub.Domain.DTOs
         public Guid IdUser { get; set; } = Guid.Empty;
         public bool IsOwner { get; set; }
         public DateTime Created { get; set; }
+        public bool IsEdited { get; set; }
+        public bool IsImported { get; set; }
     }
 }
