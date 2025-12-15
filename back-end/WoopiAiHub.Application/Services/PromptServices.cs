@@ -42,8 +42,7 @@ namespace WoopiAiHub.Application.Services
                               IStepToolOutputRepository stepToolOutputRepository,
                               IHubNotifier hubNotifier,
                               IDocumentHistoryRepository documentHistoryRepository,
-                              IWorkflowRepository workflowRepository)
-                              IDocumentHistoryRepository documentHistoryRepository,
+                              IWorkflowRepository workflowRepository,
                               IFunctionFileRetriever functionFileRetriever,
                               IOptions<PromptSettings> promptSettingsOptions,
                               IConfiguration config)
