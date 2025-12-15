@@ -181,8 +181,8 @@
 </template>
 
 <script>
-import ModalAlert from "@/components/common/modal-alert";
-import ToastAlert from "@/components/common/toast-alert";
+import ModalAlert from "@/components/pages/analyzer/modal-alert";
+import ToastAlert from "@/components/pages/analyzer/toast-alert";
 import api from "@/services/api";
 import uploadFileWorker from "@/workers";
 import Dropzone from "dropzone";

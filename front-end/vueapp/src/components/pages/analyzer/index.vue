@@ -55,9 +55,9 @@
 import PromptView from "@/components/pages/analyzer/prompt-view";
 import DocView from "@/components/pages/analyzer/doc-view";
 import StepAnalysisView from "@/components/pages/analyzer/step-analysis-view";
-import ToastAlert from "@/components/common/toast-alert";
+import ToastAlert from "@/components/pages/analyzer/toast-alert";
 import api from "@/services/api";
-import NormalizeIndex from "@/components/pages/normalize/loading";
+import NormalizeIndex from "@/components/documents/EmbeddingDocument";
 import CardsServices from "@/services/cards/CardsServices";
 import LogService from '@/services/log/logService';
 

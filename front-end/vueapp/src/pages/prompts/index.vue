@@ -27,9 +27,6 @@
     </main>
 </template>
 <script>
-    import Pagination from '@/components/common/pagination';
-    import TruncateText from "@/components/common/truncate-text.vue";
-    import SearchComponent from "@/components/global/SearchComponent.vue";
     import PromptComponent from "@/components/prompts/PromptComponent.vue";
     import PromptFilters from "@/components/prompts/PromptFilter"
     export default {
@@ -60,9 +57,6 @@
             }
         },
         components: {
-            Pagination,
-            TruncateText,
-            SearchComponent,
             PromptComponent,
             PromptFilters,
         },
@@ -86,11 +80,6 @@
                 this.reloadData();
             },
         },
-        computed: {},
-        created() {
-        },
-        mounted() { },
-        unmounted() { },
     }
 </script>
 

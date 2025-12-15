@@ -153,5 +153,14 @@ export default {
                     error: error,
                 };
             });
-    }
+    },
+    checkPagesLength() {
+        return api.get("/Document/CheckExceededPages")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return false;
+            });
+    },
 };

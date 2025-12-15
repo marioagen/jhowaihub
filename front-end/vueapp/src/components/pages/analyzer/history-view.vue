@@ -171,7 +171,7 @@
 <script>
     import date from "@/helpers/date";
     import api from "@/services/api";
-    import ModalAlert from "@/components/common/modal-alert";
+    import ModalAlert from "@/components/pages/analyzer/modal-alert";
 
     export default {
         name: "HistoryView",
