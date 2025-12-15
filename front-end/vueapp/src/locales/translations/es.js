@@ -699,7 +699,18 @@
         updateError: "No se pudieron actualizar el prompt",
         deleteSuccess: "Prompts eliminados exitosamente",
         deleteError: "No se pudieron eliminar los prompts",
-        removeAllPrompts: "Eliminar prompts"
+        removeAllPrompts: "Eliminar prompts",
+        importTitle: "Importar prompt",
+        importSubtitle: "Selecione prompts predefinidos del sistema",
+        importButton: "Importar",
+        mostRecent: "Mas reciente",
+        mostOld: "Mas antiguo",
+        nameAZ: "Nombre (A-Z)",
+        nameZA: "Nombre (Z-A)",
+        selectAllTemplates: "Selecionar todos los templates",
+        viewComplete: "Ver completo",
+        importPredefined: "Importar predefinidos",
+
     },
     analyze: {
         title: "Análisis de Documentos",
