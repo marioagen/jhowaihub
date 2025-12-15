@@ -444,7 +444,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(responseMessage);
 
             //Act
-            var result = await _promptServices.FindPromptTemplates(null, null);
+            var result = await _promptServices.FindPromptTemplates("Template", null);
 
             //Assert
             Assert.NotNull(result);
@@ -488,9 +488,9 @@ namespace WoopiAiHub.UnitTests.Services
                 }
             };
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
-            var responseMessage = new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
-                Content = new System.Net.Http.StringContent(jsonContent)
+                Content = new StringContent(jsonContent)
             };
 
             _mocker.GetMock<IConfiguration>().Setup(c => c["RefitExternalSettings:FunctionApiKey"]).Returns("key");
@@ -530,9 +530,9 @@ namespace WoopiAiHub.UnitTests.Services
                 Prompts = new List<PromptTemplateDto>() // Empty
             };
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
-            var responseMessage = new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
-                Content = new System.Net.Http.StringContent(jsonContent)
+                Content = new StringContent(jsonContent)
             };
 
             _mocker.GetMock<IConfiguration>().Setup(c => c["RefitExternalSettings:FunctionApiKey"]).Returns("key");
