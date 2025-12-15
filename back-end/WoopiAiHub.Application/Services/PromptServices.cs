@@ -507,7 +507,3 @@ namespace WoopiAiHub.Application.Services
         }
     }
 }
-
-
-
-

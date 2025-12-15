@@ -18,7 +18,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         private readonly IValidatePrompt _validatePrompt;
 
         public PromptController(IPromptServices promptServices,
-            IValidatePrompt validatePrompt)
+                                IValidatePrompt validatePrompt)
         {
             _promptServices = promptServices;
             _validatePrompt = validatePrompt;
@@ -33,7 +33,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives the request to create a Prompt in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public IActionResult Create([FromBody] PromptCreateDto promptCreateDto,
-            [FromHeader] HeadersDto headersDto)
+                                    [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.CreateUniquePrompt(promptCreateDto, headersDto.EmailCreator);
             return Ok(result);
@@ -48,7 +48,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives the request to update a Prompt in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public IActionResult Update([FromBody] PromptUpdateDto promptUpdateDto,
-            [FromHeader] HeadersDto headersDto)
+                                    [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.Update(promptUpdateDto,
                 headersDto.EmailCreator);
@@ -66,7 +66,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives an email and returns its prompts paginated")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
         public IActionResult FindByIdUserPaged([FromQuery] PagedDataDto pagedDataDto,
-            [FromHeader] HeadersDto headersDto)
+                                               [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.FindByIdUserPaged(pagedDataDto,
                 headersDto.EmailCreator);
@@ -98,7 +98,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that receives the request to return all prompts paginated")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
         public IActionResult FindAllPaged([FromQuery] PagedDataDto pagedDataDto,
-            [FromHeader] HeadersDto headersDto)
+                                          [FromHeader] HeadersDto headersDto)
         {
             var result = _promptServices.FindAllPaged(pagedDataDto,
                 headersDto.EmailCreator);
@@ -130,7 +130,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public IActionResult ValidateOwnership(int id,
-            [FromHeader] HeadersDto headersDto)
+                                               [FromHeader] HeadersDto headersDto)
         {
             _validatePrompt.ValidateOwnership(id,
                 headersDto.EmailCreator);
@@ -161,7 +161,8 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [Route("Templates")]
         [SwaggerOperation("Endpoint that retrieves prompt templates from external source")]
         [ProducesResponseType(typeof(List<PromptTemplateDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindPromptTemplates([FromQuery] string? query, [FromQuery] string? orderBy)
+        public async Task<IActionResult> FindPromptTemplates([FromQuery] string? query, 
+                                                             [FromQuery] string? orderBy)
         {
             var result = await _promptServices.FindPromptTemplates(query, orderBy);
             return Ok(result);
@@ -178,7 +179,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [SwaggerOperation("Endpoint that imports selected prompt templates")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> ImportPrompts([FromBody] List<Guid> templateIds,
-            [FromHeader] HeadersDto headersDto)
+                                                       [FromHeader] HeadersDto headersDto)
         {
             if (templateIds == null || templateIds.Count == 0)
             {
