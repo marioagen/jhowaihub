@@ -102,7 +102,7 @@ namespace WoopiAiHub.Application.Services
         private async Task<List<PromptTemplateDto>> FindAllTemplates()
         {
             var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
-            var promptTemplateFileName = _config["Chat:FunctionApiKey"];
+
             var response = await _functionFileRetriever.Get(_promptSettings.TemplateFileName,
                                                             functionApiKeyAuth!,
                                                             _promptSettings.Folder);
