@@ -451,7 +451,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             if (updated)
             {
-                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id);
+                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id, string.Empty);
                 
                 if (dependentStepTool != null)
                 {

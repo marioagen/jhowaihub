@@ -14,6 +14,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
 using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services
@@ -28,6 +29,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IHubNotifier _hubNotifier;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
+        private readonly IWorkflowRepository _workflowRepository;
         private readonly IFunctionFileRetriever _functionFileRetriever;
         private readonly IConfiguration _config;
         private readonly PromptSettings _promptSettings;
@@ -39,6 +41,8 @@ namespace WoopiAiHub.Application.Services
                               IStepToolExecutionRepository stepToolExecutionRepository,
                               IStepToolOutputRepository stepToolOutputRepository,
                               IHubNotifier hubNotifier,
+                              IDocumentHistoryRepository documentHistoryRepository,
+                              IWorkflowRepository workflowRepository)
                               IDocumentHistoryRepository documentHistoryRepository,
                               IFunctionFileRetriever functionFileRetriever,
                               IOptions<PromptSettings> promptSettingsOptions,
@@ -52,6 +56,7 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _hubNotifier = hubNotifier;
             _documentHistoryRepository = documentHistoryRepository;
+            _workflowRepository=workflowRepository;
             _functionFileRetriever = functionFileRetriever;
             _config = config;
             _promptSettings = promptSettingsOptions.Value;
@@ -484,7 +489,9 @@ namespace WoopiAiHub.Application.Services
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId);
+            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepTool.Id);
+
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, tool != null ? tool.Name : string.Empty);
         }
 
         /// <summary>

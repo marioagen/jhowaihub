@@ -30,7 +30,8 @@ namespace WoopiAiHub.Api.Hubs
         public async Task CardProgessAsync(string userEmail, 
                                            int cardId, 
                                            double percentage,
-                                           int stepId)
+                                           int stepId,
+                                           string toolName)
         {
             var connections = _connectionMapping.GetConnections(userEmail);
             foreach (var connectionId in connections)
@@ -39,7 +40,8 @@ namespace WoopiAiHub.Api.Hubs
                 {
                     CardId = cardId,
                     Percentage = percentage,
-                    StepId = stepId
+                    StepId = stepId,
+                    ToolName = toolName
                 });
             }
         }

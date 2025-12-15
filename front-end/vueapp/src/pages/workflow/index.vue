@@ -252,7 +252,6 @@ export default {
         await signalRService.startConnection();
         signalRService.on(this.signalrEventExecutionChanged, (message) => {
             if (!this.kanbanCards.steps) return;
-
             let foundCard = null;
 
             for (let i = 0; i < this.kanbanCards.steps.length; i++) {
@@ -261,6 +260,7 @@ export default {
                     const card = step.cards.find(c => c.id === message.cardId);
                     if (card) {
                         foundCard = card;
+                        foundCard.toolName = message.toolName;
                         break;
                     }
                 }
