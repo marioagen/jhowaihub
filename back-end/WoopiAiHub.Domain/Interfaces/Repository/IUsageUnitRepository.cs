@@ -6,6 +6,5 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     public interface IUsageUnitRepository
     {
         Task<IEnumerable<UsageUnitDto>> FindAllAsync();
-        Task<List<UsageTotalByModelEmbeddingDto>> FindTotalUsageCostAsync(DateTime? periodStart, DateTime? periodEnd);
     }
 }

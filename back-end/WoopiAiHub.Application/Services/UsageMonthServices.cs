@@ -77,9 +77,7 @@ namespace WoopiAiHub.Application.Services
         {
             var startDate = FindDate(dateFilterDto.Start);
             var endDate = FindDate(dateFilterDto.End);
-            var itens = await _usageUnitRepository.FindTotalUsageCostAsync(startDate, endDate);
-
-            return itens.Sum(s => s.Total);
+            return await _usageMonthRepository.FindTotalUsageCostAsync(startDate, endDate);
         }
     }
 }
