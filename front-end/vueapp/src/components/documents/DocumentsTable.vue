@@ -134,6 +134,7 @@
             },
             isEmbedding: false,
             isDeleting: false,
+            docDataEmbedding: {},
         }),
         methods: {
             getDocuments() {
@@ -205,6 +206,15 @@
                 return dates.formatDate(date);
             },
             embedData(id) {
+                if(this.docDataEmbedding === undefined) {
+                    return this.$notify({
+                        title: "documents.title",
+                        message: "documents.embeddError",
+                        variant: 'danger',
+                        icon: 'CircleX',
+                    });
+                }
+                
                 this.docDataEmbedding.Id = id;
                 this.isEmbedding = true
             },

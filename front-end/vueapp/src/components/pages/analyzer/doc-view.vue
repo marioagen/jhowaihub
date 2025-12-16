@@ -75,7 +75,7 @@
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import ModalReprocess from "@/components/pages/analyzer/modal-reprocess";
-    import ModalAlert from "@/components/common/modal-alert";
+    import ModalAlert from "@/components/pages/analyzer/modal-alert";
     import LogService from '@/services/log/logService';
 
     const VIEW_MODE_PDF = 'pdf';

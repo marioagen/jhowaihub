@@ -78,7 +78,7 @@
         :cancelLabel="$t('labelCancel')" @open="deletePrompts" @close="closeModal" />
 </template>
 <script>
-import ModalAlert from "@/components/common/modal-alert";
+import ModalAlert from "@/components/pages/analyzer/modal-alert";
 import PromptService from "@/services/prompts/PromptsService";
 export default {
     name: "PromptComponent",

@@ -2,7 +2,7 @@
 
 import DocumentsUpload from "@/pages/documents/uploads.vue";
 import DocumentsPage from "@/pages/documents/index.vue";
-import NormalizeIndex from "@/components/pages/normalize/loading";
+import NormalizeIndex from "@/components/documents/EmbeddingDocument";
 import AnalyzerIndex from "@/components/pages/analyzer";
 
 import LoginIndex from "@/pages/login.vue";

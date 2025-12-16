@@ -342,6 +342,9 @@
             noWorkflowFound: "Nenhum workflow vinculado ao seus times do usuário",
             selectionList: "Lista de seleção",
             warningWorkflowNotListed: "O workflow não apareceu na lista? É porque seus times não tem um workflow associado a eles.",
+            loading: "Documento em processamento",
+            uploadError: "Erro ao importar documento",
+            uploadSuccess: "Documento importado com sucesso.",
             noFileChosen: "Nenhum arquivo escolhido",
             noTeamChosen: "Nenhum time escolhido",
         }

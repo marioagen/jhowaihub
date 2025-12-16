@@ -95,7 +95,7 @@
     </div>
 </template>
 <script>
-    import GlobalEventService from "../../services/globalEventService";
+    import GlobalEventService from "@/services/globalEventService";
 
     export default {
         name: "ToastNotification",

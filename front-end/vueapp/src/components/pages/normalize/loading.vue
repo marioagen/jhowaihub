@@ -34,7 +34,7 @@
     />
 </template>
 <script>
-    import ModalAlert from "@/components/common/modal-alert";
+    import ModalAlert from "@/components/pages/analyzer/modal-alert";
     import api from "@/services/api";
 
     export default {
