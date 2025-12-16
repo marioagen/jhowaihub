@@ -17,7 +17,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-secondary btn-sm" @click="goBack">
-                            {{ $t("labelCancel") }}
+                            {{ $t("common.cancel") }}
                         </button>
                         <button class="btn btn-primary btn-sm" @click="importSelected"
                             :disabled="selectedTemplates.length === 0 || importing">
@@ -60,7 +60,7 @@
 
                 <div class="row loading-container" v-if="loading">
                     <div class="data-load">
-                        <i class="fas fa-sync-alt fa-spin text-secondary"></i>&nbsp;{{ $t('labelLoading') }}..
+                        <i class="fas fa-sync-alt fa-spin text-secondary"></i>&nbsp;{{ $t('common.loading') }}..
                     </div>
                 </div>
                 <div class="row loading-container" v-if="!loading && templates.length === 0">
@@ -113,7 +113,7 @@
                     </div>
                     <div class="text-end">
                         <small class="text-muted">
-                            {{ $t("labelCreated") }} {{ formatDate(selectedTemplate?.created) }}
+                            {{ $t("dashboard.created") }} {{ formatDate(selectedTemplate?.created) }}
                         </small>
                     </div>
                 </div>
@@ -121,7 +121,7 @@
             <template #footer>
                 <div class="modal-footer justify-content-center">
                     <button type="button" class="btn btn-secondary" @click="closeModal">
-                        {{ $t("labelClose") }}
+                        {{ $t("common.close") }}
                     </button>
                 </div>
             </template>

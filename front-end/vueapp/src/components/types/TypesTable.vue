@@ -1,12 +1,12 @@
 <template>
     <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
         <LucideIcon icon="Trash2" :size="15" />
-        {{ $t("labelDelete") }}
+        {{ $t("common.delete") }}
     </button>
     <div>
         <TableComponent
-            modalName="labelTypes"
-            emptyMessage="labelNoDocumentTypeWasFound"
+            modalName="types.title"
+            emptyMessage="types.noDocumentTypeWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -22,7 +22,7 @@
                     <li>
                         <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
                             <LucideIcon icon="SquarePen" />
-                            {{ $t("labelEdit") }}
+                            {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
@@ -31,7 +31,7 @@
                             @click="openConfirmation(data.row)"
                         >
                             <LucideIcon icon="Trash2" />
-                            {{ $t("labelDelete") }}
+                            {{ $t("common.delete") }}
                         </a>
                     </li>
                 </DropdownComponent>
@@ -41,10 +41,10 @@
     <TypesModal :isEdit="true" @reload="reload" ref="TypesModal" />
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteType"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        title="types.youAreAboutToDeleteType"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
@@ -72,11 +72,11 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "id" },
-                    { key: "name", label: "labelName" },
-                    { key: "created", label: "labelInclusionDate" },
-                    { key: "emailCreator", label: "labelOwner" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "id", label: "common.id" },
+                    { key: "name", label: "common.name" },
+                    { key: "created", label: "documents.inclusionDate" },
+                    { key: "emailCreator", label: "common.owner" },
+                    { key: "actions", label: "common.action" },
                 ],
                 data: [],
                 pagination: {
@@ -159,14 +159,14 @@
                             this.getTypes({ search: "", page: 1, type: null });
                             this.$notify({
                                 title: "Tipos",
-                                message: this.$t("labelDocumentTypeRemoveSuccess"),
+                                message: this.$t("types.removeSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "Tipos",
-                                message: this.$t("labelDocumentTypeRemoveError"),
+                                message: this.$t("types.removeError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });

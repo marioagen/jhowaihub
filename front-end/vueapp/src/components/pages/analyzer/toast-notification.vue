@@ -13,9 +13,9 @@
                     {{
                         isFinished
                             ? errorUpload
-                                ? $t("labelUploadError")
-                                : $t("labelUploadComplete")
-                            : $t("labelAlmost")
+                                ? $t("documents.uploadError")
+                                : $t("documents.uploadComplete")
+                            : $t("common.almost")
                     }}
                 </strong>
                 <button
@@ -32,7 +32,7 @@
                 <button
                     type="button"
                     class="fa fa-times btn btn-color"
-                    :title="$t('labelClose')"
+                    :title="$t('common.close')"
                     data-bs-dismiss="toast"
                     aria-label="Close"
                     @click="close"
@@ -42,7 +42,7 @@
             <div class="toast-body toast-upload" v-if="!isFinished">
                 <a>{{ uploadingFiles }} -</a>
                 <a>{{ maxSizeUpload }}</a>
-                <a class="margin-label">{{ $t("labelShowingFilesUpload") }}</a>
+                <a class="margin-label">{{ $t("documents.showingFilesUpload") }}</a>
                 <div class="scroll-area">
                     <div :class="['extra-content', { show: isExpanded }]" v-for="(item, index) in dataUpload">
                         <div class="row">
@@ -56,7 +56,7 @@
                                     style="font-size: smaller"
                                     v-if="!item.success && !item.isLoading"
                                 >
-                                    {{ $t("labelFailed") }}
+                                    {{ $t("common.failed") }}
                                 </span>
                                 <div class="progress" style="height: 5px">
                                     <div
@@ -86,10 +86,10 @@
                 </div>
             </div>
             <div class="toast-body toast-success" v-if="isFinished && !errorUpload">
-                <p>{{ $t("labelUploadedFiles") }}</p>
+                <p>{{ $t("documents.uploadedFiles") }}</p>
             </div>
             <div class="toast-body toast-danger" v-if="isFinished && errorUpload">
-                <p>{{ $t("labelUploadedFilesError") }}</p>
+                <p>{{ $t("documents.uploadedFilesError") }}</p>
             </div>
         </div>
     </div>

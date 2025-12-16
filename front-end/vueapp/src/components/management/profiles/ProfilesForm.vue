@@ -20,37 +20,37 @@
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="save">
                         <LucideIcon icon="Save" :size="15" />
-                        {{ $t("labelSave") }}
+                        {{ $t("common.save") }}
                     </button>
                 </div>
             </div>
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
-                    <label>{{ $t("labelName") }}</label>
+                    <label>{{ $t("common.name") }}</label>
                     <input v-model="profileData.name" class="form-control form-control-sm"
-                        @blur="nameError = profileData.name ? '' : $t('labelRequiredField')" @input="nameError = ''" />
+                        @blur="nameError = profileData.name ? '' : $t('management.users.requiredField')" @input="nameError = ''" />
                     <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label mb-0">{{ $t("labelPermissions") }}</label>
-                            <span class="text-muted">{{ selectedPermissions.length }} {{ $t("labelSelectedWithO")
+                            <label class="form-label mb-0">{{ $t("management.profiles.permissions") }}</label>
+                            <span class="text-muted">{{ selectedPermissions.length }} {{ $t("management.teams.selectedWithO")
                             }}</span>
                         </div>
                         <div class="mb-3">
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
                                 <input type="text" class="form-control form-control-sm"
-                                    :placeholder="$t('labelSearchPermissions')" v-model="searchTerm" />
+                                    :placeholder="$t('management.profiles.searchPermissions')" v-model="searchTerm" />
                             </div>
                         </div>
                         <div class="mb-3">
                             <button type="button" class="btn btn-outline-primary btn-sm me-2" @click="selectAll">
                                 <LucideIcon icon="CheckCheck" :size="15" />
-                                {{ $t("labelSelectAll") }}
+                                {{ $t("common.selectAll") }}
                             </button>
                             <button type="button" class="btn btn-outline-secondary btn-sm" @click="clearSelection">
                                 <LucideIcon icon="CircleX" :size="15" />
-                                {{ $t("labelClearSelection") }}
+                                {{ $t("common.clearSelection") }}
                             </button>
                         </div>
                         <div v-if="isLoadingPermissions">

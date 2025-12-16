@@ -34,7 +34,7 @@
                     <li>
                         <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToEdit(data.row)">
                             <LucideIcon icon="SquarePen" />
-                            {{ $t("labelEdit") }}
+                            {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
@@ -43,7 +43,7 @@
                             @click="openConfirmation(data.row)"
                         >
                             <LucideIcon icon="Trash2" />
-                            {{ $t("labelDelete") }}
+                            {{ $t("common.delete") }}
                         </a>
                     </li>
                 </DropdownComponent>
@@ -53,9 +53,9 @@
     <ConfirmModal
         id="deleteConfirm"
         title="questions.removeTitle"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
@@ -81,7 +81,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "id" },
+                    { key: "id", label: "common.id" },
                     { key: "name", label: "workflow.name" },
                     { key: "teams", label: "workflow.teams" },
                     { key: "actions", label: "workflow.actions" },

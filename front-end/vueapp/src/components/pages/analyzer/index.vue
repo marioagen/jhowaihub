@@ -40,7 +40,7 @@
                 </div>
             </div>
             <div v-if="isExpandedHistory" style="position: absolute; top: 50%">
-                <a class="btn btn-light btn-sm shadow" :title="$t('labelQuestionnaireAndAi')" @click="expandHistory">
+                <a class="btn btn-light btn-sm shadow" :title="$t('quizzes.questionnaireAndAi')" @click="expandHistory">
                     <img src="./../../../assets/img/prompt.png" />
                 </a>
             </div>
@@ -105,9 +105,9 @@ export default {
         },
         setCrumbsData: function () {
             this.crumbsData = [
-                { crumb: this.$t("labelDocuments"), link: { to: "Documents" } },
-                { crumb: this.$t("labelListing"), link: { to: "Documents", queryPage: this.$route.query.page } },
-                { crumb: this.$t("labelConsult"), link: { to: "Analyzer", queryPage: this.$route.query.page } },
+                { crumb: this.$t("documents.title"), link: { to: "Documents" } },
+                { crumb: this.$t("documents.listing"), link: { to: "Documents", queryPage: this.$route.query.page } },
+                { crumb: this.$t("common.consult"), link: { to: "Analyzer", queryPage: this.$route.query.page } },
             ];
         },
         expandHistory: function () {

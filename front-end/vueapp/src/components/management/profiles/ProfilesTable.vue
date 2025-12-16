@@ -15,14 +15,14 @@
                 {{ data.row.users.length }}
             </template>
             <template #cell-permissions="{ data }">
-                {{ data.row.permissions.length }} {{ $t("labelShowingToTotal") }} {{ this.permissionsCount }}
+                {{ data.row.permissions.length }} {{ $t("common.showingToTotal") }} {{ this.permissionsCount }}
             </template>
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
                         <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToForm(data.row)">
                             <LucideIcon icon="SquarePen" />
-                            {{ $t("labelEdit") }}
+                            {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
@@ -31,7 +31,7 @@
                             @click="openConfirmation(data.row)"
                         >
                             <LucideIcon icon="Trash2" />
-                            {{ $t("labelDelete") }}
+                            {{ $t("common.delete") }}
                         </a>
                     </li>
                 </DropdownComponent>

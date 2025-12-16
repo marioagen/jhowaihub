@@ -1,7 +1,7 @@
 <template>
     <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
         <LucideIcon icon="Trash2" :size="15" />
-        {{ $t("labelDelete") }}
+        {{ $t("common.delete") }}
     </button>
     <div>
         <TableComponent
@@ -29,7 +29,7 @@
                         <li>
                             <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
                                 <LucideIcon icon="SquarePen" />
-                                {{ $t("labelEdit") }}
+                                {{ $t("common.edit") }}
                             </a>
                         </li>
                         <li>
@@ -38,7 +38,7 @@
                                 @click="openConfirmation(data.row)"
                             >
                                 <LucideIcon icon="Trash2" />
-                                {{ $t("labelDelete") }}
+                                {{ $t("common.delete") }}
                             </a>
                         </li>
                     </ul>
@@ -54,9 +54,9 @@
     <ConfirmModal
         id="deleteConfirm"
         title="tools.removeTitle"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
@@ -82,12 +82,12 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "id" },
-                    { key: "name", label: "labelName" },
+                    { key: "id", label: "common.id" },
+                    { key: "name", label: "common.name" },
                     { key: "toolType", label: "tools.type" },
                     { key: "inputData", label: "tools.entry" },
                     { key: "outputData", label: "tools.output" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "actions", label: "common.action" },
                 ],
                 data: [],
                 pagination: {

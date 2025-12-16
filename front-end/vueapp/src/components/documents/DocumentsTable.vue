@@ -5,7 +5,7 @@
         @click="openConfirmation"
     >
         <LucideIcon icon="Trash2" :size="15" />
-        {{ $t("labelDelete") }}
+        {{ $t("common.delete") }}
     </button>
     <div v-if="showTable">
         <TableComponent

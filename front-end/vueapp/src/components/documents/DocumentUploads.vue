@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="mb-1">
                                     <label class="form-label" for="descId">
-                                        {{ $t("labelDescriptionDocumentNote") }}
+                                        {{ $t("documents.descriptionDocumentNote") }}
                                     </label>
                                     <textarea rows="5" id="descId" v-validate name="text" v-model="form.description"
                                         required
@@ -69,13 +69,13 @@
                                             {{ 250 - form.description.length }}
                                             {{
                                                 250 - form.description.length === 1
-                                                    ? $t("labelCharacter")
-                                                    : $t("labelCharacters")
+                                                    ? $t("common.character")
+                                                    : $t("common.characters")
                                             }}
                                         </a>
                                         <a v-if="form.description.length > 250"
                                             class="char-counter char-error exceedDesc">
-                                            {{ $t("labelExceedDesc") }}
+                                            {{ $t("questions.numberOfQuestionsHasBeenExceeded") }}
                                         </a>
                                     </div>
                                 </div>
@@ -89,7 +89,7 @@
                                             </label>
                                         </div>
                                         <span class="selected-count">
-                                            {{ selectedWorkflows.length }} {{ $t("labelSelectedWithO") }}
+                                            {{ selectedWorkflows.length }} {{ $t("management.teams.selectedWithO") }}
                                         </span>
                                     </div>
                                     <div class="text-muted small mb-3">
@@ -97,7 +97,7 @@
                                     </div>
                                     <div v-if="hasError" class="text-danger small mb-3 d-flex align-items-center gap-1">
                                         <span class="text-danger">*</span>
-                                        <span>{{ $t("labelRequiredField") }}</span>
+                                        <span>{{ $t("management.users.requiredField") }}</span>
                                     </div>
                                     <div class="mb-3 rounded">
                                         <div class="input-group">
@@ -112,12 +112,12 @@
                                         <button type="button" class="btn btn-custom-light btn-sm"
                                             @click="selectAll($event)">
                                             <LucideIcon icon="Check" class="me-1" />
-                                            {{ $t("labelSelectAll") }}
+                                            {{ $t("common.selectAll") }}
                                         </button>
                                         <button type="button" class="btn btn-custom-light btn-sm"
                                             @click="clearSelection($event)">
                                             <LucideIcon icon="X" class="me-1" />
-                                            {{ $t("labelClearSelection") }}
+                                            {{ $t("common.clearSelection") }}
                                         </button>
                                     </div>
                                     <div class="text-muted small mb-1">
@@ -126,7 +126,7 @@
                                     <div class="border rounded p-1 user-list scrollable-list bg-white">
                                         <div v-if="isLoading" class="text-center">
                                             <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden">{{ $t("labelloading") }}</span>
+                                                <span class="visually-hidden">{{ $t("common.loading") }}</span>
                                             </div>
                                         </div>
                                         <div v-else-if="filtersWorkflowList.length === 0"
@@ -157,13 +157,13 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary m-2 float-right" :title="$t('labelSend')"
+                                <button type="submit" class="btn btn-primary m-2 float-right" :title="$t('common.send')"
                                     :disabled="form.description.length > 250">
-                                    {{ $t("labelSend") }}
+                                    {{ $t("common.send") }}
                                 </button>
                                 <router-link class="btn btn-secondary m-2 btn-custom-cancel float-right"
-                                    :to="{ name: 'Documents', query: { page: '1' } }" :title="$t('labelCancel')">
-                                    {{ $t("labelCancel") }}
+                                    :to="{ name: 'Documents', query: { page: '1' } }" :title="$t('common.cancel')">
+                                    {{ $t("common.cancel") }}
                                 </router-link>
                             </form>
                         </div>
@@ -174,9 +174,9 @@
         </div>
         <!-- Component ToastAlert -->
         <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
-        <modal-alert v-if="modalAlertShow" :type="'Confirm'" :alertTitle="$t('labelRemoveAllFilesDropzone')"
-            :alertMessage="$t('labelThisActionRemoveAllFiles')" :okLabel="$t('labelConfirm')"
-            :cancelLabel="$t('labelCancel')" @open="removeAllFiles" @close="closeModal" />
+        <modal-alert v-if="modalAlertShow" :type="'Confirm'" :alertTitle="$t('documents.upload.removeAllDropzone')"
+            :alertMessage="$t('documents.thisActionRemoveAllFiles')" :okLabel="$t('common.confirm')"
+            :cancelLabel="$t('common.cancel')" @open="removeAllFiles" @close="closeModal" />
     </main>
 </template>
 
@@ -204,7 +204,7 @@ export default {
                 el.addEventListener("invalid", function (event) {
                     event.preventDefault();
                     if (el.validity.valueMissing) {
-                        el.setCustomValidity(this.$t("labelFillInThisField"));
+                        el.setCustomValidity(this.$t("common.fillInThisField"));
                     }
                     el.reportValidity();
                 });
@@ -285,8 +285,8 @@ export default {
         },
         setCrumbsData: function () {
             this.crumbsData = [
-                { crumb: this.$t("labelDocuments"), link: { to: "Documents" } },
-                { crumb: this.$t("labelUpload"), link: { to: "DocumentUpload" } },
+                { crumb: this.$t("documents.title"), link: { to: "Documents" } },
+                { crumb: this.$t("common.upload"), link: { to: "DocumentUpload" } },
             ];
         },
         onFileAdded(message) {
@@ -325,7 +325,7 @@ export default {
                 .then(function (response) {
                     if (response.data === true) {
                         self.clearMyInterval();
-                        self.alertToast(self.$t("labelNumberOfPagesHasBeenExceeded"), "toast-warning");
+                        self.alertToast(self.$t("documents.numberOfPagesHasBeenExceeded"), "toast-warning");
                     }
                 })
                 .catch(function (e) {
@@ -351,7 +351,7 @@ export default {
             window.onbeforeunload = function () {
                 return true;
             };
-            this.message = this.$t("labelSendingTheDocument");
+            this.message = this.$t("documents.sendingTheDocument");
             this.isLoading = true;
 
             const apiHeaders = {
