@@ -86,8 +86,8 @@
                         window.onbeforeunload = null;
                         if(response.error !== undefined) {
                             return this.$notify({
-                                title: this.$t('labelFailedToNormalize'),
-                                message: this.$t('labelTheFileMayBeUnreadableOrHaveAnError'),
+                                title: this.$t('documents.failedToNormalize'),
+                                message: this.$t('documents.theFileMayBeUnreadableOrHaveAnError'),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });
@@ -122,7 +122,7 @@
             },
         },
         created() {
-            this.message = this.$t("labelPreparingTheDocument");
+            this.message = this.$t("documents.preparingTheDocument");
             this.verifyNormalizedDoc();
         },
     };

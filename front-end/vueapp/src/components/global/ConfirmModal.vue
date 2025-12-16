@@ -64,19 +64,19 @@
             },
             title: {
                 type: String,
-                default: "labelConfirmTitle",
+                default: "modals.confirmTitle",
             },
             message: {
                 type: String,
-                default: "labelMessage",
+                default: "modals.message",
             },
             cancelText: {
                 type: String,
-                default: "labelCancelMessage",
+                default: "modals.cancelMessage",
             },
             confirmText: {
                 type: String,
-                default: "labelConfirmMessage",
+                default: "modals.confirmMessage",
             },
             confirmVariant: {
                 type: String,
