@@ -17,7 +17,7 @@
                     <div>
                         <form @submit.prevent="save">
                             <div class="mb-3">
-                                <label class="form-label">{{ $t("common.model") }}</label>
+                                <label class="form-label">{{ $t("dashboard.model") }}</label>
                                 <select class="form-select" v-model="modelSelected">
                                     <option value="">{{ $t("common.select") }}</option>
                                     <option value="text-embedding-3-large">text-embedding-3-large</option>
