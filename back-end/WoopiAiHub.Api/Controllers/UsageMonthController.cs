@@ -28,8 +28,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet]
         [SwaggerOperation("Endpoint that receives the request to list usage month by usage type")]
         [ProducesResponseType(typeof(ICollection<DashboardUsageDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ICollection<DashboardUsageDto>>> FindByUsageType(
-            [FromQuery] UsageTypeFilterDto usageMonthFilterDto)
+        public async Task<ActionResult<ICollection<DashboardUsageDto>>> FindByUsageType([FromQuery] UsageTypeFilterDto usageMonthFilterDto)
         {
             var result = await _usageMonthServices.FindDataByUsageType(usageMonthFilterDto);
             return Ok(result);
@@ -43,8 +42,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("FindByModel")]
         [SwaggerOperation("Endpoint that receives the request to list usage month by model embeddings")]
         [ProducesResponseType(typeof(ICollection<DashboardUsageDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ICollection<DashboardUsageDto>>> FindByModelEmbedding(
-            [FromQuery] ModelEmbeddingFilterDto modelEmbeddingFilterDto)
+        public async Task<ActionResult<ICollection<DashboardUsageDto>>> FindByModelEmbedding([FromQuery] ModelEmbeddingFilterDto modelEmbeddingFilterDto)
         {
             var result = await _usageMonthServices.FindDataByModelEmbedding(modelEmbeddingFilterDto);
             return Ok(result);
