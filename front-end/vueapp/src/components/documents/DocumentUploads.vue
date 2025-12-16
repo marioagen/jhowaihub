@@ -89,7 +89,7 @@
                                             </label>
                                         </div>
                                         <span class="selected-count">
-                                            {{ selectedWorkflows.length }} {{ $t("management.teams.selectedWithO") }}
+                                            {{ selectedWorkflows.length }} {{ $t("common.selected") }}
                                         </span>
                                     </div>
                                     <div class="text-muted small mb-3">
@@ -97,7 +97,7 @@
                                     </div>
                                     <div v-if="hasError" class="text-danger small mb-3 d-flex align-items-center gap-1">
                                         <span class="text-danger">*</span>
-                                        <span>{{ $t("management.users.requiredField") }}</span>
+                                        <span>{{ $t("validation.required") }}</span>
                                     </div>
                                     <div class="mb-3 rounded">
                                         <div class="input-group">
@@ -204,7 +204,7 @@ export default {
                 el.addEventListener("invalid", function (event) {
                     event.preventDefault();
                     if (el.validity.valueMissing) {
-                        el.setCustomValidity(this.$t("common.fillInThisField"));
+                        el.setCustomValidity(this.$t("validation.fillInThisField"));
                     }
                     el.reportValidity();
                 });

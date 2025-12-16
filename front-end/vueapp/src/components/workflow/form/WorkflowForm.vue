@@ -22,7 +22,7 @@
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" :disabled="cantSave" type="button" @click="save">
                         <LucideIcon icon="Save" :size="15" />
-                        {{ $t("quizzes.formSave") }}
+                        {{ $t("common.save") }}
                     </button>
                 </div>
             </div>

@@ -64,7 +64,7 @@
             },
             title: {
                 type: String,
-                default: "modals.confirmTitle",
+                default: "common.confirm",
             },
             message: {
                 type: String,
@@ -72,11 +72,11 @@
             },
             cancelText: {
                 type: String,
-                default: "modals.cancelMessage",
+                default: "common.cancel",
             },
             confirmText: {
                 type: String,
-                default: "modals.confirmMessage",
+                default: "common.confirm",
             },
             confirmVariant: {
                 type: String,

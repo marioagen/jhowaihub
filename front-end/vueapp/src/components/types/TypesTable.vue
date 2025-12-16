@@ -76,7 +76,7 @@
                     { key: "name", label: "common.name" },
                     { key: "created", label: "documents.inclusionDate" },
                     { key: "emailCreator", label: "common.owner" },
-                    { key: "actions", label: "common.action" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -166,7 +166,7 @@
                         } else {
                             this.$notify({
                                 title: "Tipos",
-                                message: this.$t("types.removeError"),
+                                message: this.$t("types.errors.removeError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });

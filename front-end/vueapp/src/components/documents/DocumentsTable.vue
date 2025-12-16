@@ -28,7 +28,7 @@
                 />
                 <BadgeComponent
                     v-else 
-                    text="documents.statusList.analyzed"
+                    text="common.analyzed"
                     variant="success"
                 />
             </template>
@@ -49,7 +49,7 @@
                             @click="embedData(data.row.id)"
                         >
                             <LucideIcon icon="TextSearch" />
-                            {{ $t("documents.actions.analyze") }}
+                            {{ $t("common.analyze") }}
                         </a>
                     </li>
                     <li v-else>
@@ -107,12 +107,12 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "name", label: "documents.name" },
-                    { key: "description", label: "documents.description" },
+                    { key: "name", label: "common.name" },
+                    { key: "description", label: "common.description" },
                     { key: "created", label: "documents.createdDate" },
-                    { key: "status", label: "documents.status" },
+                    { key: "status", label: "common.status" },
                     { key: "workflows", label: "documents.workflows" },
-                    { key: "actions", label: "questions.actions" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {

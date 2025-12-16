@@ -55,7 +55,7 @@
                 return this.isEdit ? "types.editTitleType" : "types.saveTitleType";
             },
             saveText() {
-                return this.isEdit ? "types.editType" : "types.saveType";
+                return this.isEdit ? "common.edit" : "types.saveType";
             },
         },
         methods: {
@@ -93,7 +93,7 @@
                             });
                         }
                         const messageKey =
-                            result.status === 409 ? "types.typeDocAlreadyExists" : "types.typeDocError";
+                            result.status === 409 ? "types.typeDocAlreadyExists" : "types.errors.invalid";
                         this.$notify({
                             title: "Tipos",
                             message: this.$t(messageKey),
@@ -120,7 +120,7 @@
                         }
 
                         const messageKey =
-                            result.status === 409 ? "types.typeDocAlreadyExists" : "types.typeDocError";
+                            result.status === 409 ? "types.typeDocAlreadyExists" : "types.errors.invalid";
                         this.$notify({
                             title: "Tipos",
                             message: this.$t(messageKey),

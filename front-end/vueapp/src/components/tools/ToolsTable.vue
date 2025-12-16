@@ -86,8 +86,8 @@
                     { key: "name", label: "common.name" },
                     { key: "toolType", label: "tools.type" },
                     { key: "inputData", label: "tools.entry" },
-                    { key: "outputData", label: "tools.output" },
-                    { key: "actions", label: "common.action" },
+                    { key: "outputData", label: "common.output" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {

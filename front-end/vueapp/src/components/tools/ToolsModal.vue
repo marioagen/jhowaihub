@@ -89,7 +89,7 @@
                         </Field>
                     </div>
                     <div class="col-6">
-                        <label>{{ $t("tools.form.output") }}</label>
+                        <label>{{ $t("common.output") }}</label>
                         <Field name="outputDataId" rules="required" v-slot="{ field, errorMessage }">
                             <select v-bind="field" class="form-select form-select-sm"
                                 :class="{ 'is-invalid': errorMessage }">

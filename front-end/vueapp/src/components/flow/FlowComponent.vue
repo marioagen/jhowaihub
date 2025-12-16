@@ -20,7 +20,7 @@
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm me-2" @click="save">
                         <LucideIcon icon="Save" :size="15" />
-                        {{ $t("flow.save") }}
+                        {{ $t("common.save") }}
                     </button>
                 </div>
             </div>

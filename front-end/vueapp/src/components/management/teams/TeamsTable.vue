@@ -166,7 +166,7 @@
 
                         this.$notify({
                             title: 'management.teams.title',
-                            message: 'management.teams.deleteError',
+                            message: 'management.teams.errors.deleteError',
                             variant: 'danger',
                             icon: 'CircleX',
                         });

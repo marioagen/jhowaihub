@@ -77,10 +77,10 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "common.id" },
-                    { key: "description", label: "questions.description" },
+                    { key: "description", label: "common.description" },
                     { key: "created", label: "questions.createdData" },
-                    { key: "emailCreator", label: "questions.owner" },
-                    { key: "actions", label: "questions.actions" },
+                    { key: "emailCreator", label: "common.owner" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -170,7 +170,7 @@
                         } else {
                             this.$notify({
                                 title: this.$t("questions.title"),
-                                message: this.$t("removeError.removeError"),
+                                message: this.$t("questions.errors.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });

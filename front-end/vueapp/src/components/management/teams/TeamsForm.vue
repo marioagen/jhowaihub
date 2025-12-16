@@ -305,10 +305,10 @@
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-                        let errorMessage = "management.teams.invalid";
+                        let errorMessage = "management.teams.errors.invalid";
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
-                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.duplicated"));
-                            errorMessage = "management.teams.duplicated";
+                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.errors.duplicated"));
+                            errorMessage = "management.teams.errors.duplicated";
                         } 
                         this.$notify({
                             title: 'management.teams.title',
@@ -361,10 +361,10 @@
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-                        let errorMessage = "management.teams.invalid";
+                        let errorMessage = "management.teams.errors.invalid";
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
-                            this.$refs.formRef.setFieldError("teamName", this.$t("management.users.duplicated"));
-                            errorMessage = "management.users.duplicated";
+                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.errors.duplicated"));
+                            errorMessage = "management.teams.errors.duplicated";
                         } 
                         this.$notify({
                             title: 'management.users.title',

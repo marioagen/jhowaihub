@@ -13,7 +13,7 @@
                     {{
                         isFinished
                             ? errorUpload
-                                ? $t("documents.uploadError")
+                                ? $t("documents.errors.uploadError")
                                 : $t("documents.uploadComplete")
                             : $t("common.almost")
                     }}

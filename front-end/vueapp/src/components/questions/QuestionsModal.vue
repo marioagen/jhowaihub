@@ -9,7 +9,7 @@
 
         <template #body>
             <div class="modal-body">
-                <label>{{ $t("questions.description") }}</label>
+                <label>{{ $t("common.description") }}</label>
                 <textarea rows="7" v-model="questionData.description" class="form-control" />
             </div>
         </template>
@@ -96,8 +96,8 @@ export default {
                     }
 
                     const messageKey = result.error === "labelQuestionAlreadyExists"
-                        ? "questions.errorDuplicated"
-                        : "questions.createError";
+                        ? "questions.errors.duplicated"
+                        : "questions.errors.createError";
 
                     this.$notify({
                         title: this.$t("questions.title"),
@@ -124,7 +124,7 @@ export default {
                         });
                     }
 
-                    const messageKey = result.status === 409 ? "questions.errorDuplicated" : "questions.editError";
+                    const messageKey = result.status === 409 ? "questions.errors.duplicated" : "questions.errors.editError";
                     this.$notify({
                        title: this.$t("questions.title"),
                         message: this.$t(messageKey),

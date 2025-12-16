@@ -28,12 +28,12 @@
                 <div class="main-div shadow-sm">
                     <label>{{ $t("common.name") }}</label>
                     <input v-model="profileData.name" class="form-control form-control-sm"
-                        @blur="nameError = profileData.name ? '' : $t('management.users.requiredField')" @input="nameError = ''" />
+                        @blur="nameError = profileData.name ? '' : $t('validation.required')" @input="nameError = ''" />
                     <div v-if="nameError" class="invalid-feedback d-block">{{ nameError }}</div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="form-label mb-0">{{ $t("management.profiles.permissions") }}</label>
-                            <span class="text-muted">{{ selectedPermissions.length }} {{ $t("management.teams.selectedWithO")
+                            <span class="text-muted">{{ selectedPermissions.length }} {{ $t("common.selected")
                             }}</span>
                         </div>
                         <div class="mb-3">
@@ -335,7 +335,7 @@ export default {
                     } else {
                         this.$notify({
                             title: "Profiles",
-                            message: this.$t("management.profiles.saveError"),
+                            message: this.$t("management.profiles.errors.saveError"),
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -367,7 +367,7 @@ export default {
                     } else {
                         this.$notify({
                             title: "Profiles",
-                            message: this.$t("management.profiles.editError"),
+                            message: this.$t("management.profiles.errors.editError"),
                             variant: "danger",
                             icon: "CircleX",
                         });

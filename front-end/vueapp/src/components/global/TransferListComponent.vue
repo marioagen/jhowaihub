@@ -51,7 +51,7 @@
             </div>
 
             <div class="col">
-                <h6>{{ $t("common.selected") }}</h6>
+                <h6>{{ $t("common.selectedList") }}</h6>
                 <input
                     type="text"
                     class="form-control form-control-sm mb-2"

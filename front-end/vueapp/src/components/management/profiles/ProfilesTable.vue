@@ -181,7 +181,7 @@
                         } else {
                             this.$notify({
                                 title: "Profiles",
-                                message: "management.profiles.deleteError",
+                                message: "management.profiles.errors.deleteError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });

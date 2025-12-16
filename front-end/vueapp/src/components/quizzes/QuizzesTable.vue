@@ -83,12 +83,12 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "common.id" },
-                    { key: "title", label: "quizzes.name" },
+                    { key: "title", label: "common.name" },
                     { key: "typeDocName", label: "quizzes.type" },
                     { key: "questions", label: "quizzes.questions" },
                     { key: "created", label: "quizzes.createdDate" },
-                    { key: "emailCreator", label: "quizzes.owner" },
-                    { key: "actions", label: "quizzes.actions" },
+                    { key: "emailCreator", label: "common.owner" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -180,7 +180,7 @@
                         } else {
                             this.$notify({
                                 title: "quizzes.title",
-                                message: "quizzes.removeError",
+                                message: "quizzes.errors.removeError",
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });

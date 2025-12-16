@@ -95,7 +95,7 @@
                         <SelectionListComponent
                             :id="'teams'"
                             :labelPanel="'management.teams.title'"
-                            :labelSelectedQuantity="'management.teams.selectedWithO'"
+                            :labelSelectedQuantity="'common.selected'"
                             :labelSearch="'management.teams.searchTeams'"
                             :items="teamsList"
                             :loading="isLoading"
@@ -246,7 +246,7 @@
                 api.post("User/IsEmailInUse", paramsReq)
                     .then((response) => {
                         if (response && response.data && response.data === true) {
-                            this.$refs.formRef.setFieldError("userEmail", this.$t("management.users.emailDuplicated"));
+                            this.$refs.formRef.setFieldError("userEmail", this.$t("management.users.errors.emailDuplicated"));
 
                         } else {
                             this.$refs.formRef.setFieldError("userEmail", "");
@@ -255,7 +255,7 @@
                     .catch((e) => {
                         this.$notify({
                             title: 'management.users.title',
-                            message: "management.users.invalid",
+                            message: "management.users.errors.invalid",
                             variant: 'danger',
                             icon: 'CircleX',
                         });
@@ -335,7 +335,7 @@
                     .catch((e) => {
                         this.$notify({
                             title: "management.users.title",
-                            message: "management.users.saveError",
+                            message: "management.users.errors.saveError",
                             variant: "danger",
                             icon: "CircleX",
                         });
