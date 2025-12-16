@@ -28,6 +28,7 @@
         fillInThisField: "Fill in this field.",
         loading: "Loading",
         manage: "Manage",
+        model: "Model",
         name: "Name",
         new: "New",
         notice: "Notice",
@@ -164,6 +165,7 @@
         notReloadThePage: "To avoid interrupting the upload process, do not reload the page",
         selectAFile: "Select a file.",
         numberOfPagesHasBeenExceeded: "Number of pages has been exceeded. Contact your plan administrator.",
+        descriptionExceeded: "Description exceeds the maximum of 250 characters.",
         closeSidebar: "Close sidebar",
     },
     questions: {

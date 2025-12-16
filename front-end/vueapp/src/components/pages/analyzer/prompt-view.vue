@@ -58,7 +58,7 @@
             sendQuiz: function () {
                 this.loadingApplying = true;
                 this.clearMyInterval();
-                this.alertToast(this.$t("labelApplyingQuestionnaireWait"), "toast-primary");
+                this.alertToast(this.$t("quizzes.applyingQuestionnaireWait"), "toast-primary");
                 let paramsReq = {
                     idDocument: parseInt(this.idAnalyzer),
                     idQuestionnaire: this.quizSelected.id,
@@ -69,7 +69,7 @@
                         // Handle success
                         self.loadingApplying = false;
                         self.clearMyInterval();
-                        self.alertToast(self.$t("labelQuestionnaireAppliedSuccessfully"), "toast-success");
+                        self.alertToast(self.$t("quizzes.questionnaireAppliedSuccessfully"), "toast-success");
                         setTimeout(() => self.$emit("showHistory"), 3000);
                     })
                     .catch(function (e) {
@@ -78,14 +78,14 @@
                         self.loadingApplying = false;
                         self.clearMyInterval();
                         if (e.response && e.response.data === "No Credits to send a Question") {
-                            self.alertToast(self.$t("labelNumberOfQuestionsHasBeenExceeded"), "toast-danger");
+                            self.alertToast(self.$t("questions.numberOfQuestionsHasBeenExceeded"), "toast-danger");
                         } else if (e.response.status === 404) {
-                            self.alertToast(self.$t("labelAnInconsistencyWasIdentifiedInTheDocument"), "toast-danger");
+                            self.alertToast(self.$t("documents.anInconsistencyWasIdentifiedInTheDocument"), "toast-danger");
                         } else if (e.response.status === 402) {
-                            self.alertToast(self.$t("labelThereIsNotEnoughCredit"), "toast-warning");
+                            self.alertToast(self.$t("quizzes.thereIsNotEnoughCredit"), "toast-warning");
                             setTimeout(() => self.$emit("showHistory"), 3000);
                         } else {
-                            self.alertToast(self.$t("labelFailedToApplyQuestionnaire"), "toast-danger");
+                            self.alertToast(self.$t("quizzes.failedToApplyQuestionnaire"), "toast-danger");
                         }
                     })
                     .finally(function () {
@@ -124,11 +124,11 @@
                         if (e.response.data === "No Credits to send a Question") {
                             self.output = "";
                             self.clearMyInterval();
-                            self.alertToast(self.$t("labelNumberOfQuestionsHasBeenExceeded"), "toast-danger");
+                            self.alertToast(self.$t("questions.numberOfQuestionsHasBeenExceeded"), "toast-danger");
                         } else if (e.response.status === 404) {
-                            self.output = self.$t("labelAnInconsistencyWasIdentifiedInTheDocument");
+                            self.output = self.$t("documents.anInconsistencyWasIdentifiedInTheDocument");
                         } else {
-                            self.output = self.$t("labelFailedNoResponse");
+                            self.output = self.$t("analyze.failedNoResponse");
                         }
                     })
                     .finally(function () {
@@ -147,7 +147,7 @@
             copyToClipboard: function (content) {
                 navigator.clipboard.writeText(content);
                 this.clearMyInterval();
-                this.alertToast(this.$t("labelTextCopiedToClipboard"), "toast-primary");
+                this.alertToast(this.$t("common.textCopiedToClipboard"), "toast-primary");
             },
             alertToast: function (msg, color) {
                 this.$emit("showAlertToast", { msg: msg, color: color });

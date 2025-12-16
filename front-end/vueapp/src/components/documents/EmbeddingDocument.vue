@@ -55,14 +55,14 @@
                 NormalizeServices.VerifyNormalize(this.docData.Id)
                     .then((response) => {
                         if (response.status === 0) {
-                            this.message = this.$t("labelNormalizingTheDocument");
+                            this.message = this.$t("documents.normalizingTheDocument");
                             this.normalizeDoc();
                         } else {
                             if (this.isReprocessing) {
-                                this.message = this.$t("labelNormalizingTheDocument");
+                                this.message = this.$t("documents.normalizingTheDocument");
                                 this.normalizeDoc();
                             } else {
-                                this.message = this.$t("labelDocumentHasAlreadyBeenStandardizedPreviously", [
+                                this.message = this.$t("documents.documentHasAlreadyBeenStandardizedPreviously", [
                                     response.name,
                                 ]);
                                 this.redirectToDocument();

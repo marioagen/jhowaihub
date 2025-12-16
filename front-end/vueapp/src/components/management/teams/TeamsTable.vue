@@ -37,10 +37,10 @@
     </div>
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteTeam"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        title="management.teams.youAreAboutToDeleteTeam"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"

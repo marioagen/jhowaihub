@@ -17,13 +17,13 @@
         <template #footer>
             <div class="modal-footer">
                 <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
-                    {{ $t("labelCancel") }}
+                    {{ $t("common.cancel") }}
                 </button>
                 <button class="btn btn-primary btn-sm" @click="copy">
-                    {{ $t("labelCopy") }}
+                    {{ $t("common.copy") }}
                 </button>
                 <button class="btn btn-success btn-sm" @click="save" :disabled="!hasChanges">
-                    {{ $t("labelSave") }}
+                    {{ $t("common.save") }}
                 </button>
             </div>
         </template>

@@ -73,9 +73,9 @@
     <ConfirmModal
         id="deleteConfirm"
         title="documents.removeTitle"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"

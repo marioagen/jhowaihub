@@ -3,8 +3,8 @@
         <div class="container-fluid scroll-area manage-user mx-2">
             <div class="row">
                 <div class="col-12">
-                    <h5 class="mb-0 fw-bold">{{ $t("labelUserManagement") }}</h5>
-                    <p>{{ $t("labelUserManagementDescription") }}</p>
+                    <h5 class="mb-0 fw-bold">{{ $t("management.title") }}</h5>
+                    <p>{{ $t("management.subtitle") }}</p>
                     <TabsComponent :tabs="tabsList" color="custom">
                         <template #users>
                             <UsersComponent />

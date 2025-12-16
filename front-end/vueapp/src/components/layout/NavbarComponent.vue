@@ -59,7 +59,7 @@
                                     name: 'Logout'
                                 }" title="Sair">
                                     <LucideIcon icon="LogOut" />
-                                    {{ $t("labelSignOut") }}
+                                    {{ $t("common.signOut") }}
                                 </router-link>
                             </li>
                         </ul>

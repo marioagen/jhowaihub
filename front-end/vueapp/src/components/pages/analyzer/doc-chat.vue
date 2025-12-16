@@ -9,7 +9,7 @@
             <div class="chat-header">
                 <i class="fas fa-comment-dots"></i>
                 {{ $t("analyze.conversationWithDocument") }}
-                <button class="close-button" @click="toggleChat" :title="$t('labelClose')">
+                <button class="close-button" @click="toggleChat" :title="$t('common.close')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>

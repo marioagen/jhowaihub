@@ -28,6 +28,7 @@
         fillInThisField: "Preencha este campo.",
         loading: "Carregando",
         manage: "Gerenciar",
+        model: "Modelo",
         name: "Nome",
         new: "Novo",
         notice: "Aviso",
@@ -164,6 +165,7 @@
         notReloadThePage: "Para não interromper o processo de upload, não recarregue a página",
         selectAFile: "Selecione um arquivo.",
         numberOfPagesHasBeenExceeded: "Número de páginas foi excedido. Contate o administrador do plano.",
+        descriptionExceeded: "A descrição excede o máximo de 250 caracteres.",
         closeSidebar: "Fechar barra lateral",
     },
     questions: {

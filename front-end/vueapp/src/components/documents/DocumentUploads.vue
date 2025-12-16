@@ -75,7 +75,7 @@
                                         </a>
                                         <a v-if="form.description.length > 250"
                                             class="char-counter char-error exceedDesc">
-                                            {{ $t("questions.numberOfQuestionsHasBeenExceeded") }}
+                                            {{ $t("documents.descriptionExceeded") }}
                                         </a>
                                     </div>
                                 </div>

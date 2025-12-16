@@ -40,10 +40,10 @@
     </div>
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteProfile"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        title="management.profiles.youAreAboutToDeleteProfile"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
