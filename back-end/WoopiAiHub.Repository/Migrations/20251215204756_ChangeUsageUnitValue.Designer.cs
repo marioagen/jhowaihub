@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WoopiAiHub.Repository.Context;
 
@@ -11,9 +12,11 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215204756_ChangeUsageUnitValue")]
+    partial class ChangeUsageUnitValue
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -365,18 +368,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Property<Guid>("IdUser")
                         .HasColumnType("uniqueIdentifier")
                         .HasColumnName("IdUser");
-
-                    b.Property<bool>("IsEdited")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsEdited");
-
-                    b.Property<bool>("IsImported")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsImported");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -60,5 +60,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _usageMonthServices.FindUsedModelEmbeddings();
             return Ok(result);
         }
+
+        /// <summary>
+        /// Endpoint that receives the request to find total usage cost
+        /// </summary>
+        /// <param name="dateFilterDto"></param>
+        /// <returns></returns>
+        [HttpGet("FindTotalUsageCost")]
+        [SwaggerOperation("Endpoint that receives the request to find total usage cost")]
+        [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
+        public async Task<ActionResult<decimal>> FindTotalUsageCost([FromQuery] DateFilterDto dateFilterDto)
+        {
+            var result = await _usageMonthServices.FindTotalUsageCostAsync(dateFilterDto);
+            return Ok(result);
+        }
     }
 }

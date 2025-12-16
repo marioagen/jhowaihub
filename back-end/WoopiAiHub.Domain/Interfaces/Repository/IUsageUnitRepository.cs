@@ -1,3 +1,4 @@
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository

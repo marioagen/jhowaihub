@@ -14,7 +14,8 @@
                         <span> {{ $t("dashboard.graphs.unitValue") }} {{ usageUnitWorkflowAutomatic }}</span>
                         <hr />
                         <span class="mt-1">{{ $t("dashboard.graphs.periodTotal") }}</span>
-                        <h4 class="mb-0 fw-bold text-primary">{{ totalWorkflowsAutomatic * usageUnitWorkflowAutomatic }}
+                        <h4 class="mb-0 fw-bold text-primary">{{ (totalWorkflowsAutomatic *
+                            usageUnitWorkflowAutomatic).toFixed(5) }}
                         </h4>
                     </div>
                 </div>

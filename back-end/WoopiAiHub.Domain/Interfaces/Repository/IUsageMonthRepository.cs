@@ -11,5 +11,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<ICollection<DashboardUsageDto>> FindDataByUsageType(string usageType, DateTime? start, DateTime? end);
         Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId, DateTime? start, DateTime? end);
         Task<ICollection<ModelEmbeddingDto>> FindUsedModelEmbeddings();
+        Task<decimal> FindTotalUsageCostAsync(DateTime? periodStart, DateTime? periodEnd);
     }
 }
