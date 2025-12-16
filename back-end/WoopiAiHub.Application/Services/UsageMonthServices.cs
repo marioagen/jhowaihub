@@ -9,13 +9,10 @@ namespace WoopiAiHub.Application.Services
     public class UsageMonthServices : IUsageMonthServices
     {
         private readonly IUsageMonthRepository _usageMonthRepository;
-        private readonly IUsageUnitRepository _usageUnitRepository;
 
-        public UsageMonthServices(IUsageMonthRepository usageMonthRepository, 
-                                  IUsageUnitRepository usageUnitRepository)
+        public UsageMonthServices(IUsageMonthRepository usageMonthRepository)
         {
             _usageMonthRepository = usageMonthRepository;
-            _usageUnitRepository = usageUnitRepository;
         }
 
         /// <summary>
