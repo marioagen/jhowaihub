@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Linq.Dynamic.Core;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Util;
+
 namespace WoopiAiHub.Repository
 {
     public class DocumentRepository : IDocumentRepository
@@ -24,22 +27,22 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IQueryable<Document> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto, 
-                                                   string email)
+        public IQueryable<DocumentListItemDto> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto,
+            string email)
         {
             var search = documentPagedDataDto.Search?.ToLower();
             var login = documentPagedDataDto.Login?.ToLower();
             var query = _context.Documents
-                                .Include(t => t.Workflows)
-                                .AsNoTracking()
-                                .Where(i => i.Enable);
+                .Include(t => t.Workflows)
+                .AsNoTracking()
+                .Where(i => i.Enable);
 
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(i =>
-                             EF.Functions.Like(i.Name, $"%{search}%") ||
-                             EF.Functions.Like(i.Description, $"%{search}%") ||
-                             i.Id.ToString().Contains(search));
+                    EF.Functions.Like(i.Name, $"%{search}%") ||
+                    EF.Functions.Like(i.Description, $"%{search}%") ||
+                    i.Id.ToString().Contains(search));
             }
 
             if (documentPagedDataDto.WorkflowIds.Count() > 0)
@@ -57,11 +60,32 @@ namespace WoopiAiHub.Repository
                 ));
             }
 
-            query = documentPagedDataDto.IsAscending ? 
-                    query.OrderByDynamic(documentPagedDataDto.ColType.ToString()) :
-                    query.OrderByDynamic(documentPagedDataDto.ColType + " descending");
+            query = documentPagedDataDto.IsAscending
+                ? query.OrderByDynamic(documentPagedDataDto.ColType.ToString())
+                : query.OrderByDynamic(documentPagedDataDto.ColType + " descending");
 
-            return query;
+            return query.Select(d => new DocumentListItemDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                ReferenceFile = d.ReferenceFile,
+                Status = d.Status,
+                Created = d.Created,
+                WorkflowProgress = d.Workflows.Select(w => new DocumentWorkflowProgressDto
+                {
+                    WorkflowName = w.Name,
+                    TotalSteps = w.Steps.Count(),
+                    CurrentStep = d.Status == DocumentStatus.Analyzed
+                        ? w.Steps.Count()
+                        : (d.Cards.Any(c => c.Step.WorkflowId == w.Id)
+                            ? d.Cards.Where(c => c.Step.WorkflowId == w.Id)
+                                .OrderByDescending(c => c.Created)
+                                .Select(c => c.Step.Order)
+                                .FirstOrDefault()
+                            : 0)
+                }).ToList()
+            });
         }
 
         /// <summary>
@@ -81,8 +105,8 @@ namespace WoopiAiHub.Repository
         public Document FindById(int id)
         {
             return _context.Documents.Where(a => a.Id.Equals(id))
-                                     .AsNoTracking()
-                                     .FirstOrDefault();
+                .AsNoTracking()
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -93,7 +117,7 @@ namespace WoopiAiHub.Repository
         public IQueryable<string> FindHashById(List<int> ids)
         {
             return _context.Documents.Where(a => ids.Contains(a.Id) && a.Enable.Equals(true))
-                                     .Select(b => b.ReferenceFile);
+                .Select(b => b.ReferenceFile);
         }
 
 
@@ -122,7 +146,7 @@ namespace WoopiAiHub.Repository
             if (documents.Any())
             {
                 documents.ExecuteUpdate(b => b
-                .SetProperty(u => u.Enable, false));
+                    .SetProperty(u => u.Enable, false));
                 _context.SaveChanges();
                 return true;
             }
@@ -138,7 +162,7 @@ namespace WoopiAiHub.Repository
         /// <param name="id"></param>
         /// <returns></returns>
         public bool ChangeStatus(int id,
-                                 DocumentStatus documentStatus)
+            DocumentStatus documentStatus)
         {
             var documents = _context.Documents.Where(a => a.Id.Equals(id));
             if (documents.Any())
@@ -162,8 +186,8 @@ namespace WoopiAiHub.Repository
         public JsonResult FindInqueryHistory(int id)
         {
             var inqueryHistory = _context.DocumentHistories.Where(a => a.Id.Equals(id))
-                                                           .AsNoTracking()
-                                                           .FirstOrDefault();
+                .AsNoTracking()
+                .FirstOrDefault();
 
             return new JsonResult(inqueryHistory);
         }
@@ -177,8 +201,8 @@ namespace WoopiAiHub.Repository
         public int FindDocumentIdByReferenceFile(string referenceFile)
         {
             var documentId = _context.Documents.Where(a => a.ReferenceFile.Equals(referenceFile))
-                                               .Select(a => a.Id)
-                                               .FirstOrDefault();
+                .Select(a => a.Id)
+                .FirstOrDefault();
 
             return documentId;
         }
@@ -186,8 +210,8 @@ namespace WoopiAiHub.Repository
         public Document? FindByReferenceFile(string referenceFile)
         {
             return _context.Documents.Where(a => a.ReferenceFile.Equals(referenceFile))
-                                     .AsNoTracking()
-                                     .FirstOrDefault();
+                .AsNoTracking()
+                .FirstOrDefault();
         }
     }
 }

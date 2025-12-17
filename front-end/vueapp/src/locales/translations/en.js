@@ -60,10 +60,11 @@
         selectAll: "Select All",
         selectAnItemFromTheList: "Select an item from the list.",
     },
-        modals: {
+    modals: {
         message: "Are you sure?",
     },
     documents: {
+        step: "Step",
         title: "Documents",
         subtitle: "Manage documents and extract information",
         notFound: "No documents found",
