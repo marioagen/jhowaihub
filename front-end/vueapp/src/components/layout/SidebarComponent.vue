@@ -5,14 +5,14 @@
                 <img
                     v-if="isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
-                    :title="$t('labelGoHome')"
+                    :title="$t('common.home')"
                     width="30"
                     height="30"
                 />
                 <img
                     v-else
                     src="./../../assets/img/woopiai-hub-logo.png"
-                    :title="$t('labelGoHome')"
+                    :title="$t('common.home')"
                     height="23" 
                     alt="WOOPI AI"
                     style="margin-left: 0px;"
@@ -87,7 +87,7 @@
                         activeKey: 'Home',
                         to: '/home',
                         icon: { name: 'Home', color: '#0d6efd' },
-                        labelKey: 'labelGoHome'
+                        labelKey: 'common.home'
                     },    
                     {   
                         permission: 'Dashboard',

@@ -9,7 +9,7 @@
             <div class="chat-header">
                 <i class="fas fa-comment-dots"></i>
                 {{ $t("analyze.conversationWithDocument") }}
-                <button class="close-button" @click="toggleChat" :title="$t('labelClose')">
+                <button class="close-button" @click="toggleChat" :title="$t('common.close')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -66,7 +66,7 @@
                     {{ $t("analyze.sendQuestion") }}
                 </button>
                 <div v-if="output != ''">
-                    <label class="input-label">{{ $t("analyze.output") }}</label>
+                    <label class="input-label">{{ $t("common.output") }}</label>
                     <textarea v-model="output" class="chat-textarea" rows="4">
                     </textarea>
                     <button type="button" class="btn btn-outline-primary" @click="copy">{{ $t("analyze.copy")

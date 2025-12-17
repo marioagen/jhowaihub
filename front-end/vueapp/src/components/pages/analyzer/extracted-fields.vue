@@ -16,7 +16,7 @@
                     <label class="field-label">{{ field.label }}</label>
                     <span v-if="field.isEdited" class="edited-badge">
                         <i class="fas fa-pen"></i>
-                        {{ $t("labelEdited") }}
+                        {{ $t("common.edited") }}
                     </span>
                     <span @click="open(fields[index].value, field.label, index)">
                         <LucideIcon icon="Eye" :size="16" />
@@ -26,14 +26,14 @@
                     <input type="text" class="field-value" @input="(e) => handleFieldEdit(index, e.target.value)"
                         :readonly="!isEditing[index]" v-model="fields[index].value" />
                     <button v-if="!isEditing[index]" class="edit-button mb-2" @click="startEditing(index)"
-                        :title="$t('labelEdit')">
+                        :title="$t('common.edit')">
                         <i class="fas fa-pen"></i>
                     </button>
                     <div v-else class="edit-actions">
-                        <button class="save-button" @click="saveEdit(index, field.outputId)" :title="$t('labelSave')">
+                        <button class="save-button" @click="saveEdit(index, field.outputId)" :title="$t('common.save')">
                             <i class="fas fa-check"></i>
                         </button>
-                        <button class="cancel-button" @click="cancelEdit(index)" :title="$t('labelCancel')">
+                        <button class="cancel-button" @click="cancelEdit(index)" :title="$t('common.cancel')">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -43,14 +43,14 @@
                         @input="(e) => handleFieldEdit(index, e.target.value)" :readonly="!isEditing[index]"
                         v-model="fields[index].value" rows="5"></textarea>
                     <button v-if="!isEditing[index]" class="edit-button mb-2" @click="startEditing(index)"
-                        :title="$t('labelEdit')">
+                        :title="$t('common.edit')">
                         <i class="fas fa-pen"></i>
                     </button>
                     <div v-else class="edit-actions">
-                        <button class="save-button" @click="saveEdit(index, field.outputId)" :title="$t('labelSave')">
+                        <button class="save-button" @click="saveEdit(index, field.outputId)" :title="$t('common.save')">
                             <i class="fas fa-check"></i>
                         </button>
-                        <button class="cancel-button" @click="cancelEdit(index)" :title="$t('labelCancel')">
+                        <button class="cancel-button" @click="cancelEdit(index)" :title="$t('common.cancel')">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>

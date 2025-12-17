@@ -36,7 +36,7 @@
                     </div>
                     <div v-if="!isLastStep">
                         <button v-if="!isFirstStep || dataCard.assignedUser" class="btn btn-sm btn-primary float-end" @click.stop="advanceStep">
-                            <span>{{ $t("labelAdvance") }}</span>
+                            <span>{{ $t("common.advance") }}</span>
                             <LucideIcon icon="ChevronRight" :size="16" class="me-1" v-if="!isLoadingAnalysis" />
                             <div class="spinner-grow text-light" role="status" v-if="isLoadingAnalysis"></div>
                         </button>
@@ -75,7 +75,7 @@
                     <div v-if="showLoading"
                          class="progress-content">
                         <div class="mb-2">
-                            {{ $t("labelProcessing")}} {{ truncatedToolName }}
+                            {{ $t("common.processing")}} {{ truncatedToolName }}
                             <span class="float-end">
                                 {{ dataCard.percentage || 0 }}%
                             </span>

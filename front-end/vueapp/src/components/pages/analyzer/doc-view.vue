@@ -4,19 +4,19 @@
             <div v-if="viewMode === $options.VIEW_MODE_PDF">
                 <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
                 <a @click="openTab" v-if="srcPdf">
-                    <i class="fas fa-expand text-primary" style="cursor: pointer" :title="$t('labelExpand')"></i>
+                    <i class="fas fa-expand text-primary" style="cursor: pointer" :title="$t('common.expand')"></i>
                 </a>
                 <img
                     src="@/assets/img/go-to-text.png"
                     @click="toggleToText"
                     style="cursor: pointer; float: right"
-                    :title="$t('labelOcrText')"
+                    :title="$t('documents.ocrText')"
                     v-if="srcPdf && hasOcrText"
                 />
                 <!--
                 <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
                     <i class="fas fa-sync-alt"></i>
-                    {{ $t("labelReprocess") }}
+                    {{ $t("common.reprocess") }}
                 </button>
                 -->
                 <div class="view-pdf" v-if="srcPdf">
@@ -32,7 +32,7 @@
                 >
                     <span class="text-danger" style="text-decoration: none">
                         <i class="fas fa-exclamation-circle"></i>
-                        {{ $t("labelAttentionPDFDisplayFailed") }}.
+                        {{ $t("documents.attentionPDFDisplayFailed") }}.
                     </span>
                 </div>
                 <div class="mt-1 p-2 loading-div" v-if="loading" @click="reloadPage">
@@ -43,21 +43,21 @@
                         v-if="loading"
                     ></div>
                     <span class="text-primary" style="text-decoration: none">
-                        {{ $t("labelLoadingFilePleaseWait") }}.
+                        {{ $t("documents.loadingFilePleaseWait") }}.
                     </span>
                 </div>
             </div>
             <div v-else-if="viewMode === $options.VIEW_MODE_TEXT">
                 <div>
                     <strong class="form-label mb-3">
-                        {{ upperFormat($t("labelOcrText")) }}&nbsp;&nbsp;
+                        {{ upperFormat($t("documents.ocrText")) }}&nbsp;&nbsp;
                     </strong>
                     <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingText"></i>
                     <img
                         src="@/assets/img/go-to-pdf.png"
                         @click="viewMode = $options.VIEW_MODE_PDF"
                         style="cursor: pointer; float: right"
-                        :title="$t('labelPdfBack')"
+                        :title="$t('documents.pdfBack')"
                     />
                 </div>
                 <textarea
@@ -204,7 +204,7 @@
                             return console.log(response.error);
                         }
                         window.onbeforeunload = null;
-                        this.message = this.$t("labelNormalizingTheDocument");
+                        this.message = this.$t("documents.normalizingTheDocument");
                     })
                     .finally(() => {
                         console.log("Finished request.");

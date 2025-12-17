@@ -10,7 +10,7 @@
                         <h5 class="fw-bold">{{ $t("unauthorized.title") }}</h5>
                         <button class="btn btn-outline-primary" @click="returnToPreviousPage">
                             <LucideIcon icon="Redo2" />
-                            {{ $t("labelBack") }}
+                            {{ $t("common.back") }}
                         </button>
                     </form>
                 </div>
