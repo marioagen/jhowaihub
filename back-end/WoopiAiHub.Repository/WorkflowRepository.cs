@@ -446,50 +446,6 @@ namespace WoopiAiHub.Repository
                         Color = s.Status.Color,
                     },
                     HasStepTools = s.StepTools.Any(),
-                    Cards = s.Cards
-                        .Where(c => c.Enable &&
-                            (
-                                string.IsNullOrWhiteSpace(input)
-                                || c.Name.Contains(input)
-                                || c.Document.Name.Contains(input)
-                                || c.Document.Description.Contains(input)
-                            ) &&
-                            (
-                                allUsers == null
-                                || allUsers == true
-                                || (c.AssignedUser != null && c.AssignedUser.Email == login)
-                            )
-                        )
-                        .Select(c => new CardDto
-                        {
-                            Id = c.Id,
-                            Name = c.Name,
-                            Created = c.Created,
-                            Description = c.Document!.Description,
-                            Owner = c.Document.EmailCreator,
-                            DocumentId = c.Document.Id,
-                            StatusDocument = c.Document.Status,
-                            Percentage = c.Step!.StepTools.Any(st => st.Executions.Any(e => e.CardId == c.Id))
-                            ? (
-                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100
-                                /
-                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
-                              )
-                            : 100,
-                            ToolName = c.Step!.StepTools
-                                              .Where(st => st.Executions.Any(e => e.CardId == c.Id && e.Status == StatusExecution.Running))
-                                              .Select(st => st.Tool.Name)
-                                              .FirstOrDefault(),
-                            AssignedUser = c.AssignedUser != null ?
-                            new UserDto
-                            {
-                                Name = c.AssignedUser.Name,
-                                Email = c.AssignedUser.Email,
-                                Created = c.AssignedUser.Created,
-                                Id = c.AssignedUser.Id
-                            }
-                            : null
-                        }).ToList(),
                     StepTools = s.StepTools
                         .Select(st => new StepToolDto
                         {
