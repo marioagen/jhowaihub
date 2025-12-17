@@ -437,6 +437,10 @@
             all: "Todos os times",
             none: "Selecione um time",
         },
+        usersSelect: {
+            all: "Todos os usuários",
+            none: "Selecione um usuário",
+        },
         typesSelect: {
             all: "Todos os tipos",
             none: "Selecione um tipo",
@@ -449,6 +453,11 @@
             all: "Todos os workflow",
             none: "Selecione um workflow",
         },
+        sortBy: "Ordenar por",
+        mostRecent: "Mais recente",
+        mostOld: "Mais antigo",
+        nameAZ: "Nome (A-Z)",
+        nameZA: "Nome (Z-A)",
     },
     unauthorized: {
         title: "Você não tem permissão para acessar esta tela.",
@@ -650,10 +659,6 @@
         importTitle: "Importar prompts",
         importSubtitle: "Selecione prompts pré-definidos do sistema",
         importButton: "Importar",
-        mostRecent: "Mais recente",
-        mostOld: "Mais antigo",
-        nameAZ: "Nome (A-Z)",
-        nameZA: "Nome (Z-A)",
         selectAllTemplates: "Selecionar todos os templates",
         viewComplete: "Ver completo",
         importPredefined: "Importar pré-definidos",

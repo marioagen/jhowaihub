@@ -40,6 +40,20 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [HttpGet("{Id}/Steps")]
+        [SwaggerOperation("Endpoint that receive an workflow id and return a valid workflow")]
+        [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindStepsById(int id, [FromQuery] WorkflowFilterDto workflowFilterDto)
+        {
+            var workflow = await _workflowServices.FindStepsById(id, workflowFilterDto);
+            return Ok(workflow);
+        }
+
+        /// <summary>
+        /// Endpoint that receives a team id and returns a valid workflow
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("Teams/{teamId}")]
         [SwaggerOperation("Endpoint that receive an team id and return a valid workflow")]
         [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]

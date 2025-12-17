@@ -200,6 +200,23 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Throws<ArgumentException>(() => _userServices.FindAllPaged(pagedDataDto));
         }
 
+        [Fact(DisplayName = "FindAllAsync")]
+        [Trait("FindAllAsync", "Success")]
+        public async Task FindAllAsync_ShouldReturnAllUsers()
+        {
+            // Arrange
+            var users = new List<UserDto>();
+            _userRepositoryMock.Setup(r => r.FindAllAsync()).ReturnsAsync(users);
+
+            // Act
+            var result = await _userServices.FindAll();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+            _userRepositoryMock.Verify(r => r.FindAllAsync(), Times.Once);
+        }
+
         [Fact(DisplayName = "Update should return true when update is sucess")]
         [Trait("Update", "Sucess")]
         public async Task Update_ShouldReturnTrue_WhenUpdateSucceeds()

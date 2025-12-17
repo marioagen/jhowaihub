@@ -188,12 +188,16 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Empty(result);
         }
 
-        [Fact(DisplayName = "Test FindAllPaged page greater than zero returns PaginatedList")]
+        [Theory(DisplayName = "Test FindAllPaged page greater than zero returns PaginatedList")]
         [Trait("FindAllPaged", "Success")]
-        public void FindAllPaged_PageGreaterThanZero_ReturnsPaginatedList()
+        [InlineData("created asc")]
+        [InlineData("created desc")]
+        [InlineData("name asc")]
+        [InlineData("name desc")]
+        public void FindAllPaged_PageGreaterThanZero_ReturnsPaginatedList(string filter)
         {
             // Arrange
-            var workflowPagedDto = new WorkflowPagedDto { Page = 1 };
+            var workflowPagedDto = new WorkflowPagedDto { Page = 1, OrderBy = filter, TeamId = 1, UserId = Guid.NewGuid() };
             var workflowList = new List<WorkflowDto> { new WorkflowDto() };
 
             _workflowRepositoryMock.Setup(repo => repo.FindAllWithFilter(workflowPagedDto)).Returns(workflowList.AsQueryable());
@@ -1148,6 +1152,65 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(true); 
+        }
+
+        [Fact(DisplayName = "FindStepsById should return steps when found")]
+        [Trait("FindStepsById", "Success")]
+        public async Task FindStepsById_ShouldReturnSteps_WhenFound()
+        {
+            // Arrange
+            var workflowId = 1;
+            var filter = new WorkflowFilterDto
+            {
+                Input = "search",
+                IsAllUsers = true,
+                Login = "user@example.com",
+                OrderBy = "created asc"
+            };
+
+            var expectedSteps = new List<StepDto>
+            {
+                WorkflowFixture.FindValidStepDto()
+            };
+
+            _stepRepositoryMock
+                .Setup(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(expectedSteps);
+
+            // Act
+            var result = await _workflowServices.FindStepsById(workflowId, filter);
+
+            // Assert
+            Assert.Equal(expectedSteps, result);
+            _stepRepositoryMock.Verify(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindStepsById should throw AppException when no steps found")]
+        [Trait("FindStepsById", "Fail")]
+        public async Task FindStepsById_ShouldThrowAppException_WhenNotFound()
+        {
+            // Arrange
+            var workflowId = 1;
+            var filter = new WorkflowFilterDto
+            {
+                Input = string.Empty,
+                IsAllUsers = false,
+                Login = string.Empty,
+                OrderBy = string.Empty
+            };
+
+            _stepRepositoryMock
+                .Setup(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((List<StepDto>)null);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindStepsById(workflowId, filter));
+
+            Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
+            Assert.Equal("Workflow not found", ex.Message);
+            Assert.Equal(WorkflowLabel.NotFound, ex.LabelError);
+
+            _stepRepositoryMock.Verify(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
     }
 }

@@ -37,10 +37,10 @@
                             </div>
                             <div class="col-md-4">
                                 <select class="form-select" v-model="orderBy" @change="loadTemplates">
-                                    <option value="created_desc">{{ $t("prompts.mostRecent") }}</option>
-                                    <option value="created_asc">{{ $t("prompts.mostOld") }}</option>
-                                    <option value="name_asc">{{ $t("prompts.nameAZ") }}</option>
-                                    <option value="name_desc">{{ $t("prompts.nameZA") }}</option>
+                                    <option value="created_desc">{{ $t("filters.mostRecent") }}</option>
+                                    <option value="created_asc">{{ $t("filters.mostOld") }}</option>
+                                    <option value="name_asc">{{ $t("filters.nameAZ") }}</option>
+                                    <option value="name_desc">{{ $t("filters.nameZA") }}</option>
                                 </select>
                             </div>
                         </div>

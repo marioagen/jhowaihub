@@ -429,13 +429,17 @@
     },
     filters: {
         documentInput: "Search by document, description or user, ...",
-        workflowInput: "Search by document",
+        workflowInput: "Search by document, description or requester",
         toolInput: "Search by tool name",
         questionsInput: "Search question",
         quizzesInput: "Search quiz",
         teamsSelect: {
             all: "All teams",
             none: "Select a team",
+        },
+        usersSelect: {
+            all: "All users",
+            none: "Select a user",
         },
         typesSelect: {
             all: "All types",
@@ -449,6 +453,11 @@
             all: "All workflows",
             none: "Select a workflow",
         },
+        sortBy: "Sort by",
+        mostRecent: "Most recent",
+        mostOld: "Most old",
+        nameAZ: "Name (A-Z)",
+        nameZA: "Name (Z-A)",
     },
     unauthorized: {
         title: "You do not have permission to access this screen.",
@@ -648,10 +657,6 @@
         importTitle: "Import prompt",
         importSubtitle: "Import a prompt from a file",
         importButton: "Import",
-        mostRecent: "Most recent",
-        mostOld: "Most old",
-        nameAZ: "Name (A-Z)",
-        nameZA: "Name (Z-A)",
         selectAllTemplates: "Select all templates",
         viewComplete: "View complete",
         importPredefined: "Import predefined",
