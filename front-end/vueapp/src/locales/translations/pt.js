@@ -64,6 +64,7 @@
         message: "Tem certeza?",
     },
     documents: {
+        step: "Etapa",
         title: "Documentos",
         subtitle: "Gerencie documentos e extraia informações",
         notFound: "Documentos não encontrados",

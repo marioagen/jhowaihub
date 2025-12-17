@@ -1,5 +1,6 @@
 ﻿using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
@@ -9,9 +10,11 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         bool Create(Document document);
         bool Delete(List<int> ids);
         Document FindById(int id);
+
         bool ChangeStatus(int id,
-                          DocumentStatus documentStatus);
-        IQueryable<Document> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto, string email);
+            DocumentStatus documentStatus);
+
+        public IQueryable<DocumentListItemDto> FindAllOrdered(DocumentPagedDataDto documentPagedDataDto, string email);
         int FindDocumentCount();
         IQueryable<string> FindHashById(List<int> ids);
         int FindDocumentIdByReferenceFile(string referenceFile);
