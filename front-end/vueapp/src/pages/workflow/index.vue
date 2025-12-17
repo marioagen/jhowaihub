@@ -70,11 +70,11 @@
                                     <b>{{ selectedOption.name }}</b>
                                 </div>
                                 <div>
-                                    <span class="me-1">{{ $t("labelTeam") }}:</span>
+                                    <span class="me-1">{{ $t("management.teams.team") }}:</span>
                                     <b>{{ selectedOption.teamName }}</b>
                                 </div>
                                 <div>
-                                    <span class="me-1">{{ $t("labelTotalDocuments") }}</span>
+                                    <span class="me-1">{{ $t("documents.totalDocuments") }}</span>
                                     <b>{{ kanbanCards.numDocuments }}</b>
                                 </div>
                             </div>

@@ -10,12 +10,12 @@
             <div class="toast-header">
                 <strong class="me-auto">
                     <i class="fas fa-bell bell-animated"></i>
-                    {{ $t("labelNotice") }}
+                    {{ $t("common.notice") }}
                 </strong>
                 <button
                     type="button"
                     class="btn-close"
-                    :title="$t('labelClose')"
+                    :title="$t('common.close')"
                     data-bs-dismiss="toast"
                     aria-label="Close"
                     @click="close"

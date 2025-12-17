@@ -63,17 +63,17 @@
             title: {
                 type: String,
                 required: false,
-                default: "labelModalTitle",
+                default: "common.new",
             },
             cancelText: {
                 type: String,
                 required: false,
-                default: "labelCancel",
+                default: "common.cancel",
             },
             saveText: {
                 type: String,
                 required: false,
-                default: "labelSave",
+                default: "common.save",
             },
         },
         mounted() {

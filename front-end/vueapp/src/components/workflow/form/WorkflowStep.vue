@@ -50,7 +50,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="mb-3">
-                     <label class="form-label text-muted small">{{ $t("workflow.status") }}</label>
+                     <label class="form-label text-muted small">{{ $t("common.status") }}</label>
                      <Field
                         :name="`steps[${index - 1}].statusId`"
                         rules="required"

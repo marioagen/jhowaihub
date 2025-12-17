@@ -13,7 +13,7 @@
                     <button
                         type="button"
                         class="btn-close"
-                        :title="$t('labelClose')"
+                        :title="$t('common.close')"
                         data-bs-dismiss="modal"
                         aria-label="Close"
                         @click="close"

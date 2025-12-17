@@ -56,7 +56,7 @@
                         <!-- STATUS -->
                         <div class="mb-3">
                             <label class="form-label text-muted small">
-                                {{ $t("workflow.status") }}
+                                {{ $t("common.status") }}
                             </label>
 
                             <Field v-model="step.statusId" :name="`steps[${step.tempId}}].statusId`"

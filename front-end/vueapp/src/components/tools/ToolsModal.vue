@@ -89,7 +89,7 @@
                         </Field>
                     </div>
                     <div class="col-6">
-                        <label>{{ $t("tools.form.output") }}</label>
+                        <label>{{ $t("common.output") }}</label>
                         <Field name="outputDataId" rules="required" v-slot="{ field, errorMessage }">
                             <select v-bind="field" class="form-select form-select-sm"
                                 :class="{ 'is-invalid': errorMessage }">
@@ -109,7 +109,7 @@
         <template #footer>
             <div class="modal-footer">
                 <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
-                    {{ $t("labelCancel") }}
+                    {{ $t("common.cancel") }}
                 </button>
                 <button class="btn btn-primary btn-sm" @click="save">
                     {{ $t(saveText) }}

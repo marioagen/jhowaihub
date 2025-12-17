@@ -54,8 +54,8 @@ export default {
         setEntitySearch() {
             this.entitySearch = {
                 screen: "question",
-                labelInput: this.$t("questions.filters.input"),
-                placeholderInput: this.$t("questions.filters.input"),
+                labelInput: this.$t("filters.questionsInput"),
+                placeholderInput: this.$t("filters.questionsInput"),
                 labelButton: this.$t("questions.createBtn"),
             };
         },

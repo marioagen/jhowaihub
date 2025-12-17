@@ -3,7 +3,7 @@
         <div class="form-pill">
             <a class="pill-link" href="#" :class="{ selected: !loadAllPrompts }"
                 @click.prevent="!loadAllPrompts ? getAllPrompts() : null">
-                <span class="badge rounded-pill" :class="{ border: loadAllPrompts }">{{ $t('labelAll') }}</span>
+                <span class="badge rounded-pill" :class="{ border: loadAllPrompts }">{{ $t('common.all') }}</span>
             </a>
         </div>
         <div class="form-pill">
@@ -15,12 +15,12 @@
         </div>
         <div class="form-check" v-if="this.dataPrompt.length > 1 && !loadAllPrompts">
             <input class="form-check-input" type="checkbox" value="" @click="checkAll($event)">
-            <label>{{ $t('labelSelectAll') }} &nbsp;</label>
+            <label>{{ $t('common.selectAll') }} &nbsp;</label>
         </div>
         <button type="button" class="btn delete-custom d-flex align-items-center" @click="confirmationDialog(item)"
             v-if="this.listIds.length > 0">
             <i class="fas fa-trash text-danger icon-delete"></i>
-            {{ $t('labelDelete') }}
+            {{ $t('common.delete') }}
         </button>
     </div>
     <div class="row loading-container" v-if="dataPrompt.length === 0 && !loading">
@@ -28,7 +28,7 @@
             $t('prompts.noPromptsListWereFound') }}.</div>
     </div>
     <div class="row loading-container" v-if="loading">
-        <div class="data-load"><i class="fas fa-sync-alt fa-spin text-secondary"></i>&nbsp;{{ $t('labelLoading') }}..
+        <div class="data-load"><i class="fas fa-sync-alt fa-spin text-secondary"></i>&nbsp;{{ $t('common.loading') }}..
         </div>
     </div>
     <div>
@@ -49,7 +49,7 @@
                                 <i class="fas fa-ellipsis-v icon-ellipsis"></i>
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="dropdownIcon">
-                                <li @click="redirectToEditPrompt(item.id)"><a class="dropdown-item">{{ $t('labelEdit')
+                                <li @click="redirectToEditPrompt(item.id)"><a class="dropdown-item">{{ $t('common.edit')
                                         }}</a></li>
                             </ul>
                         </div>
@@ -60,7 +60,7 @@
             <div class="card-footer">
                 <div class="date-info float-end">
                     <i class="far fa-clock mt-1"></i>
-                    <span>&ensp;{{ $t('labelCreated') }} {{ this.formatDate(item.created) }}</span>
+                    <span>&ensp;{{ $t('dashboard.created') }} {{ this.formatDate(item.created) }}</span>
                 </div>
             </div>
         </div>
@@ -74,8 +74,8 @@
         </div>
     </div>
     <modal-alert v-if="modalAlertShow" :type="'Confirm'" :alertTitle="$t('prompts.removeAllPrompts')"
-        :alertMessage="$t('labelThisActionCannotBeUndone')" :okLabel="$t('labelConfirm')"
-        :cancelLabel="$t('labelCancel')" @open="deletePrompts" @close="closeModal" />
+        :alertMessage="$t('common.thisActionCannotBeUndone')" :okLabel="$t('common.confirm')"
+        :cancelLabel="$t('common.cancel')" @open="deletePrompts" @close="closeModal" />
 </template>
 <script>
 import ModalAlert from "@/components/pages/analyzer/modal-alert";

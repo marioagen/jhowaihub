@@ -7,7 +7,7 @@
                         <div class="d-flex align-items-center">
                             <button class="btn btn-sm p-0 me-3" @click="redirectToPromptList">
                                 <LucideIcon icon="ArrowLeft" :size="17" class="me-1" />
-                                <span class="fw-bold">{{$t('labelBack')}}</span>
+                                <span class="fw-bold">{{$t('common.back')}}</span>
                             </button>
                             <div>
                                 <div class="fw-semibold">{{$t('prompts.newPrompt')}}</div>
@@ -15,7 +15,7 @@
                             </div>
                         </div>
                         <button class="btn btn-sm btn-primary" type="submit">
-                            <LucideIcon icon="Save" :size="17" class="me-2" />{{$t('labelSave')}}
+                            <LucideIcon icon="Save" :size="17" class="me-2" />{{$t('common.save')}}
                         </button>
                     </div>
                 </div>
@@ -37,7 +37,7 @@
                                     </Field>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="FormControlTextarea1" class="form-label">{{$t('labelDescription')}}</label>
+                                    <label for="FormControlTextarea1" class="form-label">{{$t('common.description')}}</label>
                                     <Field name="description" :rules="'required|max:100'" v-slot="{ field, errorMessage }">
                                         <textarea v-bind="field" type="text"
                                                   class="form-control"
@@ -63,7 +63,7 @@
                                         </div>
                                         <button class="btn btn-sm p-0 me-3" @click="redirectToPromptList">
                                             <LucideIcon icon="Copy" :size="17" class="me-1" />
-                                            <span class="fw-bold">{{$t('labelCopy')}}</span>
+                                            <span class="fw-bold">{{$t('common.copy')}}</span>
                                         </button>
                                     </div>
                                     <div class="mb-3">

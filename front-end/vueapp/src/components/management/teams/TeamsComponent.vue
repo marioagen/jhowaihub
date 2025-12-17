@@ -2,9 +2,9 @@
     <div class="mt-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h6 class="mb-0 fw-bold">{{ $t("labelTeams") }}</h6>
+                <h6 class="mb-0 fw-bold">{{ $t("management.teams.title") }}</h6>
                 <p>
-                    <small class="text-muted">{{ $t("labelTeamsMessage") }}</small>
+                    <small class="text-muted">{{ $t("management.teams.teamsMessage") }}</small>
                 </p>
             </div>
             <button 
@@ -75,9 +75,9 @@
             setMenuActions: function () {
                 this.menuActions = {
                     options: [
-                        { label: this.$t("labelEdit"), value: "edit", icon: editIcon },
+                        { label: this.$t("common.edit"), value: "edit", icon: editIcon },
                         {
-                            label: this.$t("labelDelete"),
+                            label: this.$t("common.delete"),
                             value: "delete",
                             icon: deleteIcon,
                             color: "text-danger",
@@ -108,8 +108,8 @@
             setEntitySearch: function () {
                 this.entitySearch = {
                     screen: "team",
-                    labelInput: this.$t("labelSearchTeams"),
-                    placeholderInput: this.$t("labelTypeTeamName"),
+                    labelInput: this.$t("management.teams.searchTeams"),
+                    placeholderInput: this.$t("management.teams.typeTeamName"),
                 };
             },
         },

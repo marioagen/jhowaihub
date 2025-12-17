@@ -3,11 +3,11 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{ $t("labelReprocess") }}</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">{{ $t("common.reprocess") }}</h5>
                     <button
                         type="button"
                         class="btn-close"
-                        :title="$t('labelClose')"
+                        :title="$t('common.close')"
                         data-bs-dismiss="modal"
                         aria-label="Close"
                         @click="close"
@@ -17,27 +17,27 @@
                     <div>
                         <form @submit.prevent="save">
                             <div class="mb-3">
-                                <label class="form-label">{{ $t("labelModel") }}</label>
+                                <label class="form-label">{{ $t("dashboard.model") }}</label>
                                 <select class="form-select" v-model="modelSelected">
-                                    <option value="">{{ $t("labelSelect") }}</option>
+                                    <option value="">{{ $t("common.select") }}</option>
                                     <option value="text-embedding-3-large">text-embedding-3-large</option>
                                 </select>
                             </div>
                             <button
                                 type="submit"
                                 class="btn btn-primary m-2"
-                                :title="$t('labelSave')"
+                                :title="$t('common.save')"
                                 style="float: right"
                             >
-                                {{ $t("labelSave") }}
+                                {{ $t("common.save") }}
                             </button>
                             <a
                                 class="btn btn-light m-2 btn-custom-cancel"
-                                :title="$t('labelCancel')"
+                                :title="$t('common.cancel')"
                                 style="float: right"
                                 @click="close"
                             >
-                                {{ $t("labelCancel") }}
+                                {{ $t("common.cancel") }}
                             </a>
                         </form>
                     </div>

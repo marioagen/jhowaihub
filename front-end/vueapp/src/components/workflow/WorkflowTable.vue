@@ -21,22 +21,30 @@
                     <li>
                         <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToEdit(data.row)">
                             <LucideIcon icon="SquarePen" />
-                            {{ $t("labelEdit") }}
+                            {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
                             <LucideIcon icon="Trash2" />
-                            {{ $t("labelDelete") }}
+                            {{ $t("common.delete") }}
                         </a>
                     </li>
                 </DropdownComponent>
             </template>
         </TableComponent>
     </div>
-    <ConfirmModal id="deleteConfirm" title="questions.removeTitle" message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel" confirmText="labelConfirm" confirmVariant="primary" ref="DeleteDialog"
-        :isLoading="isDeleting" @confirm="deleteWorkflow" />
+    <ConfirmModal
+        id="deleteConfirm"
+        title="questions.removeTitle"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
+        confirmVariant="primary"
+        ref="DeleteDialog"
+        :isLoading="isDeleting"
+        @confirm="deleteWorkflow"
+    />
 </template>
 
 <script>
