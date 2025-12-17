@@ -117,6 +117,15 @@ namespace WoopiAiHub.Repository
                                                      s.WorkflowId == workflowId);
         }
 
+        /// <summary>
+        /// Finds steps by workflow ID with optional filtering and ordering.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="input"></param>
+        /// <param name="allUsers"></param>
+        /// <param name="login"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
         public async Task<List<StepDto>> FindStepsByWorkflowId(int id, string input = "", bool allUsers = false, string login = "", string order = "")
         {
             var steps = await _context.Steps
@@ -192,6 +201,12 @@ namespace WoopiAiHub.Repository
             return steps;
         }
 
+        /// <summary>
+        /// Applies ordering to a collection of CardDto based on the specified orderBy string.
+        /// </summary>
+        /// <param name="cards"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
         private ICollection<CardDto> ApplyCardOrdering(ICollection<CardDto> cards, string? orderBy)
         {
             return orderBy?.ToLower() switch

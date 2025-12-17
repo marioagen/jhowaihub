@@ -804,6 +804,13 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Find steps by workflow id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="workflowFilterDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
         public async Task<ICollection<StepDto>> FindStepsById(int id, WorkflowFilterDto? workflowFilterDto)
         {
             var input = workflowFilterDto?.Input ?? string.Empty;
