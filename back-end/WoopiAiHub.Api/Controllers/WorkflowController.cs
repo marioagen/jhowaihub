@@ -49,7 +49,6 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(workflow);
         }
 
-
         /// <summary>
         /// Endpoint that receives a team id and returns a valid workflow
         /// </summary>
