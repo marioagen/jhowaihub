@@ -16,31 +16,38 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
-                            <div>
-                                <LucideIcon icon="Clock" :size="14" class="me-2" />
-                                <span>{{ $t("workflow.boardView") }}</span>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
+                                    <div>
+                                        <LucideIcon icon="Clock" :size="14" class="me-2" />
+                                        <span>{{ $t("workflow.boardView") }}</span>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-light border text-start" type="button"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                            <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
+                                            <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li v-for="item in workflowList" :key="item.id">
+                                                <a class="dropdown-item" @click="selectOption(item)">
+                                                    <div class="fw-bold">{{ item.teams.name }}</div>
+                                                    <div class="text-muted small">{{ item.name }}</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="badge bg-secondary badge-custom">
+                                        <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
+                                        <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
+                                    </div>
+
+                                </div>
                             </div>
-                            <div class="dropdown">
-                                <button class="btn btn-light border text-start" type="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
-                                    <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li v-for="item in workflowList" :key="item.id">
-                                        <a class="dropdown-item" @click="selectOption(item)">
-                                            <div class="fw-bold">{{ item.teams.name }}</div>
-                                            <div class="text-muted small">{{ item.name }}</div>
-                                        </a>
-                                    </li>
-                                </ul>
+                            <div class="col-6">
+                                <WorkflowFilters @filter="filterData" class="ms-auto" />
                             </div>
-                            <div class="badge bg-secondary badge-custom">
-                                <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
-                                <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
-                            </div>
-                            <WorkflowFilters @filter="filterData" class="ms-auto" />
                         </div>
                     </div>
                 </div>
@@ -114,6 +121,7 @@ export default {
             isLoadingKanban: true,
             signalrEventExecutionChanged: "CardExecutionChanged",
             filters: {
+                orderBy: "",
                 input: null,
                 login: null,
                 isAllUsers: true,
@@ -181,9 +189,9 @@ export default {
 
             this.selectOption(workflowToSelect);
         },
-        getWorkflowById(workflowId) {
+        getWorkflowStepsById(workflowId) {
             this.isLoadingKanban = true;
-            WorkflowService.getWorkflowById(workflowId, this.filters)
+            WorkflowService.getWorkflowStepsById(workflowId, this.filters)
                 .then((response) => {
                     this.kanbanCards = response;
                 })
@@ -229,11 +237,11 @@ export default {
                 name: workflow.name,
             };
 
-            this.getWorkflowById(workflow.id);
+            this.getWorkflowStepsById(workflow.id);
             this.getUsersByTeams(workflow.teams);
         },
         reloadKanban() {
-            this.getWorkflowById(this.selectedOption.id);
+            this.getWorkflowStepsById(this.selectedOption.id);
         },
         filterData(filters) {
             this.filters = filters;

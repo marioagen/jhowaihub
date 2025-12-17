@@ -20,6 +20,19 @@ export default {
                 logService.showMessage(e);
             });
     },
+    getAllUsers() {
+        return api
+            .get("/User")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch(function (e) {
+                logService.showMessage(e);
+                return {
+                    error: e,
+                }
+            });
+    },
     deleteUsersById(userId) {
         return api
             .delete("/User/DeactivateByIds", { data: [userId] })

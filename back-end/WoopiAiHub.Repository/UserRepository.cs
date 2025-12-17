@@ -224,6 +224,19 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Find all users 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ICollection<UserDto>> FindAllAsync()
+        {
+            return await _context.Users
+                                 .AsNoTracking()
+                                 .Where(u => u.IsActive)
+                                 .Select(s => new UserDto { Id = s.Id, Name = s.Name, Email = s.Email })
+                                 .ToListAsync();
+        }
+
+        /// <summary>
         /// Retrieves a collection of users who are associated with any of the specified team IDs.
         /// </summary>
         /// <remarks>This method performs a database query to find users associated with the specified

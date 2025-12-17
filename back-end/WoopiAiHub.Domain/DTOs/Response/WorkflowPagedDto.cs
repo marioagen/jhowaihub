@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WoopiAiHub.Domain.Enum;
-
-namespace WoopiAiHub.Domain.DTOs.Response
+﻿namespace WoopiAiHub.Domain.DTOs.Response
 {
     public record class WorkflowPagedDto
     {
@@ -14,5 +7,9 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public string? Search { get; set; }
         public String? Login { get; set; } = null;
         public bool IsAllUsers { get; set; } = true;
+        public string? OrderBy { get; set; } = null;
+        public int? TeamId { get; set; }
+        public Guid? UserId { get; set; }
+
     }
 }

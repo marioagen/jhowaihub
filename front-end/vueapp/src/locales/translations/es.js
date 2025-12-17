@@ -282,7 +282,7 @@
     },
     filters: {
         documentInput: "Buscar por documento, descripción o usuario, ...",
-        workflowInput: "Buscar por documento",
+        workflowInput: "Buscar por documento, descripción o solicitante",
         toolInput: "Buscar por nombre de la herramienta",
         teamsSelect: {
             all: "Todos los equipos",
@@ -292,6 +292,10 @@
             all: "Todos los tipos",
             none: "Selecciona un tipo",
         },
+        usersSelect: {
+            all: "Todos los usuarios",
+            none: "Selecciona un usuario",
+        },
         assignment: {
             currentUser: "Mis documentos",
             allUsers: "Todos los usuarios",
@@ -300,6 +304,11 @@
             all: "Todos los flujos de trabajo",
             none: "Selecciona un flujo de trabajo",
         },
+        sortBy: "Ordenar por",
+        mostRecent: "Mas reciente",
+        mostOld: "Mas antiguo",
+        nameAZ: "Nombre (A-Z)",
+        nameZA: "Nombre (Z-A)",
     },
     labelBackToListDocuments: "Volver a los documentos",
     pageTitleDocumentsForm: "Nuevo documento",
@@ -703,10 +712,6 @@
         importTitle: "Importar prompt",
         importSubtitle: "Selecione prompts predefinidos del sistema",
         importButton: "Importar",
-        mostRecent: "Mas reciente",
-        mostOld: "Mas antiguo",
-        nameAZ: "Nombre (A-Z)",
-        nameZA: "Nombre (Z-A)",
         selectAllTemplates: "Selecionar todos los templates",
         viewComplete: "Ver completo",
         importPredefined: "Importar predefinidos",

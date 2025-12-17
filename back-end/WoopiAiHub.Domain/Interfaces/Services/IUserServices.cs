@@ -1,5 +1,4 @@
-﻿using System;
-using WoopiAiHub.Domain.DTOs;
+﻿using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 
@@ -17,5 +16,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<UserDto> FindUserByEmail(string email);
         Guid FindIdByEmail(string email);
         Task<ICollection<UserDto>> FindByTeamIds(int[] teamIds);
+        Task<ICollection<UserDto>> FindAll();
     }
 }

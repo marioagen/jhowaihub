@@ -188,12 +188,16 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Empty(result);
         }
 
-        [Fact(DisplayName = "Test FindAllPaged page greater than zero returns PaginatedList")]
+        [Theory(DisplayName = "Test FindAllPaged page greater than zero returns PaginatedList")]
         [Trait("FindAllPaged", "Success")]
-        public void FindAllPaged_PageGreaterThanZero_ReturnsPaginatedList()
+        [InlineData("created asc")]
+        [InlineData("created desc")]
+        [InlineData("name asc")]
+        [InlineData("name desc")]
+        public void FindAllPaged_PageGreaterThanZero_ReturnsPaginatedList(string filter)
         {
             // Arrange
-            var workflowPagedDto = new WorkflowPagedDto { Page = 1 };
+            var workflowPagedDto = new WorkflowPagedDto { Page = 1, OrderBy = filter, TeamId = 1, UserId = Guid.NewGuid() };
             var workflowList = new List<WorkflowDto> { new WorkflowDto() };
 
             _workflowRepositoryMock.Setup(repo => repo.FindAllWithFilter(workflowPagedDto)).Returns(workflowList.AsQueryable());

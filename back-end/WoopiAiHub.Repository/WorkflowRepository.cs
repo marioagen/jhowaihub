@@ -609,6 +609,8 @@ namespace WoopiAiHub.Repository
         {
             var search = workflowPagedDto.Search?.ToLower();
             var login = workflowPagedDto.Login?.ToLower();
+            var orderBy = workflowPagedDto.OrderBy?.ToLower();
+
             var userTeamIds = _context.Users
                  .Where(u => u.Email.Equals(login))
                  .SelectMany(u => u.Teams.Select(t => t.Id))
@@ -626,6 +628,16 @@ namespace WoopiAiHub.Repository
                              EF.Functions.Like(i.Name, $"%{search}%"));
             }
 
+            if (workflowPagedDto.TeamId.HasValue)
+            {
+                query = query.Where(w => w.Teams.Any(t => t.Id == workflowPagedDto.TeamId.Value));
+            }
+
+            if (workflowPagedDto.UserId.HasValue)
+            {
+                query = query.Where(w => w.Teams.Any(t => t.Users.Any(u => u.Id == workflowPagedDto.UserId.Value)));
+            }
+
             if (!workflowPagedDto.IsAllUsers)
             {
                 query = query
@@ -635,6 +647,26 @@ namespace WoopiAiHub.Repository
                         c.AssignedUser != null &&
                         EF.Functions.Like(c.AssignedUser.Email, login)
                     )));
+            }
+
+            if (!string.IsNullOrWhiteSpace(orderBy))
+            {
+                if (orderBy == "created desc")
+                {
+                    query = query.OrderByDescending(w => w.Created);
+                }
+                else if (orderBy == "created asc")
+                {
+                    query = query.OrderBy(w => w.Created);
+                }
+                if (orderBy == "name desc")
+                {
+                    query = query.OrderByDescending(w => w.Name);
+                }
+                else if (orderBy == "name asc")
+                {
+                    query = query.OrderBy(w => w.Name);
+                }
             }
 
             return query.Select(w => new WorkflowDto

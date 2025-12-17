@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
+﻿using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -11,8 +9,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using WoopiAiHub.Repository;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -26,7 +22,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolDependencyRepository _stepToolDependencyRepository;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
@@ -40,8 +35,7 @@ namespace WoopiAiHub.Application.Services
             IStepToolOutputRepository stepToolOutputRepository,
             IUnitOfWork unitOfWork,
             IValidateStep validateStep,
-            ILogger<WorkflowServices> logger,
-            IValidateWorkflow validateWorkflow)
+            ILogger<WorkflowServices> logger)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -51,7 +45,6 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
-            _validateWorkflow = validateWorkflow;
             _teamRepository = teamRepository;
             _logger = logger;
         }
@@ -809,6 +802,21 @@ namespace WoopiAiHub.Application.Services
                     }
                 }
             }
+        }
+
+        public async Task<ICollection<StepDto>> FindStepsById(int id, WorkflowFilterDto? workflowFilterDto)
+        {
+            var input = workflowFilterDto?.Input ?? string.Empty;
+            var allUsers = workflowFilterDto?.IsAllUsers ?? false;
+            var login = workflowFilterDto?.Login ?? string.Empty;
+            var order = workflowFilterDto?.OrderBy ?? string.Empty;
+
+            var workflow = await _stepRepository.FindStepsByWorkflowId(id, input, allUsers, login, order);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+            return workflow;
         }
     }
 }
