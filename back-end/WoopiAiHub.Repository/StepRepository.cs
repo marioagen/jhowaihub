@@ -147,7 +147,7 @@ namespace WoopiAiHub.Repository
                         Name = s.Status.Name,
                         Color = s.Status.Color,
                     },
-                    HasStepTools = s.StepTools.Any(),
+                    HasStepTools = s.StepTools.Count > 0,
                     Cards = s.Cards
                          .Where(c => c.Enable &&
                              (
@@ -207,7 +207,7 @@ namespace WoopiAiHub.Repository
         /// <param name="cards"></param>
         /// <param name="orderBy"></param>
         /// <returns></returns>
-        private ICollection<CardDto> ApplyCardOrdering(ICollection<CardDto> cards, string? orderBy)
+        private static ICollection<CardDto> ApplyCardOrdering(ICollection<CardDto> cards, string? orderBy)
         {
             return orderBy?.ToLower() switch
             {
