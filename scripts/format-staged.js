@@ -145,17 +145,30 @@ function main() {
     const csharpFiles = stagedFiles.filter((file) => /\.cs$/i.test(file));
     let csharpFormatted = false;
 
-    // Format C# files using dotnet format (more efficient to do all at once)
+    // Format C# files using dotnet format (only changed files)
     if (csharpFiles.length > 0) {
         try {
             const solutionFile = path.resolve("WoopiaiHub.sln");
             if (fs.existsSync(solutionFile)) {
                 log(`Formatting ${csharpFiles.length} C# file(s) using dotnet format...`, "blue");
-                execSync("dotnet format WoopiaiHub.sln --include-generated", {
+
+                // Build --include arguments for each C# file (use relative paths)
+                const includeArgs = csharpFiles
+                    .map((file) => {
+                        // Use forward slashes for dotnet format (works on all platforms)
+                        return file.replace(/\\/g, "/");
+                    })
+                    .map((filePath) => `--include "${filePath}"`)
+                    .join(" ");
+
+                // Format only the specified files
+                const formatCommand = `dotnet format WoopiaiHub.sln ${includeArgs}`;
+                execSync(formatCommand, {
                     stdio: "pipe",
                     cwd: path.resolve("."),
                 });
-                // Stage all C# files
+
+                // Stage all formatted C# files
                 for (const file of csharpFiles) {
                     execSync(`git add "${file}"`, { stdio: "pipe" });
                 }
