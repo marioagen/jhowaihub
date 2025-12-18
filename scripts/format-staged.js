@@ -37,6 +37,43 @@ function getStagedFiles() {
     }
 }
 
+/**
+ * Determines the file type and category
+ * @returns {Object} { type: 'csharp'|'frontend'|'root'|'skip', category: string }
+ */
+function categorizeFile(filePath) {
+    // Normalize path separators
+    const normalizedPath = filePath.replace(/\\/g, "/");
+    
+    // C# backend files - any .cs file
+    if (/\.cs$/i.test(filePath)) {
+        return { type: "csharp", category: "backend", tool: "dotnet format" };
+    }
+    
+    // Frontend files - must be in front-end/vueapp/ directory
+    const isInFrontendDir = normalizedPath.startsWith("front-end/vueapp/");
+    const frontendExtensions = /\.(js|vue|ts|tsx|json|css|scss|html)$/i;
+    
+    if (isInFrontendDir && frontendExtensions.test(filePath)) {
+        return { type: "frontend", category: "frontend", tool: "prettier (frontend)" };
+    }
+    
+    // Root-level formattable files (JSON, YAML, MD) - not in frontend or backend specific dirs
+    const rootExtensions = /\.(json|yml|yaml|md)$/i;
+    const isInBackendDir = normalizedPath.startsWith("back-end/");
+    const isInExternalApiDir = normalizedPath.startsWith("external-api/");
+    
+    if (!isInFrontendDir && !isInBackendDir && !isInExternalApiDir && rootExtensions.test(filePath)) {
+        return { type: "root", category: "root", tool: "prettier (root)" };
+    }
+    
+    // Skip all other files
+    return { type: "skip", category: "other", tool: "none" };
+}
+
+/**
+ * Formats a non-C# file (frontend or root files)
+ */
 function formatFile(filePath) {
     const fullPath = path.resolve(filePath);
 
@@ -45,63 +82,19 @@ function formatFile(filePath) {
         return { success: true, skipped: true };
     }
 
-    // Check if file is a C# file
-    const isCSharpFile = /\.cs$/i.test(filePath);
-
-    // Check if file is in frontend Vue app
-    const isFrontendFile = filePath.startsWith("front-end/vueapp/");
-    const isFormattable = /\.(js|vue|ts|tsx|json|css|scss|html|yml|yaml|md)$/i.test(filePath);
-
-    // Handle C# files
-    if (isCSharpFile) {
-        try {
-            // Find the solution file or project file
-            const backendDir = path.resolve("back-end");
-            const solutionFile = path.resolve("WoopiaiHub.sln");
-
-            // Use dotnet format to format the specific file
-            // Note: dotnet format works on solution/project level, so we format the whole solution
-            // but only staged files will be affected
-            if (fs.existsSync(solutionFile)) {
-                // Format the solution (dotnet format will respect .editorconfig)
-                execSync("dotnet format WoopiaiHub.sln --include-generated", {
-                    stdio: "pipe",
-                    cwd: path.resolve("."),
-                });
-                // Stage all formatted files
-                execSync(`git add "${filePath}"`, { stdio: "pipe" });
-                return { success: true };
-            } else if (fs.existsSync(backendDir)) {
-                // Try to find any .sln file in the backend directory
-                const files = fs.readdirSync(backendDir);
-                const slnFile = files.find((f) => f.endsWith(".sln"));
-                if (slnFile) {
-                    execSync(`dotnet format "${path.join(backendDir, slnFile)}" --include-generated`, {
-                        stdio: "pipe",
-                        cwd: path.resolve("."),
-                    });
-                    execSync(`git add "${filePath}"`, { stdio: "pipe" });
-                    return { success: true };
-                }
-            }
-            // If dotnet format is not available or solution not found, skip
-            return { success: true, skipped: true };
-        } catch (error) {
-            // dotnet might not be installed or available, that's okay
-            return { success: true, skipped: true };
-        }
-    }
-
-    // Handle frontend and other files
-    if (!isFormattable) {
+    const fileInfo = categorizeFile(filePath);
+    
+    // Skip files that shouldn't be formatted
+    if (fileInfo.type === "skip" || fileInfo.type === "csharp") {
         return { success: true, skipped: true };
     }
 
     try {
-        if (isFrontendFile) {
-            // Format using frontend prettier
+        if (fileInfo.type === "frontend") {
+            // Format using frontend prettier (uses front-end/vueapp/.prettierrc)
             const frontendDir = path.resolve("front-end/vueapp");
             if (fs.existsSync(path.join(frontendDir, "package.json"))) {
+                log(`  Formatting frontend file: ${filePath}`, "blue");
                 execSync(`npx prettier --write "${fullPath}"`, {
                     cwd: frontendDir,
                     stdio: "pipe",
@@ -109,18 +102,24 @@ function formatFile(filePath) {
                 // Stage the file again after formatting
                 execSync(`git add "${filePath}"`, { stdio: "pipe" });
                 return { success: true };
+            } else {
+                log(`  Warning: Frontend package.json not found, skipping ${filePath}`, "yellow");
+                return { success: true, skipped: true };
             }
-        } else {
-            // Format using root prettier (if prettier is available)
+        } else if (fileInfo.type === "root") {
+            // Format using root prettier (uses .prettierrc)
             try {
+                log(`  Formatting root file: ${filePath}`, "blue");
                 execSync(`npx prettier --write "${fullPath}"`, {
                     stdio: "pipe",
+                    cwd: path.resolve("."),
                 });
                 // Stage the file again after formatting
                 execSync(`git add "${filePath}"`, { stdio: "pipe" });
                 return { success: true };
             } catch (error) {
                 // Prettier might not be installed at root, that's okay
+                log(`  Note: Prettier not available at root, skipping ${filePath}`, "yellow");
                 return { success: true, skipped: true };
             }
         }
@@ -141,67 +140,160 @@ function main() {
         process.exit(0);
     }
 
-    // Check if there are any C# files to format
-    const csharpFiles = stagedFiles.filter((file) => /\.cs$/i.test(file));
+    // Categorize all files
+    const fileCategories = {
+        csharp: [],
+        frontend: [],
+        root: [],
+        skip: [],
+    };
+
+    for (const file of stagedFiles) {
+        const fileInfo = categorizeFile(file);
+        fileCategories[fileInfo.type].push({ path: file, ...fileInfo });
+    }
+
+    // Log file categorization
+    if (fileCategories.csharp.length > 0) {
+        log(`\nBackend C# files (${fileCategories.csharp.length}):`, "blue");
+        fileCategories.csharp.forEach((f) => log(`  - ${f.path}`, "blue"));
+    }
+    if (fileCategories.frontend.length > 0) {
+        log(`\nFrontend files (${fileCategories.frontend.length}):`, "blue");
+        fileCategories.frontend.forEach((f) => log(`  - ${f.path}`, "blue"));
+    }
+    if (fileCategories.root.length > 0) {
+        log(`\nRoot files (${fileCategories.root.length}):`, "blue");
+        fileCategories.root.forEach((f) => log(`  - ${f.path}`, "blue"));
+    }
+    if (fileCategories.skip.length > 0) {
+        log(`\nSkipped files (${fileCategories.skip.length}):`, "yellow");
+        fileCategories.skip.forEach((f) => log(`  - ${f.path}`, "yellow"));
+    }
+
+    // Format C# backend files using dotnet format
+    const csharpFiles = fileCategories.csharp.map((f) => f.path);
     let csharpFormatted = false;
 
-    // Format C# files using dotnet format (only changed files)
+    // Format C# backend files using dotnet format (only changed files)
     if (csharpFiles.length > 0) {
         try {
             const solutionFile = path.resolve("WoopiaiHub.sln");
             if (fs.existsSync(solutionFile)) {
-                log(`Formatting ${csharpFiles.length} C# file(s) using dotnet format...`, "blue");
+                log(`\n[BACKEND] Formatting ${csharpFiles.length} C# file(s) using dotnet format...`, "blue");
 
-                // Build --include arguments for each C# file (use relative paths)
-                const includeArgs = csharpFiles
-                    .map((file) => {
-                        // Use forward slashes for dotnet format (works on all platforms)
-                        return file.replace(/\\/g, "/");
-                    })
-                    .map((filePath) => `--include "${filePath}"`)
-                    .join(" ");
-
-                // Format only the specified files
-                const formatCommand = `dotnet format WoopiaiHub.sln ${includeArgs}`;
-                execSync(formatCommand, {
-                    stdio: "pipe",
-                    cwd: path.resolve("."),
-                });
-
-                // Stage all formatted C# files
+                // Build command with multiple --include flags (one per file)
+                // Use relative paths from the solution file location
+                const formatArgs = ["dotnet", "format", "WoopiaiHub.sln"];
+                
                 for (const file of csharpFiles) {
-                    execSync(`git add "${file}"`, { stdio: "pipe" });
+                    // Normalize path separators to forward slashes (works on all platforms)
+                    const normalizedPath = file.replace(/\\/g, "/");
+                    formatArgs.push("--include", normalizedPath);
                 }
-                csharpFormatted = true;
-                log(`✓ Formatted ${csharpFiles.length} C# file(s)`, "green");
+
+                try {
+                    // Log which files will be formatted
+                    log(`Files to format: ${csharpFiles.join(", ")}`, "blue");
+                    log(`Command: ${formatArgs.join(" ")}`, "blue");
+                    
+                    // Execute dotnet format with proper argument array
+                    // Use array format to avoid shell interpretation issues
+                    const output = execSync(formatArgs, {
+                        stdio: "pipe",
+                        cwd: path.resolve("."),
+                        encoding: "utf-8",
+                    });
+
+                    // Check if any changes were made
+                    if (output && output.trim().length > 0) {
+                        const outputPreview = output.trim().substring(0, 500);
+                        log(`Format output: ${outputPreview}${output.length > 500 ? "..." : ""}`, "blue");
+                    } else {
+                        log("Format completed (no output)", "blue");
+                    }
+
+                    // Stage all formatted C# files
+                    for (const file of csharpFiles) {
+                        try {
+                            execSync(`git add "${file}"`, { stdio: "pipe" });
+                        } catch (addError) {
+                            log(`Warning: Could not stage ${file}`, "yellow");
+                        }
+                    }
+                    csharpFormatted = true;
+                    log(`✓ Formatted ${csharpFiles.length} C# file(s)`, "green");
+                } catch (formatError) {
+                    // Try to get more details about the error
+                    const errorOutput = formatError.stdout || formatError.stderr || formatError.message;
+                    if (formatError.status === 0) {
+                        // Exit code 0 means success (even if --verify-no-changes found changes)
+                        // Stage files anyway
+                        for (const file of csharpFiles) {
+                            try {
+                                execSync(`git add "${file}"`, { stdio: "pipe" });
+                            } catch (addError) {
+                                log(`Warning: Could not stage ${file}`, "yellow");
+                            }
+                        }
+                        csharpFormatted = true;
+                        log(`✓ Formatted ${csharpFiles.length} C# file(s)`, "green");
+                    } else {
+                        log(`Error running dotnet format (exit code: ${formatError.status})`, "red");
+                        if (errorOutput) {
+                            log(`Error details: ${errorOutput.substring(0, 500)}`, "red");
+                        }
+                        log(`Command: ${formatArgs.join(" ")}`, "yellow");
+                        
+                        // Don't fail the commit if formatting fails, just warn
+                        log("Continuing with commit (formatting had issues)", "yellow");
+                    }
+                }
+            } else {
+                log("Solution file WoopiaiHub.sln not found", "yellow");
             }
         } catch (error) {
             // dotnet might not be available, continue with other files
-            log("Note: dotnet format not available, skipping C# formatting", "yellow");
+            log(`Note: dotnet format error - ${error.message}`, "yellow");
+            log("Skipping C# formatting", "yellow");
         }
     }
 
     let formattedCount = csharpFormatted ? csharpFiles.length : 0;
     let errorCount = 0;
-    let skippedCount = 0;
+    let skippedCount = fileCategories.skip.length;
 
-    // Format other files (frontend, JSON, etc.)
-    for (const file of stagedFiles) {
-        // Skip C# files as they're already formatted
-        if (/\.cs$/i.test(file)) {
-            continue;
+    // Format frontend files
+    if (fileCategories.frontend.length > 0) {
+        log(`\n[FRONTEND] Formatting ${fileCategories.frontend.length} file(s) using prettier (frontend config)...`, "blue");
+        for (const fileInfo of fileCategories.frontend) {
+            const result = formatFile(fileInfo.path);
+            if (result.skipped) {
+                skippedCount++;
+            } else if (result.success) {
+                log(`✓ Formatted: ${fileInfo.path}`, "green");
+                formattedCount++;
+            } else {
+                log(`✗ Error formatting ${fileInfo.path}: ${result.error}`, "red");
+                errorCount++;
+            }
         }
+    }
 
-        const result = formatFile(file);
-
-        if (result.skipped) {
-            skippedCount++;
-        } else if (result.success) {
-            log(`✓ Formatted: ${file}`, "green");
-            formattedCount++;
-        } else {
-            log(`✗ Error formatting ${file}: ${result.error}`, "red");
-            errorCount++;
+    // Format root-level files
+    if (fileCategories.root.length > 0) {
+        log(`\n[ROOT] Formatting ${fileCategories.root.length} file(s) using prettier (root config)...`, "blue");
+        for (const fileInfo of fileCategories.root) {
+            const result = formatFile(fileInfo.path);
+            if (result.skipped) {
+                skippedCount++;
+            } else if (result.success) {
+                log(`✓ Formatted: ${fileInfo.path}`, "green");
+                formattedCount++;
+            } else {
+                log(`✗ Error formatting ${fileInfo.path}: ${result.error}`, "red");
+                errorCount++;
+            }
         }
     }
 

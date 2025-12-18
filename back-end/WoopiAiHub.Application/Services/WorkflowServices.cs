@@ -46,10 +46,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<WorkflowDto> FindById(
-            int id,
-            WorkflowFilterDto? workflowFilterDto
-        )
+        public async Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto)
         {
             var workflow = await _workflowRepository.FindById(id, workflowFilterDto);
             if (workflow == null)
@@ -75,7 +72,6 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
-
             return phase1;
         }
 
