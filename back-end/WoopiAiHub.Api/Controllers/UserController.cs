@@ -77,11 +77,25 @@ namespace WoopiAiHub.Api.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("Paged")]
-        [SwaggerOperation("Endpoint that receives the request to return all teams paginated")]
+        [SwaggerOperation("Endpoint that receives the request to return all users paginated")]
         [ProducesResponseType(typeof(PagedDataDto), StatusCodes.Status200OK)]
         public ActionResult<UserPagedResultDto> FindAllPaged([FromQuery] PagedDataDto pagedDataDto)
         {
             var result = _userServices.FindAllPaged(pagedDataDto);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Endpoint that receives the request to return all users.
+        /// </summary>
+        /// <param name="userDto"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [SwaggerOperation("Endpoint that receives the request to return all users")]
+        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindAll()
+        {
+            var result = await _userServices.FindAll();
             return Ok(result);
         }
 

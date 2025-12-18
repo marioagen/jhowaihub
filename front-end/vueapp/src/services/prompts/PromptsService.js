@@ -2,8 +2,8 @@ import api from "@/services/api";
 
 export default {
     getPromptList(paramsReq) {
-       return api.get('/Prompt/Paged/', { params: paramsReq })
-            .then(function (response) { 
+        return api.get('/Prompt/Paged/', { params: paramsReq })
+            .then(function (response) {
                 return response
             }).catch((e) => {
                 return {
@@ -86,6 +86,18 @@ export default {
                     error: error,
                 }
             });
+    },
+    findPromptTemplates(query, orderBy) {
+        return api.get('/Prompt/Templates', {
+            params: { query, orderBy }
+        })
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
+    importPrompts(templateIds) {
+        return api.post('/Prompt/Import', templateIds)
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
     }
-
 }
+

@@ -20,7 +20,7 @@
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="save">
                         <LucideIcon icon="Save" :size="15" />
-                        {{ $t("quizzes.formSave") }}
+                        {{ $t("common.save") }}
                     </button>
                 </div>
             </div>
@@ -79,7 +79,7 @@
                             v-model="form.questions"
                             :available="questionsList"
                             transferListTitle="questions.availableList"
-                            transferListPlaceholder="questions.filters.input"
+                            transferListPlaceholder="filters.questionsInput"
                         />    
                     </div>
                     <button 

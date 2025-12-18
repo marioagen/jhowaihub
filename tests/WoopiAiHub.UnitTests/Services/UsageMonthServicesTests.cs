@@ -17,6 +17,7 @@ namespace WoopiAiHub.UnitTests.Services
         public UsageMonthServicesTests()
         {
             _usageMonthRepositoryMock = new Mock<IUsageMonthRepository>();
+
             _usageMonthServices = new UsageMonthServices(_usageMonthRepositoryMock.Object);
         }
 
@@ -104,6 +105,35 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(expectedData.Count, result.Count);
             Assert.Equal(expectedData, result);
             _usageMonthRepositoryMock.Verify(x => x.FindUsedModelEmbeddings(), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindTotalUsageCostAsync should return total cost for given date range")]
+        [Trait("FindTotalUsageCostAsync", "Success")]
+        public async Task FindTotalUsageCostAsync_ShouldReturnTotalCost_ForDateRange()
+        {
+            // Arrange
+            var start = "2023-10-01";
+            var end = "2023-10-31";
+            var dateFilterDto = new DateFilterDto { Start = start, End = end };
+            var expectedTotal = 123.45m;
+
+            DateTime? expectedStart = DateTime.Parse(start);
+            DateTime? expectedEnd = DateTime.Parse(end);
+
+            _usageMonthRepositoryMock
+                .Setup(x => x.FindTotalUsageCostAsync(
+                    It.Is<DateTime?>(d => d == expectedStart),
+                    It.Is<DateTime?>(d => d == expectedEnd)))
+                .ReturnsAsync(expectedTotal);
+
+            // Act
+            var result = await _usageMonthServices.FindTotalUsageCostAsync(dateFilterDto);
+
+            // Assert
+            Assert.Equal(expectedTotal, result);
+            _usageMonthRepositoryMock.Verify(x => x.FindTotalUsageCostAsync(
+                It.Is<DateTime?>(d => d == expectedStart),
+                It.Is<DateTime?>(d => d == expectedEnd)), Times.Once);
         }
     }
 }

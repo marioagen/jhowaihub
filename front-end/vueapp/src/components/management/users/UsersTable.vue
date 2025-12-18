@@ -54,7 +54,7 @@
                     <li>
                         <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToForm(data.row)">
                             <LucideIcon icon="SquarePen" />
-                            {{ $t("labelEdit") }}
+                            {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
@@ -63,7 +63,7 @@
                             @click="openConfirmation(data.row)"
                         >
                             <LucideIcon icon="Trash2" />
-                            {{ $t("labelDelete") }}
+                            {{ $t("common.delete") }}
                         </a>
                     </li>
                 </DropdownComponent>
@@ -72,10 +72,10 @@
     </div>
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteUser"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        title="management.users.youAreAboutToDeleteUser"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"

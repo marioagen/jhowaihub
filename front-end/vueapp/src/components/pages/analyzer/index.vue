@@ -40,7 +40,7 @@
                 </div>
             </div>
             <div v-if="isExpandedHistory" style="position: absolute; top: 50%">
-                <a class="btn btn-light btn-sm shadow" :title="$t('labelQuestionnaireAndAi')" @click="expandHistory">
+                <a class="btn btn-light btn-sm shadow" :title="$t('quizzes.questionnaireAndAi')" @click="expandHistory">
                     <img src="./../../../assets/img/prompt.png" />
                 </a>
             </div>
@@ -55,9 +55,9 @@
 import PromptView from "@/components/pages/analyzer/prompt-view";
 import DocView from "@/components/pages/analyzer/doc-view";
 import StepAnalysisView from "@/components/pages/analyzer/step-analysis-view";
-import ToastAlert from "@/components/common/toast-alert";
+import ToastAlert from "@/components/pages/analyzer/toast-alert";
 import api from "@/services/api";
-import NormalizeIndex from "@/components/pages/normalize/loading";
+import NormalizeIndex from "@/components/documents/EmbeddingDocument";
 import CardsServices from "@/services/cards/CardsServices";
 import LogService from '@/services/log/logService';
 
@@ -105,9 +105,9 @@ export default {
         },
         setCrumbsData: function () {
             this.crumbsData = [
-                { crumb: this.$t("labelDocuments"), link: { to: "Documents" } },
-                { crumb: this.$t("labelListing"), link: { to: "Documents", queryPage: this.$route.query.page } },
-                { crumb: this.$t("labelConsult"), link: { to: "Analyzer", queryPage: this.$route.query.page } },
+                { crumb: this.$t("documents.title"), link: { to: "Documents" } },
+                { crumb: this.$t("documents.listing"), link: { to: "Documents", queryPage: this.$route.query.page } },
+                { crumb: this.$t("common.consult"), link: { to: "Analyzer", queryPage: this.$route.query.page } },
             ];
         },
         expandHistory: function () {

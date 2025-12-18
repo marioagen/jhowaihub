@@ -17,7 +17,7 @@
         <template #footer>
             <div class="modal-footer">
                 <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
-                    {{ $t("labelCancel") }}
+                    {{ $t("common.cancel") }}
                 </button>
                 <button class="btn btn-primary btn-sm" @click="save">
                     {{ $t(saveText) }}
@@ -52,10 +52,10 @@
         }),
         computed: {
             titleText() {
-                return this.isEdit ? "labelEditTitleType" : "labelSaveTitleType";
+                return this.isEdit ? "types.editTitleType" : "types.saveTitleType";
             },
             saveText() {
-                return this.isEdit ? "labelEditType" : "labelSaveType";
+                return this.isEdit ? "common.edit" : "types.saveType";
             },
         },
         methods: {
@@ -87,13 +87,13 @@
                             this.$emit("reload");
                             return this.$notify({
                                 title: "Tipos",
-                                message: this.$t("labelDocumentTypeSuccess"),
+                                message: this.$t("types.createSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         }
                         const messageKey =
-                            result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
+                            result.status === 409 ? "types.typeDocAlreadyExists" : "types.errors.invalid";
                         this.$notify({
                             title: "Tipos",
                             message: this.$t(messageKey),
@@ -113,14 +113,14 @@
                             this.$emit("reload");
                             return this.$notify({
                                 title: "Tipos",
-                                message: this.$t("labelDocumentTypeEditSuccess"),
+                                message: this.$t("types.editSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         }
 
                         const messageKey =
-                            result.status === 409 ? "labelDocumentTypeAlreadyExists" : "labelDocumentTypeError";
+                            result.status === 409 ? "types.typeDocAlreadyExists" : "types.errors.invalid";
                         this.$notify({
                             title: "Tipos",
                             message: this.$t(messageKey),

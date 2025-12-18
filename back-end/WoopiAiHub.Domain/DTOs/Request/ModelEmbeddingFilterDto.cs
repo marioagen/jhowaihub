@@ -1,6 +1,4 @@
-﻿using WoopiAiHub.Domain.Enum;
-
-namespace WoopiAiHub.Domain.DTOs.Request
+﻿namespace WoopiAiHub.Domain.DTOs.Request
 {
     public record class ModelEmbeddingFilterDto
     {

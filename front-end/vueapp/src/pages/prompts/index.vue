@@ -1,35 +1,38 @@
 <template>
     <main>
         <div class="container-fluid">
-                <div class="mt-3 mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h5 class="mb-0 fw-bold">{{ $t("prompts.title") }}</h5>
-                            <p>
-                                <small class="text-muted">{{ $t("prompts.subtitle") }}</small>
-                            </p>
-                        </div>
+            <div class="mt-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="mb-0 fw-bold">{{ $t("prompts.title") }}</h5>
+                        <p>
+                            <small class="text-muted">{{ $t("prompts.subtitle") }}</small>
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" @click="redirectToImport">
+                            <LucideIcon icon="CloudDownload" :size="17" />
+                            {{ $t("prompts.importPredefined") }}
+                        </button>
                         <button class="btn btn-primary btn-sm" @click="redirectToNewPrompt">
                             <LucideIcon icon="Plus" :size="17" />
                             {{ $t("prompts.createPrompt") }}
                         </button>
                     </div>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <PromptFilters  @filter="filterData"></PromptFilters>
-                        </div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <PromptFilters @filter="filterData"></PromptFilters>
                     </div>
                 </div>
-                   <div>
-                       <PromptComponent ref="PromptComponent"/>
-                   </div>
             </div>
+            <div>
+                <PromptComponent ref="PromptComponent" />
+            </div>
+        </div>
     </main>
 </template>
 <script>
-    import Pagination from '@/components/common/pagination';
-    import TruncateText from "@/components/common/truncate-text.vue";
-    import SearchComponent from "@/components/global/SearchComponent.vue";
     import PromptComponent from "@/components/prompts/PromptComponent.vue";
     import PromptFilters from "@/components/prompts/PromptFilter"
     export default {
@@ -60,9 +63,6 @@
             }
         },
         components: {
-            Pagination,
-            TruncateText,
-            SearchComponent,
             PromptComponent,
             PromptFilters,
         },
@@ -73,10 +73,14 @@
                 },
                 deep: true
             },
+            deep: true
         },
         methods: {
             redirectToNewPrompt: function () {
                 this.$router.push({ name: "PromptNew" });
+            },
+            redirectToImport: function () {
+                this.$router.push({ name: "PromptImport" });
             },
             reloadData() {
                 this.$refs.PromptComponent.getList({ search: '', page: this.queryPage, type: null });
@@ -86,11 +90,5 @@
                 this.reloadData();
             },
         },
-        computed: {},
-        created() {
-        },
-        mounted() { },
-        unmounted() { },
-    }
+}
 </script>
-

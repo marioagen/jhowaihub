@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
@@ -19,21 +20,18 @@ namespace WoopiAiHub.Application.Services
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _config;
         private readonly ITeamRepository _teamRepository;
-        private readonly IProfileRepository _profileRepository;
         private readonly IPasswordHasher _passwordHasher;
 
         public UserServices(IUserRepository userRepository,
                             IMarketPlaceApi marketPlaceApi,
                             IConfiguration config,
                             ITeamRepository teamRepository,
-                            IProfileRepository profileRepository,
                             IPasswordHasher passwordHasher)
         {
             _userRepository = userRepository;
             _teamRepository = teamRepository;
             _marketPlaceApi = marketPlaceApi;
             _config = config;
-            _profileRepository = profileRepository;
             _passwordHasher = passwordHasher;
         }
 
@@ -430,6 +428,15 @@ namespace WoopiAiHub.Application.Services
             var userEnabledReference = await _marketPlaceApi.AssignLicensesByHub(KeyAccess, requestAssignLicensesByHub);
 
             return userEnabledReference;
+        }
+
+        /// <summary>
+        /// Find all users
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ICollection<UserDto>> FindAll()
+        {
+            return await _userRepository.FindAllAsync();
         }
     }
 }

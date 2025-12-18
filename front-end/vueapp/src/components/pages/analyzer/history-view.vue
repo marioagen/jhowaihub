@@ -5,27 +5,27 @@
                 <h6 class="mt-0 text-primary">
                     <i
                         class="fas fa-compress"
-                        :title="$t('labelReduceHistory')"
+                        :title="$t('documents.reduceHistory')"
                         @click="expandHistory"
                         v-show="isExpandedHistory"
                         style="margin-left: 1%; cursor: pointer"
                     ></i>
                     <i
                         class="fas fa-expand text-primary"
-                        :title="$t('labelExpandHistory')"
+                        :title="$t('documents.expandHistory')"
                         @click="expandHistory"
                         v-show="!isExpandedHistory"
                         style="margin-left: 4%; cursor: pointer"
                     ></i>
-                    {{ $t("labelHistoric") }}
+                    {{ $t("documents.historic") }}
                     <a style="margin-left: 1%" @click="expandSort">
-                        <i class="fas fa-sort" style="color: #0073e6; cursor: pointer" :title="$t('labelOrder')"></i>
+                        <i class="fas fa-sort" style="color: #0073e6; cursor: pointer" :title="$t('common.order')"></i>
                     </a>
                     <container class="flex-shrink">
                         <span
                             class="badge rounded-pill bg-primary badge-custom"
                             style="margin-left: 1.5%; cursor: pointer"
-                            :title="$t('labelDownloadCsv')"
+                            :title="$t('dashboard.downloadCsv')"
                             @click="downloadHistory"
                             v-if="historyList.length > 0"
                         >
@@ -35,7 +35,7 @@
                         <span
                             class="badge rounded-pill bg-danger badge-custom"
                             style="margin-left: 1.5%; cursor: pointer"
-                            :title="$t('labelDeleteHistory')"
+                            :title="$t('documents.deleteHistory')"
                             @click="confirmationDialog(idAnalyzer)"
                             v-if="historyList.length > 0"
                         >
@@ -56,7 +56,7 @@
                                 title="circle"
                                 v-show="historyListOrder == 'asc'"
                             ></i>
-                            &nbsp;{{ $t("labelMostRecent") }}
+                            &nbsp;{{ $t("documents.mostRecent") }}
                         </a>
                         <a class="dropdown-item" @click="sortHistoryListDesc">
                             <i
@@ -71,7 +71,7 @@
                                 title="circle"
                                 v-show="historyListOrder == 'desc'"
                             ></i>
-                            &nbsp;{{ $t("labelMostOlder") }}
+                            &nbsp;{{ $t("documents.mostOlder") }}
                         </a>
                     </span>
                 </h6>
@@ -81,11 +81,11 @@
             <span>
                 &nbsp;&nbsp;&nbsp;
                 <i class="fas fa-sync-alt fa-spin"></i>
-                &nbsp;{{ $t("labelLoading") }}..
+                &nbsp;{{ $t("common.loading") }}..
             </span>
         </div>
         <div class="row mb-2" v-if="!loadingHistory && historyList.length == 0">
-            <span>&nbsp;&nbsp;&nbsp;{{ $t("labelQueryWithoutHistory") }}.</span>
+            <span>&nbsp;&nbsp;&nbsp;{{ $t("documents.queryWithoutHistory") }}.</span>
         </div>
         <div class="div-row-overflow" ref="historyDiv">
             <div class="row" v-for="(history, index) in historyList" :key="index">
@@ -99,7 +99,7 @@
                                         <a @click="copyToClipboard(history.output)">
                                             <i
                                                 class="fas fa-clone text-primary"
-                                                :title="$t('labelCopy')"
+                                                :title="$t('common.copy')"
                                                 style="cursor: pointer"
                                             ></i>
                                         </a>
@@ -108,7 +108,7 @@
                                         <a @click="changeTextArea(index)">
                                             <i
                                                 class="fas fa-pen text-primary"
-                                                :title="$t('labelEdit')"
+                                                :title="$t('common.edit')"
                                                 style="cursor: pointer"
                                             ></i>
                                         </a>
@@ -127,7 +127,7 @@
                                             <i
                                                 class="fa fa-check text-primary"
                                                 @click="editHistory(index)"
-                                                :title="$t('labelConfirm')"
+                                                :title="$t('common.confirm')"
                                             ></i>
                                         </a>
                                     </div>
@@ -136,16 +136,16 @@
                                             <i
                                                 class="fa fa-times text-secondary"
                                                 @click="stopEditing(index)"
-                                                :title="$t('labelCancel')"
+                                                :title="$t('common.cancel')"
                                             ></i>
                                         </a>
                                     </div>
                                 </div>
                                 <div v-if="history.isEdited == true" class="text-primary edited">
-                                    {{ $t("labelEdited") }}
+                                    {{ $t("common.edited") }}
                                 </div>
                                 <div v-if="history.isEditedFail == true" class="text-danger fail">
-                                    {{ $t("labelEditedFail") }}
+                                    {{ $t("common.editedFail") }}
                                 </div>
                             </div>
                         </div>
@@ -159,10 +159,10 @@
         v-if="modalAlertShow"
         :type="'Confirm'"
         :entity="modalEntity"
-        :alertTitle="$t('labelYouAreAboutToDeleteDocumentQuery')"
-        :alertMessage="$t('labelThisActionCannotBeUndone')"
-        :okLabel="$t('labelConfirm')"
-        :cancelLabel="$t('labelCancel')"
+        :alertTitle="$t('documents.youAreAboutToDeleteDocumentQuery')"
+        :alertMessage="$t('common.thisActionCannotBeUndone')"
+        :okLabel="$t('common.confirm')"
+        :cancelLabel="$t('common.cancel')"
         @open="deleteHistory"
         @close="closeModal"
     />
@@ -171,7 +171,7 @@
 <script>
     import date from "@/helpers/date";
     import api from "@/services/api";
-    import ModalAlert from "@/components/common/modal-alert";
+    import ModalAlert from "@/components/pages/analyzer/modal-alert";
 
     export default {
         name: "HistoryView",
@@ -265,7 +265,7 @@
                         self.historyList = [];
                         self.loadingHistory = false;
                         self.clearMyInterval();
-                        self.alertToast(self.$t("labelFailedToLoadHistory"), "toast-danger");
+                        self.alertToast(self.$t("analyze.failedToLoadHistory"), "toast-danger");
                     })
                     .finally(function () {
                         // Always executed
@@ -289,13 +289,13 @@
                         fileLink.href = fileURL;
                         fileLink.setAttribute(
                             "download",
-                            this.$t("labelHistoric") + " - " + this.dateFormat(Date.now()) + ".csv"
+                            this.$t("documents.historic") + " - " + this.dateFormat(Date.now()) + ".csv"
                         );
                         document.body.appendChild(fileLink);
                         fileLink.click();
                         // Download forced - End
                         this.clearMyInterval();
-                        this.alertToast(this.$t("labelDownloadSuccessfully"), "toast-success");
+                        this.alertToast(this.$t("dashboard.downloadSuccessfully"), "toast-success");
                     }
                 }
             },
@@ -368,7 +368,7 @@
             copyToClipboard: function (content) {
                 navigator.clipboard.writeText(content);
                 this.clearMyInterval();
-                this.alertToast(this.$t("labelTextCopiedToClipboard"), "toast-primary");
+                this.alertToast(this.$t("common.textCopiedToClipboard"), "toast-primary");
             },
             changeTextArea: function (id) {
                 this.historyList[id].isEditing = true;

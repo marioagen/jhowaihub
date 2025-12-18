@@ -3,7 +3,7 @@ import store from "@/store";
 
 export default {
     getDocuments(filters) {
-        if (!store.state.userProfile.keyMongoAccess) {
+        /*if (!store.state.userProfile.keyMongoAccess) {
             return Promise.resolve({
                 content: [],
                 pagination: {
@@ -13,8 +13,8 @@ export default {
                     totalItems: 0,
                 }
             });
-        }
-        
+        }*/
+
         return api.get("/Document", { params: filters })
             .then(({ data }) => {
                 return {
@@ -35,14 +35,14 @@ export default {
     },
     deleteDocument(ids) {
         return api.delete("/Document/Delete", { data: ids })
-                .then(() => {
-                    return true;
-                })
-                .catch(function (e) {
-                    return {
-                        error: e,
-                    }
-                });
+            .then(() => {
+                return true;
+            })
+            .catch(function (e) {
+                return {
+                    error: e,
+                }
+            });
     },
     getDocumentAnalyze(docId) {
         return api
@@ -153,5 +153,14 @@ export default {
                     error: error,
                 };
             });
-    }
+    },
+    checkPagesLength() {
+        return api.get("/Document/CheckExceededPages")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return false;
+            });
+    },
 };

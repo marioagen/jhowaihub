@@ -20,7 +20,7 @@
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm" @click="saveUser">
                         <LucideIcon icon="Save" :size="15" />
-                        {{ $t("labelSave") }}
+                        {{ $t("common.save") }}
                     </button>
                 </div>
             </div>
@@ -31,7 +31,7 @@
                             <div class="col-6">
                                 <div class="mb-3">
                                     <label for="userName" class="form-label fw-semibold mb-0">
-                                        {{ $t("labelName") }}
+                                        {{ $t("common.name") }}
                                     </label>
                                     <Field
                                         type="text"
@@ -42,7 +42,7 @@
                                         name="userName"
                                         :rules="'required|min:3|max:150'"
                                         v-model="userData.name"
-                                        :placeholder="$t('labelTypeUserName')"
+                                        :placeholder="$t('management.users.typeUserName')"
                                     />
                                     <ErrorMessage name="userName" class="invalid-feedback d-block" />
                                 </div>
@@ -50,7 +50,7 @@
                             <div class="col-6">
                                 <div class="mb-3">
                                     <label for="userEmail" class="form-label fw-semibold mb-0">
-                                        {{ $t("labelEmail") }}
+                                        {{ $t("management.users.email") }}
                                     </label>
                                     <Field
                                         type="text"
@@ -61,7 +61,7 @@
                                         name="userEmail"
                                         :rules="'required|min:5|max:100|email'"
                                         v-model="userData.email"
-                                        :placeholder="$t('labelTypeUserEmail')"
+                                        :placeholder="$t('management.users.typeUserEmail')"
                                         @blur="validateEmailBackend"
                                     />
                                     <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
@@ -71,10 +71,10 @@
                         <div class="row">
                             <div class="col-6">
                                 <label for="userPassword" class="form-label fw-semibold mb-0">
-                                    {{ $t("labelPassword") }}
+                                    {{ $t("management.users.password") }}
                                 </label>
                                 <PasswordInputComponent
-                                    :placeholder="$t('labelTypePassword')"
+                                    :placeholder="$t('management.users.typePassword')"
                                     :rules="passwordRules"
                                     name="userPassword"
                                     v-model="userData.password"
@@ -82,10 +82,10 @@
                             </div>
                             <div class="col-6">
                                 <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
-                                    {{ $t("labelConfirmedPassword") }}
+                                    {{ $t("management.users.confirmedPassword") }}
                                 </label>
                                 <PasswordInputComponent
-                                    :placeholder="$t('labelTypeConfirmedPassword')"
+                                    :placeholder="$t('management.users.typeConfirmedPassword')"
                                     :rules="confirmedPasswordRules"
                                     name="userConfirmedPassword"
                                     v-model="userData.confirmedPassword"
@@ -94,9 +94,9 @@
                         </div>
                         <SelectionListComponent
                             :id="'teams'"
-                            :labelPanel="'labelTeams'"
-                            :labelSelectedQuantity="'labelSelectedTeams'"
-                            :labelSearch="'labelSearchTeams'"
+                            :labelPanel="'management.teams.title'"
+                            :labelSelectedQuantity="'common.selected'"
+                            :labelSearch="'management.teams.searchTeams'"
                             :items="teamsList"
                             :loading="isLoading"
                             v-model:selectedItems="selectedTeams"
@@ -119,7 +119,7 @@
                     <Form @submit="createTeam" ref="formRefTeam">
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="teamName" class="form-label fw-semibold mb-0">{{ $t("labelTeamName") }}</label>
+                                <label for="teamName" class="form-label fw-semibold mb-0">{{ $t("management.teams.teamName") }}</label>
                                 <Field
                                     type="text"
                                     class="form-control form-control-sm"
@@ -128,7 +128,7 @@
                                     autocomplete="off"
                                     name="teamName"
                                     v-model="teamData.name"
-                                    :placeholder="$t('labelTypeTeamName')"
+                                    :placeholder="$t('management.teams.typeTeamName')"
                                     :rules="'required|min:3|max:100'"
                                 />
                                 <ErrorMessage name="teamName" class="invalid-feedback d-block" />
@@ -137,7 +137,7 @@
                         <div class="col-auto ms-auto">
                             <button class="btn btn-primary btn-sm">
                                 <LucideIcon icon="Save" :size="15" />
-                                {{ $t("labelSave") }}
+                                {{ $t("common.save") }}
                             </button>
                         </div>
                     </Form>
@@ -246,7 +246,7 @@
                 api.post("User/IsEmailInUse", paramsReq)
                     .then((response) => {
                         if (response && response.data && response.data === true) {
-                            this.$refs.formRef.setFieldError("userEmail", this.$t("management.users.emailDuplicated"));
+                            this.$refs.formRef.setFieldError("userEmail", this.$t("management.users.errors.emailDuplicated"));
 
                         } else {
                             this.$refs.formRef.setFieldError("userEmail", "");
@@ -255,7 +255,7 @@
                     .catch((e) => {
                         this.$notify({
                             title: 'management.users.title',
-                            message: "management.users.invalid",
+                            message: "management.users.errors.invalid",
                             variant: 'danger',
                             icon: 'CircleX',
                         });
@@ -335,7 +335,7 @@
                     .catch((e) => {
                         this.$notify({
                             title: "management.users.title",
-                            message: "management.users.saveError",
+                            message: "management.users.errors.saveError",
                             variant: "danger",
                             icon: "CircleX",
                         });

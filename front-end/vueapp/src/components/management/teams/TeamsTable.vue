@@ -19,7 +19,7 @@
                     <li>
                         <a class="dropdown-item d-flex align-items-center gap-2" @click="editTeam(data.row)">
                             <LucideIcon icon="SquarePen" />
-                            {{ $t("labelEdit") }}
+                            {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
@@ -28,7 +28,7 @@
                             @click="openConfirmation(data.row)"
                         >
                             <LucideIcon icon="Trash2" />
-                            {{ $t("labelDelete") }}
+                            {{ $t("common.delete") }}
                         </a>
                     </li>
                 </DropdownComponent>
@@ -37,10 +37,10 @@
     </div>
     <ConfirmModal
         id="deleteConfirm"
-        title="labelYouAreAboutToDeleteTeam"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        title="management.teams.youAreAboutToDeleteTeam"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
@@ -166,7 +166,7 @@
 
                         this.$notify({
                             title: 'management.teams.title',
-                            message: 'management.teams.deleteError',
+                            message: 'management.teams.errors.deleteError',
                             variant: 'danger',
                             icon: 'CircleX',
                         });

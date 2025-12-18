@@ -27,14 +27,14 @@
     <modal-alert
         v-if="modalAlertShow"
         :type="'Error'"
-        :alertTitle="$t('labelFailedToNormalize')"
-        :alertMessage="$t('labelTheFileMayBeUnreadableOrHaveAnError')"
-        :okLabel="$t('labelClose')"
+        :alertTitle="$t('documents.failedToNormalize')"
+        :alertMessage="$t('documents.theFileMayBeUnreadableOrHaveAnError')"
+        :okLabel="$t('common.close')"
         @close="closeModal"
     />
 </template>
 <script>
-    import ModalAlert from "@/components/common/modal-alert";
+    import ModalAlert from "@/components/pages/analyzer/modal-alert";
     import api from "@/services/api";
 
     export default {
@@ -74,14 +74,14 @@
                         // Handle success
                         if (response.data.status === 0) {
                             // Status not analyzed
-                            self.message = self.$t("labelNormalizingTheDocument");
+                            self.message = self.$t("documents.normalizingTheDocument");
                             self.normalizeDoc();
                         } else {
                             if (self.isReprocessing) {
-                                self.message = self.$t("labelNormalizingTheDocument");
+                                self.message = self.$t("documents.normalizingTheDocument");
                                 self.normalizeDoc();
                             } else {
-                                self.message = self.$t("labelDocumentHasAlreadyBeenStandardizedPreviously", [
+                                self.message = self.$t("documents.documentHasAlreadyBeenStandardizedPreviously", [
                                     response.data.name,
                                 ]);
                                 self.redirectToDocument();
@@ -158,7 +158,7 @@
         },
         computed: {},
         created() {
-            this.message = this.$t("labelPreparingTheDocument");
+            this.message = this.$t("documents.preparingTheDocument");
             this.verifyNormalizedDoc();
         },
         mounted() {},

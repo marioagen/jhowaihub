@@ -5,7 +5,7 @@
         @click="openConfirmationMultiple"
     >
         <LucideIcon icon="Trash2" :size="15" />
-        {{ $t("labelDelete") }}
+        {{ $t("common.delete") }}
     </button>
     <div>
         <TableComponent
@@ -26,7 +26,7 @@
                     <li>
                         <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
                             <LucideIcon icon="SquarePen" />
-                            {{ $t("labelEdit") }}
+                            {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
@@ -35,7 +35,7 @@
                             @click="openConfirmation(data.row)"
                         >
                             <LucideIcon icon="Trash2" />
-                            {{ $t("labelDelete") }}
+                            {{ $t("common.delete") }}
                         </a>
                     </li>
                 </DropdownComponent>
@@ -46,9 +46,9 @@
     <ConfirmModal
         id="deleteConfirm"
         title="questions.removeTitle"
-        message="labelThisActionCannotBeUndone"
-        cancelText="labelCancel"
-        confirmText="labelConfirm"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
         confirmVariant="primary"
         ref="DeleteDialog"
         :isLoading="isDeleting"
@@ -76,11 +76,11 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "id" },
-                    { key: "description", label: "questions.description" },
+                    { key: "id", label: "common.id" },
+                    { key: "description", label: "common.description" },
                     { key: "created", label: "questions.createdData" },
-                    { key: "emailCreator", label: "questions.owner" },
-                    { key: "actions", label: "questions.actions" },
+                    { key: "emailCreator", label: "common.owner" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -170,7 +170,7 @@
                         } else {
                             this.$notify({
                                 title: this.$t("questions.title"),
-                                message: this.$t("removeError.removeError"),
+                                message: this.$t("questions.errors.removeError"),
                                 variant: 'danger',
                                 icon: 'CircleX',
                             });

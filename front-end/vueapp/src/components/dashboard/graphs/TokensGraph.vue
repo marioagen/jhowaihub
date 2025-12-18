@@ -59,6 +59,7 @@ export default {
         IAList: [],
         currentIAIndex: 0,
         previousTotalTokens: 0,
+        totalCost: 0,
         graph: {
             options: {
                 chart: {
@@ -136,13 +137,27 @@ export default {
                 })
                 .finally(() => {
                     this.isLoading = false;
-                    this.setTotalTokens();
+                });
+        },
+        getTotalCost() {
+            let paramsTotalCost = {
+                start: this.start,
+                end: this.end
+            };
+            this.isLoading = true;
+            DashboardServices.GetTotalUsageCost(paramsTotalCost)
+                .then((response) => {
+                    if (response && !response.error) {
+                        this.totalCost = response;
+                        this.setTotalTokens();
+                    }
+                })
+                .finally(() => {
+                    this.isLoading = false;
                 });
         },
         setTotalTokens() {
-            var total = this.usageUnitTokens * this.totalTokens;
-            this.$emit('setTotalTokens', total - this.previousTotalTokens);
-            this.previousTotalTokens = total;
+            this.$emit('setTotalTokens', this.totalCost);
         },
         getIAList() {
             DashboardServices.GetUsedModels()
@@ -152,6 +167,7 @@ export default {
                         if (this.IAList.length > 0) {
                             this.currentIAIndex = 0;
                             this.getTokensData();
+                            this.getTotalCost();
                         }
                     }
                 });

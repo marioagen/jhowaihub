@@ -20,7 +20,7 @@
                 <div class="col-auto ms-auto">
                     <button class="btn btn-primary btn-sm me-2" @click="save">
                         <LucideIcon icon="Save" :size="15" />
-                        {{ $t("flow.save") }}
+                        {{ $t("common.save") }}
                     </button>
                 </div>
             </div>
@@ -84,7 +84,7 @@
                         </div>
                         
                         <div class="mt-4">
-                            <button type="button" class="btn btn-primary" @click="updateNodeWithForm">{{ $t("labelSave")
+                            <button type="button" class="btn btn-primary" @click="updateNodeWithForm">{{ $t("common.save")
                                 }}</button>
                         </div>
                     </div>
@@ -100,7 +100,7 @@
 
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary" @click="updateNode">
-                                {{ $t("labelSave") }}
+                                {{ $t("common.save") }}
                             </button>
                         </div>
                     </div>
@@ -113,7 +113,7 @@
 
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary" @click="updateNode">
-                                {{ $t("labelSave") }}
+                                {{ $t("common.save") }}
                             </button>
                         </div>
                     </div>
