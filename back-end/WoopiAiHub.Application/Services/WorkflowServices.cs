@@ -214,7 +214,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public ICollection<WorkflowDto> FindAllByUser(string email)
         {
-            return _workflowRepository.FindAllByUser(email);
+            let workflows = _workflowRepository.FindAllByUser(email);
+            return workflows;
         }
 
         /// <summary>
