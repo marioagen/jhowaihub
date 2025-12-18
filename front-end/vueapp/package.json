@@ -6,7 +6,8 @@
         "dev": "vite",
         "build": "vite build",
         "lint": "eslint .",
-        "format": "prettier --write ."
+        "format": "prettier --write . --ignore-path .prettierignore",
+        "format:check": "prettier --check . --ignore-path .prettierignore"
     },
     "dependencies": {
         "@jaxtheprime/vue3-dropzone": "^3.3.0",
