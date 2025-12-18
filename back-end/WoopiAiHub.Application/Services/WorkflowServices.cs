@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -26,16 +26,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
-        public WorkflowServices(IWorkflowRepository workflowRepository,
-            IProfileRepository profileRepository,
-            ITeamRepository teamRepository,
-            IStatusRepository statusRepository,
-            IStepRepository stepRepository,
-            IStepToolDependencyRepository stepToolDependencyRepository,
-            IStepToolOutputRepository stepToolOutputRepository,
-            IUnitOfWork unitOfWork,
-            IValidateStep validateStep,
-            ILogger<WorkflowServices> logger)
+        public WorkflowServices(IWorkflowRepository workflowRepository, IProfileRepository profileRepository, ITeamRepository teamRepository, IStatusRepository statusRepository, IStepRepository stepRepository, IStepToolDependencyRepository stepToolDependencyRepository, IStepToolOutputRepository stepToolOutputRepository, IUnitOfWork unitOfWork, IValidateStep validateStep, ILogger<WorkflowServices> logger)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -55,7 +46,10 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto)
+        public async Task<WorkflowDto> FindById(
+            int id,
+            WorkflowFilterDto? workflowFilterDto
+        )
         {
             var workflow = await _workflowRepository.FindById(id, workflowFilterDto);
             if (workflow == null)
@@ -200,7 +194,8 @@ namespace WoopiAiHub.Application.Services
                 stepToolDto.ToolId,
                 stepToolDto.Order,
                 stepToolDto.PositionX,
-                stepToolDto.PositionY);
+                stepToolDto.PositionY
+            );
 
             foreach (var parameter in stepToolDto.Parameters)
             {
@@ -219,8 +214,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public ICollection<WorkflowDto> FindAllByUser(string email)
         {
-            var workflow = _workflowRepository.FindAllByUser(email);
-            return workflow;
+            return _workflowRepository.FindAllByUser(email);
         }
 
         /// <summary>
@@ -278,8 +272,11 @@ namespace WoopiAiHub.Application.Services
         /// <param name="workflows">A list of workflows to associate with the team.</param>
         /// <param name="profiles">A list of profiles used to verify and adjust workflow relationships.</param>
         /// <returns></returns>
-        public async Task UpdateTeamWorkflowRelationship(Team team, List<Workflow> workflows,
-            List<Domain.Models.Profile> profiles)
+        public async Task UpdateTeamWorkflowRelationship(
+            Team team,
+            List<Workflow> workflows,
+            List<Domain.Models.Profile> profiles
+        )
         {
             var workflowsToRemove = new List<TeamsWorkflowsDto>();
             foreach (var profile in profiles)

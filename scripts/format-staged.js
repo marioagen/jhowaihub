@@ -45,10 +45,54 @@ function formatFile(filePath) {
         return { success: true, skipped: true };
     }
 
+    // Check if file is a C# file
+    const isCSharpFile = /\.cs$/i.test(filePath);
+
     // Check if file is in frontend Vue app
     const isFrontendFile = filePath.startsWith("front-end/vueapp/");
     const isFormattable = /\.(js|vue|ts|tsx|json|css|scss|html|yml|yaml|md)$/i.test(filePath);
 
+    // Handle C# files
+    if (isCSharpFile) {
+        try {
+            // Find the solution file or project file
+            const backendDir = path.resolve("back-end");
+            const solutionFile = path.resolve("WoopiaiHub.sln");
+
+            // Use dotnet format to format the specific file
+            // Note: dotnet format works on solution/project level, so we format the whole solution
+            // but only staged files will be affected
+            if (fs.existsSync(solutionFile)) {
+                // Format the solution (dotnet format will respect .editorconfig)
+                execSync("dotnet format WoopiaiHub.sln --include-generated", {
+                    stdio: "pipe",
+                    cwd: path.resolve("."),
+                });
+                // Stage all formatted files
+                execSync(`git add "${filePath}"`, { stdio: "pipe" });
+                return { success: true };
+            } else if (fs.existsSync(backendDir)) {
+                // Try to find any .sln file in the backend directory
+                const files = fs.readdirSync(backendDir);
+                const slnFile = files.find((f) => f.endsWith(".sln"));
+                if (slnFile) {
+                    execSync(`dotnet format "${path.join(backendDir, slnFile)}" --include-generated`, {
+                        stdio: "pipe",
+                        cwd: path.resolve("."),
+                    });
+                    execSync(`git add "${filePath}"`, { stdio: "pipe" });
+                    return { success: true };
+                }
+            }
+            // If dotnet format is not available or solution not found, skip
+            return { success: true, skipped: true };
+        } catch (error) {
+            // dotnet might not be installed or available, that's okay
+            return { success: true, skipped: true };
+        }
+    }
+
+    // Handle frontend and other files
     if (!isFormattable) {
         return { success: true, skipped: true };
     }
@@ -97,11 +141,44 @@ function main() {
         process.exit(0);
     }
 
-    let formattedCount = 0;
+    // Check if there are any C# files to format
+    const csharpFiles = stagedFiles.filter((file) => /\.cs$/i.test(file));
+    let csharpFormatted = false;
+
+    // Format C# files using dotnet format (more efficient to do all at once)
+    if (csharpFiles.length > 0) {
+        try {
+            const solutionFile = path.resolve("WoopiaiHub.sln");
+            if (fs.existsSync(solutionFile)) {
+                log(`Formatting ${csharpFiles.length} C# file(s) using dotnet format...`, "blue");
+                execSync("dotnet format WoopiaiHub.sln --include-generated", {
+                    stdio: "pipe",
+                    cwd: path.resolve("."),
+                });
+                // Stage all C# files
+                for (const file of csharpFiles) {
+                    execSync(`git add "${file}"`, { stdio: "pipe" });
+                }
+                csharpFormatted = true;
+                log(`✓ Formatted ${csharpFiles.length} C# file(s)`, "green");
+            }
+        } catch (error) {
+            // dotnet might not be available, continue with other files
+            log("Note: dotnet format not available, skipping C# formatting", "yellow");
+        }
+    }
+
+    let formattedCount = csharpFormatted ? csharpFiles.length : 0;
     let errorCount = 0;
     let skippedCount = 0;
 
+    // Format other files (frontend, JSON, etc.)
     for (const file of stagedFiles) {
+        // Skip C# files as they're already formatted
+        if (/\.cs$/i.test(file)) {
+            continue;
+        }
+
         const result = formatFile(file);
 
         if (result.skipped) {

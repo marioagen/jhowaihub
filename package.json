@@ -7,6 +7,9 @@
         "format": "prettier --write \"**/*.{json,yml,yaml,md}\" --ignore-path .prettierignore",
         "format:check": "prettier --check \"**/*.{json,yml,yaml,md}\" --ignore-path .prettierignore",
         "format:frontend": "cd front-end/vueapp && npm run format",
+        "format:backend": "dotnet format WoopiaiHub.sln --include-generated",
+        "format:backend:check": "dotnet format WoopiaiHub.sln --verify-no-changes --include-generated",
+        "format:all": "npm run format && npm run format:frontend && npm run format:backend",
         "lint:frontend": "cd front-end/vueapp && npm run lint"
     },
     "devDependencies": {
