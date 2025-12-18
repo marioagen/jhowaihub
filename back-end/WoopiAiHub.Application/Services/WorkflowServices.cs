@@ -56,6 +56,7 @@ namespace WoopiAiHub.Application.Services
 
             int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
             workflow.NumDocuments = totalCards;
+            
             return workflow;
         }
 
