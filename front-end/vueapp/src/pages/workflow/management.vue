@@ -16,8 +16,12 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <WorkflowFilters @filter="filterData" class="ms-auto" :teamsList="teamsList"
-                            :usersList="usersList" />
+                        <WorkflowFilters
+                            @filter="filterData"
+                            class="ms-auto"
+                            :teamsList="teamsList"
+                            :usersList="usersList"
+                        />
                     </div>
                 </div>
                 <WorkflowTable ref="WorkflowTable" />
@@ -27,98 +31,96 @@
 </template>
 
 <script>
-import WorkflowTable from "@/components/workflow/WorkflowTable.vue";
-import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
-import TeamsService from "@/services/teams/TeamsService";
-import UsersService from "@/services/users/UserService";
-export default {
-    name: "WorkflowManagement",
-    data() {
-        return {
-            teamsList: [],
-            usersList: [],
-        };
-    },
-    components: {
-        WorkflowFilters,
-        WorkflowTable
-    },
-    methods: {
-        filterData(filters) {
-            this.$refs.WorkflowTable.filters = filters;
-            this.$refs.WorkflowTable.getWorkflowList();
+    import WorkflowTable from "@/components/workflow/WorkflowTable.vue";
+    import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
+    import TeamsService from "@/services/teams/TeamsService";
+    import UsersService from "@/services/users/UserService";
+    export default {
+        name: "WorkflowManagement",
+        data() {
+            return {
+                teamsList: [],
+                usersList: [],
+            };
         },
-        redirectToForm() {
-            this.$router.push({ name: "NewWorkflow" });
+        components: {
+            WorkflowFilters,
+            WorkflowTable,
         },
-        getTeams() {
-            TeamsService.getTeamList().then((response) => {
-                console.log("teams", response);
-                this.teamsList = response;
-            });
+        methods: {
+            filterData(filters) {
+                this.$refs.WorkflowTable.filters = filters;
+                this.$refs.WorkflowTable.getWorkflowList();
+            },
+            redirectToForm() {
+                this.$router.push({ name: "NewWorkflow" });
+            },
+            getTeams() {
+                TeamsService.getTeamList().then((response) => {
+                    this.teamsList = response;
+                });
+            },
+            getUsers() {
+                UsersService.getAllUsers().then((response) => {
+                    this.usersList = response;
+                });
+            },
         },
-        getUsers() {
-            UsersService.getAllUsers().then((response) => {
-                console.log("users", response);
-                this.usersList = response;
-            });
+        created() {
+            this.getTeams();
+            this.getUsers();
         },
-    },
-    created() {
-        this.getTeams();
-        this.getUsers();
-    },
-};
+    };
 </script>
 
 <style scoped>
-.content-center {
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-tbody {
-    background-color: #fff !important;
-}
-
-.content-left-middle {
-    text-align: left;
-    vertical-align: middle;
-    max-width: 200px;
-}
-
-.content-right-middle {
-    text-align: right;
-    vertical-align: middle;
-}
-
-.content-center-middle {
-    text-align: center;
-    vertical-align: middle;
-}
-
-.bg-success {
-    background-color: #edfef2 !important;
-    color: #0eaa42 !important;
-    font-weight: inherit !important;
-    padding: 8px 12px !important;
-}
-
-.container-fluid {
-    padding: 0 13px;
-}
-
-.scroll-area {
-    display: list-item;
-    overflow-y: auto;
-}
-
-@media (max-width: 768px) {
-    .lines {
-        display: none !important;
+    .content-center {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
     }
-}
+
+    tbody {
+        background-color: #fff !important;
+    }
+
+    .content-left-middle {
+        text-align: left;
+        vertical-align: middle;
+        max-width: 200px;
+    }
+
+    .content-right-middle {
+        text-align: right;
+        vertical-align: middle;
+    }
+
+    .content-center-middle {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .bg-success {
+        background-color: #edfef2 !important;
+        color: #0eaa42 !important;
+        font-weight: inherit !important;
+        padding: 8px 12px !important;
+    }
+
+    .container-fluid {
+        padding: 0 13px;
+    }
+
+    .scroll-area {
+        display: list-item;
+        overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
+        .lines {
+            display: none !important;
+        }
+    }
 </style>
