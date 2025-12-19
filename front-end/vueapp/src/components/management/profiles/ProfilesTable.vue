@@ -1,8 +1,8 @@
 <template>
     <div>
         <TableComponent
-            modalName="labelProfile"
-            emptyMessage="labelNoProfilesWereFound"
+            modalName="management.profiles.index"
+            emptyMessage="management.profiles.noProfilesWereFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -70,11 +70,11 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "id" },
-                    { key: "name", label: "labelProfile" },
-                    { key: "users", label: "labelUsers" },
-                    { key: "permissions", label: "labelPermissions" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "id", label: "common.id" },
+                    { key: "name", label: "management.profiles.profile" },
+                    { key: "users", label: "management.users.title" },
+                    { key: "permissions", label: "management.profiles.permissions" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {
