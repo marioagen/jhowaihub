@@ -8,7 +8,7 @@
         <div v-if="isExpanded" class="chat-panel">
             <div class="chat-header">
                 <i class="fas fa-comment-dots"></i>
-                {{ $t("analyze.conversationWithDocument") }}
+                {{ $t("analyze.askTheDoc") }}
                 <button class="close-button" @click="toggleChat" :title="$t('common.close')">
                     <i class="fas fa-times"></i>
                 </button>
@@ -70,9 +70,9 @@
                     <textarea v-model="output" class="chat-textarea" rows="4">
                     </textarea>
                     <button type="button" class="btn btn-outline-primary" @click="copy">{{ $t("analyze.copy")
-                        }}</button>
+                    }}</button>
                     <button type="button" class="btn btn-outline-primary" @click="clear">{{ $t("analyze.clear")
-                        }}</button>
+                    }}</button>
                 </div>
             </div>
         </div>

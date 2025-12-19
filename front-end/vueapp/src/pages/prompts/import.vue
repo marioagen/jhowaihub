@@ -227,6 +227,7 @@ export default {
             try {
                 const result = await PromptService.importPrompts(this.selectedTemplates);
                 if (result.error || !result) {
+                    console.log("result erro 1", result);
                     this.$notify({
                         title: 'prompts.title',
                         message: 'prompts.importError',
@@ -240,7 +241,7 @@ export default {
                         variant: 'success',
                         icon: 'CircleCheckBig',
                     });
-                    this.$router.push({ name: "Prompts" });
+                    this.goBack();
                 }
             } catch (error) {
                 this.$notify({

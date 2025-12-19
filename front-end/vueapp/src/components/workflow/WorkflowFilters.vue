@@ -50,15 +50,6 @@
                 </select>
             </div>
         </div>
-        <div class="col-1">
-            <button
-                v-tooltip="filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')"
-                class="btn table-btn btn-sm"
-                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'" type="button"
-                style="display: flex; align-items: center; justify-content: center;" @click="filterUsers">
-                <LucideIcon icon="User" />
-            </button>
-        </div>
     </div>
 </template>
 
@@ -80,7 +71,7 @@ export default {
     data() {
         return {
             filters: {
-                orderBy: "",
+                orderBy: "created asc",
                 input: null,
                 isAllUsers: true,
                 login: this.$store.state.userProfile.login,
@@ -106,7 +97,7 @@ export default {
                 case "search":
                     return this.hasTeams || this.hasUsers ? '5' : '7';
                 case "orderBy":
-                    return this.hasTeams || this.hasUsers ? '2' : '4';
+                    return this.hasTeams || this.hasUsers ? '3' : '5';
                 case "team":
                     return this.hasTeams ? '2' : '0';
                 case "user":

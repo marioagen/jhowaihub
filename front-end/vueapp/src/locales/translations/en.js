@@ -661,6 +661,8 @@
         selectAllTemplates: "Select all templates",
         viewComplete: "View complete",
         importPredefined: "Import predefined",
+        importError: "Error importing prompts",
+        importSuccess: "Prompts imported successfully",
     },
     analyze: {
         title: "Analyze Document",

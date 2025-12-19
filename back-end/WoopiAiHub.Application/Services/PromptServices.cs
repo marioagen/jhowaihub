@@ -183,8 +183,8 @@ namespace WoopiAiHub.Application.Services
             var prompts = importedPrompts.Select(dto => new Prompt(
                 0,
                 dto.Created,
-                dto.Name,
-                dto.Description,
+                dto.Name.Substring(0, Math.Min(dto.Name.Length, 50)),
+                dto.Description.Substring(0, Math.Min(dto.Description.Length, 95)),
                 dto.Text,
                 idUser,
                 isEdited: false,
