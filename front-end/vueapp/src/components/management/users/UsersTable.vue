@@ -1,8 +1,8 @@
 <template>
     <div>
         <TableComponent
-            modalName="labelUsers"
-            emptyMessage="labelNoUsersWasFound"
+            modalName="management.users.title"
+            emptyMessage="management.users.noUsersWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -107,10 +107,10 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "name", label: "labelUser" },
-                    { key: "profiles", label: "labelProfiles" },
-                    { key: "teams", label: "labelTeams" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "name", label: "management.users.user" },
+                    { key: "profiles", label: "management.profiles.profiles" },
+                    { key: "teams", label: "management.teams.title" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {
