@@ -65,10 +65,10 @@ export default {
         table: {
             isLoading: true,
             columns: [
-                { key: "id", label: "id" },
+                { key: "id", label: "common.id" },
                 { key: "name", label: "workflow.name" },
                 { key: "teams", label: "workflow.teams" },
-                { key: "actions", label: "workflow.actions" },
+                { key: "actions", label: "common.actions" },
             ],
             data: [],
             pagination: {

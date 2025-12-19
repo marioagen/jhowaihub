@@ -1,8 +1,8 @@
 <template>
     <div>
         <TableComponent
-            modalName="labelTeams"
-            emptyMessage="labelNoTeamWasFound"
+            modalName="management.teams.title"
+            emptyMessage="management.teams.noTeamWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -66,10 +66,10 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "id" },
-                    { key: "name", label: "labelTeamName" },
-                    { key: "members", label: "labelMembers" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "id", label: "common.id" },
+                    { key: "name", label: "management.teams.teamName" },
+                    { key: "members", label: "management.teams.members" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {

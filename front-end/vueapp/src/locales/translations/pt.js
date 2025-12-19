@@ -663,6 +663,8 @@
         selectAllTemplates: "Selecionar todos os templates",
         viewComplete: "Ver completo",
         importPredefined: "Importar pré-definidos",
+        importError: "Erro ao importar prompts",
+        importSuccess: "Prompts importados com sucesso",
     },
     analyze: {
         title: "Análise de Documentos",
