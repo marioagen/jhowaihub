@@ -1,9 +1,7 @@
-﻿namespace WoopiAiHub.Domain.DTOs.Response
+namespace WoopiAiHub.Domain.DTOs.Request
 {
-    public record class ApiTemplateDto
+    public record class ApiTemplateCreateDto
     {
-        public Guid? Id { get; set; }
-        public DateTime? Created { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Method { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;

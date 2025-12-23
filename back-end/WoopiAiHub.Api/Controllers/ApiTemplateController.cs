@@ -8,12 +8,12 @@ using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
-    public class ApiTemplateController(IWorkflowServices workflowServices) : ControllerBase
+    public class ApiTemplateController(IApiTemplateServices templateServices) : ControllerBase
     {
-        readonly IWorkflowServices _workflowServices = workflowServices;
+        readonly IApiTemplateServices _templateServices = templateServices;
 
         /// <summary>
         /// Endpoint that find all valid templates based on the passed query param filters.
@@ -23,10 +23,10 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet]
         [SwaggerOperation("Endpoint that find all valid templates based on the passed query param filters")]
         [ProducesResponseType(typeof(PaginatedListDto<ApiTemplateDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindAll([FromQuery] ApiTemplateFilterDto templateFilterDto)
+        public IActionResult FindAllPaged([FromQuery] ApiTemplatePagedFilterDto templateFilterDto)
         {
-            //var workflow = await _workflowServices.FindById(templateFilterDto);
-            //return Ok(workflow);
+            var templates = _templateServices.FindAllPaged(templateFilterDto);
+            return Ok(templates);
         }
 
         /// <summary>
@@ -34,13 +34,13 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("{Id}")]
+        [HttpGet("{id}")]
         [SwaggerOperation("Endpoint that receive an api template id and return a valid template")]
         [ProducesResponseType(typeof(ApiTemplateDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindById(Guid id)
         {
-            //var workflow = await _workflowServices.FindById(id, workflowFilterDto);
-            //return Ok(workflow);
+            var workflow = await _templateServices.FindById(id);
+            return Ok(workflow);
         }
 
         /// <summary>
@@ -53,8 +53,8 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> DeleteById(Guid id)
         {
-            //var result = await _workflowServices.DeleteById(id);
-            //return Ok(result);
+            var result = await _templateServices.DeleteById(id);
+            return Ok(result);
         }
 
         /// <summary>
@@ -65,10 +65,10 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut]
         [SwaggerOperation("Endpoint that update a template")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Update([FromBody] ApiTemplateDto templateDto)
+        public async Task<IActionResult> Update([FromBody] ApiTemplateUpdateDto templateDto)
         {
-            //var result = await _workflowServices.UpdateStepToolOutput(outputUpdateDto);
-            //return Ok(result);
+            var result = await _templateServices.UpdateAsync(templateDto);
+            return Ok(result);
         }
 
         /// <summary>
@@ -79,10 +79,10 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPost]
         [SwaggerOperation("Endpoint that create a new template")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status201Created)]
-        public async Task<IActionResult> Create([FromBody] ApiTemplateDto templateDto)
+        public async Task<IActionResult> Create([FromBody] ApiTemplateCreateDto templateDto)
         {
-            //var workflowId = await _workflowServices.CreatePhase1(workflowPhase1Dto);
-            //return Ok(workflowId);
+            var result = await _templateServices.CreateAsync(templateDto);
+            return Ok(result);
         }
     }
 }

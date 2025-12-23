@@ -63,6 +63,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IUsageUnitServices, UsageUnitServices>();
             services.AddScoped<IUsageAggregationService, UsageAggregationService>();
             services.AddScoped<IUsageLogRepository, UsageLogRepository>();
+            services.AddScoped<IApiTemplateServices, ApiTemplateServices>();
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();
