@@ -18,13 +18,13 @@ namespace WoopiAiHub.Api.Attributes
                 .OfType<OptionalTenantHeaderAttribute>()
                 .Any();
 
-            //operation.Parameters.Add(new OpenApiParameter
-            //{
-            //    Name = HeaderNames.XTenant,
-            //    In = ParameterLocation.Header,
-            //    Description = "Tenant Name",
-            //    Required = hasOptionalTenantHeader is false,
-            //});
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = HeaderNames.XTenant,
+                In = ParameterLocation.Header,
+                Description = "Tenant Name",
+                Required = hasOptionalTenantHeader is false,
+            });
         }
     }
 }
