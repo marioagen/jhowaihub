@@ -459,7 +459,7 @@
             none: "Select a workflow",
         },
         templates: {
-            all: "All templates",
+            all: "HTTP methods",
             searchBtn: "Search",
         },
         sortBy: "Sort by",
@@ -674,9 +674,13 @@
     },
     template: {
         title: "API Templates",
+        tableTitle: "Templates",
         subtitle: "Manage, test and edit your API request templates.",
         createTemplate: "Create new template",
         notFound: "No templates registered",
+        method: "Method",
+        name: "Name",
+        url: "URL",
     },
     analyze: {
         title: "Analyze Document",

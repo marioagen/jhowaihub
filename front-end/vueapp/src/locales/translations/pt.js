@@ -460,7 +460,7 @@
             none: "Selecione um workflow",
         },
         templates: {
-            all: "Todos os templates",
+            all: "Métodos HTTP",
             searchBtn: "Buscar",
         },
         sortBy: "Ordenar por",
@@ -679,9 +679,13 @@
     },
     template: {
         title: "Templates de API",
+        tableTitle: "Templates",
         subtitle: "Gerencie, teste e edite seus templates de requisição de API.",
         createBtn: "Criar novo template",
         notFound: "Nenhum template encontrado",
+        method: "Método",
+        name: "Nome",
+        url: "URL",
     },
     analyze: {
         title: "Análise de Documentos",

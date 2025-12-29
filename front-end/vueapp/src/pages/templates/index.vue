@@ -23,21 +23,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="isLoading">
-                    <LoadingComponent />
-                </div>
-                <div v-else-if="hasList">
-                    <div class="card custom-height">
-                        <div class="card-body d-flex flex-column p-2 card-container">
-                            <div class="kanban-wrapper">
-                                <!-- <KanbanBoard :kanbanData="kanbanCards" :users="users" @reload="reloadKanban" /> -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div v-else class="text-center">
-                    <span class="text-primary">{{ $t("template.notFound") }}</span>
-                </div>
+                <TemplateTable ref="TemplateTable" />
             </div>
         </div>
     </main>
@@ -46,94 +32,27 @@
 <script>
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import TemplateFilters from "@/components/templates/TemplateFilters.vue";
-    import TemplateService from "@/services/template/TemplateService";
+    import TemplateTable from "@/components/templates/TemplateTable.vue";
 
     export default {
         name: "TemplatesPage",
-        data() {
-            return {
-                templates: [],
-                filteredTemplates: [],
-                selectedOption: {
-                    id: 0,
-                    name: "Select a template",
-                    teamName: "Select a team",
-                    teamId: 0,
-                },
-                isLoading: false,
-                filters: {
-                    orderBy: "",
-                    input: null,
-                    method: null,
-                },
-            };
-        },
         components: {
             LoadingComponent,
             TemplateFilters,
-        },
-        computed: {
-            hasList() {
-                return this.templates.length > 0;
-            },
+            TemplateTable,
         },
         methods: {
-            getTemplates() {
-                this.isLoading = true;
-                const params = {
-                    input: this.filters.input,
-                    orderBy: this.filters.orderBy,
-                    method: this.filters.method,
-                };
-
-                TemplateService.getTemplates(params).then((response) => {
-                    console.log(response);
-                    if (response.error !== undefined) {
-                        this.$notify({
-                            title: "template.title",
-                            message: "template.notFound",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    }
-
-                    this.templates = response;
-                    this.filteredTemplates = response;
-                    this.isLoading = false;
-                });
-            },
-            selectOption(workflow) {
-                if (!workflow?.id) return;
-
-                this.isLoaded = false;
-                this.isLoadedUsers = false;
-
-                this.$store.commit("setLastSelectedWorkflow", {
-                    id: workflow.id,
-                    name: workflow.name,
-                });
-
-                this.selectedOption = {
-                    id: workflow.id,
-                    name: workflow.name,
-                };
-
-                this.getWorkflowStepsById(workflow.id);
-                this.getUsersByTeams(workflow.teams);
-            },
             redirectToNewTemplate() {
                 // this.$router.push({ name: "DocumentsUpload" });
             },
             setFilters(filters) {
-                this.filters = filters;
-                this.getTemplates();
+                this.$refs.TemplateTable.filters = filters;
+                this.$refs.TemplateTable.getTemplates();
             },
         },
-        created() {
-            this.getTemplates();
+        mounted() {
+            this.$refs.TemplateTable.getTemplates();
         },
-        async mounted() {},
-        beforeUnmount() {},
     };
 </script>
 

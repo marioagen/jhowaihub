@@ -462,7 +462,7 @@
             none: "Selecciona un flujo de trabajo",
         },
         templates: {
-            all: "Todas las plantillas",
+            all: "Métodos HTTP",
             searchBtn: "Buscar",
         },
         sortBy: "Ordenar por",
@@ -681,9 +681,13 @@
     },
     template: {
         title: "Plantillas de API",
+        tableTitle: "Plantillas",
         subtitle: "Administre, pruebe y edite sus plantillas de solicitud de API.",
         createBtn: "Nueva plantilla",
         notFound: "No hay plantillas registradas",
+        method: "Método",
+        name: "Nombre",
+        url: "URL",
     },
     analyze: {
         title: "Análisis de Documentos",
