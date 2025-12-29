@@ -90,6 +90,52 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("UserTeams", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ApiTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("Id");
+
+                    b.Property<string>("BodyTemplate")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("BodyTemplate");
+
+                    b.Property<DateTime>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created")
+                        .HasDefaultValueSql("(GETDATE())");
+
+                    b.Property<string>("HeaderTemplate")
+                        .IsRequired()
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("HeaderTemplate");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("Method");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("QueryTemplate")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("QueryTemplate");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Url");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApiTemplates", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
                 {
                     b.Property<int>("Id")
@@ -284,7 +330,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ModelEmbeddings");
+                    b.ToTable("ModelEmbeddings", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Permission", b =>
@@ -978,7 +1024,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageDailies");
+                    b.ToTable("UsageDailies", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageLog", b =>
@@ -1022,7 +1068,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageLogs");
+                    b.ToTable("UsageLogs", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageMonth", b =>
@@ -1062,7 +1108,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageMonths");
+                    b.ToTable("UsageMonths", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageType", b =>
@@ -1085,7 +1131,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UsageTypes");
+                    b.ToTable("UsageTypes", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageUnit", b =>
@@ -1124,7 +1170,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UsageTypeId");
 
-                    b.ToTable("UsageUnits");
+                    b.ToTable("UsageUnits", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>

@@ -23,6 +23,20 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet]
         [SwaggerOperation("Endpoint that find all valid templates based on the passed query param filters")]
         [ProducesResponseType(typeof(PaginatedListDto<ApiTemplateDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindAll([FromQuery] ApiTemplateFilterDto templateFilterDto)
+        {
+            var templates = await _templateServices.FindAll(templateFilterDto);
+            return Ok(templates);
+        }
+
+        /// <summary>
+        /// Endpoint that find all valid templates based on the passed query param filters.
+        /// </summary>
+        /// <param name="templateFilterDto"></param>
+        /// <returns></returns>
+        [HttpGet("paged")]
+        [SwaggerOperation("Endpoint that find all valid templates based on the passed query param filters")]
+        [ProducesResponseType(typeof(PaginatedListDto<ApiTemplateDto>), StatusCodes.Status200OK)]
         public IActionResult FindAllPaged([FromQuery] ApiTemplatePagedFilterDto templateFilterDto)
         {
             var templates = _templateServices.FindAllPaged(templateFilterDto);

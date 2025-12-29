@@ -86,11 +86,50 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="templateFilterDto"></param>
         /// <returns></returns>
+        public async Task<ICollection<ApiTemplate>> FindAll(ApiTemplateFilterDto templateFilterDto)
+        {
+            var query = ApplyFilters(templateFilterDto.Input, templateFilterDto.Method, templateFilterDto.OrderBy);
+            return await query.ToListAsync();
+        }
+
+        /// <summary>
+        /// Finds all templates associated by the paged filter data transfer object.
+        /// </summary>
+        /// <param name="templateFilterDto"></param>
+        /// <returns></returns>
         public IQueryable<ApiTemplateDto> FindAllPaged(ApiTemplatePagedFilterDto templateFilterDto)
         {
-            var input = templateFilterDto.Input?.ToLower();
-            var method = templateFilterDto.Method?.ToLower();
-            var orderBy = templateFilterDto.OrderBy?.ToLower();
+            var query = ApplyFilters(templateFilterDto.Input, templateFilterDto.Method, templateFilterDto.OrderBy);
+
+            return query.Select(w => new ApiTemplateDto
+            {
+                Id = w.Id,
+                Created = w.Created,
+                Name = w.Name,
+                Method = w.Method,
+                Url = w.Url,
+                QueryTemplate = w.QueryTemplate,
+                HeaderTemplate = w.HeaderTemplate,
+                BodyTemplate = w.BodyTemplate
+            });
+        }
+
+        /// <summary>
+        /// Filters and orders the collection of API templates based on the specified input, HTTP method, and ordering
+        /// criteria.
+        /// </summary>
+        /// <param name="input">The substring to search for within the template names. The search is case-insensitive. If null or empty, no
+        /// name filtering is applied.</param>
+        /// <param name="method">The HTTP method to filter by (for example, "get" or "post"). The comparison is case-insensitive. If null or
+        /// empty, no method filtering is applied.</param>
+        /// <param name="orderBy">The ordering criteria to apply to the results. Supported values are "created asc", "created desc", "name
+        /// asc", and "name desc" (case-insensitive). If null, empty, or unrecognized, no ordering is applied.</param>
+        /// <returns></returns>
+        private IQueryable<ApiTemplate> ApplyFilters(string? input, string? method, string? orderBy)
+        {
+            input = input?.ToLower();
+            method = method?.ToLower();
+            orderBy = orderBy?.ToLower();
 
             var query = _context.ApiTemplates
                 .AsNoTracking();
@@ -126,17 +165,7 @@ namespace WoopiAiHub.Repository
                 }
             }
 
-            return query.Select(w => new ApiTemplateDto
-            {
-                Id = w.Id,
-                Created = w.Created,
-                Name = w.Name,
-                Method = w.Method,
-                Url = w.Url,
-                QueryTemplate = w.QueryTemplate,
-                HeaderTemplate = w.HeaderTemplate,
-                BodyTemplate = w.BodyTemplate
-            });
+            return query;
         }
     }
 }

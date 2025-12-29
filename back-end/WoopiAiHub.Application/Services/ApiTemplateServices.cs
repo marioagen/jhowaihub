@@ -54,6 +54,28 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Retrieves a collection of API templates that match the specified filter criteria.
+        /// </summary>
+        /// <param name="templateDto">An object containing the filter criteria to apply when searching for API templates. Only templates matching
+        /// these criteria are returned. Cannot be null.</param>
+        /// <returns></returns>
+        public async Task<ICollection<ApiTemplateDto>> FindAll(ApiTemplateFilterDto templateDto)
+        {
+            var templates = await _templateRepository.FindAll(templateDto);
+            return [.. templates.Select(item => new ApiTemplateDto
+            {
+                Id = item.Id,
+                Created = item.Created,
+                Name = item.Name,
+                Method = item.Method,
+                Url = item.Url,
+                QueryTemplate = item.QueryTemplate,
+                HeaderTemplate = item.HeaderTemplate,
+                BodyTemplate = item.BodyTemplate
+            })];
+        }
+
+        /// <summary>
         /// This method sends the current page  
         /// and search text to repository and return an PaginatedListDto<ApiTemplateDto>.
         /// </summary>

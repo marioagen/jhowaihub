@@ -109,7 +109,8 @@
         documentTypeSuccess: "Document type inserted successfully",
         documentTypeRemoveSuccess: "Document type successfully removed",
         documentTypeEditSuccess: "Document type updated successfully",
-        documentHasAlreadyBeenStandardizedPreviously: "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
+        documentHasAlreadyBeenStandardizedPreviously:
+            "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
         documentTranscript: "Document transcription",
         ocrText: "OCR Text",
         descriptionDocumentNote: "Description (Unique for multiple documents)",
@@ -146,10 +147,13 @@
         failedToNormalize: "Failed to normalize",
         standardizedFullText: "Standardized full text",
         theFileMayBeCorrupt: "The file may be <br/> corrupt or have an error. <br/> Please try again.",
-        theFileMayBeUnreadableOrHaveAnError: "The file may be <br/> unreadable or have an error. <br/> Please try again.",
-        attentionDependingOnTheSpeed: "Attention, depending on the speed of your Internet connection and the size of the uploaded file, this operation may take a few minutes.",
+        theFileMayBeUnreadableOrHaveAnError:
+            "The file may be <br/> unreadable or have an error. <br/> Please try again.",
+        attentionDependingOnTheSpeed:
+            "Attention, depending on the speed of your Internet connection and the size of the uploaded file, this operation may take a few minutes.",
         attentionPDFDisplayFailed: "An error occurred while loading the PDF. Click here to try again",
-        anInconsistencyWasIdentifiedInTheDocument: "An inconsistency was identified in the document. Please reprocess to achieve better results",
+        anInconsistencyWasIdentifiedInTheDocument:
+            "An inconsistency was identified in the document. Please reprocess to achieve better results",
         uploadPdf: "Drag and drop your PDF files below to get started or click on the area to browse",
         uploadedFiles: "All files are uploaded!",
         uploadComplete: "Upload complete",
@@ -408,7 +412,7 @@
         userIncorrectPassword: "The entered password is incorrect.",
         userTokenMicrosoftInvalid: "Could not validate your authentication. Please log in again.",
         selectTenant: "Select the tenant to continue",
-        continue: "Continue"
+        continue: "Continue",
     },
     validation: {
         required: "Required field",
@@ -453,6 +457,10 @@
         workflowSelect: {
             all: "All workflows",
             none: "Select a workflow",
+        },
+        templates: {
+            all: "All templates",
+            searchBtn: "Search",
         },
         sortBy: "Sort by",
         mostRecent: "Most recent",
@@ -532,11 +540,11 @@
         loadError: "Error loading workflow",
         formCreate: {
             title: "Create Workflow",
-            subtitle: "Follow the steps to configure your workflow."
+            subtitle: "Follow the steps to configure your workflow.",
         },
         formEdit: {
             title: "Edit Workflow",
-            subtitle: "Follow the steps to configure your workflow."
+            subtitle: "Follow the steps to configure your workflow.",
         },
         labelWatchingWorkflow: "Viewing workflow:",
         labelWorkflowDocs: "Documents Workflow",
@@ -552,7 +560,7 @@
         userApplicant: "Applicant",
         assignBtn: "Assign",
         unassignInfo: "Unassign document",
-        cardsOpened: "There are open cards in this Workflow"
+        cardsOpened: "There are open cards in this Workflow",
     },
     tools: {
         index: "Tools",
@@ -583,7 +591,7 @@
             connectorApiKey: "API Key",
             validatingConnector: "Validating connector url",
             invalidConnector: "Connector did not respond. Invalid URL or key",
-            validConnector: "Connector is active"
+            validConnector: "Connector is active",
         },
         formCreate: {
             title: "New Tool",
@@ -631,7 +639,7 @@
             editFlowNodeFail: "Failed to edit node",
             connectorWorkflowFail: "Workflow connector did not respond. Check tool URL and API key",
             connectorWorkflowConfigFail: "Failed to retrieve workflow configuration. Check tool URL and API key",
-        }
+        },
     },
     prompts: {
         title: "Prompts",
@@ -663,6 +671,12 @@
         importPredefined: "Import predefined",
         importError: "Error importing prompts",
         importSuccess: "Prompts imported successfully",
+    },
+    template: {
+        title: "API Templates",
+        subtitle: "Manage, test and edit your API request templates.",
+        createTemplate: "Create new template",
+        notFound: "No templates registered",
     },
     analyze: {
         title: "Analyze Document",
@@ -712,6 +726,7 @@
         quizzes: "Quizzes",
         tools: "Tools",
         prompts: "Prompts",
+        templates: "API Templates",
     },
     dashboard: {
         title: "Consumption and Ticketing Dashboard",
@@ -719,7 +734,8 @@
         exportBtn: "Export CSV",
         totalWTC: "Total WTC",
         update: "Update",
-        WTCText: "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan's multipliers. This is not a financial value.",
+        WTCText:
+            "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan's multipliers. This is not a financial value.",
         filters: {
             currentMonth: "This Month",
             lastMonth: "Last Month",
@@ -733,8 +749,10 @@
             pagesGraphSubtitle: "Daily Consumption",
             workflowsAutomaticGraphTitle: "AI Automation Workflow Executions",
             workflowsGraphTitle: "Woopi AI Workflow Executions",
-            tokensTooltip: "View of token consumption for different Artificial Intelligence models. Tokens are the text processing units used by the models.",
-            pagesTooltip: "Number of document pages processed through Optical Character Recognition (OCR), which converts text images into editable text.",
+            tokensTooltip:
+                "View of token consumption for different Artificial Intelligence models. Tokens are the text processing units used by the models.",
+            pagesTooltip:
+                "Number of document pages processed through Optical Character Recognition (OCR), which converts text images into editable text.",
             workflowAutomaticTooltip: "Number of times AI automation workflows were executed.",
             workflowTooltip: "Number of times workflows created in the Woopi AI platform were executed.",
             totalTokens: "Total Tokens Consumed",
@@ -764,19 +782,19 @@
         platformCard: {
             title: "Discover the Platform",
             description: "Watch a 5-minute guided tour about the main features.",
-            button: "Watch video"
+            button: "Watch video",
         },
         workflowCard: {
             title: "Your First Workflow",
             description: "Follow our step-by-step guide to create your first automation in minutes.",
-            button: "Start guide"
+            button: "Start guide",
         },
         docsCard: {
             title: "Explore the Documentation",
             description: "Check our complete documentation to explore all the potential of AI HUB.",
-            button: "Access docs"
-        }
-    }
+            button: "Access docs",
+        },
+    },
 };
 
 export default english;

@@ -27,7 +27,7 @@ namespace WoopiAiHub.Domain.Models
         public string? QueryTemplate { get; private set; }
 
         [Column("HeaderTemplate", TypeName = "varchar(max)")]
-        public string HeaderTemplate { get; private set; }
+        public string? HeaderTemplate { get; private set; }
 
         [Column("BodyTemplate", TypeName = "varchar(max)")]
         public string? BodyTemplate { get; private set; }
@@ -64,10 +64,6 @@ namespace WoopiAiHub.Domain.Models
             if (string.IsNullOrWhiteSpace(Url))
             {
                 throw new ArgumentException("Url cannot be null or empty.");
-            }
-            if (string.IsNullOrWhiteSpace(HeaderTemplate))
-            {
-                throw new ArgumentException("HeaderTemplate cannot be null or empty.");
             }
             if(
                 Method != HttpMethodConstants.GET && 

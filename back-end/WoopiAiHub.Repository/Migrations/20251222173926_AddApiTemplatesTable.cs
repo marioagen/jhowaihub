@@ -21,7 +21,7 @@ namespace WoopiAiHub.Repository.Migrations
                     Method = table.Column<string>(type: "varchar(10)", nullable: false),
                     Url = table.Column<string>(type: "varchar(100)", nullable: false),
                     QueryTemplate = table.Column<string>(type: "varchar(max)", nullable: true),
-                    HeaderTemplate = table.Column<string>(type: "varchar(max)", nullable: false),
+                    HeaderTemplate = table.Column<string>(type: "varchar(max)", nullable: true),
                     BodyTemplate = table.Column<string>(type: "varchar(max)", nullable: true)
                 },
                 constraints: table =>
