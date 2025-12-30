@@ -21,4 +21,48 @@ export default {
                 };
             });
     },
+
+    getTemplateById(id) {
+        return api
+            .get(`/ApiTemplate/${id}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                throw e;
+            });
+    },
+
+    createTemplate(template) {
+        return api
+            .post("/ApiTemplate", template)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                throw e;
+            });
+    },
+
+    updateTemplate(id, template) {
+        return api
+            .put(`/ApiTemplate/${id}`, template)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                throw e;
+            });
+    },
+
+    deleteTemplate(id) {
+        return api
+            .delete(`/ApiTemplate/${id}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                throw e;
+            });
+    },
 };

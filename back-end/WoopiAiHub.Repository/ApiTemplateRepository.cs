@@ -164,6 +164,10 @@ namespace WoopiAiHub.Repository
                     query = query.OrderBy(w => w.Name);
                 }
             }
+            else
+            {
+                query = query.OrderBy(w => w.Created);
+            }
 
             return query;
         }

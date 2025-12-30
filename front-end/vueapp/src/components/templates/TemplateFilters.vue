@@ -43,7 +43,7 @@
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Zap" size="16" />
                 </span>
-                <select class="form-select form-select-sm border-start-0" @change="setFilters">
+                <select class="form-select form-select-sm border-start-0" @change="setFilters" v-model="filters.method">
                     <option value="">{{ $t("filters.templates.all") }}</option>
                     <option v-for="method in methodsList" :key="method.id" :value="method.name">
                         {{ method.name }}
@@ -75,7 +75,7 @@
                 filters: {
                     orderBy: "created asc",
                     input: null,
-                    method: null,
+                    method: "",
                 },
             };
         },

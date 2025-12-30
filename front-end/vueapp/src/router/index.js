@@ -43,6 +43,7 @@ import HomePage from "@/pages/home.vue";
 import TemplatePage from "@/pages/templates/index.vue";
 
 import { hasPermission } from "@/utils/permissions";
+import TemplateDetail from "../pages/templates/templateDetail.vue";
 function authenticate(to, from, next) {
     const userStr = window.localStorage.getItem("project");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -409,6 +410,28 @@ const routes = [
         path: "/templates",
         name: "Template",
         component: TemplatePage,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates/new",
+        name: "TemplateNew",
+        component: TemplateDetail,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates/:id",
+        name: "TemplateEdit",
+        component: TemplateDetail,
         meta: {
             layout: "default",
             module: "Templates",

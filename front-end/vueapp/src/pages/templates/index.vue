@@ -11,7 +11,7 @@
                     </div>
                     <button class="btn btn-primary btn-sm" @click="redirectToNewTemplate">
                         <LucideIcon icon="Plus" :size="17" />
-                        {{ $t("template.createBtn") }}
+                        {{ $t("template.createTemplate") }}
                     </button>
                 </div>
                 <div class="card mb-2">
@@ -43,7 +43,7 @@
         },
         methods: {
             redirectToNewTemplate() {
-                // this.$router.push({ name: "DocumentsUpload" });
+                this.$router.push({ name: "TemplateNew" });
             },
             setFilters(filters) {
                 this.$refs.TemplateTable.filters = filters;

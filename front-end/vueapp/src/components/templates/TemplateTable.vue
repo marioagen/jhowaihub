@@ -21,19 +21,13 @@
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToIndex(data.row)">
-                            <LucideIcon icon="ExternalLink" />
-                            {{ $t("workflow.access") }}
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToEdit(data.row)">
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToEdit(data.row.id)">
                             <LucideIcon icon="SquarePen" />
                             {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row.id)">
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
                         </a>
@@ -88,10 +82,11 @@
                 selectedRows: [],
             },
             filters: {
-                orderBy: "",
+                orderBy: "created asc",
                 input: null,
                 method: null,
             },
+            selectedTemplate: null,
             isDeleting: false,
         }),
         methods: {
@@ -123,51 +118,53 @@
                         this.table.isLoading = false;
                     });
             },
-            redirectToIndex(workflow) {
-                // this.$router.push({
-                //     name: "Workflow",
-                //     query: {
-                //         id: workflow.id,
-                //     },
-                // });
+            redirectToEdit(id) {
+                this.$router.push({
+                    name: "TemplateEdit",
+                    params: {
+                        id: id,
+                    },
+                });
             },
-            redirectToEdit(workflow) {
-                // this.$router.push({
-                //     name: "EditWorkflow",
-                //     params: {
-                //         id: workflow.id,
-                //     },
-                // });
-            },
-            openConfirmation(workflow) {
-                // this.selectedWorkflow = [workflow.id];
-                // this.$refs.DeleteDialog.open();
+            openConfirmation(id) {
+                this.selectedTemplate = id;
+                this.$refs.DeleteDialog.open();
             },
             deleteTemplate() {
+                if (this.selectedTemplate === null) {
+                    this.$notify({
+                        title: this.$t("common.warning"),
+                        message: this.$t("template.unselected"),
+                        variant: "warning",
+                        icon: "TriangleAlert",
+                    });
+                    return;
+                }
+
                 this.isDeleting = true;
-                // WorkflowService.deleteWorkflowById(this.selectedWorkflow)
-                //     .then((result) => {
-                //         if (result.error === undefined) {
-                //             this.$refs.DeleteDialog.close();
-                //             this.getWorkflowList();
-                //             this.$notify({
-                //                 title: "workflow.index",
-                //                 message: "workflow.removeSuccess",
-                //                 variant: "success",
-                //                 icon: "CircleCheckBig",
-                //             });
-                //         } else {
-                //             this.$notify({
-                //                 title: "workflow.index",
-                //                 message: result.error.response.data.labelError ?? "workflow.removeError",
-                //                 variant: "danger",
-                //                 icon: "CircleX",
-                //             });
-                //         }
-                //     })
-                //     .finally(() => {
-                //         this.isDeleting = false;
-                //     });
+                TemplateService.deleteTemplate(this.selectedTemplate)
+                    .then(() => {
+                        this.$refs.DeleteDialog.close();
+                        this.getTemplates();
+                        this.$notify({
+                            title: this.$t("common.success"),
+                            message: this.$t("template.removeSuccess"),
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    })
+                    .catch((error) => {
+                        this.$notify({
+                            title: this.$t("common.error"),
+                            message: error.response?.data?.labelError ?? this.$t("template.removeError"),
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    })
+                    .finally(() => {
+                        this.selectedTemplate = null;
+                        this.isDeleting = false;
+                    });
             },
             changePage(page) {
                 this.table.pagination.currentPage = page;
