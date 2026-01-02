@@ -152,4 +152,12 @@ export default {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
 }
+
+/* Ensure step names wrap properly within card-header boundaries */
+.card-header {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    hyphens: auto;
+}
 </style>
