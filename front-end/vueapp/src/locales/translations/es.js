@@ -723,6 +723,7 @@
         removeSuccess: "Plantilla eliminada exitosamente",
         removeError: "Error al eliminar plantilla",
         unselected: "Seleccione una plantilla",
+        keyPlaceholder: "Key (el valor será {{nombreKey}})",
     },
     analyze: {
         title: "Análisis de Documentos",

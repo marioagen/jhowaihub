@@ -141,20 +141,12 @@
                                                 :key="index"
                                                 class="row mb-2 align-items-center"
                                             >
-                                                <div class="col-5">
+                                                <div class="col-10">
                                                     <input
                                                         v-model="param.key"
                                                         type="text"
                                                         class="form-control form-control-sm"
-                                                        placeholder="Key"
-                                                    />
-                                                </div>
-                                                <div class="col-5">
-                                                    <input
-                                                        v-model="param.value"
-                                                        type="text"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Value"
+                                                        :placeholder="$t('template.keyPlaceholder')"
                                                     />
                                                 </div>
                                                 <div class="col-2">
@@ -188,20 +180,12 @@
                                                 :key="index"
                                                 class="row mb-2 align-items-center"
                                             >
-                                                <div class="col-5">
+                                                <div class="col-10">
                                                     <input
                                                         v-model="header.key"
                                                         type="text"
                                                         class="form-control form-control-sm"
-                                                        placeholder="Key"
-                                                    />
-                                                </div>
-                                                <div class="col-5">
-                                                    <input
-                                                        v-model="header.value"
-                                                        type="text"
-                                                        class="form-control form-control-sm"
-                                                        placeholder="Value"
+                                                        :placeholder="$t('template.keyPlaceholder')"
                                                     />
                                                 </div>
                                                 <div class="col-2">
@@ -307,13 +291,21 @@
                 });
             }
         },
+        watch: {
+            "form.queryParams": {
+                handler() {
+                    this.updateUrlWithQueryParams();
+                },
+                deep: true,
+            },
+        },
         methods: {
             redirectToTemplateList() {
                 this.$router.push({ name: "Template" });
             },
 
             addQueryParam() {
-                this.form.queryParams.push({ key: "", value: "" });
+                this.form.queryParams.push({ key: "" });
             },
 
             removeQueryParam(index) {
@@ -321,25 +313,70 @@
             },
 
             addHeader() {
-                this.form.headers.push({ key: "", value: "" });
+                this.form.headers.push({ key: "" });
             },
 
             removeHeader(index) {
                 this.form.headers.splice(index, 1);
             },
 
+            updateUrlWithQueryParams() {
+                const validQueryParams = this.form.queryParams.filter((p) => p.key.trim() !== "");
+
+                if (!this.values.url) {
+                    return;
+                }
+
+                const baseUrl = this.values.url.split("?")[0];
+
+                if (validQueryParams.length > 0) {
+                    const queryString = validQueryParams
+                        .map((p) => `${encodeURIComponent(p.key)}={{${p.key}}}`)
+                        .join("&");
+                    this.setValues({
+                        ...this.values,
+                        url: `${baseUrl}?${queryString}`,
+                    });
+                } else {
+                    this.setValues({
+                        ...this.values,
+                        url: baseUrl,
+                    });
+                }
+            },
+
             loadTemplate() {
                 this.isLoading = true;
-                console.log(this.routeId);
                 TemplateService.getTemplateById(this.routeId)
                     .then((data) => {
                         this.form.name = data.name || "";
                         this.form.method = data.method || "GET";
                         this.form.url = data.url || "";
-                        this.form.body = data.body || "";
+                        this.form.body = data.bodyTemplate || "";
 
-                        this.form.queryParams = data.queryParams || [];
-                        this.form.headers = data.headers || [];
+                        try {
+                            const parsedQueryParams = data.queryTemplate
+                                ? typeof data.queryTemplate === "string"
+                                    ? JSON.parse(data.queryTemplate)
+                                    : data.queryTemplate
+                                : [];
+                            this.form.queryParams = parsedQueryParams.map((p) => ({ key: p.key }));
+                        } catch (e) {
+                            console.error("Error parsing queryParams:", e);
+                            this.form.queryParams = [];
+                        }
+
+                        try {
+                            const parsedHeaders = data.headerTemplate
+                                ? typeof data.headerTemplate === "string"
+                                    ? JSON.parse(data.headerTemplate)
+                                    : data.headerTemplate
+                                : [];
+                            this.form.headers = parsedHeaders.map((h) => ({ key: h.key }));
+                        } catch (e) {
+                            console.error("Error parsing headers:", e);
+                            this.form.headers = [];
+                        }
 
                         this.setValues({
                             name: this.form.name,
@@ -370,22 +407,29 @@
 
                     this.isSaving = true;
 
-                    const queryParams = this.form.queryParams.filter(
-                        (p) => p.key.trim() !== "" || p.value.trim() !== ""
-                    );
-                    const headers = this.form.headers.filter((h) => h.key.trim() !== "" || h.value.trim() !== "");
+                    const queryParams = this.form.queryParams
+                        .filter((p) => p.key.trim() !== "")
+                        .map((p) => ({ key: p.key, value: `{{${p.key}}}` }));
+
+                    const headers = this.form.headers
+                        .filter((h) => h.key.trim() !== "")
+                        .map((h) => ({ key: h.key, value: `{{${h.key}}}` }));
 
                     const templateData = {
                         name: this.values.name,
                         method: this.values.method,
                         url: this.values.url,
-                        body: this.values.body || "",
-                        queryParams: queryParams,
-                        headers: headers,
+                        bodyTemplate: this.values.body == "" ? null : this.values.body,
+                        queryTemplate: queryParams.length === 0 ? null : JSON.stringify(queryParams),
+                        headerTemplate: headers.length === 0 ? null : JSON.stringify(headers),
                     };
 
+                    if (this.isEditMode) {
+                        templateData.id = this.routeId;
+                    }
+
                     const savePromise = this.isEditMode
-                        ? TemplateService.updateTemplate(this.routeId, templateData)
+                        ? TemplateService.updateTemplate(templateData)
                         : TemplateService.createTemplate(templateData);
 
                     savePromise

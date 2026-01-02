@@ -729,6 +729,7 @@
         name: "Nome",
         url: "URL",
         unselected: "Selecione um template",
+        keyPlaceholder: "Key (o valor será {{nomeKey}})",
     },
     analyze: {
         title: "Análise de Documentos",

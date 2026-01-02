@@ -37,10 +37,10 @@ namespace WoopiAiHub.Domain.Models
         public void UpdateMethod(string method) => Method = method;
         public void UpdateUrl(string url) => Url = url;
         public void UpdateQueryTemplate(string? queryTemplate) => QueryTemplate = queryTemplate;
-        public void UpdateHeaderTemplate(string headerTemplate) => HeaderTemplate = headerTemplate;
+        public void UpdateHeaderTemplate(string? headerTemplate) => HeaderTemplate = headerTemplate;
         public void UpdateBodyTemplate(string? bodyTemplate) => BodyTemplate = bodyTemplate;
 
-        public ApiTemplate(string name, string method, string url, string? queryTemplate, string headerTemplate, string? bodyTemplate)
+        public ApiTemplate(string name, string method, string url, string? queryTemplate, string? headerTemplate, string? bodyTemplate)
         {
             Name = name;
             Method = method;

@@ -715,6 +715,7 @@
         removeSuccess: "Template removed successfully",
         removeError: "Error removing template",
         unselected: "Select a template",
+        keyPlaceholder: "Key (value will be {{keyName}})",
     },
     analyze: {
         title: "Analyze Document",

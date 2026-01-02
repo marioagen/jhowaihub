@@ -44,9 +44,9 @@ export default {
             });
     },
 
-    updateTemplate(id, template) {
+    updateTemplate(template) {
         return api
-            .put(`/ApiTemplate/${id}`, template)
+            .put(`/ApiTemplate`, template)
             .then(({ data }) => {
                 return data;
             })
