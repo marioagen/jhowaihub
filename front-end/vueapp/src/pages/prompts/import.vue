@@ -19,8 +19,11 @@
                         <button class="btn btn-outline-secondary btn-sm" @click="goBack">
                             {{ $t("common.cancel") }}
                         </button>
-                        <button class="btn btn-primary btn-sm" @click="importSelected"
-                            :disabled="selectedTemplates.length === 0 || importing">
+                        <button
+                            class="btn btn-primary btn-sm"
+                            @click="importSelected"
+                            :disabled="selectedTemplates.length === 0 || importing"
+                        >
                             <span v-if="importing" class="spinner-border spinner-border-sm me-2" role="status"></span>
                             {{ $t("prompts.importButton") }} ({{ selectedTemplates.length }})
                         </button>
@@ -32,8 +35,12 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-8">
-                                <input type="text" class="form-control" v-model="filterQuery"
-                                    :placeholder="$t('prompts.searchPrompts')" />
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    v-model="filterQuery"
+                                    :placeholder="$t('prompts.searchPrompts')"
+                                />
                             </div>
                             <div class="col-md-4">
                                 <select class="form-select" v-model="orderBy" @change="loadTemplates">
@@ -50,34 +57,44 @@
                 <!-- Select All Section -->
                 <div class="mb-3" v-if="filteredTemplates.length > 0">
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="selectAll" :checked="allSelected"
-                            @change="toggleSelectAll" />
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            id="selectAll"
+                            :checked="allSelected"
+                            @change="toggleSelectAll"
+                        />
                         <label class="form-check-label" for="selectAll">
-                            {{ $t("prompts.selectAllTemplates").replace('{count}', filteredTemplates.length) }}
+                            {{ $t("prompts.selectAllTemplates").replace("{count}", filteredTemplates.length) }}
                         </label>
                     </div>
                 </div>
 
                 <div class="row loading-container" v-if="loading">
                     <div class="data-load">
-                        <i class="fas fa-sync-alt fa-spin text-secondary"></i>&nbsp;{{ $t('common.loading') }}..
+                        <i class="fas fa-sync-alt fa-spin text-secondary"></i>
+                        &nbsp;{{ $t("common.loading") }}..
                     </div>
                 </div>
                 <div class="row loading-container" v-if="!loading && templates.length === 0">
                     <div class="data-load">
-                        <i class="fas fa-exclamation-circle text-secondary"></i>&nbsp;{{
-                            $t('prompts.noPromptsListWereFound') }}.
+                        <i class="fas fa-exclamation-circle text-secondary"></i>
+                        &nbsp;{{ $t("prompts.noPromptsListWereFound") }}.
                     </div>
                 </div>
 
                 <div class="row g-3" v-if="!loading && filteredTemplates.length > 0">
                     <div v-for="template in filteredTemplates" :key="template.id" class="col-md-4">
-                        <div class="card h-100 template-card" :class="{ 'selected': isSelected(template.id) }">
+                        <div class="card h-100 template-card" :class="{ selected: isSelected(template.id) }">
                             <div class="card-body">
                                 <div class="d-flex align-items-start mb-2">
-                                    <input class="form-check-input me-2 mt-1" type="checkbox"
-                                        :id="`template-${template.id}`" :checked="isSelected(template.id)"
-                                        @change="toggleSelection(template.id)" />
+                                    <input
+                                        class="form-check-input me-2 mt-1"
+                                        type="checkbox"
+                                        :id="`template-${template.id}`"
+                                        :checked="isSelected(template.id)"
+                                        @change="toggleSelection(template.id)"
+                                    />
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center gap-2">
                                             <LucideIcon icon="Globe" :size="16" class="text-primary" />
@@ -86,7 +103,7 @@
                                     </div>
                                 </div>
                                 <p class="text-muted small mb-2">{{ template.description }}</p>
-                                <div class="prompt-preview mb-2 ">
+                                <div class="prompt-preview mb-2">
                                     <div class="text-muted small">
                                         {{ template.text }}
                                     </div>
@@ -102,8 +119,15 @@
             </div>
         </div>
 
-        <ModalComponent v-if="showModal" id="viewCompleteModal" :title="selectedTemplate?.name || ''"
-            :saveText="'labelClose'" :cancelText="''" @save="closeModal" ref="modalRef">
+        <ModalComponent
+            v-if="showModal"
+            id="viewCompleteModal"
+            :title="selectedTemplate?.name || ''"
+            :saveText="'labelClose'"
+            :cancelText="''"
+            @save="closeModal"
+            ref="modalRef"
+        >
             <template #body>
                 <div class="modal-body-content m-3">
                     <p class="text-muted mb-3">{{ selectedTemplate?.description }}</p>
@@ -130,213 +154,214 @@
 </template>
 
 <script>
-import PromptService from "@/services/prompts/PromptsService";
-import ModalComponent from "@/components/global/ModalComponent.vue";
+    import PromptService from "@/services/prompts/PromptsService";
+    import ModalComponent from "@/components/global/ModalComponent.vue";
 
-export default {
-    name: "PromptImportPage",
-    components: {
-        ModalComponent
-    },
-    data() {
-        return {
-            templates: [],
-            selectedTemplates: [],
-            filterQuery: "",
-            orderBy: "created_desc",
-            loading: false,
-            importing: false,
-            showModal: false,
-            selectedTemplate: null
-        };
-    },
-    computed: {
-        filteredTemplates() {
-            if (!this.filterQuery) {
-                return this.templates;
-            }
-            const query = this.filterQuery.toLowerCase();
-            return this.templates.filter(t =>
-                t.name.toLowerCase().includes(query) ||
-                t.description.toLowerCase().includes(query) ||
-                t.text.toLowerCase().includes(query)
-            );
+    export default {
+        name: "PromptImportPage",
+        components: {
+            ModalComponent,
         },
-        allSelected() {
-            return this.filteredTemplates.length > 0 &&
-                this.filteredTemplates.every(t => this.isSelected(t.id));
-        }
-    },
-    methods: {
-        async loadTemplates() {
-            this.loading = true;
-            try {
-                const result = await PromptService.findPromptTemplates(this.filterQuery, this.orderBy);
-                if (result.error) {
+        data() {
+            return {
+                templates: [],
+                selectedTemplates: [],
+                filterQuery: "",
+                orderBy: "created_desc",
+                loading: false,
+                importing: false,
+                showModal: false,
+                selectedTemplate: null,
+            };
+        },
+        computed: {
+            filteredTemplates() {
+                if (!this.filterQuery) {
+                    return this.templates;
+                }
+                const query = this.filterQuery.toLowerCase();
+                return this.templates.filter(
+                    (t) =>
+                        t.name.toLowerCase().includes(query) ||
+                        t.description.toLowerCase().includes(query) ||
+                        t.text.toLowerCase().includes(query)
+                );
+            },
+            allSelected() {
+                return this.filteredTemplates.length > 0 && this.filteredTemplates.every((t) => this.isSelected(t.id));
+            },
+        },
+        methods: {
+            async loadTemplates() {
+                this.loading = true;
+                try {
+                    const result = await PromptService.findPromptTemplates(this.filterQuery, this.orderBy);
+                    if (result.error) {
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.importError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        this.templates = [];
+                    } else {
+                        this.templates = result;
+                    }
+                } catch (error) {
                     this.$notify({
-                        title: 'prompts.title',
-                        message: 'prompts.importError',
-                        variant: 'danger',
-                        icon: 'CircleX',
+                        title: "prompts.title",
+                        message: "prompts.importError",
+                        variant: "danger",
+                        icon: "CircleX",
                     });
                     this.templates = [];
-                } else {
-                    this.templates = result;
+                } finally {
+                    this.loading = false;
                 }
-            } catch (error) {
-                this.$notify({
-                    title: 'prompts.title',
-                    message: 'prompts.importError',
-                    variant: 'danger',
-                    icon: 'CircleX',
-                });
-                this.templates = [];
-            } finally {
-                this.loading = false;
-            }
-        },
-        isSelected(id) {
-            return this.selectedTemplates.includes(id);
-        },
-        toggleSelection(id) {
-            const index = this.selectedTemplates.indexOf(id);
-            if (index > -1) {
-                this.selectedTemplates.splice(index, 1);
-            } else {
-                this.selectedTemplates.push(id);
-            }
-        },
-        toggleSelectAll() {
-            if (this.allSelected) {
-                this.filteredTemplates.forEach(t => {
-                    const index = this.selectedTemplates.indexOf(t.id);
-                    if (index > -1) {
-                        this.selectedTemplates.splice(index, 1);
-                    }
-                });
-            } else {
-                this.filteredTemplates.forEach(t => {
-                    if (!this.isSelected(t.id)) {
-                        this.selectedTemplates.push(t.id);
-                    }
-                });
-            }
-        },
-        async importSelected() {
-            this.importing = true;
-            try {
-                const result = await PromptService.importPrompts(this.selectedTemplates);
-                if (result.error || !result) {
-                    this.$notify({
-                        title: 'prompts.title',
-                        message: 'prompts.importError',
-                        variant: 'danger',
-                        icon: 'CircleX',
+            },
+            isSelected(id) {
+                return this.selectedTemplates.includes(id);
+            },
+            toggleSelection(id) {
+                const index = this.selectedTemplates.indexOf(id);
+                if (index > -1) {
+                    this.selectedTemplates.splice(index, 1);
+                } else {
+                    this.selectedTemplates.push(id);
+                }
+            },
+            toggleSelectAll() {
+                if (this.allSelected) {
+                    this.filteredTemplates.forEach((t) => {
+                        const index = this.selectedTemplates.indexOf(t.id);
+                        if (index > -1) {
+                            this.selectedTemplates.splice(index, 1);
+                        }
                     });
                 } else {
-                    this.$notify({
-                        title: 'prompts.title',
-                        message: 'prompts.importSuccess',
-                        variant: 'success',
-                        icon: 'CircleCheckBig',
+                    this.filteredTemplates.forEach((t) => {
+                        if (!this.isSelected(t.id)) {
+                            this.selectedTemplates.push(t.id);
+                        }
                     });
-                    this.$router.push({ name: "Prompts" });
                 }
-            } catch (error) {
-                this.$notify({
-                    title: 'prompts.title',
-                    message: 'prompts.importError',
-                    variant: 'danger',
-                    icon: 'CircleX',
+            },
+            async importSelected() {
+                this.importing = true;
+                try {
+                    const result = await PromptService.importPrompts(this.selectedTemplates);
+                    if (result.error || !result) {
+                        console.log("result erro 1", result);
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.importError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    } else {
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.importSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                        this.goBack();
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "prompts.title",
+                        message: "prompts.importError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.importing = false;
+                }
+            },
+            viewComplete(template) {
+                this.selectedTemplate = template;
+                this.showModal = true;
+                this.$nextTick(() => {
+                    this.$refs.modalRef?.open();
                 });
-            } finally {
-                this.importing = false;
-            }
+            },
+            closeModal() {
+                this.$refs.modalRef?.close();
+                this.showModal = false;
+                this.selectedTemplate = null;
+            },
+            goBack() {
+                this.$router.back();
+            },
+            formatDate(dateStr) {
+                if (!dateStr) return "";
+                const date = new Date(dateStr);
+                return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
+            },
         },
-        viewComplete(template) {
-            this.selectedTemplate = template;
-            this.showModal = true;
-            this.$nextTick(() => {
-                this.$refs.modalRef?.open();
-            });
+        mounted() {
+            this.loadTemplates();
         },
-        closeModal() {
-            this.$refs.modalRef?.close();
-            this.showModal = false;
-            this.selectedTemplate = null;
-        },
-        goBack() {
-            this.$router.back();
-        },
-        formatDate(dateStr) {
-            if (!dateStr) return '';
-            const date = new Date(dateStr);
-            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-        }
-    },
-    mounted() {
-        this.loadTemplates();
-    }
-};
+    };
 </script>
 
 <style scoped>
-.template-card {
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
+    .template-card {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
 
-.template-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+    .template-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
 
-.template-card.selected {
-    border-color: #0073ea;
-    background-color: #f0f7ff;
-}
+    .template-card.selected {
+        border-color: #0073ea;
+        background-color: #f0f7ff;
+    }
 
-.prompt-preview {
-    max-height: 90px;
-    font-size: 0.875rem;
-    color: #666;
-    background-color: #f8f9fa;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    border: 1px solid #dee2e6;
-}
+    .prompt-preview {
+        max-height: 90px;
+        font-size: 0.875rem;
+        color: #666;
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid #dee2e6;
+    }
 
-.prompt-preview div {
-    max-height: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-}
+    .prompt-preview div {
+        max-height: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+    }
 
-.prompt-content-full {
-    white-space: pre-wrap;
-    font-size: 0.875rem;
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 0.25rem;
-    border: 1px solid #dee2e6;
-    max-height: 400px;
-    overflow-y: auto;
-}
+    .prompt-content-full {
+        white-space: pre-wrap;
+        font-size: 0.875rem;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        border: 1px solid #dee2e6;
+        max-height: 400px;
+        overflow-y: auto;
+    }
 
-.loading-container {
-    padding-left: 10px;
-    padding-right: 10px;
-}
+    .loading-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 
-.data-load {
-    background-color: var(--color-bg-loading-content) !important;
-    border-color: var(--color-bg-loading-content) !important;
-    color: var(--color-body-content) !important;
-    text-align: center;
-    padding: 9px;
-    border-bottom-width: 2px;
-    border-radius: 10px;
-}
+    .data-load {
+        background-color: var(--color-bg-loading-content) !important;
+        border-color: var(--color-bg-loading-content) !important;
+        color: var(--color-body-content) !important;
+        text-align: center;
+        padding: 9px;
+        border-bottom-width: 2px;
+        border-radius: 10px;
+    }
 </style>

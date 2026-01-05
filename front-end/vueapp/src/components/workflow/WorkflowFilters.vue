@@ -1,14 +1,21 @@
 <template>
-
     <div class="row">
         <div :class="`col-${findColSize('search')}`">
             <div class="input-group">
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search" size="16" />
                 </span>
-                <input id="InputSearch" type="text" class="form-control form-control-sm border-start-0 custom-input"
-                    :class="{ 'border-end-0': showCleanBtn }" v-model="filters.input" @keydown.enter="filterData"
-                    @keydown.delete="filterData" :placeholder="$t('filters.workflowInput')" ref="searchInpt" />
+                <input
+                    id="InputSearch"
+                    type="text"
+                    class="form-control form-control-sm border-start-0 custom-input"
+                    :class="{ 'border-end-0': showCleanBtn }"
+                    v-model="filters.input"
+                    @keydown.enter="filterData"
+                    @keydown.delete="filterData"
+                    :placeholder="$t('filters.workflowInput')"
+                    ref="searchInpt"
+                />
                 <span v-if="showCleanBtn" class="input-group-text border-start-0 bg-white" @click="cleanInput">
                     <LucideIcon icon="X" size="16" />
                 </span>
@@ -19,8 +26,11 @@
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="ArrowUpDown" size="16" />
                 </span>
-                <select class="form-select form-select-sm border-start-0" v-model="filters.orderBy"
-                    @change="filterData">
+                <select
+                    class="form-select form-select-sm border-start-0"
+                    v-model="filters.orderBy"
+                    @change="filterData"
+                >
                     <option value="created desc">{{ $t("filters.mostRecent") }}</option>
                     <option value="created asc">{{ $t("filters.mostOld") }}</option>
                     <option value="name asc">{{ $t("filters.nameAZ") }}</option>
@@ -50,93 +60,84 @@
                 </select>
             </div>
         </div>
-        <div class="col-1">
-            <button
-                v-tooltip="filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')"
-                class="btn table-btn btn-sm"
-                :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'" type="button"
-                style="display: flex; align-items: center; justify-content: center;" @click="filterUsers">
-                <LucideIcon icon="User" />
-            </button>
-        </div>
     </div>
 </template>
 
 <script>
-export default {
-    name: "WorkflowFilters",
-    props: {
-        teamsList: {
-            type: Array,
-            required: false,
-            default: () => []
-        },
-        usersList: {
-            type: Array,
-            required: false,
-            default: () => []
-        },
-    },
-    data() {
-        return {
-            filters: {
-                orderBy: "",
-                input: null,
-                isAllUsers: true,
-                login: this.$store.state.userProfile.login,
-                teamId: null,
-                userId: null
+    export default {
+        name: "WorkflowFilters",
+        props: {
+            teamsList: {
+                type: Array,
+                required: false,
+                default: () => [],
             },
-        };
-    },
-    methods: {
-        filterData() {
-            this.$emit("filter", this.filters)
+            usersList: {
+                type: Array,
+                required: false,
+                default: () => [],
+            },
         },
-        filterUsers() {
-            this.filters.isAllUsers = !this.filters.isAllUsers;
-            this.filterData();
+        data() {
+            return {
+                filters: {
+                    orderBy: "created asc",
+                    input: null,
+                    isAllUsers: true,
+                    login: this.$store.state.userProfile.login,
+                    teamId: null,
+                    userId: null,
+                },
+            };
         },
-        cleanInput() {
-            this.filters.input = null;
-            this.filterData();
+        methods: {
+            filterData() {
+                this.$emit("filter", this.filters);
+            },
+            filterUsers() {
+                this.filters.isAllUsers = !this.filters.isAllUsers;
+                this.filterData();
+            },
+            cleanInput() {
+                this.filters.input = null;
+                this.filterData();
+            },
+            findColSize(item) {
+                switch (item) {
+                    case "search":
+                        return this.hasTeams || this.hasUsers ? "5" : "7";
+                    case "orderBy":
+                        return this.hasTeams || this.hasUsers ? "3" : "5";
+                    case "team":
+                        return this.hasTeams ? "2" : "0";
+                    case "user":
+                        return this.hasUsers ? "2" : "0";
+                    default:
+                        return "1";
+                }
+            },
         },
-        findColSize(item) {
-            switch (item) {
-                case "search":
-                    return this.hasTeams || this.hasUsers ? '5' : '7';
-                case "orderBy":
-                    return this.hasTeams || this.hasUsers ? '2' : '4';
-                case "team":
-                    return this.hasTeams ? '2' : '0';
-                case "user":
-                    return this.hasUsers ? '2' : '0';
-                default:
-                    return '1';
-            }
-        }
-    },
-    computed: {
-        showCleanBtn() {
-            return this.filters.input !== null;
+        computed: {
+            showCleanBtn() {
+                return this.filters.input !== null;
+            },
+            hasTeams() {
+                return this.teamsList.length > 0;
+            },
+            hasUsers() {
+                return this.usersList.length > 0;
+            },
         },
-        hasTeams() {
-            return this.teamsList.length > 0;
-        },
-        hasUsers() {
-            return this.usersList.length > 0;
-        },
-    },
-};
+    };
 </script>
 
 <style scooped>
-.custom-input {
-    font-size: 12px;
-}
+    .custom-input {
+        font-size: 12px;
+    }
 
-.custom-input::placeholder {
-    font-size: 12px;
-    color: #999;
-}
+    .custom-input::placeholder {
+        font-size: 12px;
+        color: #999;
+    }
 </style>

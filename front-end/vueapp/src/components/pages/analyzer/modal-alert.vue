@@ -12,9 +12,9 @@
                     <div>
                         <div class="row">
                             <div class="col content-center" style="padding: 14px">
-                                <img src="./../../assets/img/icon-alert.png" v-if="type === 'Error'" />
-                                <img src="./../../assets/img/icon-trash.png" v-if="type === 'Confirm'" />
-                                <img src="./../../assets/img/icon-warning.png" v-if="type === 'Warning'" />
+                                <img src="./../../../assets/img/icon-alert.png" v-if="type === 'Error'" />
+                                <img src="./../../../assets/img/icon-trash.png" v-if="type === 'Confirm'" />
+                                <img src="./../../../assets/img/icon-warning.png" v-if="type === 'Warning'" />
                             </div>
                         </div>
                         <div class="row">
@@ -116,9 +116,12 @@
     }
 
     .prevent-text-select {
-        -webkit-user-select: none; /* Safari */
-        -ms-user-select: none; /* IE 10 and IE 11 */
-        user-select: none; /* Standard syntax */
+        -webkit-user-select: none;
+        /* Safari */
+        -ms-user-select: none;
+        /* IE 10 and IE 11 */
+        user-select: none;
+        /* Standard syntax */
     }
 
     .modal-footer {

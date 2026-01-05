@@ -1,8 +1,8 @@
 <template>
     <div>
         <TableComponent
-            modalName="labelUsers"
-            emptyMessage="labelNoUsersWasFound"
+            modalName="management.users.title"
+            emptyMessage="management.users.noUsersWasFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -12,7 +12,7 @@
         >
             <template #cell-name="{ data }">
                 <div class="p-1">
-                     <div class="d-flex">
+                    <div class="d-flex">
                         <label class="form-check-label d-flex align-items-center w-100">
                             <AvatarComponent :name="data.row.name" />
                             <div>
@@ -58,10 +58,7 @@
                         </a>
                     </li>
                     <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="openConfirmation(data.row)"
-                        >
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
                         </a>
@@ -107,10 +104,10 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "name", label: "labelUser" },
-                    { key: "profiles", label: "labelProfiles" },
-                    { key: "teams", label: "labelTeams" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "name", label: "management.users.user" },
+                    { key: "profiles", label: "management.profiles.profiles" },
+                    { key: "teams", label: "management.teams.title" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -198,10 +195,10 @@
             },
             redirectToForm(user) {
                 this.$router.push({
-                    name: 'EditUser',
+                    name: "EditUser",
                     params: {
                         email: user.email,
-                    }
+                    },
                 });
             },
         },

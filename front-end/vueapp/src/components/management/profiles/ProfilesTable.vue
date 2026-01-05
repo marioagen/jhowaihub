@@ -1,8 +1,8 @@
 <template>
     <div>
         <TableComponent
-            modalName="labelProfile"
-            emptyMessage="labelNoProfilesWereFound"
+            modalName="management.profiles.index"
+            emptyMessage="management.profiles.noProfilesWereFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -26,10 +26,7 @@
                         </a>
                     </li>
                     <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="openConfirmation(data.row)"
-                        >
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
                         </a>
@@ -70,11 +67,11 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "id" },
-                    { key: "name", label: "labelProfile" },
-                    { key: "users", label: "labelUsers" },
-                    { key: "permissions", label: "labelPermissions" },
-                    { key: "actions", label: "labelAction" },
+                    { key: "id", label: "common.id" },
+                    { key: "name", label: "management.profiles.profile" },
+                    { key: "users", label: "management.users.title" },
+                    { key: "permissions", label: "management.profiles.permissions" },
+                    { key: "actions", label: "common.actions" },
                 ],
                 data: [],
                 pagination: {
@@ -152,10 +149,10 @@
             },
             redirectToForm(profile) {
                 this.$router.push({
-                    name: 'EditProfile',
+                    name: "EditProfile",
                     params: {
                         id: profile.id,
-                    }
+                    },
                 });
             },
             openConfirmation(profile) {

@@ -34,10 +34,10 @@
 </template>
 <script>
     import PromptComponent from "@/components/prompts/PromptComponent.vue";
-    import PromptFilters from "@/components/prompts/PromptFilter"
+    import PromptFilters from "@/components/prompts/PromptFilter";
     export default {
         name: "PromptPage",
-        emits: ['showAlertToast'],
+        emits: ["showAlertToast"],
         data() {
             return {
                 entitySearch: {},
@@ -60,7 +60,7 @@
                 toastMessage: "",
                 listIds: [],
                 loadAllPrompts: true,
-            }
+            };
         },
         components: {
             PromptComponent,
@@ -69,11 +69,9 @@
         watch: {
             filters: {
                 handler(newFilters) {
-                    this.$emit('filterData', newFilters);
+                    this.$emit("filterData", newFilters);
                 },
-                deep: true
             },
-            deep: true
         },
         methods: {
             redirectToNewPrompt: function () {
@@ -83,12 +81,12 @@
                 this.$router.push({ name: "PromptImport" });
             },
             reloadData() {
-                this.$refs.PromptComponent.getList({ search: '', page: this.queryPage, type: null });
+                this.$refs.PromptComponent.getList({ search: "", page: this.queryPage, type: null });
             },
             filterData(filters) {
                 this.$refs.PromptComponent.filters = filters;
                 this.reloadData();
             },
         },
-}
+    };
 </script>
