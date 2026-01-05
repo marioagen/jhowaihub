@@ -220,7 +220,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public ICollection<WorkflowDto> FindAllByUser(string email)
         {
-            let workflows = _workflowRepository.FindAllByUser(email);
+            var workflows = _workflowRepository.FindAllByUser(email);
             return workflows;
         }
 
