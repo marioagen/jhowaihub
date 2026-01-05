@@ -26,7 +26,18 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
-        public WorkflowServices(IWorkflowRepository workflowRepository, IProfileRepository profileRepository, ITeamRepository teamRepository, IStatusRepository statusRepository, IStepRepository stepRepository, IStepToolDependencyRepository stepToolDependencyRepository, IStepToolOutputRepository stepToolOutputRepository, IUnitOfWork unitOfWork, IValidateStep validateStep, ILogger<WorkflowServices> logger)
+        public WorkflowServices(
+            IWorkflowRepository workflowRepository,
+            IProfileRepository profileRepository,
+            ITeamRepository teamRepository,
+            IStatusRepository statusRepository,
+            IStepRepository stepRepository,
+            IStepToolDependencyRepository stepToolDependencyRepository,
+            IStepToolOutputRepository stepToolOutputRepository,
+            IUnitOfWork unitOfWork,
+            IValidateStep validateStep,
+            ILogger<WorkflowServices> logger
+        )
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
@@ -55,7 +66,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
-            workflow.NumDocuments = totalCards;            
+            workflow.NumDocuments = totalCards;
             return workflow;
         }
 
@@ -308,7 +319,8 @@ namespace WoopiAiHub.Application.Services
             var profileTeams = profile.Teams;
             var workflows = await _workflowRepository.FindByStep(steps);
 
-            if (workflows.Count() == 0) return;
+            if (workflows.Count() == 0)
+                return;
 
             var workflowsToRemove = new List<TeamsWorkflowsDto>();
             foreach (var team in profileTeams)
@@ -703,7 +715,8 @@ namespace WoopiAiHub.Application.Services
             foreach (var stepDto in steps.OrderBy(s => s.Order))
             {
                 var existingStep = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
-                if (existingStep == null) continue;
+                if (existingStep == null)
+                    continue;
 
                 foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                 {
