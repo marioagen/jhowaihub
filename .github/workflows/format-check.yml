@@ -21,7 +21,13 @@ jobs:
                   node-version: "20"
 
             - name: Install root dependencies
-              run: npm install
+              run: |
+                  # Só instala se houver package-lock.json
+                  if [ -f "package-lock.json" ]; then
+                      npm install
+                  else
+                      echo "No package-lock.json found in root, skipping npm install"
+                  fi
               continue-on-error: true
 
             - name: Cache frontend node_modules
@@ -47,12 +53,16 @@ jobs:
             - name: Check for formatting changes
               run: |
                   # Verifica se a formatação causou mudanças
-                  if [ -n "$(git status --porcelain)" ]; then
+                  # Ignora arquivos não rastreados (??) e arquivos ignorados (!!)
+                  # Filtra apenas arquivos modificados (M), adicionados (A), deletados (D), renomeados (R)
+                  CHANGED_FILES=$(git status --porcelain | grep -E "^[MADR]" || true)
+
+                  if [ -n "$CHANGED_FILES" ]; then
                       echo "❌ Arquivos não formatados encontrados!"
                       echo "Execute 'npm run format:changed' localmente e faça commit das mudanças."
                       echo ""
                       echo "Arquivos que precisam ser formatados:"
-                      git status --short
+                      echo "$CHANGED_FILES"
                       echo ""
                       echo "Diff das mudanças:"
                       git diff
