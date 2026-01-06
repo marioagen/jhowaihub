@@ -26,11 +26,18 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
-        public WorkflowServices( IWorkflowRepository workflowRepository, IProfileRepository profileRepository,
-            ITeamRepository teamRepository, IStatusRepository statusRepository,
-            IStepRepository stepRepository,IStepToolDependencyRepository stepToolDependencyRepository,
-            IStepToolOutputRepository stepToolOutputRepository, IUnitOfWork unitOfWork, IValidateStep validateStep,
-            ILogger<WorkflowServices> logger )
+        public WorkflowServices(
+            IWorkflowRepository workflowRepository, 
+            IProfileRepository profileRepository,
+            ITeamRepository teamRepository, 
+            IStatusRepository statusRepository,
+            IStepRepository stepRepository,
+            IStepToolDependencyRepository stepToolDependencyRepository,
+            IStepToolOutputRepository stepToolOutputRepository, 
+            IUnitOfWork unitOfWork, 
+            IValidateStep validateStep,
+            ILogger<WorkflowServices> logger 
+        )
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
