@@ -21,15 +21,16 @@ RUN dotnet build "WoopiAiHub.Functions.csproj" -c Release -o /app/build
 RUN dotnet publish "WoopiAiHub.Functions.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
-# FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0
-FROM mcr.microsoft.com/azure-functions/dotnet:4
+FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0
+# FROM mcr.microsoft.com/azure-functions/dotnet:4
 WORKDIR /home/site/wwwroot
 
 # Copy published files
 COPY --from=build /app/publish .
 
 # Environment variables
-ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
+ENV FUNCTIONS_WORKER_RUNTIME=dotnet-isolated \
+    AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
     ASPNETCORE_ENVIRONMENT=Production
 
