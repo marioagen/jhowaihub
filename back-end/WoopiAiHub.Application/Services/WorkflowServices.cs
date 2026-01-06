@@ -30,8 +30,7 @@ namespace WoopiAiHub.Application.Services
             ITeamRepository teamRepository, IStatusRepository statusRepository,
             IStepRepository stepRepository,IStepToolDependencyRepository stepToolDependencyRepository,
             IStepToolOutputRepository stepToolOutputRepository, IUnitOfWork unitOfWork, IValidateStep validateStep,
-            ILogger<WorkflowServices> logger
-        )
+            ILogger<WorkflowServices> logger )
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
