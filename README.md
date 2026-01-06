@@ -62,7 +62,6 @@ npm run format:staged
 # Formatar todos os arquivos
 npm run format:all
 npm run format:frontend:all
-npm run format:backend:all
 ```
 
 ### Pular o Hook (Não Recomendado)

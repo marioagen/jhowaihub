@@ -9,10 +9,7 @@
         "format:check": "prettier --check \"**/*.{json,yml,yaml,md}\" --ignore-path .prettierignore",
         "format:frontend": "node scripts/format-changed.js frontend",
         "format:frontend:all": "cd front-end/vueapp && npm run format",
-        "format:backend": "node scripts/format-changed-backend.js",
-        "format:backend:all": "dotnet format WoopiaiHub.sln --include-generated",
-        "format:backend:check": "dotnet format WoopiaiHub.sln --verify-no-changes --include-generated",
-        "format:changed": "npm run format && npm run format:frontend && npm run format:backend",
+        "format:changed": "npm run format && npm run format:frontend",
         "format:staged": "node scripts/format-staged.js",
         "lint:frontend": "cd front-end/vueapp && npm run lint",
         "setup:hooks": "node -e \"const {execSync} = require('child_process'); const os = require('os'); const path = require('path'); const isWindows = os.platform() === 'win32'; const scriptPath = path.resolve('scripts', isWindows ? 'setup-git-hooks.ps1' : 'setup-git-hooks.sh'); execSync(isWindows ? `powershell -ExecutionPolicy Bypass -File \"${scriptPath}\"` : `bash \"${scriptPath}\"`, {stdio: 'inherit', cwd: process.cwd()})\""
