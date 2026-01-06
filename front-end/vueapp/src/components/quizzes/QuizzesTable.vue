@@ -1,9 +1,5 @@
 <template>
-    <button 
-        v-if="showMultiDelete" 
-        class="btn btn-outline-danger btn-sm mb-2 ms-2" 
-        @click="openConfirmationMultiple"
-    >
+    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
         <LucideIcon icon="Trash2" :size="15" />
         {{ $t("common.delete") }}
     </button>
@@ -19,15 +15,9 @@
             @change-page="changePage"
         >
             <template #cell-questions="{ data }">
-                <BadgeComponent 
-                    :text="questionsNumber(data.row.questions)"
-                    :clickable="false"
-                    variant="primary"
-                />
+                <BadgeComponent :text="questionsNumber(data.row.questions)" :clickable="false" variant="primary" />
             </template>
-            <template #cell-created="{ data }">
-                {{ formatDate(data.row.created) }}
-            </template>
+            <template #cell-created="{ data }">{{ formatDate(data.row.created) }}</template>
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
@@ -37,10 +27,7 @@
                         </a>
                     </li>
                     <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="openConfirmation(data.row)"
-                        >
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
                         </a>
@@ -76,7 +63,7 @@
             DropdownComponent,
             TableComponent,
             ConfirmModal,
-            BadgeComponent
+            BadgeComponent,
         },
         data: () => ({
             table: {
@@ -147,15 +134,15 @@
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
             },
+
             redirectToEdit(quizz) {
                 this.$router.push({
-                    name: 'EditQuizz',
-                    params: {
-                        id: quizz.id,
-                    },
+                    name: "EditQuizz",
+                    params: { id: quizz.id },
                 });
             },
             openConfirmation(quizz) {
+                console.log(quizz);
                 this.selectedQuizz = [quizz.id];
                 this.$refs.DeleteDialog.open();
             },
@@ -174,15 +161,15 @@
                             this.$notify({
                                 title: "quizzes.title",
                                 message: "quizzes.removeSuccess",
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "quizzes.title",
                                 message: "quizzes.errors.removeError",
-                                variant: 'danger',
-                                icon: 'CircleX',
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                     })
@@ -190,7 +177,7 @@
                         this.listIds = [];
                         this.table.selectedRows = [];
                         this.isDeleting = false;
-                    })
+                    });
             },
             filterList(input) {
                 this.searchInput = input;
