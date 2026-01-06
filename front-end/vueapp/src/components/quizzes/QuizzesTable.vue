@@ -1,8 +1,16 @@
 <template>
-    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
-        <LucideIcon icon="Trash2" :size="15" />
+    <button
+        v-if="showMultiDelete"
+        class="btn btn-outline-danger btn-sm mb-2 ms-2"
+        @click="openConfirmationMultiple"
+    >
+        <LucideIcon
+            icon="Trash2"
+            :size="15"
+        />
         {{ $t("common.delete") }}
     </button>
+
     <div>
         <TableComponent
             modalName="quizzes.title"
@@ -15,19 +23,37 @@
             @change-page="changePage"
         >
             <template #cell-questions="{ data }">
-                <BadgeComponent :text="questionsNumber(data.row.questions)" :clickable="false" variant="primary" />
+                <BadgeComponent
+                    :text="
+                        questionsNumber(data.row.questions)
+                    "
+                    :clickable="false"
+                    variant="primary"
+                />
             </template>
-            <template #cell-created="{ data }">{{ formatDate(data.row.created) }}</template>
+            <template #cell-created="{ data }">
+                {{ formatDate(data.row.created) }}
+            </template>
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToEdit(data.row)">
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="
+                                redirectToEdit(data.row)
+                            "
+                        >
                             <LucideIcon icon="SquarePen" />
                             {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="
+                                openConfirmation(data.row)
+                            "
+                        >
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
                         </a>
@@ -48,7 +74,6 @@
         @confirm="deleteQuizz"
     />
 </template>
-
 <script>
     import dates from "@/helpers/date";
     import QuizzesService from "@/services/quizzes/QuizzesService";
@@ -71,11 +96,26 @@
                 columns: [
                     { key: "id", label: "common.id" },
                     { key: "title", label: "common.name" },
-                    { key: "typeDocName", label: "quizzes.type" },
-                    { key: "questions", label: "quizzes.questions" },
-                    { key: "created", label: "quizzes.createdDate" },
-                    { key: "emailCreator", label: "common.owner" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "typeDocName",
+                        label: "quizzes.type",
+                    },
+                    {
+                        key: "questions",
+                        label: "quizzes.questions",
+                    },
+                    {
+                        key: "created",
+                        label: "quizzes.createdDate",
+                    },
+                    {
+                        key: "emailCreator",
+                        label: "common.owner",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -99,7 +139,9 @@
                 this.table.isLoading = true;
                 this.searchInput = obj.search;
                 var paramsReq = {
-                    search: this.searchInput.trim() ? this.searchInput.trim() : "",
+                    search: this.searchInput.trim()
+                        ? this.searchInput.trim()
+                        : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
                     isAscending: this.isAscending,
@@ -109,10 +151,12 @@
                 QuizzesService.getQuizzes(paramsReq)
                     .then((response) => {
                         this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        this.table.pagination =
+                            response.pagination;
                     })
                     .finally(() => {
-                        if (obj.type === "search") this.searching = true;
+                        if (obj.type === "search")
+                            this.searching = true;
                         this.table.isLoading = false;
                     });
             },
@@ -129,7 +173,11 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getQuizzes({ search: "", page: this.queryPage, type: null });
+                this.getQuizzes({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
@@ -147,27 +195,37 @@
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
-                const ids = this.table.selectedRows.map((item) => item.id);
+                const ids = this.table.selectedRows.map(
+                    (item) => item.id
+                );
                 this.selectedQuizz = ids;
                 this.$refs.DeleteDialog.open();
             },
             deleteQuizz() {
                 this.isDeleting = true;
-                QuizzesService.deleteQuizzById(this.selectedQuizz)
+                QuizzesService.deleteQuizzById(
+                    this.selectedQuizz
+                )
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getQuizzes({ search: "", page: 1, type: null });
+                            this.getQuizzes({
+                                search: "",
+                                page: 1,
+                                type: null,
+                            });
                             this.$notify({
                                 title: "quizzes.title",
-                                message: "quizzes.removeSuccess",
+                                message:
+                                    "quizzes.removeSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "quizzes.title",
-                                message: "quizzes.errors.removeError",
+                                message:
+                                    "quizzes.errors.removeError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -181,19 +239,37 @@
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getQuizzes({ search: input, page: this.queryPage, type: null });
+                this.getQuizzes({
+                    search: input,
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             reload() {
                 this.$refs.QuizzesModal.close();
-                this.getQuizzes({ search: "", page: this.queryPage, type: null });
+                this.getQuizzes({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             changePage(page) {
-                this.getQuizzes({ search: "", page: page, type: null });
+                this.getQuizzes({
+                    search: "",
+                    page: page,
+                    type: null,
+                });
             },
         },
         created() {
-            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getQuizzes({ search: "", page: this.queryPage, type: null });
+            this.queryPage = this.$route.query.page
+                ? this.$route.query.page
+                : 1;
+            this.getQuizzes({
+                search: "",
+                page: this.queryPage,
+                type: null,
+            });
         },
         computed: {
             showMultiDelete() {
