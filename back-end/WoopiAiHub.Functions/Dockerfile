@@ -26,7 +26,7 @@ FROM mcr.microsoft.com/azure-functions/dotnet-isolated:4-dotnet-isolated8.0
 WORKDIR /home/site/wwwroot
 
 # Copy published files
-COPY --from=build /app/publish .
+COPY --from=build /app/publish/. .
 
 # Environment variables
 ENV FUNCTIONS_WORKER_RUNTIME=dotnet-isolated \
