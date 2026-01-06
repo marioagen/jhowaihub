@@ -4,38 +4,10 @@
  * Works on Windows, Linux, and macOS
  */
 
-const { execSync } = require("child_process");
 const path = require("path");
-const fs = require("fs");
-
-// Get the repository root directory (where .git folder is)
-function getRepoRoot() {
-    try {
-        const gitRoot = execSync("git rev-parse --show-toplevel", {
-            encoding: "utf-8",
-            stdio: "pipe",
-        }).trim();
-        return path.resolve(gitRoot);
-    } catch (error) {
-        // Fallback to current working directory
-        return process.cwd();
-    }
-}
+const { log, getRepoRoot, formatFile } = require("./utils/formatting-utils");
 
 const repoRoot = getRepoRoot();
-
-// Colors for console output
-const colors = {
-    reset: "\x1b[0m",
-    red: "\x1b[31m",
-    green: "\x1b[32m",
-    yellow: "\x1b[33m",
-    blue: "\x1b[34m",
-};
-
-function log(message, color = "reset") {
-    console.log(`${colors[color]}${message}${colors.reset}`);
-}
 
 /**
  * Gets changed files from git (unstaged + staged)
@@ -119,15 +91,11 @@ function main() {
         
         log(`Formatting ${files.length} changed root file(s)...`, "blue");
         for (const file of files) {
-            try {
-                const fullPath = path.resolve(repoRoot, file);
-                execSync(`npx prettier --write "${fullPath}"`, {
-                    stdio: "pipe",
-                    cwd: repoRoot,
-                });
+            const result = formatFile(file, repoRoot);
+            if (result.success && !result.skipped) {
                 log(`✓ Formatted: ${file}`, "green");
-            } catch (error) {
-                log(`✗ Error formatting ${file}: ${error.message}`, "red");
+            } else if (result.error) {
+                log(`✗ Error formatting ${file}: ${result.error}`, "red");
             }
         }
     } else if (type === "frontend") {
@@ -147,18 +115,13 @@ function main() {
         }
         
         log(`Formatting ${files.length} changed frontend file(s)...`, "blue");
-        const frontendDir = path.resolve(repoRoot, "front-end/vueapp");
         
         for (const file of files) {
-            try {
-                const fullPath = path.resolve(repoRoot, file);
-                execSync(`npx prettier --write "${fullPath}"`, {
-                    stdio: "pipe",
-                    cwd: frontendDir,
-                });
+            const result = formatFile(file, repoRoot);
+            if (result.success && !result.skipped) {
                 log(`✓ Formatted: ${file}`, "green");
-            } catch (error) {
-                log(`✗ Error formatting ${file}: ${error.message}`, "red");
+            } else if (result.error) {
+                log(`✗ Error formatting ${file}: ${result.error}`, "red");
             }
         }
     } else {

@@ -7,19 +7,7 @@
 const { execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
-
-// Colors for console output
-const colors = {
-    reset: "\x1b[0m",
-    red: "\x1b[31m",
-    green: "\x1b[32m",
-    yellow: "\x1b[33m",
-    blue: "\x1b[34m",
-};
-
-function log(message, color = "reset") {
-    console.log(`${colors[color]}${message}${colors.reset}`);
-}
+const { log, categorizeFile, formatFile, splitVueAttributes } = require("./utils/formatting-utils");
 
 /**
  * Post-processes Vue files to format component attributes
@@ -51,44 +39,7 @@ function formatVueAttributes(filePath) {
                 // Skip if already formatted (has newlines)
                 if (!attributes.includes("\n")) {
                     // Split attributes properly (handling Vue directives and bindings)
-                    // Use regex to split on whitespace that's not inside quotes
-                    const attrList = [];
-                    let currentAttr = "";
-                    let inQuotes = false;
-                    let quoteChar = null;
-
-                    for (let j = 0; j < attributes.length; j++) {
-                        const char = attributes[j];
-                        const prevChar = j > 0 ? attributes[j - 1] : null;
-                        
-                        if ((char === '"' || char === "'") && prevChar !== "\\") {
-                            if (!inQuotes) {
-                                inQuotes = true;
-                                quoteChar = char;
-                            } else if (char === quoteChar) {
-                                inQuotes = false;
-                                quoteChar = null;
-                            }
-                            currentAttr += char;
-                        } else if (!inQuotes && /\s/.test(char)) {
-                            // Check if this whitespace separates attributes
-                            if (currentAttr.trim()) {
-                                // Look ahead to see if next non-whitespace starts a new attribute
-                                const remaining = attributes.substring(j).trim();
-                                if (remaining.match(/^(@|:|v-|[\w-]+\s*=)/)) {
-                                    attrList.push(currentAttr.trim());
-                                    currentAttr = "";
-                                } else {
-                                    currentAttr += char;
-                                }
-                            }
-                        } else {
-                            currentAttr += char;
-                        }
-                    }
-                    if (currentAttr.trim()) {
-                        attrList.push(currentAttr.trim());
-                    }
+                    const attrList = splitVueAttributes(attributes);
 
                     if (attrList.length > 1) {
                         const indent = line.match(/^(\s*)/)?.[1] || "";
@@ -114,43 +65,7 @@ function formatVueAttributes(filePath) {
                     // Skip if already formatted (has newlines)
                     if (!attributes.includes("\n")) {
                         // Split attributes properly (handling Vue directives and bindings)
-                        const attrList = [];
-                        let currentAttr = "";
-                        let inQuotes = false;
-                        let quoteChar = null;
-
-                        for (let j = 0; j < attributes.length; j++) {
-                            const char = attributes[j];
-                            const prevChar = j > 0 ? attributes[j - 1] : null;
-                            
-                            if ((char === '"' || char === "'") && prevChar !== "\\") {
-                                if (!inQuotes) {
-                                    inQuotes = true;
-                                    quoteChar = char;
-                                } else if (char === quoteChar) {
-                                    inQuotes = false;
-                                    quoteChar = null;
-                                }
-                                currentAttr += char;
-                            } else if (!inQuotes && /\s/.test(char)) {
-                                // Check if this whitespace separates attributes
-                                if (currentAttr.trim()) {
-                                    // Look ahead to see if next non-whitespace starts a new attribute
-                                    const remaining = attributes.substring(j).trim();
-                                    if (remaining.match(/^(@|:|v-|[\w-]+\s*=)/)) {
-                                        attrList.push(currentAttr.trim());
-                                        currentAttr = "";
-                                    } else {
-                                        currentAttr += char;
-                                    }
-                                }
-                            } else {
-                                currentAttr += char;
-                            }
-                        }
-                        if (currentAttr.trim()) {
-                            attrList.push(currentAttr.trim());
-                        }
+                        const attrList = splitVueAttributes(attributes);
 
                         if (attrList.length > 1) {
                             const indent = line.match(/^(\s*)/)?.[1] || "";
@@ -240,92 +155,18 @@ function getStagedFiles() {
     }
 }
 
-/**
- * Determines the file type and category
- * @returns {Object} { type: 'frontend'|'root'|'skip', category: string }
- */
-function categorizeFile(filePath) {
-    // Normalize path separators
-    const normalizedPath = filePath.replace(/\\/g, "/");
-    
-    // Frontend files - must be in front-end/vueapp/ directory
-    const isInFrontendDir = normalizedPath.startsWith("front-end/vueapp/");
-    const frontendExtensions = /\.(js|vue|ts|tsx|json|css|scss|html)$/i;
-    
-    if (isInFrontendDir && frontendExtensions.test(filePath)) {
-        return { type: "frontend", category: "frontend", tool: "prettier (frontend)" };
-    }
-    
-    // Root-level formattable files (JSON, YAML, MD) - not in frontend or backend specific dirs
-    const rootExtensions = /\.(json|yml|yaml|md)$/i;
-    const isInBackendDir = normalizedPath.startsWith("back-end/");
-    const isInExternalApiDir = normalizedPath.startsWith("external-api/");
-    
-    if (!isInFrontendDir && !isInBackendDir && !isInExternalApiDir && rootExtensions.test(filePath)) {
-        return { type: "root", category: "root", tool: "prettier (root)" };
-    }
-    
-    // Skip all other files
-    return { type: "skip", category: "other", tool: "none" };
-}
-
-/**
- * Formats a file (frontend or root files)
- */
-function formatFile(filePath) {
-    const fullPath = path.resolve(filePath);
-
-    // Check if file exists
-    if (!fs.existsSync(fullPath)) {
-        return { success: true, skipped: true };
-    }
-
-    const fileInfo = categorizeFile(filePath);
-    
-    // Skip files that shouldn't be formatted
-    if (fileInfo.type === "skip") {
-        return { success: true, skipped: true };
-    }
-
-    try {
-        if (fileInfo.type === "frontend") {
-            // Format using frontend prettier (uses front-end/vueapp/.prettierrc)
-            const frontendDir = path.resolve("front-end/vueapp");
-            if (fs.existsSync(path.join(frontendDir, "package.json"))) {
-                log(`  Formatting frontend file: ${filePath}`, "blue");
-                execSync(`npx prettier --write "${fullPath}"`, {
-                    cwd: frontendDir,
-                    stdio: "pipe",
-                });
-                // Stage the file again after formatting
-                execSync(`git add "${filePath}"`, { stdio: "pipe" });
-                return { success: true };
-            } else {
-                log(`  Warning: Frontend package.json not found, skipping ${filePath}`, "yellow");
-                return { success: true, skipped: true };
-            }
-        } else if (fileInfo.type === "root") {
-            // Format using root prettier (uses .prettierrc)
-            try {
-                log(`  Formatting root file: ${filePath}`, "blue");
-                execSync(`npx prettier --write "${fullPath}"`, {
-                    stdio: "pipe",
-                    cwd: path.resolve("."),
-                });
-                // Stage the file again after formatting
-                execSync(`git add "${filePath}"`, { stdio: "pipe" });
-                return { success: true };
-            } catch (error) {
-                // Prettier might not be installed at root, that's okay
-                log(`  Note: Prettier not available at root, skipping ${filePath}`, "yellow");
-                return { success: true, skipped: true };
-            }
+// formatFile is imported from utils, but we need to wrap it to stage files after formatting
+function formatAndStageFile(filePath) {
+    const result = formatFile(filePath);
+    if (result.success && !result.skipped) {
+        // Stage the file again after formatting
+        try {
+            execSync(`git add "${filePath}"`, { stdio: "pipe" });
+        } catch (error) {
+            // If staging fails, still return success for formatting
         }
-    } catch (error) {
-        return { success: false, error: error.message };
     }
-
-    return { success: true, skipped: true };
+    return result;
 }
 
 function main() {
@@ -372,7 +213,7 @@ function main() {
     if (fileCategories.frontend.length > 0) {
         log(`\n[FRONTEND] Formatting ${fileCategories.frontend.length} file(s) using prettier (frontend config)...`, "blue");
         for (const fileInfo of fileCategories.frontend) {
-            const result = formatFile(fileInfo.path);
+            const result = formatAndStageFile(fileInfo.path);
             if (result.skipped) {
                 skippedCount++;
             } else if (result.success) {
@@ -402,7 +243,7 @@ function main() {
     if (fileCategories.root.length > 0) {
         log(`\n[ROOT] Formatting ${fileCategories.root.length} file(s) using prettier (root config)...`, "blue");
         for (const fileInfo of fileCategories.root) {
-            const result = formatFile(fileInfo.path);
+            const result = formatAndStageFile(fileInfo.path);
             if (result.skipped) {
                 skippedCount++;
             } else if (result.success) {
