@@ -84,22 +84,22 @@ namespace WoopiAiHub.Repository
         /// <summary>
         /// Finds all templates associated by the paged filter data transfer object.
         /// </summary>
-        /// <param name="templateFilterDto"></param>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        public async Task<ICollection<ApiTemplate>> FindAll(ApiTemplateFilterDto templateFilterDto)
+        public async Task<ICollection<ApiTemplate>> FindAll(ApiTemplateFilterDto filter)
         {
-            var query = ApplyFilters(templateFilterDto.Input, templateFilterDto.Method, templateFilterDto.OrderBy);
+            var query = ApplyFilters(filter.Input, filter.Method, filter.OrderBy);
             return await query.ToListAsync();
         }
 
         /// <summary>
         /// Finds all templates associated by the paged filter data transfer object.
         /// </summary>
-        /// <param name="templateFilterDto"></param>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        public IQueryable<ApiTemplateDto> FindAllPaged(ApiTemplatePagedFilterDto templateFilterDto)
+        public IQueryable<ApiTemplateDto> FindAllPaged(ApiTemplatePagedFilterDto filter)
         {
-            var query = ApplyFilters(templateFilterDto.Input, templateFilterDto.Method, templateFilterDto.OrderBy);
+            var query = ApplyFilters(filter.Input, filter.Method, filter.OrderBy);
 
             return query.Select(w => new ApiTemplateDto
             {

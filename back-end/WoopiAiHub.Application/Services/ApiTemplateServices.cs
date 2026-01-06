@@ -56,12 +56,12 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Retrieves a collection of API templates that match the specified filter criteria.
         /// </summary>
-        /// <param name="templateDto">An object containing the filter criteria to apply when searching for API templates. Only templates matching
+        /// <param name="filter">An object containing the filter criteria to apply when searching for API templates. Only templates matching
         /// these criteria are returned. Cannot be null.</param>
         /// <returns></returns>
-        public async Task<ICollection<ApiTemplateDto>> FindAll(ApiTemplateFilterDto templateDto)
+        public async Task<ICollection<ApiTemplateDto>> FindAll(ApiTemplateFilterDto filter)
         {
-            var templates = await _templateRepository.FindAll(templateDto);
+            var templates = await _templateRepository.FindAll(filter);
             return [.. templates.Select(item => new ApiTemplateDto
             {
                 Id = item.Id,
@@ -79,15 +79,15 @@ namespace WoopiAiHub.Application.Services
         /// This method sends the current page  
         /// and search text to repository and return an PaginatedListDto<ApiTemplateDto>.
         /// </summary>
-        /// <param name="templatePagedDto"></param>
+        /// <param name="filter"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public PaginatedListDto<ApiTemplateDto> FindAllPaged(ApiTemplatePagedFilterDto templatePagedDto)
+        public PaginatedListDto<ApiTemplateDto> FindAllPaged(ApiTemplatePagedFilterDto filter)
         {
-            if (templatePagedDto.Page > 0)
+            if (filter.Page > 0)
             {
-                var templates = _templateRepository.FindAllPaged(templatePagedDto);
-                var paginatedList = PaginationHelper.Paginate(templates, templatePagedDto.Page, templatePagedDto.PageSize);
+                var templates = _templateRepository.FindAllPaged(filter);
+                var paginatedList = PaginationHelper.Paginate(templates, filter.Page, filter.PageSize);
                 return paginatedList;
             }
             else
