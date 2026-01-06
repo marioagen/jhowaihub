@@ -9,10 +9,10 @@
                         </button>
                         <div>
                             <h5 class="mb-0 fw-bold">
-                                {{ isEditMode ? $t("template.formEdit.title") : $t("template.formCreate.title") }}
+                                {{ getTemplateTitle }}
                             </h5>
                             <p class="mb-1">
-                                {{ isEditMode ? $t("template.formEdit.subtitle") : $t("template.formCreate.subtitle") }}
+                                {{ getTemplateSubtitle }}
                             </p>
                         </div>
                     </div>
@@ -31,13 +31,11 @@
                         </button>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-body">
                                 <h6 class="card-title mb-3">{{ $t("template.requestDetails") }}</h6>
-
                                 <div class="mb-3">
                                     <label for="templateName" class="form-label">
                                         {{ $t("template.templateName") }}
@@ -56,7 +54,6 @@
                                         </span>
                                     </Field>
                                 </div>
-
                                 <div class="row mb-3">
                                     <div class="col-md-3">
                                         <label for="method" class="form-label">{{ $t("template.method") }}</label>
@@ -67,11 +64,13 @@
                                                 id="method"
                                                 :class="{ 'is-invalid': errorMessage }"
                                             >
-                                                <option value="GET">GET</option>
-                                                <option value="POST">POST</option>
-                                                <option value="PUT">PUT</option>
-                                                <option value="PATCH">PATCH</option>
-                                                <option value="DELETE">DELETE</option>
+                                                <option
+                                                    v-for="method in methodsList"
+                                                    :key="method.id"
+                                                    :value="method.value"
+                                                >
+                                                    {{ method.value }}
+                                                </option>
                                             </select>
                                             <span class="validation-message text-danger" v-if="errorMessage">
                                                 {{ errorMessage }}
@@ -97,7 +96,6 @@
                                         </Field>
                                     </div>
                                 </div>
-
                                 <ul class="nav nav-tabs mb-3" role="tablist">
                                     <li class="nav-item" role="presentation">
                                         <button
@@ -124,7 +122,6 @@
                                         </button>
                                     </li>
                                 </ul>
-
                                 <div class="tab-content">
                                     <div class="tab-pane fade show active" id="query-params" role="tabpanel">
                                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -134,7 +131,6 @@
                                                 {{ $t("template.addParam") }}
                                             </button>
                                         </div>
-
                                         <div v-if="form.queryParams.length > 0">
                                             <div
                                                 v-for="(param, index) in form.queryParams"
@@ -164,7 +160,6 @@
                                             <small>{{ $t("template.noQueryParameters") }}</small>
                                         </div>
                                     </div>
-
                                     <div class="tab-pane fade" id="headers" role="tabpanel">
                                         <div class="d-flex justify-content-between align-items-center mb-3">
                                             <h6 class="mb-0">{{ $t("template.headers") }}</h6>
@@ -173,7 +168,6 @@
                                                 {{ $t("template.addParam") }}
                                             </button>
                                         </div>
-
                                         <div v-if="form.headers.length > 0">
                                             <div
                                                 v-for="(header, index) in form.headers"
@@ -207,7 +201,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-body">
@@ -215,7 +208,6 @@
                                     <h6 class="card-title">{{ $t("template.requestBody") }}</h6>
                                     <small class="text-muted">{{ $t("template.bodySubtitle") }}</small>
                                 </div>
-
                                 <Field name="body" rules="jsonValidation" v-slot="{ field, errorMessage }">
                                     <div class="position-relative">
                                         <textarea
@@ -229,8 +221,6 @@
                                             @keydown="handleKeyDown"
                                             @blur="hideAutocomplete"
                                         ></textarea>
-
-                                        <!-- Autocomplete Dropdown -->
                                         <div
                                             v-if="showAutocomplete"
                                             class="autocomplete-dropdown"
@@ -258,7 +248,6 @@
                                         {{ jsonError }}
                                     </span>
                                 </Field>
-
                                 <div class="alert alert-info mt-3 py-2 px-3 d-flex align-items-start">
                                     <LucideIcon icon="Lightbulb" :size="16" class="me-2 flex-shrink-0" />
                                     <small>{{ $t("template.variablesTip") }}</small>
@@ -275,7 +264,6 @@
 <script>
     import { Field, useForm, defineRule } from "vee-validate";
     import TemplateService from "@/services/template/TemplateService";
-    import { notify } from "@/utils/notification";
     import i18n from "@/locales/i18n";
 
     defineRule("jsonValidation", (value) => {
@@ -283,7 +271,6 @@
             return true;
         }
         try {
-            // Replace all {{variable}} patterns with valid placeholder strings
             const sanitizedValue = value.replace(/\{\{[^}]+\}\}/g, '"PLACEHOLDER"');
             JSON.parse(sanitizedValue);
             return true;
@@ -296,6 +283,19 @@
         name: "TemplateDetail",
         components: {
             Field,
+        },
+        props: {
+            methodsList: {
+                type: Array,
+                required: false,
+                default: () => [
+                    { id: 1, value: "GET" },
+                    { id: 2, value: "POST" },
+                    { id: 3, value: "PUT" },
+                    { id: 4, value: "PATCH" },
+                    { id: 5, value: "DELETE" },
+                ],
+            },
         },
         data() {
             return {
@@ -333,6 +333,14 @@
             },
             filteredAutocompleteOptions() {
                 return this.autocompleteOptions;
+            },
+            getTemplateTitle() {
+                return this.isEditMode ? this.$t("template.formEdit.title") : this.$t("template.formCreate.title");
+            },
+            getTemplateSubtitle() {
+                return this.isEditMode
+                    ? this.$t("template.formEdit.subtitle")
+                    : this.$t("template.formCreate.subtitle");
             },
         },
         setup() {
@@ -375,7 +383,6 @@
                     this.hideAutocomplete();
                 }
             },
-
             isMainJsonOpeningBrace(value, position) {
                 const beforeCursor = value.substring(0, position).trim();
 
@@ -391,23 +398,19 @@
 
                 return depth === 0;
             },
-
             validateJSON(value) {
                 if (!value || value.trim() === "") {
                     this.jsonError = "";
                     return;
                 }
                 try {
-                    // Replace all {{variable}} patterns with valid placeholder strings
                     const sanitizedValue = value.replace(/\{\{[^}]+\}\}/g, '"PLACEHOLDER"');
                     JSON.parse(sanitizedValue);
                     this.jsonError = "";
                 } catch (e) {
-                    // Don't show error while typing
                     this.jsonError = "";
                 }
             },
-
             showAutocompleteDropdown(textarea) {
                 const coords = this.getCaretCoordinates(textarea);
                 this.autocompletePosition = {
@@ -417,13 +420,11 @@
                 this.showAutocomplete = true;
                 this.selectedAutocompleteIndex = 0;
             },
-
             hideAutocomplete() {
                 setTimeout(() => {
                     this.showAutocomplete = false;
                 }, 200);
             },
-
             handleKeyDown(event) {
                 if (!this.showAutocomplete) return;
 
@@ -443,7 +444,6 @@
                     this.showAutocomplete = false;
                 }
             },
-
             selectAutocompleteOption(option) {
                 const textarea = this.$refs.bodyTextarea;
                 const cursorPosition = textarea.selectionStart;
@@ -470,7 +470,6 @@
 
                 this.showAutocomplete = false;
             },
-
             getCaretCoordinates(textarea) {
                 const rect = textarea.getBoundingClientRect();
                 const style = window.getComputedStyle(textarea);
@@ -510,27 +509,21 @@
 
                 return coordinates;
             },
-
             redirectToTemplateList() {
                 this.$router.push({ name: "Template" });
             },
-
             addQueryParam() {
                 this.form.queryParams.push({ key: "" });
             },
-
             removeQueryParam(index) {
                 this.form.queryParams.splice(index, 1);
             },
-
             addHeader() {
                 this.form.headers.push({ key: "" });
             },
-
             removeHeader(index) {
                 this.form.headers.splice(index, 1);
             },
-
             updateUrlWithQueryParams() {
                 const validQueryParams = this.form.queryParams.filter((p) => p.key.trim() !== "");
 
@@ -555,7 +548,6 @@
                     });
                 }
             },
-
             loadTemplate() {
                 this.isLoading = true;
                 TemplateService.getTemplateById(this.routeId)
@@ -573,7 +565,6 @@
                                 : [];
                             this.form.queryParams = parsedQueryParams.map((p) => ({ key: p.key }));
                         } catch (e) {
-                            console.error("Error parsing queryParams:", e);
                             this.form.queryParams = [];
                         }
 
@@ -585,7 +576,6 @@
                                 : [];
                             this.form.headers = parsedHeaders.map((h) => ({ key: h.key }));
                         } catch (e) {
-                            console.error("Error parsing headers:", e);
                             this.form.headers = [];
                         }
 
@@ -596,12 +586,12 @@
                             body: this.form.body,
                         });
                     })
-                    .catch((error) => {
-                        console.error("Error loading template:", error);
-                        notify({
-                            title: this.$t("common.error"),
-                            message: this.$t("template.editError"),
+                    .catch(() => {
+                        this.$notify({
+                            title: "common.error",
+                            message: "template.editError",
                             variant: "danger",
+                            icon: "CircleX",
                         });
                         this.redirectToTemplateList();
                     })
@@ -609,7 +599,6 @@
                         this.isLoading = false;
                     });
             },
-
             save() {
                 this.validate().then((result) => {
                     if (!result.valid) {
@@ -648,22 +637,23 @@
                             const successMsg = this.isEditMode
                                 ? this.$t("template.editSuccess")
                                 : this.$t("template.createSuccess");
-                            notify({
-                                title: this.$t("common.success"),
+                            this.$notify({
+                                title: "common.success",
                                 message: successMsg,
                                 variant: "success",
+                                icon: "CircleCheckBig",
                             });
                             this.redirectToTemplateList();
                         })
                         .catch((error) => {
-                            console.error("Error saving template:", error);
                             const errorMsg = this.isEditMode
                                 ? this.$t("template.editError")
                                 : this.$t("template.createError");
-                            notify({
-                                title: this.$t("common.error"),
+                            this.$notify({
+                                title: "common.error",
                                 message: errorMsg,
                                 variant: "danger",
+                                icon: "CircleX",
                             });
                         })
                         .finally(() => {

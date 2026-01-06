@@ -15,7 +15,8 @@ namespace WoopiAiHub.Repository.Migrations
                 name: "ApiTemplates",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Created = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(GETDATE())"),
                     Name = table.Column<string>(type: "varchar(200)", nullable: false),
                     Method = table.Column<string>(type: "varchar(10)", nullable: false),

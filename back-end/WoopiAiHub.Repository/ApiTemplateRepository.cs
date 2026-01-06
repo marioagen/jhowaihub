@@ -38,7 +38,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<ApiTemplateDto?> FindById(Guid id)
+        public async Task<ApiTemplateDto?> FindById(int id)
         {
             return await _context.ApiTemplates
                 .Where(w => w.Id == id)
@@ -62,7 +62,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<bool> DeleteById(Guid id)
+        public async Task<bool> DeleteById(int id)
         {
             var template = await _context.ApiTemplates.FirstOrDefaultAsync(a => a.Id == id);
 
@@ -75,7 +75,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<ApiTemplate?> FindByIdReturnModel(Guid id)
+        public async Task<ApiTemplate?> FindByIdReturnModel(int id)
         {
             return await _context.ApiTemplates
                  .FirstOrDefaultAsync(w => w.Id == id);
@@ -86,10 +86,21 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="filter"></param>
         /// <returns></returns>
-        public async Task<ICollection<ApiTemplate>> FindAll(ApiTemplateFilterDto filter)
+        public async Task<ICollection<ApiTemplateDto>> FindAll(ApiTemplateFilterDto filter)
         {
             var query = ApplyFilters(filter.Input, filter.Method, filter.OrderBy);
-            return await query.ToListAsync();
+            var templates = await query.ToListAsync();
+            return [.. templates.Select(item => new ApiTemplateDto
+            {
+                Id = item.Id,
+                Created = item.Created,
+                Name = item.Name,
+                Method = item.Method,
+                Url = item.Url,
+                QueryTemplate = item.QueryTemplate,
+                HeaderTemplate = item.HeaderTemplate,
+                BodyTemplate = item.BodyTemplate
+            })];
         }
 
         /// <summary>
@@ -147,21 +158,20 @@ namespace WoopiAiHub.Repository
 
             if (!string.IsNullOrWhiteSpace(orderBy))
             {
-                if (orderBy == "created desc")
+                switch (orderBy)
                 {
-                    query = query.OrderByDescending(w => w.Created);
-                }
-                else if (orderBy == "created asc")
-                {
-                    query = query.OrderBy(w => w.Created);
-                }
-                if (orderBy == "name desc")
-                {
-                    query = query.OrderByDescending(w => w.Name);
-                }
-                else if (orderBy == "name asc")
-                {
-                    query = query.OrderBy(w => w.Name);
+                    case "created desc":
+                        query = query.OrderByDescending(w => w.Created);
+                        break;
+                    case "created asc":
+                        query = query.OrderBy(w => w.Created);
+                        break;
+                    case "name desc":
+                        query = query.OrderByDescending(w => w.Name);
+                        break;
+                    case "name asc":
+                        query = query.OrderBy(w => w.Name);
+                        break;
                 }
             }
             else

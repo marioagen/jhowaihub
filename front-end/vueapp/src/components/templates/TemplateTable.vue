@@ -133,8 +133,8 @@
             deleteTemplate() {
                 if (this.selectedTemplate === null) {
                     this.$notify({
-                        title: this.$t("common.warning"),
-                        message: this.$t("template.unselected"),
+                        title: "common.warning",
+                        message: "template.unselected",
                         variant: "warning",
                         icon: "TriangleAlert",
                     });
@@ -147,16 +147,16 @@
                         this.$refs.DeleteDialog.close();
                         this.getTemplates();
                         this.$notify({
-                            title: this.$t("common.success"),
-                            message: this.$t("template.removeSuccess"),
+                            title: "common.success",
+                            message: "template.removeSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
                     })
                     .catch((error) => {
                         this.$notify({
-                            title: this.$t("common.error"),
-                            message: error.response?.data?.labelError ?? this.$t("template.removeError"),
+                            title: "common.error",
+                            message: error.response?.data?.labelError ?? "template.removeError",
                             variant: "danger",
                             icon: "CircleX",
                         });

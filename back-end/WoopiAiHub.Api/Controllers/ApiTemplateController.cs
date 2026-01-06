@@ -51,7 +51,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("{id}")]
         [SwaggerOperation("Endpoint that receive an api template id and return a valid template")]
         [ProducesResponseType(typeof(ApiTemplateDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindById(Guid id)
+        public async Task<IActionResult> FindById(int id)
         {
             var workflow = await _templateServices.FindById(id);
             return Ok(workflow);
@@ -65,7 +65,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpDelete("{id}")]
         [SwaggerOperation("Endpoint that receives the request to delete a template by its ID")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> DeleteById(Guid id)
+        public async Task<IActionResult> DeleteById(int id)
         {
             var result = await _templateServices.DeleteById(id);
             return Ok(result);

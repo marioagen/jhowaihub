@@ -25,7 +25,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<ApiTemplateDto> FindById(Guid id)
+        public async Task<ApiTemplateDto> FindById(int id)
         {
             var template = await _templateRepository.FindById(id);
             if (template == null)
@@ -42,7 +42,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<bool> DeleteById(Guid id)
+        public async Task<bool> DeleteById(int id)
         {
             var template = await _templateRepository.FindByIdReturnModel(id);
             if (template == null)
@@ -61,18 +61,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<ICollection<ApiTemplateDto>> FindAll(ApiTemplateFilterDto filter)
         {
-            var templates = await _templateRepository.FindAll(filter);
-            return [.. templates.Select(item => new ApiTemplateDto
-            {
-                Id = item.Id,
-                Created = item.Created,
-                Name = item.Name,
-                Method = item.Method,
-                Url = item.Url,
-                QueryTemplate = item.QueryTemplate,
-                HeaderTemplate = item.HeaderTemplate,
-                BodyTemplate = item.BodyTemplate
-            })];
+            return await _templateRepository.FindAll(filter);
         }
 
         /// <summary>

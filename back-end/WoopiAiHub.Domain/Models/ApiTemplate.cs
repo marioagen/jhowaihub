@@ -6,14 +6,8 @@ namespace WoopiAiHub.Domain.Models
     /// <summary>
     /// Entity that represents an API template for making HTTP requests.
     /// </summary>
-    public class ApiTemplate
+    public class ApiTemplate : BaseEntity
     {
-        [Column("Id", TypeName = "uniqueidentifier")]
-        public Guid Id { get; private set; } = Guid.NewGuid();
-
-        [Column("Created", TypeName = "datetime")]
-        public DateTime Created { get; private set; } = DateTime.UtcNow;
-
         [Column("Name", TypeName = "varchar(200)")]
         public string Name { get; private set; }
 
@@ -40,7 +34,8 @@ namespace WoopiAiHub.Domain.Models
         public void UpdateHeaderTemplate(string? headerTemplate) => HeaderTemplate = headerTemplate;
         public void UpdateBodyTemplate(string? bodyTemplate) => BodyTemplate = bodyTemplate;
 
-        public ApiTemplate(string name, string method, string url, string? queryTemplate, string? headerTemplate, string? bodyTemplate)
+        public ApiTemplate(string name, string method, string url, string? queryTemplate, string? headerTemplate, string? bodyTemplate) 
+            : base(0, DateTime.Now)
         {
             Name = name;
             Method = method;

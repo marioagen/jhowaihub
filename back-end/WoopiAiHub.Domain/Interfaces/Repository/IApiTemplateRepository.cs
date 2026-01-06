@@ -6,11 +6,11 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface IApiTemplateRepository
     {
-        Task<ApiTemplateDto?> FindById(Guid id);
-        Task<ApiTemplate?> FindByIdReturnModel(Guid id);
-        Task<ICollection<ApiTemplate>> FindAll(ApiTemplateFilterDto filter);
+        Task<ApiTemplateDto?> FindById(int id);
+        Task<ApiTemplate?> FindByIdReturnModel(int id);
+        Task<ICollection<ApiTemplateDto>> FindAll(ApiTemplateFilterDto filter);
         IQueryable<ApiTemplateDto> FindAllPaged(ApiTemplatePagedFilterDto filter);
-        Task<bool> DeleteById(Guid id);
+        Task<bool> DeleteById(int id);
         Task<bool> CreateAsync(ApiTemplate template);
         Task<bool> UpdateAsync(ApiTemplate template);
     }

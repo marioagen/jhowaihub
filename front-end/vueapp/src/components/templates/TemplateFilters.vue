@@ -31,10 +31,9 @@
                     v-model="filters.orderBy"
                     @change="setFilters"
                 >
-                    <option value="created desc">{{ $t("filters.mostRecent") }}</option>
-                    <option value="created asc">{{ $t("filters.mostOld") }}</option>
-                    <option value="name asc">{{ $t("filters.nameAZ") }}</option>
-                    <option value="name desc">{{ $t("filters.nameZA") }}</option>
+                    <option v-for="sorting in sortingList" :key="sorting.id" :value="sorting.value">
+                        {{ $t(sorting.name) }}
+                    </option>
                 </select>
             </div>
         </div>
@@ -58,6 +57,16 @@
     export default {
         name: "TemplateFilters",
         props: {
+            sortingList: {
+                type: Array,
+                required: false,
+                default: () => [
+                    { id: 1, name: "filters.mostRecent", value: "created desc" },
+                    { id: 2, name: "filters.mostOld", value: "created asc" },
+                    { id: 3, name: "filters.nameAZ", value: "name asc" },
+                    { id: 4, name: "filters.nameZA", value: "name desc" },
+                ],
+            },
             methodsList: {
                 type: Array,
                 required: false,

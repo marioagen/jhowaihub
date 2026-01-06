@@ -30,7 +30,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindById_WhenTemplateExists_ShouldReturnTemplate()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 1;
             var expectedTemplate = new ApiTemplateDto
             {
                 Id = templateId,
@@ -64,7 +64,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindById_WhenTemplateNotFound_ShouldThrowAppException()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 999;
 
             _mocker.GetMock<IApiTemplateRepository>()
                 .Setup(x => x.FindById(templateId))
@@ -87,7 +87,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteById_WhenTemplateExists_ShouldDeleteSuccessfully()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 1;
             var existingTemplate = new ApiTemplate(
                 "Test Template",
                 "POST",
@@ -121,7 +121,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteById_WhenTemplateNotFound_ShouldThrowAppException()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 999;
 
             _mocker.GetMock<IApiTemplateRepository>()
                 .Setup(x => x.FindByIdReturnModel(templateId))
@@ -134,7 +134,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IApiTemplateRepository>()
                 .Verify(x => x.FindByIdReturnModel(templateId), Times.Once);
             _mocker.GetMock<IApiTemplateRepository>()
-                .Verify(x => x.DeleteById(It.IsAny<Guid>()), Times.Never);
+                .Verify(x => x.DeleteById(It.IsAny<int>()), Times.Never);
         }
 
         #endregion
@@ -153,10 +153,10 @@ namespace WoopiAiHub.UnitTests.Services
                 OrderBy = "Name"
             };
 
-            var templates = new List<ApiTemplate>
+            var templates = new List<ApiTemplateDto>
             {
-                new ApiTemplate("Template 1", "GET", "https://api.example.com/1", null, null, null),
-                new ApiTemplate("Template 2", "POST", "https://api.example.com/2", null, null, "{}")
+                new ApiTemplateDto { Id = 1, Name = "Template 1", Method = "GET", Url = "https://api.example.com/1", Created = DateTime.Now },
+                new ApiTemplateDto { Id = 2, Name = "Template 2", Method = "POST", Url = "https://api.example.com/2", Created = DateTime.Now }
             };
 
             _mocker.GetMock<IApiTemplateRepository>()
@@ -188,7 +188,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _mocker.GetMock<IApiTemplateRepository>()
                 .Setup(x => x.FindAll(filterDto))
-                .ReturnsAsync(new List<ApiTemplate>());
+                .ReturnsAsync(new List<ApiTemplateDto>());
 
             // Act
             var result = await _apiTemplateServices.FindAll(filterDto);
@@ -219,9 +219,9 @@ namespace WoopiAiHub.UnitTests.Services
 
             var templates = new List<ApiTemplateDto>
             {
-                new ApiTemplateDto { Id = Guid.NewGuid(), Name = "Template 1", Method = "GET", Url = "https://api.example.com/1", Created = DateTime.UtcNow },
-                new ApiTemplateDto { Id = Guid.NewGuid(), Name = "Template 2", Method = "GET", Url = "https://api.example.com/2", Created = DateTime.UtcNow },
-                new ApiTemplateDto { Id = Guid.NewGuid(), Name = "Template 3", Method = "GET", Url = "https://api.example.com/3", Created = DateTime.UtcNow }
+                new ApiTemplateDto { Id = 1, Name = "Template 1", Method = "GET", Url = "https://api.example.com/1", Created = DateTime.UtcNow },
+                new ApiTemplateDto { Id = 2, Name = "Template 2", Method = "GET", Url = "https://api.example.com/2", Created = DateTime.UtcNow },
+                new ApiTemplateDto { Id = 3, Name = "Template 3", Method = "GET", Url = "https://api.example.com/3", Created = DateTime.UtcNow }
             }.AsQueryable();
 
             _mocker.GetMock<IApiTemplateRepository>()
@@ -410,7 +410,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task UpdateAsync_WhenTemplateExists_ShouldUpdateSuccessfully()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 1;
             var existingTemplate = new ApiTemplate(
                 "Old Name",
                 "GET",
@@ -458,7 +458,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task UpdateAsync_WhenTemplateNotFound_ShouldThrowAppException()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 999;
             var updateDto = new ApiTemplateUpdateDto
             {
                 Id = templateId,
@@ -486,7 +486,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task UpdateAsync_WhenUpdatedNameIsEmpty_ShouldThrowArgumentException()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 1;
             var existingTemplate = new ApiTemplate(
                 "Old Name",
                 "GET",
@@ -519,7 +519,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task UpdateAsync_WhenUpdatedMethodIsInvalid_ShouldThrowArgumentException()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 1;
             var existingTemplate = new ApiTemplate(
                 "Test Template",
                 "GET",
@@ -552,7 +552,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task UpdateAsync_WhenOptionalFieldsAreNull_ShouldUpdateSuccessfully()
         {
             // Arrange
-            var templateId = Guid.NewGuid();
+            var templateId = 1;
             var existingTemplate = new ApiTemplate(
                 "Test Template",
                 "GET",

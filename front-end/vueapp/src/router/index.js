@@ -41,9 +41,10 @@ import PromptImport from "@/pages/prompts/import.vue";
 import HomePage from "@/pages/home.vue";
 
 import TemplatePage from "@/pages/templates/index.vue";
+import TemplateDetail from "@/pages/templates/templateDetail.vue";
 
 import { hasPermission } from "@/utils/permissions";
-import TemplateDetail from "../pages/templates/templateDetail.vue";
+
 function authenticate(to, from, next) {
     const userStr = window.localStorage.getItem("project");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -429,7 +430,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/templates/:id",
+        path: "/templates/edit/:id",
         name: "TemplateEdit",
         component: TemplateDetail,
         meta: {
