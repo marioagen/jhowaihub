@@ -127,11 +127,7 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if the template is not found or if required fields are missing.</exception>
         public async Task<bool> UpdateAsync(ApiTemplateUpdateDto templateUpdateDto)
         {
-            var existingTemplate = await _templateRepository.FindByIdReturnModel(templateUpdateDto.Id);
-            if (existingTemplate == null)
-            {
-                throw new AppException(ErrorCode.NotFound, NotFoundMessage, ApiTemplateLabel.NotFound);
-            }
+            var existingTemplate = await _templateRepository.FindByIdReturnModel(templateUpdateDto.Id) ?? throw new AppException(ErrorCode.NotFound, NotFoundMessage, ApiTemplateLabel.NotFound);
 
             existingTemplate.UpdateName(templateUpdateDto.Name);
             existingTemplate.UpdateMethod(templateUpdateDto.Method);

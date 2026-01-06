@@ -705,7 +705,7 @@
         queryParameters: "Parámetros de Query",
         addParam: "Agregar Parámetro",
         noQueryParameters: "Sin parámetros de query. Agregue uno o escriba en la URL.",
-        bodySupportsVariables: "Soporta {{ variables }}",
+        bodySubtitle: "Escriba '{' para ver las variables disponibles.",
         variablesTip:
             "Consejo: Use variables como {{ocr}} o {{prompt}} que serán reemplazadas en el momento de la ejecución.",
         formCreate: {
@@ -724,6 +724,7 @@
         removeError: "Error al eliminar plantilla",
         unselected: "Seleccione una plantilla",
         keyPlaceholder: "Key (el valor será {{nombreKey}})",
+        invalidJsonFormat: "Formato JSON inválido",
     },
     analyze: {
         title: "Análisis de Documentos",

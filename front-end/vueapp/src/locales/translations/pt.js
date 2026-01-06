@@ -703,7 +703,7 @@
         queryParameters: "Parâmetros de Query",
         addParam: "Adicionar Parâmetro",
         noQueryParameters: "Sem parâmetros de query. Adicione um ou digite na URL.",
-        bodySupportsVariables: "Suporta '{{ variáveis }}'",
+        bodySubtitle: "Digite '{' para ver as variáveis disponíveis.",
         variablesTip:
             "Dica: Use variáveis como '{{ocr}}' ou '{{prompt}}' que serão substituídas no momento da execução.",
         formCreate: {
@@ -730,6 +730,7 @@
         url: "URL",
         unselected: "Selecione um template",
         keyPlaceholder: "Key (o valor será {{nomeKey}})",
+        invalidJsonFormat: "Formato JSON inválido",
     },
     analyze: {
         title: "Análise de Documentos",

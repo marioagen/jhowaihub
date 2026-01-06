@@ -213,24 +213,54 @@
                             <div class="card-body">
                                 <div class="mb-2">
                                     <h6 class="card-title">{{ $t("template.requestBody") }}</h6>
-                                    <small class="text-muted">{{ $t("template.bodySupportsVariables") }}</small>
+                                    <small class="text-muted">{{ $t("template.bodySubtitle") }}</small>
                                 </div>
 
-                                <Field name="body" v-slot="{ field, errorMessage }">
-                                    <textarea
-                                        v-bind="field"
-                                        class="form-control font-monospace"
-                                        rows="15"
-                                        :placeholder="bodyPlaceholder"
-                                        :class="{ 'is-invalid': errorMessage }"
-                                    ></textarea>
+                                <Field name="body" rules="jsonValidation" v-slot="{ field, errorMessage }">
+                                    <div class="position-relative">
+                                        <textarea
+                                            v-bind="field"
+                                            ref="bodyTextarea"
+                                            class="form-control font-monospace"
+                                            rows="15"
+                                            :placeholder="bodyPlaceholder"
+                                            :class="{ 'is-invalid': errorMessage || jsonError }"
+                                            @input="handleBodyInput"
+                                            @keydown="handleKeyDown"
+                                            @blur="hideAutocomplete"
+                                        ></textarea>
+
+                                        <!-- Autocomplete Dropdown -->
+                                        <div
+                                            v-if="showAutocomplete"
+                                            class="autocomplete-dropdown"
+                                            :style="{
+                                                top: autocompletePosition.top + 'px',
+                                                left: autocompletePosition.left + 'px',
+                                            }"
+                                        >
+                                            <div
+                                                v-for="(option, index) in filteredAutocompleteOptions"
+                                                :key="index"
+                                                class="autocomplete-item"
+                                                :class="{ active: index === selectedAutocompleteIndex }"
+                                                @mousedown.prevent="selectAutocompleteOption(option)"
+                                            >
+                                                <strong>{{ option.label }}</strong>
+                                                <span class="text-muted ms-2">{{ option.value }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <span class="validation-message text-danger" v-if="errorMessage">
                                         {{ errorMessage }}
+                                    </span>
+                                    <span class="validation-message text-danger" v-if="jsonError">
+                                        {{ jsonError }}
                                     </span>
                                 </Field>
 
                                 <div class="alert alert-info mt-3 py-2 px-3 d-flex align-items-start">
-                                    <LucideIcon icon="Lightbulb" :size="16" class="me-2 mt-1 flex-shrink-0" />
+                                    <LucideIcon icon="Lightbulb" :size="16" class="me-2 flex-shrink-0" />
                                     <small>{{ $t("template.variablesTip") }}</small>
                                 </div>
                             </div>
@@ -243,9 +273,24 @@
 </template>
 
 <script>
-    import { Field, useForm } from "vee-validate";
+    import { Field, useForm, defineRule } from "vee-validate";
     import TemplateService from "@/services/template/TemplateService";
     import { notify } from "@/utils/notification";
+    import i18n from "@/locales/i18n";
+
+    defineRule("jsonValidation", (value) => {
+        if (!value || value.trim() === "") {
+            return true;
+        }
+        try {
+            // Replace all {{variable}} patterns with valid placeholder strings
+            const sanitizedValue = value.replace(/\{\{[^}]+\}\}/g, '"PLACEHOLDER"');
+            JSON.parse(sanitizedValue);
+            return true;
+        } catch (e) {
+            return i18n.global.t("template.invalidJsonFormat");
+        }
+    });
 
     export default {
         name: "TemplateDetail",
@@ -265,6 +310,18 @@
                 isSaving: false,
                 isLoading: false,
                 bodyPlaceholder: '{\n  "key": "{{variable}}"\n}',
+                jsonError: "",
+                showAutocomplete: false,
+                autocompletePosition: { top: 0, left: 0 },
+                selectedAutocompleteIndex: 0,
+                autocompleteOptions: [
+                    { label: "OCR", value: "{{ocr}}" },
+                    { label: "EMBEDDINGS", value: "{{embeddings}}" },
+                    { label: "PROMPT", value: "{{prompt}}" },
+                    { label: "AI MODEL", value: "{{ai_model}}" },
+                    { label: "TRANSLATION", value: "{{translation}}" },
+                    { label: "IMAGE DATA", value: "{{image_data}}" },
+                ],
             };
         },
         computed: {
@@ -273,6 +330,9 @@
             },
             isEditMode() {
                 return this.routeId !== undefined;
+            },
+            filteredAutocompleteOptions() {
+                return this.autocompleteOptions;
             },
         },
         setup() {
@@ -300,6 +360,157 @@
             },
         },
         methods: {
+            handleBodyInput(event) {
+                const textarea = event.target;
+                const value = textarea.value;
+                const cursorPosition = textarea.selectionStart;
+
+                this.validateJSON(value);
+
+                if (value[cursorPosition - 1] === "{") {
+                    if (!this.isMainJsonOpeningBrace(value, cursorPosition - 1)) {
+                        this.showAutocompleteDropdown(textarea);
+                    }
+                } else {
+                    this.hideAutocomplete();
+                }
+            },
+
+            isMainJsonOpeningBrace(value, position) {
+                const beforeCursor = value.substring(0, position).trim();
+
+                if (beforeCursor === "") {
+                    return true;
+                }
+
+                let depth = 0;
+                for (let i = 0; i < position; i++) {
+                    if (value[i] === "{") depth++;
+                    if (value[i] === "}") depth--;
+                }
+
+                return depth === 0;
+            },
+
+            validateJSON(value) {
+                if (!value || value.trim() === "") {
+                    this.jsonError = "";
+                    return;
+                }
+                try {
+                    // Replace all {{variable}} patterns with valid placeholder strings
+                    const sanitizedValue = value.replace(/\{\{[^}]+\}\}/g, '"PLACEHOLDER"');
+                    JSON.parse(sanitizedValue);
+                    this.jsonError = "";
+                } catch (e) {
+                    // Don't show error while typing
+                    this.jsonError = "";
+                }
+            },
+
+            showAutocompleteDropdown(textarea) {
+                const coords = this.getCaretCoordinates(textarea);
+                this.autocompletePosition = {
+                    top: coords.top + 20,
+                    left: coords.left,
+                };
+                this.showAutocomplete = true;
+                this.selectedAutocompleteIndex = 0;
+            },
+
+            hideAutocomplete() {
+                setTimeout(() => {
+                    this.showAutocomplete = false;
+                }, 200);
+            },
+
+            handleKeyDown(event) {
+                if (!this.showAutocomplete) return;
+
+                if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    this.selectedAutocompleteIndex =
+                        (this.selectedAutocompleteIndex + 1) % this.filteredAutocompleteOptions.length;
+                } else if (event.key === "ArrowUp") {
+                    event.preventDefault();
+                    this.selectedAutocompleteIndex =
+                        (this.selectedAutocompleteIndex - 1 + this.filteredAutocompleteOptions.length) %
+                        this.filteredAutocompleteOptions.length;
+                } else if (event.key === "Enter" || event.key === "Tab") {
+                    event.preventDefault();
+                    this.selectAutocompleteOption(this.filteredAutocompleteOptions[this.selectedAutocompleteIndex]);
+                } else if (event.key === "Escape") {
+                    this.showAutocomplete = false;
+                }
+            },
+
+            selectAutocompleteOption(option) {
+                const textarea = this.$refs.bodyTextarea;
+                const cursorPosition = textarea.selectionStart;
+                const value = textarea.value;
+
+                const beforeCursor = value.substring(0, cursorPosition - 1);
+                const afterCursor = value.substring(cursorPosition);
+
+                const newValue = beforeCursor + option.value + afterCursor;
+                const newCursorPosition = beforeCursor.length + option.value.length;
+
+                this.setValues({
+                    ...this.values,
+                    body: newValue,
+                });
+
+                this.form.body = newValue;
+
+                this.$nextTick(() => {
+                    textarea.selectionStart = newCursorPosition;
+                    textarea.selectionEnd = newCursorPosition;
+                    textarea.focus();
+                });
+
+                this.showAutocomplete = false;
+            },
+
+            getCaretCoordinates(textarea) {
+                const rect = textarea.getBoundingClientRect();
+                const style = window.getComputedStyle(textarea);
+
+                const mirror = document.createElement("div");
+                const styles = [
+                    "fontFamily",
+                    "fontSize",
+                    "fontWeight",
+                    "letterSpacing",
+                    "lineHeight",
+                    "padding",
+                    "border",
+                    "boxSizing",
+                ];
+
+                styles.forEach((prop) => {
+                    mirror.style[prop] = style[prop];
+                });
+
+                mirror.style.position = "absolute";
+                mirror.style.visibility = "hidden";
+                mirror.style.whiteSpace = "pre-wrap";
+                mirror.style.width = rect.width + "px";
+
+                const textBeforeCursor = textarea.value.substring(0, textarea.selectionStart);
+                mirror.textContent = textBeforeCursor;
+
+                document.body.appendChild(mirror);
+
+                const coordinates = {
+                    top: mirror.scrollHeight - textarea.scrollTop,
+                    left: 10,
+                };
+
+                document.body.removeChild(mirror);
+
+                return coordinates;
+            },
+
             redirectToTemplateList() {
                 this.$router.push({ name: "Template" });
             },
@@ -501,5 +712,38 @@
     .font-monospace {
         font-family: "Courier New", Courier, monospace;
         font-size: 0.875rem;
+    }
+
+    .autocomplete-dropdown {
+        position: absolute;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        max-height: 300px;
+        overflow-y: auto;
+        min-width: 250px;
+    }
+
+    .autocomplete-item {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.active {
+        background-color: #f8f9fa;
+    }
+
+    .autocomplete-item strong {
+        display: block;
+        font-size: 0.875rem;
+    }
+
+    .autocomplete-item .text-muted {
+        font-size: 0.75rem;
+        font-family: "Courier New", Courier, monospace;
     }
 </style>
