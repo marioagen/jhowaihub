@@ -19,10 +19,18 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: "20"
-                  cache: "npm"
 
-            - name: Install dependencies
+            - name: Install root dependencies
               run: npm install
+              continue-on-error: true
+
+            - name: Cache frontend node_modules
+              uses: actions/cache@v3
+              with:
+                  path: front-end/vueapp/node_modules
+                  key: ${{ runner.os }}-frontend-node-${{ hashFiles('front-end/vueapp/package-lock.json') }}
+                  restore-keys: |
+                      ${{ runner.os }}-frontend-node-
 
             - name: Install frontend dependencies
               working-directory: front-end/vueapp
@@ -32,23 +40,23 @@ jobs:
               run: |
                   # Formata todos os arquivos alterados
                   npm run format:changed || {
-                    echo "❌ Formatação falhou!"
-                    exit 1
+                      echo "❌ Formatação falhou!"
+                      exit 1
                   }
 
             - name: Check for formatting changes
               run: |
                   # Verifica se a formatação causou mudanças
                   if [ -n "$(git status --porcelain)" ]; then
-                    echo "❌ Arquivos não formatados encontrados!"
-                    echo "Execute 'npm run format:changed' localmente e faça commit das mudanças."
-                    echo ""
-                    echo "Arquivos que precisam ser formatados:"
-                    git status --short
-                    echo ""
-                    echo "Diff das mudanças:"
-                    git diff
-                    exit 1
+                      echo "❌ Arquivos não formatados encontrados!"
+                      echo "Execute 'npm run format:changed' localmente e faça commit das mudanças."
+                      echo ""
+                      echo "Arquivos que precisam ser formatados:"
+                      git status --short
+                      echo ""
+                      echo "Diff das mudanças:"
+                      git diff
+                      exit 1
                   else
-                    echo "✅ Todos os arquivos estão formatados corretamente!"
+                      echo "✅ Todos os arquivos estão formatados corretamente!"
                   fi
