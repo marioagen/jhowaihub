@@ -13,7 +13,9 @@
         "format:backend:all": "dotnet format WoopiaiHub.sln --include-generated",
         "format:backend:check": "dotnet format WoopiaiHub.sln --verify-no-changes --include-generated",
         "format:changed": "npm run format && npm run format:frontend && npm run format:backend",
-        "lint:frontend": "cd front-end/vueapp && npm run lint"
+        "format:staged": "node scripts/format-staged.js",
+        "lint:frontend": "cd front-end/vueapp && npm run lint",
+        "setup:hooks": "node -e \"const {execSync} = require('child_process'); const os = require('os'); const isWindows = os.platform() === 'win32'; execSync(isWindows ? 'powershell -ExecutionPolicy Bypass -File scripts/setup-git-hooks.ps1' : 'bash scripts/setup-git-hooks.sh', {stdio: 'inherit'})\""
     },
     "devDependencies": {
         "prettier": "^3.6.2"

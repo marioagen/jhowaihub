@@ -21,6 +21,209 @@ function log(message, color = "reset") {
     console.log(`${colors[color]}${message}${colors.reset}`);
 }
 
+/**
+ * Post-processes Vue files to format component attributes
+ * - Removes empty lines between attributes
+ * - Ensures buttons and custom components have one attribute per line
+ */
+function formatVueAttributes(filePath) {
+    try {
+        const fullPath = path.resolve(filePath);
+        if (!fs.existsSync(fullPath)) {
+            return false;
+        }
+
+        let content = fs.readFileSync(fullPath, "utf-8");
+        const originalContent = content;
+        const lines = content.split("\n");
+        const modifiedLines = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmedLine = line.trim();
+
+            // Pattern to match button elements with multiple attributes on one line
+            const buttonMatch = trimmedLine.match(/^<button\s+([^>]+)(\s*\/?>)$/);
+            if (buttonMatch) {
+                const attributes = buttonMatch[1];
+                const closing = buttonMatch[2];
+
+                // Skip if already formatted (has newlines)
+                if (!attributes.includes("\n")) {
+                    // Split attributes properly (handling Vue directives and bindings)
+                    // Use regex to split on whitespace that's not inside quotes
+                    const attrList = [];
+                    let currentAttr = "";
+                    let inQuotes = false;
+                    let quoteChar = null;
+
+                    for (let j = 0; j < attributes.length; j++) {
+                        const char = attributes[j];
+                        const prevChar = j > 0 ? attributes[j - 1] : null;
+                        
+                        if ((char === '"' || char === "'") && prevChar !== "\\") {
+                            if (!inQuotes) {
+                                inQuotes = true;
+                                quoteChar = char;
+                            } else if (char === quoteChar) {
+                                inQuotes = false;
+                                quoteChar = null;
+                            }
+                            currentAttr += char;
+                        } else if (!inQuotes && /\s/.test(char)) {
+                            // Check if this whitespace separates attributes
+                            if (currentAttr.trim()) {
+                                // Look ahead to see if next non-whitespace starts a new attribute
+                                const remaining = attributes.substring(j).trim();
+                                if (remaining.match(/^(@|:|v-|[\w-]+\s*=)/)) {
+                                    attrList.push(currentAttr.trim());
+                                    currentAttr = "";
+                                } else {
+                                    currentAttr += char;
+                                }
+                            }
+                        } else {
+                            currentAttr += char;
+                        }
+                    }
+                    if (currentAttr.trim()) {
+                        attrList.push(currentAttr.trim());
+                    }
+
+                    if (attrList.length > 1) {
+                        const indent = line.match(/^(\s*)/)?.[1] || "";
+                        const formattedAttrs = attrList.map((attr) => `${indent}    ${attr}`).join("\n");
+                        modifiedLines.push(`${indent}<button`);
+                        modifiedLines.push(formattedAttrs);
+                        modifiedLines.push(`${indent}${closing.trim()}`);
+                        continue;
+                    }
+                }
+            }
+
+            // Pattern to match custom Vue components (PascalCase)
+            const componentMatch = trimmedLine.match(/^<([A-Z][\w-]*)\s+([^/>]+)(\s*\/?>)$/);
+            if (componentMatch) {
+                const componentName = componentMatch[1];
+                const attributes = componentMatch[2];
+                const closing = componentMatch[3];
+
+                // Skip native HTML elements
+                const nativeElements = ["Button", "Div", "Span", "A", "Li", "Ul", "Ol", "P", "H1", "H2", "H3", "H4", "H5", "H6", "Input", "Form", "Label", "Select", "Option", "Textarea", "Img", "Table", "Thead", "Tbody", "Tr", "Td", "Th"];
+                if (!nativeElements.includes(componentName)) {
+                    // Skip if already formatted (has newlines)
+                    if (!attributes.includes("\n")) {
+                        // Split attributes properly (handling Vue directives and bindings)
+                        const attrList = [];
+                        let currentAttr = "";
+                        let inQuotes = false;
+                        let quoteChar = null;
+
+                        for (let j = 0; j < attributes.length; j++) {
+                            const char = attributes[j];
+                            const prevChar = j > 0 ? attributes[j - 1] : null;
+                            
+                            if ((char === '"' || char === "'") && prevChar !== "\\") {
+                                if (!inQuotes) {
+                                    inQuotes = true;
+                                    quoteChar = char;
+                                } else if (char === quoteChar) {
+                                    inQuotes = false;
+                                    quoteChar = null;
+                                }
+                                currentAttr += char;
+                            } else if (!inQuotes && /\s/.test(char)) {
+                                // Check if this whitespace separates attributes
+                                if (currentAttr.trim()) {
+                                    // Look ahead to see if next non-whitespace starts a new attribute
+                                    const remaining = attributes.substring(j).trim();
+                                    if (remaining.match(/^(@|:|v-|[\w-]+\s*=)/)) {
+                                        attrList.push(currentAttr.trim());
+                                        currentAttr = "";
+                                    } else {
+                                        currentAttr += char;
+                                    }
+                                }
+                            } else {
+                                currentAttr += char;
+                            }
+                        }
+                        if (currentAttr.trim()) {
+                            attrList.push(currentAttr.trim());
+                        }
+
+                        if (attrList.length > 1) {
+                            const indent = line.match(/^(\s*)/)?.[1] || "";
+                            const formattedAttrs = attrList.map((attr) => `${indent}    ${attr}`).join("\n");
+                            modifiedLines.push(`${indent}<${componentName}`);
+                            modifiedLines.push(formattedAttrs);
+                            modifiedLines.push(`${indent}${closing.trim()}`);
+                            continue;
+                        }
+                    }
+                }
+            }
+
+            modifiedLines.push(line);
+        }
+
+        // Remove empty lines between attributes and other empty lines in Vue files
+        const finalLines = [];
+        for (let i = 0; i < modifiedLines.length; i++) {
+            const line = modifiedLines[i];
+            const trimmed = line.trim();
+            const isAttribute = trimmed.match(/^(@|:|v-|[\w-]+\s*=)/);
+            
+            // Skip empty lines between attributes
+            if (i > 0 && isAttribute) {
+                const prevLine = modifiedLines[i - 1];
+                const prevTrimmed = prevLine.trim();
+                const prevIsAttribute = prevTrimmed.match(/^(@|:|v-|[\w-]+\s*=)/);
+                
+                // If previous was an attribute and current line is empty, skip it
+                if (prevIsAttribute && trimmed === "") {
+                    continue;
+                }
+            }
+            
+            // Remove empty lines between template and script/style sections
+            if (trimmed === "") {
+                const prevLine = i > 0 ? modifiedLines[i - 1].trim() : "";
+                const nextLine = i < modifiedLines.length - 1 ? modifiedLines[i + 1].trim() : "";
+                
+                // Skip empty line if it's between </template> and <script> or <style>
+                if (prevLine === "</template>" && (nextLine.startsWith("<script") || nextLine.startsWith("<style"))) {
+                    continue;
+                }
+                
+                // Skip empty line if it's between </script> and <style>
+                if (prevLine === "</script>" && nextLine.startsWith("<style")) {
+                    continue;
+                }
+                
+                // Skip empty line if it's between closing tag and opening tag of different sections
+                if ((prevLine === "</template>" || prevLine === "</script>" || prevLine === "</style>") &&
+                    (nextLine.startsWith("<script") || nextLine.startsWith("<style") || nextLine.startsWith("<template"))) {
+                    continue;
+                }
+            }
+            
+            finalLines.push(line);
+        }
+
+        const newContent = finalLines.join("\n");
+        if (newContent !== originalContent) {
+            fs.writeFileSync(fullPath, newContent, "utf-8");
+            return true;
+        }
+
+        return false;
+    } catch (error) {
+        log(`Warning: Could not post-process Vue file ${filePath}: ${error.message}`, "yellow");
+        return false;
+    }
+}
+
 function getStagedFiles() {
     try {
         const output = execSync("git diff --cached --name-only --diff-filter=ACM", {
@@ -173,6 +376,19 @@ function main() {
             if (result.skipped) {
                 skippedCount++;
             } else if (result.success) {
+                // Post-process Vue files to format component attributes
+                if (fileInfo.path.endsWith(".vue")) {
+                    try {
+                        if (formatVueAttributes(fileInfo.path)) {
+                            log(`  Post-processed Vue attributes: ${fileInfo.path}`, "blue");
+                            // Re-stage the file after post-processing
+                            execSync(`git add "${fileInfo.path}"`, { stdio: "pipe" });
+                        }
+                    } catch (error) {
+                        log(`  ✗ Error post-processing Vue file ${fileInfo.path}: ${error.message}`, "red");
+                        errorCount++;
+                    }
+                }
                 log(`✓ Formatted: ${fileInfo.path}`, "green");
                 formattedCount++;
             } else {
@@ -202,12 +418,15 @@ function main() {
     log("\n--- Summary ---", "blue");
     log(`Formatted: ${formattedCount}`, "green");
     log(`Skipped: ${skippedCount}`, "yellow");
+    
     if (errorCount > 0) {
-        log(`Errors: ${errorCount}`, "red");
+        log(`\n✗ Errors: ${errorCount}`, "red");
+        log("Pre-commit hook failed due to formatting errors.", "red");
+        log("Please fix the errors above and try again.", "red");
         process.exit(1);
     }
 
-    log("Pre-commit formatting completed successfully!", "green");
+    log("\n✓ Pre-commit formatting completed successfully!", "green");
     process.exit(0);
 }
 

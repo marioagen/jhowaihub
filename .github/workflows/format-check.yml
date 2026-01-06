@@ -1,0 +1,54 @@
+name: Format Check
+
+on:
+    pull_request:
+        branches: [main, develop]
+    push:
+        branches: [main, develop]
+
+jobs:
+    format-check:
+        name: Check Code Formatting
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Install frontend dependencies
+              working-directory: front-end/vueapp
+              run: npm install
+
+            - name: Format all files
+              run: |
+                  # Formata todos os arquivos alterados
+                  npm run format:changed || {
+                    echo "❌ Formatação falhou!"
+                    exit 1
+                  }
+
+            - name: Check for formatting changes
+              run: |
+                  # Verifica se a formatação causou mudanças
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "❌ Arquivos não formatados encontrados!"
+                    echo "Execute 'npm run format:changed' localmente e faça commit das mudanças."
+                    echo ""
+                    echo "Arquivos que precisam ser formatados:"
+                    git status --short
+                    echo ""
+                    echo "Diff das mudanças:"
+                    git diff
+                    exit 1
+                  else
+                    echo "✅ Todos os arquivos estão formatados corretamente!"
+                  fi
