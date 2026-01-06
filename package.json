@@ -15,7 +15,7 @@
         "format:changed": "npm run format && npm run format:frontend && npm run format:backend",
         "format:staged": "node scripts/format-staged.js",
         "lint:frontend": "cd front-end/vueapp && npm run lint",
-        "setup:hooks": "node -e \"const {execSync} = require('child_process'); const os = require('os'); const isWindows = os.platform() === 'win32'; execSync(isWindows ? 'powershell -ExecutionPolicy Bypass -File scripts/setup-git-hooks.ps1' : 'bash scripts/setup-git-hooks.sh', {stdio: 'inherit'})\""
+        "setup:hooks": "node -e \"const {execSync} = require('child_process'); const os = require('os'); const path = require('path'); const isWindows = os.platform() === 'win32'; const scriptPath = path.resolve('scripts', isWindows ? 'setup-git-hooks.ps1' : 'setup-git-hooks.sh'); execSync(isWindows ? `powershell -ExecutionPolicy Bypass -File \"${scriptPath}\"` : `bash \"${scriptPath}\"`, {stdio: 'inherit', cwd: process.cwd()})\""
     },
     "devDependencies": {
         "prettier": "^3.6.2"
