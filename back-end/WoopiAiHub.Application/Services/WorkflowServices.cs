@@ -26,16 +26,10 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
-        public WorkflowServices(
-            IWorkflowRepository workflowRepository,
-            IProfileRepository profileRepository,
-            ITeamRepository teamRepository,
-            IStatusRepository statusRepository,
-            IStepRepository stepRepository,
-            IStepToolDependencyRepository stepToolDependencyRepository,
-            IStepToolOutputRepository stepToolOutputRepository,
-            IUnitOfWork unitOfWork,
-            IValidateStep validateStep,
+        public WorkflowServices( IWorkflowRepository workflowRepository, IProfileRepository profileRepository,
+            ITeamRepository teamRepository, IStatusRepository statusRepository,
+            IStepRepository stepRepository,IStepToolDependencyRepository stepToolDependencyRepository,
+            IStepToolOutputRepository stepToolOutputRepository, IUnitOfWork unitOfWork, IValidateStep validateStep,
             ILogger<WorkflowServices> logger
         )
         {
@@ -155,7 +149,6 @@ namespace WoopiAiHub.Application.Services
 
             var stepIds = workflow.Steps.Select(s => s.Id).ToList();
             await _validateStep.ValidateDeleteStep(stepIds);
-
             return await _workflowRepository.DeleteById(id);
         }
 
@@ -171,8 +164,8 @@ namespace WoopiAiHub.Application.Services
             if (workflowPagedDto.Page > 0)
             {
                 var workflowList = _workflowRepository.FindAllWithFilter(workflowPagedDto);
-                var paginatedList = PaginationHelper.Paginate(workflowList, workflowPagedDto.Page);
-                return paginatedList;
+                return PaginationHelper.Paginate(workflowList, workflowPagedDto.Page);
+                // return paginatedList;
             }
             else
             {
@@ -205,9 +198,7 @@ namespace WoopiAiHub.Application.Services
 
             foreach (var parameter in stepToolDto.Parameters)
             {
-                stepTool.Parameters.Add(
-                    new StepToolParameter(0, DateTime.Now, 0, parameter.RequiredFile, parameter.WebhookId,
-                        parameter.Value));
+                stepTool.Parameters.Add(new StepToolParameter(0, DateTime.Now, 0, parameter.RequiredFile, parameter.WebhookId, parameter.Value));
             }
 
             return stepTool;
