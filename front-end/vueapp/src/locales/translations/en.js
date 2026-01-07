@@ -81,6 +81,7 @@
             uploadError: "Something is wrong",
             uploadFailure: "Upload failure",
             uploadedFilesError: "Fail to upload files!",
+            unselectedDocuments: "No documents selected",
         },
         createdDate: "Upload date",
         teams: "Team",
@@ -168,6 +169,7 @@
         numberOfPagesHasBeenExceeded: "Number of pages has been exceeded. Contact your plan administrator.",
         descriptionExceeded: "Description exceeds the maximum of 250 characters.",
         closeSidebar: "Close sidebar",
+        selectToDelete: "Select at least one document to perform deletion.",
     },
     questions: {
         title: "Questions",
