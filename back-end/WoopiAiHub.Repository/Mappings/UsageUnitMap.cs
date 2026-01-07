@@ -30,7 +30,7 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(u => u.Value)
                    .HasColumnName("Value")
-                   .HasColumnType("decimal(5,5)")
+                   .HasColumnType("decimal(18,7)")
                    .IsRequired();
 
             builder.HasOne(u => u.UsageType)

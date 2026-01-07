@@ -1,6 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Google.Api;
+using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
+using System.Linq;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -108,6 +115,108 @@ namespace WoopiAiHub.Repository
             return _context.Steps
                            .FirstOrDefaultAsync(s => s.Order == order &&
                                                      s.WorkflowId == workflowId);
+        }
+
+        /// <summary>
+        /// Finds steps by workflow ID with optional filtering and ordering.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="input"></param>
+        /// <param name="allUsers"></param>
+        /// <param name="login"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
+        public async Task<List<StepDto>> FindStepsByWorkflowId(int id, string input = "", bool allUsers = false, string login = "", string order = "")
+        {
+            var steps = await _context.Steps
+                .Where(s => s.WorkflowId == id)
+                .Select(s => new StepDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Order = s.Order,
+                    WorkflowId = s.WorkflowId,
+                    Profile = new ProfileDto
+                    {
+                        Id = s.Profile!.Id,
+                        Name = s.Profile.Name
+                    },
+                    Status = new StatusDto
+                    {
+                        Id = s.Status!.Id,
+                        Name = s.Status.Name,
+                        Color = s.Status.Color,
+                    },
+                    HasStepTools = s.StepTools.Count > 0,
+                    Cards = s.Cards
+                         .Where(c => c.Enable &&
+                             (
+                                 string.IsNullOrWhiteSpace(input)
+                                 || c.Name.Contains(input)
+                                 || c.Document!.Name.Contains(input)
+                                 || c.Document.Description.Contains(input)
+                                 || c.Document.EmailCreator.Contains(input)
+                             ) &&
+                             (
+                                 allUsers == true
+                                 || (c.AssignedUser != null && c.AssignedUser.Email == login)
+                             )
+                         )
+                        .Select(c => new CardDto
+                        {
+                            Id = c.Id,
+                            Name = c.Name,
+                            Created = c.Created,
+                            Description = c.Document!.Description,
+                            Owner = c.Document.EmailCreator,
+                            DocumentId = c.Document.Id,
+                            StatusDocument = c.Document.Status,
+                            Percentage = c.Step!.StepTools.Any(st => st.Executions.Any(e => e.CardId == c.Id))
+                            ? (
+                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100
+                                /
+                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
+                              )
+                            : 100,
+                            ToolName = c.Step!.StepTools
+                                              .Where(st => st.Executions.Any(e => e.CardId == c.Id && e.Status == StatusExecution.Running))
+                                              .Select(st => st.Tool!.Name)
+                                              .FirstOrDefault() ?? string.Empty,
+                            AssignedUser = c.AssignedUser != null ?
+                            new UserDto
+                            {
+                                Name = c.AssignedUser.Name,
+                                Email = c.AssignedUser.Email,
+                                Created = c.AssignedUser.Created,
+                                Id = c.AssignedUser.Id
+                            }
+                            : null
+                        }).ToList()
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            steps.ForEach(step => step.Cards = ApplyCardOrdering(step.Cards, order));
+
+            return steps;
+        }
+
+        /// <summary>
+        /// Applies ordering to a collection of CardDto based on the specified orderBy string.
+        /// </summary>
+        /// <param name="cards"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        private static ICollection<CardDto> ApplyCardOrdering(ICollection<CardDto> cards, string? orderBy)
+        {
+            return orderBy?.ToLower() switch
+            {
+                "created desc" => cards.OrderByDescending(c => c.Created).ToList(),
+                "created asc" => cards.OrderBy(c => c.Created).ToList(),
+                "name desc" => cards.OrderByDescending(c => c.Name).ToList(),
+                "name asc" => cards.OrderBy(c => c.Name).ToList(),
+                _ => cards
+            };
         }
     }
 }

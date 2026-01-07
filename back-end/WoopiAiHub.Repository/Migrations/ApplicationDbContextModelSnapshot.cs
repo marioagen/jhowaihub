@@ -366,6 +366,18 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("uniqueIdentifier")
                         .HasColumnName("IdUser");
 
+                    b.Property<bool>("IsEdited")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsEdited");
+
+                    b.Property<bool>("IsImported")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsImported");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -1103,7 +1115,7 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnName("UsageTypeId");
 
                     b.Property<decimal>("Value")
-                        .HasColumnType("decimal(5,5)")
+                        .HasColumnType("decimal(18,7)")
                         .HasColumnName("Value");
 
                     b.HasKey("Id");

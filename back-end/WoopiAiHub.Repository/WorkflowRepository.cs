@@ -446,46 +446,6 @@ namespace WoopiAiHub.Repository
                         Color = s.Status.Color,
                     },
                     HasStepTools = s.StepTools.Any(),
-                    Cards = s.Cards
-                        .Where(c => c.Enable &&
-                            (
-                                string.IsNullOrWhiteSpace(input)
-                                || c.Name.Contains(input)
-                                || c.Document.Name.Contains(input)
-                                || c.Document.Description.Contains(input)
-                            ) &&
-                            (
-                                allUsers == null
-                                || allUsers == true
-                                || (c.AssignedUser != null && c.AssignedUser.Email == login)
-                            )
-                        )
-                        .Select(c => new CardDto
-                        {
-                            Id = c.Id,
-                            Name = c.Name,
-                            Created = c.Created,
-                            Description = c.Document!.Description,
-                            Owner = c.Document.EmailCreator,
-                            DocumentId = c.Document.Id,
-                            StatusDocument = c.Document.Status,
-                            Percentage = c.Step!.StepTools.Any(st => st.Executions.Any(e => e.CardId == c.Id))
-                            ? (
-                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100
-                                /
-                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
-                              )
-                            : 100,
-                            AssignedUser = c.AssignedUser != null ?
-                            new UserDto
-                            {
-                                Name = c.AssignedUser.Name,
-                                Email = c.AssignedUser.Email,
-                                Created = c.AssignedUser.Created,
-                                Id = c.AssignedUser.Id
-                            }
-                            : null
-                        }).ToList(),
                     StepTools = s.StepTools
                         .Select(st => new StepToolDto
                         {
@@ -605,6 +565,8 @@ namespace WoopiAiHub.Repository
         {
             var search = workflowPagedDto.Search?.ToLower();
             var login = workflowPagedDto.Login?.ToLower();
+            var orderBy = workflowPagedDto.OrderBy?.ToLower();
+
             var userTeamIds = _context.Users
                  .Where(u => u.Email.Equals(login))
                  .SelectMany(u => u.Teams.Select(t => t.Id))
@@ -622,6 +584,16 @@ namespace WoopiAiHub.Repository
                              EF.Functions.Like(i.Name, $"%{search}%"));
             }
 
+            if (workflowPagedDto.TeamId.HasValue)
+            {
+                query = query.Where(w => w.Teams.Any(t => t.Id == workflowPagedDto.TeamId.Value));
+            }
+
+            if (workflowPagedDto.UserId.HasValue)
+            {
+                query = query.Where(w => w.Teams.Any(t => t.Users.Any(u => u.Id == workflowPagedDto.UserId.Value)));
+            }
+
             if (!workflowPagedDto.IsAllUsers)
             {
                 query = query
@@ -631,6 +603,26 @@ namespace WoopiAiHub.Repository
                         c.AssignedUser != null &&
                         EF.Functions.Like(c.AssignedUser.Email, login)
                     )));
+            }
+
+            if (!string.IsNullOrWhiteSpace(orderBy))
+            {
+                if (orderBy == "created desc")
+                {
+                    query = query.OrderByDescending(w => w.Created);
+                }
+                else if (orderBy == "created asc")
+                {
+                    query = query.OrderBy(w => w.Created);
+                }
+                if (orderBy == "name desc")
+                {
+                    query = query.OrderByDescending(w => w.Name);
+                }
+                else if (orderBy == "name asc")
+                {
+                    query = query.OrderBy(w => w.Name);
+                }
             }
 
             return query.Select(w => new WorkflowDto
@@ -655,6 +647,21 @@ namespace WoopiAiHub.Repository
             var stepToolOutput = _context.StepToolOutputs.Where(p => p.Id == id)
                                                          .FirstOrDefault();
             return stepToolOutput;
+        }
+
+        /// <summary>
+        /// Finds a Tool by its StepTool ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<ToolDto> FindToolByStepToolId(int id)
+        {
+            return await _context.StepTools.Where(p => p.Id == id)
+                                            .Select(s => new ToolDto
+                                            {
+                                                Id = s.Tool.Id,
+                                                Name = s.Tool.Name,
+                                            }).FirstOrDefaultAsync();
         }
 
     }

@@ -12,6 +12,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
@@ -107,7 +108,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var pagedData = _fixture.FindValidDocumentPagedDataDto();
-            var iqueryable = new List<Document>().AsQueryable();
+            var iqueryable = new List<DocumentListItemDto>().AsQueryable();
             documentRepository.Setup(a => a.FindAllOrdered(pagedData, "email")).Returns(iqueryable);
 
             // Act

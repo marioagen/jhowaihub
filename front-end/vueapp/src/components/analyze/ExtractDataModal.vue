@@ -9,17 +9,21 @@
 
         <template #body>
             <div class="modal-body">
-                <span ref="textToCopy">{{value}}</span>
+                <textarea ref="textToCopy" v-model="currentValue" class="form-control" rows="10"
+                    @input="handleInput"></textarea>
             </div>
         </template>
 
         <template #footer>
             <div class="modal-footer">
                 <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
-                    {{ $t("labelCancel") }}
+                    {{ $t("common.cancel") }}
                 </button>
                 <button class="btn btn-primary btn-sm" @click="copy">
-                    {{ $t("labelCopy") }}
+                    {{ $t("common.copy") }}
+                </button>
+                <button class="btn btn-success btn-sm" @click="save" :disabled="!hasChanges">
+                    {{ $t("common.save") }}
                 </button>
             </div>
         </template>
@@ -27,31 +31,53 @@
 </template>
 
 <script>
-    import ModalComponent from "@/components/global/ModalComponent.vue";
-    export default {
-        components: {
-            ModalComponent,
+import ModalComponent from "@/components/global/ModalComponent.vue";
+export default {
+    components: {
+        ModalComponent,
+    },
+    emits: ['update'],
+    props: {
+    },
+    data: () => ({
+        value: "",
+        currentValue: "",
+        label: "",
+        hasChanges: false,
+    }),
+    methods: {
+        open(value, label) {
+            this.value = value;
+            this.currentValue = value;
+            this.label = label;
+            this.hasChanges = false;
+            this.$refs.ExtractDataModal.open();
         },
-        props: {
+        close() {
+            this.$refs.ExtractDataModal.close();
         },
-        data: () => ({
-            value: "",
-            label: "",
-        }),
-        methods: {
-            open(value, label) {
-                console.log("Here 2", value,label);
-                this.value = value;
-                this.label = label;
-                this.$refs.ExtractDataModal.open();
-            },
-            close() {
-                this.$refs.ExtractDataModal.close();
-            },
-            copy() {
-               const text = this.$refs.textToCopy.textContent;
-               navigator.clipboard.writeText(text)
-            },
+        handleInput() {
+            this.hasChanges = this.currentValue !== this.value;
         },
-    };
+        copy() {
+            const text = this.$refs.textToCopy.value;
+            navigator.clipboard.writeText(text)
+        },
+        save() {
+            if (this.hasChanges) {
+                this.$emit('update', this.currentValue);
+                this.value = this.currentValue;
+                this.hasChanges = false;
+                this.close();
+            }
+        },
+    },
+};
 </script>
+
+<style scoped>
+.form-control {
+    resize: vertical;
+    font-family: inherit;
+}
+</style>

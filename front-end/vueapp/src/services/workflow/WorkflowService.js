@@ -64,6 +64,17 @@ export default {
                 }
             });
     },
+    getWorkflowStepsById(workflowId, filters) {
+        return api.get(`/Workflow/${workflowId}/Steps`, { params: filters })
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
+    },
     getPhase1ById(workflowId) {
         return api.get(`/Workflow/Phase1/${workflowId}`)
             .then(({ data }) => {

@@ -2,9 +2,9 @@
     <div class="mt-3 mb-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h6 class="mb-0 fw-bold">{{ $t("labelProfilePermissions") }}</h6>
+                <h6 class="mb-0 fw-bold">{{ $t("management.profiles.profilePermissions") }}</h6>
                 <p>
-                    <small class="text-muted">{{ $t("labelProfilesMessage") }}</small>
+                    <small class="text-muted">{{ $t("management.profiles.profilesMessage") }}</small>
                 </p>
             </div>
             <button 
@@ -71,9 +71,9 @@
             setMenuActions: function () {
                 this.menuActions = {
                     options: [
-                        { label: this.$t("labelEdit"), value: "edit", icon: editIcon },
+                        { label: this.$t("common.edit"), value: "edit", icon: editIcon },
                         {
-                            label: this.$t("labelDelete"),
+                            label: this.$t("common.delete"),
                             value: "delete",
                             icon: deleteIcon,
                             color: "text-danger",
@@ -87,8 +87,8 @@
             setEntitySearch: function () {
                 this.entitySearch = {
                     screen: "profile",
-                    labelInput: this.$t("labelSearchProfiles"),
-                    placeholderInput: this.$t("labelTypeProfileName"),
+                    labelInput: this.$t("management.profiles.searchProfiles"),
+                    placeholderInput: this.$t("management.profiles.typeProfileName"),
                 };
             },
             reloadTable() {

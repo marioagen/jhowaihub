@@ -1,11 +1,11 @@
 <template>
     <main>
-        <div class="container-fluid scroll-area mx-2">
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="container-fluid mx-2">
+            <div>
+                <div class="d-flex justify-content-between align-items-center mb-1">
                     <div>
                         <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
-                        <p>
+                        <p class="mb-1">
                             <small class="text-muted">{{ $t("workflow.subtitle") }}</small>
                         </p>
                     </div>
@@ -14,33 +14,54 @@
                         {{ $t("documents.createBtn") }}
                     </button>
                 </div>
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
-                            <div>
-                                <LucideIcon icon="Clock" :size="14" class="me-2" />
-                                <span>{{ $t("workflow.boardView") }}</span>
+                <div class="card mb-2">
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
+                                    <div>
+                                        <LucideIcon icon="Clock" :size="14" class="me-2" />
+                                        <span>{{ $t("workflow.boardView") }}</span>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn btn-light border text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle pe-1"
+                                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <div>
+                                                <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
+                                                <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
+                                            </div>
+                                            <LucideIcon icon="ChevronDown" :size="20" class="ms-2" />
+                                        </button>
+                                        <ul class="dropdown-menu p-2 workflow-list">
+                                            <li v-if="workflowList.length > 5" class="mb-1">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text p-1">
+                                                        <LucideIcon icon="Search" :size="16" class="me-1" />
+                                                    </span>
+                                                    <input id="filter-workflow" v-model="workflowSearchText" type="text"
+                                                        name="filter" class="form-control" @input="searchWorkflow"
+                                                        @click.stop="" />
+                                                </div>
+                                            </li>
+                                            <li v-for="item in filteredWorkflows" :key="item.id">
+                                                <a class="dropdown-item" @click="selectOption(item)">
+                                                    <div class="fw-bold">{{ item.teams.name }}</div>
+                                                    <div class="text-muted small">{{ item.name }}</div>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="badge bg-secondary badge-custom">
+                                        <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
+                                        <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
+                                    </div>
+
+                                </div>
                             </div>
-                            <div class="dropdown">
-                                <button class="btn btn-light border text-start" type="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
-                                    <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li v-for="item in workflowList" :key="item.id">
-                                        <a class="dropdown-item" @click="selectOption(item)">
-                                            <div class="fw-bold">{{ item.teams.name }}</div>
-                                            <div class="text-muted small">{{ item.name }}</div>
-                                        </a>
-                                    </li>
-                                </ul>
+                            <div class="col-6">
+                                <WorkflowFilters @filter="filterData" class="ms-auto" />
                             </div>
-                            <div class="badge bg-secondary badge-custom">
-                                <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
-                                <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
-                            </div>
-                            <WorkflowFilters @filter="filterData" class="ms-auto" />
                         </div>
                     </div>
                 </div>
@@ -48,28 +69,10 @@
                     <LoadingComponent />
                 </div>
                 <div v-else-if="hasList">
-                    <div class="card mb-3 h-100">
+                    <div class="card custom-height">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
                                 <KanbanBoard :kanbanData="kanbanCards" :users="users" @reload="reloadKanban" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <div class="flex flex-col items-start gap-4 flex-1 align-items-center">
-                                <div>
-                                    <span class="me-1">Workflow:</span>
-                                    <b>{{ selectedOption.name }}</b>
-                                </div>
-                                <div>
-                                    <span class="me-1">{{ $t("labelTeam") }}:</span>
-                                    <b>{{ selectedOption.teamName }}</b>
-                                </div>
-                                <div>
-                                    <span class="me-1">{{ $t("labelTotalDocuments") }}</span>
-                                    <b>{{ kanbanCards.numDocuments }}</b>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -101,6 +104,8 @@ export default {
                 name: "",
             },
             workflowList: [],
+            workflowSearchText: "",
+            filteredWorkflows: [],
             selectedOption: {
                 id: 0,
                 name: "Select a workflow",
@@ -114,6 +119,7 @@ export default {
             isLoadingKanban: true,
             signalrEventExecutionChanged: "CardExecutionChanged",
             filters: {
+                orderBy: "",
                 input: null,
                 login: null,
                 isAllUsers: true,
@@ -147,6 +153,7 @@ export default {
                     }
 
                     this.workflowList = response;
+                    this.filteredWorkflows = response;
                     if (this.workflowList.length > 0) {
                         return this.setSelectedWorkflow();
                     }
@@ -181,9 +188,9 @@ export default {
 
             this.selectOption(workflowToSelect);
         },
-        getWorkflowById(workflowId) {
+        getWorkflowStepsById(workflowId) {
             this.isLoadingKanban = true;
-            WorkflowService.getWorkflowById(workflowId, this.filters)
+            WorkflowService.getWorkflowStepsById(workflowId, this.filters)
                 .then((response) => {
                     this.kanbanCards = response;
                 })
@@ -229,11 +236,11 @@ export default {
                 name: workflow.name,
             };
 
-            this.getWorkflowById(workflow.id);
+            this.getWorkflowStepsById(workflow.id);
             this.getUsersByTeams(workflow.teams);
         },
         reloadKanban() {
-            this.getWorkflowById(this.selectedOption.id);
+            this.getWorkflowStepsById(this.selectedOption.id);
         },
         filterData(filters) {
             this.filters = filters;
@@ -241,6 +248,13 @@ export default {
         },
         redirectToNewUpload() {
             this.$router.push({ name: "DocumentsUpload" });
+        },
+        searchWorkflow() {
+            const searchText = this.workflowSearchText.toLowerCase();
+            this.filteredWorkflows = this.workflowList.filter(o =>
+                (o.name && o.name.toLowerCase().includes(searchText)) ||
+                (o.teams && o.teams.name && o.teams.name.toLowerCase().includes(searchText))
+            );
         },
     },
     created() {
@@ -252,7 +266,6 @@ export default {
         await signalRService.startConnection();
         signalRService.on(this.signalrEventExecutionChanged, (message) => {
             if (!this.kanbanCards.steps) return;
-
             let foundCard = null;
 
             for (let i = 0; i < this.kanbanCards.steps.length; i++) {
@@ -261,6 +274,7 @@ export default {
                     const card = step.cards.find(c => c.id === message.cardId);
                     if (card) {
                         foundCard = card;
+                        foundCard.toolName = message.toolName;
                         break;
                     }
                 }
@@ -302,11 +316,26 @@ export default {
 }
 
 .card-container {
-    max-height: 70vh;
+    max-height: 75vh;
+    overflow-y: auto;
 }
 
 .kanban-wrapper {
     overflow-x: auto;
     white-space: nowrap;
+}
+
+.workflow-list {
+    min-width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.custom-height {
+    height: calc(100vh - 230px);
 }
 </style>

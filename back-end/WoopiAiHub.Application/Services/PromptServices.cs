@@ -1,15 +1,21 @@
-﻿using System.Linq.Dynamic.Core;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using System.Linq.Dynamic.Core;
 using System.Text.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
+using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -23,6 +29,10 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IHubNotifier _hubNotifier;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
+        private readonly IWorkflowRepository _workflowRepository;
+        private readonly IFunctionFileRetriever _functionFileRetriever;
+        private readonly IConfiguration _config;
+        private readonly PromptSettings _promptSettings;
 
         public PromptServices(IUnitOfWork unitOfWork,
                               IPromptRepository promptRepository,
@@ -31,7 +41,11 @@ namespace WoopiAiHub.Application.Services
                               IStepToolExecutionRepository stepToolExecutionRepository,
                               IStepToolOutputRepository stepToolOutputRepository,
                               IHubNotifier hubNotifier,
-                              IDocumentHistoryRepository documentHistoryRepository)
+                              IDocumentHistoryRepository documentHistoryRepository,
+                              IWorkflowRepository workflowRepository,
+                              IFunctionFileRetriever functionFileRetriever,
+                              IOptions<PromptSettings> promptSettingsOptions,
+                              IConfiguration config)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
@@ -41,6 +55,143 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _hubNotifier = hubNotifier;
             _documentHistoryRepository = documentHistoryRepository;
+            _workflowRepository=workflowRepository;
+            _functionFileRetriever = functionFileRetriever;
+            _config = config;
+            _promptSettings = promptSettingsOptions.Value;
+        }
+
+
+        /// <summary>
+        /// Find prompt templates from external source
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        public async Task<List<PromptTemplateDto>> FindPromptTemplates(string? query, string? orderBy)
+        {
+            var templates = await FindAllTemplates();
+
+            if (!string.IsNullOrEmpty(query))
+            {
+                var lowerQuery = query.ToLower();
+                templates = templates.Where(t =>
+                    t.Name.ToLower().Contains(lowerQuery) ||
+                    t.Description.ToLower().Contains(lowerQuery) ||
+                    t.Text.ToLower().Contains(lowerQuery)
+                ).ToList();
+            }
+
+
+            templates = orderBy?.ToLower() switch
+            {
+                "name_asc" => templates.OrderBy(t => t.Name).ToList(),
+                "name_desc" => templates.OrderByDescending(t => t.Name).ToList(),
+                "created_asc" => templates.OrderBy(t => t.Created).ToList(),
+                _ => templates.OrderByDescending(t => t.Created).ToList()
+            };
+
+            return templates;
+        }
+
+        /// <summary>
+        /// Find all prompt templates
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private async Task<List<PromptTemplateDto>> FindAllTemplates()
+        {
+            var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
+
+            var response = await _functionFileRetriever.Get(_promptSettings.TemplateFileName,
+                                                            functionApiKeyAuth!,
+                                                            _promptSettings.Folder);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new AppException(ErrorCode.DefaultError, "Failed to retrieve prompt templates", null);
+            }
+
+            var jsonContent = await response.Content.ReadAsStringAsync();
+            var items = JsonSerializer.Deserialize<PromptTemplatesResponse>(
+                jsonContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            var templates = items?.Prompts;
+            if (templates == null)
+            {
+                return new List<PromptTemplateDto>();
+            }
+
+            return templates;
+        }
+
+        /// <summary>
+        /// Import prompts from template IDs
+        /// </summary>
+        /// <param name="templateIds"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public async Task<bool> ImportPromptsByIds(List<Guid> templateIds, string email)
+        {
+            if (templateIds == null || templateIds.Count == 0)
+            {
+                return false;
+            }
+
+            var allTemplates = await FindAllTemplates();
+
+            var selectedTemplates = allTemplates.Where(t => templateIds.Contains(t.Id)).ToList();
+
+            if (selectedTemplates.Count == 0)
+            {
+                throw new ArgumentException("Selected templates not found");
+            }
+
+            var importedPrompts = selectedTemplates.Select(t => new ImportedPromptDto
+            {
+                TemplateId = t.Id,
+                Name = t.Name,
+                Description = t.Description,
+                Text = t.Text,
+                Created = t.Created
+            }).ToList();
+
+            return ImportPrompts(importedPrompts, email);
+        }        
+        
+        /// <summary>
+        /// Import prompts from templates
+        /// </summary>
+        /// <param name="importedPrompts"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public bool ImportPrompts(List<ImportedPromptDto> importedPrompts, string email)
+        {
+            if (importedPrompts == null || importedPrompts.Count == 0)
+            {
+                return false;
+            }
+
+            var idUser = _userServices.FindIdByEmail(email);
+            if (idUser == Guid.Empty)
+            {
+                throw new ArgumentException("Invalid user id");
+            }
+
+            var prompts = importedPrompts.Select(dto => new Prompt(
+                0,
+                dto.Created,
+                dto.Name.Substring(0, Math.Min(dto.Name.Length, 50)),
+                dto.Description.Substring(0, Math.Min(dto.Description.Length, 95)),
+                dto.Text,
+                idUser,
+                isEdited: false,
+                isImported: true
+            )).ToList();
+
+            return _promptRepository.CreateByRange(prompts);
         }
 
         /// <summary>
@@ -120,8 +271,8 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Invalid user id");
 
             query = pagedDataDto.IsAscending ?
-                query.OrderBy(nameof(Domain.Models.Prompt.Name)) :
-                query.OrderBy(nameof(Domain.Models.Prompt.Name) + " descending");
+                query.OrderBy(nameof(Prompt.Name)) :
+                query.OrderBy(nameof(Prompt.Name) + " descending");
 
             var result = PromptPagination(query, new PagedDataDto());
 
@@ -143,8 +294,8 @@ namespace WoopiAiHub.Application.Services
                 var query = _promptRepository.FindAllWithOwnerStatus(idUser);
 
                 query = pagedDataDto.IsAscending ?
-                    query.OrderBy(nameof(Domain.Models.Prompt.Name)) :
-                    query.OrderBy(nameof(Domain.Models.Prompt.Name) + " descending");
+                    query.OrderBy(nameof(Prompt.Name)) :
+                    query.OrderBy(nameof(Prompt.Name) + " descending");
 
                 var result = PromptPagination(query, pagedDataDto);
                 return result;
@@ -271,15 +422,16 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="promptDto"></param>
         /// <param name="promptUpdateDto"></param>
-        private static Domain.Models.Prompt GeneratePromptToUpdate(PromptDto promptDto, PromptUpdateDto promptUpdateDto)
+        private static Prompt GeneratePromptToUpdate(PromptDto promptDto, PromptUpdateDto promptUpdateDto)
         {
-            var prompt = new Domain.Models.Prompt(
+            var prompt = new Prompt(
                 promptDto.Id,
                 promptDto.Created,
                 promptUpdateDto.Name,
                 promptUpdateDto.Description,
                 promptUpdateDto.Text,
-                promptDto.IdUser);
+                promptDto.IdUser,
+                true);
 
             return prompt;
         }
@@ -336,7 +488,9 @@ namespace WoopiAiHub.Application.Services
             execution.UpdateStatusExecution(StatusExecution.Ready);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId);
+            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepTool.Id);
+
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, tool != null ? tool.Name : string.Empty);
         }
 
         /// <summary>

@@ -42,6 +42,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddRefitClient<IKeyGeneratorApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.KeyGeneratorApiBaseAddress));
 
             services.Configure<EncryptionSettings>(configuration.GetSection("EncryptionSettings"));
+            services.Configure<PromptSettings>(configuration.GetSection("PromptSettings"));
 
             return services;
         }

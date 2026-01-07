@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using Bogus.DataSets;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Moq;
 using Moq.AutoMock;
 using System;
 using WoopiAiHub.Application.Services;
@@ -22,6 +24,7 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly AutoMocker _mocker;
         private readonly Mock<IWorkflowRepository> _workflowRepositoryMock;
+        private readonly Mock<IWorkflowServices> _workflowServicesMock;
         private readonly Mock<IStepRepository> _stepRepositoryMock;
         private readonly Mock<ICardRepository> _cardRepositoryMock;
         private readonly Mock<IProfileRepository> _profileRepositoryMock;
@@ -37,6 +40,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker = new AutoMocker();
 
             _workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            _workflowServicesMock = _mocker.GetMock<IWorkflowServices>();
             _stepRepositoryMock = _mocker.GetMock<IStepRepository>();
             _cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             _profileRepositoryMock = _mocker.GetMock<IProfileRepository>();
@@ -184,12 +188,16 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Empty(result);
         }
 
-        [Fact(DisplayName = "Test FindAllPaged page greater than zero returns PaginatedList")]
+        [Theory(DisplayName = "Test FindAllPaged page greater than zero returns PaginatedList")]
         [Trait("FindAllPaged", "Success")]
-        public void FindAllPaged_PageGreaterThanZero_ReturnsPaginatedList()
+        [InlineData("created asc")]
+        [InlineData("created desc")]
+        [InlineData("name asc")]
+        [InlineData("name desc")]
+        public void FindAllPaged_PageGreaterThanZero_ReturnsPaginatedList(string filter)
         {
             // Arrange
-            var workflowPagedDto = new WorkflowPagedDto { Page = 1 };
+            var workflowPagedDto = new WorkflowPagedDto { Page = 1, OrderBy = filter, TeamId = 1, UserId = Guid.NewGuid() };
             var workflowList = new List<WorkflowDto> { new WorkflowDto() };
 
             _workflowRepositoryMock.Setup(repo => repo.FindAllWithFilter(workflowPagedDto)).Returns(workflowList.AsQueryable());
@@ -265,6 +273,141 @@ namespace WoopiAiHub.UnitTests.Services
             var returnedWorkflow = result.First();
             Assert.Equal(123, returnedWorkflow.Id);
             Assert.Equal("Workflow Test I", returnedWorkflow.Name);
+        }
+
+        [Fact(DisplayName = "RemoveTeamWorkflowRelationship should remove workflows and update team when successful")]
+        [Trait("RemoveTeamWorkflowRelationship", "Success")]
+        public async Task RemoveTeamWorkflowRelationship_ShouldRemoveWorkflows_AndUpdateTeam_WhenSuccessful()
+        {
+            // Arrange
+            var team = new Team("Teen Titans", 1, DateTime.UtcNow);
+            var workflowX = new Workflow(10, DateTime.UtcNow, new List<Team>(), "WF X");
+            var workflowXIX = new Workflow(20, DateTime.UtcNow, new List<Team>(), "WF XIX");
+            var workflows = new List<Workflow>();
+            workflows.Add(workflowXIX);
+
+            workflowX.AddTeam(team);
+            var dto = new List<TeamsWorkflowsDto>
+            {
+                new TeamsWorkflowsDto
+                {
+                    TeamId = 1,
+                    Workflows = new List<int> { 10, 20 }
+                }
+            };
+
+            _teamRepositoryMock
+                .Setup(r => r.FindByIdReturnModel(1))
+                .Returns(team);
+
+            _workflowRepositoryMock
+                .Setup(r => r.FindByIdsAsync(It.IsAny<ICollection<int>>()))
+                .ReturnsAsync(workflows);
+
+            // Act
+            await _workflowServices.RemoveTeamWorkflowRelationship(dto);
+
+            // Assert
+            Assert.Empty(team.Workflows);
+            _teamRepositoryMock.Verify(r => r.FindByIdReturnModel(1), Times.Once);
+            _workflowRepositoryMock.Verify(r => r.FindByIdsAsync(It.Is<ICollection<int>>(ids => ids.SequenceEqual(dto[0].Workflows))), Times.Once);
+            _teamRepositoryMock.Verify(r => r.Update(team), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdateTeamProfileRelationshipToWorkflow should exit early when no workflows to remove")]
+        [Trait("UpdateTeamProfileRelationshipToWorkflow", "EarlyExit")]
+        public async Task UpdateTeamProfileRelationshipToWorkflow_ShouldStopEarly_WhenNoWorkflowsToRemove()
+        {
+            // Arrange
+            var profile = new Profile("Wayne Corp", 1, DateTime.UtcNow);
+            var steps = new List<int> { 1, 2, 3 };
+
+            var team = new Team("Teen Titans", 1, DateTime.UtcNow);
+            profile.Teams = new List<Team>();
+            profile.AddTeam(team);
+
+            var workflowA = new Workflow(10, DateTime.UtcNow, new List<Team>(), "WF 10");
+            var workflowB = new Workflow(20, DateTime.UtcNow, new List<Team>(), "WF 20");
+            var workflowsFromSteps = new List<Workflow> { workflowA, workflowB };
+
+            _workflowRepositoryMock
+                .Setup(r => r.FindByStep(steps))
+                .ReturnsAsync(workflowsFromSteps);
+
+            _teamRepositoryMock
+                .Setup(r => r.FindByIdReturnModel(team.Id))
+                .Returns(team);
+
+            _workflowServicesMock
+                .Setup(s => s.VerifyWorkflowMatchInOtherTeamProfile(
+                    profile.Id,
+                    team.Id,
+                    It.IsAny<List<Workflow>>()
+                ))
+                .ReturnsAsync(new TeamsWorkflowsDto
+                {
+                    TeamId = team.Id,
+                    Workflows = new List<int>()
+                });
+
+            // Act
+            await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(steps, profile);
+
+            // Assert
+            _workflowRepositoryMock.Verify(r => r.FindByStep(steps), Times.Once);
+            _teamRepositoryMock.Verify(r => r.FindByIdReturnModel(team.Id), Times.AtLeastOnce);
+        }
+
+        [Fact(DisplayName = "VerifyWorkflowMatchInOtherTeamProfile should return only workflows not matched by other profiles")]
+        [Trait("VerifyWorkflowMatchInOtherTeamProfile", "PartialMatch")]
+        public async Task VerifyWorkflowMatchInOtherTeamProfile_ShouldReturnOnlyWorkflowsNotFoundInOtherProfiles()
+        {
+            // Arrange
+            int profileId = 100;
+            int teamId = 10;
+
+            // Team
+            var team = new Team("Justice League", teamId, DateTime.UtcNow)
+            {
+                Profiles = new List<Profile>()
+            };
+
+            var workflowA = new Workflow(1, DateTime.UtcNow, new List<Team>(), "WF 1");
+            var workflowB = new Workflow(2, DateTime.UtcNow, new List<Team>(), "WF 2");
+            var workflowC = new Workflow(3, DateTime.UtcNow, new List<Team>(), "WF 3");
+
+            var inputWorkflows = new List<Workflow> { workflowA, workflowB, workflowC };
+
+            var anotherProfile = new Profile("Gotham Ops", 200, DateTime.UtcNow)
+            {
+                StepProfilePermissions = new List<StepProfilePermission>()
+            };
+
+            anotherProfile.StepProfilePermissions.Add(new StepProfilePermission(1, 999, 1));
+            anotherProfile.StepProfilePermissions.Add(new StepProfilePermission(2, 888, 1));
+
+            team.Profiles.Add(anotherProfile);
+
+            _teamRepositoryMock
+                .Setup(r => r.FindByIdReturnModel(teamId))
+                .Returns(team);
+
+            var workflowsFromSteps = new List<Workflow> { workflowA, workflowC };
+
+            _workflowRepositoryMock
+                .Setup(r => r.FindByStep(It.IsAny<List<int>>()))
+                .ReturnsAsync(workflowsFromSteps);
+
+            // Act
+            var result = await _workflowServices.VerifyWorkflowMatchInOtherTeamProfile(
+                profileId,
+                teamId,
+                inputWorkflows
+            );
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(teamId, result.TeamId);
         }
 
         [Fact(DisplayName = "CreatePhase1 should throw AppException when name is empty")]
@@ -529,7 +672,6 @@ namespace WoopiAiHub.UnitTests.Services
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindPhase1ById(1));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
         }
-
         [Fact(DisplayName = "UpdatePhase3 success")]
         [Trait("UpdatePhase3", "Success")]
         public async Task UpdatePhase3_WorkflowExists_UpdatesSuccessfully()
@@ -539,7 +681,7 @@ namespace WoopiAiHub.UnitTests.Services
             var stepTools = WorkflowFixture.FindValidStepToolWithDependencies();
             var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
             var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            var stepToolDependencyDto = new StepToolOutputDependencyDto{ StepOrder = 1, StepToolOrder = 1};
+            var stepToolDependencyDto = new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 };
             stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto> { stepToolDependencyDto };
             var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
             var workflowPhase3Dto = new WorkflowPhase3Dto
@@ -577,6 +719,54 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.AtLeastOnce);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should throw AppException when existing StepTools output")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task UpdatePhase3_ExistingStepToolsOutput_ThrowsAppException()
+        {
+            // Arrange
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var stepTools = WorkflowFixture.FindValidStepToolWithDependencies();
+            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            var stepToolDependencyDto = new StepToolOutputDependencyDto{ StepOrder = 1, StepToolOrder = 1};
+            stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto> { stepToolDependencyDto };
+            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto
+                    {
+                        Id = stepDto.Id,
+                        Order = stepDto.Order,
+                        StepTools = stepToolsList
+                }
+                }
+            };
+
+            var workflow = WorkflowFixture.FindValidWorkflow();
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase3Dto.WorkflowId))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolOutputRepositoryMock.Setup(sto => sto.HasOutputsByStepToolIds(It.IsAny<List<int>>())).ReturnsAsync(true);
+
+            // Act / Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+            Assert.Equal(ErrorCode.ExistingStepToolOutput, exception.ErrorCode);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _stepToolOutputRepositoryMock.Verify(sto => sto.HasOutputsByStepToolIds(It.IsAny<List<int>>()), Times.Once);
         }
 
         [Fact(DisplayName = "CreatePhase1 success")]
@@ -962,6 +1152,65 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(true); 
+        }
+
+        [Fact(DisplayName = "FindStepsById should return steps when found")]
+        [Trait("FindStepsById", "Success")]
+        public async Task FindStepsById_ShouldReturnSteps_WhenFound()
+        {
+            // Arrange
+            var workflowId = 1;
+            var filter = new WorkflowFilterDto
+            {
+                Input = "search",
+                IsAllUsers = true,
+                Login = "user@example.com",
+                OrderBy = "created asc"
+            };
+
+            var expectedSteps = new List<StepDto>
+            {
+                WorkflowFixture.FindValidStepDto()
+            };
+
+            _stepRepositoryMock
+                .Setup(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(expectedSteps);
+
+            // Act
+            var result = await _workflowServices.FindStepsById(workflowId, filter);
+
+            // Assert
+            Assert.Equal(expectedSteps, result);
+            _stepRepositoryMock.Verify(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindStepsById should throw AppException when no steps found")]
+        [Trait("FindStepsById", "Fail")]
+        public async Task FindStepsById_ShouldThrowAppException_WhenNotFound()
+        {
+            // Arrange
+            var workflowId = 1;
+            var filter = new WorkflowFilterDto
+            {
+                Input = string.Empty,
+                IsAllUsers = false,
+                Login = string.Empty,
+                OrderBy = string.Empty
+            };
+
+            _stepRepositoryMock
+                .Setup(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((List<StepDto>)null);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<AppException>(() => _workflowServices.FindStepsById(workflowId, filter));
+
+            Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
+            Assert.Equal("Workflow not found", ex.Message);
+            Assert.Equal(WorkflowLabel.NotFound, ex.LabelError);
+
+            _stepRepositoryMock.Verify(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
     }
 }

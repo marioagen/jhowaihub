@@ -1,4 +1,5 @@
 ﻿using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
 {
@@ -11,5 +12,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<ICollection<int>> FindActiveCardIdsInFirstStepAsync(IEnumerable<int> cardIds);
         Task<Card?> FindByDocumentIdCardAsync(int documentId);
         Task<List<Card>> FindByDocumentIdCardListAsync(int documentId);
+        Task<CardHeaderDto?> FindHeaderInfoAsync(int cardId);
     }
 }

@@ -25,5 +25,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<List<StepDto>> FindPhase3ById(int id);
         Task<Phase1Dto> FindPhase1ById(int id);
         StepDto FindStepById(int id);
+        Task<ToolDto> FindToolByStepToolId(int id);
     }
 }

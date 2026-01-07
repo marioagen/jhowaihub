@@ -9,6 +9,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     {
         Task<WorkflowDto> FindByTeamId(int teamId, WorkflowFilterDto workflowFilterDto);
         Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto);
+        Task<ICollection<StepDto>> FindStepsById(int id, WorkflowFilterDto? workflowFilterDto);
         Task<bool> DeleteById(int id);
         ICollection<WorkflowDto> FindAllByUser(string email);
         ICollection<WorkflowDto> FindAll();
@@ -18,6 +19,8 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task UpdateTeamProfileRelationshipToWorkflow(List<int> steps, Profile profile);
         PaginatedListDto<WorkflowDto> FindAllPaged(WorkflowPagedDto workflowPagedDto);
         Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto);
+        Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto);
+        Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows);
         Task<int> CreatePhase1(WorkflowPhase1Dto workflowPhase1Dto);
         Task<bool> UpdatePhase2(WorkflowPhase2Dto workflowPhase2Dto);
         Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto);

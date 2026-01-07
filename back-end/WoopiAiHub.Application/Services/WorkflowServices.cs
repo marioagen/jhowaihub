@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
+﻿using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -11,8 +9,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using WoopiAiHub.Repository;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -24,31 +20,31 @@ namespace WoopiAiHub.Application.Services
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
         private readonly IStepToolDependencyRepository _stepToolDependencyRepository;
+        private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IValidateWorkflow _validateWorkflow;
         private readonly IValidateStep _validateStep;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(IWorkflowRepository workflowRepository,
-                                IProfileRepository profileRepository,
-                                ITeamRepository teamRepository,
-                                IStatusRepository statusRepository,
-                                IStepRepository stepRepository,
-                                IStepToolDependencyRepository stepToolDependencyRepository,
-                                IUnitOfWork unitOfWork,
-                                IValidateStep validateStep,
-                                ILogger<WorkflowServices> logger,
-                                IValidateWorkflow validateWorkflow)
+            IProfileRepository profileRepository,
+            ITeamRepository teamRepository,
+            IStatusRepository statusRepository,
+            IStepRepository stepRepository,
+            IStepToolDependencyRepository stepToolDependencyRepository,
+            IStepToolOutputRepository stepToolOutputRepository,
+            IUnitOfWork unitOfWork,
+            IValidateStep validateStep,
+            ILogger<WorkflowServices> logger)
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
             _stepToolDependencyRepository = stepToolDependencyRepository;
+            _stepToolOutputRepository = stepToolOutputRepository;
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
-            _validateWorkflow = validateWorkflow;
             _teamRepository = teamRepository;
             _logger = logger;
         }
@@ -66,6 +62,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
+
             int totalCards = workflow.Steps.Sum(step => step.Cards.Count);
             workflow.NumDocuments = totalCards;
             return workflow;
@@ -84,6 +81,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
+
             return phase1;
         }
 
@@ -100,6 +98,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
+
             return workflow;
         }
 
@@ -116,6 +115,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
+
             return workflow;
         }
 
@@ -177,7 +177,8 @@ namespace WoopiAiHub.Application.Services
             else
             {
                 var ex = new ArgumentException("Invalid Page");
-                _logger.LogError(ex, $"An argument exception occurred in the {nameof(WorkflowServices)} in the {nameof(FindAllPaged)} method");
+                _logger.LogError(ex,
+                    $"An argument exception occurred in the {nameof(WorkflowServices)} in the {nameof(FindAllPaged)} method");
                 throw ex;
             }
         }
@@ -204,7 +205,8 @@ namespace WoopiAiHub.Application.Services
             foreach (var parameter in stepToolDto.Parameters)
             {
                 stepTool.Parameters.Add(
-                    new StepToolParameter(0, DateTime.Now, 0, parameter.RequiredFile, parameter.WebhookId, parameter.Value));
+                    new StepToolParameter(0, DateTime.Now, 0, parameter.RequiredFile, parameter.WebhookId,
+                        parameter.Value));
             }
 
             return stepTool;
@@ -258,10 +260,11 @@ namespace WoopiAiHub.Application.Services
         private async Task CreateRelationshipBetweenTeamWorkfloFromProfile(int teamId, List<Workflow> workflows)
         {
             var team = _teamRepository.FindByIdReturnModel(teamId);
-            foreach(var workflow in workflows)
+            foreach (var workflow in workflows)
             {
                 team.AddWorkflow(workflow);
             }
+
             _teamRepository.Update(team);
         }
 
@@ -275,15 +278,16 @@ namespace WoopiAiHub.Application.Services
         /// <param name="workflows">A list of workflows to associate with the team.</param>
         /// <param name="profiles">A list of profiles used to verify and adjust workflow relationships.</param>
         /// <returns></returns>
-        public async Task UpdateTeamWorkflowRelationship(Team team, List<Workflow> workflows, List<Domain.Models.Profile> profiles)
+        public async Task UpdateTeamWorkflowRelationship(Team team, List<Workflow> workflows,
+            List<Domain.Models.Profile> profiles)
         {
             var workflowsToRemove = new List<TeamsWorkflowsDto>();
             foreach (var profile in profiles)
             {
                 var teamsWorkflows = await VerifyWorkflowMatchInOtherTeamProfile(profile.Id, team.Id, workflows);
                 workflowsToRemove.Add(teamsWorkflows);
-            }            
-            
+            }
+
             var filterEmptyWorkflows = workflowsToRemove
                 .Where(w => w.Workflows.Count > 0)
                 .Select(w => new TeamsWorkflowsDto
@@ -316,7 +320,8 @@ namespace WoopiAiHub.Application.Services
             var workflowsToRemove = new List<TeamsWorkflowsDto>();
             foreach (var team in profileTeams)
             {
-                var teamsWorkflows = await VerifyWorkflowMatchInOtherTeamProfile(profileId, team.Id, workflows.ToList());
+                var teamsWorkflows =
+                    await VerifyWorkflowMatchInOtherTeamProfile(profileId, team.Id, workflows.ToList());
                 workflowsToRemove.Add(teamsWorkflows);
             }
 
@@ -340,7 +345,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private async Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows)
+        public async Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows)
         {
             var team = _teamRepository.FindByIdReturnModel(teamId);
             var profiles = team.Profiles.Where(p => p.Id != profileId).ToList();
@@ -391,7 +396,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private async Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto)
+        public async Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto)
         {
             foreach (var teamsWorkflows in teamsWorkflowsDto)
             {
@@ -438,7 +443,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public StepToolOutput FindByStepToolOutputById(int id)
         {
-
             var stepToolOutput = _workflowRepository.FindByStepToolOutputById(id);
             return stepToolOutput;
         }
@@ -458,7 +462,8 @@ namespace WoopiAiHub.Application.Services
 
             if (workflowPhase1Dto.Teams == null || workflowPhase1Dto.Teams.Count == 0)
             {
-                throw new AppException(ErrorCode.RequiredField, "At least one team must be selected", WorkflowLabel.InvalidTeams);
+                throw new AppException(ErrorCode.RequiredField, "At least one team must be selected",
+                    WorkflowLabel.InvalidTeams);
             }
 
             var teamsList = _teamRepository.FindByIds(workflowPhase1Dto.Teams);
@@ -520,13 +525,13 @@ namespace WoopiAiHub.Application.Services
                     .ToList();
 
 
-                var stepcards =_stepRepository.FindByIdsWithCards(stepsToRemove.Select(s => s.Id));
-                if(stepcards.Any(s => s.Cards.Count > 0))
+                var stepcards = _stepRepository.FindByIdsWithCards(stepsToRemove.Select(s => s.Id));
+                if (stepcards.Any(s => s.Cards.Count > 0))
                 {
                     throw new AppException(ErrorCode.DefaultError, "Can't delete with cards related", null);
                 }
 
-                 _stepRepository.DeleteByIds(stepsToRemove.Select(s => s.Id));
+                _stepRepository.DeleteByIds(stepsToRemove.Select(s => s.Id));
 
                 foreach (var stepDto in workflowPhase2Dto.Steps.Where(s => s.Id > 0))
                 {
@@ -544,7 +549,7 @@ namespace WoopiAiHub.Application.Services
                     await ValidateProfileAndStatusStepPhase2(stepDto);
 
                     var newStep = new Step(
-                        id: 0, 
+                        id: 0,
                         created: DateTime.Now,
                         workflowId: workflow.Id,
                         name: stepDto.Name,
@@ -661,7 +666,7 @@ namespace WoopiAiHub.Application.Services
         /// Processes step tools for each step in the workflow.
         /// </summary>
         private async Task<Dictionary<(int stepId, int order), StepTool>> ProcessStepTools(
-            Workflow workflow, 
+            Workflow workflow,
             ICollection<StepPhase3Dto> steps)
         {
             StepTool? lastGlobalStepTool = null;
@@ -677,14 +682,14 @@ namespace WoopiAiHub.Application.Services
                 foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                 {
                     var stepTool = CreateAndConfigureStepTool(
-                        stepToolDto, 
-                        existingStep, 
-                        previousStepToolInStep, 
+                        stepToolDto,
+                        existingStep,
+                        previousStepToolInStep,
                         lastGlobalStepTool);
 
                     stepToolMap[(existingStep.Id, stepToolDto.Order)] = stepTool;
                     existingStep.AddStepTool(stepTool);
-                    
+
                     previousStepToolInStep = stepTool;
                     lastGlobalStepTool = stepTool;
                 }
@@ -725,8 +730,10 @@ namespace WoopiAiHub.Application.Services
             var step = workflow.Steps.FirstOrDefault(s => s.Id == stepDto.Id || s.Order == stepDto.Order);
             if (step == null)
             {
-                throw new AppException(ErrorCode.NotFound, $"Step with order {stepDto.Order} not found", StepLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, $"Step with order {stepDto.Order} not found",
+                    StepLabel.NotFound);
             }
+
             return step;
         }
 
@@ -738,8 +745,19 @@ namespace WoopiAiHub.Application.Services
             var stepToolIdsToRemove = step.StepTools.Select(st => st.Id).ToList();
             if (stepToolIdsToRemove.Any())
             {
+                var hasOutputs = await _stepToolOutputRepository.HasOutputsByStepToolIds(stepToolIdsToRemove);
+                if (hasOutputs)
+                {
+                    throw new AppException(
+                        ErrorCode.ExistingStepToolOutput,
+                        "Cannot delete step tools that have been executed and contain output data. Please remove the execution data first or create a new workflow version.",
+                        null
+                    );
+                }
+
                 await _stepToolDependencyRepository.DeleteByStepToolIdAsync(stepToolIdsToRemove);
             }
+
             step.StepTools.Clear();
         }
 
@@ -774,7 +792,8 @@ namespace WoopiAiHub.Application.Services
                 {
                     var dependsOnStepTool = workflow.Steps
                         .SelectMany(s => s.StepTools)
-                        .FirstOrDefault(st => st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
+                        .FirstOrDefault(st =>
+                            st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
 
                     if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
                     {
@@ -785,5 +804,26 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Find steps by workflow id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="workflowFilterDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<ICollection<StepDto>> FindStepsById(int id, WorkflowFilterDto? workflowFilterDto)
+        {
+            var input = workflowFilterDto?.Input ?? string.Empty;
+            var allUsers = workflowFilterDto?.IsAllUsers ?? false;
+            var login = workflowFilterDto?.Login ?? string.Empty;
+            var order = workflowFilterDto?.OrderBy ?? string.Empty;
+
+            var workflow = await _stepRepository.FindStepsByWorkflowId(id, input, allUsers, login, order);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+            return workflow;
+        }
     }
 }

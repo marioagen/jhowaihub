@@ -1,37 +1,7 @@
 <template>
     <div class="card clickable" @click="redirectToAnalyzer">
         <div class="card-content">
-            <div class="cover" v-if="showLoading">
-                <div class="spinner-cover">
-                    <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
-                </div>
-                <div 
-                    v-if="showLoading"
-                    class="progress-content" 
-                >
-                    <div 
-                        class="mb-2"
-                    >
-                        {{ $t("labelProcessing") }}
-                        <span 
-                            class="float-end"
-                        >
-                            {{ dataCard.percentage || 0 }}%
-                        </span>
-                    </div>
-                    <div class="progress">
-                        <div 
-                            class="progress-bar progress-bar-striped progress-bar-animated"
-                            role="progressbar"
-                            :aria-valuenow="dataCard.percentage || 0"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                            :style="{ width: (dataCard.percentage || 0) + '%' }"
-                        ></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body pb-0 clickable" :class="showLoading ? 'hide-card' : ''">
+            <div class="card-body pb-0 clickable" >
                 <p>{{ dataCard.name }}</p>
                 <div class="mb-2">
                     <LucideIcon icon="FileText" :size="12" class="me-1" />
@@ -59,32 +29,32 @@
                     </button>
                 </div>
             </div>
-            <div class="card-footer pt-0">
+            <div class="card-footer pt-0" :class="showLoading ? 'padding-loading ' : ''">
                 <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap" v-if="!showLoading">
                     <div class="badge flex-shrink-1 mb-1" :style="badgeStyle(dataStep.status.color)">
                         {{ dataStep.status.name }}
                     </div>
                     <div v-if="!isLastStep">
                         <button v-if="!isFirstStep || dataCard.assignedUser" class="btn btn-sm btn-primary float-end" @click.stop="advanceStep">
-                            <span>{{ $t("labelAdvance") }}</span>
+                            <span>{{ $t("common.advance") }}</span>
                             <LucideIcon icon="ChevronRight" :size="16" class="me-1" v-if="!isLoadingAnalysis" />
-                            <div class="spinner-grow text-light" role="status"  v-if="isLoadingAnalysis"></div>
+                            <div class="spinner-grow text-light" role="status" v-if="isLoadingAnalysis"></div>
                         </button>
                         <div v-else-if="!dataCard.assignedUser && !showLoading">
-                            <div v-if="isAdmin"  class="btn-group">
+                            <div v-if="isAdmin" class="btn-group">
                                 <button type="button" class="btn btn-sm  btn-primary assing-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" @click.stop="">
                                     <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
                                     <span>{{ $t("card.assignBtn") }}</span>
-                                    <LucideIcon icon="ChevronRight" size="20" class="ml-2 icon-closed"/>
-                                    <LucideIcon icon="ChevronDown" size="20" class="ml-2 icon-open"/>
+                                    <LucideIcon icon="ChevronRight" size="20" class="ml-2 icon-closed" />
+                                    <LucideIcon icon="ChevronDown" size="20" class="ml-2 icon-open" />
                                 </button>
-                                <ul class="dropdown-menu p-2">
+                                <ul class="dropdown-menu p-2 users-list">
                                     <li v-if="users.length > 5" class="mb-1">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text p-1">
                                                 <LucideIcon icon="Search" :size="16" class="me-1" />
                                             </span>
-                                            <input :id="`filter-user-${dataCard.id}`" v-model="userSearchText" type="text" name="filter" class="form-control" @input="searchUser" @click.stop=""/>
+                                            <input :id="`filter-user-${dataCard.id}`" v-model="userSearchText" type="text" name="filter" class="form-control" @input="searchUser" @click.stop="" />
                                         </div>
                                     </li>
                                     <li v-for="user in filteredUsers" :key="user.id" @click.stop="assignUser(user.id)"><span class="dropdown-item">{{user.name}}</span></li>
@@ -92,9 +62,31 @@
                             </div>
                             <button v-else type="button" class="btn btn-sm btn-primary assing-btn" @click.stop="assignUser(loggedUserId)">
                                 <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
-                                {{ $t("card.assignBtn") }} 
+                                {{ $t("card.assignBtn") }}
                                 <LucideIcon icon="NotebookPen" size="16" class="ml-2" />
                             </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="cover" v-if="showLoading">
+                    <div class="spinner-cover">
+                        <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
+                    </div>
+                    <div v-if="showLoading"
+                         class="progress-content">
+                        <div class="mb-2">
+                            {{ $t("common.processing")}} {{ truncatedToolName }}
+                            <span class="float-end">
+                                {{ dataCard.percentage || 0 }}%
+                            </span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                 role="progressbar"
+                                 :aria-valuenow="dataCard.percentage || 0"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"
+                                 :style="{ width: (dataCard.percentage || 0) + '%' }"></div>
                         </div>
                     </div>
                 </div>
@@ -256,6 +248,11 @@
             loggedUserId(){
                 const user = this.users.find(u=> u.email === this.$store.state.userProfile.login);
                 return user ? user.id : null;
+            },
+            truncatedToolName() {
+                if (!this.dataCard?.toolName) return '';
+                const toolName = this.dataCard.toolName.trim();
+                return toolName.length > 10 ? toolName.substring(0, 10) + '...' : toolName;
             }
         }
     };
@@ -291,12 +288,12 @@
         position: relative
     }
 
-    .progress-content{
+    .progress-content {
         width: 100%;
         z-index: 11;
         position: absolute;
         bottom: 0;
-        padding: 15px;
+        padding: 20px 35px 10px 2px;
     }
         .progress-content .progress {
             height: 10px;
@@ -435,5 +432,14 @@
     .unlink-icon{
         vertical-align: sub;
         color: white;
+    }
+
+    .users-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .padding-loading {
+        padding-bottom: 50px;
     }
 </style>

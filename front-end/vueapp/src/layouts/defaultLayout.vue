@@ -33,7 +33,7 @@
     import GlobalEventService from "@/services/globalEventService";
     import SidebarComponent from "@/components/layout/SidebarComponent.vue";
     import NavbarComponent from "@/components/layout/NavbarComponent.vue";
-    import ToastNotification from "@/components/common/toast-notification.vue";
+    import ToastNotification from "@/components/pages/analyzer/toast-notification.vue";
 
     const SIDEBAR_COLLAPSE_WIDTH = 768;
 

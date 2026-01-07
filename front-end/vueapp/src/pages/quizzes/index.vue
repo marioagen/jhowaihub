@@ -55,8 +55,8 @@
             setEntitySearch() {
                 this.entitySearch = {
                     screen: "quizzes",
-                    labelInput: this.$t("quizzes.filters.input"),
-                    placeholderInput: this.$t("quizzes.filters.input"),
+                    labelInput: this.$t("filters.quizzesInput"),
+                    placeholderInput: this.$t("filters.quizzesInput"),
                     labelButton: this.$t("quizzes.createBtn"),
                 };
             },

@@ -1,4 +1,6 @@
-﻿using WoopiAiHub.Domain.Models;
+﻿using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
 {
@@ -13,5 +15,10 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
                                              int workflowId);
         Task CreateRange(ICollection<Step> steps);
         ICollection<Step> FindByIdsWithCards(IEnumerable<int> ids);
+        Task<List<StepDto>> FindStepsByWorkflowId(int id, 
+                                                  string input = "", 
+                                                  bool allUsers = false, 
+                                                  string login = "", 
+                                                  string order = "");
     }
 }
