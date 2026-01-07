@@ -46,12 +46,27 @@
                     <h2 class="mb-0 fw-bold text-primary">{{ totalWTC.toFixed(5) }}</h2>
                 </div>
             </div>
-            <TokensGraph :key="datesChange" :usageUnits="usageUnits" @setTotalTokens="setTotalTokens"
-                ref="TokensGraph" />
-            <PagesProcessedGraph :key="datesChange" :usageUnits="usageUnits" @setTotalPages="setTotalWTC"
-                ref="PagesProcessedGraph" />
-            <WorkflowsGraph :key="datesChange" :usageUnits="usageUnits" @setTotalExecution="setTotalWTC"
-                ref="WorkflowsGraph" />
+            <TokensGraph 
+                :key="datesChange" 
+                :usageUnits="usageUnits" 
+                @setTotalTokens="setTotalTokens"
+                :isLoading="isLoading"
+                ref="TokensGraph" 
+            />
+            <PagesProcessedGraph 
+                :key="datesChange" 
+                :usageUnits="usageUnits" 
+                @setTotalPages="setTotalWTC"
+                :isLoading="isLoading"
+                ref="PagesProcessedGraph" 
+            />
+            <WorkflowsGraph 
+                :key="datesChange" 
+                :usageUnits="usageUnits" 
+                @setTotalExecution="setTotalWTC"
+                :isLoading="isLoading"
+                ref="WorkflowsGraph" 
+            />
         </div>
     </main>
 </template>
@@ -103,6 +118,7 @@ export default {
             return this.$t(`dashboard.filters.${this.filters.preset}`);
         },
         getDashboardData() {
+            this.filterData(this.filters);
             DashboardServices.GetUsageUnits()
                 .then((response) => {
                     this.usageUnits = response;
@@ -130,7 +146,7 @@ export default {
                 });
         },
     },
-    created() {
+    mounted() {
         this.getDashboardData();
         this.getPlan();
     }
