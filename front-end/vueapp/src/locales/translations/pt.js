@@ -757,7 +757,7 @@
         enterprise: "Plano Enterprise",
     },
     home: {
-        title: "Bem-vindo ao AI HUB, Woopi AI!",
+        title: "Bem-vindo ao WOOPI AI!",
         subtitle: "Sua jornada para automatizar e otimizar processos com inteligência artificial começa agora.",
         planLabel: "Você adquiriu o",
         planName: "Plano Enterprise",
@@ -775,7 +775,7 @@
         },
         docsCard: {
             title: "Explore a Documentação",
-            description: "Consulte nossa documentação completa para explorar todo o potencial do AI HUB.",
+            description: "Consulte nossa documentação completa para explorar todo o potencial do WOOPI AI.",
             button: "Acessar docs"
         }
     }

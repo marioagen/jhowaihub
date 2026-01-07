@@ -20,7 +20,7 @@ namespace WoopiAiHub.Application.Utils
         /// <returns></returns>
         public In8NConnector Create(string baseUrl)
         {
-            var client = _httpClientFactory.CreateClient("WoopiAi Hub");
+            var client = _httpClientFactory.CreateClient("WOOPI AI");
             client.BaseAddress = new Uri(baseUrl);
             return RestService.For<In8NConnector>(client);
         }
