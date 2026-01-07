@@ -24,6 +24,7 @@
         edit: "Editar",
         edited: "Editado",
         editedFail: "Falha ao editar",
+        error: "Erro",
         expand: "Expandir",
         loading: "Carregando",
         manage: "Gerenciar",
@@ -44,6 +45,7 @@
         actions: "Ações",
         signOut: "Sair",
         status: "Status",
+        success: "Sucesso",
         upload: "Carregar",
         home: "Home",
         failed: "falhou!",
@@ -59,6 +61,7 @@
         all: "Tudo",
         selectAll: "Selecionar Todos",
         selectAnItemFromTheList: "Selecione um item da lista.",
+        warning: "Atenção",
     },
     modals: {
         message: "Tem certeza?",
@@ -98,7 +101,8 @@
             linkSubtitle: "Selecione pelo menos um workflow para associar ao documento.",
             noWorkflowFound: "Nenhum workflow vinculado ao seus times do usuário",
             selectionList: "Lista de seleção",
-            warningWorkflowNotListed: "O workflow não apareceu na lista? É porque seus times não tem um workflow associado a eles.",
+            warningWorkflowNotListed:
+                "O workflow não apareceu na lista? É porque seus times não tem um workflow associado a eles.",
             noFileChosen: "Nenhum arquivo escolhido",
             noTeamChosen: "Nenhum time escolhido",
         },
@@ -109,7 +113,8 @@
         documentTypeSuccess: "Tipo de documento inserido com sucesso",
         documentTypeRemoveSuccess: "Tipo de documento removido com sucesso",
         documentTypeEditSuccess: "Tipo de documento atualizado com sucesso",
-        documentHasAlreadyBeenStandardizedPreviously: "O Documento já foi normalizado anteriormente. <br/> Aguarde, você será redirecionado para a página inicial.",
+        documentHasAlreadyBeenStandardizedPreviously:
+            "O Documento já foi normalizado anteriormente. <br/> Aguarde, você será redirecionado para a página inicial.",
         documentTranscript: "Transcrição do documento",
         ocrText: "Texto OCR",
         descriptionDocumentNote: "Descrição (Única para múltiplos documentos)",
@@ -146,10 +151,13 @@
         failedToNormalize: "Falha ao normalizar",
         standardizedFullText: "Texto integral normalizado",
         theFileMayBeCorrupt: "O Arquivo pode estar <br/> corrompido ou com erro. <br/> Por favor, tente novamente.",
-        theFileMayBeUnreadableOrHaveAnError: "O Arquivo pode estar <br/> ilegível ou com erro. <br/> Por favor, tente novamente.",
-        attentionDependingOnTheSpeed: "Atenção, dependendo da velocidade da sua conexão com a Internet e do tamanho do arquivo carregado, essa operação pode demorar alguns minutos.",
+        theFileMayBeUnreadableOrHaveAnError:
+            "O Arquivo pode estar <br/> ilegível ou com erro. <br/> Por favor, tente novamente.",
+        attentionDependingOnTheSpeed:
+            "Atenção, dependendo da velocidade da sua conexão com a Internet e do tamanho do arquivo carregado, essa operação pode demorar alguns minutos.",
         attentionPDFDisplayFailed: "Ocorreu uma falha ao carregar o PDF. Clique aqui para tentar novamente",
-        anInconsistencyWasIdentifiedInTheDocument: "Uma inconsistência foi identificada no documento. Por favor, reprocesse para ter melhores resultados",
+        anInconsistencyWasIdentifiedInTheDocument:
+            "Uma inconsistência foi identificada no documento. Por favor, reprocesse para ter melhores resultados",
         uploadPdf: "Arraste e solte seus arquivos PDF abaixo para começar ou clique na área para navegar",
         uploadedFiles: "Todos os arquivos carregados",
         uploadComplete: "Carregamento completo",
@@ -408,7 +416,7 @@
         userIncorrectPassword: "A senha informada está incorreta.",
         userTokenMicrosoftInvalid: "Não foi possível validar sua autenticação. Por favor, faça login novamente.",
         selectTenant: "Selecione o tenant para continuar",
-        continue: "Continuar"
+        continue: "Continuar",
     },
     validation: {
         required: "Campo obrigatório",
@@ -453,6 +461,10 @@
         workflowSelect: {
             all: "Todos os workflow",
             none: "Selecione um workflow",
+        },
+        templates: {
+            all: "Métodos HTTP",
+            searchBtn: "Buscar",
         },
         sortBy: "Ordenar por",
         mostRecent: "Mais recente",
@@ -533,11 +545,11 @@
         loadError: "Erro ao carregar workflow",
         formCreate: {
             title: "Criar Workflow",
-            subtitle: "Siga as etapas para configurar seu workflow."
+            subtitle: "Siga as etapas para configurar seu workflow.",
         },
         formEdit: {
             title: "Editar Workflow",
-            subtitle: "Siga as etapas para configurar seu workflow."
+            subtitle: "Siga as etapas para configurar seu workflow.",
         },
         labelWatchingWorkflow: "Visualizando workflow:",
         labelWorkflowDocs: "Workflow de documentos",
@@ -553,7 +565,7 @@
         userApplicant: "Solicitante",
         assignBtn: "Atribuir",
         unassignInfo: "Desatribuir documento",
-        cardsOpened: "Existem cards abertos neste Workflow"
+        cardsOpened: "Existem cards abertos neste Workflow",
     },
     tools: {
         index: "Ferramentas",
@@ -584,7 +596,7 @@
             connectorApiKey: "Chave de API",
             validatingConnector: "Validando url do  conector",
             invalidConnector: "Conector não respondeu. Url ou chave inválidas",
-            validConnector: "Conector está ativo"
+            validConnector: "Conector está ativo",
         },
         formCreate: {
             title: "Nova Ferramenta",
@@ -628,12 +640,14 @@
         formFlow: {
             progressFlowSuccess: "Fluxo inserido com sucesso",
             progressFlowFail: "Não foi possível inserir fluxo",
-            progressFlowUpdateFail: "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
+            progressFlowUpdateFail:
+                "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
             editFlowNodeSuccess: "Nodo editado com sucesso",
             editFlowNodeFail: "Falha ao editar o nodo",
             connectorWorkflowFail: "Conector do workflow não respondeu. Verifique a URL e a chave da API da ferramenta",
-            connectorWorkflowConfigFail: "Falha ao recuperar a configuração do workflow. Verifique a URL e a chave da API da ferramenta",
-        }
+            connectorWorkflowConfigFail:
+                "Falha ao recuperar a configuração do workflow. Verifique a URL e a chave da API da ferramenta",
+        },
     },
     prompts: {
         title: "Prompts",
@@ -665,6 +679,58 @@
         importPredefined: "Importar pré-definidos",
         importError: "Erro ao importar prompts",
         importSuccess: "Prompts importados com sucesso",
+    },
+    template: {
+        title: "Templates de API",
+        tableTitle: "Templates",
+        subtitle: "Gerencie, teste e edite seus templates de requisição API.",
+        createTemplate: "Criar novo template",
+        notFound: "Nenhum template registrado",
+        method: "Método",
+        name: "Nome",
+        url: "URL",
+        createBtn: "Salvar Template",
+        cancelBtn: "Cancelar",
+        importCurl: "Importar cURL",
+        requestDetails: "Detalhes da Requisição",
+        requestBody: "Corpo da Requisição",
+        templateName: "Nome do Template",
+        templateNamePlaceholder: "ex. Processamento de OCR de Usuário",
+        endpointUrl: "URL do Endpoint",
+        endpointUrlPlaceholder: "https://api.exemplo.com/v1/recurso",
+        queryParams: "Parâmetros de Query",
+        headers: "Cabeçalhos",
+        queryParameters: "Parâmetros de Query",
+        addParam: "Adicionar Parâmetro",
+        noQueryParameters: "Sem parâmetros de query. Adicione um ou digite na URL.",
+        bodySubtitle: "Digite '{' para ver as variáveis disponíveis.",
+        variablesTip:
+            "Dica: Use variáveis como '{{ocr}}' ou '{{prompt}}' que serão substituídas no momento da execução.",
+        formCreate: {
+            title: "Criar Template",
+            subtitle: "Configure o modelo da sua requisição API.",
+        },
+        formEdit: {
+            title: "Editar Template",
+            subtitle: "Atualize o modelo da sua requisição API.",
+        },
+        createSuccess: "Template criado com sucesso",
+        createError: "Erro ao criar template",
+        editSuccess: "Template atualizado com sucesso",
+        editError: "Erro ao atualizar template",
+        removeSuccess: "Template removido com sucesso",
+        removeError: "Erro ao remover template",
+        title: "Templates de API",
+        tableTitle: "Templates",
+        subtitle: "Gerencie, teste e edite seus templates de requisição de API.",
+        createBtn: "Salvar template",
+        notFound: "Nenhum template encontrado",
+        method: "Método",
+        name: "Nome",
+        url: "URL",
+        unselected: "Selecione um template",
+        keyPlaceholder: "Key (o valor será {{nomeKey}})",
+        invalidJsonFormat: "Formato JSON inválido",
     },
     analyze: {
         title: "Análise de Documentos",
@@ -714,6 +780,7 @@
         quizzes: "Questionários",
         tools: "Ferramentas",
         prompts: "Prompts",
+        templates: "Templates de API",
     },
     dashboard: {
         title: "Dashboard de Consumo e Bilhetagem",
@@ -721,7 +788,8 @@
         exportBtn: "Exportar CSV",
         totalWTC: "Total WTC",
         update: "Atualizar",
-        WTCText: "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
+        WTCText:
+            "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
         filters: {
             currentMonth: "Este mês",
             lastMonth: "Mês passado",
@@ -735,10 +803,13 @@
             pagesGraphSubtitle: "Consumo Diário",
             workflowsAutomaticGraphTitle: "Execuções de Workflows de Automação de IA",
             workflowsGraphTitle: "Execuções de Workflows Woopi AI",
-            tokensTooltip: "Visualização do consumo de tokens para os diferentes modelos de Inteligência Artificial. Tokens são as unidades de processamento de texto utilizadas pelos modelos.",
-            pagesTooltip: "Quantidade de páginas de documentos que passaram pelo processo de Reconhecimento Óptico de Caracteres (OCR), que converte imagens de texto em texto editável.",
+            tokensTooltip:
+                "Visualização do consumo de tokens para os diferentes modelos de Inteligência Artificial. Tokens são as unidades de processamento de texto utilizadas pelos modelos.",
+            pagesTooltip:
+                "Quantidade de páginas de documentos que passaram pelo processo de Reconhecimento Óptico de Caracteres (OCR), que converte imagens de texto em texto editável.",
             workflowAutomaticTooltip: "Número de vezes que os fluxos de automação de IA foram executados.",
-            workflowTooltip: "Número de vezes que os fluxos de automação criados na plataforma Woopi AI foram executados.",
+            workflowTooltip:
+                "Número de vezes que os fluxos de automação criados na plataforma Woopi AI foram executados.",
             totalTokens: "Total de Tokens Consumidos",
             totalPages: "Total de Páginas Processadas",
             totalWorkflowAutomatic: "Total de Execuções Woopi AI",
@@ -766,19 +837,19 @@
         platformCard: {
             title: "Conheça a Plataforma",
             description: "Assista a um tour guiado de 5 minutos sobre as principais funcionalidades.",
-            button: "Ver vídeo"
+            button: "Ver vídeo",
         },
         workflowCard: {
             title: "Seu Primeiro Workflow",
             description: "Siga nosso guia passo-a-passo para criar sua primeira automação em minutos.",
-            button: "Iniciar guia"
+            button: "Iniciar guia",
         },
         docsCard: {
             title: "Explore a Documentação",
-            description: "Consulte nossa documentação completa para explorar todo o potencial do WOOPI AI.",
-            button: "Acessar docs"
-        }
-    }
+            description: "Consulte nossa documentação completa para explorar todo o potencial do AI HUB.",
+            button: "Acessar docs",
+        },
+    },
 };
 
 export default portuguese;
