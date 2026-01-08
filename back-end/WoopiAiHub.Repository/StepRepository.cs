@@ -160,7 +160,8 @@ namespace WoopiAiHub.Repository
                              (
                                  allUsers == true
                                  || (c.AssignedUser != null && c.AssignedUser.Email == login)
-                             )
+                             ) &&
+                             c.Document!.Enable
                          )
                         .Select(c => new CardDto
                         {
