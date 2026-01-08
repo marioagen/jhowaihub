@@ -588,6 +588,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             _unitOfWork.BeginTransaction();
+            workflow.Teams.Clear();
             try
             {
                 var teamsList = _teamRepository.FindByIds(workflowUpdatePhase1Dto.Teams);
