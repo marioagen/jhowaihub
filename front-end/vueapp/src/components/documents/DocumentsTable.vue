@@ -21,15 +21,9 @@
             </template>
             <template #cell-actions="{ data }">
                 <DropdownComponent>
-                    <li v-if="data.row.status === 0">
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="embedData(data.row.id)">
-                            <LucideIcon icon="TextSearch" />
-                            {{ $t("common.analyze") }}
-                        </a>
-                    </li>
-                    <li v-else>
+                    <li>
                         <a class="dropdown-item d-flex align-items-center gap-2"
-                            @click="redirectToConsult(data.row.id)">
+                            @click="getWorkFlowListByDocumentId(data.row.id)">
                             <LucideIcon icon="Search" />
                             {{ $t("documents.actions.consult") }}
                         </a>
@@ -42,13 +36,17 @@
     <ConfirmModal id="deleteConfirm" title="documents.removeTitle" message="common.thisActionCannotBeUndone"
         cancelText="common.cancel" confirmText="common.confirm" confirmVariant="primary" ref="DeleteDialog"
         :isLoading="isDeleting" @confirm="deleteDocument" />
+    <DocumentWorkflowListModal id="typeModalWorkflow" :documentId="selectedDocumentId"  ref="ListWorkFlowModal" />
 </template>
 
 <script>
 import dates from "@/helpers/date";
+import DocumentWorkflowListModal from "@/components/documents/DocumentWorkflowListModal.vue";
 import TableComponent from "@/components/global/TableComponent.vue";
 import ConfirmModal from "@/components/global/ConfirmModal.vue";
+import ModalComponent from "@/components/global/ModalComponent.vue";
 import DocumentsServices from "@/services/documents/DocumentsServices";
+import WorkflowService from "@/services/workflow/WorkflowService";
 import BadgeComponent from "@/components/global/BadgeComponent";
 import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent"
 import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
@@ -63,6 +61,8 @@ export default {
         BadgeComponent,
         TableComponent,
         ConfirmModal,
+        ModalComponent,
+        DocumentWorkflowListModal
     },
     data: () => ({
         table: {
@@ -96,6 +96,8 @@ export default {
         isEmbedding: false,
         isDeleting: false,
         docDataEmbedding: {},
+        workflowListByDocument: [],
+        selectedDocumentId: null,
     }),
     methods: {
         getDocuments() {
@@ -180,6 +182,29 @@ export default {
             this.docDataEmbedding.Id = id;
             this.isEmbedding = true
         },
+        getWorkFlowListByDocumentId(id) {
+            this.selectedDocumentId = id;
+            this.$nextTick(() => {
+                this.$refs.ListWorkFlowModal.open();
+            });
+            // WorkflowService.getWorkflowsByDocumentId(id)
+            //     .then((response) => {
+            //         console.log("getWorkFlowListByDocumentId", response);
+            //         if (response?.error !== undefined) {
+            //             this.$notify({
+            //                 title: 'Error',
+            //                 message: "response.error",
+            //                 variant: 'danger',
+            //                 icon: 'CircleX',
+            //             });
+            //         }
+            //         this.workflowListByDocument = response.content;
+            //         this.$refs.ListDataModal.open();
+            //     })
+            //     .finally(() => {
+            //         // this.table.isLoading = false;
+            //     });
+        },
         redirectToConsult(id) {
             this.$router.push({
                 name: "Analyzer",
@@ -215,5 +240,16 @@ export default {
 <style scoped>
 .analyze-btn {
     width: 94px;
+}
+
+.modal-div {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.modal-title,
+.modal-message {
+    text-align: center;
 }
 </style>
