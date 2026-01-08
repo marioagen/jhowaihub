@@ -45,8 +45,8 @@
                                 <button type="button" class="btn btn-sm  btn-primary assing-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" @click.stop="">
                                     <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
                                     <span>{{ $t("card.assignBtn") }}</span>
-                                    <LucideIcon icon="ChevronRight" size="20" class="ml-2 icon-closed" />
-                                    <LucideIcon icon="ChevronDown" size="20" class="ml-2 icon-open" />
+                                    <LucideIcon icon="ChevronRight" :size="15" class="ml-2 icon-closed" />
+                                    <LucideIcon icon="ChevronDown" :size="15" class="ml-2 icon-open" />
                                 </button>
                                 <ul class="dropdown-menu p-2 users-list">
                                     <li v-if="users.length > 5" class="mb-1">
@@ -61,7 +61,7 @@
                                 </ul>
                             </div>
                             <button v-else type="button" class="btn btn-sm btn-primary assing-btn" @click.stop="assignUser(loggedUserId)">
-                                <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="16" class="mr-2 animate-spin text-white" />
+                                <LucideIcon v-if="isUpdatingAssignedUser" icon="Loader" :size="12" class="mr-2 animate-spin text-white" />
                                 {{ $t("card.assignBtn") }}
                                 <LucideIcon icon="NotebookPen" size="16" class="ml-2" />
                             </button>
@@ -259,6 +259,17 @@
 </script>
 
 <style scoped>
+    .card {
+        --kanban-card-title-size: 0.6rem;
+        --kanban-card-text-size: 0.6rem;
+        --kanban-card-badge-size: 0.5rem;
+        --kanban-card-button-size: 0.6rem;
+        --kanban-card-margin: 0;
+        --kanban-card-padding: 0.5rem;
+        margin-top: var(--kanban-card-margin) !important;
+        margin-bottom: var(--kanban-card-margin) !important;
+        white-space: nowrap;
+    }
 
     .bg-primary {
         background-color: #dbeafe !important;
@@ -279,10 +290,6 @@
         background-color: #d0fae5 !important;
         color: #007a55 !important;
     }
-    
-    .card {
-        white-space: nowrap;
-    }
 
     .card-content {
         position: relative
@@ -291,9 +298,9 @@
     .progress-content {
         width: 100%;
         z-index: 11;
-        position: absolute;
-        bottom: 0;
-        padding: 20px 35px 10px 2px;
+        position: relative;
+        padding: var(--kanban-card-padding) !important;
+        font-size: var(--kanban-card-text-size) !important;
     }
         .progress-content .progress {
             height: 10px;
@@ -348,8 +355,15 @@
         }
     }
 
-    .card-body p,
+    .card .card-body p {
+        font-size: var(--kanban-card-title-size) !important;
+        font-weight: bold !important;
+        overflow-wrap: break-word;
+        white-space: normal;
+    }
+
     .card-body small {
+        font-size: var(--kanban-card-text-size);
         overflow-wrap: break-word;
         white-space: normal;
     }
@@ -360,14 +374,71 @@
         }
 
     .card-body .badge {
+        font-size: var(--kanban-card-badge-size);
         max-width: 60%;
         overflow-wrap: break-word;
         white-space: normal;
     }
 
+    /* Add padding to card body for space from borders, but keep internal spacing removed */
+    .card-body {
+        padding: var(--kanban-card-padding) !important;
+    }
+
+    /* Remove margins from all elements inside card-body */
+    .card-body > * {
+        margin: 0 !important;
+    }
+
+    .card-body .mb-2 {
+        margin-bottom: 0 !important;
+    }
+
+    .card-body p {
+        margin-bottom: 0 !important;
+    }
+
+    .card-body hr {
+        margin: 0 !important;
+    }
+
     .card-footer{
         background-color: inherit;
         border-top-width: 0px;
+        padding: var(--kanban-card-padding) !important;
+    }
+
+    /* Remove margins from footer elements, but keep spacing for progress-content */
+    .card-footer > *:not(.cover) {
+        margin: 0 !important;
+    }
+
+    .card-footer .mb-2:not(.progress-content .mb-2),
+    .card-footer .mb-1:not(.progress-content .mb-1) {
+        margin-bottom: 0 !important;
+    }
+
+    /* Reduce spacing around badge and button */
+    .card-footer .d-flex {
+        margin: 0 !important;
+        gap: 0.25rem;
+    }
+
+    .card-footer .badge {
+        margin: 0 !important;
+    }
+
+    .card-footer .btn {
+        margin: 0 !important;
+    }
+
+    /* Ensure progress-content keeps its spacing */
+    .progress-content .mb-2 {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .card-footer .btn {
+        font-size: var(--kanban-card-button-size);
     }
 
     .overlay-loading {
@@ -401,7 +472,7 @@
     }
 
     hr{
-        margin: 0.5rem 0;
+        margin: 0 !important;
     }
 
     .dropdown-toggle::after {
@@ -437,6 +508,10 @@
     .users-list {
         max-height: 300px;
         overflow-y: auto;
+    }
+
+    .users-list .dropdown-item {
+        font-size: var(--kanban-card-text-size);
     }
 
     .padding-loading {

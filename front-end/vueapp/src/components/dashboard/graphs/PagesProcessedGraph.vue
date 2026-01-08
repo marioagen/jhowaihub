@@ -77,7 +77,7 @@ export default {
             return this.graph.series[0].data.reduce((a, b) => a + b, 0);
         },
         usageUnitPages() {
-            if (this.usageUnits.length === 0) {
+            if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
                 return 0;
             }
             return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.Page)?.value ?? 0;

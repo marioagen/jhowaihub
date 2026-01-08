@@ -99,6 +99,7 @@
                             :labelSearch="'management.teams.searchTeams'"
                             :items="teamsList"
                             :loading="isLoading"
+                            :listHeight="'300px'"
                             v-model:selectedItems="selectedTeams"
                         >
                             <template #footer>

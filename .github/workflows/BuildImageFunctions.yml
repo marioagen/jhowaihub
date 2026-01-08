@@ -25,8 +25,7 @@ jobs:
           echo "imageVersion=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
           
       - name: Build Image
-        working-directory: ./back-end
-        run: docker image build -f WoopiAiHub.Functions/Dockerfile -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
+        run: docker image build -f back-end/WoopiAiHub.Functions/Dockerfile -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
 
       - name: Azure login
         run: az login --identity

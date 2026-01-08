@@ -53,6 +53,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<UsageType> UsageTypes { get; set; }
         public DbSet<UsageUnit> UsageUnits { get; set; }
         public DbSet<UsageDaily> UsageDailies { get; set; }
+        public DbSet<ApiTemplate> ApiTemplates { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -98,6 +99,7 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<ModelEmbedding>(new ModelEmbeddingsMap().Configure);
             modelBuilder.Entity<UsageUnit>(new UsageUnitMap().Configure);
             modelBuilder.Entity<UsageType>(new UsageTypeMap().Configure);
+            modelBuilder.Entity<ApiTemplate>(new ApiTemplateMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
     }
