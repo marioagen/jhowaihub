@@ -1,7 +1,15 @@
 <template>
     <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
-        <div class="sidebar-header d-flex align-items-center" :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'" style="height: 60px; padding: 0 10px;">
-            <router-link class="d-flex align-items-center text-decoration-none" :class="isCollapsed ? 'justify-content-center' : 'w-100'" :to="{ name: 'Home' }">
+        <div
+            class="sidebar-header d-flex align-items-center"
+            :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'"
+            style="height: 60px; padding: 0 10px"
+        >
+            <router-link
+                class="d-flex align-items-center text-decoration-none"
+                :class="isCollapsed ? 'justify-content-center' : 'w-100'"
+                :to="{ name: 'Home' }"
+            >
                 <img
                     v-if="isCollapsed"
                     src="./../../assets/img/woopiai-hub-small-logo.png"
@@ -13,12 +21,12 @@
                     v-else
                     src="./../../assets/img/woopiai-hub-logo.png"
                     :title="$t('common.home')"
-                    height="23" 
+                    height="23"
                     alt="WOOPI AI"
-                    style="margin-left: 0px;"
+                    style="margin-left: 0px"
                 />
             </router-link>
-        </div>        
+        </div>
         <div class="horizontal-separator-fixed"></div>
         <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
             <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
@@ -38,15 +46,11 @@
                     :class="[
                         'd-flex align-items-center custom-menu-item link-dark rounded',
                         isRouteActive(item) ? 'active' : '',
-                        isCollapsed ? 'justify-content-center' : ''
+                        isCollapsed ? 'justify-content-center' : '',
                     ]"
                     :to="item.to"
                 >
-                    <LucideIcon
-                        strokeWidth="2"
-                        :icon="item.icon.name"
-                        :color="item.icon.color"
-                    />
+                    <LucideIcon strokeWidth="2" :icon="item.icon.name" :color="item.icon.color" />
                     <span v-show="!isCollapsed" class="ms-2">{{ $t(item.labelKey) }}</span>
                 </router-link>
             </li>
@@ -55,7 +59,7 @@
 </template>
 
 <script>
-    import { hasPermission } from '@/utils/permissions';
+    import { hasPermission } from "@/utils/permissions";
     export default {
         name: "SideBar",
         props: {
@@ -75,7 +79,7 @@
                 permissions: {
                     management: hasPermission("Management", "View"),
                     questions: hasPermission("Questions", "View"),
-                    documents: hasPermission("Documents","View"),
+                    documents: hasPermission("Documents", "View"),
                     types: hasPermission("Types", "View"),
                     quizzes: hasPermission("Quizzes", "View"),
                     workflow: hasPermission("Workflow", "View"),
@@ -84,111 +88,121 @@
                 },
                 menuItems: [
                     {
-                        activeKey: 'Home',
-                        to: '/home',
-                        icon: { name: 'Home', color: '#0d6efd' },
-                        labelKey: 'common.home'
-                    },    
-                    {   
-                        permission: 'Dashboard',
-                        activeKey: 'Dashboard',
-                        to: '/dashboard',
-                        icon: { name: 'LayoutGrid', color: '#f43f5e' },
-                        labelKey: 'pages.dashboard'
+                        activeKey: "Home",
+                        to: "/home",
+                        icon: { name: "Home", color: "#0d6efd" },
+                        labelKey: "common.home",
                     },
                     {
-                        permission: 'Management',
-                        activeKey: 'DocumentList',
-                        to: '/management',
-                        icon: { name: 'Users', color: '#ff6900' },
-                        labelKey: 'pages.management'
+                        permission: "Dashboard",
+                        activeKey: "Dashboard",
+                        to: "/dashboard",
+                        icon: { name: "LayoutGrid", color: "#f43f5e" },
+                        labelKey: "pages.dashboard",
                     },
                     {
-                        activeKey: 'DocumentList',
-                        to: '/documents',
-                        icon: { 
-                            name: 'FileText', 
-                            color: '#2f80ed' 
-                        },
-                        labelKey: 'pages.documents'
+                        permission: "Management",
+                        activeKey: "DocumentList",
+                        to: "/management",
+                        icon: { name: "Users", color: "#ff6900" },
+                        labelKey: "pages.management",
                     },
                     {
-                        permission: 'Workflow',
-                        activeKey: 'Workflow',
-                        to: '/workflow',
-                        icon: { 
-                            name: 'Workflow', 
-                            color: '#615FFF' 
-                        },
-                        labelKey: 'pages.workflows'
-                    },
-                    {
-                        permission: 'Workflow',
-                        activeKey: 'WorkflowManagement',
-                        to: '/workflow/management',
-                        icon: { 
-                            name: 'Workflow', 
-                            color: '#00bba7' 
-                        },
-                        labelKey: 'pages.workflowManagement'
-                    },
-                    {
-                        permission: 'Types',
-                        activeKey: 'Type',
-                        to: '/types',
-                        icon: { 
-                            name: 'BookmarkCheck', 
-                            color: '#f2c94c' 
-                        },
-                        labelKey: 'pages.types'
-                    },
-                    {
-                        permission: 'Questions',
-                        activeKey: 'Questions',
-                        to: '/questions',
-                        icon: { 
-                            name: 'MessageSquare', 
-                            color: '#3fd67b' 
-                        },
-                        labelKey: 'pages.questions'
-                    },
-                    {
-                        permission: 'Quizzes',
-                        activeKey: 'Quizzes',
-                        to: '/quizzes',
-                        icon: { 
-                            name: 'ClipboardList', 
-                            color: '#a259ff' 
-                        },
-                        labelKey: 'pages.quizzes'
-                    },
-                    {
-                        permission: 'Tools',
-                        activeKey: 'Tools',
-                        to: '/tools',
-                        icon: { 
-                            name: 'PocketKnife', 
-                            color: '#f59e0b'
-                        },
-                        labelKey: 'pages.tools'
-                    },
-                    {
-                        permission: 'Prompts',
-                        activeKey: 'Prompts',
-                        to: '/prompts',
+                        activeKey: "DocumentList",
+                        to: "/documents",
                         icon: {
-                            name: 'Braces',
-                            color: '#8e51ff'
+                            name: "FileText",
+                            color: "#2f80ed",
                         },
-                        labelKey: 'pages.prompts'
+                        labelKey: "pages.documents",
                     },
-                ]
+                    {
+                        permission: "Workflow",
+                        activeKey: "Workflow",
+                        to: "/workflow",
+                        icon: {
+                            name: "Workflow",
+                            color: "#615FFF",
+                        },
+                        labelKey: "pages.workflows",
+                    },
+                    {
+                        permission: "Workflow",
+                        activeKey: "WorkflowManagement",
+                        to: "/workflow/management",
+                        icon: {
+                            name: "Workflow",
+                            color: "#00bba7",
+                        },
+                        labelKey: "pages.workflowManagement",
+                    },
+                    {
+                        permission: "Types",
+                        activeKey: "Type",
+                        to: "/types",
+                        icon: {
+                            name: "BookmarkCheck",
+                            color: "#f2c94c",
+                        },
+                        labelKey: "pages.types",
+                    },
+                    {
+                        permission: "Questions",
+                        activeKey: "Questions",
+                        to: "/questions",
+                        icon: {
+                            name: "MessageSquare",
+                            color: "#3fd67b",
+                        },
+                        labelKey: "pages.questions",
+                    },
+                    {
+                        permission: "Quizzes",
+                        activeKey: "Quizzes",
+                        to: "/quizzes",
+                        icon: {
+                            name: "ClipboardList",
+                            color: "#a259ff",
+                        },
+                        labelKey: "pages.quizzes",
+                    },
+                    {
+                        permission: "Tools",
+                        activeKey: "Tools",
+                        to: "/tools",
+                        icon: {
+                            name: "PocketKnife",
+                            color: "#f59e0b",
+                        },
+                        labelKey: "pages.tools",
+                    },
+                    {
+                        permission: "Prompts",
+                        activeKey: "Prompts",
+                        to: "/prompts",
+                        icon: {
+                            name: "Braces",
+                            color: "#8e51ff",
+                        },
+                        labelKey: "pages.prompts",
+                    },
+                    // {
+                    //     permission: 'Templates',
+                    //     activeKey: 'Templates',
+                    //     to: '/templates',
+                    //     icon: {
+                    //         name: 'Zap',
+                    //         color: '#0d6efd'
+                    //     },
+                    //     labelKey: 'pages.templates'
+                    // },
+                ],
             };
         },
         methods: {
             isRouteActive(item) {
                 return this.$route.path === item.to;
-            }
+            },
         },
     };
 </script>
