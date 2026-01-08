@@ -117,7 +117,6 @@
             },
         },
         mounted() {
-            // Emit initial filter data with default dates
             this.filterData();
         },
     };
