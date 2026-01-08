@@ -72,7 +72,14 @@
                     <div class="card custom-height">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
-                                <KanbanBoard :kanbanData="kanbanCards" :users="users" @reload="reloadKanban" />
+                                <KanbanBoard 
+                                    ref="kanbanBoardRef"
+                                    :kanbanData="kanbanCards" 
+                                    :users="users" 
+                                    @reload="reloadKanban" 
+                                    :isLoading="isLoadingKanban"
+                                    :cardIdsToUpdate="cardIdsToUpdate"
+                                />
                             </div>
                         </div>
                     </div>
@@ -124,7 +131,9 @@ export default {
                 login: null,
                 isAllUsers: true,
             },
-            users: []
+            users: [],
+            cardIdsToUpdate: [],
+            updateCardsDebounceTimer: null
         };
     },
     components: {
@@ -242,6 +251,75 @@ export default {
         reloadKanban() {
             this.getWorkflowStepsById(this.selectedOption.id);
         },
+        updateSpecificCards(cardIds) {
+            if (!cardIds || cardIds.length === 0) return;
+            
+            // Clear existing debounce timer
+            if (this.updateCardsDebounceTimer) {
+                clearTimeout(this.updateCardsDebounceTimer);
+            }
+            
+            // Debounce the update to batch rapid changes
+            this.updateCardsDebounceTimer = setTimeout(() => {
+                // Update the cardIdsToUpdate prop to trigger KanbanBoard watch
+                this.cardIdsToUpdate = [...cardIds];
+                
+                this.isLoadingKanban = true;
+                WorkflowService.getWorkflowStepsById(this.selectedOption.id, this.filters)
+                    .then((response) => {
+                        // Handle both array and object with steps property
+                        const currentSteps = Array.isArray(this.kanbanCards) 
+                            ? this.kanbanCards 
+                            : (this.kanbanCards?.steps || []);
+                        const responseSteps = Array.isArray(response) 
+                            ? response 
+                            : (response?.steps || []);
+                        
+                        if (currentSteps.length > 0 && responseSteps.length > 0) {
+                            // Update only the specific cards
+                            cardIds.forEach(cardId => {
+                                for (let i = 0; i < currentSteps.length; i++) {
+                                    const step = currentSteps[i];
+                                    if (step.cards) {
+                                        const cardIndex = step.cards.findIndex(c => c.id === cardId);
+                                        if (cardIndex !== -1) {
+                                            // Find the updated card in the response
+                                            for (let j = 0; j < responseSteps.length; j++) {
+                                                const responseStep = responseSteps[j];
+                                                if (responseStep.cards) {
+                                                    const updatedCard = responseStep.cards.find(c => c.id === cardId);
+                                                    if (updatedCard) {
+                                                        // Replace the card with updated data using Vue reactivity
+                                                        this.$set(step.cards, cardIndex, updatedCard);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                            
+                            // Update kanbanCards to trigger reactivity
+                            if (Array.isArray(this.kanbanCards)) {
+                                this.kanbanCards = [...currentSteps];
+                            } else if (this.kanbanCards) {
+                                this.kanbanCards = { ...this.kanbanCards, steps: [...currentSteps] };
+                            }
+                        } else {
+                            // If structure is different, update the whole thing
+                            this.kanbanCards = response;
+                        }
+                    })
+                    .finally(() => {
+                        this.isLoadingKanban = false;
+                        // Clear cardIdsToUpdate after a short delay to allow KanbanBoard to process
+                        setTimeout(() => {
+                            this.cardIdsToUpdate = [];
+                        }, 100);
+                    });
+            }, 300); // 300ms debounce delay
+        },
         filterData(filters) {
             this.filters = filters;
             this.reloadKanban();
@@ -265,11 +343,17 @@ export default {
     async mounted() {
         await signalRService.startConnection();
         signalRService.on(this.signalrEventExecutionChanged, (message) => {
-            if (!this.kanbanCards.steps) return;
+            console.log(message);
+            // Handle both array and object with steps property
+            const steps = Array.isArray(this.kanbanCards) 
+                ? this.kanbanCards 
+                : (this.kanbanCards?.steps || []);
+            
+            if (steps.length === 0) return;
             let foundCard = null;
 
-            for (let i = 0; i < this.kanbanCards.steps.length; i++) {
-                const step = this.kanbanCards.steps[i];
+            for (let i = 0; i < steps.length; i++) {
+                const step = steps[i];
                 if (step.cards) {
                     const card = step.cards.find(c => c.id === message.cardId);
                     if (card) {
@@ -283,11 +367,18 @@ export default {
             if (!foundCard) return;
             foundCard.percentage = message.percentage;
             if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
-                this.getWorkflowByUser();
+                // Instead of reloading everything, collect card ID and update only that card
+                if (!this.cardIdsToUpdate.includes(message.cardId)) {
+                    this.cardIdsToUpdate.push(message.cardId);
+                }
+                this.updateSpecificCards([message.cardId]);
             }
         });
     },
     beforeUnmount() {
+        if (this.updateCardsDebounceTimer) {
+            clearTimeout(this.updateCardsDebounceTimer);
+        }
         signalRService.off(this.signalrEventExecutionChanged);
         signalRService.stopConnection();
         GlobalEventService.off("all-uploads-complete", this.reloadKanban);

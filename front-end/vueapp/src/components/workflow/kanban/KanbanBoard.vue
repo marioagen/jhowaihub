@@ -24,9 +24,14 @@
                     </div>
                     <div v-else>
                         <div v-for="card in step.cards" :key="card.id" class="card-body">
-                            <KanbanCard :dataCard="card" :dataStep="step" :isFirstStep="step.order === minOrder"
+                            <KanbanCard 
+                                :dataCard="card" 
+                                :dataStep="step" 
+                                :isFirstStep="step.order === minOrder"
+                                :isLoading="isLoading"
                                 :isLastStep="step.order === maxOrder" @reload="reloadList" label="labelAnalyze"
-                                :users="users" />
+                                :users="users" 
+                            />
                         </div>
                     </div>
                 </div>
@@ -57,10 +62,20 @@ export default {
             required: false,
             default: false,
         },
+        cardIdsToUpdate: {
+            type: Array,
+            required: false,
+            default: () => []
+        },
     },
     watch: {
         kanbanData() {
             this.setCard();
+        },
+        cardIdsToUpdate(newCardIds) {
+            if (newCardIds && newCardIds.length > 0) {
+                this.updateCards(newCardIds);
+            }
         },
     },
     data: () => ({
@@ -91,6 +106,14 @@ export default {
         },
         setCard() {
             this.stepsList = this.kanbanData;
+        },
+        updateCards(cardIds) {
+            if (!cardIds || cardIds.length === 0) return;
+            
+            // This method is called when cardIdsToUpdate changes
+            // The parent component will handle fetching and updating the cards
+            // This component just needs to react to the updated kanbanData prop
+            // which will be updated by the parent
         },
     },
     mounted() {
