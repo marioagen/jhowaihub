@@ -85,19 +85,23 @@ export default {
         WorkflowsGraph,
         PagesProcessedGraph,
     },
-    data: () => ({
-        isLoading: false,
-        showDateFilter: false,
-        datesChange: 0,
-        filters: {
-            preset: "currentMonth",
-            start: "",
-            end: "",
-        },
-        totalWTC: 0,
-        usageUnits: [],
-        plan: "",
-    }),
+    data() {
+        const today = new Date();
+        const first = new Date(today.getFullYear(), today.getMonth(), 1);
+        return {
+            isLoading: false,
+            showDateFilter: false,
+            datesChange: 0,
+            filters: {
+                preset: "currentMonth",
+                start: first.toISOString().slice(0, 10),
+                end: today.toISOString().slice(0, 10),
+            },
+            totalWTC: 0,
+            usageUnits: [],
+            plan: "",
+        };
+    },
     methods: {
         toggleDateFilter() {
             this.showDateFilter = !this.showDateFilter;
