@@ -64,10 +64,12 @@
     export default {
         name: "DashboardDateFilter",
         data() {
+            const today = new Date();
+            const first = new Date(today.getFullYear(), today.getMonth(), 1);
             return {
                 selectedPreset: "currentMonth",
-                start: "",
-                end: "",
+                start: first.toISOString().slice(0, 10),
+                end: today.toISOString().slice(0, 10),
             };
         },
         methods: {
@@ -113,6 +115,10 @@
                 this.end = end.toISOString().slice(0, 10);
                 this.filterData();
             },
+        },
+        mounted() {
+            // Emit initial filter data with default dates
+            this.filterData();
         },
     };
 </script>
