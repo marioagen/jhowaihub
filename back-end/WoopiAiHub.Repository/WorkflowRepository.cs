@@ -134,17 +134,17 @@ namespace WoopiAiHub.Repository
                 Order = s.Order,
                 WorkflowId = s.WorkflowId,
                 Profile = new ProfileDto
-            {
-                Id = s.Profile!.Id,
-                Name = s.Profile.Name
-            },
+                {
+                    Id = s.Profile!.Id,
+                    Name = s.Profile.Name
+                },
                 Status = new StatusDto
-            {
-                Id = s.Status!.Id,
-                Name = s.Status.Name,
-                Color = s.Status.Color,
-            },
-            StepTools = s.StepTools
+                {
+                    Id = s.Status!.Id,
+                    Name = s.Status.Name,
+                    Color = s.Status.Color,
+                },
+                StepTools = s.StepTools
             .Select(st => new StepToolDto
             {
                 Id = st.Id,
@@ -208,6 +208,42 @@ namespace WoopiAiHub.Repository
                 .Include(w => w.Teams)
                 .Where(w => w.Enable && w.Teams.Any(s => teamsIds.Contains(s.Id)))
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves a list of workflows by documentId and user .
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        public async Task<ICollection<Workflow>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDTO dto, CancellationToken ct = default)
+        {
+
+            var search = dto.Search?.ToLower();
+            var login = dto.Login?.ToLower();
+            var query = _context.Workflows
+                    .Include(w => w.Documents)
+                    .Include(w => w.Steps)
+                        .ThenInclude(s => s.Cards)
+                        .ThenInclude(s => s.AssignedUser)
+                .AsNoTracking();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(i => EF.Functions.Like(i.Name, $"%{search}%"));
+            }
+
+            if (!string.IsNullOrEmpty(login))
+            {
+                query = query.Where(d =>
+                    d.Teams.Any(c =>
+                        c.Users.Any(c =>
+                            EF.Functions.Like(c.Email, login)
+                        )
+                    )
+                );
+            }
+
+            return await query.Where(w => w.Documents.Any(s => s.Id == dto.DocumentId)).ToListAsync(ct);
         }
 
         /// <summary>
@@ -429,7 +465,7 @@ namespace WoopiAiHub.Repository
                     Name = t.Name,
                 }).ToList(),
                 Steps = w.Steps.Select(s => new StepDto
-                { 
+                {
                     Id = s.Id,
                     Name = s.Name,
                     Order = s.Order,

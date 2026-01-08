@@ -245,5 +245,20 @@ namespace WoopiAiHub.Api.Controllers
             var result = _workflowServices.FindStepById(id);
             return Ok(result);
         }
+
+        
+        /// <summary>
+        /// Endpoint that get all the workflows linked to a document and user
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("Document")]
+        [SwaggerOperation("Endpoint that receive an document id and return workflow list linke to the document")]
+        [ProducesResponseType(typeof(List<WorkflowDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindWorkflowByDocument([FromBody]RequestWorkFlowByDocumentDTO dto, CancellationToken ct = default)
+        {
+            var workflow = await _workflowServices.FindWorkflowsByDocument(dto, ct);
+            return Ok(workflow);
+        }
     }
 }
