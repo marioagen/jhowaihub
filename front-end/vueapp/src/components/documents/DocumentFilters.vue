@@ -22,29 +22,23 @@
             </div>
         </div>
         <div class="col-3">
-            <select
-                v-model="filters.workflowId"
-                class="form-select form-select-sm w-auto"
-                @change="filterData"
-            >
-                <option value="" disabled>{{ $t("filters.workflowSelect.none") }}</option>
-                <option :value="0">{{ $t("filters.workflowSelect.all") }}</option>
-                <option 
-                    v-for="workflow in workflowsList"
-                    :key="workflow.id" 
-                    :value="workflow.id"
-                >
+            <select v-model="filters.workflowId" class="form-select form-select-sm w-auto" @change="filterData">
+                <option value="">{{ $t("filters.workflowSelect.none") }}</option>
+                <option :value="0">{{ $t("filters.workflowSelect.withWorkflow") }}</option>
+                <option v-for="workflow in workflowsList" :key="workflow.id" :value="workflow.id">
                     {{ workflow.name }}
                 </option>
             </select>
         </div>
         <div class="col-1">
             <button
-                v-tooltip="filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')"
+                v-tooltip="
+                    filters.isAllUsers ? $t('filters.assignment.currentUser') : $t('filters.assignment.allUsers')
+                "
                 class="btn table-btn btn-sm"
                 :class="filters.isAllUsers ? 'btn-outline-secondary' : 'btn-outline-primary'"
                 type="button"
-                style="display: flex; align-items: center; justify-content: center;"
+                style="display: flex; align-items: center; justify-content: center"
                 @click="filterUsers"
             >
                 <LucideIcon icon="User" />
@@ -57,10 +51,10 @@
     export default {
         name: "DocumentFilters",
         props: {
-            workflowsList: { 
-                type: [Object, Array], 
-                required: true 
-            } 
+            workflowsList: {
+                type: [Object, Array],
+                required: true,
+            },
         },
         data() {
             return {
@@ -71,28 +65,32 @@
                     isAllUsers: true,
                     login: this.$store.state.userProfile.login,
                     colType: 2,
-                }
+                },
             };
         },
         watch: {
             workflowsList: {
-                immediate: true, 
+                immediate: true,
                 handler(newVal) {
                     if (newVal.length) {
-                        this.filters.workflows = this.filters.workflowId
-                            ? [this.filters.workflowId]
-                            : newVal.map(t => t.id);
-                            
                         this.$emit("filter", { ...this.filters });
                     }
-                }
-            }
+                },
+            },
         },
         methods: {
             filterData() {
-                this.filters.workflows = this.filters.workflowId
-                    ? [this.filters.workflowId]                
-                    : this.workflowsList.map(t => t.id);  
+                switch (this.filters.workflowId) {
+                    case "":
+                        this.filters.workflows = [];
+                        break;
+                    case 0:
+                        this.filters.workflows = this.workflowsList.map((t) => t.id);
+                        break;
+                    default:
+                        this.filters.workflows = [this.filters.workflowId];
+                }
+
                 this.$emit("filter", { ...this.filters });
             },
             filterUsers() {
@@ -108,7 +106,7 @@
             showCleanBtn() {
                 return this.filters.input !== "";
             },
-        }
+        },
     };
 </script>
 

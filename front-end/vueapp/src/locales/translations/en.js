@@ -460,7 +460,7 @@
             allUsers: "All users",
         },
         workflowSelect: {
-            all: "All workflows",
+            withWorkflow: "All with associated workflow",
             none: "Select a workflow",
         },
         templates: {
