@@ -67,13 +67,7 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<object> Login(LoginDto loginDto)
         {
-            ResponseCheckAccessDto userAccess = null;
-            userAccess = await CheckMarketplaceAccess(loginDto.Email);
-            userAccess = new ResponseCheckAccessDto
-            {
-                HasAccess = true,
-                Tenants = new List<string>{"WoopiAiDev"}
-            };
+            var userAccess = await CheckMarketplaceAccess(loginDto.Email);
             if (userAccess != null && userAccess.HasAccess)
             {
                 if (string.IsNullOrEmpty(loginDto.Tenant) && userAccess.Tenants.Count > 1)
