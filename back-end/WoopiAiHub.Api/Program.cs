@@ -75,7 +75,7 @@ if (!string.IsNullOrWhiteSpace(allowedOrigin))
     }));
 }
 else
-    throw new InvalidOperationException("CORS origin não está configurado. Verifique a chave 'CORS' no appsettings ou variável de ambiente.");
+    throw new InvalidOperationException("CORS origin nï¿½o estï¿½ configurado. Verifique a chave 'CORS' no appsettings ou variï¿½vel de ambiente.");
 
 builder.Services.AddInfrastructure(config);
 builder.Services.AddApplication();
@@ -104,10 +104,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         OnMessageReceived = context =>
         {
-            // Permite autenticação JWT via query para SignalR
+            // Permite autenticaï¿½ï¿½o JWT via query para SignalR
             var accessToken = context.Request.Query["access_token"];
 
-            // Verifica se é requisição do SignalR
+            // Verifica se ï¿½ requisiï¿½ï¿½o do SignalR
             var path = context.HttpContext.Request.Path;
             if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
             {
