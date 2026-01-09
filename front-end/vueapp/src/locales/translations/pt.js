@@ -110,8 +110,7 @@
             nothingFound: "Nenhum workflow encontrado.",
             cancel: "Cancelar",
             errorToGetWorkflows: "Erro ao buscar workflows.",
-            errorUnexpected: "Erro inesperado.",
-
+            errorUnexpected: "Erro inesperado."
         },
         documentName: "Nome do documento",
         documentType: "Tipo de documento",

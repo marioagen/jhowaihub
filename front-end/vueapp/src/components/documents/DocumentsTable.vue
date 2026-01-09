@@ -187,34 +187,6 @@ export default {
             this.$nextTick(() => {
                 this.$refs.ListWorkFlowModal.open();
             });
-            // WorkflowService.getWorkflowsByDocumentId(id)
-            //     .then((response) => {
-            //         console.log("getWorkFlowListByDocumentId", response);
-            //         if (response?.error !== undefined) {
-            //             this.$notify({
-            //                 title: 'Error',
-            //                 message: "response.error",
-            //                 variant: 'danger',
-            //                 icon: 'CircleX',
-            //             });
-            //         }
-            //         this.workflowListByDocument = response.content;
-            //         this.$refs.ListDataModal.open();
-            //     })
-            //     .finally(() => {
-            //         // this.table.isLoading = false;
-            //     });
-        },
-        redirectToConsult(id) {
-            this.$router.push({
-                name: "Analyzer",
-                params: {
-                    id: id
-                },
-                query: {
-                    page: this.table.pagination.currentPage
-                }
-            });
         },
         changePage(page) {
             this.table.pagination.currentPage = page;

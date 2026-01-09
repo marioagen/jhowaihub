@@ -69,6 +69,7 @@
 <script>
 import ModalComponent from "@/components/global/ModalComponent.vue";
 import WorkflowService from "@/services/workflow/WorkflowService";
+import LogService from '@/services/log/logService';
 
 export default {
   name: "DocumentWorkflowListModal",
@@ -107,11 +108,10 @@ export default {
           });
           this.workflowListByDocument = [];
         } else {
-          // Check if response.content is the array or response itself
           this.workflowListByDocument = response.content || response || [];
         }
       } catch (error) {
-        console.error("Error fetching workflows:", error);
+        LogService.showMessage("Error fetching workflows:", error);
         this.$notify({
           title: 'Error',
           message: this.$t("documents.workflowListModal.errorUnexpected"),
@@ -141,10 +141,10 @@ export default {
     },
     async open() {
       await this.filterData();
-      // if (this.workflowListByDocument.length == 1) {
-      //   this.redirectToConsult(this.workflowListByDocument[0]);
-      //   return;
-      // }
+      if (this.workflowListByDocument.length == 1) {
+        this.redirectToConsult(this.workflowListByDocument[0]);
+        return;
+      }
       this.$refs.modal.open();
     },
     close() {
@@ -165,7 +165,6 @@ export default {
   line-height: 1.4;
 }
 
-/* Search Bar Styling */
 .search-container .input-group-text,
 .search-input {
   border-color: #dee2e6;
@@ -174,15 +173,9 @@ export default {
 .search-input:focus {
   box-shadow: none;
   border-color: #3b82f6;
-  /* Adjust primary color */
   border-top: 1px solid #3b82f6;
   border-bottom: 1px solid #3b82f6;
 }
-
-/* When input is focused, we want the side spans to also look like they are part of the focused input if possible, 
-   but standard bootstrap input-group structure makes this tricky without custom wrappers. 
-   For now, we rely on the input's own border. A common trick is to wrap them in a div that handles the border.
-*/
 
 .input-group:focus-within .input-group-text {
   border-color: #3b82f6;
@@ -192,7 +185,6 @@ export default {
   border-color: #3b82f6 !important;
 }
 
-/* Workflow Card Styling */
 .workflow-card {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -212,10 +204,8 @@ export default {
   height: 40px;
   border-radius: 50%;
   background-color: #eff6ff;
-  /* Light blue bg */
 }
 
-/* Typography override if needed */
 .text-primary {
   color: #3b82f6 !important;
 }

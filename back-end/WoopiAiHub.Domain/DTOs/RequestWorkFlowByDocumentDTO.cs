@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class RequestWorkFlowByDocumentDTO
+    public record class RequestWorkFlowByDocumentDTO
     {
 
         public string Login { get; set; }
