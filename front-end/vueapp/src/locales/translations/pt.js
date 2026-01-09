@@ -81,6 +81,7 @@
             uploadError: "Algo deu errado",
             uploadFailure: "Falha no upload",
             uploadedFilesError: "Falha ao fazer upload dos arquivos!",
+            unselectedDocuments: "Nenhum documento selecionado",
         },
         createdDate: "Data de upload",
         teams: "Time",
@@ -169,6 +170,7 @@
         numberOfPagesHasBeenExceeded: "Número de páginas foi excedido. Contate o administrador do plano.",
         descriptionExceeded: "A descrição excede o máximo de 250 caracteres.",
         closeSidebar: "Fechar barra lateral",
+        selectToDelete: "Selecione ao menos um documento para realizar a exclusão.",
     },
     questions: {
         title: "Perguntas",

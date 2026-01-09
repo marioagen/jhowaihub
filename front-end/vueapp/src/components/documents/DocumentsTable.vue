@@ -1,8 +1,13 @@
 <template>
-    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmation">
-        <LucideIcon icon="Trash2" :size="15" />
-        {{ $t("common.delete") }}
-    </button>
+    <div class="d-flex flex-column justify-content-between align-items-start mb-2">
+        <div class="delete-container">
+            <button class="btn btn-outline-danger btn-sm delete-button" @click="openConfirmation" :disabled="!enableMultiDelete">
+                <LucideIcon icon="Trash2" :size="15" />
+                {{ $t("common.delete") }}
+            </button>
+            <small v-if="!enableMultiDelete" class="text-danger delete-tooltip">{{ $t("documents.selectToDelete") }}</small>
+        </div>
+    </div>
     <div v-if="showTable">
         <TableComponent
             modalName="documents.title"
@@ -153,6 +158,16 @@
                 this.table.selectedRows = selectedRows;
             },
             openConfirmation() {
+                if (this.table.selectedRows.length === 0) {
+                    this.$notify({
+                        title: "common.warning",
+                        message: "documents.errors.unselectedDocuments",
+                        variant: "warning",
+                        icon: "TriangleAlert",
+                    });
+                    return;
+                }
+
                 const ids = this.table.selectedRows.map((item) => item.id);
                 this.selectedDocument = ids;
                 this.$refs.DeleteDialog.open();
@@ -222,7 +237,7 @@
             this.getDocuments();
         },
         computed: {
-            showMultiDelete() {
+            enableMultiDelete() {
                 return this.table.selectedRows.length > 0;
             },
             showTable() {
@@ -235,5 +250,58 @@
 <style scoped>
     .analyze-btn {
         width: 94px;
+    }
+
+    .delete-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .delete-button {
+        position: relative;
+    }
+
+    .delete-tooltip {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        white-space: nowrap;
+        background-color: #fff;
+        border: 1px solid #dc3545;
+        border-radius: 6px;
+        padding: 6px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+    }
+
+    .delete-tooltip::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 20px;
+        border: 6px solid transparent;
+        border-bottom-color: #dc3545;
+    }
+
+    .delete-tooltip::after {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 21px;
+        border: 5px solid transparent;
+        border-bottom-color: #fff;
+    }
+
+    .delete-container:hover .delete-tooltip {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .delete-button:not(:disabled) ~ .delete-tooltip {
+        display: none !important;
     }
 </style>

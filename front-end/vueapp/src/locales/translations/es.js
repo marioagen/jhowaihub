@@ -80,6 +80,7 @@
             uploadError: "Algo salió mal",
             uploadFailure: "Error de carga",
             uploadedFilesError: "¡Error al cargar archivos!",
+            unselectedDocuments: "Ningún documento seleccionado",
         },
         createdDate: "Fecha de carga",
         teams: "Equipo",
@@ -170,6 +171,7 @@
             "Se ha excedido el número de páginas. Comuníquese con el administrador de su plan.",
         descriptionExceeded: "La descripción excede el máximo de 250 caracteres.",
         closeSidebar: "Cerrar barra lateral",
+        selectToDelete: "Seleccione al menos un documento para realizar la eliminación.",
     },
     questions: {
         title: "Preguntas",
