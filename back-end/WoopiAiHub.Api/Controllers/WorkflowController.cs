@@ -255,7 +255,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPost("Document")]
         [SwaggerOperation("Endpoint that receive an document id and return workflow list linke to the document")]
         [ProducesResponseType(typeof(List<WorkflowDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindWorkflowByDocument([FromBody]RequestWorkFlowByDocumentDTO dto, CancellationToken ct = default)
+        public async Task<IActionResult> FindWorkflowByDocument([FromBody]RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
         {
             var workflow = await _workflowServices.FindWorkflowsByDocument(dto, ct);
             return Ok(workflow);

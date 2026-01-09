@@ -131,7 +131,7 @@ export default {
         name: "Analyzer",
         params: {
           documentId: this.documentId,
-          cardId: workflow.steps.find(c => true).cards.find(c => true).id,
+          cardId: workflow.cardId,
         },
         query: {
           page: this.currentPage

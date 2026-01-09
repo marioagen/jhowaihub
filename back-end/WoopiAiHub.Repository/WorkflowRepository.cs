@@ -215,7 +215,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
-        public async Task<ICollection<Workflow>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDTO dto, CancellationToken ct = default)
+        public async Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
         {
 
             var search = dto.Search?.ToLower();
@@ -243,7 +243,24 @@ namespace WoopiAiHub.Repository
                 );
             }
 
-            return await query.Where(w => w.Documents.Any(s => s.Id == dto.DocumentId)).ToListAsync(ct);
+            var result = await query.Where(w => w.Documents.Any(s => s.Id == dto.DocumentId)).ToListAsync(ct);
+
+            var resultDto = result
+                .SelectMany(workflow =>
+                    workflow.Steps.SelectMany(step =>
+                        step.Cards.Select(card => new ResponseWorkflowByDocumentDto
+                        {
+                            Id = workflow.Id,
+                            Name = workflow.Name,
+                            CardId = card.Id,
+                            DocumentId = card.DocumentId,
+                            AssignedUserEmail = card.AssignedUser?.Email ?? string.Empty
+                        })
+                    )
+                )
+                .ToList();
+
+            return resultDto;
         }
 
         /// <summary>

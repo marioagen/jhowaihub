@@ -494,32 +494,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
-        public async Task<ICollection<WorkflowDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDTO dto, CancellationToken ct = default)
+        public async Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
         {
-            var workflows = await _workflowRepository.FindWorkflowsByDocument(dto, ct);
-            return workflows.Select(d => new WorkflowDto
-            {
-                Id = d.Id,
-                Name = d.Name,
-                Created = d.Created,
-                Steps = d.Steps.Select(s => new StepDto
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Order = s.Order,
-                    Cards = s.Cards.Select(c => new CardDto
-                    {
-                        Id = c.Id,
-                        Name = c.Name,
-                        AssignedUser = c.AssignedUser != null ? new UserDto
-                        {
-                            Id = c.AssignedUser.Id,
-                            Email = c.AssignedUser.Email
-                        } : null,
-                        Created = c.Created,
-                    }).ToList()
-                }).ToList()
-            }).ToList();
+            return await _workflowRepository.FindWorkflowsByDocument(dto, ct);
         }
 
         /// <summary>

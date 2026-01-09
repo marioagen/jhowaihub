@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public record class RequestWorkFlowByDocumentDTO
+    public record class RequestWorkFlowByDocumentDto
     {
-
         public string Login { get; set; }
         public int DocumentId { get; set; }
         public string Search { get; set; }
-        
     }
 }

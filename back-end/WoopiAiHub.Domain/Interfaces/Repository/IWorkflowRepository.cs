@@ -27,6 +27,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<Phase1Dto> FindPhase1ById(int id);
         StepDto FindStepById(int id);
         Task<ToolDto> FindToolByStepToolId(int id);
-        Task<ICollection<Workflow>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDTO dto, CancellationToken ct = default);
+        Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
     }
 }
