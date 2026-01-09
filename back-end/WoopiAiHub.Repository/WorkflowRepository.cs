@@ -217,7 +217,6 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
         {
-
             var search = dto.Search?.ToLower();
             var login = dto.Login?.ToLower();
             var query = _context.Workflows

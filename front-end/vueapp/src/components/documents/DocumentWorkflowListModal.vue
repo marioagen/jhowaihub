@@ -79,7 +79,7 @@ export default {
   props: {
     documentId: {
       type: [Number, String],
-      required: true,
+      required: false,
     }
   },
   data() {
