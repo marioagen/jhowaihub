@@ -46,12 +46,27 @@
                     <h2 class="mb-0 fw-bold text-primary">{{ totalWTC.toFixed(5) }}</h2>
                 </div>
             </div>
-            <TokensGraph :key="datesChange" :usageUnits="usageUnits" @setTotalTokens="setTotalTokens"
-                ref="TokensGraph" />
-            <PagesProcessedGraph :key="datesChange" :usageUnits="usageUnits" @setTotalPages="setTotalWTC"
-                ref="PagesProcessedGraph" />
-            <WorkflowsGraph :key="datesChange" :usageUnits="usageUnits" @setTotalExecution="setTotalWTC"
-                ref="WorkflowsGraph" />
+            <TokensGraph 
+                :key="datesChange" 
+                :usageUnits="usageUnits" 
+                @setTotalTokens="setTotalTokens"
+                :isLoading="isLoading"
+                ref="TokensGraph" 
+            />
+            <PagesProcessedGraph 
+                :key="datesChange" 
+                :usageUnits="usageUnits" 
+                @setTotalPages="setTotalWTC"
+                :isLoading="isLoading"
+                ref="PagesProcessedGraph" 
+            />
+            <WorkflowsGraph 
+                :key="datesChange" 
+                :usageUnits="usageUnits" 
+                @setTotalExecution="setTotalWTC"
+                :isLoading="isLoading"
+                ref="WorkflowsGraph" 
+            />
         </div>
     </main>
 </template>
@@ -70,19 +85,23 @@ export default {
         WorkflowsGraph,
         PagesProcessedGraph,
     },
-    data: () => ({
-        isLoading: false,
-        showDateFilter: false,
-        datesChange: 0,
-        filters: {
-            preset: "currentMonth",
-            start: "",
-            end: "",
-        },
-        totalWTC: 0,
-        usageUnits: [],
-        plan: "",
-    }),
+    data() {
+        const today = new Date();
+        const first = new Date(today.getFullYear(), today.getMonth(), 1);
+        return {
+            isLoading: false,
+            showDateFilter: false,
+            datesChange: 0,
+            filters: {
+                preset: "currentMonth",
+                start: first.toISOString().slice(0, 10),
+                end: today.toISOString().slice(0, 10),
+            },
+            totalWTC: 0,
+            usageUnits: [],
+            plan: "",
+        };
+    },
     methods: {
         toggleDateFilter() {
             this.showDateFilter = !this.showDateFilter;
@@ -103,6 +122,7 @@ export default {
             return this.$t(`dashboard.filters.${this.filters.preset}`);
         },
         getDashboardData() {
+            this.filterData(this.filters);
             DashboardServices.GetUsageUnits()
                 .then((response) => {
                     this.usageUnits = response;
@@ -130,7 +150,7 @@ export default {
                 });
         },
     },
-    created() {
+    mounted() {
         this.getDashboardData();
         this.getPlan();
     }

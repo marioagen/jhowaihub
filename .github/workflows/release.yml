@@ -21,6 +21,7 @@ jobs:
           echo "imageNameBackend=woopiai-hub-backend" >> $GITHUB_OUTPUT
           echo "imageNameFrontend=woopiai-hub-frontend" >> $GITHUB_OUTPUT
           echo "imageNameFileRepository=woopiai-hub-file-repository" >> $GITHUB_OUTPUT
+          echo "imageNameFunctions=woopiai-hub-functions" >> $GITHUB_OUTPUT
 
       - name: Bump version and push tag
         id: tag_version
@@ -56,6 +57,12 @@ jobs:
       - name: Push File-Repository Image
         run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }}
       
+      - name: Build Functions Image
+        run: docker image build -f back-end/WoopiAiHub.Functions/Dockerfile -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }} .
+      
+      - name: Push Functions Image
+        run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }}
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:

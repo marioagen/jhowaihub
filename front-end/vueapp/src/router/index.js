@@ -40,7 +40,11 @@ import PromptNew from "@/pages/prompts/newPrompt.vue";
 import PromptImport from "@/pages/prompts/import.vue";
 import HomePage from "@/pages/home.vue";
 
+import TemplatePage from "@/pages/templates/index.vue";
+import TemplateDetail from "@/pages/templates/templateDetail.vue";
+
 import { hasPermission } from "@/utils/permissions";
+
 function authenticate(to, from, next) {
     const userStr = window.localStorage.getItem("project");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -87,8 +91,8 @@ const routes = [
         name: "Logout",
         component: LogoutPage,
         meta: {
-            public: true
-        }
+            public: true,
+        },
     },
     {
         path: "/unauthorized",
@@ -403,6 +407,39 @@ const routes = [
         beforeEnter: authenticate,
         props: true,
     },
+    // {
+    //     path: "/templates",
+    //     name: "Template",
+    //     component: TemplatePage,
+    //     meta: {
+    //         layout: "default",
+    //         module: "Templates",
+    //         action: "View",
+    //     },
+    //     beforeEnter: authenticate,
+    // },
+    // {
+    //     path: "/templates/new",
+    //     name: "TemplateNew",
+    //     component: TemplateDetail,
+    //     meta: {
+    //         layout: "default",
+    //         module: "Templates",
+    //         action: "View",
+    //     },
+    //     beforeEnter: authenticate,
+    // },
+    // {
+    //     path: "/templates/edit/:id",
+    //     name: "TemplateEdit",
+    //     component: TemplateDetail,
+    //     meta: {
+    //         layout: "default",
+    //         module: "Templates",
+    //         action: "View",
+    //     },
+    //     beforeEnter: authenticate,
+    // },
 ];
 
 const router = createRouter({

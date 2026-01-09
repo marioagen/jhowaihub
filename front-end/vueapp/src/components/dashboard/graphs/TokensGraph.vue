@@ -105,7 +105,7 @@ export default {
             return this.graph.series[0].data.reduce((a, b) => a + b, 0);
         },
         usageUnitTokens() {
-            if (this.usageUnits.length === 0) {
+            if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
                 return 0;
             }
             return this.usageUnits.find(item => item.modelEmbeddingId === (this.IAList[this.currentIAIndex]?.id ?? 0))?.value ?? 0;
@@ -195,6 +195,7 @@ export default {
     },
 }
 </script>
+
 <style scoped>
 .disabled {
     opacity: 0.3;

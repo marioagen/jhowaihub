@@ -143,4 +143,21 @@ export default {
 .xsm-text {
     font-size: 0.55rem;
 }
+
+/* Reduce spacing between kanban cards - adjust this value to make cards more/less compact */
+.kanban-col .card-body {
+    --kanban-card-gap: 0.25rem;  /* Spacing between cards - adjust this value */
+    padding-top: var(--kanban-card-gap) !important;
+    padding-bottom: var(--kanban-card-gap) !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+/* Ensure step names wrap properly within card-header boundaries */
+.card-header {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    hyphens: auto;
+}
 </style>
