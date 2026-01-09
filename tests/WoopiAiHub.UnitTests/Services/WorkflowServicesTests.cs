@@ -1212,5 +1212,48 @@ namespace WoopiAiHub.UnitTests.Services
 
             _stepRepositoryMock.Verify(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
+        [Fact(DisplayName = "FindWorkflowsByDocument success")]
+        [Trait("FindWorkflowsByDocument", "Success")]
+        public async Task FindWorkflowsByDocument_ValidDto_ReturnsWorkflows()
+        {
+            // Arrange
+            var requestDto = new RequestWorkFlowByDocumentDto();
+            var expectedResponse = new List<ResponseWorkflowByDocumentDto>
+            {
+                new ResponseWorkflowByDocumentDto { WorkflowId = 1, Name = "Workflow 1" }
+            };
+
+            _workflowRepositoryMock.Setup(repo => repo.FindWorkflowsByDocument(requestDto, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedResponse);
+
+            // Act
+            var result = await _workflowServices.FindWorkflowsByDocument(requestDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedResponse.Count, result.Count);
+            Assert.Equal(expectedResponse, result);
+            _workflowRepositoryMock.Verify(repo => repo.FindWorkflowsByDocument(requestDto, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindWorkflowsByDocument returns empty list")]
+        [Trait("FindWorkflowsByDocument", "Success")]
+        public async Task FindWorkflowsByDocument_ReturnsEmptyList_WhenNoWorkflowsFound()
+        {
+            // Arrange
+            var requestDto = new RequestWorkFlowByDocumentDto();
+            var expectedResponse = new List<ResponseWorkflowByDocumentDto>();
+
+            _workflowRepositoryMock.Setup(repo => repo.FindWorkflowsByDocument(requestDto, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedResponse);
+
+            // Act
+            var result = await _workflowServices.FindWorkflowsByDocument(requestDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+            _workflowRepositoryMock.Verify(repo => repo.FindWorkflowsByDocument(requestDto, It.IsAny<CancellationToken>()), Times.Once);
+        }
     }
 }
