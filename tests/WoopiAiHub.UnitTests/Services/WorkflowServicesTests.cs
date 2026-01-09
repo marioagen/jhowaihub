@@ -1212,6 +1212,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _stepRepositoryMock.Verify(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
+        
         [Fact(DisplayName = "FindWorkflowsByDocument success")]
         [Trait("FindWorkflowsByDocument", "Success")]
         public async Task FindWorkflowsByDocument_ValidDto_ReturnsWorkflows()
@@ -1220,7 +1221,7 @@ namespace WoopiAiHub.UnitTests.Services
             var requestDto = new RequestWorkFlowByDocumentDto();
             var expectedResponse = new List<ResponseWorkflowByDocumentDto>
             {
-                new ResponseWorkflowByDocumentDto { WorkflowId = 1, Name = "Workflow 1" }
+                new ResponseWorkflowByDocumentDto { Id = 1, Name = "Workflow 1" }
             };
 
             _workflowRepositoryMock.Setup(repo => repo.FindWorkflowsByDocument(requestDto, It.IsAny<CancellationToken>()))
