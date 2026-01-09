@@ -58,22 +58,49 @@
                                 <input class="form-control form-control-sm" :id="field.name"
                                     v-model="formData[field.name]" />
                             </div>
-                            <div v-else-if="field.type === 'boolean'" class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" :id="field.name"
-                                    v-model="formData[field.name]" />
-                                <label class="form-check-label" for="flexCheckDefault"> {{ field.label }} </label>
+                            <div 
+                                v-else-if="field.type === 'boolean'" 
+                                class="form-check mb-3"
+                                :disabled="loadingWebhooks || loadingInputs"
+                            >
+                                <input 
+                                    class="form-check-input" 
+                                    type="checkbox" 
+                                    :id="field.name"
+                                    v-model="formData[field.name]"
+                                    :disabled="loadingWebhooks || loadingInputs"
+                                />
+                                <label 
+                                    class="form-check-label" 
+                                    for="flexCheckDefault"
+                                >
+                                    {{ field.label }}
+                                </label>
                             </div>
                             <div v-else-if="field.type === 'array'">
                                 <h6> {{ field.label }}</h6>
                                 <div v-for="(item, index) in formData[field.name]" :key="index">
                                     <div class="mb-3" v-for="child in field.children" :key="child.name">
-                                        <label v-if="child.label" :for="child.name" class="form-label">{{ child.label
-                                            }}</label>
-
-                                        <label v-else :for="child.name" class="form-label text-capitalize">{{ child.name
-                                            }}</label>
-                                        <input :id="child.name" v-model="formData[field.name][index][child.name]"
-                                            class="form-control form-control-sm" />
+                                        <label 
+                                            v-if="child.label" 
+                                            :for="child.name" 
+                                            class="form-label"
+                                            :disabled="loadingWebhooks || loadingInputs"
+                                        >
+                                            {{ child.label }}</label>
+                                        <label 
+                                            v-else 
+                                            :for="child.name" 
+                                            class="form-label text-capitalize"
+                                        >
+                                            {{ child.name }}
+                                        </label>
+                                        <input 
+                                            :id="child.name" 
+                                            v-model="formData[field.name][index][child.name]"
+                                            :disabled="loadingWebhooks || loadingInputs"
+                                            class="form-control form-control-sm" 
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -84,8 +111,14 @@
                         </div>
                         
                         <div class="mt-4">
-                            <button type="button" class="btn btn-primary" @click="updateNodeWithForm">{{ $t("common.save")
-                                }}</button>
+                            <button 
+                                type="button" 
+                                class="btn btn-primary" 
+                                @click="updateNodeWithForm"
+                                :disabled="loadingWebhooks || loadingInputs"
+                            >
+                                {{ $t("common.save") }}
+                            </button>
                         </div>
                     </div>
                     <div v-else-if="isPromptTool">
@@ -393,7 +426,10 @@ export default {
             }
         },
         updateNodeWithForm() {
-            this.parameters[0].requiredFile = false;
+            this.parameters.forEach(param => {
+                param.requiredFile = false;
+            });
+
             if (Object.prototype.hasOwnProperty.call(this.formData, 'requiredFile')) {
                 this.parameters[0].requiredFile = this.formData['requiredFile'];
             }
@@ -435,7 +471,6 @@ export default {
                         workflowId: this.workflowId,
                         steps: allSteps
                     };
-
                     const result = await WorkflowService.updatePhase3(params);
                     if (result.error !== undefined) {
                         return this.$notify({
@@ -544,22 +579,22 @@ export default {
             isTargetTool(targetToolType){
                 return this.toolType?.toLowerCase().includes(targetToolType.toLowerCase()) || false
             },
+    },
+    computed: {
+        selectedItem() {
+            if (this.idSelected != 0)
+                return this.promptlist.find(item => item.id === this.idSelected)
+            return null;
         },
-        computed: {
-            selectedItem() {
-                if (this.idSelected != 0)
-                    return this.promptlist.find(item => item.id === this.idSelected)
-                return null;
-            },
-            isN8NTool(){
-                return this.isTargetTool(ToolType.N8N);
-            },
-            isPromptTool(){
-                return this.isTargetTool(ToolType.Prompt);
-            },
+        isN8NTool(){
+            return this.isTargetTool(ToolType.N8N);
+        },
+        isPromptTool(){
+            return this.isTargetTool(ToolType.Prompt);
+        },
 
-        }
-    };
+    },
+};
 </script>
 
 <style>

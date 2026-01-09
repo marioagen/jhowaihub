@@ -318,7 +318,6 @@ export default {
                 }
             });
         },
-
         async handleRemoveToolFlow(step) {
             const phase3Component = this.$refs.phase3;
             let phase3DataResult = await this.getPhase3Data()
@@ -466,7 +465,6 @@ export default {
             await this.reloadCurrentPhaseData();
         }
     },
-
     watch: {
         '$route.params.phase': {
             handler(newPhase) {
