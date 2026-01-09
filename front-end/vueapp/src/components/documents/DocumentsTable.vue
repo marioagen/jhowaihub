@@ -139,7 +139,6 @@
 
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
-                        console.log("getDocuments", response);
                         if (response?.error !== undefined) {
                             this.$notify({
                                 title: "Error",
