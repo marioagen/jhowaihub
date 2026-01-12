@@ -205,8 +205,20 @@ export default {
             })
             .catch((error) => {
                 return {
+                    error: error,   
+                }
+            });
+    },
+    getWorkflowsByDocument(dto) {
+        return api.post(`/Workflow/Document`, dto)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
                     error: error,
                 }
             });
     },
+    
 }

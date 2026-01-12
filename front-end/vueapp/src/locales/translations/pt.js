@@ -107,6 +107,16 @@
             noFileChosen: "Nenhum arquivo escolhido",
             noTeamChosen: "Nenhum time escolhido",
         },
+        workflowListModal: {
+            title: "Selecione o Workflow",
+            titleMessage: "Este documento está associado a múltiplos workflows.<br>Escolha qual deseja visualizar:",
+            searchPlaceholder: "Buscar workflow...",
+            clickToView: "Clique para visualizar",
+            nothingFound: "Nenhum workflow encontrado.",
+            cancel: "Cancelar",
+            errorToGetWorkflows: "Erro ao buscar workflows.",
+            errorUnexpected: "Erro inesperado."
+        },
         documentName: "Nome do documento",
         documentType: "Tipo de documento",
         documentNameOrDescription: "Nome ou descrição do documento",
