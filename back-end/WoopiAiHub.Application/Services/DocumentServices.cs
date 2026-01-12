@@ -185,10 +185,7 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 var deleted = _documentRepository.Delete(ids);
-
-                await Task.WhenAll(hashList.Select(hash =>
-                    DeleteHash(hash, headersDto.Tenant)));
-
+                await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
                 await _cardRepository.DeleteByDocumentIds(ids);
 
                 _unitOfWork.Commit();

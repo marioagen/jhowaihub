@@ -141,12 +141,12 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Delete(List<int> ids)
         {
-            var documents = _context.Documents.Where(a => ids.Contains(a.Id) && a.Enable.Equals(true));
-
+            var documents = _context.Documents.Where(a => ids.Contains(a.Id));
+            var referenceFilesToRemove = documents.Select(d => d.ReferenceFile).ToList();
+            
             if (documents.Any())
             {
-                documents.ExecuteUpdate(b => b
-                    .SetProperty(u => u.Enable, false));
+                documents.ExecuteDelete();
                 _context.SaveChanges();
                 return true;
             }
