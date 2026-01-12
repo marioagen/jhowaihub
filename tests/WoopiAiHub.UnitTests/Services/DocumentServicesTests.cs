@@ -305,13 +305,18 @@ namespace WoopiAiHub.UnitTests.Services
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var cardRepository = _mocker.GetMock<ICardRepository>();
             var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
 
+            documentRepository.Setup(r => r.ClearWorkflowRelationships(ids)).Returns(true);
             documentRepository.Setup(r => r.Delete(ids)).Returns(true);
             documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
 
             embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                          .ReturnsAsync(_fixture.FindHttpResponseMessage);
+
+            fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
+                            .ReturnsAsync(_fixture.FindHttpResponseMessage);
 
             cardRepository
                 .Setup(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()))
@@ -322,9 +327,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
+            documentRepository.Verify(r => r.ClearWorkflowRelationships(ids), Times.Once);
             documentRepository.Verify(r => r.Delete(ids), Times.Once);
             documentRepository.Verify(r => r.FindHashById(ids), Times.Once);
             embeddingsApi.Verify(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(hashes.Count));
+            fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Exactly(hashes.Count));
             cardRepository.Verify(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);
@@ -342,14 +349,18 @@ namespace WoopiAiHub.UnitTests.Services
 
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var embeddingRepository = _mocker.GetMock<IEmbeddingsApi>();
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var cardRepository = _mocker.GetMock<ICardRepository>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
 
+            documentRepository.Setup(a => a.ClearWorkflowRelationships(list)).Returns(true);
             documentRepository.Setup(a => a.Delete(list)).Returns(false);
             documentRepository.Setup(a => a.FindHashById(list)).Returns(stringArray.AsQueryable());
             embeddingRepository
                 .Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(_fixture.FindHttpResponseMessage);
+            fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
+                            .ReturnsAsync(_fixture.FindHttpResponseMessage);
             cardRepository
                 .Setup(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()))
                 .ReturnsAsync(false);
@@ -359,9 +370,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.False(result);
+            documentRepository.Verify(a => a.ClearWorkflowRelationships(list), Times.Once);
             documentRepository.Verify(a => a.Delete(list), Times.Once);
             documentRepository.Verify(a => a.FindHashById(list), Times.Once);
             embeddingRepository.Verify(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Once);
             cardRepository.Verify(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);   // mesmo retornando false, ainda faz commit
