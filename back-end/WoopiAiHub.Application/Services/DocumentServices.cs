@@ -180,14 +180,25 @@ namespace WoopiAiHub.Application.Services
         {
             ArgumentNullException.ThrowIfNull(ids);
 
-            var hashList = _documentRepository.FindHashById(ids).ToList();
+            var referenceFilesToRemove = _documentRepository.FindHashById(ids).ToList();
+            var hashList = referenceFilesToRemove;
+            
             _unitOfWork.BeginTransaction();
             try
             {
+                // Clear Document-Workflow relationships before deletion
+                _documentRepository.ClearWorkflowRelationships(ids);
+                
+                await _cardRepository.DeleteByDocumentIds(ids);
                 var deleted = _documentRepository.Delete(ids);
                 await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
-                await _cardRepository.DeleteByDocumentIds(ids);
-
+                
+                // Delete blob files from Azure Storage
+                if (referenceFilesToRemove.Any())
+                {
+                    await DeleteBlobFilesAsync(referenceFilesToRemove, headersDto.Tenant);
+                }
+            
                 _unitOfWork.Commit();
                 return deleted;
             }
@@ -660,6 +671,34 @@ namespace WoopiAiHub.Application.Services
             if (!resultRequest.IsSuccessStatusCode && resultRequest.StatusCode != HttpStatusCode.NotFound)
             {
                 throw new ArgumentException("Error while sending delete hash in Embeddings API");
+            }
+        }
+
+        /// <summary>
+        /// Deletes blob files from Azure Storage
+        /// </summary>
+        /// <param name="referenceFiles"></param>
+        /// <param name="tenant"></param>
+        /// <returns></returns>
+        private async Task DeleteBlobFilesAsync(List<string> referenceFiles, string tenant)
+        {
+            foreach (var referenceFile in referenceFiles)
+            {
+                if (!string.IsNullOrEmpty(referenceFile))
+                {
+                    try
+                    {
+                        // Files are stored as {tenant}/{GuidId} in Azure Blob Storage
+                        string blobPath = $"{tenant}/{referenceFile}";
+                        await _fileRepositoryApi.Delete(blobPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but continue with deletion
+                        // The blob might not exist or already be deleted
+                        _logger.LogWarning(ex, $"Failed to delete blob file: {referenceFile}");
+                    }
+                }
             }
         }
 

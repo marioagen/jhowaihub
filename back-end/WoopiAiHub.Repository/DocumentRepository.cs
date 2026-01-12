@@ -142,7 +142,6 @@ namespace WoopiAiHub.Repository
         public bool Delete(List<int> ids)
         {
             var documents = _context.Documents.Where(a => ids.Contains(a.Id));
-            var referenceFilesToRemove = documents.Select(d => d.ReferenceFile).ToList();
             
             if (documents.Any())
             {
@@ -212,6 +211,37 @@ namespace WoopiAiHub.Repository
             return _context.Documents.Where(a => a.ReferenceFile.Equals(referenceFile))
                 .AsNoTracking()
                 .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Clears the relationship between documents and workflows by removing entries from the WorkflowDocuments join table
+        /// </summary>
+        /// <param name="documentIds"></param>
+        /// <returns></returns>
+        public bool ClearWorkflowRelationships(List<int> documentIds)
+        {
+            if (documentIds == null || !documentIds.Any())
+            {
+                return false;
+            }
+
+            var documents = _context.Documents
+                .Include(d => d.Workflows)
+                .Where(d => documentIds.Contains(d.Id))
+                .ToList();
+
+            if (!documents.Any())
+            {
+                return false;
+            }
+
+            foreach (var document in documents)
+            {
+                document.Workflows.Clear();
+            }
+
+            _context.SaveChanges();
+            return true;
         }
     }
 }
