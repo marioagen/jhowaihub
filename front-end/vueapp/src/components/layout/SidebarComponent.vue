@@ -137,29 +137,9 @@
                         labelKey: "pages.workflowManagement",
                     },
                     {
-                        permission: "Types",
-                        activeKey: "Type",
-                        to: "/types",
-                        icon: {
-                            name: "BookmarkCheck",
-                            color: "#f2c94c",
-                        },
-                        labelKey: "pages.types",
-                    },
-                    {
-                        permission: "Questions",
-                        activeKey: "Questions",
-                        to: "/questions",
-                        icon: {
-                            name: "MessageSquare",
-                            color: "#3fd67b",
-                        },
-                        labelKey: "pages.questions",
-                    },
-                    {
                         permission: "Quizzes",
-                        activeKey: "Quizzes",
-                        to: "/quizzes",
+                        activeKey: "ManagementQuizzes",
+                        to: "/management-quizzes",
                         icon: {
                             name: "ClipboardList",
                             color: "#a259ff",

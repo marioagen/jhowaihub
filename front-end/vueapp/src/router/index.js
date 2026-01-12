@@ -9,8 +9,8 @@ import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
 
-import TypesPage from "@/pages/types.vue";
-import QuestionsPage from "@/pages/questions.vue";
+// import TypesPage from "@/pages/managementQuizzes/types/types.vue";
+// import QuestionsPage from "@/pages/managementQuizzes/questions/questions.vue";
 import ManagementPage from "@/pages/management/index.vue";
 import DashboardPage from "@/pages/dashboard.vue";
 
@@ -22,9 +22,10 @@ import EditTeam from "@/pages/management/teams/editTeam.vue";
 import NewProfile from "@/pages/management/profiles/newProfile.vue";
 import EditProfile from "@/pages/management/profiles/editProfile.vue";
 
-import QuizzesPage from "@/pages/quizzes/index.vue";
-import NewQuizz from "@/pages/quizzes/newQuizz.vue";
-import EditQuizz from "@/pages/quizzes/editQuizz.vue";
+import ManagementQuizzesPage from "@/pages/managementQuizzes/index.vue";
+// import QuizzesPage from "@/pages/managementQuizzes/quizzes/index.vue";
+import NewQuizz from "@/pages/managementQuizzes/quizzes/newQuizz.vue";
+import EditQuizz from "@/pages/managementQuizzes/quizzes/editQuizz.vue";
 
 import WorkflowPage from "@/pages/workflow/index.vue";
 import WorkflowManagement from "@/pages/workflow/management.vue";
@@ -144,32 +145,32 @@ const routes = [
         },
         beforeEnter: authenticate,
     },
+    // {
+    //     path: "/types",
+    //     name: "Type",
+    //     component: TypesPage,
+    //     meta: {
+    //         layout: "default",
+    //         module: "Types",
+    //         action: "View",
+    //     },
+    //     beforeEnter: authenticate,
+    // },
+    // {
+    //     path: "/questions",
+    //     name: "Question",
+    //     component: QuestionsPage,
+    //     meta: {
+    //         layout: "default",
+    //         module: "Questions",
+    //         action: "View",
+    //     },
+    //     beforeEnter: authenticate,
+    // },
     {
-        path: "/types",
-        name: "Type",
-        component: TypesPage,
-        meta: {
-            layout: "default",
-            module: "Types",
-            action: "View",
-        },
-        beforeEnter: authenticate,
-    },
-    {
-        path: "/questions",
-        name: "Question",
-        component: QuestionsPage,
-        meta: {
-            layout: "default",
-            module: "Questions",
-            action: "View",
-        },
-        beforeEnter: authenticate,
-    },
-    {
-        path: "/quizzes",
-        name: "Quiz",
-        component: QuizzesPage,
+        path: "/management-quizzes",
+        name: "ManagementQuizzes",
+        component: ManagementQuizzesPage,
         meta: {
             layout: "default",
             module: "Quizzes",
@@ -177,6 +178,17 @@ const routes = [
         },
         beforeEnter: authenticate,
     },
+    // {
+    //     path: "/quizzes",
+    //     name: "Quiz",
+    //     component: QuizzesPage,
+    //     meta: {
+    //         layout: "default",
+    //         module: "Quizzes",
+    //         action: "View",
+    //     },
+    //     beforeEnter: authenticate,
+    // },
     {
         path: "/quizzes/new",
         name: "NewQuizz",
