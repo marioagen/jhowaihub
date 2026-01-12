@@ -37,7 +37,7 @@ namespace WoopiAiHub.Application.Services
 
             var typeDocResult = _typeDocRepository.CreateUniqueTypeDoc(typedoc);
 
-            if (typeDocResult.Duplicated == true)
+            if (typeDocResult.Duplicated)
             {
                 throw new ArgumentException("Duplicated TypeDoc");
             }
