@@ -864,7 +864,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var workflowId = 1;
             var step = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
-            var card = new Card(1, DateTime.Now, 1, 1, "Name", 1, true, null);
+            var card = new Card(1, DateTime.Now, 1, 1, "Name", 1, null);
             step.AddCard(card);
             var stepDto = WorkflowFixture.FindValidStepDto();
             var steps = new List<Step> { step };

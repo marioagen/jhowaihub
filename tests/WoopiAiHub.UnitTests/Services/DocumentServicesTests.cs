@@ -171,7 +171,7 @@ namespace WoopiAiHub.UnitTests.Services
             var functionFileRetriever = _mocker.GetMock<IFunctionFileRetriever>();
             var headers = DocumentFixture.FindValidHeadersDto();
 
-            var card = new Card(1, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(1, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
             cardRepository.Setup(a => a.FindByDocumentIdCardListAsync(It.IsAny<int>())).ReturnsAsync(new List<Card> { card });
 
@@ -664,7 +664,7 @@ namespace WoopiAiHub.UnitTests.Services
             var referenceFile = "test-file.pdf";
 
             var document = new Document("Test Document", "Description", referenceFile, 
-                DocumentStatus.OCR, true, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
+                DocumentStatus.OCR, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
 
             var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, true);
             var tool = new Tool(1, DateTime.UtcNow, "OCR Tool", true, 1, 1, 1, false, null, null);
@@ -676,7 +676,7 @@ namespace WoopiAiHub.UnitTests.Services
             var execution = new StepToolExecution(1, DateTime.UtcNow, stepToolId, StatusExecution.Ready, cardId);
             typeof(StepToolExecution).GetProperty("StepTool")!.SetValue(execution, stepTool);
 
-            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, true, null);
+            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, null);
             typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution> { execution });
 
             var ocrOutput = new DocumentEmbeddingsDataDto
@@ -745,9 +745,9 @@ namespace WoopiAiHub.UnitTests.Services
             var referenceFile = "test-file.pdf";
 
             var document = new Document("Test Document", "Description", referenceFile, 
-                DocumentStatus.NotAnalyzed, true, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
+                DocumentStatus.NotAnalyzed, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
 
-            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, true, null);
+            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, null);
             typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution>());
 
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();

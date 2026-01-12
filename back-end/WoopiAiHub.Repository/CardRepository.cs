@@ -107,7 +107,7 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindByDocumentIdCardAsync(int documentId)
         {
             return await _context.Cards
-                .Where(c => c.DocumentId == documentId && c.Enable)
+                .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Executions)
                 .ThenInclude(e => e.StepTool)
                 .ThenInclude(st => st!.Tool)
@@ -124,7 +124,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<Card>> FindByDocumentIdCardListAsync(int documentId)
         {
             return await _context.Cards
-                .Where(c => c.DocumentId == documentId && c.Enable)
+                .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Step)
                 .Include(c => c.Outputs)
                 .ThenInclude(o => o.StepTool)

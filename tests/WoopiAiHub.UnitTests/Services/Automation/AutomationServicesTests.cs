@@ -198,7 +198,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var guid = Guid.NewGuid();
             var step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
             {
-                Cards = new List<Card> { new Card(1, DateTime.UtcNow,2,1,"name",1,true, guid) },
+                Cards = new List<Card> { new Card(1, DateTime.UtcNow,2,1,"name",1, guid) },
                 StepTools = new List<StepTool>()
             };
             var automationDto = AutomationFixture.FindValidautomationServicesDto();

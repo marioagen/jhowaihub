@@ -34,8 +34,7 @@ namespace WoopiAiHub.Repository
             var login = documentPagedDataDto.Login?.ToLower();
             var query = _context.Documents
                 .Include(t => t.Workflows)
-                .AsNoTracking()
-                .Where(i => i.Enable);
+                .AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -94,7 +93,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public int FindDocumentCount()
         {
-            return _context.Documents.Where(a => a.Enable.Equals(true)).Count();
+            return _context.Documents.Count();
         }
 
         /// <summary>
@@ -116,7 +115,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public IQueryable<string> FindHashById(List<int> ids)
         {
-            return _context.Documents.Where(a => ids.Contains(a.Id) && a.Enable.Equals(true))
+            return _context.Documents.Where(a => ids.Contains(a.Id))
                 .Select(b => b.ReferenceFile);
         }
 

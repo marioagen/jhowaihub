@@ -643,7 +643,6 @@ namespace WoopiAiHub.Application.Services
                 requestCreateDocumentDto.Description,
                 referenceFile,
                 (int)Domain.Enum.DocumentStatus.NotAnalyzed,
-                true,
                 requestCreateDocumentDto.EmailCreator,
                 0,
                 workflow,
@@ -904,7 +903,6 @@ namespace WoopiAiHub.Application.Services
                     0,
                     requestCreateDocumentDto.Filename,
                     step.StatusId,
-                    true,
                     null
                 ))
                 .ToList();

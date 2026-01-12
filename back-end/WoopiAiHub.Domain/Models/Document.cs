@@ -17,9 +17,6 @@ namespace WoopiAiHub.Domain.Models
         [Column("Status", TypeName = "int")]
         public Enum.DocumentStatus Status { get; private set; }
 
-        [Column("Enable", TypeName = "bit")]
-        public bool Enable { get; private set; }
-
         [Column("EmailCreator", TypeName = "varchar(50)")]
         public string EmailCreator { get; private set; } = string.Empty;
 
@@ -32,7 +29,6 @@ namespace WoopiAiHub.Domain.Models
                        string description,
                        string referenceFile,
                        Enum.DocumentStatus status,
-                       bool enable,
                        string emailCreator,
                        int id,
                        List<Workflow> workflow,
@@ -42,7 +38,6 @@ namespace WoopiAiHub.Domain.Models
             Description = description;
             ReferenceFile = referenceFile;
             Status = status;
-            Enable = enable;
             Workflows = workflow;
             EmailCreator = emailCreator;
         }
