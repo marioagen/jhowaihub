@@ -39,7 +39,7 @@ namespace WoopiAiHub.UnitTests.Services
                                                               typeDocHeaderDto);
 
             // Assert
-            Assert.True(result.Duplicated == false);
+            Assert.False(result.Duplicated);
             typeDocRepository.Verify(a => a.CreateUniqueTypeDoc(It.IsAny<TypeDoc>()), Times.Once);
         }
 
