@@ -644,6 +644,7 @@
             editFlowNodeFail: "Failed to edit node",
             connectorWorkflowFail: "Workflow connector did not respond. Check tool URL and API key",
             connectorWorkflowConfigFail: "Failed to retrieve workflow configuration. Check tool URL and API key",
+            dependenciesRequired: "Select at least one dependency",
         },
     },
     prompts: {

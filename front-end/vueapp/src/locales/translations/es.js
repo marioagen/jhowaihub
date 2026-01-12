@@ -651,6 +651,7 @@
                 "El conector del workflow no respondió. Verifica la URL y la clave API de la herramienta",
             connectorWorkflowConfigFail:
                 "No se pudo recuperar la configuración del workflow. Verifica la URL y la clave API de la herramienta",
+            dependenciesRequired: "Seleccione al menos una dependencia",
         },
     },
     prompts: {

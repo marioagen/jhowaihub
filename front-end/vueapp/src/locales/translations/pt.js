@@ -649,6 +649,7 @@
             connectorWorkflowFail: "Conector do workflow não respondeu. Verifique a URL e a chave da API da ferramenta",
             connectorWorkflowConfigFail:
                 "Falha ao recuperar a configuração do workflow. Verifique a URL e a chave da API da ferramenta",
+            dependenciesRequired: "Selecione ao menos uma dependência",
         },
     },
     prompts: {
