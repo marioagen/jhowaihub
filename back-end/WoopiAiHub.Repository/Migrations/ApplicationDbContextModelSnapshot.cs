@@ -157,10 +157,6 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("int")
                         .HasColumnName("DocumentId");
 
-                    b.Property<bool>("Enable")
-                        .HasColumnType("bit")
-                        .HasColumnName("Enable");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -216,10 +212,6 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("EmailCreator");
-
-                    b.Property<bool>("Enable")
-                        .HasColumnType("bit")
-                        .HasColumnName("Enable");
 
                     b.Property<string>("Name")
                         .IsRequired()
