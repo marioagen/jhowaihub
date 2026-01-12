@@ -221,8 +221,8 @@ namespace WoopiAiHub.Repository
             var login = dto.Login?.ToLower();
             var query = _context.Workflows
                     .Include(w => w.Documents)
-                    .Include(w => w.Steps.Where(s => s.Cards.Any(c => c.AssignedUser.Email == dto.Login && c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
-                        .ThenInclude(s => s.Cards.Where(c => c.AssignedUser.Email == dto.Login && c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
+                    .Include(w => w.Steps.Where(s => s.Cards.Any(c =>  c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
+                        .ThenInclude(s => s.Cards.Where(c => c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
                         .ThenInclude(s => s.AssignedUser)
                 .AsNoTracking();
 
