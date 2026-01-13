@@ -219,7 +219,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool ClearWorkflowRelationships(List<int> documentIds)
         {
-            if (documentIds == null || !documentIds.Any())
+            if (documentIds == null || documentIds.Count() == 0)
             {
                 return false;
             }
