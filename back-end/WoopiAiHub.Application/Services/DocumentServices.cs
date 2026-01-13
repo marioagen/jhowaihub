@@ -186,14 +186,12 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                // Clear Document-Workflow relationships before deletion
                 _documentRepository.ClearWorkflowRelationships(ids);
                 
                 await _cardRepository.DeleteByDocumentIds(ids);
                 var deleted = _documentRepository.Delete(ids);
                 await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
                 
-                // Delete blob files from Azure Storage
                 if (referenceFilesToRemove.Any())
                 {
                     await DeleteBlobFilesAsync(referenceFilesToRemove, headersDto.Tenant);
@@ -685,18 +683,8 @@ namespace WoopiAiHub.Application.Services
             {
                 if (!string.IsNullOrEmpty(referenceFile))
                 {
-                    try
-                    {
-                        // Files are stored as {tenant}/{GuidId} in Azure Blob Storage
-                        string blobPath = $"{tenant}/{referenceFile}";
-                        await _fileRepositoryApi.Delete(blobPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        // Log error but continue with deletion
-                        // The blob might not exist or already be deleted
-                        _logger.LogWarning(ex, $"Failed to delete blob file: {referenceFile}");
-                    }
+                    string blobPath = $"{tenant}/{referenceFile}";
+                    await _fileRepositoryApi.Delete(blobPath);
                 }
             }
         }

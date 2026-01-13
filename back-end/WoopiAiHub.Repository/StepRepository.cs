@@ -148,7 +148,6 @@ namespace WoopiAiHub.Repository
                         Color = s.Status.Color,
                     },
                     HasStepTools = s.StepTools.Count > 0,
-                    //No longer requires Enabled
                     Cards = s.Cards
                          .Where(c =>
                              (
