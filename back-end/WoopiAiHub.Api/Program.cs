@@ -74,8 +74,9 @@ if (!string.IsNullOrWhiteSpace(allowedOrigin))
             .AllowCredentials(); 
     }));
 }
-else
-    throw new InvalidOperationException("CORS origin n�o est� configurado. Verifique a chave 'CORS' no appsettings ou vari�vel de ambiente.");
+else {
+    throw new InvalidOperationException("CORS origin não está configurado. Verifique a chave 'CORS' no appsettings ou variável de ambiente.");
+}
 
 builder.Services.AddInfrastructure(config);
 builder.Services.AddApplication();
@@ -104,10 +105,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         OnMessageReceived = context =>
         {
-            // Permite autentica��o JWT via query para SignalR
             var accessToken = context.Request.Query["access_token"];
-
-            // Verifica se � requisi��o do SignalR
             var path = context.HttpContext.Request.Path;
             if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
             {
