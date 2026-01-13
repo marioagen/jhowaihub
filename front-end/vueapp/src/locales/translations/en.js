@@ -572,6 +572,8 @@
         title: "Tools",
         subtitle: "Manage and configure your document processing tools",
         notFound: "No tools registered",
+        toolNotFound: "Tool not found",
+        dependencyToolNotFound: "Dependency tool not found",
         createBtn: "New Tool",
         editBtn: "Save changes",
         type: "Type",
@@ -584,6 +586,8 @@
         removeSuccess: "Tool removed successfully",
         removeError: "Error removing tool",
         removeTitle: "You are about to delete a tool from the system",
+        dependencyRequired: "Prompt tool requires at least one dependency",
+        ocrDependencyRequired: "Prompt tool requires a dependency on an OCR tool",
         form: {
             name: "Tool Name",
             types: "Tool Type",

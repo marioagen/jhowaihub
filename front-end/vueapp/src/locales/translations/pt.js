@@ -574,6 +574,8 @@
         title: "Ferramentas",
         subtitle: "Gerencie e configure suas ferramentas de processamento de documentos",
         notFound: "Não há ferramentas cadastradas",
+        toolNotFound: "Ferramenta não encontrada",
+        dependencyToolNotFound: "Ferramenta de dependência não encontrada",
         createBtn: "Nova Ferramenta",
         editBtn: "Salvar alterações",
         type: "Tipo",
@@ -586,6 +588,8 @@
         removeSuccess: "Ferramenta removida com sucesso",
         removeError: "Erro ao remover Ferramenta",
         removeTitle: "Você está prestes a deletar uma ferramenta do sistema",
+        dependencyRequired: "A ferramenta de Prompt requer ao menos uma dependência",
+        ocrDependencyRequired: "A ferramenta de Prompt requer uma dependência de uma ferramenta de OCR",
         form: {
             name: "Nome da Ferramenta",
             types: "Tipo da Ferramenta",

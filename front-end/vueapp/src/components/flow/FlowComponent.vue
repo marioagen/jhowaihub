@@ -505,6 +505,14 @@
 
                         const result = await WorkflowService.updatePhase3(params);
                         if (result.error !== undefined) {
+                            if (result.error.response?.data && result.error.response?.data?.labelError) {
+                                return this.$notify({
+                                    title: "flow.title",
+                                    message: result.error.response.data.labelError,
+                                    variant: "danger",
+                                    icon: "CircleX",
+                                });
+                            }
                             return this.$notify({
                                 title: "flow.title",
                                 message: "flow.formFlow.progressFlowUpdateFail",
