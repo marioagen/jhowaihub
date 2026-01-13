@@ -27,24 +27,23 @@ namespace WoopiAiHub.Repository
             {
                 _context.TypeDoc.Add(typeDoc);
                 _context.SaveChanges();
-
-                return new ResponseCreateTypeDto
-                {
-                    Id = typeDoc.Id,
-                    Name = typeDoc.Name,
-                    Created = typeDoc.Created,
-                    EmailCreator = typeDoc.EmailCreator,
-                    Duplicated = false
-                };
+                return CreateResponseCreateTypeDto(typeDoc, false);
             }
+
+            return CreateResponseCreateTypeDto(typeDoc);
+        }
+
+
+        private ResponseCreateTypeDto CreateResponseCreateTypeDto(TypeDoc typeDoc, bool duplicated = true)
+        {
             return new ResponseCreateTypeDto
-                {
-                    Id = typeDoc.Id,
-                    Name = typeDoc.Name,
-                    Created = typeDoc.Created,
-                    EmailCreator = typeDoc.EmailCreator,
-                    Duplicated = true
-                };
+            {
+                Id = typeDoc.Id,
+                Name = typeDoc.Name,
+                Created = typeDoc.Created,
+                EmailCreator = typeDoc.EmailCreator,
+                Duplicated = duplicated
+            };
         }
 
         /// <summary>

@@ -24,8 +24,10 @@ namespace WoopiAiHub.Application.Services
         /// <param name="typeDocCreateDto"></param>
         /// <param name="typeDocHeaderDto"></param>
         /// <returns></returns>
-        public ResponseCreateTypeDto CreateUniqueTypeDoc(TypeDocCreateDto typeDocCreateDto,
-                                        HeadersDto typeDocHeaderDto)
+        public ResponseCreateTypeDto CreateUniqueTypeDoc(
+            TypeDocCreateDto typeDocCreateDto,
+            HeadersDto typeDocHeaderDto
+        )
         {
             TypeDoc typedoc = new TypeDoc
             (
