@@ -75,8 +75,8 @@ export default {
                 input: null,
                 isAllUsers: true,
                 login: this.$store.state.userProfile.login,
-                teamId: null,
-                userId: null
+                teamId: "",
+                userId: ""
             },
         };
     },

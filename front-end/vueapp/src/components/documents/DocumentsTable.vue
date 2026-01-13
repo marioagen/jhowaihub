@@ -37,17 +37,9 @@
             </template>
             <template #cell-actions="{ data }">
                 <DropdownComponent>
-                    <li v-if="data.row.status === 0">
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="embedData(data.row.id)">
-                            <LucideIcon icon="TextSearch" />
-                            {{ $t("common.analyze") }}
-                        </a>
-                    </li>
-                    <li v-else>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="redirectToConsult(data.row.id)"
-                        >
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2"
+                            @click="getWorkFlowListByDocumentId(data.row.id)">
                             <LucideIcon icon="Search" />
                             {{ $t("documents.actions.consult") }}
                         </a>
@@ -68,6 +60,8 @@
         :isLoading="isDeleting"
         @confirm="deleteDocument"
     />
+    
+    <DocumentWorkflowListModal id="typeModalWorkflow" :documentId="selectedDocumentId"  ref="ListWorkFlowModal" />
 </template>
 
 <script>
@@ -79,6 +73,7 @@
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent";
     import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
     import DropdownComponent from "@/components/global/DropdownComponent.vue";
+    import DocumentWorkflowListModal from "@/components/documents/DocumentWorkflowListModal.vue";
 
     export default {
         name: "DocumentsTable",
@@ -89,6 +84,7 @@
             BadgeComponent,
             TableComponent,
             ConfirmModal,
+            DocumentWorkflowListModal
         },
         data: () => ({
             table: {
@@ -122,6 +118,7 @@
             isEmbedding: false,
             isDeleting: false,
             docDataEmbedding: {},
+            selectedDocumentId: null,
         }),
         methods: {
             getDocuments() {
@@ -139,7 +136,6 @@
 
                 DocumentsServices.getDocuments(params)
                     .then((response) => {
-                        console.log("getDocuments", response);
                         if (response?.error !== undefined) {
                             this.$notify({
                                 title: "Error",
@@ -215,16 +211,11 @@
 
                 this.docDataEmbedding.Id = id;
                 this.isEmbedding = true;
-            },
-            redirectToConsult(id) {
-                this.$router.push({
-                    name: "Analyzer",
-                    params: {
-                        id: id,
-                    },
-                    query: {
-                        page: this.table.pagination.currentPage,
-                    },
+            },  
+            getWorkFlowListByDocumentId(id) {
+                this.selectedDocumentId = id;
+                this.$nextTick(() => {
+                    this.$refs.ListWorkFlowModal.open();
                 });
             },
             changePage(page) {
@@ -244,11 +235,22 @@
             showTable() {
                 return this.table.data !== undefined;
             },
-        },
+        },      
     };
 </script>
 
 <style scoped>
+    .modal-div {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .modal-title,
+    .modal-message {
+        text-align: center;
+    }
+
     .analyze-btn {
         width: 94px;
     }
