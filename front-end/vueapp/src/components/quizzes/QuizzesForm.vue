@@ -32,44 +32,6 @@
                             <small class="text-muted">{{ $t("quizzes.basicInfoSubtitle") }}</small>
                         </p>
                     </div>
-                    <!-- <div class="row">
-                        <div class="col-10">
-                            <div class="row p-0">
-                                <div class="col">
-                                    <label>{{ $t("quizzes.formName") }}</label>
-                                    <input 
-                                        class="form-control form-control-sm"
-                                        :placeholder="$t('quizzes.formNamePlaceholder')"
-                                        v-model="form.title"
-                                    />
-                                </div>
-                                <div class="col">
-                                    <label>{{ $t("quizzes.type") }}</label>
-                                    <select
-                                        id="typeDocId"
-                                        class="form-select form-select-sm"
-                                        v-model="form.typeDocId"
-                                    >
-                                        <option value="">{{ $t("quizzes.formSelect") }}</option>
-                                        <option 
-                                            v-for="(item, index) in docTypesList" 
-                                            :key="index"
-                                            :value="item.id" 
-                                        >
-                                            {{ item.id }} - {{ item.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>                        
-                        <div class="col-2 d-flex align-items-end">
-                            <button class="btn btn-primary btn-sm w-100" @click="openModalType">
-                                <LucideIcon icon="Plus" :size="15" />
-                                {{ $t("types.createBtn") }}
-                            </button>
-                        </div>
-                    </div> -->
-                    
                     <div class="row">
                         <div class="col">
                             <label>{{ $t("quizzes.formName") }}</label>
