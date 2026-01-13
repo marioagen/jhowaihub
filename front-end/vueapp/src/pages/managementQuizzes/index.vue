@@ -42,9 +42,9 @@
         },
         data: () => ({
             tabsList: [
-            { name: "quizzes", label: "Questionario", icon: "ClipboardList" },
-                { name: "questions", label: "Questoes", icon: "MessageSquare" },
-                { name: "types", label: "Tipo de Questionario", icon: "BookmarkCheck" },
+                { name: "quizzes", label: "quizzes.title", icon: "ClipboardList" },
+                { name: "questions", label: "questions.title", icon: "MessageSquare" },
+                { name: "types", label: "types.title", icon: "BookmarkCheck" },
             ],
         }),
         mounted() {

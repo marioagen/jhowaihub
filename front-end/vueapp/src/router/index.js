@@ -145,28 +145,6 @@ const routes = [
         },
         beforeEnter: authenticate,
     },
-    // {
-    //     path: "/types",
-    //     name: "Type",
-    //     component: TypesPage,
-    //     meta: {
-    //         layout: "default",
-    //         module: "Types",
-    //         action: "View",
-    //     },
-    //     beforeEnter: authenticate,
-    // },
-    // {
-    //     path: "/questions",
-    //     name: "Question",
-    //     component: QuestionsPage,
-    //     meta: {
-    //         layout: "default",
-    //         module: "Questions",
-    //         action: "View",
-    //     },
-    //     beforeEnter: authenticate,
-    // },
     {
         path: "/management-quizzes",
         name: "ManagementQuizzes",
@@ -178,17 +156,6 @@ const routes = [
         },
         beforeEnter: authenticate,
     },
-    // {
-    //     path: "/quizzes",
-    //     name: "Quiz",
-    //     component: QuizzesPage,
-    //     meta: {
-    //         layout: "default",
-    //         module: "Quizzes",
-    //         action: "View",
-    //     },
-    //     beforeEnter: authenticate,
-    // },
     {
         path: "/quizzes/new",
         name: "NewQuizz",
@@ -418,40 +385,7 @@ const routes = [
         },
         beforeEnter: authenticate,
         props: true,
-    },
-    // {
-    //     path: "/templates",
-    //     name: "Template",
-    //     component: TemplatePage,
-    //     meta: {
-    //         layout: "default",
-    //         module: "Templates",
-    //         action: "View",
-    //     },
-    //     beforeEnter: authenticate,
-    // },
-    // {
-    //     path: "/templates/new",
-    //     name: "TemplateNew",
-    //     component: TemplateDetail,
-    //     meta: {
-    //         layout: "default",
-    //         module: "Templates",
-    //         action: "View",
-    //     },
-    //     beforeEnter: authenticate,
-    // },
-    // {
-    //     path: "/templates/edit/:id",
-    //     name: "TemplateEdit",
-    //     component: TemplateDetail,
-    //     meta: {
-    //         layout: "default",
-    //         module: "Templates",
-    //         action: "View",
-    //     },
-    //     beforeEnter: authenticate,
-    // },
+    }
 ];
 
 const router = createRouter({

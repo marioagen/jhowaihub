@@ -193,9 +193,9 @@
             };
         },
         methods: {
-            getDocTypes(newValue = null) {
-                if(newValue !== null && newValue.duplicated === false) {
-                    this.form.typeDocId = newValue.id;
+            getDocTypes(docTypeCreated = null) {
+                if(docTypeCreated !== null && docTypeCreated.duplicated === false) {
+                    this.form.typeDocId = docTypeCreated.id;
                 }
                 TypesService.getTypesList()
                     .then((response) => {
