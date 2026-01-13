@@ -34,7 +34,7 @@ namespace WoopiAiHub.Repository
         }
 
 
-        private ResponseCreateTypeDto CreateResponseCreateTypeDto(TypeDoc typeDoc, bool duplicated = true)
+        private static ResponseCreateTypeDto CreateResponseCreateTypeDto(TypeDoc typeDoc, bool duplicated = true)
         {
             return new ResponseCreateTypeDto
             {
