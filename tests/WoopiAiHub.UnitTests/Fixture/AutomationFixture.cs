@@ -55,7 +55,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Domain.Enum.StatusExecution.Pending,
                 _faker.Random.Int(1, 1000)
             );
-            step.Card = new Card(1, DateTime.Now,1,1,"name",1,true,Guid.NewGuid());
+            step.Card = new Card(1, DateTime.Now,1,1,"name",1,Guid.NewGuid());
             step.StepTool = FindValidStepTool();
             return step;
         }

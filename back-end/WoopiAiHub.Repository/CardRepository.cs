@@ -73,12 +73,9 @@ namespace WoopiAiHub.Repository
         public async Task<bool> DeleteByDocumentIds(List<int> documentIds)
         {
             var cards = _context.Cards.Where(c => documentIds.Contains(c.DocumentId));
-
             if (await cards.AnyAsync())
             {
-                await cards.ExecuteUpdateAsync(b => b
-                    .SetProperty(u => u.Enable, false));
-
+                await cards.ExecuteDeleteAsync();
                 return await _context.SaveChangesAsync() > 0;
             }
 
@@ -110,7 +107,7 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindByDocumentIdCardAsync(int documentId)
         {
             return await _context.Cards
-                .Where(c => c.DocumentId == documentId && c.Enable)
+                .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Executions)
                 .ThenInclude(e => e.StepTool)
                 .ThenInclude(st => st!.Tool)
@@ -127,7 +124,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<Card>> FindByDocumentIdCardListAsync(int documentId)
         {
             return await _context.Cards
-                .Where(c => c.DocumentId == documentId && c.Enable)
+                .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Step)
                 .Include(c => c.Outputs)
                 .ThenInclude(o => o.StepTool)

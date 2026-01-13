@@ -171,7 +171,7 @@ namespace WoopiAiHub.UnitTests.Services
             var functionFileRetriever = _mocker.GetMock<IFunctionFileRetriever>();
             var headers = DocumentFixture.FindValidHeadersDto();
 
-            var card = new Card(1, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(1, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
             cardRepository.Setup(a => a.FindByDocumentIdCardListAsync(It.IsAny<int>())).ReturnsAsync(new List<Card> { card });
 
@@ -305,13 +305,18 @@ namespace WoopiAiHub.UnitTests.Services
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var cardRepository = _mocker.GetMock<ICardRepository>();
             var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
 
+            documentRepository.Setup(r => r.ClearWorkflowRelationships(ids)).Returns(true);
             documentRepository.Setup(r => r.Delete(ids)).Returns(true);
             documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
 
             embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                          .ReturnsAsync(_fixture.FindHttpResponseMessage);
+
+            fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
+                            .ReturnsAsync(_fixture.FindHttpResponseMessage);
 
             cardRepository
                 .Setup(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()))
@@ -322,9 +327,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
+            documentRepository.Verify(r => r.ClearWorkflowRelationships(ids), Times.Once);
             documentRepository.Verify(r => r.Delete(ids), Times.Once);
             documentRepository.Verify(r => r.FindHashById(ids), Times.Once);
             embeddingsApi.Verify(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(hashes.Count));
+            fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Exactly(hashes.Count));
             cardRepository.Verify(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);
@@ -342,14 +349,18 @@ namespace WoopiAiHub.UnitTests.Services
 
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var embeddingRepository = _mocker.GetMock<IEmbeddingsApi>();
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var cardRepository = _mocker.GetMock<ICardRepository>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
 
+            documentRepository.Setup(a => a.ClearWorkflowRelationships(list)).Returns(true);
             documentRepository.Setup(a => a.Delete(list)).Returns(false);
             documentRepository.Setup(a => a.FindHashById(list)).Returns(stringArray.AsQueryable());
             embeddingRepository
                 .Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(_fixture.FindHttpResponseMessage);
+            fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
+                            .ReturnsAsync(_fixture.FindHttpResponseMessage);
             cardRepository
                 .Setup(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()))
                 .ReturnsAsync(false);
@@ -359,9 +370,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.False(result);
+            documentRepository.Verify(a => a.ClearWorkflowRelationships(list), Times.Once);
             documentRepository.Verify(a => a.Delete(list), Times.Once);
             documentRepository.Verify(a => a.FindHashById(list), Times.Once);
             embeddingRepository.Verify(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Once);
             cardRepository.Verify(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);   // mesmo retornando false, ainda faz commit
@@ -651,7 +664,7 @@ namespace WoopiAiHub.UnitTests.Services
             var referenceFile = "test-file.pdf";
 
             var document = new Document("Test Document", "Description", referenceFile, 
-                DocumentStatus.OCR, true, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
+                DocumentStatus.OCR, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
 
             var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, true);
             var tool = new Tool(1, DateTime.UtcNow, "OCR Tool", true, 1, 1, 1, false, null, null);
@@ -663,7 +676,7 @@ namespace WoopiAiHub.UnitTests.Services
             var execution = new StepToolExecution(1, DateTime.UtcNow, stepToolId, StatusExecution.Ready, cardId);
             typeof(StepToolExecution).GetProperty("StepTool")!.SetValue(execution, stepTool);
 
-            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, true, null);
+            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, null);
             typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution> { execution });
 
             var ocrOutput = new DocumentEmbeddingsDataDto
@@ -732,9 +745,9 @@ namespace WoopiAiHub.UnitTests.Services
             var referenceFile = "test-file.pdf";
 
             var document = new Document("Test Document", "Description", referenceFile, 
-                DocumentStatus.NotAnalyzed, true, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
+                DocumentStatus.NotAnalyzed, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
 
-            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, true, null);
+            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, null);
             typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution>());
 
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();

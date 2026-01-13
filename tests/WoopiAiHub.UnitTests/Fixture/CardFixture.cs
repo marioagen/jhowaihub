@@ -33,7 +33,6 @@ namespace WoopiAiHub.UnitTests.Fixture
                 1, 
                 "Card", 
                 1, 
-                true, 
                 null
             );
             card.Document = new Document(
@@ -41,7 +40,6 @@ namespace WoopiAiHub.UnitTests.Fixture
                 "Ref", 
                 "Link", 
                 Domain.Enum.DocumentStatus.ReadyForAnalysis, 
-                true,
                 "email",
                 1,
                 new List<Workflow>(),

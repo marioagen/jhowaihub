@@ -48,7 +48,12 @@
             </template>
         </TableComponent>
     </div>
-    <EmbeddingDocument v-if="isEmbedding" :docData="docDataEmbedding" :isReprocessing="isReprocessing" />
+    <EmbeddingDocument 
+        v-if="isEmbedding" 
+        :docData="docDataEmbedding" 
+        :isReprocessing="isReprocessing" 
+        @close="isEmbedding = false"
+    />
     <ConfirmModal
         id="deleteConfirm"
         title="documents.removeTitle"
@@ -172,24 +177,24 @@
             deleteDocument() {
                 this.isDeleting = true;
                 DocumentsServices.deleteDocument(this.selectedDocument)
-                    .then((success) => {
-                        if (success) {
-                            this.$refs.DeleteDialog.close();
-                            this.getDocuments({ search: "", page: 1, type: null });
-                            this.$notify({
-                                title: this.$t("documents.title"),
-                                message: this.$t("documents.removeSuccess"),
-                                variant: "success",
-                                icon: "CircleCheckBig",
-                            });
-                        } else {
-                            this.$notify({
+                    .then((response) => {
+                        if(response?.error !== undefined) {
+                            return this.$notify({
                                 title: this.$t("documents.title"),
                                 message: this.$t("documents.removeError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
                         }
+
+                        this.$refs.DeleteDialog.close();
+                        this.getDocuments({ search: "", page: 1, type: null });
+                        this.$notify({
+                            title: this.$t("documents.title"),
+                            message: this.$t("documents.removeSuccess"),
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
                     })
                     .finally(() => {
                         this.table.selectedRows = [];
