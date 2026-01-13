@@ -353,7 +353,7 @@ export default {
         signalRService.on(this.signalrEventExecutionChanged, (message) => {
             console.log(message);
             // Handle both array and object with steps property
-            const steps = Array.isArray(this.kanbanCards) 
+            const steps = Array.isArray(this.kanbanCards)
                 ? this.kanbanCards 
                 : (this.kanbanCards?.steps || []);
             
@@ -370,14 +370,15 @@ export default {
                     }
                 }
 
-            if (!foundCard) return;
-            foundCard.percentage = message.percentage;
-            if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
-                // Instead of reloading everything, collect card ID and update only that card
-                if (!this.cardIdsToUpdate.includes(message.cardId)) {
-                    this.cardIdsToUpdate.push(message.cardId);
+                if (!foundCard) return;
+                foundCard.percentage = message.percentage;
+                if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
+                    // Instead of reloading everything, collect card ID and update only that card
+                    if (!this.cardIdsToUpdate.includes(message.cardId)) {
+                        this.cardIdsToUpdate.push(message.cardId);
+                    }
+                    this.updateSpecificCards([message.cardId]);
                 }
-                this.updateSpecificCards([message.cardId]);
             }
         });
     },
@@ -389,8 +390,8 @@ export default {
         signalRService.stopConnection();
         GlobalEventService.off("all-uploads-complete", this.reloadKanban);
         GlobalEventService.off("refresh-once", this.reloadKanban);
-    },
-};
+    }
+}
 </script>
 
 <style scoped>
