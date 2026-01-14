@@ -176,27 +176,15 @@
                         },
                         labelKey: "pages.prompts",
                     },
-                    // {
-                    //     permission: 'Templates',
-                    //     activeKey: 'Templates',
-                    //     to: '/templates',
-                    //     icon: {
-                    //         name: 'Zap',
-                    //         color: '#0d6efd'
-                    //     },
-                    //     labelKey: 'pages.templates'
-                    // },
                 ],
             };
         },
         computed: {
             filteredMenuItems() {
                 return this.menuItems.filter(item => {
-                    // If no permission property, always show (e.g., Home)
                     if (!item.permission) {
                         return true;
                     }
-                    // Check if user has permission for this item
                     return hasPermission(item.permission, "View");
                 });
             },
