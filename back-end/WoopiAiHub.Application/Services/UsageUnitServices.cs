@@ -1,7 +1,7 @@
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -17,10 +17,11 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Find all usage units
         /// </summary>
+        /// <param name="dateFilterDto"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<UsageUnitDto>> FindAllAsync()
+        public async Task<IEnumerable<UsageUnitDto>> FindAllAsync(DateFilterDto? dateFilterDto = null)
         {
-            return await _usageUnitRepository.FindAllAsync();
+            return await _usageUnitRepository.FindAllAsync(dateFilterDto);
         }
     }
 }

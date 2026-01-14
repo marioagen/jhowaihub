@@ -123,7 +123,7 @@ export default {
         },
         getDashboardData() {
             this.filterData(this.filters);
-            DashboardServices.GetUsageUnits()
+            DashboardServices.GetUsageUnits(this.filters)
                 .then((response) => {
                     this.usageUnits = response;
                 });
