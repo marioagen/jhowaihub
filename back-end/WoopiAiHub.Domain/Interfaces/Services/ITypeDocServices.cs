@@ -7,12 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WoopiAiHub.Domain.DTOs;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface ITypeDocServices
     {
-        bool CreateUniqueTypeDoc(TypeDocCreateDto typeDocCreateDto,
+        ResponseCreateTypeDto CreateUniqueTypeDoc(TypeDocCreateDto typeDocCreateDto,
                                  HeadersDto typeDocHeaderDto);
         ICollection<TypeDoc> FindAll();
         TypeDoc FindByName(string name);
