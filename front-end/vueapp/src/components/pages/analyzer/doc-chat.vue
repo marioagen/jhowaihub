@@ -301,15 +301,16 @@ export default {
 .chat-toggle-button.expanded {
     display: none;
 }
-
 .chat-panel {
-    background: white;
-    border: 2px solid #0073e6;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 115, 230, 0.15);
-    animation: slideDown 0.3s ease;
-}
+   background: white;
+   border: 2px solid #0073e6;
+   border-radius: 8px;
+   padding: 1rem;
+   box-shadow: 0 4px 12px rgba(0, 115, 230, 0.15);
+   animation: slideDown 0.3s ease;
+   max-height: 70vh;
+   overflow-y: auto;
+ }
 
 @keyframes slideDown {
     from {
@@ -423,17 +424,18 @@ export default {
     align-items: stretch;
 }
 
-.questionnaire-select {
-    flex: 1;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    font-family: inherit;
-    background: white;
-    cursor: pointer;
-    transition: border-color 0.3s ease;
-}
+    .questionnaire-select {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+        width: 50%;
+    }
 
 .questionnaire-select:focus {
     outline: none;
@@ -572,7 +574,6 @@ export default {
     font-size: 0.75rem;
     font-weight: 500;
 }
-
 @media (max-width: 768px) {
     .chat-panel {
         padding: 0.75rem;
