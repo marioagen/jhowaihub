@@ -81,12 +81,14 @@
                             </span>
                         </div>
                         <div class="progress">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                 role="progressbar"
-                                 :aria-valuenow="dataCard.percentage || 0"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100"
-                                 :style="{ width: (dataCard.percentage || 0) + '%' }"></div>
+                            <div 
+                                class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar"
+                                :aria-valuenow="dataCard.percentage || 0"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                :style="{ width: (dataCard.percentage || 0) + '%' }"
+                            ></div>
                         </div>
                     </div>
                 </div>
@@ -101,7 +103,7 @@
 
     export default {
         name: "CardComponent",
-        emits: ["reload"],
+        emits: ["reload", "cardMoved"],
         data: () => ({
             isLoadingAnalysis: false,
             isUpdatingAssignedUser: false,
@@ -154,12 +156,22 @@
                         WorkflowId: this.dataStep.workflowId,
                     }
                     const response = await CardsServices.updateStepAndStatus(params);
+                    console.log(response)
                     if (response?.error !== undefined) {
                         this.$notify({
                             title: 'Error',
                             message: response.error,
                             variant: 'danger',
                             icon: 'CircleX',
+                        });
+                    } else {
+                        // If response is successful, emit event to update only this card
+                        // Pass the card data and next step info so we can update locally without fetching
+                        this.$emit('cardMoved', {
+                            card: { ...this.dataCard },
+                            currentStepOrder: this.dataStep.order,
+                            nextStepOrder: this.dataStep.order + 1,
+                            workflowId: this.dataStep.workflowId
                         });
                     }
                 }
@@ -204,7 +216,7 @@
                this.isLoadingAnalysis = true;
                     try {
                         await this.updateStatus();
-                        this.reloadList();                     
+                        // Don't reload the entire list - let the cardMoved event handle the update
                     } catch (e) {
                         this.$notify({
                             title: 'Error',

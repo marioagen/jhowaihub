@@ -85,6 +85,7 @@
                                     :kanbanData="kanbanCards" 
                                     :users="users" 
                                     @reload="reloadKanban" 
+                                    @cardMoved="handleCardMoved"
                                     :isLoading="isLoadingKanban"
                                     :cardIdsToUpdate="cardIdsToUpdate"
                                 />
@@ -176,68 +177,68 @@ export default {
                     }
                     this.isLoadingKanban = false;
                 });
-            },
-            setSelectedWorkflow() {
-                const redicteWorkflowId = this.$route.query.id;
-                let workflowToSelect = this.workflowList[0];
+        },
+        setSelectedWorkflow() {
+            const redicteWorkflowId = this.$route.query.id;
+            let workflowToSelect = this.workflowList[0];
 
-                if (redicteWorkflowId !== undefined) {
-                    const foundWorkflow = this.workflowList.find((w) => w.id == redicteWorkflowId);
-                    if (foundWorkflow) {
-                        return this.selectOption(foundWorkflow);
-                    } else {
-                        return this.$notify({
-                            title: "workflow.index",
-                            message: "workflow.error",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    }
-                }
-
-                const lastSelected = this.$store.state.lastSelectedWorkflow;
-                if (lastSelected) {
-                    const foundWorkflow = this.workflowList.find((w) => w.id === lastSelected.id);
-                    if (foundWorkflow) {
-                        return this.selectOption(foundWorkflow);
-                    }
-                }
-
-                this.selectOption(workflowToSelect);
-            },
-            getWorkflowStepsById(workflowId) {
-                this.isLoadingKanban = true;
-                WorkflowService.getWorkflowStepsById(workflowId, this.filters)
-                    .then((response) => {
-                        this.kanbanCards = response;
-                    })
-                    .finally(() => {
-                        this.isLoadingKanban = false;
+            if (redicteWorkflowId !== undefined) {
+                const foundWorkflow = this.workflowList.find((w) => w.id == redicteWorkflowId);
+                if (foundWorkflow) {
+                    return this.selectOption(foundWorkflow);
+                } else {
+                    return this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.error",
+                        variant: "danger",
+                        icon: "CircleX",
                     });
-            },
-            getUsersByTeams(teams) {
-                if (!teams || teams.length === 0) {
+                }
+            }
+
+            const lastSelected = this.$store.state.lastSelectedWorkflow;
+            if (lastSelected) {
+                const foundWorkflow = this.workflowList.find((w) => w.id === lastSelected.id);
+                if (foundWorkflow) {
+                    return this.selectOption(foundWorkflow);
+                }
+            }
+
+            this.selectOption(workflowToSelect);
+        },
+        getWorkflowStepsById(workflowId) {
+            this.isLoadingKanban = true;
+            WorkflowService.getWorkflowStepsById(workflowId, this.filters)
+                .then((response) => {
+                    this.kanbanCards = response;
+                })
+                .finally(() => {
+                    this.isLoadingKanban = false;
+                });
+        },
+        getUsersByTeams(teams) {
+            if (!teams || teams.length === 0) {
+                this.users = [];
+                this.isLoading = false;
+                return;
+            }
+
+            this.isLoading = true;
+            const teamIds = teams.map((t) => t.id);
+
+            UserService.getUsersByTeamIds(teamIds)
+                .then((users) => {
+                    this.users = users;
+                })
+                .catch((error) => {
+                    console.error("Error loading users:", error);
                     this.users = [];
+                })
+                .finally(() => {
                     this.isLoading = false;
-                    return;
-                }
-
-                this.isLoading = true;
-                const teamIds = teams.map((t) => t.id);
-
-                UserService.getUsersByTeamIds(teamIds)
-                    .then((users) => {
-                        this.users = users;
-                    })
-                    .catch((error) => {
-                        console.error("Error loading users:", error);
-                        this.users = [];
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            },
-            selectOption(workflow) {
+                });
+        },
+        selectOption(workflow) {
                 if (!workflow?.id) return;
 
                 this.isLoaded = false;
@@ -258,6 +259,57 @@ export default {
         },
         reloadKanban() {
             this.getWorkflowStepsById(this.selectedOption.id);
+        },
+        handleCardMoved(cardMoveData) {
+            // Update only the local state - no server calls, no full reloads
+            const steps = Array.isArray(this.kanbanCards) ? this.kanbanCards : (this.kanbanCards?.steps || []);
+            
+            if (steps.length === 0) return;
+            
+            // Find the current step (where the card is now)
+            const currentStep = steps.find(s => s.order === cardMoveData.currentStepOrder);
+            // Find the next step (where the card should move to)
+            const nextStep = steps.find(s => s.order === cardMoveData.nextStepOrder);
+            
+            if (!currentStep || !nextStep) {
+                console.warn('Could not find current or next step for card movement');
+                return;
+            }
+            
+            // Find and remove the card from current step
+            if (!currentStep.cards) {
+                currentStep.cards = [];
+            }
+            
+            const cardIndex = currentStep.cards.findIndex(c => c.id === cardMoveData.card.id);
+            if (cardIndex === -1) {
+                console.warn('Card not found in current step');
+                return;
+            }
+            
+            // Get the card and update its stepId and status to match the next step
+            const card = currentStep.cards[cardIndex];
+            const updatedCard = {
+                ...card,
+                stepId: nextStep.id,
+                status: nextStep.status ? { ...nextStep.status } : card.status
+            };
+            
+            // Remove from current step
+            currentStep.cards.splice(cardIndex, 1);
+            
+            // Add to next step
+            if (!nextStep.cards) {
+                nextStep.cards = [];
+            }
+            nextStep.cards.push(updatedCard);
+            
+            // Trigger Vue reactivity by updating the array reference
+            if (Array.isArray(this.kanbanCards)) {
+                this.kanbanCards = [...steps];
+            } else if (this.kanbanCards) {
+                this.kanbanCards = { ...this.kanbanCards, steps: [...steps] };
+            }
         },
         updateSpecificCards(cardIds) {
             if (!cardIds || cardIds.length === 0) return;
@@ -352,7 +404,6 @@ export default {
         await signalRService.startConnection();
         signalRService.on(this.signalrEventExecutionChanged, (message) => {
             console.log(message);
-            // Handle both array and object with steps property
             const steps = Array.isArray(this.kanbanCards)
                 ? this.kanbanCards 
                 : (this.kanbanCards?.steps || []);
@@ -373,7 +424,6 @@ export default {
                 if (!foundCard) return;
                 foundCard.percentage = message.percentage;
                 if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
-                    // Instead of reloading everything, collect card ID and update only that card
                     if (!this.cardIdsToUpdate.includes(message.cardId)) {
                         this.cardIdsToUpdate.push(message.cardId);
                     }

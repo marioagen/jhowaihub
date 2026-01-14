@@ -23,13 +23,21 @@
                         </div>
                     </div>
                     <div v-else>
-                        <div v-for="card in step.cards" :key="card.id" class="card-body">
+                        <div 
+                        v-for="card in step.cards" 
+                        :key="card.id" 
+                        class="card-body"
+                        :id="card.id"
+                    >
                             <KanbanCard 
                                 :dataCard="card" 
                                 :dataStep="step" 
                                 :isFirstStep="step.order === minOrder"
                                 :isLoading="isLoading"
-                                :isLastStep="step.order === maxOrder" @reload="reloadList" label="labelAnalyze"
+                                :isLastStep="step.order === maxOrder" 
+                                @reload="reloadList" 
+                                @cardMoved="handleCardMoved"
+                                label="labelAnalyze"
                                 :users="users" 
                             />
                         </div>
@@ -104,16 +112,21 @@ export default {
         reloadList() {
             this.$emit('reload');
         },
+        handleCardMoved(cardMoveData) {
+            this.$emit('cardMoved', cardMoveData);
+        },
         setCard() {
             this.stepsList = this.kanbanData;
         },
         updateCards(cardIds) {
             if (!cardIds || cardIds.length === 0) return;
-            
-            // This method is called when cardIdsToUpdate changes
-            // The parent component will handle fetching and updating the cards
-            // This component just needs to react to the updated kanbanData prop
-            // which will be updated by the parent
+            console.log(cardIds);
+            cardIds.forEach(cardId => {
+                const cardElement = document.getElementById(cardId);
+                if (cardElement) {
+                    cardElement.remove();
+                }
+            });
         },
     },
     mounted() {
