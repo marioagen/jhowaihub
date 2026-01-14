@@ -168,7 +168,6 @@ export default {
                 });
         },
         changePage(page) {
-            console.log("Change page" + page)
             this.table.pagination.currentPage = page;
             this.getWorkflowList();
         },
