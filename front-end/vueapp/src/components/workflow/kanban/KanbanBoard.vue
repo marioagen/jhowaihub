@@ -1,8 +1,8 @@
 <template>
-    <div class="container mt-2">
+    <div class="kanban-board-container">
         <div class="d-flex flex-nowrap">
             <div class="col-3 kanban-col me-3" v-for="step in stepsList" :key="step.id">
-                <div class="card flex-grow-1">
+                <div class="card flex-grow-1 kanban-column-card">
                     <div class="card-header" :class="findOrder(step.order)">
                         {{ step.name }}
                     </div>
@@ -22,7 +22,7 @@
                             </p>
                         </div>
                     </div>
-                    <div v-else>
+                    <div v-else class="kanban-column-body">
                         <div 
                         v-for="card in step.cards" 
                         :key="card.id" 
@@ -140,6 +140,41 @@ export default {
 </script>
 
 <style scoped>
+.kanban-board-container {
+    height: 100%;
+    width: 100%;
+    padding: 0.5rem 0;
+    overflow: visible;
+}
+
+.kanban-board-container > .d-flex {
+    height: 100%;
+    align-items: stretch;
+}
+
+.kanban-col {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.kanban-column-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.kanban-column-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
 .first-steps {
     background-color: #dbe9fc;
 }
@@ -199,5 +234,6 @@ export default {
     overflow-wrap: break-word;
     white-space: normal;
     hyphens: auto;
+    flex-shrink: 0;
 }
 </style>

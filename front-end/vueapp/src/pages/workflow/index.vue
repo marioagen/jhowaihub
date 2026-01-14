@@ -483,13 +483,20 @@ export default {
     }
 
     .card-container {
-        max-height: 75vh;
-        overflow-y: auto;
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .kanban-wrapper {
+        flex: 1;
         overflow-x: auto;
-        white-space: nowrap;
+        overflow-y: hidden;
+        min-height: 0;
+        display: flex;
+        align-items: stretch;
+        -webkit-overflow-scrolling: touch;
     }
 
     .workflow-list {
