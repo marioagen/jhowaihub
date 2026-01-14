@@ -103,14 +103,14 @@
 </template>
 
 <script>
-    import signalRService from "@/services/signalR/signalRServices.js";
-    import GlobalEventService from "@/services/globalEventService.js";
-    import WorkflowService from "@/services/workflow/WorkflowService.js";
-    import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
-    import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
-    import UserService from "@/services/users/UserService";
-    import LogService from "@/services/log/LogService";
-    import LoadingComponent from "@/components/global/LoadingComponent.vue";
+import signalRService from "@/services/signalR/signalRServices.js";
+import GlobalEventService from "@/services/globalEventService.js";
+import WorkflowService from "@/services/workflow/WorkflowService.js";
+import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
+import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
+import UserService from "@/services/users/UserService";
+import LogService from "@/services/log/logService";
+import LoadingComponent from "@/components/global/LoadingComponent.vue";
 
 export default {
     name: "WorkflowPage",
