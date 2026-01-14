@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -149,6 +149,19 @@ namespace WoopiAiHub.Repository
                     WorkflowName = c.Step != null && c.Step.Workflow != null ? c.Step.Workflow.Name : string.Empty
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Retrieves the IDs of cards associated with the specified document IDs.
+        /// </summary>
+        /// <param name="documentIds">The collection of document IDs to search for.</param>
+        /// <returns>A collection of card IDs associated with the specified documents.</returns>
+        public async Task<ICollection<int>> FindCardIdsByDocumentIdsAsync(IEnumerable<int> documentIds)
+        {
+            return await _context.Cards
+                .Where(c => documentIds.Contains(c.DocumentId))
+                .Select(c => c.Id)
+                .ToListAsync();
         }
     }
 }

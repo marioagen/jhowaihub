@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
 {
@@ -10,6 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<string> FindByStepToolId(int stepToolId, int cardId);
         Task<List<StepToolOutput>> FindByCardIdAsync(int cardId);
         Task<bool> HasOutputsByStepToolIds(IEnumerable<int> stepToolIds);
+        bool DeleteByCardIds(IEnumerable<int> cardIds);
     }
 }
 
