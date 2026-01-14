@@ -80,7 +80,16 @@
                     <div class="card custom-height">
                         <div class="card-body d-flex flex-column p-2 card-container">
                             <div class="kanban-wrapper">
-                                <KanbanBoard :kanbanData="kanbanCards" :users="users" @reload="reloadKanban" />
+                                <KanbanBoard 
+                                    ref="kanbanBoardRef"
+                                    :kanbanData="kanbanCards" 
+                                    :users="users" 
+                                    @reload="reloadKanban" 
+                                    @cardMoved="handleCardMoved"
+                                    @cardUpdated="updateCard"
+                                    :isLoading="isLoadingKanban"
+                                    :cardIdsToUpdate="cardIdsToUpdate"
+                                />
                             </div>
                         </div>
                     </div>
@@ -100,56 +109,60 @@
     import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
     import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
     import UserService from "@/services/users/UserService";
+    import LogService from "@/services/log/LogService";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
 
-    export default {
-        name: "WorkflowPage",
-        data() {
-            return {
-                crumbsData: [],
-                entitySearch: {},
-                modalQuestion: {
-                    name: "",
-                },
-                workflowList: [],
-                workflowSearchText: "",
-                filteredWorkflows: [],
-                selectedOption: {
-                    id: 0,
-                    name: "Select a workflow",
-                    teamName: "Select a team",
-                    teamId: 0,
-                },
-                kanbanCards: [],
-                numDocs: 0,
-                isLoaded: false,
-                isLoadedUsers: false,
-                isLoadingKanban: true,
-                signalrEventExecutionChanged: "CardExecutionChanged",
-                filters: {
-                    orderBy: "",
-                    input: null,
-                    login: null,
-                    isAllUsers: true,
-                },
-                users: [],
-            };
-        },
-        components: {
-            LoadingComponent,
-            WorkflowFilters,
-            KanbanBoard,
-        },
-        computed: {
-            hasList() {
-                return this.workflowList.length > 0;
+export default {
+    name: "WorkflowPage",
+    data() {
+        return {
+            crumbsData: [],
+            entitySearch: {},
+            modalQuestion: {
+                name: "",
             },
+            workflowList: [],
+            workflowSearchText: "",
+            filteredWorkflows: [],
+            selectedOption: {
+                id: 0,
+                name: "Select a workflow",
+                teamName: "Select a team",
+                teamId: 0,
+            },
+            kanbanCards: [],
+            numDocs: 0,
+            isLoaded: false,
+            isLoadedUsers: false,
+            isLoadingKanban: true,
+            signalrEventExecutionChanged: "CardExecutionChanged",
+            filters: {
+                orderBy: "",
+                input: null,
+                login: null,
+                isAllUsers: true,
+            },
+            users: [],
+            cardIdsToUpdate: [],
+            updateCardsDebounceTimer: null
+        };
+    },
+    components: {
+        LoadingComponent,
+        WorkflowFilters,
+        KanbanBoard,
+    },
+    computed: {
+        hasList() {
+            return this.workflowList.length > 0;
         },
-        methods: {
-            getWorkflowByUser() {
-                this.isLoadingKanban = true;
-                var email = this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email).then((response) => {
+    },
+    methods: {
+        getWorkflowByUser() {
+            this.isLoadingKanban = true;
+            var email = this.$store.state.userProfile.login;
+            WorkflowService.getWorkflowList(email)
+                .then((response) => {
                     if (response.error !== undefined) {
                         this.$notify({
                             title: "workflow.index",
@@ -166,68 +179,68 @@
                     }
                     this.isLoadingKanban = false;
                 });
-            },
-            setSelectedWorkflow() {
-                const redicteWorkflowId = this.$route.query.id;
-                let workflowToSelect = this.workflowList[0];
+        },
+        setSelectedWorkflow() {
+            const redicteWorkflowId = this.$route.query.id;
+            let workflowToSelect = this.workflowList[0];
 
-                if (redicteWorkflowId !== undefined) {
-                    const foundWorkflow = this.workflowList.find((w) => w.id == redicteWorkflowId);
-                    if (foundWorkflow) {
-                        return this.selectOption(foundWorkflow);
-                    } else {
-                        return this.$notify({
-                            title: "workflow.index",
-                            message: "workflow.error",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    }
-                }
-
-                const lastSelected = this.$store.state.lastSelectedWorkflow;
-                if (lastSelected) {
-                    const foundWorkflow = this.workflowList.find((w) => w.id === lastSelected.id);
-                    if (foundWorkflow) {
-                        return this.selectOption(foundWorkflow);
-                    }
-                }
-
-                this.selectOption(workflowToSelect);
-            },
-            getWorkflowStepsById(workflowId) {
-                this.isLoadingKanban = true;
-                WorkflowService.getWorkflowStepsById(workflowId, this.filters)
-                    .then((response) => {
-                        this.kanbanCards = response;
-                    })
-                    .finally(() => {
-                        this.isLoadingKanban = false;
+            if (redicteWorkflowId !== undefined) {
+                const foundWorkflow = this.workflowList.find((w) => w.id == redicteWorkflowId);
+                if (foundWorkflow) {
+                    return this.selectOption(foundWorkflow);
+                } else {
+                    return this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.error",
+                        variant: "danger",
+                        icon: "CircleX",
                     });
-            },
-            getUsersByTeams(teams) {
-                if (!teams || teams.length === 0) {
+                }
+            }
+
+            const lastSelected = this.$store.state.lastSelectedWorkflow;
+            if (lastSelected) {
+                const foundWorkflow = this.workflowList.find((w) => w.id === lastSelected.id);
+                if (foundWorkflow) {
+                    return this.selectOption(foundWorkflow);
+                }
+            }
+
+            this.selectOption(workflowToSelect);
+        },
+        getWorkflowStepsById(workflowId) {
+            this.isLoadingKanban = true;
+            WorkflowService.getWorkflowStepsById(workflowId, this.filters)
+                .then((response) => {
+                    this.kanbanCards = response;
+                })
+                .finally(() => {
+                    this.isLoadingKanban = false;
+                });
+        },
+        getUsersByTeams(teams) {
+            if (!teams || teams.length === 0) {
+                this.users = [];
+                this.isLoading = false;
+                return;
+            }
+
+            this.isLoading = true;
+            const teamIds = teams.map((t) => t.id);
+
+            UserService.getUsersByTeamIds(teamIds)
+                .then((users) => {
+                    this.users = users;
+                })
+                .catch((error) => {
+                    LogService.showMessage("Error loading users:", error);
                     this.users = [];
+                })
+                .finally(() => {
                     this.isLoading = false;
-                    return;
-                }
-
-                this.isLoading = true;
-                const teamIds = teams.map((t) => t.id);
-
-                UserService.getUsersByTeamIds(teamIds)
-                    .then((users) => {
-                        this.users = users;
-                    })
-                    .catch((error) => {
-                        console.error("Error loading users:", error);
-                        this.users = [];
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            },
-            selectOption(workflow) {
+                });
+        },
+        selectOption(workflow) {
                 if (!workflow?.id) return;
 
                 this.isLoaded = false;
@@ -243,63 +256,212 @@
                     name: workflow.name,
                 };
 
-                this.getWorkflowStepsById(workflow.id);
-                this.getUsersByTeams(workflow.teams);
-            },
-            reloadKanban() {
-                this.getWorkflowStepsById(this.selectedOption.id);
-            },
-            filterData(filters) {
-                this.filters = filters;
-                this.reloadKanban();
-            },
-            redirectToNewUpload() {
-                this.$router.push({ name: "DocumentsUpload" });
-            },
-            searchWorkflow() {
-                const searchText = this.workflowSearchText.toLowerCase();
-                this.filteredWorkflows = this.workflowList.filter(
-                    (o) =>
-                        (o.name && o.name.toLowerCase().includes(searchText)) ||
-                        (o.teams && o.teams.name && o.teams.name.toLowerCase().includes(searchText))
-                );
-            },
+            this.getWorkflowStepsById(workflow.id);
+            this.getUsersByTeams(workflow.teams);
         },
-        created() {
-            this.getWorkflowByUser();
-            GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
-            GlobalEventService.on("refresh-once", this.getWorkflowByUser);
+        reloadKanban() {
+            this.getWorkflowStepsById(this.selectedOption.id);
         },
-        async mounted() {
-            await signalRService.startConnection();
-            signalRService.on(this.signalrEventExecutionChanged, (message) => {
-                const step = this.kanbanCards.find((w) => w.id === message.stepId);
-                if (!step) return;
+        handleCardMoved(cardMoveData) {
+            this.updateCard({
+                card: cardMoveData.card,
+                currentStepOrder: cardMoveData.currentStepOrder,
+                newStepOrder: cardMoveData.nextStepOrder
+            });
+        },
+        updateCard(cardUpdateData) {
+            const steps = Array.isArray(this.kanbanCards) ? this.kanbanCards : (this.kanbanCards?.steps || []);
+            
+            if (steps.length === 0) return;
+            
+            const currentStep = steps.find(s => s.order === cardUpdateData.currentStepOrder);
+            if (!currentStep) {
+                LogService.showMessage('Could not find current step for card update');
+                return;
+            }
+            
+            if (!currentStep.cards) {
+                currentStep.cards = [];
+            }
+            
+            const cardIndex = currentStep.cards.findIndex(c => c.id === cardUpdateData.card.id);
+            if (cardIndex === -1) {
+                LogService.showMessage('Card not found in current step');
+                return;
+            }
+            
+            const existingCard = currentStep.cards[cardIndex];
+            const shouldMove = cardUpdateData.newStepOrder !== undefined && cardUpdateData.newStepOrder !== cardUpdateData.currentStepOrder;
+            if (shouldMove) {
+                const targetStep = steps.find(s => s.order === cardUpdateData.newStepOrder);
+                if (!targetStep) {
+                    LogService.showMessage('Could not find target step for card movement');
+                    return;
+                }
+                
+                const updatedCard = {
+                    ...existingCard,
+                    ...cardUpdateData.card,
+                    stepId: targetStep.id,
+                    status: targetStep.status ? { ...targetStep.status } : (cardUpdateData.card.status || existingCard.status)
+                };
+                
+                currentStep.cards.splice(cardIndex, 1);
+                if (!targetStep.cards) {
+                    targetStep.cards = [];
+                }
+                targetStep.cards.push(updatedCard);
+            } else {
+                const updatedCard = {
+                    ...existingCard,
+                    ...cardUpdateData.card
+                };
+                
+                currentStep.cards[cardIndex] = updatedCard;
+            }
+            
+            if (Array.isArray(this.kanbanCards)) {
+                this.kanbanCards = [...steps];
+            } else if (this.kanbanCards) {
+                this.kanbanCards = { ...this.kanbanCards, steps: [...steps] };
+            }
+        },
+        updateSpecificCards(cardIds, signalRMessage = null) {
+            if (!cardIds || cardIds.length === 0) return;
+            
+            if (this.updateCardsDebounceTimer) {
+                clearTimeout(this.updateCardsDebounceTimer);
+            }
+            
+            this.updateCardsDebounceTimer = setTimeout(() => {
+                const steps = Array.isArray(this.kanbanCards) 
+                    ? this.kanbanCards 
+                    : (this.kanbanCards?.steps || []);
+                
+                if (steps.length === 0) return;
+                
+                cardIds.forEach(cardId => {
+                    let currentCard = null;
+                    let currentStepOrder = null;
+                    
+                    for (const step of steps) {
+                        if (step.cards) {
+                            const card = step.cards.find(c => c.id === cardId);
+                            if (card) {
+                                currentCard = card;
+                                currentStepOrder = step.order;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!currentCard) {
+                        LogService.showMessage(`Card ${cardId} not found in current state`);
+                        return;
+                    }
+                    
+                    let newStepOrder = currentStepOrder;
+                    if (signalRMessage && signalRMessage.stepId) {
+                        const targetStep = steps.find(s => s.id === signalRMessage.stepId);
+                        if (targetStep) {
+                            newStepOrder = targetStep.order;
+                        }
+                    }
+                    
+                    const updatedCardData = {
+                        ...currentCard
+                    };
+                    
+                    if (signalRMessage) {
+                        if (signalRMessage.percentage !== undefined) {
+                            updatedCardData.percentage = signalRMessage.percentage;
+                        }
+                        if (signalRMessage.toolName !== undefined) {
+                            updatedCardData.toolName = signalRMessage.toolName;
+                        }
+                    }
+                    
+                    this.updateCard({
+                        card: updatedCardData,
+                        currentStepOrder: currentStepOrder,
+                        newStepOrder: newStepOrder
+                    });
+                });
+                
+                setTimeout(() => {
+                    this.cardIdsToUpdate = [];
+                }, 100);
+            }, 300);
+        },
+        filterData(filters) {
+            this.filters = filters;
+            this.reloadKanban();
+        },
+        redirectToNewUpload() {
+            this.$router.push({ name: "DocumentsUpload" });
+        },
+        searchWorkflow() {
+            const searchText = this.workflowSearchText.toLowerCase();
+            this.filteredWorkflows = this.workflowList.filter(o =>
+                (o.name && o.name.toLowerCase().includes(searchText)) ||
+                (o.teams && o.teams.name && o.teams.name.toLowerCase().includes(searchText))
+            );
+        },
+    },
+    created() {
+        this.getWorkflowByUser();
+        GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
+        GlobalEventService.on("refresh-once", this.getWorkflowByUser);
+    },
+    async mounted() {
+        await signalRService.startConnection();
+        signalRService.on(this.signalrEventExecutionChanged, (message) => {
+            const steps = Array.isArray(this.kanbanCards)
+                ? this.kanbanCards 
+                : (this.kanbanCards?.steps || []);
+            
+            if (steps.length === 0) return;
+            
+            let foundCard = null;
+            let currentStepOrder = null;
 
-                let foundCard = null;
+            for (const step of steps) {
                 if (step.cards) {
                     const card = step.cards.find((c) => c.id === message.cardId);
                     if (card) {
                         foundCard = card;
-                        foundCard.toolName = message.toolName;
+                        currentStepOrder = step.order;
+                        break;
                     }
                 }
+            }
 
-                if (!foundCard) return;
+            if (!foundCard) {
+                LogService.showMessage(`Card ${message.cardId} not found in SignalR update`);
+                return;
+            }
 
-                foundCard.percentage = message.percentage;
-                if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
-                    this.getWorkflowByUser();
+            foundCard.percentage = message.percentage;
+            foundCard.toolName = message.toolName;
+
+            if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
+                if (!this.cardIdsToUpdate.includes(message.cardId)) {
+                    this.cardIdsToUpdate.push(message.cardId);
                 }
-            });
-        },
-        beforeUnmount() {
-            signalRService.off(this.signalrEventExecutionChanged);
-            signalRService.stopConnection();
-            GlobalEventService.off("all-uploads-complete", this.reloadKanban);
-            GlobalEventService.off("refresh-once", this.reloadKanban);
-        },
-    };
+                this.updateSpecificCards([message.cardId], message);
+            }
+        });
+    },
+    beforeUnmount() {
+        if (this.updateCardsDebounceTimer) {
+            clearTimeout(this.updateCardsDebounceTimer);
+        }
+        signalRService.off(this.signalrEventExecutionChanged);
+        signalRService.stopConnection();
+        GlobalEventService.off("all-uploads-complete", this.reloadKanban);
+        GlobalEventService.off("refresh-once", this.reloadKanban);
+    }
+}
 </script>
 
 <style scoped>
@@ -322,13 +484,20 @@
     }
 
     .card-container {
-        max-height: 75vh;
-        overflow-y: auto;
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .kanban-wrapper {
+        flex: 1;
         overflow-x: auto;
-        white-space: nowrap;
+        overflow-y: hidden;
+        min-height: 0;
+        display: flex;
+        align-items: stretch;
+        -webkit-overflow-scrolling: touch;
     }
 
     .workflow-list {
