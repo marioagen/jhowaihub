@@ -37,7 +37,7 @@
         <div class="sidebar-horizontal-separator"></div>
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li
-                v-for="item in menuItems"
+                v-for="item in filteredMenuItems"
                 :key="item.labelKey"
                 class="mb-1"
                 :class="{ 'is-active': isRouteActive(item) }"
@@ -76,16 +76,6 @@
         data() {
             return {
                 title: "SideBarComponent",
-                permissions: {
-                    management: hasPermission("Management", "View"),
-                    questions: hasPermission("Questions", "View"),
-                    documents: hasPermission("Documents", "View"),
-                    types: hasPermission("Types", "View"),
-                    quizzes: hasPermission("Quizzes", "View"),
-                    workflow: hasPermission("Workflow", "View"),
-                    tools: hasPermission("Tools", "View"),
-                    prompts: hasPermission("Prompts", "View"),
-                },
                 menuItems: [
                     {
                         activeKey: "Home",
@@ -198,6 +188,18 @@
                     // },
                 ],
             };
+        },
+        computed: {
+            filteredMenuItems() {
+                return this.menuItems.filter(item => {
+                    // If no permission property, always show (e.g., Home)
+                    if (!item.permission) {
+                        return true;
+                    }
+                    // Check if user has permission for this item
+                    return hasPermission(item.permission, "View");
+                });
+            },
         },
         methods: {
             isRouteActive(item) {
