@@ -9,8 +9,6 @@ import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
 
-// import TypesPage from "@/pages/managementQuizzes/types/types.vue";
-// import QuestionsPage from "@/pages/managementQuizzes/questions/questions.vue";
 import ManagementPage from "@/pages/management/index.vue";
 import DashboardPage from "@/pages/dashboard.vue";
 
@@ -23,7 +21,6 @@ import NewProfile from "@/pages/management/profiles/newProfile.vue";
 import EditProfile from "@/pages/management/profiles/editProfile.vue";
 
 import ManagementQuizzesPage from "@/pages/managementQuizzes/index.vue";
-// import QuizzesPage from "@/pages/managementQuizzes/quizzes/index.vue";
 import NewQuizz from "@/pages/managementQuizzes/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/managementQuizzes/quizzes/editQuizz.vue";
 
