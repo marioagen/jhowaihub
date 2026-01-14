@@ -209,13 +209,11 @@
                         variant: 'danger',
                         icon: 'CircleX',
                     });
-                }
-                else{
-                    // Emit cardUpdated event with updated card data (stays in same step)
+                } else {
                     this.$emit('cardUpdated', {
                         card: { ...this.dataCard, assignedUser: null },
                         currentStepOrder: this.dataStep.order,
-                        newStepOrder: this.dataStep.order // Same step, no movement
+                        newStepOrder: this.dataStep.order
                     });
                 }
                 this.isUnassigningUser = false;
