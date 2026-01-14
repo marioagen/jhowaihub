@@ -233,7 +233,7 @@ export default {
                     this.users = users;
                 })
                 .catch((error) => {
-                    console.error("Error loading users:", error);
+                    LogService.showMessage("Error loading users:", error);
                     this.users = [];
                 })
                 .finally(() => {
