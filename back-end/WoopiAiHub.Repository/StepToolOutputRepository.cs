@@ -127,6 +127,7 @@ namespace WoopiAiHub.Repository
                 .Where(o => cardIds!.Contains(o.CardId))
                 .ExecuteDelete();
 
+            _context.SaveChanges();
             return deletedCount > 0;
         }
     }
