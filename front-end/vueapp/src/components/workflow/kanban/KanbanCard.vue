@@ -156,7 +156,6 @@
                         WorkflowId: this.dataStep.workflowId,
                     }
                     const response = await CardsServices.updateStepAndStatus(params);
-                    console.log(response)
                     if (response?.error !== undefined) {
                         this.$notify({
                             title: 'Error',
@@ -165,11 +164,10 @@
                             icon: 'CircleX',
                         });
                     } else {
-                        // If response is successful, emit cardUpdated event (card moves to next step)
                         this.$emit('cardUpdated', {
                             card: { ...this.dataCard },
                             currentStepOrder: this.dataStep.order,
-                            newStepOrder: this.dataStep.order + 1 // Move to next step
+                            newStepOrder: this.dataStep.order + 1
                         });
                     }
                 }
@@ -188,18 +186,15 @@
                         variant: 'danger',
                         icon: 'CircleX',
                     });
-                }
-                else{
-                    // Find the user from the users list
+                } else {
                     const assignedUser = Array.isArray(this.users) 
                         ? this.users.find(u => u.id === userId) 
                         : null;
                     
-                    // Emit cardUpdated event with updated card data (stays in same step)
                     this.$emit('cardUpdated', {
                         card: { ...this.dataCard, assignedUser: assignedUser || null },
                         currentStepOrder: this.dataStep.order,
-                        newStepOrder: this.dataStep.order // Same step, no movement
+                        newStepOrder: this.dataStep.order
                     });
                 }
                 this.isUpdatingAssignedUser = false;
@@ -229,7 +224,6 @@
                this.isLoadingAnalysis = true;
                     try {
                         await this.updateStatus();
-                        // Don't reload the entire list - let the cardMoved event handle the update
                     } catch (e) {
                         this.$notify({
                             title: 'Error',

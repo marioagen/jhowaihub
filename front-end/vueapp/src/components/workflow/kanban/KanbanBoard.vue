@@ -124,7 +124,6 @@ export default {
         },
         updateCards(cardIds) {
             if (!cardIds || cardIds.length === 0) return;
-            console.log(cardIds);
             cardIds.forEach(cardId => {
                 const cardElement = document.getElementById(cardId);
                 if (cardElement) {
