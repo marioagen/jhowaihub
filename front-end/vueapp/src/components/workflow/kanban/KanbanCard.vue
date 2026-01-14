@@ -103,7 +103,7 @@
 
     export default {
         name: "CardComponent",
-        emits: ["reload", "cardMoved"],
+        emits: ["reload", "cardMoved", "cardUpdated"],
         data: () => ({
             isLoadingAnalysis: false,
             isUpdatingAssignedUser: false,
@@ -165,13 +165,11 @@
                             icon: 'CircleX',
                         });
                     } else {
-                        // If response is successful, emit event to update only this card
-                        // Pass the card data and next step info so we can update locally without fetching
-                        this.$emit('cardMoved', {
+                        // If response is successful, emit cardUpdated event (card moves to next step)
+                        this.$emit('cardUpdated', {
                             card: { ...this.dataCard },
                             currentStepOrder: this.dataStep.order,
-                            nextStepOrder: this.dataStep.order + 1,
-                            workflowId: this.dataStep.workflowId
+                            newStepOrder: this.dataStep.order + 1 // Move to next step
                         });
                     }
                 }
@@ -192,7 +190,17 @@
                     });
                 }
                 else{
-                    this.reloadList();
+                    // Find the user from the users list
+                    const assignedUser = Array.isArray(this.users) 
+                        ? this.users.find(u => u.id === userId) 
+                        : null;
+                    
+                    // Emit cardUpdated event with updated card data (stays in same step)
+                    this.$emit('cardUpdated', {
+                        card: { ...this.dataCard, assignedUser: assignedUser || null },
+                        currentStepOrder: this.dataStep.order,
+                        newStepOrder: this.dataStep.order // Same step, no movement
+                    });
                 }
                 this.isUpdatingAssignedUser = false;
             },   
@@ -208,7 +216,12 @@
                     });
                 }
                 else{
-                    this.reloadList();
+                    // Emit cardUpdated event with updated card data (stays in same step)
+                    this.$emit('cardUpdated', {
+                        card: { ...this.dataCard, assignedUser: null },
+                        currentStepOrder: this.dataStep.order,
+                        newStepOrder: this.dataStep.order // Same step, no movement
+                    });
                 }
                 this.isUnassigningUser = false;
             },                      

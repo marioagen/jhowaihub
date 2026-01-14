@@ -37,6 +37,7 @@
                                 :isLastStep="step.order === maxOrder" 
                                 @reload="reloadList" 
                                 @cardMoved="handleCardMoved"
+                                @cardUpdated="handleCardUpdated"
                                 label="labelAnalyze"
                                 :users="users" 
                             />
@@ -114,6 +115,9 @@ export default {
         },
         handleCardMoved(cardMoveData) {
             this.$emit('cardMoved', cardMoveData);
+        },
+        handleCardUpdated(cardUpdateData) {
+            this.$emit('cardUpdated', cardUpdateData);
         },
         setCard() {
             this.stepsList = this.kanbanData;
