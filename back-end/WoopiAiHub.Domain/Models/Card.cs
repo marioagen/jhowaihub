@@ -20,9 +20,6 @@ namespace WoopiAiHub.Domain.Models
         [Column("StatusId", TypeName = "int")]
         public int StatusId { get; private set; }
 
-        [Column("Enable", TypeName = "bit")]
-        public bool Enable { get; private set; }
-
         public virtual Step? Step { get; set; }
         public virtual Document? Document { get; set; }
         public virtual Status? Status { get; set; }
@@ -30,14 +27,13 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<StepToolExecution> Executions { get; private set; } = new List<StepToolExecution>();
         public virtual ICollection<StepToolOutput> Outputs { get; private set; } = new List<StepToolOutput>();
 
-        public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId, bool enable, Guid? assignedUserId)
+        public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId, Guid? assignedUserId)
             : base(id, created)
         {
             StepId = stepId;
             DocumentId = documentId;
             Name = name;
             StatusId = statusId;
-            Enable = enable;
             AssignedUserId = assignedUserId;
         }
 

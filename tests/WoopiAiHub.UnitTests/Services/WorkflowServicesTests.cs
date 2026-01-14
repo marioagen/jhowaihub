@@ -698,7 +698,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var workflow = WorkflowFixture.FindValidWorkflow();
 
-            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase3Dto.WorkflowId))
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(workflowPhase3Dto.WorkflowId))
                 .ReturnsAsync(workflow);
 
             _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
@@ -748,7 +748,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var workflow = WorkflowFixture.FindValidWorkflow();
 
-            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase3Dto.WorkflowId))
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(workflowPhase3Dto.WorkflowId))
                 .ReturnsAsync(workflow);
 
             _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
@@ -864,7 +864,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var workflowId = 1;
             var step = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
-            var card = new Card(1, DateTime.Now, 1, 1, "Name", 1, true, null);
+            var card = new Card(1, DateTime.Now, 1, 1, "Name", 1, null);
             step.AddCard(card);
             var stepDto = WorkflowFixture.FindValidStepDto();
             var steps = new List<Step> { step };

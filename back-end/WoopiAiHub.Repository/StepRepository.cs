@@ -149,7 +149,7 @@ namespace WoopiAiHub.Repository
                     },
                     HasStepTools = s.StepTools.Count > 0,
                     Cards = s.Cards
-                         .Where(c => c.Enable &&
+                         .Where(c =>
                              (
                                  string.IsNullOrWhiteSpace(input)
                                  || c.Name.Contains(input)
@@ -160,8 +160,7 @@ namespace WoopiAiHub.Repository
                              (
                                  allUsers == true
                                  || (c.AssignedUser != null && c.AssignedUser.Email == login)
-                             ) &&
-                             c.Document!.Enable
+                             )
                          )
                         .Select(c => new CardDto
                         {

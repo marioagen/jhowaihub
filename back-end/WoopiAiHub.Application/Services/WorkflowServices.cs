@@ -204,8 +204,9 @@ namespace WoopiAiHub.Application.Services
 
             foreach (var parameter in stepToolDto.Parameters)
             {
+                var requiredFile = parameter.RequiredFile ?? false;
                 stepTool.Parameters.Add(
-                    new StepToolParameter(0, DateTime.Now, 0, parameter.RequiredFile, parameter.WebhookId,
+                    new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId,
                         parameter.Value));
             }
 
@@ -598,6 +599,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             _unitOfWork.BeginTransaction();
+            workflow.Teams.Clear();
             try
             {
                 var teamsList = _teamRepository.FindByIds(workflowUpdatePhase1Dto.Teams);
@@ -648,7 +650,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto)
         {
-            var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase3Dto.WorkflowId);
+            var workflow = await _workflowRepository.FindByIdForFlow(workflowPhase3Dto.WorkflowId);
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);

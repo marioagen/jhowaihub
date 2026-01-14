@@ -26,7 +26,6 @@ namespace WoopiAiHub.UnitTests.Fixture
                 f.Lorem.Paragraph(),
                 f.Random.AlphaNumeric(10),
                 Domain.Enum.DocumentStatus.ReadyForAnalysis,
-                true,
                 f.Person.Email,
                 f.IndexFaker,
                 new List<Workflow>(),
@@ -373,7 +372,7 @@ namespace WoopiAiHub.UnitTests.Fixture
         {
             var guid = Guid.NewGuid();
             var faker = new Faker("pt_BR");
-            var card = new Card(1, DateTime.Now, 456, 1, "name", 1, true, guid);
+            var card = new Card(1, DateTime.Now, 456, 1, "name", 1, guid);
             var stepTool = new StepTool(1, DateTime.Now, 456, 456, 456, 1, 1);
             var execution = new StepToolExecution
             (

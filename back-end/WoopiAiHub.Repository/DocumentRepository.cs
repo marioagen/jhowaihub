@@ -34,8 +34,7 @@ namespace WoopiAiHub.Repository
             var login = documentPagedDataDto.Login?.ToLower();
             var query = _context.Documents
                 .Include(t => t.Workflows)
-                .AsNoTracking()
-                .Where(i => i.Enable);
+                .AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -94,7 +93,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public int FindDocumentCount()
         {
-            return _context.Documents.Where(a => a.Enable.Equals(true)).Count();
+            return _context.Documents.Count();
         }
 
         /// <summary>
@@ -116,7 +115,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public IQueryable<string> FindHashById(List<int> ids)
         {
-            return _context.Documents.Where(a => ids.Contains(a.Id) && a.Enable.Equals(true))
+            return _context.Documents.Where(a => ids.Contains(a.Id))
                 .Select(b => b.ReferenceFile);
         }
 
@@ -141,12 +140,11 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Delete(List<int> ids)
         {
-            var documents = _context.Documents.Where(a => ids.Contains(a.Id) && a.Enable.Equals(true));
-
+            var documents = _context.Documents.Where(a => ids.Contains(a.Id));
+            
             if (documents.Any())
             {
-                documents.ExecuteUpdate(b => b
-                    .SetProperty(u => u.Enable, false));
+                documents.ExecuteDelete();
                 _context.SaveChanges();
                 return true;
             }
@@ -212,6 +210,27 @@ namespace WoopiAiHub.Repository
             return _context.Documents.Where(a => a.ReferenceFile.Equals(referenceFile))
                 .AsNoTracking()
                 .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Clears the relationship between documents and workflows by removing entries from the WorkflowDocuments join table
+        /// </summary>
+        /// <param name="documentIds"></param>
+        /// <returns></returns>
+        public bool ClearWorkflowRelationships(List<int> documentIds)
+        {
+            if (documentIds == null || !documentIds.Any())
+            {
+                return false;
+            }
+
+            var WorkflowDocuments = _context.Set<Dictionary<string, object>>("WorkflowDocuments");
+            var deletedCount = WorkflowDocuments
+                .Where(workflowDocuments => documentIds.Contains((int)workflowDocuments["DocumentId"]))
+                .ExecuteDelete();
+
+            _context.SaveChanges();
+            return deletedCount > 0;
         }
     }
 }

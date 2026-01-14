@@ -37,21 +37,35 @@
                 <div class="col-12">
                     <div class="main-div shadow-sm">
                         <!-- Phase 1: Name and Teams -->
-                        <Phase1NameAndTeams v-if="currentPhase === 1" ref="phase1" :initialData="phase1Data ?? null" />
+                        <Phase1NameAndTeams 
+                            v-if="currentPhase === 1" 
+                            ref="phase1" 
+                            :initialData="phase1Data ?? null" 
+                            :key="phase1Data?.name" 
+                        />
 
-                        <Phase2Steps v-if="currentPhase === 2" ref="phase2" :initialSteps="phase2Data?.steps ?? []"
-                            :key="phase2Data?.steps.length" />
+                        <Phase2Steps 
+                            v-if="currentPhase === 2" 
+                            ref="phase2" 
+                            :initialSteps="phase2Data?.steps ?? []"
+                            :key="phase2Data?.steps.length" 
+                        />
 
-                        <Phase3Tools v-if="currentPhase === 3" ref="phase3" :workflowSteps="phase3Data?.steps ?? []"
+                        <Phase3Tools 
+                            v-if="currentPhase === 3" 
+                            ref="phase3" 
+                            :workflowSteps="phase3Data?.steps ?? []"
+                            :key="phase3Data?.steps.length" 
                             :profilesList="profilesList ?? []" :phase="currentPhase" @add-tool-flow="handleAddToolFlow"
                             @edit-tool-flow="handleEditToolFlow" @remove-tool-flow="handleRemoveToolFlow"
-                            :hasStepsTools="phase3Data?.steps.hasStepTools" />
+                            :hasStepsTools="phase3Data?.steps.hasStepTools" 
+                        />
                     </div>
                 </div>
             </div>
 
             <!-- Navigation Buttons -->
-            <div class="row mt-4">
+            <div class="row mt-4 mb-2">
                 <div class="col-12 d-flex justify-content-between">
                     <button v-if="currentPhase > 1" class="btn btn-outline-secondary" @click="previousPhase"
                         type="button">
@@ -304,7 +318,6 @@ export default {
                 }
             });
         },
-
         async handleRemoveToolFlow(step) {
             const phase3Component = this.$refs.phase3;
             let phase3DataResult = await this.getPhase3Data()
@@ -452,7 +465,6 @@ export default {
             await this.reloadCurrentPhaseData();
         }
     },
-
     watch: {
         '$route.params.phase': {
             handler(newPhase) {
