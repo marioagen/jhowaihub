@@ -109,6 +109,7 @@
     import KanbanBoard from "@/components/workflow/kanban/KanbanBoard.vue";
     import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
     import UserService from "@/services/users/UserService";
+    import LogService from "@/services/log/LogService";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
 
 export default {
@@ -275,7 +276,7 @@ export default {
             
             const currentStep = steps.find(s => s.order === cardUpdateData.currentStepOrder);
             if (!currentStep) {
-                console.warn('Could not find current step for card update');
+                LogService.showMessage('Could not find current step for card update');
                 return;
             }
             
@@ -285,7 +286,7 @@ export default {
             
             const cardIndex = currentStep.cards.findIndex(c => c.id === cardUpdateData.card.id);
             if (cardIndex === -1) {
-                console.warn('Card not found in current step');
+                LogService.showMessage('Card not found in current step');
                 return;
             }
             
@@ -294,7 +295,7 @@ export default {
             if (shouldMove) {
                 const targetStep = steps.find(s => s.order === cardUpdateData.newStepOrder);
                 if (!targetStep) {
-                    console.warn('Could not find target step for card movement');
+                    LogService.showMessage('Could not find target step for card movement');
                     return;
                 }
                 
@@ -355,7 +356,7 @@ export default {
                     }
                     
                     if (!currentCard) {
-                        console.warn(`Card ${cardId} not found in current state`);
+                        LogService.showMessage(`Card ${cardId} not found in current state`);
                         return;
                     }
                     
@@ -436,7 +437,7 @@ export default {
             }
 
             if (!foundCard) {
-                console.warn(`Card ${message.cardId} not found in SignalR update`);
+                LogService.showMessage(`Card ${message.cardId} not found in SignalR update`);
                 return;
             }
 
