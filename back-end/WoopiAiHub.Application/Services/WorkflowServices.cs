@@ -23,6 +23,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateStep _validateStep;
+        private readonly IToolRepository _toolRepository;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
@@ -35,6 +36,7 @@ namespace WoopiAiHub.Application.Services
             IStepToolOutputRepository stepToolOutputRepository,
             IUnitOfWork unitOfWork,
             IValidateStep validateStep,
+            IToolRepository toolRepository,
             ILogger<WorkflowServices> logger)
         {
             _workflowRepository = workflowRepository;
@@ -46,6 +48,7 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _teamRepository = teamRepository;
+            _toolRepository = toolRepository;
             _logger = logger;
         }
 
@@ -699,6 +702,8 @@ namespace WoopiAiHub.Application.Services
                         previousStepToolInStep,
                         lastGlobalStepTool);
 
+                    await ValidateStepTool(stepTool);
+
                     stepToolMap[(existingStep.Id, stepToolDto.Order)] = stepTool;
                     existingStep.AddStepTool(stepTool);
 
@@ -709,6 +714,38 @@ namespace WoopiAiHub.Application.Services
 
             await _unitOfWork.SaveChangesAsync();
             return stepToolMap;
+        }
+
+        /// <summary>
+        /// Validates the specified step tool and its dependencies according to business rules.
+        /// </summary>
+        /// <param name="stepTool">The step tool to validate. Must not be null and must have a valid ToolId. If the tool type is "Prompt", a
+        /// valid dependency on an OCR tool is required.</param>
+        /// <returns></returns>
+        /// <exception cref="AppException">Thrown if the step tool is missing required fields, references a non-existent tool, or violates dependency
+        /// requirements.</exception>
+        private async Task ValidateStepTool(StepTool stepTool)
+        {
+            if (stepTool.ToolId <= 0)
+            {
+                throw new AppException(ErrorCode.RequiredField, "ToolId is required", StepLabel.Required);
+            }
+
+            var tool = await _toolRepository.FindByIdAsync(stepTool.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
+
+            if (tool.ToolType == "Prompt")
+            {
+                if(stepTool.DependsOnStepTool == null)
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Prompt tool must have a dependency", ToolLabel.DependecyRequired);
+                }
+
+                var dependencyTool = await _toolRepository.FindByIdAsync(stepTool.DependsOnStepTool.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Dependency tool not found", ToolLabel.DependencyToolNotFound);
+                if (dependencyTool.ToolType != "OCR")
+                {
+                    throw new AppException(ErrorCode.RequiredField, "Prompt tool must have a dependency of an OCR tool", ToolLabel.OcrDependencyRequired);
+                }
+            }
         }
 
         /// <summary>

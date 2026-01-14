@@ -89,37 +89,48 @@ namespace WoopiAiHub.Application.Services
         /// <param name="updateCardStepStatusDto"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<bool> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto,
+        public async Task<bool> UpdateStepAndStatus(
+            UpdateCardStepStatusDto updateCardStepStatusDto,
             string tenant,
-            string email)
+            string email
+        )
         {
-            var card = await _cardRepository.FindById(updateCardStepStatusDto.CardId);
-            if (card == null)
-            {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
-            }
+            var card = await _cardRepository.FindById(updateCardStepStatusDto.CardId) ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
-            var step = await _stepRepository.FindByOrderAndWorkflowId(updateCardStepStatusDto.NextStepOrder,
-                updateCardStepStatusDto.WorkflowId);
-            if (step == null)
-            {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
-            }
+            var step = await _stepRepository.FindByOrderAndWorkflowId(
+                updateCardStepStatusDto.NextStepOrder,
+                updateCardStepStatusDto.WorkflowId
+            ) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
+
+            var previousStepId = card.StepId;
+            var previousStatusId = card.StatusId;
 
             card.UpdateStepAndSatus(step.Id, step.StatusId);
             var result = _cardRepository.Update(card);
 
-            var automationServicesDto = new AutomationServicesDto
-            (
-                0,
-                card.Id,
-                tenant,
-                email,
-                card.Document!.ReferenceFile,
-                step.Id
-            );
             if (result)
-                await _automationServices.StartExecutionByCardAsync(automationServicesDto);
+            {
+                try
+                {
+                    var automationServicesDto = new AutomationServicesDto
+                    (
+                        0,
+                        card.Id,
+                        tenant,
+                        email,
+                        card.Document!.ReferenceFile,
+                        step.Id
+                    );
+
+                    await _automationServices.StartExecutionByCardAsync(automationServicesDto);
+                }
+                catch
+                {
+                    card.UpdateStepAndSatus(previousStepId, previousStatusId);
+                    _cardRepository.Update(card);
+                    throw;
+                }
+            }
 
             return true;
         }
