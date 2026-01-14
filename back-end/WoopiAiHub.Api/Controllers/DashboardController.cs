@@ -24,13 +24,14 @@ namespace WoopiAiHub.Api.Controllers
         /// <summary>
         /// Returns usage units
         /// </summary>
+        /// <param name="dateFilterDto"></param>
         /// <returns></returns>
         [HttpGet("UsageUnits")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [SwaggerOperation("Returns usage units")]
-        public async Task<IActionResult> FindAllUsageUnits()
+        public async Task<IActionResult> FindAllUsageUnits([FromQuery] DateFilterDto dateFilterDto)
         {
-            var result = await _usageUnitServices.FindAllAsync();
+            var result = await _usageUnitServices.FindAllAsync(dateFilterDto);
             return Ok(result);
         }
 

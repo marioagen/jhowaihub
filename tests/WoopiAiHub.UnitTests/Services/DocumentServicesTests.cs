@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -300,10 +300,13 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var ids = new List<int> { 1, 2, 3 };
             var hashes = new List<string> { "hash1", "hash2" };
+            var cardIds = new List<int> { 10, 20, 30 };
             var headers = DocumentFixture.FindValidHeadersDto();
 
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var cardRepository = _mocker.GetMock<ICardRepository>();
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
             var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
@@ -319,8 +322,19 @@ namespace WoopiAiHub.UnitTests.Services
                             .ReturnsAsync(_fixture.FindHttpResponseMessage);
 
             cardRepository
+                .Setup(r => r.FindCardIdsByDocumentIdsAsync(ids))
+                .ReturnsAsync(cardIds);
+            cardRepository
                 .Setup(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()))
                 .ReturnsAsync(true);
+
+            stepToolExecutionRepository
+                .Setup(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(true);
+
+            stepToolOutputRepository
+                .Setup(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(true);
 
             // Act
             var result = await _documentServices.Delete(ids, headers);
@@ -332,7 +346,10 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(r => r.FindHashById(ids), Times.Once);
             embeddingsApi.Verify(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(hashes.Count));
             fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Exactly(hashes.Count));
+            cardRepository.Verify(r => r.FindCardIdsByDocumentIdsAsync(ids), Times.Once);
             cardRepository.Verify(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
+            stepToolExecutionRepository.Verify(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()), Times.Once);
+            stepToolOutputRepository.Verify(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()), Times.Once);
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);
             unitOfWork.Verify(u => u.Rollback(), Times.Never);
@@ -345,12 +362,15 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             List<int> list = new() { 1, 2, 3 };
             List<string> stringArray = new() { "test" };
+            var cardIds = new List<int> { 10, 20, 30 };
             var headers = DocumentFixture.FindValidHeadersDto();
 
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             var embeddingRepository = _mocker.GetMock<IEmbeddingsApi>();
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var cardRepository = _mocker.GetMock<ICardRepository>();
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
 
             documentRepository.Setup(a => a.ClearWorkflowRelationships(list)).Returns(true);
@@ -362,8 +382,19 @@ namespace WoopiAiHub.UnitTests.Services
             fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
                             .ReturnsAsync(_fixture.FindHttpResponseMessage);
             cardRepository
+                .Setup(a => a.FindCardIdsByDocumentIdsAsync(list))
+                .ReturnsAsync(cardIds);
+            cardRepository
                 .Setup(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()))
                 .ReturnsAsync(false);
+
+            stepToolExecutionRepository
+                .Setup(a => a.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(true);
+
+            stepToolOutputRepository
+                .Setup(a => a.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(true);
 
             // Act
             var result = await _documentServices.Delete(list, headers);
@@ -375,7 +406,10 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.FindHashById(list), Times.Once);
             embeddingRepository.Verify(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Once);
+            cardRepository.Verify(a => a.FindCardIdsByDocumentIdsAsync(list), Times.Once);
             cardRepository.Verify(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
+            stepToolExecutionRepository.Verify(a => a.DeleteByCardIds(It.IsAny<IEnumerable<int>>()), Times.Once);
+            stepToolOutputRepository.Verify(a => a.DeleteByCardIds(It.IsAny<IEnumerable<int>>()), Times.Once);
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);   // mesmo retornando false, ainda faz commit
             unitOfWork.Verify(u => u.Rollback(), Times.Never);

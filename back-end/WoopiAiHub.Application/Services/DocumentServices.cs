@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -187,6 +187,13 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 _documentRepository.ClearWorkflowRelationships(ids);
+                
+                var cardIds = await _cardRepository.FindCardIdsByDocumentIdsAsync(ids);
+                if (cardIds.Any())
+                {
+                    _stepToolExecutionRepository.DeleteByCardIds(cardIds);
+                    _stepToolOutputRepository.DeleteByCardIds(cardIds);
+                }
                 
                 await _cardRepository.DeleteByDocumentIds(ids);
                 var deleted = _documentRepository.Delete(ids);
