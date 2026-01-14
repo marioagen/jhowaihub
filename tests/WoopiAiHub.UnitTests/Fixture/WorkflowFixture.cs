@@ -262,7 +262,6 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 _faker.Name.FullName(),
                 _faker.Random.Int(1, 1000),
-                true,
                 Guid.NewGuid()
              );
         }

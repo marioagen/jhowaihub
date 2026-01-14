@@ -29,14 +29,17 @@ namespace WoopiAiHub.UnitTests.Services
             var typeDocHeaderDto = TypeDocFixture.FindValidTypeDocHeaderDto();
             var typeDocCreateDto = TypeDocFixture.FindValidTypeDocCreateDto();
             var typeDocRepository = _mocker.GetMock<ITypeDocRepository>();
-            typeDocRepository.Setup(a => a.CreateUniqueTypeDoc(It.IsAny<TypeDoc>())).Returns(true);
+            typeDocRepository.Setup(a => a.CreateUniqueTypeDoc(It.IsAny<TypeDoc>())).Returns(new Domain.DTOs.ResponseCreateTypeDto
+            {
+                Duplicated = false
+            });
 
             // Act
             var result = _typeDocServices.CreateUniqueTypeDoc(typeDocCreateDto,
                                                               typeDocHeaderDto);
 
             // Assert
-            Assert.True(result);
+            Assert.False(result.Duplicated);
             typeDocRepository.Verify(a => a.CreateUniqueTypeDoc(It.IsAny<TypeDoc>()), Times.Once);
         }
 
@@ -48,7 +51,10 @@ namespace WoopiAiHub.UnitTests.Services
             var typeDocHeaderDto = TypeDocFixture.FindValidTypeDocHeaderDto();
             var typeDocCreateDto = TypeDocFixture.FindValidTypeDocCreateDto();
             var typeDocRepository = _mocker.GetMock<ITypeDocRepository>();
-            typeDocRepository.Setup(a => a.CreateUniqueTypeDoc(It.IsAny<TypeDoc>())).Returns(false);
+            typeDocRepository.Setup(a => a.CreateUniqueTypeDoc(It.IsAny<TypeDoc>())).Returns(new Domain.DTOs.ResponseCreateTypeDto
+            {
+                Duplicated = true
+            });
 
             // Act / Assert
             Assert.Throws<ArgumentException>(() => _typeDocServices.CreateUniqueTypeDoc(typeDocCreateDto,
@@ -64,7 +70,7 @@ namespace WoopiAiHub.UnitTests.Services
             var typeDoc = _fixture.FindValidTypeDocList().First();
             var typeDocRepository = _mocker.GetMock<ITypeDocRepository>();
             typeDocRepository.Setup(a => a.FindByName(It.IsAny<string>())).Returns(typeDoc);
-            
+
             // Act
             var result = _typeDocServices.FindByName("name");
 

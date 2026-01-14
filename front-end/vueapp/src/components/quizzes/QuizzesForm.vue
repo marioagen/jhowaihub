@@ -38,6 +38,7 @@
                             <input 
                                 class="form-control form-control-sm"
                                 :placeholder="$t('quizzes.formNamePlaceholder')"
+                                :required="true"
                                 v-model="form.title"
                             />
                         </div>
@@ -47,6 +48,7 @@
                                 id="typeDocId"
                                 class="form-select form-select-sm"
                                 v-model="form.typeDocId"
+                                :required="true"
                             >
                                 <option value="">{{ $t("quizzes.formSelect") }}</option>
                                 <option 
@@ -57,6 +59,17 @@
                                     {{ item.id }} - {{ item.name }}
                                 </option>
                             </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col">
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-primary btn-sm table-btn mt-4" @click="openModalType">
+                                <LucideIcon icon="Plus" :size="15" />
+                                {{ $t("types.createBtn") }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -96,6 +109,8 @@
                 @reload="getQuestions()"
                 ref="QuestionsModal"
             />
+            
+            <TypesModal :isEdit="false" :type="modalType" @reload="getDocTypes" ref="TypesModal" />
         </div>
     </main>
 </template>
@@ -106,6 +121,7 @@
     import TypesService from "@/services/types/TypesService";
     import QuestionsService from "@/services/questions/QuestionsService";
     import QuizzesService from "@/services/quizzes/QuizzesService";
+    import TypesModal from "@/components/types/TypesModal.vue";
 
     export default {
         name: "QuizFormNew",
@@ -123,6 +139,7 @@
         components: {
             TransferListComponent,
             QuestionsModal,
+            TypesModal,
         },
         data() {
             return {
@@ -138,13 +155,17 @@
             };
         },
         methods: {
-            getDocTypes() {
+            getDocTypes(docTypeCreated = null) {
+                if(docTypeCreated !== null && docTypeCreated.duplicated === false) {
+                    this.form.typeDocId = docTypeCreated.id;
+                }
                 TypesService.getTypesList()
                     .then((response) => {
                         if(response.error === undefined) {
                             return this.docTypesList = response;
                         }
-                    });
+                    })
+                    .finally(() => this.$refs.TypesModal.close());
             },
             getQuestions() {
                 this.isLoadingQuestions = true;
@@ -244,7 +265,10 @@
                 this.$refs.QuestionsModal.open();
             },
             returnToTable() {
-                return this.$router.push({ name: "Quiz" });
+                return this.$router.push({ name: "ManagementQuizzes" });
+            },
+            openModalType() {
+                this.$refs.TypesModal.open();
             },
         },
         computed: {

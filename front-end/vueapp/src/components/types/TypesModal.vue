@@ -84,7 +84,7 @@
                 TypesService.addType(this.typeData.name)
                     .then((result) => {
                         if (result.success) {
-                            this.$emit("reload");
+                            this.$emit("reload", result.data);
                             return this.$notify({
                                 title: "Tipos",
                                 message: this.$t("types.createSuccess"),
@@ -110,7 +110,7 @@
                 TypesService.editType(this.typeData)
                     .then((result) => {
                         if (result.success) {
-                            this.$emit("reload");
+                            this.$emit("reload", result.data);
                             return this.$notify({
                                 title: "Tipos",
                                 message: this.$t("types.editSuccess"),

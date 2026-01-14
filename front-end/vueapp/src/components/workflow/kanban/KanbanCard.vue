@@ -81,12 +81,14 @@
                             </span>
                         </div>
                         <div class="progress">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                 role="progressbar"
-                                 :aria-valuenow="dataCard.percentage || 0"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100"
-                                 :style="{ width: (dataCard.percentage || 0) + '%' }"></div>
+                            <div 
+                                class="progress-bar progress-bar-striped progress-bar-animated"
+                                role="progressbar"
+                                :aria-valuenow="dataCard.percentage || 0"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                :style="{ width: (dataCard.percentage || 0) + '%' }"
+                            ></div>
                         </div>
                     </div>
                 </div>
@@ -101,7 +103,7 @@
 
     export default {
         name: "CardComponent",
-        emits: ["reload"],
+        emits: ["reload", "cardMoved", "cardUpdated"],
         data: () => ({
             isLoadingAnalysis: false,
             isUpdatingAssignedUser: false,
@@ -161,6 +163,12 @@
                             variant: 'danger',
                             icon: 'CircleX',
                         });
+                    } else {
+                        this.$emit('cardUpdated', {
+                            card: { ...this.dataCard },
+                            currentStepOrder: this.dataStep.order,
+                            newStepOrder: this.dataStep.order + 1
+                        });
                     }
                 }
             },
@@ -178,9 +186,16 @@
                         variant: 'danger',
                         icon: 'CircleX',
                     });
-                }
-                else{
-                    this.reloadList();
+                } else {
+                    const assignedUser = Array.isArray(this.users) 
+                        ? this.users.find(u => u.id === userId) 
+                        : null;
+                    
+                    this.$emit('cardUpdated', {
+                        card: { ...this.dataCard, assignedUser: assignedUser || null },
+                        currentStepOrder: this.dataStep.order,
+                        newStepOrder: this.dataStep.order
+                    });
                 }
                 this.isUpdatingAssignedUser = false;
             },   
@@ -194,9 +209,12 @@
                         variant: 'danger',
                         icon: 'CircleX',
                     });
-                }
-                else{
-                    this.reloadList();
+                } else {
+                    this.$emit('cardUpdated', {
+                        card: { ...this.dataCard, assignedUser: null },
+                        currentStepOrder: this.dataStep.order,
+                        newStepOrder: this.dataStep.order
+                    });
                 }
                 this.isUnassigningUser = false;
             },                      
@@ -204,7 +222,6 @@
                this.isLoadingAnalysis = true;
                     try {
                         await this.updateStatus();
-                        this.reloadList();                     
                     } catch (e) {
                         this.$notify({
                             title: 'Error',

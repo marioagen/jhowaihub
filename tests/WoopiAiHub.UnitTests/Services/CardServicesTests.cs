@@ -239,7 +239,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -291,7 +291,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var card = new Card(cardId, DateTime.Now, 1, 1, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, 1, "Card Test", 1, null);
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
@@ -314,7 +314,7 @@ namespace WoopiAiHub.UnitTests.Services
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var document = DocumentFixture.FindValidDocument();
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
@@ -351,7 +351,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -399,7 +399,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -447,7 +447,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -496,7 +496,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -550,7 +550,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step2, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step1, step2 });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step1);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -600,7 +600,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
             typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput>());
@@ -645,7 +645,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 

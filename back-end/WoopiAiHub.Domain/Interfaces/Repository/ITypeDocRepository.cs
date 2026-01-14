@@ -6,7 +6,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface ITypeDocRepository
     {
-        bool CreateUniqueTypeDoc(TypeDoc typeDoc);
+        ResponseCreateTypeDto CreateUniqueTypeDoc(TypeDoc typeDoc);
         ICollection<TypeDoc> FindAll();
         TypeDoc FindByName(string name);
         public bool DeleteByIds(List<int> ids);

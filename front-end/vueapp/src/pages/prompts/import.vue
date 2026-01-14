@@ -227,7 +227,6 @@ export default {
             try {
                 const result = await PromptService.importPrompts(this.selectedTemplates);
                 if (result.error || !result) {
-                    console.log("result erro 1", result);
                     this.$notify({
                         title: 'prompts.title',
                         message: 'prompts.importError',

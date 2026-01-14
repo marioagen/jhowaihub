@@ -198,7 +198,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var guid = Guid.NewGuid();
             var step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
             {
-                Cards = new List<Card> { new Card(1, DateTime.UtcNow,2,1,"name",1,true, guid) },
+                Cards = new List<Card> { new Card(1, DateTime.UtcNow,2,1,"name",1, guid) },
                 StepTools = new List<StepTool>()
             };
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
@@ -574,7 +574,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             var nextStep = new Domain.Models.Step(2, DateTime.UtcNow, 1, "Next Step", 2, 2, 1);
 
-            var card = new Domain.Models.Card(1, DateTime.UtcNow, currentStep.Id, 1, "Test Card", 1, true, null);
+            var card = new Domain.Models.Card(1, DateTime.UtcNow, currentStep.Id, 1, "Test Card", 1, null);
             card.Step = currentStep;
             
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
@@ -614,7 +614,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var currentStep = new Domain.Models.Step(1, DateTime.UtcNow, 1, "Current Step", 1, normalProfile.Id, 1);
             currentStep.Profile = normalProfile;
 
-            var card = new Domain.Models.Card(1, DateTime.UtcNow, currentStep.Id, 1, "Test Card", 1, true, null);
+            var card = new Domain.Models.Card(1, DateTime.UtcNow, currentStep.Id, 1, "Test Card", 1, null);
             card.Step = currentStep;
             
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();

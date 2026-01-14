@@ -10,5 +10,8 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         [Post("/File/upload")]
         Task<FileUploadSummaryDto> Upload([AliasAs("file")] ByteArrayPart bytes,
                                           [Header(HeaderNames.XTenant)] string tenant);
+
+        [Delete("/File/delete")]
+        Task<HttpResponseMessage> Delete([AliasAs("GuidfileName")] string guidFileName);
     }
 }

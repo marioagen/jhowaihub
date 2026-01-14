@@ -324,6 +324,24 @@ namespace WoopiAiHub.Repository
                  .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
         }
 
+        /// <summary>
+        /// Retrieves a workflow by its ID and includes only the necessaryrelated entities.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Workflow?> FindByIdForFlow(int id)
+        {
+            return await _context.Workflows
+                 .AsSplitQuery()
+                 .Include(w => w.Steps)
+                     .ThenInclude(s => s.StepTools)
+                         .ThenInclude(p => p.Parameters)
+                 .Include(w => w.Steps)
+                      .ThenInclude(s => s.StepTools)
+                          .ThenInclude(st => st.Dependencies)
+                 .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
+        }
+
 
         /// <summary>
         /// Update output of step in a workflow.
