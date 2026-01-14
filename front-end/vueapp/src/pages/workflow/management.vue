@@ -53,13 +53,11 @@ export default {
         },
         getTeams() {
             TeamsService.getTeamList().then((response) => {
-                console.log("teams", response);
                 this.teamsList = response;
             });
         },
         getUsers() {
             UsersService.getAllUsers().then((response) => {
-                console.log("users", response);
                 this.usersList = response;
             });
         },

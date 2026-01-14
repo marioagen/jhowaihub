@@ -4,7 +4,6 @@ export default {
     getMainDashboardData() {
         return api.get(`/Dashboard`)
             .then(({ data }) => {
-                console.log(data);
                 return data;
             })
             .catch((error) => {
