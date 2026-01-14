@@ -194,14 +194,8 @@
                         WorkflowId: this.dataStep.workflowId,
                     };
                     const response = await CardsServices.updateStepAndStatus(params);
-                    console.log(response);
                     if (response?.error !== undefined) {
-                        this.$notify({
-                            title: "Error",
-                            message: response.error,
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
+                        throw new Error(response.error.response?.data?.labelError);
                     }
                 }
             },
