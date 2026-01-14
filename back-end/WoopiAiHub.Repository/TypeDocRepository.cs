@@ -33,6 +33,12 @@ namespace WoopiAiHub.Repository
             return CreateResponseCreateTypeDto(typeDoc);
         }
 
+        /// <summary>
+        /// Create a ResponseCreateTypeDto to send when a new document type is created
+        /// </summary>
+        /// <param name="typeDoc"></param>
+        /// <param name="duplicated"></param>
+        /// <returns></returns>
         private static ResponseCreateTypeDto CreateResponseCreateTypeDto(TypeDoc typeDoc, bool duplicated = true)
         {
             return new ResponseCreateTypeDto
