@@ -1452,12 +1452,10 @@ namespace WoopiAiHub.UnitTests.Services
             workflow.Steps.Add(step);
             step.Workflow = workflow;
 
-            // Add OCR tool to step 1 with order 1
             var ocrStepTool = new StepTool(10, DateTime.UtcNow, 1, 999, 1, 1, 1);
             ocrStepTool.Step = step;
             step.StepTools.Add(ocrStepTool);
 
-            // Add Prompt tool to step 1 with order 2 (this is the tool being validated)
             var promptStepToolEntity = new StepTool(20, DateTime.UtcNow, 1, 2, 2, 2, 2);
             promptStepToolEntity.Step = step;
             step.StepTools.Add(promptStepToolEntity);
@@ -1475,9 +1473,9 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             _toolRepositoryMock.SetupSequence(x => x.FindModelByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync(ocrTool)    // tool setup for firstStepToolDto
-                .ReturnsAsync(promptTool) // tool setup for promptStepToolDto
-                .ReturnsAsync(ocrTool);   // tool setup during HasOcrDependency check
+                .ReturnsAsync(ocrTool)   
+                .ReturnsAsync(promptTool) 
+                .ReturnsAsync(ocrTool);  
 
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
