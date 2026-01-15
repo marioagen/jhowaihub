@@ -881,6 +881,17 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Determines whether any of the specified dependencies require an OCR tool.
+        /// </summary>
+        /// <remarks>This method checks each dependency to determine if it is associated with a tool of
+        /// type OCR. The <paramref name="toolCache"/> is used to avoid redundant lookups and may be populated with
+        /// additional tools as needed.</remarks>
+        /// <param name="dependencies">A list of <see cref="StepTool"/> objects representing the tool dependencies to check.</param>
+        /// <param name="toolCache">A dictionary that maps tool IDs to <see cref="Tool"/> instances, used to cache tool lookups and improve
+        /// performance. May be updated with additional entries during execution.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if at least one
+        /// dependency requires an OCR tool; otherwise, <see langword="false"/>.</returns>
         private async Task<bool> HasOcrDependency(List<StepTool> dependencies, Dictionary<int, Tool> toolCache)
         {
             foreach (var dependency in dependencies)
