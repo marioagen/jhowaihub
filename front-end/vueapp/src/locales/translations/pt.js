@@ -296,7 +296,7 @@
         },
     },
     managementQuizzes: {
-        title: "Gestão de Questionário, questões e Tipos de Documentos",
+        title: "Gestão de Questionário, questões e Tipos de Docupagesentos",
         subtitle: "Gerencie questionário, times e permissões do sistema",
         quizzes: {
             title: "Questionários",
@@ -798,8 +798,8 @@
         dashboard: "Dashboard",
         management: "Gestão de Usuários",
         documents: "Documentos",
-        workflows: "Esteiras de Processamento de Documentos",
-        workflowManagement: "Gestão de Esteiras de Processamento",
+        workflows: "Esteiras de Processamento",
+        workflowManagement: "Gestão de Esteiras",
         types: "Tipos",
         questions: "Perguntas",
         quizzes: "Questionários",
