@@ -269,7 +269,6 @@
         },
         methods: {
             redirectToIndex() {
-                // Navigate back to the workflow wizard at phase 3
                 if (this.workflowId) {
                     const routeName = this.isEdit ? "EditWorkflow" : "NewWorkflow";
                     const params = this.isEdit
@@ -282,7 +281,6 @@
                     });
                 }
 
-                // Fallback for old workflow form (backward compatibility)
                 if (this.isEdit) {
                     return this.$router.push({
                         name: "EditWorkflow",
@@ -642,10 +640,7 @@
 </script>
 
 <style>
-    /* import the necessary styles for Vue Flow to work */
     @import "@vue-flow/core/dist/style.css";
-
-    /* import the default theme, this is optional but generally recommended */
     @import "@vue-flow/core/dist/theme-default.css";
 
     .vue-flow-container {
