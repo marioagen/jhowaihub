@@ -808,12 +808,12 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
             }
 
-            var createdDependencies = await GetStepToolDependencies(workflow, stepTool, stepToolDto);
+            var createdDependencies = await FindStepToolDependencies(workflow, stepTool, stepToolDto);
 
             await ValidatePromptTool(tool, createdDependencies, stepToolDto);
         }
 
-        private async Task<List<StepTool>> GetStepToolDependencies(Workflow workflow, StepTool stepTool, StepToolUpdateDto stepToolDto)
+        private async Task<List<StepTool>> FindStepToolDependencies(Workflow workflow, StepTool stepTool, StepToolUpdateDto stepToolDto)
         {
             var createdDependencies = new List<StepTool>();
 
