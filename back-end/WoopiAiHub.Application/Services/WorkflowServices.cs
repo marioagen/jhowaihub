@@ -813,6 +813,19 @@ namespace WoopiAiHub.Application.Services
             await ValidatePromptTool(tool, createdDependencies, stepToolDto);
         }
 
+        /// <summary>
+        /// Finds and creates dependencies between the specified step tool and other step tools within the given
+        /// workflow, based on the provided dependency information.
+        /// </summary>
+        /// <remarks>This method creates dependency records for each valid dependency specified in
+        /// <paramref name="stepToolDto"/>. Only dependencies that correspond to existing step tools in the workflow are
+        /// created and returned.</remarks>
+        /// <param name="workflow">The workflow containing the steps and step tools to search for dependencies.</param>
+        /// <param name="stepTool">The step tool for which dependencies are being established.</param>
+        /// <param name="stepToolDto">The data transfer object containing dependency information for the step tool. Must not be <c>null</c>.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="StepTool"/>
+        /// instances that were found and linked as dependencies. The list is empty if no dependencies were specified or
+        /// found.</returns>
         private async Task<List<StepTool>> FindStepToolDependencies(Workflow workflow, StepTool stepTool, StepToolUpdateDto stepToolDto)
         {
             var createdDependencies = new List<StepTool>();
@@ -840,6 +853,14 @@ namespace WoopiAiHub.Application.Services
             return createdDependencies;
         }
 
+        /// <summary>
+        /// Validates that a Prompt tool has at least one OCR dependency (direct or recursive).
+        /// </summary>
+        /// <param name="tool"></param>
+        /// <param name="createdDependencies"></param>
+        /// <param name="stepToolDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
         private async Task ValidatePromptTool(Tool tool, List<StepTool> createdDependencies, StepToolUpdateDto stepToolDto)
         {
             if (tool.ToolType?.Name != HandlersTypes.Prompt)
