@@ -316,7 +316,6 @@ namespace WoopiAiHub.UnitTests.Fixture
                 null
             );
 
-            // Set ToolType using reflection or by creating a ToolType instance
             var toolType = new ToolType(1, DateTime.UtcNow, toolTypeName, true);
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
 
