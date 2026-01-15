@@ -94,6 +94,57 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Asynchronously retrieves all prompts that are marked as internal.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ICollection<PromptDto>> FindAllInternal()
+        {
+            return await _context.Prompts
+                .Where(w => w.InternalPrompt)
+                .Select(p => new PromptDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Text = p.Text,
+                    Created = p.Created,
+                    IdUser = p.IdUser,
+                    IsEdited = p.IsEdited,
+                    IsImported = p.IsImported,
+                    InternalPrompt = p.InternalPrompt
+                })
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves an internal prompt by its unique identifier.
+        /// </summary>
+        /// <remarks>Only prompts marked as internal are considered. The returned object is not tracked by
+        /// the context.</remarks>
+        /// <param name="id">The unique identifier of the internal prompt to retrieve. Must correspond to a prompt marked as internal.</param>
+        /// <returns></returns>
+        public async Task<PromptDto?> FindInternalById(int id)
+        {
+            return await _context.Prompts
+                .Where(w => w.InternalPrompt && w.Id == id)
+                .Select(p => new PromptDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Text = p.Text,
+                    Created = p.Created,
+                    IdUser = p.IdUser,
+                    IsEdited = p.IsEdited,
+                    IsImported = p.IsImported,
+                    InternalPrompt = p.InternalPrompt
+                })
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
         /// Find prompts by user id
         /// </summary>
         /// <param name="idUser"></param>

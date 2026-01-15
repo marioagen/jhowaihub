@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WoopiAiHub.Domain.DTOs
+﻿namespace WoopiAiHub.Domain.DTOs
 {
     public record PromptDto
     {
@@ -17,5 +11,6 @@ namespace WoopiAiHub.Domain.DTOs
         public DateTime Created { get; set; }
         public bool IsEdited { get; set; }
         public bool IsImported { get; set; }
+        public bool InternalPrompt { get; set; } = false;
     }
 }
