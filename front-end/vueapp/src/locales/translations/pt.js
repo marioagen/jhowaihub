@@ -296,7 +296,7 @@
         },
     },
     managementQuizzes: {
-        title: "Gestão de Questionário, questões e Tipos de Docupagesentos",
+        title: "Gestão de Questionário, questões e Tipos de Documentos",
         subtitle: "Gerencie questionário, times e permissões do sistema",
         quizzes: {
             title: "Questionários",
