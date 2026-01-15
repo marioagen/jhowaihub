@@ -141,23 +141,22 @@ namespace WoopiAiHub.Application.Services
         private async Task SendMonthlyUsageIfExpiredAsync(TenantListDto tenant,
                                                           string keyAccess)
         {
-            if (!tenant.DateEnd.HasValue || tenant.DateEnd.Value >= DateTime.UtcNow)
-            {
-                _logger.LogDebug("Tenant {TenantName} subscription is still active or has no end date", tenant.Name);
-                return;
-            }
-
             using var scope = _scopeFactory.CreateScope();
             var connectionString = FormatConnectionStringAsync(tenant);
             var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
             var usageMonthRepository = scope.ServiceProvider.GetRequiredService<IUsageMonthRepository>();
+            var subcriptionPeriodService = scope.ServiceProvider.GetRequiredService<ISubscriptionPeriodServices>();
 
-            var periodStart = tenant.DateStart ?? DateTime.UtcNow.AddMonths(-1);
-            var periodEnd = tenant.DateEnd.Value;
+            var lastPeriod = await subcriptionPeriodService.GetLastUnprocessedAsync();
+            if (lastPeriod == null)
+            {
+                _logger.LogDebug("No unprocessed subscription period found for tenant {TenantName}", tenant.Name);
+                return;
+            }
 
-            var usageByTenant = await usageMonthRepository.FindTotalUsageAsync(periodStart, periodEnd);
+            var usageByTenant = await usageMonthRepository.FindTotalUsageAsync(lastPeriod.PeriodStart, lastPeriod.PeriodEnd);
 
             if (usageByTenant <= 0)
             {
@@ -174,6 +173,15 @@ namespace WoopiAiHub.Application.Services
             await _resiliencePipeline.ExecuteAsync(async token =>
             {
                 var result = await _marketPlaceApi.ProcessConsumption(keyAccess, chargeRequest);
+                if (result)
+                {
+                    _logger.LogInformation("Successfully sent usage charge for tenant {TenantName}", tenant.Name);
+                    await subcriptionPeriodService.UpdateToProcessedAsync(lastPeriod.Id);
+                }
+                else
+                {
+                    _logger.LogError("Failed to send usage charge for tenant {TenantName}.", tenant.Name);
+                }
                 return result;
             });
         }
