@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
@@ -733,7 +734,7 @@ namespace WoopiAiHub.Application.Services
 
             var tool = await _toolRepository.FindByIdAsync(stepTool.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
 
-            if (tool.ToolType == "Prompt")
+            if (tool.ToolType == HandlersTypes.Prompt)
             {
                 if(stepTool.DependsOnStepTool == null)
                 {
@@ -741,7 +742,7 @@ namespace WoopiAiHub.Application.Services
                 }
 
                 var dependencyTool = await _toolRepository.FindByIdAsync(stepTool.DependsOnStepTool.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Dependency tool not found", ToolLabel.DependencyToolNotFound);
-                if (dependencyTool.ToolType != "OCR")
+                if (dependencyTool.ToolType != HandlersTypes.Ocr)
                 {
                     throw new AppException(ErrorCode.RequiredField, "Prompt tool must have a dependency of an OCR tool", ToolLabel.OcrDependencyRequired);
                 }
