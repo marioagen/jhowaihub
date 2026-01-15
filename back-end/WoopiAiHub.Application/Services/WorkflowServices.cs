@@ -746,7 +746,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="AppException">Thrown if the step tool is missing required fields, references a non-existent tool, or violates dependency
         /// requirements.</exception>
-        private async Task ValidateStepTool(StepTool stepTool, ToolDto tool)
+        private async Task ValidateStepTool(StepTool stepTool, 
+                                            ToolDto tool)
         {
 
 
@@ -757,18 +758,7 @@ namespace WoopiAiHub.Application.Services
                     throw new AppException(ErrorCode.RequiredField, "Prompt tool must have a dependency", ToolLabel.DependecyRequired);
                 }
 
-                // If the dependency is already set in memory (e.g. newly created stepTool), we might not be able to fetch it from repo yet if not saved.
-                // However, stepTool.DependsOnStepTool object should be populated.
                 var dependencyToolId = stepTool.DependsOnStepTool.ToolId;
-
-                // We prefer using the loaded Tool object if available, otherwise fetch. 
-                // In CreateAndConfigureStepTool loop we don't save yet, so we can't rely on repo find for "dependsOnStepTool" if it is new.
-                // But we mainly need to check the TYPE of the dependency.
-
-                // Since we are inside the loop where we create tools, we might need to optimize this check or trust CreateAndConfigureStepTool did the right thing.
-                // But ValidateStepTool is declared as async and seemingly fetches from repo.
-                // If 'DependsOnStepTool' is a new object not in DB, _toolRepository.FindByIdAsync(dependencyToolId) is fine because ToolId refers to the tool definition (static data).
-
                 var dependencyTool = await _toolRepository.FindByIdAsync(dependencyToolId) ?? throw new AppException(ErrorCode.NotFound, "Dependency tool not found", ToolLabel.DependencyToolNotFound);
 
                 if (dependencyTool.ToolType != HandlersTypes.Ocr)
