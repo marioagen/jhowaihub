@@ -686,6 +686,7 @@ namespace WoopiAiHub.Application.Services
             ICollection<StepPhase3Dto> steps)
         {
             StepTool? lastGlobalStepTool = null;
+            StepTool? lastOcrStepTool = null;
             var stepToolMap = new Dictionary<(int stepId, int order), StepTool>();
 
             foreach (var stepDto in steps.OrderBy(s => s.Order))
@@ -697,19 +698,39 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                 {
+                    if (stepToolDto.ToolId <= 0)
+                    {
+                        throw new AppException(ErrorCode.RequiredField, "ToolId is required", StepLabel.Required);
+                    }
+
+                    var tool = await _toolRepository.FindByIdAsync(stepToolDto.ToolId);
+                    if (tool == null)
+                    {
+                        var ex = new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
+                        _logger.LogError(ex, $"Tool with id {stepToolDto.ToolId} not found");
+                        throw ex;
+                    }
+
                     var stepTool = CreateAndConfigureStepTool(
                         stepToolDto,
                         existingStep,
                         previousStepToolInStep,
-                        lastGlobalStepTool);
+                        lastGlobalStepTool,
+                        lastOcrStepTool,
+                        tool);
 
-                    await ValidateStepTool(stepTool);
+                    await ValidateStepTool(stepTool, tool);
 
                     stepToolMap[(existingStep.Id, stepToolDto.Order)] = stepTool;
                     existingStep.AddStepTool(stepTool);
 
                     previousStepToolInStep = stepTool;
                     lastGlobalStepTool = stepTool;
+
+                    if (tool.ToolType == HandlersTypes.Ocr)
+                    {
+                        lastOcrStepTool = stepTool;
+                    }
                 }
             }
 
@@ -725,23 +746,21 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="AppException">Thrown if the step tool is missing required fields, references a non-existent tool, or violates dependency
         /// requirements.</exception>
-        private async Task ValidateStepTool(StepTool stepTool)
+        private async Task ValidateStepTool(StepTool stepTool, 
+                                            ToolDto tool)
         {
-            if (stepTool.ToolId <= 0)
-            {
-                throw new AppException(ErrorCode.RequiredField, "ToolId is required", StepLabel.Required);
-            }
 
-            var tool = await _toolRepository.FindByIdAsync(stepTool.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
 
             if (tool.ToolType == HandlersTypes.Prompt)
             {
-                if(stepTool.DependsOnStepTool == null)
+                if (stepTool.DependsOnStepTool == null)
                 {
                     throw new AppException(ErrorCode.RequiredField, "Prompt tool must have a dependency", ToolLabel.DependecyRequired);
                 }
 
-                var dependencyTool = await _toolRepository.FindByIdAsync(stepTool.DependsOnStepTool.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Dependency tool not found", ToolLabel.DependencyToolNotFound);
+                var dependencyToolId = stepTool.DependsOnStepTool.ToolId;
+                var dependencyTool = await _toolRepository.FindByIdAsync(dependencyToolId) ?? throw new AppException(ErrorCode.NotFound, "Dependency tool not found", ToolLabel.DependencyToolNotFound);
+
                 if (dependencyTool.ToolType != HandlersTypes.Ocr)
                 {
                     throw new AppException(ErrorCode.RequiredField, "Prompt tool must have a dependency of an OCR tool", ToolLabel.OcrDependencyRequired);
@@ -818,11 +837,22 @@ namespace WoopiAiHub.Application.Services
             StepToolUpdateDto stepToolDto,
             Step step,
             StepTool? previousStepToolInStep,
-            StepTool? lastGlobalStepTool)
+            StepTool? lastGlobalStepTool,
+            StepTool? lastOcrStepTool,
+            ToolDto tool)
         {
             var stepTool = CreateStepToolUpdate(stepToolDto);
             stepTool.Step = step;
-            stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+
+            if (tool.ToolType == HandlersTypes.Prompt)
+            {
+                stepTool.DependsOnStepTool = lastOcrStepTool ?? previousStepToolInStep ?? lastGlobalStepTool;
+            }
+            else
+            {
+                stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
+            }
+
             return stepTool;
         }
 
