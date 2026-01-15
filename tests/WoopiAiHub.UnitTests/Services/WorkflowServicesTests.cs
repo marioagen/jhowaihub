@@ -1657,7 +1657,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Exactly(2));
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
         }
     }
