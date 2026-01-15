@@ -14,7 +14,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
@@ -1594,71 +1593,6 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
-        }
-
-        [Fact(DisplayName = "UpdatePhase3 should link Prompt tool to last OCR tool")]
-        [Trait("UpdatePhase3", "Success")]
-        public async Task UpdatePhase3_PromptToolUnrelatedPredecessor_ShouldLinkToLastOCR()
-        {
-            // Arrange
-            var stepDto = WorkflowFixture.FindValidStepDto();
-
-            // 1. OCR Tool
-            var ocrToolDto = new ToolDto { Id = 1, Name = "OCR Tool", ToolType = HandlersTypes.Ocr, InputDataId = 1, OutputDataId = 1 };
-
-            // 2. Filter Tool (Not OCR)
-            var filterToolDto = new ToolDto { Id = 2, Name = "Filter Tool", ToolType = "Filter", InputDataId = 1, OutputDataId = 1 };
-
-            // 3. Prompt Tool
-            var promptToolDto = new ToolDto { Id = 3, Name = "Prompt Tool", ToolType = HandlersTypes.Prompt, InputDataId = 1, OutputDataId = 1, IsEditableInput = true };
-
-            var stepToolsList = new List<StepToolUpdateDto>
-            {
-                new StepToolUpdateDto { Id = 0, Order = 1, ToolId = 1, Parameters = [] },
-                new StepToolUpdateDto { Id = 0, Order = 2, ToolId = 2, Parameters = [] },
-                new StepToolUpdateDto
-                {
-                    Id = 0,
-                    Order = 3,
-                    ToolId = 3,
-                    Parameters = [],
-
-                }
-            };
-
-            var workflowPhase3Dto = new WorkflowPhase3Dto
-            {
-                WorkflowId = 1,
-                Steps = { new StepPhase3Dto
-                    {
-                        Id = stepDto.Id,
-                        Order = stepDto.Order,
-                        StepTools = stepToolsList
-                    }
-                }
-            };
-
-            var workflow = WorkflowFixture.FindValidWorkflow();
-
-            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(workflowPhase3Dto.WorkflowId))
-                .ReturnsAsync(workflow);
-
-            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
-                .Returns(Task.CompletedTask);
-
-            // Setup Tool Repository to return correct tools
-            _toolRepositoryMock.Setup(x => x.FindByIdAsync(1)).ReturnsAsync(ocrToolDto);
-            _toolRepositoryMock.Setup(x => x.FindByIdAsync(2)).ReturnsAsync(filterToolDto);
-            _toolRepositoryMock.Setup(x => x.FindByIdAsync(3)).ReturnsAsync(promptToolDto);
-
-            // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
-
-            // Assert
-            Assert.True(result);
-            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Exactly(2));
-            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
         }
     }
 }
