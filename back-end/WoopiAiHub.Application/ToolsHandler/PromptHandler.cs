@@ -10,6 +10,7 @@ using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
+using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 namespace WoopiAiHub.Application.ToolsHandler;
 
@@ -52,7 +53,7 @@ public class PromptHandler : IToolHandler
             throw new ArgumentException("AiGateway ApplicationId not found");
         }
 
-        var output = outputs.FirstOrDefault()?.Value ?? string.Empty;
+        var output = outputs.FirstOrDefault()?.Value ?? throw new AppException(ErrorCode.RequiredField, "The prompt tool requires a OCR dependency", ToolLabel.OcrDependencyRequired);
         var promptId = int.Parse(input!.Value);
         var promptDto = _promptServices.FindById(promptId);
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);

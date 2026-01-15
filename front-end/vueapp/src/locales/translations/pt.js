@@ -109,13 +109,14 @@
         },
         workflowListModal: {
             title: "Selecione a esteira de processamento",
-            titleMessage: "Este documento está associado a múltiplas esteiras de processamento.<br>Escolha qual deseja visualizar:",
+            titleMessage:
+                "Este documento está associado a múltiplas esteiras de processamento.<br>Escolha qual deseja visualizar:",
             searchPlaceholder: "Buscar esteira de processamento...",
             clickToView: "Clique para visualizar",
             nothingFound: "Nenhuma esteira de processamento encontrada.",
             cancel: "Cancelar",
             errorToGetWorkflows: "Erro ao buscar esteiras de processamento.",
-            errorUnexpected: "Erro inesperado."
+            errorUnexpected: "Erro inesperado.",
         },
         documentName: "Nome do documento",
         documentType: "Tipo de documento",
@@ -302,11 +303,11 @@
             title: "Questionários",
         },
         questions: {
-            title: "Perguntas"
+            title: "Perguntas",
         },
         types: {
             title: "Tipos",
-        }
+        },
     },
     management: {
         title: "Gestão de Usuários e Times",
@@ -597,6 +598,8 @@
         title: "Ferramentas",
         subtitle: "Gerencie e configure suas ferramentas de processamento de documentos",
         notFound: "Não há ferramentas cadastradas",
+        toolNotFound: "Ferramenta não encontrada",
+        dependencyToolNotFound: "Ferramenta de dependência não encontrada",
         createBtn: "Nova Ferramenta",
         editBtn: "Salvar alterações",
         type: "Tipo",
@@ -609,6 +612,8 @@
         removeSuccess: "Ferramenta removida com sucesso",
         removeError: "Erro ao remover Ferramenta",
         removeTitle: "Você está prestes a deletar uma ferramenta do sistema",
+        dependencyRequired: "A ferramenta de Prompt requer ao menos uma dependência",
+        ocrDependencyRequired: "A ferramenta de Prompt requer uma dependência de uma ferramenta de OCR",
         form: {
             name: "Nome da Ferramenta",
             types: "Tipo da Ferramenta",
@@ -669,9 +674,11 @@
                 "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
             editFlowNodeSuccess: "Nodo editado com sucesso",
             editFlowNodeFail: "Falha ao editar o nodo",
-            connectorWorkflowFail: "Conector da esteira de processamento não respondeu. Verifique a URL e a chave da API da ferramenta",
+            connectorWorkflowFail:
+                "Conector da esteira de processamento não respondeu. Verifique a URL e a chave da API da ferramenta",
             connectorWorkflowConfigFail:
                 "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
+            dependenciesRequired: "Selecione ao menos uma dependência",
         },
     },
     prompts: {
@@ -798,8 +805,8 @@
         dashboard: "Dashboard",
         management: "Gestão de Usuários",
         documents: "Documentos",
-        workflows: "Esteiras de Processamento de Documentos",
-        workflowManagement: "Gestão de Esteiras de Processamento",
+        workflows: "Esteiras de Processamento",
+        workflowManagement: "Gestão de Esteiras",
         types: "Tipos",
         questions: "Perguntas",
         quizzes: "Questionários",
