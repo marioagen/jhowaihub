@@ -299,7 +299,7 @@
                         order: index + 1,
                         status: "Active",
                         parameters: node.data.parameters,
-                        dependsOnStepToolId: index,
+                        dependsOnStepToolId: node.data.stepToolId && node.data.stepToolId > 0 ? node.data.stepToolId : null,
                         dependencies: (node.data.dependencies || []).map((d) => ({
                             stepOrder: d.stepOrder ?? null,
                             stepToolOrder: d.stepToolOrder ?? null,
