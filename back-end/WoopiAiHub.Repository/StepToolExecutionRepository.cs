@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 
@@ -137,6 +137,26 @@ namespace WoopiAiHub.Repository
                 .Where(a => ids!.Contains(a.Id))
                 .ExecuteDelete();
 
+            return deletedCount > 0;
+        }
+
+        /// <summary>
+        /// Deletes all step tool executions associated with the specified card IDs.
+        /// </summary>
+        /// <remarks>If the specified collection of card IDs is empty or none of the card IDs match existing
+        /// records, no changes are made, and the method returns <see langword="false"/>.</remarks>
+        /// <param name="cardIds">A collection of card IDs representing the cards whose executions are to be deleted. Cannot be null.</param>
+        /// <returns><see langword="true"/> if one or more records were successfully deleted; otherwise, <see langword="false"/>.</returns>
+        public bool DeleteByCardIds(IEnumerable<int> cardIds)
+        {
+            if (!cardIds?.Any() ?? true)
+                return false;
+
+            var deletedCount = _context.StepToolExecutions
+                .Where(e => cardIds!.Contains(e.CardId))
+                .ExecuteDelete();
+
+            _context.SaveChanges();
             return deletedCount > 0;
         }
 

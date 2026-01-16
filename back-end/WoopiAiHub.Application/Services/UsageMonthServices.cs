@@ -1,8 +1,8 @@
-using System.Globalization;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -22,8 +22,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(UsageTypeFilterDto usageMonthFilterDto)
         {
-            var startDate = FindDate(usageMonthFilterDto.Start);
-            var endDate = FindDate(usageMonthFilterDto.End);
+            var startDate = DateHelper.ParseDate(usageMonthFilterDto.Start);
+            var endDate = DateHelper.ParseDate(usageMonthFilterDto.End);
 
             return await _usageMonthRepository.FindDataByUsageType(usageMonthFilterDto.UsageType, startDate, endDate);
         }
@@ -35,8 +35,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(ModelEmbeddingFilterDto modelEmbeddingFilterDto)
         {
-            var startDate = FindDate(modelEmbeddingFilterDto.Start);
-            var endDate = FindDate(modelEmbeddingFilterDto.End);
+            var startDate = DateHelper.ParseDate(modelEmbeddingFilterDto.Start);
+            var endDate = DateHelper.ParseDate(modelEmbeddingFilterDto.End);
             return await _usageMonthRepository.FindDataByModelEmbedding(modelEmbeddingFilterDto.Id, startDate, endDate);
         }
 
@@ -50,30 +50,14 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Converts a string date to DateTime?.
-        /// </summary>
-        /// <param name="date"></param>
-        /// <returns></returns>
-        private static DateTime? FindDate(string? date)
-        {
-            DateTime? convertedDate = null;
-            if (string.IsNullOrEmpty(date) is false)
-            {
-                convertedDate = DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-            }
-
-            return convertedDate;
-        }
-
-        /// <summary>
         /// Finds total usage cost.
         /// </summary>
         /// <param name="dateFilterDto"></param>
         /// <returns></returns>
         public async Task<decimal> FindTotalUsageCostAsync(DateFilterDto dateFilterDto)
         {
-            var startDate = FindDate(dateFilterDto.Start);
-            var endDate = FindDate(dateFilterDto.End);
+            var startDate = DateHelper.ParseDate(dateFilterDto.Start);
+            var endDate = DateHelper.ParseDate(dateFilterDto.End);
             return await _usageMonthRepository.FindTotalUsageCostAsync(startDate, endDate);
         }
     }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -73,12 +73,9 @@ namespace WoopiAiHub.Repository
         public async Task<bool> DeleteByDocumentIds(List<int> documentIds)
         {
             var cards = _context.Cards.Where(c => documentIds.Contains(c.DocumentId));
-
             if (await cards.AnyAsync())
             {
-                await cards.ExecuteUpdateAsync(b => b
-                    .SetProperty(u => u.Enable, false));
-
+                await cards.ExecuteDeleteAsync();
                 return await _context.SaveChangesAsync() > 0;
             }
 
@@ -110,7 +107,7 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindByDocumentIdCardAsync(int documentId)
         {
             return await _context.Cards
-                .Where(c => c.DocumentId == documentId && c.Enable)
+                .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Executions)
                 .ThenInclude(e => e.StepTool)
                 .ThenInclude(st => st!.Tool)
@@ -127,7 +124,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<Card>> FindByDocumentIdCardListAsync(int documentId)
         {
             return await _context.Cards
-                .Where(c => c.DocumentId == documentId && c.Enable)
+                .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Step)
                 .Include(c => c.Outputs)
                 .ThenInclude(o => o.StepTool)
@@ -152,6 +149,19 @@ namespace WoopiAiHub.Repository
                     WorkflowName = c.Step != null && c.Step.Workflow != null ? c.Step.Workflow.Name : string.Empty
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Retrieves the IDs of cards associated with the specified document IDs.
+        /// </summary>
+        /// <param name="documentIds">The collection of document IDs to search for.</param>
+        /// <returns>A collection of card IDs associated with the specified documents.</returns>
+        public async Task<ICollection<int>> FindCardIdsByDocumentIdsAsync(IEnumerable<int> documentIds)
+        {
+            return await _context.Cards
+                .Where(c => documentIds.Contains(c.DocumentId))
+                .Select(c => c.Id)
+                .ToListAsync();
         }
     }
 }

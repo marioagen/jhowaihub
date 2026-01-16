@@ -4,7 +4,6 @@ export default {
     getMainDashboardData() {
         return api.get(`/Dashboard`)
             .then(({ data }) => {
-                console.log(data);
                 return data;
             })
             .catch((error) => {
@@ -46,8 +45,8 @@ export default {
                 }
             });
     },
-    GetUsageUnits() {
-        return api.get(`/Dashboard/UsageUnits`)
+    GetUsageUnits(filters) {
+        return api.get(`/Dashboard/UsageUnits`, { params: filters })
             .then(({ data }) => {
                 return data;
             })

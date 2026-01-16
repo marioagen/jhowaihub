@@ -2,6 +2,7 @@
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -239,7 +240,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -291,7 +292,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var card = new Card(cardId, DateTime.Now, 1, 1, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, 1, "Card Test", 1, null);
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
             cardRepository.Setup(a => a.FindById(cardId)).ReturnsAsync(card);
@@ -314,7 +315,7 @@ namespace WoopiAiHub.UnitTests.Services
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var document = DocumentFixture.FindValidDocument();
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
             var cardRepository = _mocker.GetMock<ICardRepository>();
@@ -351,7 +352,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -399,7 +400,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -447,7 +448,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -496,7 +497,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -550,7 +551,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step2, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step1, step2 });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step1);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -600,7 +601,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
             typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput>());
@@ -645,7 +646,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, true, null);
+            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
@@ -713,6 +714,56 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(CardLabel.NotFound, exception.LabelError);
             _cardRepositoryMock.Verify(repo => repo.FindHeaderInfoAsync(cardId), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdateStepAndStatus should rollback card changes when automation fails")]
+        [Trait("UpdateStepAndStatus", "Fail")]
+        public async Task UpdateStepAndStatus_AutomationFails_RollsBackCardChanges()
+        {
+            // Arrange
+            var updateDto = CardFixture.FindValidUpdateCardStepStatusDto();
+            var card = CardFixture.FindValidCard();
+            var step = CardFixture.FindValidStep();
+            
+            var previousStepId = card.StepId;
+            var previousStatusId = card.StatusId;
+
+            _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync(card);
+            _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
+                updateDto.WorkflowId)).ReturnsAsync(step);
+            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+
+            _automationServices.Setup(s => s.StartExecutionByCardAsync(It.IsAny<AutomationServicesDto>()))
+                .ThrowsAsync(new Exception("Automation service failed"));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<Exception>(() => _cardServices.UpdateStepAndStatus(updateDto, "tenant", "email"));
+
+            _cardRepositoryMock.Verify(repo => repo.Update(card), Times.Exactly(2));
+            Assert.Equal(previousStepId, card.StepId);
+            Assert.Equal(previousStatusId, card.StatusId);
+        }
+
+        [Fact(DisplayName = "UpdateStepAndStatus should not call automation when card update fails")]
+        [Trait("UpdateStepAndStatus", "Fail")]
+        public async Task UpdateStepAndStatus_CardUpdateFails_DoesNotCallAutomation()
+        {
+            // Arrange
+            var updateDto = CardFixture.FindValidUpdateCardStepStatusDto();
+            var card = CardFixture.FindValidCard();
+            var step = CardFixture.FindValidStep();
+
+            _cardRepositoryMock.Setup(repo => repo.FindById(updateDto.CardId)).ReturnsAsync(card);
+            _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
+                updateDto.WorkflowId)).ReturnsAsync(step);
+            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(false);
+
+            // Act
+            var result = await _cardServices.UpdateStepAndStatus(updateDto, "tenant", "email");
+
+            // Assert
+            Assert.True(result);
+            _automationServices.Verify(s => s.StartExecutionByCardAsync(It.IsAny<AutomationServicesDto>()), Times.Never);
         }
     }
 }

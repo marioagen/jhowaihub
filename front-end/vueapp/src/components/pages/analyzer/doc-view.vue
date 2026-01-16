@@ -201,13 +201,11 @@
                     .then((response) => {
                         if (response.error !== undefined) {
                             window.onbeforeunload = null;
-                            return console.log(response.error);
                         }
                         window.onbeforeunload = null;
                         this.message = this.$t("documents.normalizingTheDocument");
                     })
                     .finally(() => {
-                        console.log("Finished request.");
                         this.loadingNormalize = false;
                     });
             },
