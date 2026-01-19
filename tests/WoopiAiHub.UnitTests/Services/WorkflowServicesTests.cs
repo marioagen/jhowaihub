@@ -1,4 +1,4 @@
-﻿using Bogus.DataSets;
+using Bogus.DataSets;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
 using Moq.AutoMock;
@@ -1546,5 +1546,162 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
+
+        [Fact(DisplayName = "UpdatePhase2 should update existing step with new values")]
+        [Trait("UpdatePhase2", "Success")]
+        public async Task UpdatePhase2_ShouldUpdateExistingStep_WithNewValues()
+        {
+            // Arrange
+            var workflowId = 1;
+            var existingStepId = 1;
+            var updatedName = "Updated Step Name";
+            var updatedOrder = 2;
+            var updatedProfileId = 5;
+            var updatedStatusId = 3;
+
+            var existingStep = new Step(existingStepId, DateTime.Now, workflowId, "Original Step", 1, 1, 1);
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow")
+            {
+                Steps = new List<Step> { existingStep }
+            };
+
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var profileDto = WorkflowFixture.FindValidProfileDto();
+            var status = WorkflowFixture.FindValidStatus();
+
+            var workflowPhase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = workflowId,
+                Steps = new List<StepPhase2Dto>
+                {
+                    new StepPhase2Dto
+                    {
+                        Id = existingStepId,
+                        Name = updatedName,
+                        Order = updatedOrder,
+                        ProfileId = updatedProfileId,
+                        StatusId = updatedStatusId
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _profileRepositoryMock.Setup(x => x.FindById(updatedProfileId))
+                .ReturnsAsync(profileDto);
+
+            _statusRepositoryMock.Setup(x => x.FindById(updatedStatusId))
+                .ReturnsAsync(status);
+
+            _stepRepositoryMock.Setup(x => x.FindByIdsWithCards(It.IsAny<IEnumerable<int>>()))
+                .Returns(new List<Step>());
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(updatedName, existingStep.Name);
+            Assert.Equal(updatedOrder, existingStep.Order);
+            Assert.Equal(updatedProfileId, existingStep.ProfileId);
+            Assert.Equal(updatedStatusId, existingStep.StatusId);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase1 should add teams to workflow")]
+        [Trait("UpdatePhase1", "Success")]
+        public async Task UpdatePhase1_ShouldAddTeams_ToWorkflow()
+        {
+            // Arrange
+            var workflowId = 1;
+            var team1Id = 1;
+            var team2Id = 2;
+
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+            var team1 = new Team("Team 1", team1Id, DateTime.UtcNow);
+            var team2 = new Team("Team 2", team2Id, DateTime.UtcNow);
+
+            var workflowUpdatePhase1Dto = new WorkflowUpdatePhase1Dto
+            {
+                Id = workflowId,
+                Name = "Updated Workflow",
+                Teams = new List<int> { team1Id, team2Id }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _teamRepositoryMock.Setup(x => x.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team1, team2 });
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(2, workflow.Teams.Count);
+            Assert.Contains(workflow.Teams, t => t.Id == team1Id);
+            Assert.Contains(workflow.Teams, t => t.Id == team2Id);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should throw AppException when step with order not found")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task UpdatePhase3_StepWithOrderNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var workflowId = 1;
+            var stepOrder = 99;
+
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow")
+            {
+                Steps = new List<Step>
+                {
+                    new Step(1, DateTime.UtcNow, workflowId, "Step 1", 1, 1, 1),
+                    new Step(2, DateTime.UtcNow, workflowId, "Step 2", 2, 1, 1)
+                }
+            };
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = workflowId,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto
+                    {
+                        Id = 0,
+                        Order = stepOrder,
+                        StepTools = new List<StepToolUpdateDto>()
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(workflowId))
+                .ReturnsAsync(workflow);
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Contains($"Step with order {stepOrder} not found", exception.Message);
+            Assert.Equal(StepLabel.NotFound, exception.LabelError);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
+
     }
 }
