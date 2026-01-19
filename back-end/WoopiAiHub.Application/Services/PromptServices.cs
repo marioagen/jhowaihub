@@ -402,7 +402,7 @@ namespace WoopiAiHub.Application.Services
         /// Asynchronously retrieves all internal prompts.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<PromptDto>> FindAllInternal()
+        public async Task<ICollection<PromptBaseDto>> FindAllInternal()
         {
             return await _promptRepository.FindAllInternal();
         }

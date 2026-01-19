@@ -97,21 +97,15 @@ namespace WoopiAiHub.Repository
         /// Asynchronously retrieves all prompts that are marked as internal.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<PromptDto>> FindAllInternal()
+        public async Task<ICollection<PromptBaseDto>> FindAllInternal()
         {
             return await _context.Prompts
                 .Where(w => w.InternalPrompt)
-                .Select(p => new PromptDto
+                .Select(p => new PromptBaseDto
                 {
                     Id = p.Id,
                     Name = p.Name,
-                    Description = p.Description,
-                    Text = p.Text,
-                    Created = p.Created,
-                    IdUser = p.IdUser,
-                    IsEdited = p.IsEdited,
-                    IsImported = p.IsImported,
-                    InternalPrompt = p.InternalPrompt
+                    Description = p.Description
                 })
                 .AsNoTracking()
                 .ToListAsync();

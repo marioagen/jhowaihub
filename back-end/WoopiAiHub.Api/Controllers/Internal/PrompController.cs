@@ -22,7 +22,7 @@ namespace WoopiAiHub.Api.Controllers.Internal
         [HttpGet]
         [SwaggerOperation("Endpoint that receives the request to return all internal prompts")]
         [ProducesResponseType(typeof(ICollection<PromptDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAllInternal()
+        public async Task<IActionResult> FindAllInternal()
         {
             var result = await _promptServices.FindAllInternal();
             return Ok(result);
@@ -36,7 +36,7 @@ namespace WoopiAiHub.Api.Controllers.Internal
         [HttpGet("{id}")]
         [SwaggerOperation("Endpoint that receives a prompt Id to return the correspondent prompt")]
         [ProducesResponseType(typeof(PromptDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetInternal(int id)
+        public async Task<IActionResult> FindInternal(int id)
         {
             var result = await _promptServices.FindInternalById(id);
             return Ok(result);
