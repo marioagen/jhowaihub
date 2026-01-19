@@ -111,7 +111,7 @@
             titleMessage: "Este documento está asociado a varios flujos de trabajo. Elija cuál desea ver:",
             searchPlaceholder: "Buscar flujo de trabajo...",
             clickToView: "Haga clic para ver",
-            nothingFound: "No se encontraron flujos de trabajo",
+            nothingFound: "No se encontraron flujos de trabajo. Si no hay un flujo vinculado, considere reenviar el archivo y vincular un flujo de trabajo.",
             cancel: "Cancelar",
             errorToGetWorkflows: "Error al buscar flujos de trabajo",
             errorUnexpected: "Error inesperado."
