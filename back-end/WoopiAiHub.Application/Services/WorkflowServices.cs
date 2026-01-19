@@ -10,6 +10,7 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
+using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -36,7 +37,8 @@ namespace WoopiAiHub.Application.Services
             IStepRepository stepRepository,
             IStepToolDependencyRepository stepToolDependencyRepository,
             IStepToolOutputRepository stepToolOutputRepository, 
-            IUnitOfWork unitOfWork, 
+            IUnitOfWork unitOfWork,
+            IToolRepository toolRepository,
             IValidateStep validateStep,
             ILogger<WorkflowServices> logger 
         )
