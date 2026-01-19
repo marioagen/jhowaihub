@@ -92,10 +92,12 @@ namespace WoopiAiHub.Repository.Migrations
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.ApiTemplate", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
+                        .HasColumnType("int")
                         .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BodyTemplate")
                         .HasColumnType("varchar(max)")
@@ -108,7 +110,6 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasDefaultValueSql("(GETDATE())");
 
                     b.Property<string>("HeaderTemplate")
-                        .IsRequired()
                         .HasColumnType("varchar(max)")
                         .HasColumnName("HeaderTemplate");
 
@@ -156,10 +157,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Property<int>("DocumentId")
                         .HasColumnType("int")
                         .HasColumnName("DocumentId");
-
-                    b.Property<bool>("Enable")
-                        .HasColumnType("bit")
-                        .HasColumnName("Enable");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -216,10 +213,6 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("EmailCreator");
-
-                    b.Property<bool>("Enable")
-                        .HasColumnType("bit")
-                        .HasColumnName("Enable");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -330,7 +323,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ModelEmbeddings", (string)null);
+                    b.ToTable("ModelEmbeddings");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Permission", b =>
@@ -1054,7 +1047,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageDailies", (string)null);
+                    b.ToTable("UsageDailies");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageLog", b =>
@@ -1098,7 +1091,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageLogs", (string)null);
+                    b.ToTable("UsageLogs");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageMonth", b =>
@@ -1138,7 +1131,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageMonths", (string)null);
+                    b.ToTable("UsageMonths");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageType", b =>
@@ -1161,7 +1154,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UsageTypes", (string)null);
+                    b.ToTable("UsageTypes");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageUnit", b =>
@@ -1200,7 +1193,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UsageTypeId");
 
-                    b.ToTable("UsageUnits", (string)null);
+                    b.ToTable("UsageUnits");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>
