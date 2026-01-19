@@ -1,4 +1,7 @@
-﻿import { createRouter, createWebHashHistory } from "vue-router";
+﻿import {
+    createRouter,
+    createWebHashHistory,
+} from "vue-router";
 
 import DocumentsUpload from "@/pages/documents/uploads.vue";
 import DocumentsPage from "@/pages/documents/index.vue";
@@ -9,8 +12,6 @@ import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
 import UnauthorizedPage from "@/pages/unauthorized.vue";
 
-import TypesPage from "@/pages/types.vue";
-import QuestionsPage from "@/pages/questions.vue";
 import ManagementPage from "@/pages/management/index.vue";
 import DashboardPage from "@/pages/dashboard.vue";
 
@@ -22,9 +23,9 @@ import EditTeam from "@/pages/management/teams/editTeam.vue";
 import NewProfile from "@/pages/management/profiles/newProfile.vue";
 import EditProfile from "@/pages/management/profiles/editProfile.vue";
 
-import QuizzesPage from "@/pages/quizzes/index.vue";
-import NewQuizz from "@/pages/quizzes/newQuizz.vue";
-import EditQuizz from "@/pages/quizzes/editQuizz.vue";
+import ManagementQuizzesPage from "@/pages/managementQuizzes/index.vue";
+import NewQuizz from "@/pages/managementQuizzes/quizzes/newQuizz.vue";
+import EditQuizz from "@/pages/managementQuizzes/quizzes/editQuizz.vue";
 
 import WorkflowPage from "@/pages/workflow/index.vue";
 import WorkflowManagement from "@/pages/workflow/management.vue";
@@ -40,7 +41,11 @@ import PromptNew from "@/pages/prompts/newPrompt.vue";
 import PromptImport from "@/pages/prompts/import.vue";
 import HomePage from "@/pages/home.vue";
 
+import TemplatePage from "@/pages/templates/index.vue";
+import TemplateDetail from "@/pages/templates/templateDetail.vue";
+
 import { hasPermission } from "@/utils/permissions";
+
 function authenticate(to, from, next) {
     const userStr = window.localStorage.getItem("project");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -87,8 +92,8 @@ const routes = [
         name: "Logout",
         component: LogoutPage,
         meta: {
-            public: true
-        }
+            public: true,
+        },
     },
     {
         path: "/unauthorized",
@@ -141,31 +146,9 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/types",
-        name: "Type",
-        component: TypesPage,
-        meta: {
-            layout: "default",
-            module: "Types",
-            action: "View",
-        },
-        beforeEnter: authenticate,
-    },
-    {
-        path: "/questions",
-        name: "Question",
-        component: QuestionsPage,
-        meta: {
-            layout: "default",
-            module: "Questions",
-            action: "View",
-        },
-        beforeEnter: authenticate,
-    },
-    {
-        path: "/quizzes",
-        name: "Quiz",
-        component: QuizzesPage,
+        path: "/management-quizzes",
+        name: "ManagementQuizzes",
+        component: ManagementQuizzesPage,
         meta: {
             layout: "default",
             module: "Quizzes",

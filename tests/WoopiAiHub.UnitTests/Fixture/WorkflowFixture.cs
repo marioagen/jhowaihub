@@ -128,7 +128,7 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static StepToolUpdateDto FindValidStepToolUpdateDto()
         {
-            return  new StepToolUpdateDto
+            return new StepToolUpdateDto
             {
                 Id = 0,
                 ToolId = 1,
@@ -262,7 +262,6 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 _faker.Name.FullName(),
                 _faker.Random.Int(1, 1000),
-                true,
                 Guid.NewGuid()
              );
         }
@@ -284,7 +283,7 @@ namespace WoopiAiHub.UnitTests.Fixture
         public static StepTool FindValidStepToolWithDependencies()
         {
             var _faker = new Faker("pt_BR");
-            var step =  new StepTool(
+            var step = new StepTool(
                 _faker.Random.Int(1, 1000),
                  DateTime.UtcNow,
                 _faker.Random.Int(1, 1000),
@@ -300,6 +299,27 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000)
              ));
             return step;
+        }
+
+        public static Tool CreateToolModel(int id, string name, string toolTypeName)
+        {
+            var tool = new Tool(
+                id,
+                DateTime.UtcNow,
+                name,
+                true,
+                1,
+                1,
+                1,
+                false,
+                null,
+                null
+            );
+
+            var toolType = new ToolType(1, DateTime.UtcNow, toolTypeName, true);
+            typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
+
+            return tool;
         }
     }
 

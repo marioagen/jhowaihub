@@ -29,5 +29,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task <List<StepDto>> FindPhase3ById(int id);
         Task<bool> UpdatePhase1(WorkflowUpdatePhase1Dto workflowUpdatePhase1Dto);
         StepDto FindStepById(int id);
+        Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
     }
 }

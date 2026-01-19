@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 
@@ -109,6 +109,26 @@ namespace WoopiAiHub.Repository
 
             return await _context.StepToolOutputs
                 .AnyAsync(o => stepToolIds!.Contains(o.StepToolId));
+        }
+
+        /// <summary>
+        /// Deletes all step tool outputs associated with the specified card IDs.
+        /// </summary>
+        /// <remarks>If the specified collection of card IDs is empty or none of the card IDs match existing
+        /// entities, no changes are made, and the method returns <see langword="false"/>.</remarks>
+        /// <param name="cardIds">A collection of card IDs representing the cards whose outputs are to be deleted. Cannot be null.</param>
+        /// <returns><see langword="true"/> if one or more entities were successfully deleted; otherwise, <see langword="false"/>.</returns>
+        public bool DeleteByCardIds(IEnumerable<int> cardIds)
+        {
+            if (!cardIds?.Any() ?? true)
+                return false;
+
+            var deletedCount = _context.StepToolOutputs
+                .Where(o => cardIds!.Contains(o.CardId))
+                .ExecuteDelete();
+
+            _context.SaveChanges();
+            return deletedCount > 0;
         }
     }
 }

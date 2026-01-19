@@ -90,6 +90,53 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("UserTeams", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ApiTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BodyTemplate")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("BodyTemplate");
+
+                    b.Property<DateTime>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created")
+                        .HasDefaultValueSql("(GETDATE())");
+
+                    b.Property<string>("HeaderTemplate")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("HeaderTemplate");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasColumnType("varchar(10)")
+                        .HasColumnName("Method");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("QueryTemplate")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("QueryTemplate");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Url");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApiTemplates", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
                 {
                     b.Property<int>("Id")
@@ -110,10 +157,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Property<int>("DocumentId")
                         .HasColumnType("int")
                         .HasColumnName("DocumentId");
-
-                    b.Property<bool>("Enable")
-                        .HasColumnType("bit")
-                        .HasColumnName("Enable");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -170,10 +213,6 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("EmailCreator");
-
-                    b.Property<bool>("Enable")
-                        .HasColumnType("bit")
-                        .HasColumnName("Enable");
 
                     b.Property<string>("Name")
                         .IsRequired()

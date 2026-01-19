@@ -20,18 +20,35 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="typeDoc"></param>
         /// <returns></returns>
-        public bool CreateUniqueTypeDoc(TypeDoc typeDoc)
+        public ResponseCreateTypeDto CreateUniqueTypeDoc(TypeDoc typeDoc)
         {
-
             var existTypeDoc = _context.TypeDoc.Any(p => p.Name == typeDoc.Name);
             if (!existTypeDoc)
             {
                 _context.TypeDoc.Add(typeDoc);
                 _context.SaveChanges();
-
-                return true;
+                return CreateResponseCreateTypeDto(typeDoc, false);
             }
-            return false;
+
+            return CreateResponseCreateTypeDto(typeDoc);
+        }
+
+        /// <summary>
+        /// Create a ResponseCreateTypeDto to send when a new document type is created
+        /// </summary>
+        /// <param name="typeDoc"></param>
+        /// <param name="duplicated"></param>
+        /// <returns></returns>
+        private static ResponseCreateTypeDto CreateResponseCreateTypeDto(TypeDoc typeDoc, bool duplicated = true)
+        {
+            return new ResponseCreateTypeDto
+            {
+                Id = typeDoc.Id,
+                Name = typeDoc.Name,
+                Created = typeDoc.Created,
+                EmailCreator = typeDoc.EmailCreator,
+                Duplicated = duplicated
+            };
         }
 
         /// <summary>

@@ -44,6 +44,7 @@
     "devDependencies": {
         "@babel/core": "^7.12.16",
         "@babel/eslint-parser": "^7.12.16",
+        "@vitejs/plugin-basic-ssl": "^2.1.0",
         "@vitejs/plugin-vue": "^6.0.1",
         "eslint": "^7.32.0",
         "eslint-plugin-vue": "^8.0.3",

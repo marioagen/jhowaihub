@@ -1,66 +1,71 @@
 name: Release
 
-on: 
-  push:
-    branches:
-      - master
+on:
+    push:
+        branches:
+            - master
 
 jobs:
-  release:
-    name: 'Release'
-    runs-on: ["azure-identity"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    release:
+        name: "Release"
+        runs-on: ["azure-identity"]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Declare variables
-        id: vars
-        run: |
-          echo "imageRepository=woopi-ai" >> $GITHUB_OUTPUT
+            - name: Declare variables
+              id: vars
+              run: |
+                  echo "imageRepository=woopi-ai" >> $GITHUB_OUTPUT
 
-          echo "imageNameBackend=woopiai-hub-backend" >> $GITHUB_OUTPUT
-          echo "imageNameFrontend=woopiai-hub-frontend" >> $GITHUB_OUTPUT
-          echo "imageNameFileRepository=woopiai-hub-file-repository" >> $GITHUB_OUTPUT
+                  echo "imageNameBackend=woopiai-hub-backend" >> $GITHUB_OUTPUT
+                  echo "imageNameFrontend=woopiai-hub-frontend" >> $GITHUB_OUTPUT
+                  echo "imageNameFileRepository=woopiai-hub-file-repository" >> $GITHUB_OUTPUT
+                  echo "imageNameFunctions=woopiai-hub-functions" >> $GITHUB_OUTPUT
 
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.0
-        with:
-          github_token: ${{ secrets.REPOTOKEN }}
-          tag_prefix: ""
+            - name: Bump version and push tag
+              id: tag_version
+              uses: mathieudutour/github-tag-action@v6.0
+              with:
+                  github_token: ${{ secrets.REPOTOKEN }}
+                  tag_prefix: ""
 
-      - name: Azure login
-        run: az login --identity
-  
-      - name: ACR login
-        run: az acr login -n acrapplications
+            - name: Azure login
+              run: az login --identity
 
-      - name: Build Back Image
-        working-directory: ./back-end
-        run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }} .
-      
-      - name: Push Back Image
-        run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }}
+            - name: ACR login
+              run: az acr login -n acrapplications
 
-      - name: Build Front Image
-        working-directory: ./front-end/vueapp
-        run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }} .
-      
-      - name: Push Front Image
-        run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }}
+            - name: Build Back Image
+              working-directory: ./back-end
+              run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }} .
 
-      - name: Build File-Repository Image
-        working-directory: ./external-api
-        run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }} .
-      
-      - name: Push File-Repository Image
-        run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }}
-      
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          name: ${{ steps.tag_version.outputs.new_tag }}      
-          generate_release_notes: true
+            - name: Push Back Image
+              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }}
 
-      
+            - name: Build Front Image
+              working-directory: ./front-end/vueapp
+              run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }} .
+
+            - name: Push Front Image
+              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }}
+
+            - name: Build File-Repository Image
+              working-directory: ./external-api
+              run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }} .
+
+            - name: Push File-Repository Image
+              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }}
+
+            - name: Build Functions Image
+              run: docker image build -f back-end/WoopiAiHub.Functions/Dockerfile -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }} .
+
+            - name: Push Functions Image
+              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }}
+
+            - name: Release
+              uses: softprops/action-gh-release@v1
+              with:
+                  tag_name: ${{ steps.tag_version.outputs.new_tag }}
+                  name: ${{ steps.tag_version.outputs.new_tag }}
+                  generate_release_notes: true

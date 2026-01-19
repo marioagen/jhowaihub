@@ -8,6 +8,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
@@ -23,6 +24,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateStep _validateStep;
+        private readonly IToolRepository _toolRepository;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
@@ -48,6 +50,7 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _teamRepository = teamRepository;
+            _toolRepository = toolRepository;
             _logger = logger;
         }
 
@@ -204,7 +207,10 @@ namespace WoopiAiHub.Application.Services
 
             foreach (var parameter in stepToolDto.Parameters)
             {
-                stepTool.Parameters.Add(new StepToolParameter(0, DateTime.Now, 0, parameter.RequiredFile, parameter.WebhookId, parameter.Value));
+                var requiredFile = parameter.RequiredFile ?? false;
+                stepTool.Parameters.Add(
+                    new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId,
+                        parameter.Value));
             }
 
             return stepTool;
@@ -492,6 +498,16 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Retrieves a list of workflows by documentId and user .
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        public async Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
+        {
+            return await _workflowRepository.FindWorkflowsByDocument(dto, ct);
+        }
+
+        /// <summary>
         /// Phase 2: Updates a workflow with steps information (without step tools).
         /// Validates and creates/updates steps with their profiles and statuses.
         /// </summary>
@@ -590,6 +606,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             _unitOfWork.BeginTransaction();
+            workflow.Teams.Clear();
             try
             {
                 var teamsList = _teamRepository.FindByIds(workflowUpdatePhase1Dto.Teams);
@@ -640,7 +657,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto)
         {
-            var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase3Dto.WorkflowId);
+            var workflow = await _workflowRepository.FindByIdForFlow(workflowPhase3Dto.WorkflowId);
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
@@ -700,6 +717,8 @@ namespace WoopiAiHub.Application.Services
             await _unitOfWork.SaveChangesAsync();
             return stepToolMap;
         }
+
+
 
         /// <summary>
         /// Resolves dependencies between step tools.
@@ -781,30 +800,122 @@ namespace WoopiAiHub.Application.Services
 
         /// <summary>
         /// Creates dependencies for a step tool based on the DTO.
+        /// Validates that Prompt tools have at least one OCR dependency (direct or recursive).
         /// </summary>
-        private async Task CreateDependenciesForStepTool(
-            Workflow workflow,
-            StepTool stepTool,
-            StepToolUpdateDto stepToolDto)
+        private async Task CreateDependenciesForStepTool(Workflow workflow, StepTool stepTool, StepToolUpdateDto stepToolDto)
         {
             await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
 
-            if (stepToolDto.Dependencies != null && stepToolDto.Dependencies.Count > 0)
+            var tool = await _toolRepository.FindModelByIdAsync(stepTool.ToolId);
+            if (tool == null)
             {
-                foreach (var dependsOn in stepToolDto.Dependencies)
-                {
-                    var dependsOnStepTool = workflow.Steps
-                        .SelectMany(s => s.StepTools)
-                        .FirstOrDefault(st =>
-                            st.Step!.Order == dependsOn.StepOrder && st.Order == dependsOn.StepToolOrder);
+                throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
+            }
 
-                    if (dependsOnStepTool != null && dependsOnStepTool.Id > 0)
-                    {
-                        var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
-                        await _stepToolDependencyRepository.CreateAsync(dependency);
-                    }
+            var createdDependencies = await FindStepToolDependencies(workflow, stepTool, stepToolDto);
+
+            await ValidatePromptTool(tool, createdDependencies, stepToolDto);
+        }
+
+        /// <summary>
+        /// Finds and creates dependencies between the specified step tool and other step tools within the given
+        /// workflow, based on the provided dependency information.
+        /// </summary>
+        /// <remarks>This method creates dependency records for each valid dependency specified in
+        /// <paramref name="stepToolDto"/>. Only dependencies that correspond to existing step tools in the workflow are
+        /// created and returned.</remarks>
+        /// <param name="workflow">The workflow containing the steps and step tools to search for dependencies.</param>
+        /// <param name="stepTool">The step tool for which dependencies are being established.</param>
+        /// <param name="stepToolDto">The data transfer object containing dependency information for the step tool. Must not be <c>null</c>.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="StepTool"/>
+        /// instances that were found and linked as dependencies. The list is empty if no dependencies were specified or
+        /// found.</returns>
+        private async Task<List<StepTool>> FindStepToolDependencies(Workflow workflow, StepTool stepTool, StepToolUpdateDto stepToolDto)
+        {
+            var createdDependencies = new List<StepTool>();
+
+            if (stepToolDto.Dependencies == null || stepToolDto.Dependencies.Count == 0)
+            {
+                return createdDependencies;
+            }
+
+            foreach (var dependsOn in stepToolDto.Dependencies)
+            {
+                var dependsOnStepTool = workflow.Steps
+                    .Where(s => s.Order == dependsOn.StepOrder)
+                    .SelectMany(s => s.StepTools)
+                    .FirstOrDefault(st => st.Order == dependsOn.StepToolOrder);
+
+                if (dependsOnStepTool != null)
+                {
+                    var dependency = new StepToolDependency(0, DateTime.UtcNow, stepTool.Id, dependsOnStepTool.Id);
+                    await _stepToolDependencyRepository.CreateAsync(dependency);
+                    createdDependencies.Add(dependsOnStepTool);
                 }
             }
+
+            return createdDependencies;
+        }
+
+        /// <summary>
+        /// Validates that a Prompt tool has at least one OCR dependency (direct or recursive).
+        /// </summary>
+        /// <param name="tool"></param>
+        /// <param name="createdDependencies"></param>
+        /// <param name="stepToolDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private async Task ValidatePromptTool(Tool tool, List<StepTool> createdDependencies, StepToolUpdateDto stepToolDto)
+        {
+            if (tool.ToolType?.Name != HandlersTypes.Prompt)
+            {
+                return;
+            }
+
+            if (stepToolDto.Dependencies == null || stepToolDto.Dependencies.Count == 0 || createdDependencies.Count == 0)
+            {
+                throw new AppException(ErrorCode.RequiredField, "Prompt tool must have at least one dependency", ToolLabel.DependecyRequired);
+            }
+
+            var toolCache = new Dictionary<int, Tool> { { tool.Id, tool } };
+            var hasOcrDependency = await HasOcrDependency(createdDependencies, toolCache);
+            if (!hasOcrDependency)
+            {
+                throw new AppException(ErrorCode.RequiredField, "Prompt tool must have at least one OCR dependency", ToolLabel.OcrDependencyRequired);
+            }
+        }
+
+        /// <summary>
+        /// Determines whether any of the specified dependencies require an OCR tool.
+        /// </summary>
+        /// <remarks>This method checks each dependency to determine if it is associated with a tool of
+        /// type OCR. The <paramref name="toolCache"/> is used to avoid redundant lookups and may be populated with
+        /// additional tools as needed.</remarks>
+        /// <param name="dependencies">A list of <see cref="StepTool"/> objects representing the tool dependencies to check.</param>
+        /// <param name="toolCache">A dictionary that maps tool IDs to <see cref="Tool"/> instances, used to cache tool lookups and improve
+        /// performance. May be updated with additional entries during execution.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if at least one
+        /// dependency requires an OCR tool; otherwise, <see langword="false"/>.</returns>
+        private async Task<bool> HasOcrDependency(List<StepTool> dependencies, Dictionary<int, Tool> toolCache)
+        {
+            foreach (var dependency in dependencies)
+            {
+                if (!toolCache.TryGetValue(dependency.ToolId, out var dependencyTool))
+                {
+                    dependencyTool = await _toolRepository.FindModelByIdAsync(dependency.ToolId);
+                    if (dependencyTool != null)
+                    {
+                        toolCache[dependency.ToolId] = dependencyTool;
+                    }
+                }
+
+                if (dependencyTool?.ToolType?.Name == HandlersTypes.Ocr)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

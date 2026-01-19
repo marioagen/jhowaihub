@@ -1,8 +1,27 @@
 <template>
-    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmation">
-        <LucideIcon icon="Trash2" :size="15" />
-        {{ $t("common.delete") }}
-    </button>
+    <div
+        class="d-flex flex-column justify-content-between align-items-start mb-2"
+    >
+        <div class="delete-container">
+            <button
+                class="btn btn-outline-danger btn-sm delete-button"
+                @click="openConfirmation"
+                :disabled="!enableMultiDelete"
+            >
+                <LucideIcon
+                    icon="Trash2"
+                    :size="15"
+                />
+                {{ $t("common.delete") }}
+            </button>
+            <small
+                v-if="!enableMultiDelete"
+                class="text-danger delete-tooltip"
+            >
+                {{ $t("documents.selectToDelete") }}
+            </small>
+        </div>
+    </div>
     <div v-if="showTable">
         <TableComponent
             modalName="documents.title"
@@ -18,12 +37,20 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-status="{ data }">
-                <BadgeComponent v-if="data.row.status === 0" text="documents.statusList.notAnalyzed" />
-                <BadgeComponent v-else text="common.analyzed" variant="success" />
+                <BadgeComponent
+                    v-if="data.row.status === 0"
+                    text="documents.statusList.notAnalyzed"
+                />
+                <BadgeComponent
+                    v-else
+                    text="common.analyzed"
+                    variant="success"
+                />
             </template>
             <template #cell-workflows="{ data }">
                 <BadgeOutlinedComponent
-                    v-for="(workflowData, index) in data.row.workflowProgress"
+                    v-for="(workflowData, index) in data.row
+                        .workflowProgress"
                     :key="index"
                     :text="`${workflowData.workflowName} (${workflowData.currentStep}/${workflowData.totalSteps})`"
                     :clickable="false"
@@ -32,26 +59,33 @@
             </template>
             <template #cell-actions="{ data }">
                 <DropdownComponent>
-                    <li v-if="data.row.status === 0">
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="embedData(data.row.id)">
-                            <LucideIcon icon="TextSearch" />
-                            {{ $t("common.analyze") }}
-                        </a>
-                    </li>
-                    <li v-else>
+                    <li>
                         <a
                             class="dropdown-item d-flex align-items-center gap-2"
-                            @click="redirectToConsult(data.row.id)"
+                            @click="
+                                getWorkFlowListByDocumentId(
+                                    data.row.id
+                                )
+                            "
                         >
                             <LucideIcon icon="Search" />
-                            {{ $t("documents.actions.consult") }}
+                            {{
+                                $t(
+                                    "documents.actions.consult"
+                                )
+                            }}
                         </a>
                     </li>
                 </DropdownComponent>
             </template>
         </TableComponent>
     </div>
-    <EmbeddingDocument v-if="isEmbedding" :docData="docDataEmbedding" :isReprocessing="isReprocessing" />
+    <EmbeddingDocument
+        v-if="isEmbedding"
+        :docData="docDataEmbedding"
+        :isReprocessing="isReprocessing"
+        @close="isEmbedding = false"
+    />
     <ConfirmModal
         id="deleteConfirm"
         title="documents.removeTitle"
@@ -63,8 +97,12 @@
         :isLoading="isDeleting"
         @confirm="deleteDocument"
     />
+    <DocumentWorkflowListModal
+        id="typeModalWorkflow"
+        :documentId="selectedDocumentId"
+        ref="ListWorkFlowModal"
+    />
 </template>
-
 <script>
     import dates from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
@@ -74,6 +112,7 @@
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent";
     import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
     import DropdownComponent from "@/components/global/DropdownComponent.vue";
+    import DocumentWorkflowListModal from "@/components/documents/DocumentWorkflowListModal.vue";
 
     export default {
         name: "DocumentsTable",
@@ -84,17 +123,33 @@
             BadgeComponent,
             TableComponent,
             ConfirmModal,
+            DocumentWorkflowListModal,
         },
         data: () => ({
             table: {
                 isLoading: true,
                 columns: [
                     { key: "name", label: "common.name" },
-                    { key: "description", label: "common.description" },
-                    { key: "created", label: "documents.createdDate" },
-                    { key: "status", label: "common.status" },
-                    { key: "workflows", label: "documents.workflows" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "description",
+                        label: "common.description",
+                    },
+                    {
+                        key: "created",
+                        label: "documents.createdDate",
+                    },
+                    {
+                        key: "status",
+                        label: "common.status",
+                    },
+                    {
+                        key: "workflows",
+                        label: "documents.workflows",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -117,6 +172,7 @@
             isEmbedding: false,
             isDeleting: false,
             docDataEmbedding: {},
+            selectedDocumentId: null,
         }),
         methods: {
             getDocuments() {
@@ -143,7 +199,8 @@
                             });
                         }
                         this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        this.table.pagination =
+                            response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -153,27 +210,43 @@
                 this.table.selectedRows = selectedRows;
             },
             openConfirmation() {
-                const ids = this.table.selectedRows.map((item) => item.id);
+                const ids = this.table.selectedRows.map(
+                    (item) => item.id
+                );
                 this.selectedDocument = ids;
                 this.$refs.DeleteDialog.open();
             },
             deleteDocument() {
                 this.isDeleting = true;
-                DocumentsServices.deleteDocument(this.selectedDocument)
+                DocumentsServices.deleteDocument(
+                    this.selectedDocument
+                )
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getDocuments({ search: "", page: 1, type: null });
+                            this.getDocuments({
+                                search: "",
+                                page: 1,
+                                type: null,
+                            });
                             this.$notify({
-                                title: this.$t("documents.title"),
-                                message: this.$t("documents.removeSuccess"),
+                                title: this.$t(
+                                    "documents.title"
+                                ),
+                                message: this.$t(
+                                    "documents.removeSuccess"
+                                ),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: this.$t("documents.title"),
-                                message: this.$t("documents.removeError"),
+                                title: this.$t(
+                                    "documents.title"
+                                ),
+                                message: this.$t(
+                                    "documents.removeError"
+                                ),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -207,8 +280,15 @@
                         id: id,
                     },
                     query: {
-                        page: this.table.pagination.currentPage,
+                        page: this.table.pagination
+                            .currentPage,
                     },
+                });
+            },
+            getWorkFlowListByDocumentId(id) {
+                this.selectedDocumentId = id;
+                this.$nextTick(() => {
+                    this.$refs.ListWorkFlowModal.open();
                 });
             },
             changePage(page) {
@@ -217,12 +297,16 @@
             },
         },
         created() {
-            this.filters.login = this.$store.state.userProfile.login;
-            this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
+            this.filters.login =
+                this.$store.state.userProfile.login;
+            this.table.pagination.currentPage = this.$route
+                .query.page
+                ? this.$route.query.page
+                : 1;
             this.getDocuments();
         },
         computed: {
-            showMultiDelete() {
+            enableMultiDelete() {
                 return this.table.selectedRows.length > 0;
             },
             showTable() {
@@ -231,9 +315,77 @@
         },
     };
 </script>
-
 <style scoped>
     .analyze-btn {
         width: 94px;
+    }
+    .modal-div {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .modal-title,
+    .modal-message {
+        text-align: center;
+    }
+
+    .analyze-btn {
+        width: 94px;
+    }
+
+    .delete-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .delete-button {
+        position: relative;
+    }
+
+    .delete-tooltip {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        transition:
+            opacity 0.2s ease,
+            visibility 0.2s ease;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        white-space: nowrap;
+        background-color: #fff;
+        border: 1px solid #dc3545;
+        border-radius: 6px;
+        padding: 6px 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+    }
+
+    .delete-tooltip::before {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 20px;
+        border: 6px solid transparent;
+        border-bottom-color: #dc3545;
+    }
+
+    .delete-tooltip::after {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 21px;
+        border: 5px solid transparent;
+        border-bottom-color: #fff;
+    }
+
+    .delete-container:hover .delete-tooltip {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .delete-button:not(:disabled) ~ .delete-tooltip {
+        display: none !important;
     }
 </style>
