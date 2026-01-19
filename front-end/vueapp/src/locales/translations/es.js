@@ -106,6 +106,16 @@
             noFileChosen: "Ningún archivo seleccionado",
             noTeamChosen: "Ningún equipo seleccionado",
         },
+        workflowListModal: {
+            title: "Seleccionar flujo de trabajo",
+            titleMessage: "Este documento está asociado a varios flujos de trabajo. Elija cuál desea ver:",
+            searchPlaceholder: "Buscar flujo de trabajo...",
+            clickToView: "Haga clic para ver",
+            nothingFound: "No se encontraron flujos de trabajo",
+            cancel: "Cancelar",
+            errorToGetWorkflows: "Error al buscar flujos de trabajo",
+            errorUnexpected: "Error inesperado."
+        },
         documentName: "Nombre del documento",
         documentType: "Tipo de documento",
         documentNameOrDescription: "Nombre o descripción del documento",
@@ -463,7 +473,7 @@
             allUsers: "Todos los usuarios",
         },
         workflowSelect: {
-            all: "Todos los flujos de trabajo",
+            withWorkflow: "Todos con workflow asociado",
             none: "Selecciona un flujo de trabajo",
         },
         templates: {

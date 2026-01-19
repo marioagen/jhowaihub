@@ -491,6 +491,16 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Retrieves a list of workflows by documentId and user .
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        public async Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
+        {
+            return await _workflowRepository.FindWorkflowsByDocument(dto, ct);
+        }
+
+        /// <summary>
         /// Phase 2: Updates a workflow with steps information (without step tools).
         /// Validates and creates/updates steps with their profiles and statuses.
         /// </summary>

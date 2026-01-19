@@ -37,7 +37,7 @@
         <div class="sidebar-horizontal-separator"></div>
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li
-                v-for="item in menuItems"
+                v-for="item in filteredMenuItems"
                 :key="item.labelKey"
                 class="mb-1"
                 :class="{ 'is-active': isRouteActive(item) }"
@@ -76,16 +76,6 @@
         data() {
             return {
                 title: "SideBarComponent",
-                permissions: {
-                    management: hasPermission("Management", "View"),
-                    questions: hasPermission("Questions", "View"),
-                    documents: hasPermission("Documents", "View"),
-                    types: hasPermission("Types", "View"),
-                    quizzes: hasPermission("Quizzes", "View"),
-                    workflow: hasPermission("Workflow", "View"),
-                    tools: hasPermission("Tools", "View"),
-                    prompts: hasPermission("Prompts", "View"),
-                },
                 menuItems: [
                     {
                         activeKey: "Home",
@@ -137,29 +127,9 @@
                         labelKey: "pages.workflowManagement",
                     },
                     {
-                        permission: "Types",
-                        activeKey: "Type",
-                        to: "/types",
-                        icon: {
-                            name: "BookmarkCheck",
-                            color: "#f2c94c",
-                        },
-                        labelKey: "pages.types",
-                    },
-                    {
-                        permission: "Questions",
-                        activeKey: "Questions",
-                        to: "/questions",
-                        icon: {
-                            name: "MessageSquare",
-                            color: "#3fd67b",
-                        },
-                        labelKey: "pages.questions",
-                    },
-                    {
                         permission: "Quizzes",
-                        activeKey: "Quizzes",
-                        to: "/quizzes",
+                        activeKey: "ManagementQuizzes",
+                        to: "/management-quizzes",
                         icon: {
                             name: "ClipboardList",
                             color: "#a259ff",
@@ -186,18 +156,18 @@
                         },
                         labelKey: "pages.prompts",
                     },
-                    // {
-                    //     permission: 'Templates',
-                    //     activeKey: 'Templates',
-                    //     to: '/templates',
-                    //     icon: {
-                    //         name: 'Zap',
-                    //         color: '#0d6efd'
-                    //     },
-                    //     labelKey: 'pages.templates'
-                    // },
                 ],
             };
+        },
+        computed: {
+            filteredMenuItems() {
+                return this.menuItems.filter(item => {
+                    if (!item.permission) {
+                        return true;
+                    }
+                    return hasPermission(item.permission, "View");
+                });
+            },
         },
         methods: {
             isRouteActive(item) {

@@ -9,6 +9,7 @@ using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using Xunit;
 
@@ -34,7 +35,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Mock GetValue<int>
             var mockThresholdSection = new Mock<IConfigurationSection>();
             mockThresholdSection.Setup(s => s.Value).Returns("3");
-            configMock.Setup(c => c.GetSection("UsageManagement:ArchiveMonthsThreshold")).Returns(mockThresholdSection.Object);
+            configMock.Setup(c => c.GetSection("UsageManagement:ArchiveMonthsThreshold"))
+                .Returns(mockThresholdSection.Object);
             _mocker.Use(configMock.Object);
 
             _service = _mocker.CreateInstance<UsageArchiveService>();
@@ -77,17 +79,25 @@ namespace WoopiAiHub.UnitTests.Services
             var mockHttpAccessor = new Mock<IHttpContextAccessor>();
             var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
             var mockUsageLogRepo = new Mock<IUsageLogRepository>();
+            var mockSubscriptionPeriodService = new Mock<ISubscriptionPeriodServices>();
+            var mockUsageMonthRepository = new Mock<IUsageMonthRepository>();
 
             mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
             mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<UsageDaily>());
 
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
+                .Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(mockUsageLogRepo.Object);
 
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
             _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
+
+            mockServiceProvider.Setup(x => x.GetService(typeof(ISubscriptionPeriodServices)))
+                .Returns(mockSubscriptionPeriodService.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository)))
+                .Returns(mockUsageMonthRepository.Object);
 
             // Act
             await _service.ArchiveOldUsageAsync();
@@ -96,7 +106,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IMarketPlaceApi>()
                 .Verify(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub), Times.Once);
             _mocker.GetMock<IServiceScopeFactory>()
-                .Verify(x => x.CreateScope(), Times.Exactly(tenants.Count));
+                .Verify(x => x.CreateScope(), Times.Exactly(4));
         }
 
         [Fact(DisplayName = "ArchiveOldUsageAsync should throw when KeyAccess not configured")]
@@ -144,16 +154,26 @@ namespace WoopiAiHub.UnitTests.Services
             var mockHttpAccessor = new Mock<IHttpContextAccessor>();
             var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
             var mockUsageLogRepo = new Mock<IUsageLogRepository>();
+            var mockSubscriptionPeriodService = new Mock<ISubscriptionPeriodServices>();
+            var mockUsageMonthRepository = new Mock<IUsageMonthRepository>();
 
             mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
             mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(oldRecords);
-            mockUsageLogRepo.Setup(x => x.ExistsAsync(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+            mockUsageLogRepo.Setup(x =>
+                    x.ExistsAsync(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
+            mockSubscriptionPeriodService.Setup(x => x.GetLastUnprocessedAsync())
+                .ReturnsAsync((SubscriptionPeriod?)null);
 
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
+                .Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(mockUsageLogRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ISubscriptionPeriodServices)))
+                .Returns(mockSubscriptionPeriodService.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository)))
+                .Returns(mockUsageMonthRepository.Object);
 
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
             _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
@@ -163,8 +183,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             mockUsageDailyRepo.Verify(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()), Times.Once);
-            mockUsageLogRepo.Verify(x => x.BulkInsertAsync(It.Is<List<UsageLog>>(logs => logs.Count == oldRecords.Count), It.IsAny<CancellationToken>()), Times.Once);
-            mockUsageDailyRepo.Verify(x => x.BulkDeleteAsync(It.Is<IEnumerable<int>>(ids => ids.Count() == oldRecords.Count)), Times.Once);
+            mockUsageLogRepo.Verify(
+                x => x.BulkInsertAsync(It.Is<List<UsageLog>>(logs => logs.Count == oldRecords.Count),
+                    It.IsAny<CancellationToken>()), Times.Once);
+            mockUsageDailyRepo.Verify(
+                x => x.BulkDeleteAsync(It.Is<IEnumerable<int>>(ids => ids.Count() == oldRecords.Count)), Times.Once);
         }
 
         [Fact(DisplayName = "ArchiveOldUsageAsync should not archive or delete when no old records")]
@@ -186,24 +209,32 @@ namespace WoopiAiHub.UnitTests.Services
             var mockHttpAccessor = new Mock<IHttpContextAccessor>();
             var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
             var mockUsageLogRepo = new Mock<IUsageLogRepository>();
+            var mockSubscriptionPeriodService = new Mock<ISubscriptionPeriodServices>();
+            var mockUsageMonthRepository = new Mock<IUsageMonthRepository>();
 
             mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
             mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<UsageDaily>());
 
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
+                .Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(mockUsageLogRepo.Object);
 
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
             _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ISubscriptionPeriodServices)))
+                .Returns(mockSubscriptionPeriodService.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository)))
+                .Returns(mockUsageMonthRepository.Object);
 
             // Act
             await _service.ArchiveOldUsageAsync();
 
             // Assert
             mockUsageDailyRepo.Verify(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()), Times.Once);
-            mockUsageLogRepo.Verify(x => x.BulkInsertAsync(It.IsAny<List<UsageLog>>(), It.IsAny<CancellationToken>()), Times.Never);
+            mockUsageLogRepo.Verify(x => x.BulkInsertAsync(It.IsAny<List<UsageLog>>(), It.IsAny<CancellationToken>()),
+                Times.Never);
             mockUsageDailyRepo.Verify(x => x.BulkDeleteAsync(It.IsAny<IEnumerable<int>>()), Times.Never);
         }
 
@@ -233,28 +264,42 @@ namespace WoopiAiHub.UnitTests.Services
             var mockHttpAccessor = new Mock<IHttpContextAccessor>();
             var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
             var mockUsageLogRepo = new Mock<IUsageLogRepository>();
+            var mockSubscriptionPeriodService = new Mock<ISubscriptionPeriodServices>();
+            var mockUsageMonthRepository = new Mock<IUsageMonthRepository>();
 
             mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
             mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(oldRecords);
 
             // First record already exists in log
-            mockUsageLogRepo.Setup(x => x.ExistsAsync(It.Is<int>(id => id == 1), It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
-            mockUsageLogRepo.Setup(x => x.ExistsAsync(It.Is<int>(id => id == 2), It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+            mockUsageLogRepo.Setup(x =>
+                    x.ExistsAsync(It.Is<int>(id => id == 1), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+            mockUsageLogRepo
+                .Setup(x => x.ExistsAsync(It.Is<int>(id => id == 2), It.IsAny<DateTime>(),
+                    It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
+                .Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(mockUsageLogRepo.Object);
 
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
             _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ISubscriptionPeriodServices)))
+                .Returns(mockSubscriptionPeriodService.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository)))
+                .Returns(mockUsageMonthRepository.Object);
 
             // Act
             await _service.ArchiveOldUsageAsync();
 
             // Assert
-            mockUsageLogRepo.Verify(x => x.BulkInsertAsync(It.Is<List<UsageLog>>(logs => logs.Count == 1), It.IsAny<CancellationToken>()), Times.Once);
-            mockUsageDailyRepo.Verify(x => x.BulkDeleteAsync(It.Is<IEnumerable<int>>(ids => ids.Count() == 2)), Times.Once);
+            mockUsageLogRepo.Verify(
+                x => x.BulkInsertAsync(It.Is<List<UsageLog>>(logs => logs.Count == 1), It.IsAny<CancellationToken>()),
+                Times.Once);
+            mockUsageDailyRepo.Verify(x => x.BulkDeleteAsync(It.Is<IEnumerable<int>>(ids => ids.Count() == 2)),
+                Times.Once);
         }
     }
 }

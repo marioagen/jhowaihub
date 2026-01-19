@@ -39,7 +39,7 @@ namespace WoopiAiHub.Api.Hubs
                 await _hubContext.Clients.Client(connectionId).SendAsync("CardExecutionChanged", new
                 {
                     CardId = cardId,
-                    Percentage = percentage,
+                    Percentage = (int)percentage,
                     StepId = stepId,
                     ToolName = toolName
                 });

@@ -1,6 +1,7 @@
 ﻿using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
 {
@@ -27,5 +28,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<Phase1Dto> FindPhase1ById(int id);
         StepDto FindStepById(int id);
         Task<ToolDto> FindToolByStepToolId(int id);
+        Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
     }
 }

@@ -224,23 +224,13 @@ namespace WoopiAiHub.Repository
                 return false;
             }
 
-            var documents = _context.Documents
-                .Include(d => d.Workflows)
-                .Where(d => documentIds.Contains(d.Id))
-                .ToList();
-
-            if (!documents.Any())
-            {
-                return false;
-            }
-
-            foreach (var document in documents)
-            {
-                document.Workflows.Clear();
-            }
+            var WorkflowDocuments = _context.Set<Dictionary<string, object>>("WorkflowDocuments");
+            var deletedCount = WorkflowDocuments
+                .Where(workflowDocuments => documentIds.Contains((int)workflowDocuments["DocumentId"]))
+                .ExecuteDelete();
 
             _context.SaveChanges();
-            return true;
+            return deletedCount > 0;
         }
     }
 }
