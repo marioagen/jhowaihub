@@ -699,11 +699,14 @@ namespace WoopiAiHub.Repository
             {
                 Id = w.Id,
                 Name = w.Name,
-                Teams = w.Teams.Select(t => new TeamDto
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                }).ToList(),
+                Teams = w.Teams
+                    .Select(t => new TeamDto
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                    })
+                    .OrderBy(t => t.Name)
+                    .ToList(),
             });
         }
 

@@ -33,10 +33,10 @@
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Users" size="16" />
                 </span>
-                <select class="form-select form-select-sm border-start-0" v-model="filters.teamId" @change="filterData">
-                    <option value="">{{ $t("filters.teamsSelect.all") }}</option>
-                    <option v-for="team in teamsList" :key="team.id" :value="team.id">{{ team.name }}</option>
-                </select>
+                <Multiselect v-model="filters.teamId" :options="teamsListOptions" valueProp="id" label="name"
+                    trackBy="name" :searchable="true" :placeholder="$t('filters.teamsSelect.all')" mode="single"
+                    :canClear="true" @change="filterData" class="border-start-0"
+                    style="--ms-font-size: 0.875rem; --ms-option-font-size: 0.875rem; min-height: 31px;width: auto; --ms-py: 1px; flex: 1 1 auto;" />
             </div>
         </div>
         <div :class="`col-${findColSize('user')}`" v-if="hasUsers">
@@ -54,8 +54,12 @@
 </template>
 
 <script>
+import Multiselect from "@vueform/multiselect";
 export default {
     name: "WorkflowFilters",
+    components: {
+        Multiselect,
+    },
     props: {
         teamsList: {
             type: Array,
@@ -117,6 +121,12 @@ export default {
         hasUsers() {
             return this.usersList.length > 0;
         },
+        teamsListOptions() {
+            return [
+                { id: "", name: this.$t("filters.teamsSelect.all") },
+                ...this.teamsList
+            ];
+        }
     },
 };
 </script>
