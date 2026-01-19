@@ -61,6 +61,16 @@ namespace WoopiAiHub.Application.Services
                 .Build();
         }
 
+        /// <summary>
+        /// Archives usage data for all tenants associated with the WoopiAiHub module that meet the criteria for old
+        /// usage.
+        /// </summary>
+        /// <remarks>This method retrieves all tenants registered for the WoopiAiHub module and processes
+        /// each tenant to archive their old usage data. If no tenants are found, the method completes without
+        /// performing any actions. The method requires the "KeyAccess" configuration setting to be present; otherwise,
+        /// it throws an exception.</remarks>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">Thrown if the "KeyAccess" configuration setting is missing or not set.</exception>
         public async Task ArchiveOldUsageAsync()
         {
             var keyAccess = _configuration["KeyAccess"] ??

@@ -238,6 +238,118 @@ namespace WoopiAiHub.UnitTests.Services
             mockUsageDailyRepo.Verify(x => x.BulkDeleteAsync(It.IsAny<IEnumerable<int>>()), Times.Never);
         }
 
+        [Fact(DisplayName = "ArchiveOldUsageAsync should not send consumption where there's no unprocessed period")]
+        [Trait("Archive", "Success")]
+        public async Task ArchiveOldUsageAsync_NoUnprocessedPeriod_DoesnotSendConsunption()
+        {
+            // Arrange
+            var tenants = new List<TenantListDto>
+            {
+                new TenantListDto { Name = "Tenant1", DatabaseName = "DB1" }
+            };
+
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub))
+                .ReturnsAsync(tenants);
+
+            var mockScope = new Mock<IServiceScope>();
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            var mockHttpAccessor = new Mock<IHttpContextAccessor>();
+            var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
+            var mockUsageLogRepo = new Mock<IUsageLogRepository>();
+            var mockSubscriptionPeriodService = new Mock<ISubscriptionPeriodServices>();
+            var mockUsageMonthRepository = new Mock<IUsageMonthRepository>();
+
+            mockSubscriptionPeriodService.Setup(x => x.FindLastUnprocessedAsync())
+                .ReturnsAsync((SubscriptionPeriod?)null);
+
+            mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+            mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<UsageDaily>());
+
+            mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
+                .Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(mockUsageLogRepo.Object);
+
+            mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
+            _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ISubscriptionPeriodServices)))
+                .Returns(mockSubscriptionPeriodService.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository)))
+                .Returns(mockUsageMonthRepository.Object);
+
+            // Act
+            await _service.ArchiveOldUsageAsync();
+
+            // Assert
+            mockUsageDailyRepo.Verify(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()), Times.Once);
+            mockUsageLogRepo.Verify(x => x.BulkInsertAsync(It.IsAny<List<UsageLog>>(), It.IsAny<CancellationToken>()),
+                Times.Never);
+            mockUsageDailyRepo.Verify(x => x.BulkDeleteAsync(It.IsAny<IEnumerable<int>>()), Times.Never);
+        }
+
+        [Theory(DisplayName = "ArchiveOldUsageAsync should send consumption where there's unprocessed period")]
+        [Trait("Archive", "Success")]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ArchiveOldUsageAsync_UnprocessedPeriod_SendConsunption(bool sendStatus)
+        {
+            // Arrange
+            var tenants = new List<TenantListDto>
+            {
+                new TenantListDto { Name = "Tenant1", DatabaseName = "DB1" }
+            };
+
+            var subscriptionPeriod = new SubscriptionPeriod
+            (
+                DateTime.UtcNow.AddMonths(-1),
+                DateTime.UtcNow,
+                false
+            );
+
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync("test-key", ColTypeModule.WoopiAiHub))
+                .ReturnsAsync(tenants);
+
+            var mockScope = new Mock<IServiceScope>();
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            var mockHttpAccessor = new Mock<IHttpContextAccessor>();
+            var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
+            var mockUsageLogRepo = new Mock<IUsageLogRepository>();
+            var mockSubscriptionPeriodService = new Mock<ISubscriptionPeriodServices>();
+            var mockUsageMonthRepository = new Mock<IUsageMonthRepository>();
+            var mockMarketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
+
+            mockMarketPlaceApi
+                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()))
+                .ReturnsAsync(sendStatus);
+            mockSubscriptionPeriodService.Setup(x => x.FindLastUnprocessedAsync())
+                .ReturnsAsync(subscriptionPeriod);
+            mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+            mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
+                .ReturnsAsync(new List<UsageDaily>());
+            mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
+                .Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(mockUsageLogRepo.Object);
+            mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
+            _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ISubscriptionPeriodServices)))
+                .Returns(mockSubscriptionPeriodService.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository)))
+                .Returns(mockUsageMonthRepository.Object);
+
+            // Act
+            await _service.ArchiveOldUsageAsync();
+
+            // Assert
+            mockUsageDailyRepo.Verify(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()), Times.Once);
+            mockUsageLogRepo.Verify(x => x.BulkInsertAsync(It.IsAny<List<UsageLog>>(), It.IsAny<CancellationToken>()),
+                Times.Never);
+            mockUsageDailyRepo.Verify(x => x.BulkDeleteAsync(It.IsAny<IEnumerable<int>>()), Times.Never);
+        }
+
         [Fact(DisplayName = "ArchiveOldUsageAsync should not duplicate records in log")]
         [Trait("Archive", "Success")]
         public async Task ArchiveOldUsageAsync_RecordAlreadyExists_DoesNotDuplicate()
