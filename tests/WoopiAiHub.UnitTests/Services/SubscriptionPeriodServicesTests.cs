@@ -50,16 +50,16 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var expectedPeriod = new SubscriptionPeriod(DateTime.Now, DateTime.Now.AddDays(30), false);
             var mockRepo = _mocker.GetMock<ISubscriptionPeriodRepository>();
-            mockRepo.Setup(r => r.GetLastUnprocessedAsync())
+            mockRepo.Setup(r => r.FindLastUnprocessedAsync())
                 .ReturnsAsync(expectedPeriod);
 
             // Act
-            var result = await _subscriptionPeriodServices.GetLastUnprocessedAsync();
+            var result = await _subscriptionPeriodServices.FindLastUnprocessedAsync();
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(expectedPeriod, result);
-            mockRepo.Verify(r => r.GetLastUnprocessedAsync(), Times.Once);
+            mockRepo.Verify(r => r.FindLastUnprocessedAsync(), Times.Once);
         }
 
         [Fact(DisplayName = "UpdateToProcessedAsync updates the period to processed when it exists")]
@@ -70,7 +70,7 @@ namespace WoopiAiHub.UnitTests.Services
             var id = 1;
             var period = new SubscriptionPeriod(DateTime.Now, DateTime.Now.AddDays(30), false);
             var mockRepo = _mocker.GetMock<ISubscriptionPeriodRepository>();
-            mockRepo.Setup(r => r.GetByIdAsync(id))
+            mockRepo.Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync(period);
 
             // Act
@@ -88,7 +88,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var id = 1;
             var mockRepo = _mocker.GetMock<ISubscriptionPeriodRepository>();
-            mockRepo.Setup(r => r.GetByIdAsync(id))
+            mockRepo.Setup(r => r.FindByIdAsync(id))
                 .ReturnsAsync((SubscriptionPeriod?)null);
 
             // Act

@@ -34,9 +34,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <returns>A task that represents the asynchronous operation. The task result contains the latest unprocessed <see
         /// cref="SubscriptionPeriod"/>, or <see langword="null"/> if all periods have been processed.</returns>
-        public async Task<SubscriptionPeriod?> GetLastUnprocessedAsync()
+        public async Task<SubscriptionPeriod?> FindLastUnprocessedAsync()
         {
-            return await _subscriptionPeriodRepository.GetLastUnprocessedAsync();
+            return await _subscriptionPeriodRepository.FindLastUnprocessedAsync();
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task UpdateToProcessedAsync(int id)
         {
-            var period = await _subscriptionPeriodRepository.GetByIdAsync(id);
+            var period = await _subscriptionPeriodRepository.FindByIdAsync(id);
             if (period != null)
             {
                 period.SetProcessed();

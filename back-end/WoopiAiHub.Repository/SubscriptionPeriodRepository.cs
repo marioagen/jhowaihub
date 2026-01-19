@@ -32,7 +32,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <returns>A task that represents the asynchronous operation. The task result contains the most recent <see
         /// cref="SubscriptionPeriod"/> that is unprocessed, or <see langword="null"/> if no such period exists.</returns>
-        public async Task<SubscriptionPeriod?> GetLastUnprocessedAsync()
+        public async Task<SubscriptionPeriod?> FindLastUnprocessedAsync()
         {
             return await _context.SubscriptionPeriods
                 .Where(x => !x.IsProcessed)
@@ -47,7 +47,7 @@ namespace WoopiAiHub.Repository
         /// <returns>A task that represents the asynchronous operation. The task result contains the <see
         /// cref="SubscriptionPeriod"/> with the specified identifier, or <see langword="null"/> if no matching entity
         /// is found.</returns>
-        public async Task<SubscriptionPeriod?> GetByIdAsync(int id)
+        public async Task<SubscriptionPeriod?> FindByIdAsync(int id)
         {
             return await _context.SubscriptionPeriods.FirstOrDefaultAsync(x => x.Id == id);
         }

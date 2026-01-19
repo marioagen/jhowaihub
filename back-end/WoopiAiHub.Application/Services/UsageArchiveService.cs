@@ -149,7 +149,7 @@ namespace WoopiAiHub.Application.Services
             var usageMonthRepository = scope.ServiceProvider.GetRequiredService<IUsageMonthRepository>();
             var subcriptionPeriodService = scope.ServiceProvider.GetRequiredService<ISubscriptionPeriodServices>();
 
-            var lastPeriod = await subcriptionPeriodService.GetLastUnprocessedAsync();
+            var lastPeriod = await subcriptionPeriodService.FindLastUnprocessedAsync();
             if (lastPeriod == null)
             {
                 _logger.LogDebug("No unprocessed subscription period found for tenant {TenantName}", tenant.Name);

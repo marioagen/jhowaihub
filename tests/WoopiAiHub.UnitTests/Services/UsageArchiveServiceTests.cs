@@ -163,7 +163,7 @@ namespace WoopiAiHub.UnitTests.Services
             mockUsageLogRepo.Setup(x =>
                     x.ExistsAsync(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
-            mockSubscriptionPeriodService.Setup(x => x.GetLastUnprocessedAsync())
+            mockSubscriptionPeriodService.Setup(x => x.FindLastUnprocessedAsync())
                 .ReturnsAsync((SubscriptionPeriod?)null);
 
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
