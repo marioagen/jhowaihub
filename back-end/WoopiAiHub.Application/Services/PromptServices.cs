@@ -399,22 +399,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Asynchronously retrieves all internal prompts.
+        /// Asynchronously retrieves all prompts in the basic format.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<PromptBaseDto>> FindAllInternal()
+        public async Task<ICollection<PromptBaseDto>> FindAllBasic()
         {
-            return await _promptRepository.FindAllInternal();
-        }
-
-        /// <summary>
-        /// Retrieves the internal prompt with the specified identifier.
-        /// </summary>
-        /// <param name="id">The unique identifier of the internal prompt to retrieve.</param>
-        /// <returns></returns>
-        public async Task<PromptDto> FindInternalById(int id)
-        {
-            return await _promptRepository.FindInternalById(id) ?? throw new AppException(ErrorCode.NotFound, $"Internal prompt with id {id} not found", null);
+            return await _promptRepository.FindAllBasic();
         }
 
         /// <summary>

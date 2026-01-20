@@ -22,9 +22,6 @@ namespace WoopiAiHub.Domain.Models
         [Column("IsImported", TypeName = "bit")]
         public bool IsImported { get; private set; } = false;
 
-        [Column("InternalPrompt", TypeName = "bit")]
-        public bool InternalPrompt { get; private set; } = false;
-
         public virtual User User { get; set; }
 
         public Prompt(int id, DateTime created, string name, string description, string text, Guid idUser,
@@ -37,7 +34,6 @@ namespace WoopiAiHub.Domain.Models
             IdUser = idUser;
             IsEdited = isEdited;
             IsImported = isImported;
-            InternalPrompt = internalPrompt;
         }
 
         /// <summary>

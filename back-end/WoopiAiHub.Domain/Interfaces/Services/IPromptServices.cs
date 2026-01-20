@@ -17,7 +17,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         bool ImportPrompts(List<ImportedPromptDto> importedPrompts, string email);
         Task<List<PromptTemplateDto>> FindPromptTemplates(string? query, string? orderBy);
         Task<bool> ImportPromptsByIds(List<Guid> templateIds, string email);
-        Task<ICollection<PromptBaseDto>> FindAllInternal();
-        Task<PromptDto> FindInternalById(int id);
+        Task<ICollection<PromptBaseDto>> FindAllBasic();
     }
 }

@@ -35,10 +35,6 @@ namespace WoopiAiHub.Repository.Mappings
                    .IsRequired()
                    .HasDefaultValue(false);
 
-            builder.Property(u => u.InternalPrompt)
-                   .IsRequired()
-                   .HasDefaultValue(false);
-
             builder.HasOne(d => d.User)
                    .WithMany(d => d.Prompts)
                    .HasForeignKey(d => d.IdUser)

@@ -16,15 +16,15 @@ namespace WoopiAiHub.Api.Controllers.Internal
         private readonly IPromptServices _promptServices = promptServices;
 
         /// <summary>
-        /// Handles HTTP GET requests to retrieve all internal prompts.
+        /// Handles HTTP GET requests to retrieve all prompts in basic format.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [SwaggerOperation("Endpoint that receives the request to return all internal prompts")]
-        [ProducesResponseType(typeof(ICollection<PromptDto>), StatusCodes.Status200OK)]
+        [SwaggerOperation("Endpoint that receives the request to return all prompts in basic format")]
+        [ProducesResponseType(typeof(ICollection<PromptBaseDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindAllInternal()
         {
-            var result = await _promptServices.FindAllInternal();
+            var result = await _promptServices.FindAllBasic();
             return Ok(result);
         }
 
@@ -36,9 +36,9 @@ namespace WoopiAiHub.Api.Controllers.Internal
         [HttpGet("{id}")]
         [SwaggerOperation("Endpoint that receives a prompt Id to return the correspondent prompt")]
         [ProducesResponseType(typeof(PromptDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindInternal(int id)
+        public IActionResult FindInternal(int id)
         {
-            var result = await _promptServices.FindInternalById(id);
+            var result = _promptServices.FindById(id);
             return Ok(result);
         }
     }
