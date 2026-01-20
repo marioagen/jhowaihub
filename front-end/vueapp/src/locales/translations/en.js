@@ -111,7 +111,7 @@
             titleMessage: "This document is associated with multiple workflows. Choose which one you want to view:",
             searchPlaceholder: "Search workflow...",
             clickToView: "Click to view",
-            nothingFound: "No workflows found.",
+            nothingFound: "No workflows found. If there is no linked workflow, consider resubmitting the file linking with a workflow",
             cancel: "Cancel",
             errorToGetWorkflows: "Error searching for workflows.",
             errorUnexpected: "Unexpected error."
