@@ -1762,7 +1762,7 @@ namespace WoopiAiHub.UnitTests.Services
             };
 
             _teamRepositoryMock.Setup(x => x.FindByIdReturnModel(1))
-                .Returns((Team)null);
+                .Returns((Team)null!);
 
             await _workflowServices.RemoveTeamWorkflowRelationship(teamsWorkflowsDto);
 
