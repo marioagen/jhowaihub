@@ -29,6 +29,8 @@ var host = new HostBuilder()
         services.AddScoped<IUsageAggregationService, UsageAggregationService>();
         services.AddScoped<IUsageArchiveService, UsageArchiveService>();
         services.AddScoped<IUsageLogRepository, UsageLogRepository>();
+        services.AddScoped<IUsageLogRepository, UsageLogRepository>();
+        services.AddScoped<ISubscriptionPeriodServices, SubscriptionPeriodServices>();
     })
     .Build();
 
