@@ -852,6 +852,37 @@
             button: "Access docs",
         },
     },
+    permissions: {
+        groups: {
+            questions: "Questions",
+            types: "Types",
+            quizzes: "Quizzes",
+            documents: "Documents",
+            management: "Management",
+            users: "Users",
+            teams: "Teams",
+            profiles: "Profiles",
+            workflow: "Workflow",
+            tools: "Tools",
+            dashboard: "Dashboard",
+            workflowStep: "Workflow Step",
+        },
+        descriptions: {
+            questions: "View Questions",
+            types: "View Types",
+            quizzes: "View Quizzes",
+            documents: "View Documents",
+            management: "View Management Tables",
+            users: "View Users",
+            teams: "View Teams",
+            profiles: "View Profiles",
+            workflow: "View Workflow",
+            tools: "View Tools",
+            dashboard: "View Dashboard",
+            workflowStepView: "View Steps",
+            workflowStepAccess: "Access Steps",
+        }
+    }
 };
 
 export default english;
