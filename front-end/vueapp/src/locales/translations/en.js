@@ -866,6 +866,7 @@
             tools: "Tools",
             dashboard: "Dashboard",
             workflowStep: "Workflow Step",
+            prompts: "Prompts"
         },
         descriptions: {
             questions: "View Questions",
@@ -881,6 +882,7 @@
             dashboard: "View Dashboard",
             workflowStepView: "View Steps",
             workflowStepAccess: "Access Steps",
+            prompts: "View Prompts",
         }
     }
 };
