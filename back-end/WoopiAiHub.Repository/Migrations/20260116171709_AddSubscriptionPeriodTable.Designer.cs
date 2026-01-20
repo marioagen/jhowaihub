@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WoopiAiHub.Repository.Context;
 
@@ -11,9 +12,11 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260116171709_AddSubscriptionPeriodTable")]
+    partial class AddSubscriptionPeriodTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -815,34 +818,34 @@ namespace WoopiAiHub.Repository.Migrations
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.SubscriptionPeriod", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int")
-                    .HasColumnName("Id");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime>("Created")
-                    .HasColumnType("datetime")
-                    .HasColumnName("Created");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
 
-                b.Property<bool>("IsProcessed")
-                    .HasColumnType("bit")
-                    .HasColumnName("IsProcessed");
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsProcessed");
 
-                b.Property<DateTime>("PeriodEnd")
-                    .HasColumnType("datetime")
-                    .HasColumnName("PeriodEnd");
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("datetime")
+                        .HasColumnName("PeriodEnd");
 
-                b.Property<DateTime>("PeriodStart")
-                    .HasColumnType("datetime")
-                    .HasColumnName("PeriodStart");
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("datetime")
+                        .HasColumnName("PeriodStart");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("SubscriptionPeriods", (string)null);
-            });
+                    b.ToTable("SubscriptionPeriods", (string)null);
+                });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
