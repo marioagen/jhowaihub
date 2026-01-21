@@ -78,7 +78,11 @@
                 this.$emit("close");
             },
             filterData() {
-                this.$emit("filterData", { preset: this.selectedPreset, start: this.start, end: this.end });
+                this.$emit("filterData", { 
+                    preset: this.selectedPreset, 
+                    start: this.start, 
+                    end: this.end 
+                });
             },
             setCurrentMonth() {
                 this.selectedPreset = "currentMonth";
@@ -115,9 +119,6 @@
                 this.end = end.toISOString().slice(0, 10);
                 this.filterData();
             },
-        },
-        mounted() {
-            this.filterData();
         },
     };
 </script>

@@ -30,8 +30,8 @@
                 </div>
             </div>
             <h6>{{ $t("dashboard.graphs.tokenGraphSubtitle") }}</h6>
-            <LoadingComponent v-if="isLoading" />
-            <BarGraphComponent v-else :options="graph.options" :series="graph.series" />
+            <BarGraphComponent v-if="isLoaded" :options="graph.options" :series="graph.series" />
+            <LoadingComponent v-else />
         </div>
     </div>
 </template>
@@ -46,6 +46,14 @@ export default {
         LoadingComponent,
     },
     props: {
+        start: {
+            type: String,
+            required: true,
+        },
+        end: {
+            type: String,
+            required: true,
+        },
         usageUnits: {
             type: Array,
             required: true,
@@ -53,9 +61,7 @@ export default {
     },
     emits: ['setTotalTokens'],
     data: () => ({
-        start: null,
-        end: null,
-        isLoading: false,
+        isLoaded: false,
         IAList: [],
         currentIAIndex: 0,
         previousTotalTokens: 0,
@@ -92,11 +98,6 @@ export default {
     created() {
         this.getIAList();
     },
-    watch: {
-        usageUnits() {
-            this.setTotalTokens();
-        }
-    },
     computed: {
         currentIA() {
             return this.IAList[this.currentIAIndex] || { name: 'No IA selected', id: 0 };
@@ -112,9 +113,22 @@ export default {
         },
     },
     methods: {
+        getIAList() {
+            DashboardServices.GetUsedModels()
+                .then((response) => {
+                    if (response && !response.error) {
+                        this.IAList = response;
+                        if (this.IAList.length > 0) {
+                            this.currentIAIndex = 0;
+                            this.getTokensData();
+                            this.getTotalCost();
+                        }
+                    }
+                });
+        },
         getTokensData() {
             if (!this.currentIA) return;
-            this.isLoading = true;
+            this.isLoaded = false;
             let params = {
                 start: this.start,
                 end: this.end,
@@ -136,7 +150,7 @@ export default {
                     }
                 })
                 .finally(() => {
-                    this.isLoading = false;
+                    this.isLoaded = true;
                 });
         },
         getTotalCost() {
@@ -144,7 +158,7 @@ export default {
                 start: this.start,
                 end: this.end
             };
-            this.isLoading = true;
+            this.isLoaded = false;
             DashboardServices.GetTotalUsageCost(paramsTotalCost)
                 .then((response) => {
                     if (response && !response.error) {
@@ -153,24 +167,11 @@ export default {
                     }
                 })
                 .finally(() => {
-                    this.isLoading = false;
+                    this.isLoaded = true;
                 });
         },
         setTotalTokens() {
             this.$emit('setTotalTokens', this.totalCost);
-        },
-        getIAList() {
-            DashboardServices.GetUsedModels()
-                .then((response) => {
-                    if (response && !response.error) {
-                        this.IAList = response;
-                        if (this.IAList.length > 0) {
-                            this.currentIAIndex = 0;
-                            this.getTokensData();
-                            this.getTotalCost();
-                        }
-                    }
-                });
         },
         nextIA() {
             if (this.IAList.length === 0) return;
@@ -186,12 +187,6 @@ export default {
             this.currentIAIndex = (this.currentIAIndex - 1 + this.IAList.length) % this.IAList.length;
             this.getTokensData();
         },
-        updateGraph(start, end) {
-            this.previousTotalTokens = 0;
-            this.start = start;
-            this.end = end;
-            this.getIAList();
-        }
     },
 }
 </script>

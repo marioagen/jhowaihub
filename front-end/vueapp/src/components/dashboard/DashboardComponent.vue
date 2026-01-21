@@ -16,21 +16,34 @@
                 </div>
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="row position-relative">
+                    <div class="row position-relative">
                     <div class="col" v-outsideClick="handleOutsideClick">
                         <button
                             class="btn btn-outlined-light btn-sm border d-flex align-items-center justify-content-between"
-                            style="width: 200px;" @click="toggleDateFilter">
+                            style="width: 200px;" 
+                            @click="toggleDateFilter"
+                        >
                             {{ presetDate() }}
                             <LucideIcon v-if="showDateFilter" icon="ChevronUp" :size="17" />
                             <LucideIcon v-else icon="ChevronDown" :size="17" />
                         </button>
-                        <div v-if="showDateFilter" class="position-absolute" style="z-index: 1050; width: 500px;">
-                            <DashboardDateFilter @close="showDateFilter = false" @filterData="filterData" />
+                        <div 
+                            v-if="showDateFilter" 
+                            class="position-absolute" 
+                            style="z-index: 1050; width: 500px;"
+                        >
+                            <DashboardDateFilter 
+                                @close="showDateFilter = false" 
+                                @filterData="filterData" 
+                                :isLoading="isLoading"
+                            />
                         </div>
                     </div>
                     <div class="col">
-                        <button class="btn btn-primary btn-sm" @click="proccessTenantMetrics()">
+                        <button 
+                            class="btn btn-primary btn-sm" 
+                            @click="proccessTenantMetrics()"
+                        >
                             <LucideIcon icon="RefreshCcw" :size="17" :class="{ 'animate-spin': isLoading }" />
                             {{ $t('dashboard.update') }}
                         </button>
@@ -43,28 +56,35 @@
                         <span class="me-1">{{ $t("dashboard.totalWTC") }}</span>
                         <LucideIcon v-tooltip.right="$t('dashboard.WTCText')" icon="Info" :size="17" />
                     </div>
-                    <h2 class="mb-0 fw-bold text-primary">{{ totalWTC.toFixed(5) }}</h2>
+                    <LoadingComponent v-if="isLoading" />
+                    <h2 v-else class="mb-0 fw-bold text-primary">{{ totalWTC.toFixed(5) }}</h2>
                 </div>
             </div>
-            <TokensGraph 
+            <TokensGraph
+                :start="filters.start"
+                :end="filters.end"
                 :key="datesChange" 
                 :usageUnits="usageUnits" 
-                @setTotalTokens="setTotalTokens"
                 :isLoading="isLoading"
+                @setTotalTokens="setTotalWTC"
                 ref="TokensGraph" 
             />
             <PagesProcessedGraph 
+                :start="filters.start"
+                :end="filters.end"
                 :key="datesChange" 
                 :usageUnits="usageUnits" 
-                @setTotalPages="setTotalWTC"
                 :isLoading="isLoading"
+                @setTotalPages="setTotalWTC"
                 ref="PagesProcessedGraph" 
             />
             <WorkflowsGraph 
+                :start="filters.start"
+                :end="filters.end"
                 :key="datesChange" 
                 :usageUnits="usageUnits" 
-                @setTotalExecution="setTotalWTC"
                 :isLoading="isLoading"
+                @setTotalExecution="setTotalWTC"
                 ref="WorkflowsGraph" 
             />
         </div>
@@ -78,12 +98,14 @@ import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
 import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
 import DashboardServices from '@/services/dashboard/DashboardServices';
 import store from "@/store";
+import LoadingComponent from '@/components/global/LoadingComponent.vue';
 export default {
     components: {
         DashboardDateFilter,
         TokensGraph,
         WorkflowsGraph,
         PagesProcessedGraph,
+        LoadingComponent,
     },
     data() {
         const today = new Date();
@@ -106,17 +128,20 @@ export default {
         toggleDateFilter() {
             this.showDateFilter = !this.showDateFilter;
         },
-        filterData(filters) {
-            this.filters = filters;
-            this.totalWTC = 0;
-            this.$refs.TokensGraph.updateGraph(this.filters.start, this.filters.end);
-            this.$refs.WorkflowsGraph.updateGraph(this.filters.start, this.filters.end);
-            this.$refs.PagesProcessedGraph.updateGraph(this.filters.start, this.filters.end);
-        },
         handleOutsideClick() {
             if (this.showDateFilter) {
                 this.showDateFilter = false;
             }
+        },
+        filterData(filters) {
+            this.isLoading = true;
+            this.filters = filters;
+            this.totalWTC = 0;
+            this.datesChange++;
+            
+            setTimeout(() => {
+                this.isLoading = false;
+            }, 500);
         },
         presetDate() {
             return this.$t(`dashboard.filters.${this.filters.preset}`);
@@ -133,9 +158,6 @@ export default {
                 .then((response) => {
                     this.plan = response.toUpperCase();
                 });
-        },
-        setTotalTokens(total) {
-            this.totalWTC += total;
         },
         setTotalWTC(total) {
             this.totalWTC += total;
