@@ -46,6 +46,14 @@ export default {
         LoadingComponent,
     },
     props: {
+        start: {
+            type: String,
+            required: true,
+        },
+        end: {
+            type: String,
+            required: true,
+        },
         usageUnits: {
             type: Array,
             required: true,
@@ -53,8 +61,6 @@ export default {
     },
     emits: ['setTotalTokens'],
     data: () => ({
-        start: null,
-        end: null,
         isLoading: false,
         IAList: [],
         currentIAIndex: 0,
@@ -90,12 +96,9 @@ export default {
         },
     }),
     created() {
+        console.log(this.start);
+        console.log(this.end);
         this.getIAList();
-    },
-    watch: {
-        usageUnits() {
-            this.setTotalTokens();
-        }
     },
     computed: {
         currentIA() {
@@ -112,6 +115,19 @@ export default {
         },
     },
     methods: {
+        getIAList() {
+            DashboardServices.GetUsedModels()
+                .then((response) => {
+                    if (response && !response.error) {
+                        this.IAList = response;
+                        if (this.IAList.length > 0) {
+                            this.currentIAIndex = 0;
+                            this.getTokensData();
+                            this.getTotalCost();
+                        }
+                    }
+                });
+        },
         getTokensData() {
             if (!this.currentIA) return;
             this.isLoading = true;
@@ -122,6 +138,7 @@ export default {
             };
             DashboardServices.GetTokensByModel(params)
                 .then((response) => {
+                    console.log(response);
                     if (response && !response.error) {
                         this.graph.options = {
                             ...this.graph.options,
@@ -147,6 +164,7 @@ export default {
             this.isLoading = true;
             DashboardServices.GetTotalUsageCost(paramsTotalCost)
                 .then((response) => {
+                    console.log(response);
                     if (response && !response.error) {
                         this.totalCost = response;
                         this.setTotalTokens();
@@ -158,19 +176,6 @@ export default {
         },
         setTotalTokens() {
             this.$emit('setTotalTokens', this.totalCost);
-        },
-        getIAList() {
-            DashboardServices.GetUsedModels()
-                .then((response) => {
-                    if (response && !response.error) {
-                        this.IAList = response;
-                        if (this.IAList.length > 0) {
-                            this.currentIAIndex = 0;
-                            this.getTokensData();
-                            this.getTotalCost();
-                        }
-                    }
-                });
         },
         nextIA() {
             if (this.IAList.length === 0) return;
@@ -186,12 +191,12 @@ export default {
             this.currentIAIndex = (this.currentIAIndex - 1 + this.IAList.length) % this.IAList.length;
             this.getTokensData();
         },
-        updateGraph(start, end) {
-            this.previousTotalTokens = 0;
-            this.start = start;
-            this.end = end;
-            this.getIAList();
-        }
+        // updateGraph(start, end) {
+        //     this.previousTotalTokens = 0;
+        //     this.start = start;
+        //     this.end = end;
+        //     this.getIAList();
+        // }
     },
 }
 </script>

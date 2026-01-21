@@ -33,6 +33,14 @@ export default {
         LoadingComponent
     },
     props: {
+        start: {
+            type: String,
+            required: true,
+        },
+        end: {
+            type: String,
+            required: true,
+        },
         usageUnits: {
             type: Array,
             required: true,
@@ -40,8 +48,6 @@ export default {
     },
     emits: ['setTotalPages'],
     data: () => ({
-        start: null,
-        end: null,
         isLoading: true,
         graph: {
             options: {
@@ -86,11 +92,11 @@ export default {
     created() {
         this.getPagesData();
     },
-    watch: {
-        usageUnits() {
-            this.setTotalPages();
-        }
-    },
+    // watch: {
+    //     usageUnits() {
+    //         this.setTotalPages();
+    //     }
+    // },
     methods: {
         getPagesData() {
             this.isLoading = true;

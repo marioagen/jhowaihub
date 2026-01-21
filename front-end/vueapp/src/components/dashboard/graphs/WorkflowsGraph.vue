@@ -56,6 +56,14 @@ export default {
         LoadingComponent,
     },
     props: {
+        start: {
+            type: String,
+            required: true,
+        },
+        end: {
+            type: String,
+            required: true,
+        },
         usageUnits: {
             type: Array,
             required: true,
@@ -63,8 +71,6 @@ export default {
     },
     emits: ['setTotalExecution'],
     data: () => ({
-        start: null,
-        end: null,
         isLoadingWorkflows: false,
         graph: {
             options: {
@@ -128,11 +134,11 @@ export default {
         this.getWorkflowsData();
         this.getWorkflowsAutomaticData();
     },
-    watch: {
-        usageUnits() {
-            this.setTotalExecution();
-        }
-    },
+    // watch: {
+    //     usageUnits() {
+    //         this.setTotalExecution();
+    //     }
+    // },
     computed: {
         totalWorkflows() {
             return this.graph2.series[0].data.reduce((a, b) => a + b, 0);
