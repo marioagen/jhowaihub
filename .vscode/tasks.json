@@ -15,21 +15,14 @@
             "id": "buildConfiguration",
             "default": "Debug",
             "description": "Build configuration to use. Either 'Debug' or 'Release'.",
-            "options": [
-                "Debug",
-                "Release"
-            ],
+            "options": ["Debug", "Release"],
             "type": "pickString"
         },
         {
             "id": "runtimeIdentifier",
             "default": "linux-x64",
             "description": "Runtime identifier (RID) to publish for.",
-            "options": [
-                "linux-x64",
-                "win-x64",
-                "osx-x64"
-            ],
+            "options": ["linux-x64", "win-x64", "osx-x64"],
             "type": "pickString"
         },
         {
@@ -54,10 +47,7 @@
             "id": "projectDockerComposeUpDown",
             "default": "up",
             "description": "Select if the docker compose wll up or down.",
-            "options": [
-                "up",
-                "down",
-            ],
+            "options": ["up", "down"],
             "type": "pickString"
         }
     ],
@@ -84,18 +74,14 @@
             "label": "Restore",
             "type": "process",
             "command": "dotnet",
-            "args": [
-                "restore"
-            ],
+            "args": ["restore"],
             "problemMatcher": "$msCompile"
         },
         {
             "label": "Clean",
             "type": "process",
             "command": "dotnet",
-            "args": [
-                "clean"
-            ],
+            "args": ["clean"],
             "problemMatcher": "$msCompile"
         },
         {
@@ -180,12 +166,7 @@
         },
         {
             "label": "run-all",
-            "dependsOn": [
-                "azurite",
-                "execute-external-api",
-                "execute-external-api-func",
-                "execute-front-end"
-            ],
+            "dependsOn": ["azurite", "execute-external-api", "execute-external-api-func", "execute-front-end"],
             "dependsOrder": "parallel"
         }
     ]

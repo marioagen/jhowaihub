@@ -1,11 +1,19 @@
 <template>
-    <div v-if="previousStepTools && previousStepTools.length > 0" class="mt-4">
+    <div
+        v-if="
+            previousStepTools &&
+            previousStepTools.length > 0
+        "
+        class="mt-4"
+    >
         <h6>
             {{ $t("flow.sidebar.dependencies") }}
             <span class="text-danger">*</span>
         </h6>
         <hr />
-        <p class="text-muted small">{{ $t("flow.sidebar.dependenciesHint") }}</p>
+        <p class="text-muted small">
+            {{ $t("flow.sidebar.dependenciesHint") }}
+        </p>
 
         <!-- Dropdown to Add Dependencies -->
         <div class="dropdown">
@@ -18,32 +26,69 @@
                 <span>
                     {{
                         availableStepTools.length > 0
-                            ? $t("flow.sidebar.addDependency")
-                            : $t("flow.sidebar.noDependencies")
+                            ? $t(
+                                  "flow.sidebar.addDependency"
+                              )
+                            : $t(
+                                  "flow.sidebar.noDependencies"
+                              )
                     }}
                 </span>
-                <LucideIcon :icon="'CirclePlus'" :size="16" />
+                <LucideIcon
+                    :icon="'CirclePlus'"
+                    :size="16"
+                />
             </button>
             <ul class="dropdown-menu w-100">
-                <li v-if="availableStepTools.length === 0" class="dropdown-item-text text-muted small">
-                    {{ $t("flow.sidebar.allDependenciesSelected") }}
+                <li
+                    v-if="availableStepTools.length === 0"
+                    class="dropdown-item-text text-muted small"
+                >
+                    {{
+                        $t(
+                            "flow.sidebar.allDependenciesSelected"
+                        )
+                    }}
                 </li>
-                <li v-for="step in availableStepTools" :key="step.id">
+                <li
+                    v-for="step in availableStepTools"
+                    :key="step.id"
+                >
                     <div v-if="step.stepTools.length">
-                        <span class="dropdown-divider"></span>
+                        <span
+                            class="dropdown-divider"
+                        ></span>
                         <h6>{{ step.name }}</h6>
                         <a
                             v-for="stepTool in step.stepTools"
                             :key="stepTool.id"
                             class="dropdown-item"
                             href="#"
-                            @click.prevent="addDependency(step, stepTool)"
+                            @click.prevent="
+                                addDependency(
+                                    step,
+                                    stepTool
+                                )
+                            "
                         >
-                            <div class="d-flex align-items-center">
+                            <div
+                                class="d-flex align-items-center"
+                            >
                                 <div>
                                     <div class="fw-medium">
-                                        {{ stepTool.tool.name }}
-                                        <small class="text-muted">({{ stepTool.tool.toolType }})</small>
+                                        {{
+                                            stepTool.tool
+                                                .name
+                                        }}
+                                        <small
+                                            class="text-muted"
+                                        >
+                                            ({{
+                                                stepTool
+                                                    .tool
+                                                    .toolType
+                                            }})
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -53,18 +98,34 @@
             </ul>
         </div>
         <!-- Selected Dependencies Display -->
-        <div v-if="selectedDependencies.length > 0" class="mb-3 mt-2">
+        <div
+            v-if="selectedDependencies.length > 0"
+            class="mb-3 mt-2"
+        >
             <div
-                v-for="(item, index) in selectedDependencies"
+                v-for="(
+                    item, index
+                ) in selectedDependencies"
                 :key="index"
                 class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-2"
             >
-                <div class="d-flex align-items-center flex-grow-1">
+                <div
+                    class="d-flex align-items-center flex-grow-1"
+                >
                     <div class="flex-grow-1">
                         <div class="fw-medium">
-                            {{ findStepNameByOrder(item.stepOrder) }}
+                            {{
+                                findStepNameByOrder(
+                                    item.stepOrder
+                                )
+                            }}
                             <small class="text-muted">
-                                ({{ findToolLabelById(item.stepOrder, item.stepToolOrder) }})
+                                ({{
+                                    findToolLabelById(
+                                        item.stepOrder,
+                                        item.stepToolOrder
+                                    )
+                                }})
                             </small>
                         </div>
                     </div>
@@ -73,15 +134,19 @@
                     type="button"
                     class="btn btn-sm btn-link text-danger p-0 ms-2"
                     @click="removeDependency(item)"
-                    :title="$t('flow.sidebar.deleteDependency')"
+                    :title="
+                        $t('flow.sidebar.deleteDependency')
+                    "
                 >
-                    <LucideIcon :icon="'CircleX'" :size="16" />
+                    <LucideIcon
+                        :icon="'CircleX'"
+                        :size="16"
+                    />
                 </button>
             </div>
         </div>
     </div>
 </template>
-
 <script>
     import LucideIcon from "@/components/global/LucideIcon.vue";
 
@@ -102,13 +167,21 @@
         },
         data() {
             return {
-                selectedDependencies: this.modelValue ? JSON.parse(JSON.stringify(this.modelValue)) : [],
+                selectedDependencies: this.modelValue
+                    ? JSON.parse(
+                          JSON.stringify(this.modelValue)
+                      )
+                    : [],
             };
         },
         watch: {
             modelValue: {
                 handler(newValue) {
-                    this.selectedDependencies = newValue ? JSON.parse(JSON.stringify(newValue)) : [];
+                    this.selectedDependencies = newValue
+                        ? JSON.parse(
+                              JSON.stringify(newValue)
+                          )
+                        : [];
                 },
                 deep: true,
             },
@@ -122,44 +195,72 @@
                             (stepTool) =>
                                 !this.selectedDependencies.some(
                                     (selected) =>
-                                        selected.stepOrder === step.order && selected.stepToolOrder === stepTool.order
+                                        selected.stepOrder ===
+                                            step.order &&
+                                        selected.stepToolOrder ===
+                                            stepTool.order
                                 )
                         ),
                     }))
-                    .filter((step) => step.stepTools.length > 0);
+                    .filter(
+                        (step) => step.stepTools.length > 0
+                    );
             },
         },
         methods: {
             updateModel() {
-                this.$emit("update:modelValue", this.selectedDependencies);
+                this.$emit(
+                    "update:modelValue",
+                    this.selectedDependencies
+                );
             },
             addDependency(step, stepTool) {
-                this.selectedDependencies.push({ stepOrder: step.order, stepToolOrder: stepTool.order });
+                this.selectedDependencies.push({
+                    stepOrder: step.order,
+                    stepToolOrder: stepTool.order,
+                });
                 this.updateModel();
             },
             removeDependency(item) {
-                this.selectedDependencies = this.selectedDependencies.filter(
-                    (dependency) =>
-                        dependency.stepToolOrder !== item.stepToolOrder || dependency.stepOrder !== item.stepOrder
-                );
+                this.selectedDependencies =
+                    this.selectedDependencies.filter(
+                        (dependency) =>
+                            dependency.stepToolOrder !==
+                                item.stepToolOrder ||
+                            dependency.stepOrder !==
+                                item.stepOrder
+                    );
                 this.updateModel();
             },
             reloadData() {
-                this.selectedDependencies = this.modelValue ? JSON.parse(JSON.stringify(this.modelValue)) : [];
+                this.selectedDependencies = this.modelValue
+                    ? JSON.parse(
+                          JSON.stringify(this.modelValue)
+                      )
+                    : [];
             },
             findStepNameByOrder(order) {
-                const step = this.previousStepTools.find((s) => s.order === order);
+                const step = this.previousStepTools.find(
+                    (s) => s.order === order
+                );
                 return step ? step.name : "";
             },
             findToolLabelById(stepOrder, stepToolOrder) {
-                const step = this.previousStepTools.find((s) => s.order === stepOrder);
-                const stepTool = step ? step.stepTools.find((st) => st.order === stepToolOrder) : null;
-                return stepTool ? `${stepTool.tool.name}/${stepTool.tool.toolType}` : "";
+                const step = this.previousStepTools.find(
+                    (s) => s.order === stepOrder
+                );
+                const stepTool = step
+                    ? step.stepTools.find(
+                          (st) => st.order === stepToolOrder
+                      )
+                    : null;
+                return stepTool
+                    ? `${stepTool.tool.name}/${stepTool.tool.toolType}`
+                    : "";
             },
         },
     };
 </script>
-
 <style scoped>
     .dropdown-menu {
         max-height: 300px;

@@ -1,11 +1,25 @@
 <template>
-    <div class="d-flex flex-column justify-content-between align-items-start mb-2">
+    <div
+        class="d-flex flex-column justify-content-between align-items-start mb-2"
+    >
         <div class="delete-container">
-            <button class="btn btn-outline-danger btn-sm delete-button" @click="openConfirmation" :disabled="!enableMultiDelete">
-                <LucideIcon icon="Trash2" :size="15" />
+            <button
+                class="btn btn-outline-danger btn-sm delete-button"
+                @click="openConfirmation"
+                :disabled="!enableMultiDelete"
+            >
+                <LucideIcon
+                    icon="Trash2"
+                    :size="15"
+                />
                 {{ $t("common.delete") }}
             </button>
-            <small v-if="!enableMultiDelete" class="text-danger delete-tooltip">{{ $t("documents.selectToDelete") }}</small>
+            <small
+                v-if="!enableMultiDelete"
+                class="text-danger delete-tooltip"
+            >
+                {{ $t("documents.selectToDelete") }}
+            </small>
         </div>
     </div>
     <div v-if="showTable">
@@ -23,12 +37,20 @@
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-status="{ data }">
-                <BadgeComponent v-if="data.row.status === 0" text="documents.statusList.notAnalyzed" />
-                <BadgeComponent v-else text="common.analyzed" variant="success" />
+                <BadgeComponent
+                    v-if="data.row.status === 0"
+                    text="documents.statusList.notAnalyzed"
+                />
+                <BadgeComponent
+                    v-else
+                    text="common.analyzed"
+                    variant="success"
+                />
             </template>
             <template #cell-workflows="{ data }">
                 <BadgeOutlinedComponent
-                    v-for="(workflowData, index) in data.row.workflowProgress"
+                    v-for="(workflowData, index) in data.row
+                        .workflowProgress"
                     :key="index"
                     :text="`${workflowData.workflowName} (${workflowData.currentStep}/${workflowData.totalSteps})`"
                     :clickable="false"
@@ -38,20 +60,30 @@
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2"
-                            @click="getWorkFlowListByDocumentId(data.row.id)">
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="
+                                getWorkFlowListByDocumentId(
+                                    data.row.id
+                                )
+                            "
+                        >
                             <LucideIcon icon="Search" />
-                            {{ $t("documents.actions.consult") }}
+                            {{
+                                $t(
+                                    "documents.actions.consult"
+                                )
+                            }}
                         </a>
                     </li>
                 </DropdownComponent>
             </template>
         </TableComponent>
     </div>
-    <EmbeddingDocument 
-        v-if="isEmbedding" 
-        :docData="docDataEmbedding" 
-        :isReprocessing="isReprocessing" 
+    <EmbeddingDocument
+        v-if="isEmbedding"
+        :docData="docDataEmbedding"
+        :isReprocessing="isReprocessing"
         @close="isEmbedding = false"
     />
     <ConfirmModal
@@ -65,10 +97,12 @@
         :isLoading="isDeleting"
         @confirm="deleteDocument"
     />
-    
-    <DocumentWorkflowListModal id="typeModalWorkflow" :documentId="selectedDocumentId"  ref="ListWorkFlowModal" />
+    <DocumentWorkflowListModal
+        id="typeModalWorkflow"
+        :documentId="selectedDocumentId"
+        ref="ListWorkFlowModal"
+    />
 </template>
-
 <script>
     import dates from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
@@ -89,18 +123,33 @@
             BadgeComponent,
             TableComponent,
             ConfirmModal,
-            DocumentWorkflowListModal
+            DocumentWorkflowListModal,
         },
         data: () => ({
             table: {
                 isLoading: true,
                 columns: [
                     { key: "name", label: "common.name" },
-                    { key: "description", label: "common.description" },
-                    { key: "created", label: "documents.createdDate" },
-                    { key: "status", label: "common.status" },
-                    { key: "workflows", label: "documents.workflows" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "description",
+                        label: "common.description",
+                    },
+                    {
+                        key: "created",
+                        label: "documents.createdDate",
+                    },
+                    {
+                        key: "status",
+                        label: "common.status",
+                    },
+                    {
+                        key: "workflows",
+                        label: "documents.workflows",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -150,7 +199,8 @@
                             });
                         }
                         this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        this.table.pagination =
+                            response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -160,41 +210,47 @@
                 this.table.selectedRows = selectedRows;
             },
             openConfirmation() {
-                if (this.table.selectedRows.length === 0) {
-                    this.$notify({
-                        title: "common.warning",
-                        message: "documents.errors.unselectedDocuments",
-                        variant: "warning",
-                        icon: "TriangleAlert",
-                    });
-                    return;
-                }
-
-                const ids = this.table.selectedRows.map((item) => item.id);
+                const ids = this.table.selectedRows.map(
+                    (item) => item.id
+                );
                 this.selectedDocument = ids;
                 this.$refs.DeleteDialog.open();
             },
             deleteDocument() {
                 this.isDeleting = true;
-                DocumentsServices.deleteDocument(this.selectedDocument)
-                    .then((response) => {
-                        if(response?.error !== undefined) {
-                            return this.$notify({
-                                title: this.$t("documents.title"),
-                                message: this.$t("documents.removeError"),
+                DocumentsServices.deleteDocument(
+                    this.selectedDocument
+                )
+                    .then((success) => {
+                        if (success) {
+                            this.$refs.DeleteDialog.close();
+                            this.getDocuments({
+                                search: "",
+                                page: 1,
+                                type: null,
+                            });
+                            this.$notify({
+                                title: this.$t(
+                                    "documents.title"
+                                ),
+                                message: this.$t(
+                                    "documents.removeSuccess"
+                                ),
+                                variant: "success",
+                                icon: "CircleCheckBig",
+                            });
+                        } else {
+                            this.$notify({
+                                title: this.$t(
+                                    "documents.title"
+                                ),
+                                message: this.$t(
+                                    "documents.removeError"
+                                ),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
                         }
-
-                        this.$refs.DeleteDialog.close();
-                        this.getDocuments({ search: "", page: 1, type: null });
-                        this.$notify({
-                            title: this.$t("documents.title"),
-                            message: this.$t("documents.removeSuccess"),
-                            variant: "success",
-                            icon: "CircleCheckBig",
-                        });
                     })
                     .finally(() => {
                         this.table.selectedRows = [];
@@ -216,7 +272,19 @@
 
                 this.docDataEmbedding.Id = id;
                 this.isEmbedding = true;
-            },  
+            },
+            redirectToConsult(id) {
+                this.$router.push({
+                    name: "Analyzer",
+                    params: {
+                        id: id,
+                    },
+                    query: {
+                        page: this.table.pagination
+                            .currentPage,
+                    },
+                });
+            },
             getWorkFlowListByDocumentId(id) {
                 this.selectedDocumentId = id;
                 this.$nextTick(() => {
@@ -229,8 +297,12 @@
             },
         },
         created() {
-            this.filters.login = this.$store.state.userProfile.login;
-            this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
+            this.filters.login =
+                this.$store.state.userProfile.login;
+            this.table.pagination.currentPage = this.$route
+                .query.page
+                ? this.$route.query.page
+                : 1;
             this.getDocuments();
         },
         computed: {
@@ -240,11 +312,13 @@
             showTable() {
                 return this.table.data !== undefined;
             },
-        },      
+        },
     };
 </script>
-
 <style scoped>
+    .analyze-btn {
+        width: 94px;
+    }
     .modal-div {
         display: flex;
         flex-direction: column;
@@ -273,7 +347,9 @@
         opacity: 0;
         pointer-events: none;
         visibility: hidden;
-        transition: opacity 0.2s ease, visibility 0.2s ease;
+        transition:
+            opacity 0.2s ease,
+            visibility 0.2s ease;
         position: absolute;
         top: calc(100% + 8px);
         left: 0;
@@ -287,7 +363,7 @@
     }
 
     .delete-tooltip::before {
-        content: '';
+        content: "";
         position: absolute;
         bottom: 100%;
         left: 20px;
@@ -296,7 +372,7 @@
     }
 
     .delete-tooltip::after {
-        content: '';
+        content: "";
         position: absolute;
         bottom: 100%;
         left: 21px;

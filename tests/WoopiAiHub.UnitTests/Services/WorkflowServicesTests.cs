@@ -1,4 +1,4 @@
-﻿using Bogus.DataSets;
+using Bogus.DataSets;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
 using Moq.AutoMock;
@@ -1546,5 +1546,592 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
+
+        [Fact(DisplayName = "UpdatePhase2 should update existing step with new values")]
+        [Trait("UpdatePhase2", "Success")]
+        public async Task UpdatePhase2_ShouldUpdateExistingStep_WithNewValues()
+        {
+            // Arrange
+            var workflowId = 1;
+            var existingStepId = 1;
+            var updatedName = "Updated Step Name";
+            var updatedOrder = 2;
+            var updatedProfileId = 5;
+            var updatedStatusId = 3;
+
+            var existingStep = new Step(existingStepId, DateTime.Now, workflowId, "Original Step", 1, 1, 1);
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow")
+            {
+                Steps = new List<Step> { existingStep }
+            };
+
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var profileDto = WorkflowFixture.FindValidProfileDto();
+            var status = WorkflowFixture.FindValidStatus();
+
+            var workflowPhase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = workflowId,
+                Steps = new List<StepPhase2Dto>
+                {
+                    new StepPhase2Dto
+                    {
+                        Id = existingStepId,
+                        Name = updatedName,
+                        Order = updatedOrder,
+                        ProfileId = updatedProfileId,
+                        StatusId = updatedStatusId
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _profileRepositoryMock.Setup(x => x.FindById(updatedProfileId))
+                .ReturnsAsync(profileDto);
+
+            _statusRepositoryMock.Setup(x => x.FindById(updatedStatusId))
+                .ReturnsAsync(status);
+
+            _stepRepositoryMock.Setup(x => x.FindByIdsWithCards(It.IsAny<IEnumerable<int>>()))
+                .Returns(new List<Step>());
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(updatedName, existingStep.Name);
+            Assert.Equal(updatedOrder, existingStep.Order);
+            Assert.Equal(updatedProfileId, existingStep.ProfileId);
+            Assert.Equal(updatedStatusId, existingStep.StatusId);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase1 should add teams to workflow")]
+        [Trait("UpdatePhase1", "Success")]
+        public async Task UpdatePhase1_ShouldAddTeams_ToWorkflow()
+        {
+            // Arrange
+            var workflowId = 1;
+            var team1Id = 1;
+            var team2Id = 2;
+
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+            var team1 = new Team("Team 1", team1Id, DateTime.UtcNow);
+            var team2 = new Team("Team 2", team2Id, DateTime.UtcNow);
+
+            var workflowUpdatePhase1Dto = new WorkflowUpdatePhase1Dto
+            {
+                Id = workflowId,
+                Name = "Updated Workflow",
+                Teams = new List<int> { team1Id, team2Id }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _teamRepositoryMock.Setup(x => x.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team1, team2 });
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(2, workflow.Teams.Count);
+            Assert.Contains(workflow.Teams, t => t.Id == team1Id);
+            Assert.Contains(workflow.Teams, t => t.Id == team2Id);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should throw AppException when step with order not found")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task UpdatePhase3_StepWithOrderNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var workflowId = 1;
+            var stepOrder = 99;
+
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow")
+            {
+                Steps = new List<Step>
+                {
+                    new Step(1, DateTime.UtcNow, workflowId, "Step 1", 1, 1, 1),
+                    new Step(2, DateTime.UtcNow, workflowId, "Step 2", 2, 1, 1)
+                }
+            };
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = workflowId,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto
+                    {
+                        Id = 0,
+                        Order = stepOrder,
+                        StepTools = new List<StepToolUpdateDto>()
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(workflowId))
+                .ReturnsAsync(workflow);
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Contains($"Step with order {stepOrder} not found", exception.Message);
+            Assert.Equal(StepLabel.NotFound, exception.LabelError);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdateTeamProfileRelationshipToWorkflow should return early when workflows count is zero")]
+        [Trait("UpdateTeamProfileRelationshipToWorkflow", "EarlyExit")]
+        public async Task UpdateTeamProfileRelationshipToWorkflow_WorkflowsCountZero_ReturnsEarly()
+        {
+            var steps = new List<int> { 1, 2, 3 };
+            var profile = new Profile("Test Profile", 1, DateTime.UtcNow);
+            profile.Teams = new List<Team> { new Team("Team 1", 1, DateTime.UtcNow) };
+
+            _workflowRepositoryMock.Setup(x => x.FindByStep(steps))
+                .ReturnsAsync(new List<Workflow>());
+
+            await _workflowServices.UpdateTeamProfileRelationshipToWorkflow(steps, profile);
+
+            _workflowRepositoryMock.Verify(x => x.FindByStep(steps), Times.Once);
+            _teamRepositoryMock.Verify(x => x.FindByIdReturnModel(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "VerifyWorkflowMatchInOtherTeamProfile should continue when stepIds is empty")]
+        [Trait("VerifyWorkflowMatchInOtherTeamProfile", "EarlyExit")]
+        public async Task VerifyWorkflowMatchInOtherTeamProfile_StepIdsEmpty_Continues()
+        {
+            int profileId = 1;
+            int teamId = 1;
+            var workflows = new List<Workflow> { WorkflowFixture.FindValidWorkflow() };
+
+            var team = new Team("Test Team", teamId, DateTime.UtcNow)
+            {
+                Profiles = new List<Profile>
+                {
+                    new Profile("Other Profile", 2, DateTime.UtcNow)
+                    {
+                        StepProfilePermissions = new List<StepProfilePermission>()
+                    }
+                }
+            };
+
+            _teamRepositoryMock.Setup(x => x.FindByIdReturnModel(teamId))
+                .Returns(team);
+
+            var result = await _workflowServices.VerifyWorkflowMatchInOtherTeamProfile(profileId, teamId, workflows);
+
+            Assert.NotNull(result);
+            Assert.Equal(teamId, result.TeamId);
+        }
+
+        [Fact(DisplayName = "RemoveTeamWorkflowRelationship should continue when team is null")]
+        [Trait("RemoveTeamWorkflowRelationship", "EarlyExit")]
+        public async Task RemoveTeamWorkflowRelationship_TeamIsNull_Continues()
+        {
+            var teamsWorkflowsDto = new List<TeamsWorkflowsDto>
+            {
+                new TeamsWorkflowsDto
+                {
+                    TeamId = 1,
+                    Workflows = new List<int> { 1, 2 }
+                }
+            };
+
+            _teamRepositoryMock.Setup(x => x.FindByIdReturnModel(1))
+                .Returns((Team)null!);
+
+            await _workflowServices.RemoveTeamWorkflowRelationship(teamsWorkflowsDto);
+
+            _teamRepositoryMock.Verify(x => x.FindByIdReturnModel(1), Times.Once);
+            _workflowRepositoryMock.Verify(x => x.FindByIdsAsync(It.IsAny<ICollection<int>>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase1 should rollback on exception")]
+        [Trait("UpdatePhase1", "Fail")]
+        public async Task UpdatePhase1_ExceptionOccurs_RollsBack()
+        {
+            var workflowUpdatePhase1Dto = new WorkflowUpdatePhase1Dto
+            {
+                Id = 1,
+                Name = "Updated Workflow",
+                Teams = new List<int> { 1 }
+            };
+
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(1))
+                .ReturnsAsync(workflow);
+
+            _teamRepositoryMock.Setup(x => x.FindByIds(It.IsAny<ICollection<int>>()))
+                .Throws(new Exception("Test exception"));
+
+            await Assert.ThrowsAsync<Exception>(() => _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto));
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
+
+        [Fact(DisplayName = "ResolveDependencies should continue when step has no stepTools")]
+        [Trait("UpdatePhase3", "EarlyExit")]
+        public async Task ResolveDependencies_StepHasNoStepTools_Continues()
+        {
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+            var step1 = new Step(1, DateTime.UtcNow, 1, "Step 1", 1, 1, 1);
+            var step2 = new Step(2, DateTime.UtcNow, 1, "Step 2", 2, 1, 1);
+            workflow.Steps.Add(step1);
+            workflow.Steps.Add(step2);
+            step1.Workflow = workflow;
+            step2.Workflow = workflow;
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto
+                    {
+                        Id = 1,
+                        Order = 1,
+                        StepTools = new List<StepToolUpdateDto>
+                        {
+                            new StepToolUpdateDto
+                            {
+                                Id = 0,
+                                ToolId = 1,
+                                Order = 1,
+                                PositionX = 1,
+                                PositionY = 1,
+                                Parameters = new List<StepToolParameterUpdateDto>()
+                            }
+                        }
+                    },
+                    new StepPhase3Dto
+                    {
+                        Id = 2,
+                        Order = 2,
+                        StepTools = new List<StepToolUpdateDto>()
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(WorkflowFixture.CreateToolModel(1, "Test Tool", "N8N"));
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "ResolveDependencies should continue when stepTool not found in map")]
+        [Trait("UpdatePhase3", "EarlyExit")]
+        public async Task ResolveDependencies_StepToolNotFoundInMap_Continues()
+        {
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+            var step = new Step(1, DateTime.UtcNow, 1, "Step 1", 1, 1, 1);
+            workflow.Steps.Add(step);
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto
+                    {
+                        Id = 1,
+                        Order = 1,
+                        StepTools = new List<StepToolUpdateDto>
+                        {
+                            new StepToolUpdateDto
+                            {
+                                Id = 0,
+                                ToolId = 1,
+                                Order = 1,
+                                PositionX = 1,
+                                PositionY = 1,
+                                Parameters = new List<StepToolParameterUpdateDto>(),
+                                Dependencies = new List<StepToolOutputDependencyDto>
+                                {
+                                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 999 }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(WorkflowFixture.CreateToolModel(1, "Test Tool", "N8N"));
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "ValidatePromptTool should throw when hasOcrDependency is false")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task ValidatePromptTool_HasOcrDependencyFalse_ThrowsAppException()
+        {
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            
+            var nonOcrStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 999,
+                Order = 1,
+                PositionX = 1,
+                PositionY = 1,
+                Parameters = new List<StepToolParameterUpdateDto>()
+            };
+
+            var promptStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 2,
+                Order = 2,
+                PositionX = 2,
+                PositionY = 2,
+                Parameters = new List<StepToolParameterUpdateDto>(),
+                Dependencies = new List<StepToolOutputDependencyDto>
+                {
+                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
+                }
+            };
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var stepToolsList = new List<StepToolUpdateDto> { nonOcrStepToolDto, promptStepToolDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto
+                    {
+                        Id = stepDto.Id,
+                        Order = stepDto.Order,
+                        StepTools = stepToolsList
+                    }
+                }
+            };
+
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
+            var step = new Step(1, DateTime.UtcNow, 1, "Step 1", 1, 1, 1);
+            workflow.Steps.Add(step);
+            step.Workflow = workflow;
+
+            var nonOcrTool = WorkflowFixture.CreateToolModel(999, "Non-OCR Tool", "N8N");
+            var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", "Prompt");
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.SetupSequence(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(nonOcrTool)
+                .ReturnsAsync(promptTool)
+                .ReturnsAsync(nonOcrTool);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal("Prompt tool must have at least one OCR dependency", exception.Message);
+            Assert.Equal(ToolLabel.OcrDependencyRequired, exception.LabelError);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
+
+        [Fact(DisplayName = "HasOcrDependency should return true when dependency tool is OCR")]
+        [Trait("HasOcrDependency", "Success")]
+        public async Task HasOcrDependency_DependencyToolIsOcr_ReturnsTrue()
+        {
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto>
+            {
+                new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
+            };
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto
+                    {
+                        Id = stepDto.Id,
+                        Order = stepDto.Order,
+                        StepTools = stepToolsList
+                    }
+                }
+            };
+
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
+            var step = new Step(1, DateTime.UtcNow, 1, "Step 1", 1, 1, 1);
+            workflow.Steps.Add(step);
+            step.Workflow = workflow;
+
+            var ocrStepTool = new StepTool(10, DateTime.UtcNow, 1, 999, 1, 1, 1);
+            ocrStepTool.Step = step;
+            step.StepTools.Add(ocrStepTool);
+
+            var promptStepToolEntity = new StepTool(20, DateTime.UtcNow, 1, 2, 2, 2, 2);
+            promptStepToolEntity.Step = step;
+            step.StepTools.Add(promptStepToolEntity);
+
+            var ocrTool = WorkflowFixture.CreateToolModel(999, "OCR Tool", "OCR");
+            var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", "Prompt");
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.SetupSequence(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(ocrTool)
+                .ReturnsAsync(promptTool)
+                .ReturnsAsync(ocrTool);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "HasOcrDependency should return false when no OCR dependency found")]
+        [Trait("HasOcrDependency", "Fail")]
+        public async Task HasOcrDependency_NoOcrDependency_ReturnsFalse()
+        {
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            
+            var nonOcrStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 999,
+                Order = 1,
+                PositionX = 1,
+                PositionY = 1,
+                Parameters = new List<StepToolParameterUpdateDto>()
+            };
+
+            var promptStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 2,
+                Order = 2,
+                PositionX = 2,
+                PositionY = 2,
+                Parameters = new List<StepToolParameterUpdateDto>(),
+                Dependencies = new List<StepToolOutputDependencyDto>
+                {
+                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
+                }
+            };
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var stepToolsList = new List<StepToolUpdateDto> { nonOcrStepToolDto, promptStepToolDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto
+                    {
+                        Id = stepDto.Id,
+                        Order = stepDto.Order,
+                        StepTools = stepToolsList
+                    }
+                }
+            };
+
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
+            var step = new Step(1, DateTime.UtcNow, 1, "Step 1", 1, 1, 1);
+            workflow.Steps.Add(step);
+            step.Workflow = workflow;
+
+            var nonOcrTool = WorkflowFixture.CreateToolModel(999, "Non-OCR Tool", "N8N");
+            var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", "Prompt");
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.SetupSequence(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(nonOcrTool)
+                .ReturnsAsync(promptTool)
+                .ReturnsAsync(nonOcrTool);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal("Prompt tool must have at least one OCR dependency", exception.Message);
+            Assert.Equal(ToolLabel.OcrDependencyRequired, exception.LabelError);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
+
     }
 }

@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+bin/
+obj/
+*.dll
+*.exe
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vs/
+.idea/
+*.swp
+*.swo
+
+# Frontend specific (handled by its own prettier config)
+front-end/vueapp/
+
+# Git
+.git/
+
+# Certificates
+*.pem
+*.key
+
+# Package locks
+package-lock.json
+yarn.lock
+

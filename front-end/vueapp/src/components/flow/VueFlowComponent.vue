@@ -9,12 +9,22 @@
                 aria-controls="toolsCollapse"
                 @click="showCollapse"
             >
-                <LucideIcon icon="Plus" :size="15" />
-                {{ isActiveCollapse ? $t("flow.hideTools") : $t("flow.showTools") }}
+                <LucideIcon
+                    icon="Plus"
+                    :size="15"
+                />
+                {{
+                    isActiveCollapse
+                        ? $t("flow.hideTools")
+                        : $t("flow.showTools")
+                }}
             </button>
         </div>
     </div>
-    <div class="collapse" id="toolsCollapse">
+    <div
+        class="collapse"
+        id="toolsCollapse"
+    >
         <div class="mt-3 mb-3">
             <div class="card mb-3">
                 <div class="card-body palette">
@@ -28,7 +38,8 @@
                                 onDragStart($event, {
                                     id: tool.id,
                                     name: tool.name,
-                                    isEditableInput: tool.isEditableInput,
+                                    isEditableInput:
+                                        tool.isEditableInput,
                                     toolType: tool.toolType,
                                 })
                             "
@@ -50,17 +61,29 @@
             @drop="onDrop"
             @dragover="onDragOver"
         >
-            <Background patternColor="#BCD5F2" gap="10" variant="dots" :size="1" />
+            <Background
+                patternColor="#BCD5F2"
+                gap="10"
+                variant="dots"
+                :size="1"
+            />
             <template #node-hub="props">
-                <HubNode :node="props" @deleteNode="deleteNode" @openNodeConfig="openNodeConfig" />
+                <HubNode
+                    :node="props"
+                    @deleteNode="deleteNode"
+                    @openNodeConfig="openNodeConfig"
+                />
             </template>
             <template #edge-special="props">
-                <SpecialEdge v-bind="props" @deleteEdge="deleteEdge" :data="props" />
+                <SpecialEdge
+                    v-bind="props"
+                    @deleteEdge="deleteEdge"
+                    :data="props"
+                />
             </template>
         </VueFlow>
     </div>
 </template>
-
 <script>
     import { VueFlow } from "@vue-flow/core";
     import { Background } from "@vue-flow/background";
@@ -113,9 +136,11 @@
         },
         methods: {
             getToolsList() {
-                ToolsServices.getToolsList().then((response) => {
-                    this.toolsList = response;
-                });
+                ToolsServices.getToolsList().then(
+                    (response) => {
+                        this.toolsList = response;
+                    }
+                );
             },
             onPaneReady(instance) {
                 this.vueFlowInstance = instance;
@@ -140,42 +165,67 @@
             },
             async getFlow() {
                 try {
-                    if (this.hasStepTools && this.stepId != 0) {
-                        this.step = await WorkflowService.getStepById(this.stepId);
+                    if (
+                        this.hasStepTools &&
+                        this.stepId != 0
+                    ) {
+                        this.step =
+                            await WorkflowService.getStepById(
+                                this.stepId
+                            );
                     }
 
-                    let stepTools = this.step ? this.step.stepTools : [];
-                    const mappedNodes = stepTools.map((stepTool) => ({
-                        id: stepTool.id.toString(),
-                        position: { x: stepTool.positionX, y: stepTool.positionY },
-                        label: stepTool.tool.name,
-                        toolId: stepTool.toolId,
-                        data: {
-                            order: stepTool.order,
-                            icon: "Activity",
-                            color: "blue",
-                            parameters: stepTool.parameters,
-                            isEditableInput: stepTool.tool.isEditableInput,
-                            toolType: stepTool.tool.toolType,
+                    let stepTools = this.step
+                        ? this.step.stepTools
+                        : [];
+                    const mappedNodes = stepTools.map(
+                        (stepTool) => ({
+                            id: stepTool.id.toString(),
+                            position: {
+                                x: stepTool.positionX,
+                                y: stepTool.positionY,
+                            },
+                            label: stepTool.tool.name,
                             toolId: stepTool.toolId,
-                            stepToolId: stepTool.id,
-                            dependencies: stepTool.dependencies,
-                        },
-                        sourcePosition: "right",
-                        targetPosition: "left",
-                        type: "hub",
-                    }));
-                    const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
-                        id: `${tool.id}-${stepTools[index + 1].id}`,
-                        source: tool.id.toString(),
-                        target: stepTools[index + 1].id.toString(),
-                        animated: false,
-                        type: "special",
-                    }));
+                            data: {
+                                order: stepTool.order,
+                                icon: "Activity",
+                                color: "blue",
+                                parameters:
+                                    stepTool.parameters,
+                                isEditableInput:
+                                    stepTool.tool
+                                        .isEditableInput,
+                                toolType:
+                                    stepTool.tool.toolType,
+                                toolId: stepTool.toolId,
+                                stepToolId: stepTool.id,
+                                dependencies:
+                                    stepTool.dependencies,
+                            },
+                            sourcePosition: "right",
+                            targetPosition: "left",
+                            type: "hub",
+                        })
+                    );
+                    const mappedEdges = stepTools
+                        .slice(0, -1)
+                        .map((tool, index) => ({
+                            id: `${tool.id}-${stepTools[index + 1].id}`,
+                            source: tool.id.toString(),
+                            target: stepTools[
+                                index + 1
+                            ].id.toString(),
+                            animated: false,
+                            type: "special",
+                        }));
 
                     const startNode = {
                         ...this.createStartNode(),
-                        data: { ...this.createStartNode().data, isActive: true },
+                        data: {
+                            ...this.createStartNode().data,
+                            isActive: true,
+                        },
                     };
                     if (stepTools.length > 0) {
                         const firstTool = stepTools[0];
@@ -187,42 +237,90 @@
                         });
                     }
 
-                    this.nodes = [startNode, ...mappedNodes];
+                    this.nodes = [
+                        startNode,
+                        ...mappedNodes,
+                    ];
                     this.edges = mappedEdges;
                 } catch (e) {
-                    LogService.showMessage("Erro ao carregar fluxo");
+                    LogService.showMessage(
+                        "Erro ao carregar fluxo"
+                    );
                 }
             },
             deleteNode(nodeId) {
                 this.removeNodeDependency(nodeId);
-                this.nodes = this.nodes.filter((node) => node.id !== nodeId);
-                this.edges = this.edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId);
+                this.nodes = this.nodes.filter(
+                    (node) => node.id !== nodeId
+                );
+                this.edges = this.edges.filter(
+                    (edge) =>
+                        edge.source !== nodeId &&
+                        edge.target !== nodeId
+                );
             },
             removeNodeDependency(nodeId) {
-                const idx = this.nodes.findIndex((node) => node.id === nodeId);
+                const idx = this.nodes.findIndex(
+                    (node) => node.id === nodeId
+                );
                 if (idx !== -1) {
                     const node = this.nodes[idx];
                     this.nodes.forEach((n) => {
                         if (n.order > node.data.order) {
-                            n.data.dependencies = (n.data.dependencies || []).filter(
-                                (d) => !(d.stepOrder === this.step.order && d.stepToolOrder === node.data.order)
+                            n.data.dependencies = (
+                                n.data.dependencies || []
+                            ).filter(
+                                (d) =>
+                                    !(
+                                        d.stepOrder ===
+                                            this.step
+                                                .order &&
+                                        d.stepToolOrder ===
+                                            node.data.order
+                                    )
                             );
                         }
                     });
 
-                    this.$store.state.tempWorkflow.list.forEach((step) => {
-                        if (step.order > this.step.order) {
-                            step.stepTools.forEach((stepTool) => {
-                                stepTool.dependencies = (stepTool.dependencies || []).filter(
-                                    (d) => !(d.stepOrder === this.step.order && d.stepToolOrder === node.data.order)
+                    this.$store.state.tempWorkflow.list.forEach(
+                        (step) => {
+                            if (
+                                step.order > this.step.order
+                            ) {
+                                step.stepTools.forEach(
+                                    (stepTool) => {
+                                        stepTool.dependencies =
+                                            (
+                                                stepTool.dependencies ||
+                                                []
+                                            ).filter(
+                                                (d) =>
+                                                    !(
+                                                        d.stepOrder ===
+                                                            this
+                                                                .step
+                                                                .order &&
+                                                        d.stepToolOrder ===
+                                                            node
+                                                                .data
+                                                                .order
+                                                    )
+                                            );
+                                    }
                                 );
-                            });
+                            }
                         }
-                    });
+                    );
                 }
             },
-            updateNodeInput(nodeId, parameters, dependencies) {
-                const idx = this.nodes.findIndex((node) => node.id === nodeId);
+            updateNodeInput(
+                nodeId,
+                parameters,
+                dependencies
+            ) {
+                const idx = this.nodes.findIndex(
+                    (node) => node.id === nodeId
+                );
                 if (idx !== -1) {
                     this.nodes[idx] = {
                         ...this.nodes[idx],
@@ -233,35 +331,56 @@
                         },
                     };
                 }
-
-                console.log(this.nodes);
             },
             deleteEdge(edgeId) {
-                this.edges = this.edges.filter((edge) => edge.id !== edgeId);
+                this.edges = this.edges.filter(
+                    (edge) => edge.id !== edgeId
+                );
             },
             openNodeConfig(node) {
-                const idx = this.nodes.findIndex((n) => n.id === node.id);
-                this.$emit("openNodeConfig", this.nodes, this.nodes[idx]);
+                const idx = this.nodes.findIndex(
+                    (n) => n.id === node.id
+                );
+                this.$emit(
+                    "openNodeConfig",
+                    this.nodes,
+                    this.nodes[idx]
+                );
             },
             onConnect(params) {
-                this.vueFlowInstance?.addEdges([{ ...params, type: "special" }]);
+                this.vueFlowInstance?.addEdges([
+                    { ...params, type: "special" },
+                ]);
             },
             onDragOver(event) {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = "move";
             },
             onDragStart(event, nodeData) {
-                event.dataTransfer.setData("application/node-data", JSON.stringify(nodeData));
+                event.dataTransfer.setData(
+                    "application/node-data",
+                    JSON.stringify(nodeData)
+                );
                 event.dataTransfer.effectAllowed = "move";
             },
             onDrop(event) {
                 event.preventDefault();
-                const reactFlowBounds = event.currentTarget.getBoundingClientRect();
-                const nodeData = JSON.parse(event.dataTransfer.getData("application/node-data"));
-                const position = this.vueFlowInstance.project({
-                    x: event.clientX - reactFlowBounds.left,
-                    y: event.clientY - reactFlowBounds.top,
-                });
+                const reactFlowBounds =
+                    event.currentTarget.getBoundingClientRect();
+                const nodeData = JSON.parse(
+                    event.dataTransfer.getData(
+                        "application/node-data"
+                    )
+                );
+                const position =
+                    this.vueFlowInstance.project({
+                        x:
+                            event.clientX -
+                            reactFlowBounds.left,
+                        y:
+                            event.clientY -
+                            reactFlowBounds.top,
+                    });
                 const newNode = {
                     id: (this.nodes.length + 1).toString(),
                     type: "hub",
@@ -273,7 +392,8 @@
                         icon: "Activity",
                         color: "#000",
                         isStartNode: false,
-                        isEditableInput: nodeData.isEditableInput,
+                        isEditableInput:
+                            nodeData.isEditableInput,
                         toolType: nodeData.toolType,
                         parameters: [],
                         toolId: nodeData.id,
@@ -291,23 +411,36 @@
                         toolId: node.toolId,
                         tool: {
                             name: node.label,
-                            isEditableInput: node.data.isEditableInput,
+                            isEditableInput:
+                                node.data.isEditableInput,
                             toolType: node.data.toolType,
                         },
-                        positionX: parseFloat(node.position.x.toFixed(2)),
-                        positionY: parseFloat(node.position.y.toFixed(2)),
+                        positionX: parseFloat(
+                            node.position.x.toFixed(2)
+                        ),
+                        positionY: parseFloat(
+                            node.position.y.toFixed(2)
+                        ),
                         order: index + 1,
                         status: "Active",
                         parameters: node.data.parameters,
-                        dependsOnStepToolId: node.data.stepToolId && node.data.stepToolId > 0 ? node.data.stepToolId : null,
-                        dependencies: (node.data.dependencies || []).map((d) => ({
+                        dependsOnStepToolId:
+                            node.data.stepToolId &&
+                            node.data.stepToolId > 0
+                                ? node.data.stepToolId
+                                : null,
+                        dependencies: (
+                            node.data.dependencies || []
+                        ).map((d) => ({
                             stepOrder: d.stepOrder ?? null,
-                            stepToolOrder: d.stepToolOrder ?? null,
+                            stepToolOrder:
+                                d.stepToolOrder ?? null,
                         })),
                     }));
             },
             showCollapse() {
-                this.isActiveCollapse = !this.isActiveCollapse;
+                this.isActiveCollapse =
+                    !this.isActiveCollapse;
             },
         },
         mounted() {
@@ -316,7 +449,6 @@
         },
     };
 </script>
-
 <style>
     @import "@vue-flow/core/dist/style.css";
     @import "@vue-flow/core/dist/theme-default.css";
