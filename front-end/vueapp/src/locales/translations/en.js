@@ -111,7 +111,7 @@
             titleMessage: "This document is associated with multiple workflows. Choose which one you want to view:",
             searchPlaceholder: "Search workflow...",
             clickToView: "Click to view",
-            nothingFound: "No workflows found.",
+            nothingFound: "No workflows found. If there is no linked workflow, consider resubmitting the file linking with a workflow",
             cancel: "Cancel",
             errorToGetWorkflows: "Error searching for workflows.",
             errorUnexpected: "Unexpected error."
@@ -852,6 +852,39 @@
             button: "Access docs",
         },
     },
+    permissions: {
+        groups: {
+            questions: "Questions",
+            types: "Types",
+            quizzes: "Quizzes",
+            documents: "Documents",
+            management: "Management",
+            users: "Users",
+            teams: "Teams",
+            profiles: "Profiles",
+            workflow: "Workflow",
+            tools: "Tools",
+            dashboard: "Dashboard",
+            workflowStep: "Workflow Step",
+            prompts: "Prompts"
+        },
+        descriptions: {
+            questions: "View Questions",
+            types: "View Types",
+            quizzes: "View Quizzes",
+            documents: "View Documents",
+            management: "View Management Tables",
+            users: "View Users",
+            teams: "View Teams",
+            profiles: "View Profiles",
+            workflow: "View Workflow",
+            tools: "View Tools",
+            dashboard: "View Dashboard",
+            workflowStepView: "View Steps",
+            workflowStepAccess: "Access Steps",
+            prompts: "View Prompts",
+        }
+    }
 };
 
 export default english;

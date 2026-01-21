@@ -4,7 +4,7 @@
       <div class="modal-header-custom">
         <div class="modal-info text-center w-100">
           <h6 class="modal-title mb-1">{{ $t("documents.workflowListModal.title") }}</h6>
-          <p class="modal-subtitle text-muted mb-0" v-html="$t('documents.workflowListModal.titleMessage')">
+          <p class="modal-subtitle text-muted mb-0" v-html="$t('documents.workflowListModal.titleMessage')" v-if="workflowListByDocument.length != 0">
           </p>
         </div>
         <button type="button" class="btn-close position-absolute top-0 end-0 m-3" aria-label="Close"
@@ -15,7 +15,7 @@
     <template #body>
       <div class="px-2">
         <!-- Search Input -->
-        <div class="input-group mb-3 search-container">
+        <div class="input-group mt-3 mb-3 search-container">
           <span class="input-group-text bg-white border-end-0">
             <LucideIcon icon="Search" size="18" class="text-muted" />
           </span>

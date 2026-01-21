@@ -61,7 +61,7 @@
                                 class="mb-2 border rounded">
                                 <div class="d-flex justify-content-between align-items-center p-2 px-3">
                                     <div>
-                                        <strong>{{ group.group }}</strong>
+                                        <strong>{{ $t(group.group) }}</strong>
                                         <span class="text-muted ms-1">
                                             ({{ checkedCount(group.permissions) }} / {{ group.permissions.length }})
                                         </span>
@@ -83,7 +83,7 @@
                                                         v-model="selectedPermissions" />
                                                     <label class="form-check-label fw-semibold"
                                                         :for="`permission-${permission.id}`">
-                                                        {{ permission.description }}
+                                                        {{ $t(permission.description) }}
                                                     </label>
                                                 </div>
                                             </div>
@@ -139,7 +139,7 @@
                                                         v-model="selectedWorkflowPermissions" />
                                                     <label class="form-check-label"
                                                         :for="`permission-${profileData.id ?? 'new'}-${step.id}-${permission.id}`">
-                                                        {{ permission.description }}
+                                                        {{ $t(permission.description) }}
                                                     </label>
                                                 </div>
                                             </div>
@@ -220,7 +220,7 @@ export default {
                 .map(group => {
                     const filtered = group.permissions.filter(p =>
                         p.name.toLowerCase().includes(term) ||
-                        p.description.toLowerCase().includes(term)
+                        this.$t(p.description).toLowerCase().includes(term)
                     );
 
                     return {

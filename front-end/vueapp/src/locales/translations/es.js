@@ -111,7 +111,7 @@
             titleMessage: "Este documento está asociado a varios flujos de trabajo. Elija cuál desea ver:",
             searchPlaceholder: "Buscar flujo de trabajo...",
             clickToView: "Haga clic para ver",
-            nothingFound: "No se encontraron flujos de trabajo",
+            nothingFound: "No se encontraron flujos de trabajo. Si no hay un flujo vinculado, considere reenviar el archivo y vincular un flujo de trabajo.",
             cancel: "Cancelar",
             errorToGetWorkflows: "Error al buscar flujos de trabajo",
             errorUnexpected: "Error inesperado."
@@ -860,6 +860,39 @@
             button: "Acceder docs",
         },
     },
+    permissions: {
+        groups: {
+            questions: "Preguntas",
+            types: "Tipos",
+            quizzes: "Cuestionarios",
+            documents: "Documentos",
+            management: "Gestión",
+            users: "Usuarios",
+            teams: "Equipos",
+            profiles: "Perfiles",
+            workflow: "Workflow",
+            tools: "Herramientas",
+            dashboard: "Dashboard",
+            workflowStep: "Workflow Step",
+            prompts: "Prompts"
+        },
+        descriptions: {
+            questions: "Ver Preguntas",
+            types: "Ver Tipos",
+            quizzes: "Ver Cuestionarios",
+            documents: "Ver Documentos",
+            management: "Ver Gestión de tablas",
+            users: "Ver Usuarios",
+            teams: "Ver Equipos",
+            profiles: "Ver Perfiles",
+            workflow: "Ver Workflow",
+            tools: "Ver Herramientas",
+            dashboard: "Ver Dashboard",
+            workflowStepView: "Ver Pasos",
+            workflowStepAccess: "Acceso Pasos",
+            prompts: "Ver Prompts",
+        }
+    }
 };
 
 export default spanish;

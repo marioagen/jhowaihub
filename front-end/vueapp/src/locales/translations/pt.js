@@ -113,7 +113,7 @@
                 "Este documento está associado a múltiplas esteiras de processamento.<br>Escolha qual deseja visualizar:",
             searchPlaceholder: "Buscar esteira de processamento...",
             clickToView: "Clique para visualizar",
-            nothingFound: "Nenhuma esteira de processamento encontrada.",
+            nothingFound: "Nenhuma esteira de processamento encontrada. Caso não há nenhuma esteira vinculada, considere reenviar o arquivo vinculando uma esteira de processamento",
             cancel: "Cancelar",
             errorToGetWorkflows: "Erro ao buscar esteiras de processamento.",
             errorUnexpected: "Erro inesperado.",
@@ -882,6 +882,39 @@
             button: "Acessar docs",
         },
     },
+    permissions: {
+        groups: {
+            questions: "Perguntas",
+            types: "Tipos",
+            quizzes: "Questionários",
+            documents: "Documentos",
+            management: "Gestão",
+            users: "Usuários",
+            teams: "Times",
+            profiles: "Perfis",
+            workflow: "Esteira de processamento",
+            tools: "Ferramentas",
+            dashboard: "Dashboard",
+            workflowStep: "Etapa da esteira",
+            prompts: "Prompts"
+        },
+        descriptions: {
+            questions: "Visualizar Perguntas",
+            types: "Visualizar Tipos",
+            quizzes: "Visualizar Questionários",
+            documents: "Visualizar Documentos",
+            management: "Visualizar Gestão de tabelas",
+            users: "Visualizar Usuários",
+            teams: "Visualizar Times",
+            profiles: "Visualizar Perfis",
+            workflow: "Visualizar Esteira de processamento",
+            tools: "Visualizar Ferramentas",
+            dashboard: "Visualizar Dashboard",
+            workflowStepView: "Visualizar Etapas",
+            workflowStepAccess: "Acessar Etapas",
+            prompts: "Visualizar Prompts",
+        }
+    }
 };
 
 export default portuguese;
