@@ -174,7 +174,6 @@
             filterData(filters) {
                 this.filters = filters;
                 this.totalWTC = 0;
-                console.log("Filter Data", this.filters);
                 this.$refs.TokensGraph.updateGraph(
                     this.filters.start,
                     this.filters.end
