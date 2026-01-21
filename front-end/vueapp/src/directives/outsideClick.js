@@ -5,10 +5,10 @@ export default {
                 binding.value(event);
             }
         };
-        document.addEventListener("mousedown", el.__clickOutsideHandler__);
+        document.addEventListener("click", el.__clickOutsideHandler__);
     },
     unmounted(el) {
-        document.removeEventListener("mousedown", el.__clickOutsideHandler__);
+        document.removeEventListener("click", el.__clickOutsideHandler__);
         el.__clickOutsideHandler__ = null;
     }
 };
