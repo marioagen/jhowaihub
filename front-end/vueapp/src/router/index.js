@@ -289,7 +289,7 @@ const routes = [
         component: WorkflowManagement,
         meta: {
             layout: "default",
-            module: "Workflow",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -300,7 +300,7 @@ const routes = [
         component: NewWorkflow,
         meta: {
             layout: "default",
-            module: "Workflow",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -311,7 +311,7 @@ const routes = [
         component: EditWorkflow,
         meta: {
             layout: "default",
-            module: "Workflow",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,

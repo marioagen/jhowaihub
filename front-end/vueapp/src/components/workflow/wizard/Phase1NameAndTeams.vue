@@ -29,14 +29,15 @@
                     </div>
                 </div>
                 <div v-else>
-                    <Field name="selectedTeams"
-                           rules="requiredArray"
-                           v-model="selectedTeams"
-                           v-slot="{ errors }">
+                    <div class="mb-2">
+                        <input type="text"
+                               class="form-control form-control-sm"
+                               :placeholder="$t('management.teams.searchTeams')"
+                               v-model="searchTeam" />
+                    </div>
+                    <Field name="selectedTeams" rules="requiredArray" v-model="selectedTeams" v-slot="{ errors }">
                         <div class="row">
-                            <div v-for="team in teamsList"
-                                 :key="team.id"
-                                 class="col-3 p-1">
+                            <div v-for="team in filteredTeams" :key="team.id" class="col-3 p-1">
                                 <div class="form-check d-flex align-items-center">
                                     <input class="form-check-input me-3"
                                            type="checkbox"
@@ -82,8 +83,19 @@
                 },
                 selectedTeams: this.initialData?.teams || [],
                 teamsList: [],
+                searchTeam: "",
                 isLoadingTeams: true,
             };
+        },
+        computed: {
+            filteredTeams() {
+                if (!this.searchTeam) {
+                    return this.teamsList;
+                }
+                return this.teamsList.filter((team) =>
+                    team.text.toLowerCase().includes(this.searchTeam.toLowerCase())
+                );
+            },
         },
         methods: {
             getTeams() {
@@ -135,5 +147,5 @@
         font-size: 14px;
         color: #6c757d;
         margin-bottom: 16px;
-    }
+}
 </style>
