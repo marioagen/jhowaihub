@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.DTOs
 {
-    public record PromptBaseDto
+    public record PromptInternalDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

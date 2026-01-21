@@ -12,6 +12,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         PromptDto? FindById(int id);
         IQueryable<PromptDto> FindAllWithOwnerStatus(Guid idUser);
         IQueryable<PromptDto> FindByIdUser(Guid idUser);
-        Task<ICollection<PromptBaseDto>> FindAllBasic();
+        Task<ICollection<PromptInternalDto>> FindAllInternal();
     }
 }

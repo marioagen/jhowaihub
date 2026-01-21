@@ -97,10 +97,10 @@ namespace WoopiAiHub.Repository
         /// Asynchronously retrieves all prompts in the basic format.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<PromptBaseDto>> FindAllBasic()
+        public async Task<ICollection<PromptInternalDto>> FindAllInternal()
         {
             return await _context.Prompts
-                .Select(p => new PromptBaseDto
+                .Select(p => new PromptInternalDto
                 {
                     Id = p.Id,
                     Name = p.Name,

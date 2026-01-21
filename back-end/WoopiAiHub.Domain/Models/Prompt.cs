@@ -25,7 +25,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual User User { get; set; }
 
         public Prompt(int id, DateTime created, string name, string description, string text, Guid idUser,
-            bool isEdited = false, bool isImported = false, bool internalPrompt = false)
+            bool isEdited = false, bool isImported = false)
             : base(id, created)
         {
             Name = name;

@@ -551,25 +551,25 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindAllBasic_Success()
         {
             //Arrange
-            var expectedPrompts = new List<PromptBaseDto>
+            var expectedPrompts = new List<PromptInternalDto>
             {
-                new PromptBaseDto { Id = 1, Name = "Prompt 1", Description = "Description 1" },
-                new PromptBaseDto { Id = 2, Name = "Prompt 2", Description = "Description 2" },
-                new PromptBaseDto { Id = 3, Name = "Prompt 3", Description = "Description 3" }
+                new PromptInternalDto { Id = 1, Name = "Prompt 1", Description = "Description 1" },
+                new PromptInternalDto { Id = 2, Name = "Prompt 2", Description = "Description 2" },
+                new PromptInternalDto { Id = 3, Name = "Prompt 3", Description = "Description 3" }
             };
 
             _mocker.GetMock<IPromptRepository>()
-                .Setup(r => r.FindAllBasic())
+                .Setup(r => r.FindAllInternal())
                 .ReturnsAsync(expectedPrompts);
 
             //Act
-            var result = await _promptServices.FindAllBasic();
+            var result = await _promptServices.FindAllInternal();
 
             //Assert
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
             Assert.Equal(expectedPrompts, result);
-            _mocker.GetMock<IPromptRepository>().Verify(r => r.FindAllBasic(), Times.Once);
+            _mocker.GetMock<IPromptRepository>().Verify(r => r.FindAllInternal(), Times.Once);
         }
 
         [Fact(DisplayName = "Find all basic prompts should return empty collection")]
@@ -577,19 +577,19 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindAllBasic_ShouldReturnEmptyCollection()
         {
             //Arrange
-            var emptyPrompts = new List<PromptBaseDto>();
+            var emptyPrompts = new List<PromptInternalDto>();
 
             _mocker.GetMock<IPromptRepository>()
-                .Setup(r => r.FindAllBasic())
+                .Setup(r => r.FindAllInternal())
                 .ReturnsAsync(emptyPrompts);
 
             //Act
-            var result = await _promptServices.FindAllBasic();
+            var result = await _promptServices.FindAllInternal();
 
             //Assert
             Assert.NotNull(result);
             Assert.Empty(result);
-            _mocker.GetMock<IPromptRepository>().Verify(r => r.FindAllBasic(), Times.Once);
+            _mocker.GetMock<IPromptRepository>().Verify(r => r.FindAllInternal(), Times.Once);
         }
     }
 }
