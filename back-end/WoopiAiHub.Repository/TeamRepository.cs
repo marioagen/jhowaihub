@@ -67,6 +67,7 @@ namespace WoopiAiHub.Repository
                                     }).ToList()
                                     : new List<WorkflowDto>()
                            })
+                           .OrderBy(x => x.Name)
                            .AsNoTracking();
         }
 

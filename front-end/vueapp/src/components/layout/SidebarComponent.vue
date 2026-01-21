@@ -163,7 +163,7 @@
                         labelKey: "pages.workflows",
                     },
                     {
-                        permission: "Workflow",
+                        permission: "WorkflowManagement",
                         activeKey: "WorkflowManagement",
                         to: "/workflow/management",
                         icon: {

@@ -1,53 +1,63 @@
 <template>
     <main>
-        <div class="container-fluid scroll-area mx-4 mt-4">
-            <div class="row align-items-center">
-                <div class="col-6">
-                    <div class="row">
-                        <div class="col-1">
-                            <button
-                                class="btn btn-outline-primary btn-table btn-sm table-btn"
-                                @click="returnToTable"
-                            >
-                                <LucideIcon
-                                    icon="ArrowLeft"
-                                />
-                            </button>
-                        </div>
-                        <div class="col-10">
-                            <div>
-                                <h5 class="mb-0 fw-bold">
-                                    {{ $t(formTitle) }}
-                                </h5>
-                                <p>
-                                    <small
-                                        class="text-muted"
+        <Form
+            ref="formRef"
+            v-slot="{ meta }"
+        >
+            <div
+                class="container-fluid scroll-area mx-4 mt-4"
+            >
+                <div class="row align-items-center">
+                    <div class="col-6">
+                        <div class="row">
+                            <div class="col-1">
+                                <button
+                                    class="btn btn-outline-primary btn-table btn-sm table-btn"
+                                    @click="returnToTable"
+                                >
+                                    <LucideIcon
+                                        icon="ArrowLeft"
+                                    />
+                                </button>
+                            </div>
+                            <div class="col-10">
+                                <div>
+                                    <h5
+                                        class="mb-0 fw-bold"
                                     >
-                                        {{
-                                            $t(formSubtitle)
-                                        }}
-                                    </small>
-                                </p>
+                                        {{ $t(formTitle) }}
+                                    </h5>
+                                    <p>
+                                        <small
+                                            class="text-muted"
+                                        >
+                                            {{
+                                                $t(
+                                                    formSubtitle
+                                                )
+                                            }}
+                                        </small>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-auto ms-auto">
+                        <button
+                            class="btn btn-primary btn-sm"
+                            @click="saveUser"
+                            :disabled="!meta.valid"
+                        >
+                            <LucideIcon
+                                icon="Save"
+                                :size="15"
+                            />
+                            {{ $t("common.save") }}
+                        </button>
+                    </div>
                 </div>
-                <div class="col-auto ms-auto">
-                    <button
-                        class="btn btn-primary btn-sm"
-                        @click="saveUser"
-                    >
-                        <LucideIcon
-                            icon="Save"
-                            :size="15"
-                        />
-                        {{ $t("common.save") }}
-                    </button>
-                </div>
-            </div>
-            <div class="row mt-1">
-                <div class="main-div shadow-sm">
-                    <Form ref="formRef">
+                <div class="row mt-1">
+                    <div class="main-div shadow-sm">
                         <div class="row">
                             <div class="col-6">
                                 <div class="mb-3">
@@ -208,63 +218,65 @@
                                 </div>
                             </template>
                         </SelectionListComponent>
-                    </Form>
-                </div>
-                <div
-                    v-if="showTeams"
-                    class="main-div shadow-sm mt-2"
-                >
-                    <Form
-                        @submit="createTeam"
-                        ref="formRefTeam"
-                    >
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label
-                                    for="teamName"
-                                    class="form-label fw-semibold mb-0"
-                                >
-                                    {{
-                                        $t(
-                                            "management.teams.teamName"
-                                        )
-                                    }}
-                                </label>
-                                <Field
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    id="teamName"
-                                    ref="teamNameInput"
-                                    autocomplete="off"
-                                    name="teamName"
-                                    v-model="teamData.name"
-                                    :placeholder="
-                                        $t(
-                                            'management.teams.typeTeamName'
-                                        )
-                                    "
-                                    :rules="'required|min:3|max:100'"
-                                />
-                                <ErrorMessage
-                                    name="teamName"
-                                    class="invalid-feedback d-block"
-                                />
-                            </div>
-                        </div>
-                        <div class="col-auto ms-auto">
-                            <button
-                                class="btn btn-primary btn-sm"
-                            >
-                                <LucideIcon
-                                    icon="Save"
-                                    :size="15"
-                                />
-                                {{ $t("common.save") }}
-                            </button>
-                        </div>
-                    </Form>
+                    </div>
                 </div>
             </div>
+        </Form>
+        <div
+            v-if="showTeams"
+            class="main-div shadow-sm mt-2"
+        >
+            <Form
+                @submit="createTeam"
+                ref="formRefTeam"
+                v-slot="{ meta }"
+            >
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label
+                            for="teamName"
+                            class="form-label fw-semibold mb-0"
+                        >
+                            {{
+                                $t(
+                                    "management.teams.teamName"
+                                )
+                            }}
+                        </label>
+                        <Field
+                            type="text"
+                            class="form-control form-control-sm"
+                            id="teamName"
+                            ref="teamNameInput"
+                            autocomplete="off"
+                            name="teamName"
+                            v-model="teamData.name"
+                            :placeholder="
+                                $t(
+                                    'management.teams.typeTeamName'
+                                )
+                            "
+                            :rules="'required|min:3|max:100'"
+                        />
+                        <ErrorMessage
+                            name="teamName"
+                            class="invalid-feedback d-block"
+                        />
+                    </div>
+                </div>
+                <div class="col-auto ms-auto">
+                    <button
+                        class="btn btn-primary btn-sm"
+                        :disabled="!meta.valid"
+                    >
+                        <LucideIcon
+                            icon="Save"
+                            :size="15"
+                        />
+                        {{ $t("common.save") }}
+                    </button>
+                </div>
+            </Form>
         </div>
     </main>
 </template>
