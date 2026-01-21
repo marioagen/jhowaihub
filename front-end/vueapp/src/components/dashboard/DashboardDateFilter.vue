@@ -85,7 +85,6 @@
                 });
             },
             setCurrentMonth() {
-                console.log("Set Current Month");
                 this.selectedPreset = "currentMonth";
                 const today = new Date();
                 const first = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -94,7 +93,6 @@
                 this.filterData();
             },
             setLastMonth() {
-                console.log("Set Last Month");
                 this.selectedPreset = "lastMonth";
                 const now = new Date();
                 const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -104,7 +102,6 @@
                 this.filterData();
             },
             setPreviousSeven() {
-                console.log("Set Previous Seven");
                 this.selectedPreset = "previousSeven";
                 const end = new Date();
                 const start = new Date();
@@ -114,7 +111,6 @@
                 this.filterData();
             },
             setPreviousNinety() {
-                console.log("Set Previous Ninety");
                 this.selectedPreset = "previousNinety";
                 const end = new Date();
                 const start = new Date();
@@ -123,9 +119,6 @@
                 this.end = end.toISOString().slice(0, 10);
                 this.filterData();
             },
-        },
-        mounted() {
-            // this.filterData();
         },
     };
 </script>

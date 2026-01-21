@@ -92,11 +92,6 @@ export default {
     created() {
         this.getPagesData();
     },
-    // watch: {
-    //     usageUnits() {
-    //         this.setTotalPages();
-    //     }
-    // },
     methods: {
         getPagesData() {
             this.isLoading = true;

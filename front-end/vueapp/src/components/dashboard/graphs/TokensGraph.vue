@@ -96,8 +96,6 @@ export default {
         },
     }),
     created() {
-        console.log(this.start);
-        console.log(this.end);
         this.getIAList();
     },
     computed: {
@@ -138,7 +136,6 @@ export default {
             };
             DashboardServices.GetTokensByModel(params)
                 .then((response) => {
-                    console.log(response);
                     if (response && !response.error) {
                         this.graph.options = {
                             ...this.graph.options,
@@ -164,7 +161,6 @@ export default {
             this.isLoading = true;
             DashboardServices.GetTotalUsageCost(paramsTotalCost)
                 .then((response) => {
-                    console.log(response);
                     if (response && !response.error) {
                         this.totalCost = response;
                         this.setTotalTokens();
@@ -191,12 +187,6 @@ export default {
             this.currentIAIndex = (this.currentIAIndex - 1 + this.IAList.length) % this.IAList.length;
             this.getTokensData();
         },
-        // updateGraph(start, end) {
-        //     this.previousTotalTokens = 0;
-        //     this.start = start;
-        //     this.end = end;
-        //     this.getIAList();
-        // }
     },
 }
 </script>

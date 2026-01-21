@@ -134,11 +134,6 @@ export default {
         this.getWorkflowsData();
         this.getWorkflowsAutomaticData();
     },
-    // watch: {
-    //     usageUnits() {
-    //         this.setTotalExecution();
-    //     }
-    // },
     computed: {
         totalWorkflows() {
             return this.graph2.series[0].data.reduce((a, b) => a + b, 0);

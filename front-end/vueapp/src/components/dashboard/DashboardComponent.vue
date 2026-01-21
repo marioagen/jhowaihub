@@ -66,7 +66,7 @@
                 :key="datesChange" 
                 :usageUnits="usageUnits" 
                 :isLoading="isLoading"
-                @setTotalTokens="setTotalTokens"
+                @setTotalTokens="setTotalWTC"
                 ref="TokensGraph" 
             />
             <PagesProcessedGraph 
@@ -135,16 +135,13 @@ export default {
         },
         filterData(filters) {
             this.isLoading = true;
-            console.log("Filter Data");
             this.filters = filters;
             this.totalWTC = 0;
             this.datesChange++;
+            
             setTimeout(() => {
                 this.isLoading = false;
             }, 500);
-            // this.$refs.TokensGraph.updateGraph(this.filters.start, this.filters.end);
-            // this.$refs.WorkflowsGraph.updateGraph(this.filters.start, this.filters.end);
-            // this.$refs.PagesProcessedGraph.updateGraph(this.filters.start, this.filters.end);
         },
         presetDate() {
             return this.$t(`dashboard.filters.${this.filters.preset}`);
@@ -154,7 +151,6 @@ export default {
             DashboardServices.GetUsageUnits(this.filters)
                 .then((response) => {
                     this.usageUnits = response;
-                    console.log(this.usageUnits);
                 });
         },
         getPlan() {
@@ -163,20 +159,13 @@ export default {
                     this.plan = response.toUpperCase();
                 });
         },
-        setTotalTokens(total) {
-            //Porque aqui eu deveria somar o total de tokens?
-            console.log("Set Total Tokens", total);
-            this.totalWTC += total;
-        },
         setTotalWTC(total) {
-            console.log("Set Total WTC", total);
             this.totalWTC += total;
         },
         proccessTenantMetrics() {
             this.isLoading = true;
             DashboardServices.ProcessMetricsByTenant()
                 .then(() => {
-                    // this.datesChange++;
                     this.filterData(this.filters);
                 }).finally(() => {
                     this.isLoading = false;
