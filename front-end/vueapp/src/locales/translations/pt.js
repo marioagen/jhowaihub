@@ -882,6 +882,39 @@
             button: "Acessar docs",
         },
     },
+    permissions: {
+        groups: {
+            questions: "Perguntas",
+            types: "Tipos",
+            quizzes: "Questionários",
+            documents: "Documentos",
+            management: "Gestão",
+            users: "Usuários",
+            teams: "Times",
+            profiles: "Perfis",
+            workflow: "Esteira de processamento",
+            tools: "Ferramentas",
+            dashboard: "Dashboard",
+            workflowStep: "Etapa da esteira",
+            prompts: "Prompts"
+        },
+        descriptions: {
+            questions: "Visualizar Perguntas",
+            types: "Visualizar Tipos",
+            quizzes: "Visualizar Questionários",
+            documents: "Visualizar Documentos",
+            management: "Visualizar Gestão de tabelas",
+            users: "Visualizar Usuários",
+            teams: "Visualizar Times",
+            profiles: "Visualizar Perfis",
+            workflow: "Visualizar Esteira de processamento",
+            tools: "Visualizar Ferramentas",
+            dashboard: "Visualizar Dashboard",
+            workflowStepView: "Visualizar Etapas",
+            workflowStepAccess: "Acessar Etapas",
+            prompts: "Visualizar Prompts",
+        }
+    }
 };
 
 export default portuguese;
