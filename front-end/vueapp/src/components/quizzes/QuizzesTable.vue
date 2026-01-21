@@ -289,7 +289,6 @@
         },
     };
 </script>
-
 <style scoped>
     .delete-container {
         position: relative;

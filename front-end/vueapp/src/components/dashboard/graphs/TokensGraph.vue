@@ -114,9 +114,9 @@
     </div>
 </template>
 <script>
-    import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
-    import LoadingComponent from '@/components/global/LoadingComponent.vue';
-    import DashboardServices from '@/services/dashboard/DashboardServices';
+    import BarGraphComponent from "@/components/global/graphs/BarGraphComponent.vue";
+    import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import DashboardServices from "@/services/dashboard/DashboardServices";
     export default {
         components: {
             BarGraphComponent,
@@ -136,7 +136,7 @@
                 required: true,
             },
         },
-        emits: ['setTotalTokens'],
+        emits: ["setTotalTokens"],
         data: () => ({
             isLoaded: false,
             IAList: [],
@@ -146,9 +146,9 @@
             graph: {
                 options: {
                     chart: {
-                        id: 'sales-bar',
+                        id: "sales-bar",
                         toolbar: {
-                            show: false
+                            show: false,
                         },
                     },
                     plotOptions: {
@@ -160,89 +160,16 @@
                         enabled: false,
                     },
                     xaxis: {
-                        categories: []
+                        categories: [],
                     },
-                    colors: ['#10315B']
+                    colors: ["#10315B"],
                 },
-            },
-            emits: ["setTotalTokens"],
-            data: () => ({
-                start: null,
-                end: null,
-                isLoading: false,
-                IAList: [],
-                currentIAIndex: 0,
-                previousTotalTokens: 0,
-                totalCost: 0,
-                graph: {
-                    options: {
-                        chart: {
-                            id: "sales-bar",
-                            toolbar: {
-                                show: false,
-                            },
-                        },
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 5,
-                            },
-                        },
-                        dataLabels: {
-                            enabled: false,
-                        },
-                        xaxis: {
-                            categories: [],
-                        },
-                        colors: ["#10315B"],
+                series: [
+                    {
+                        name: "Tokens",
+                        data: [],
                     },
-                    series: [
-                        {
-                            name: "Tokens",
-                            data: [],
-                        },
-                    ],
-                },
-            }),
-            created() {
-                this.getIAList();
-            },
-            watch: {
-                usageUnits() {
-                    this.setTotalTokens();
-                },
-            },
-            computed: {
-                currentIA() {
-                    return (
-                        this.IAList[this.currentIAIndex] || {
-                            name: "No IA selected",
-                            id: 0,
-                        }
-                    );
-                },
-                totalTokens() {
-                    return this.graph.series[0].data.reduce(
-                        (a, b) => a + b,
-                        0
-                    );
-                },
-                usageUnitTokens() {
-                    if (
-                        !Array.isArray(this.usageUnits) ||
-                        this.usageUnits.length === 0
-                    ) {
-                        return 0;
-                    }
-                    return (
-                        this.usageUnits.find(
-                            (item) =>
-                                item.modelEmbeddingId ===
-                                (this.IAList[
-                                    this.currentIAIndex
-                                ]?.id ?? 0)
-                        )?.value ?? 0
-                    );
-                },
+                ],
             },
         }),
         created() {
@@ -250,22 +177,41 @@
         },
         computed: {
             currentIA() {
-                return this.IAList[this.currentIAIndex] || { name: 'No IA selected', id: 0 };
+                return (
+                    this.IAList[this.currentIAIndex] || {
+                        name: "No IA selected",
+                        id: 0,
+                    }
+                );
             },
             totalTokens() {
-                return this.graph.series[0].data.reduce((a, b) => a + b, 0);
+                return this.graph.series[0].data.reduce(
+                    (a, b) => a + b,
+                    0
+                );
             },
             usageUnitTokens() {
-                if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
+                if (
+                    !Array.isArray(this.usageUnits) ||
+                    this.usageUnits.length === 0
+                ) {
                     return 0;
                 }
-                return this.usageUnits.find(item => item.modelEmbeddingId === (this.IAList[this.currentIAIndex]?.id ?? 0))?.value ?? 0;
+                return (
+                    this.usageUnits.find(
+                        (item) =>
+                            item.modelEmbeddingId ===
+                            (this.IAList[
+                                this.currentIAIndex
+                            ]?.id ?? 0)
+                    )?.value ?? 0
+                );
             },
         },
         methods: {
             getIAList() {
-                DashboardServices.GetUsedModels()
-                    .then((response) => {
+                DashboardServices.GetUsedModels().then(
+                    (response) => {
                         if (response && !response.error) {
                             this.IAList = response;
                             if (this.IAList.length > 0) {
@@ -274,7 +220,8 @@
                                 this.getTotalCost();
                             }
                         }
-                    });
+                    }
+                );
             },
             getTokensData() {
                 if (!this.currentIA) return;
@@ -282,7 +229,7 @@
                 let params = {
                     start: this.start,
                     end: this.end,
-                    id: this.currentIA.id
+                    id: this.currentIA.id,
                 };
                 DashboardServices.GetTokensByModel(params)
                     .then((response) => {
@@ -290,13 +237,21 @@
                             this.graph.options = {
                                 ...this.graph.options,
                                 xaxis: {
-                                    categories: response.map(item => item.date)
-                                }
+                                    categories:
+                                        response.map(
+                                            (item) =>
+                                                item.date
+                                        ),
+                                },
                             };
-                            this.graph.series = [{
-                                name: 'Tokens',
-                                data: response.map(item => item.value)
-                            }];
+                            this.graph.series = [
+                                {
+                                    name: "Tokens",
+                                    data: response.map(
+                                        (item) => item.value
+                                    ),
+                                },
+                            ];
                         }
                     })
                     .finally(() => {
@@ -306,10 +261,12 @@
             getTotalCost() {
                 let paramsTotalCost = {
                     start: this.start,
-                    end: this.end
+                    end: this.end,
                 };
                 this.isLoaded = false;
-                DashboardServices.GetTotalUsageCost(paramsTotalCost)
+                DashboardServices.GetTotalUsageCost(
+                    paramsTotalCost
+                )
                     .then((response) => {
                         if (response && !response.error) {
                             this.totalCost = response;
@@ -321,37 +278,37 @@
                     });
             },
             setTotalTokens() {
-                this.$emit('setTotalTokens', this.totalCost);
+                this.$emit(
+                    "setTotalTokens",
+                    this.totalCost
+                );
             },
             nextIA() {
                 if (this.IAList.length === 0) return;
-                if (this.currentIAIndex >= this.IAList.length - 1) return;
+                if (
+                    this.currentIAIndex >=
+                    this.IAList.length - 1
+                )
+                    return;
 
-                    this.currentIAIndex =
-                        (this.currentIAIndex + 1) %
-                        this.IAList.length;
-                    this.getTokensData();
-                },
-                previousIA() {
-                    if (this.IAList.length === 0) return;
-                    if (this.currentIAIndex <= 0) return;
+                this.currentIAIndex =
+                    (this.currentIAIndex + 1) %
+                    this.IAList.length;
+                this.getTokensData();
+            },
+            previousIA() {
+                if (this.IAList.length === 0) return;
+                if (this.currentIAIndex <= 0) return;
 
-                    this.currentIAIndex =
-                        (this.currentIAIndex -
-                            1 +
-                            this.IAList.length) %
-                        this.IAList.length;
-                    this.getTokensData();
-                },
-                updateGraph(start, end) {
-                    this.previousTotalTokens = 0;
-                    this.start = start;
-                    this.end = end;
-                    this.getIAList();
-                },
+                this.currentIAIndex =
+                    (this.currentIAIndex -
+                        1 +
+                        this.IAList.length) %
+                    this.IAList.length;
+                this.getTokensData();
             },
         },
-    }
+    };
 </script>
 <style scoped>
     .disabled {

@@ -142,10 +142,10 @@
     </div>
 </template>
 <script>
-    import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
-    import LoadingComponent from '@/components/global/LoadingComponent.vue';
-    import DashboardServices from '@/services/dashboard/DashboardServices';
-    import { ColTypeUsage } from '@/constants/ColTypeUsage';
+    import BarGraphComponent from "@/components/global/graphs/BarGraphComponent.vue";
+    import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import DashboardServices from "@/services/dashboard/DashboardServices";
+    import { ColTypeUsage } from "@/constants/ColTypeUsage";
     export default {
         components: {
             BarGraphComponent,
@@ -165,15 +165,15 @@
                 required: true,
             },
         },
-        emits: ['setTotalExecution'],
+        emits: ["setTotalExecution"],
         data: () => ({
             isLoadedWorkflows: false,
             graph: {
                 options: {
                     chart: {
-                        id: 'sales-bar',
+                        id: "sales-bar",
                         toolbar: {
-                            show: false
+                            show: false,
                         },
                     },
                     plotOptions: {
@@ -185,45 +185,45 @@
                         enabled: false,
                     },
                     xaxis: {
-                        categories: []
+                        categories: [],
                     },
-                    colors: ['#10315B']
+                    colors: ["#10315B"],
                 },
+                series: [
+                    {
+                        name: "Executions",
+                        data: [],
+                    },
+                ],
             },
             isLoadedAutomation: false,
             graph2: {
                 options: {
                     chart: {
-                        id: 'sales-bar',
+                        id: "sales-bar",
                         toolbar: {
-                            show: false
+                            show: false,
                         },
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 5,
-                            },
-                        },
-                        dataLabels: {
-                            enabled: false,
-                        },
-                        xaxis: {
-                            categories: [],
-                        },
-                        colors: ["#10315B"],
                     },
-                    series: [
-                        {
-                            name: "Executions",
-                            data: [],
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 5,
                         },
-                    ],
+                    },
+                    dataLabels: {
+                        enabled: false,
+                    },
+                    xaxis: {
+                        categories: [],
+                    },
+                    colors: ["#10315B"],
                 },
                 series: [
                     {
-                        name: 'Executions',
-                        data: []
-                    }
-                ]
+                        name: "Executions",
+                        data: [],
+                    },
+                ],
             },
         }),
         created() {
@@ -232,30 +232,54 @@
         },
         computed: {
             totalWorkflows() {
-                return this.graph2.series[0].data.reduce((a, b) => a + b, 0);
+                return this.graph2.series[0].data.reduce(
+                    (a, b) => a + b,
+                    0
+                );
             },
             totalWorkflowsAutomatic() {
-                return this.graph.series[0].data.reduce((a, b) => a + b, 0);
+                return this.graph.series[0].data.reduce(
+                    (a, b) => a + b,
+                    0
+                );
             },
             usageUnitWorkflowAutomatic() {
-                if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
+                if (
+                    !Array.isArray(this.usageUnits) ||
+                    this.usageUnits.length === 0
+                ) {
                     return 0;
                 }
-                return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.Automation)?.value ?? 0;
+                return (
+                    this.usageUnits.find(
+                        (item) =>
+                            item.usageTypeName ===
+                            ColTypeUsage.Automation
+                    )?.value ?? 0
+                );
             },
             usageUnitWorkflow() {
-                if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
+                if (
+                    !Array.isArray(this.usageUnits) ||
+                    this.usageUnits.length === 0
+                ) {
                     return 0;
                 }
-                return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.Execution)?.value ?? 0;
-            }
+                return (
+                    this.usageUnits.find(
+                        (item) =>
+                            item.usageTypeName ===
+                            ColTypeUsage.Execution
+                    )?.value ?? 0
+                );
+            },
         },
         methods: {
             getWorkflowsData() {
                 let params = {
                     start: this.start,
                     end: this.end,
-                    usageType: ColTypeUsage.Execution
+                    usageType: ColTypeUsage.Execution,
                 };
                 this.isLoadedWorkflows = false;
                 DashboardServices.GetByUsageType(params)
@@ -264,13 +288,21 @@
                             this.graph2.options = {
                                 ...this.graph2.options,
                                 xaxis: {
-                                    categories: response.map(item => item.date)
-                                }
+                                    categories:
+                                        response.map(
+                                            (item) =>
+                                                item.date
+                                        ),
+                                },
                             };
-                            this.graph2.series = [{
-                                name: 'Workflows',
-                                data: response.map(item => item.value)
-                            }];
+                            this.graph2.series = [
+                                {
+                                    name: "Workflows",
+                                    data: response.map(
+                                        (item) => item.value
+                                    ),
+                                },
+                            ];
                         }
                     })
                     .finally(() => {
@@ -279,15 +311,21 @@
                     });
             },
             setTotalExecution() {
-                let totalExecution = (this.usageUnitWorkflow * this.totalWorkflows)
-                    + (this.usageUnitWorkflowAutomatic * this.totalWorkflowsAutomatic);
-                this.$emit('setTotalExecution', totalExecution);
+                let totalExecution =
+                    this.usageUnitWorkflow *
+                        this.totalWorkflows +
+                    this.usageUnitWorkflowAutomatic *
+                        this.totalWorkflowsAutomatic;
+                this.$emit(
+                    "setTotalExecution",
+                    totalExecution
+                );
             },
             getWorkflowsAutomaticData() {
                 let params = {
                     start: this.start,
                     end: this.end,
-                    usageType: ColTypeUsage.Automation
+                    usageType: ColTypeUsage.Automation,
                 };
                 this.isLoadedAutomation = false;
                 DashboardServices.GetByUsageType(params)
@@ -296,13 +334,21 @@
                             this.graph.options = {
                                 ...this.graph.options,
                                 xaxis: {
-                                    categories: response.map(item => item.date)
-                                }
+                                    categories:
+                                        response.map(
+                                            (item) =>
+                                                item.date
+                                        ),
+                                },
                             };
-                            this.graph.series = [{
-                                name: 'Automatic Workflows',
-                                data: response.map(item => item.value)
-                            }];
+                            this.graph.series = [
+                                {
+                                    name: "Automatic Workflows",
+                                    data: response.map(
+                                        (item) => item.value
+                                    ),
+                                },
+                            ];
                         }
                     })
                     .finally(() => {
@@ -315,142 +361,6 @@
                 this.getWorkflowsData();
                 this.getWorkflowsAutomaticData();
             },
-            watch: {
-                usageUnits() {
-                    this.setTotalExecution();
-                },
-            },
-            computed: {
-                totalWorkflows() {
-                    return this.graph2.series[0].data.reduce(
-                        (a, b) => a + b,
-                        0
-                    );
-                },
-                totalWorkflowsAutomatic() {
-                    return this.graph.series[0].data.reduce(
-                        (a, b) => a + b,
-                        0
-                    );
-                },
-                usageUnitWorkflowAutomatic() {
-                    if (
-                        !Array.isArray(this.usageUnits) ||
-                        this.usageUnits.length === 0
-                    ) {
-                        return 0;
-                    }
-                    return (
-                        this.usageUnits.find(
-                            (item) =>
-                                item.usageTypeName ===
-                                ColTypeUsage.Automation
-                        )?.value ?? 0
-                    );
-                },
-                usageUnitWorkflow() {
-                    if (
-                        !Array.isArray(this.usageUnits) ||
-                        this.usageUnits.length === 0
-                    ) {
-                        return 0;
-                    }
-                    return (
-                        this.usageUnits.find(
-                            (item) =>
-                                item.usageTypeName ===
-                                ColTypeUsage.Execution
-                        )?.value ?? 0
-                    );
-                },
-            },
-            methods: {
-                getWorkflowsData() {
-                    let params = {
-                        start: this.start,
-                        end: this.end,
-                        usageType: ColTypeUsage.Execution,
-                    };
-                    this.isLoadingWorkflows = true;
-                    DashboardServices.GetByUsageType(params)
-                        .then((response) => {
-                            if (response && !response.error) {
-                                this.graph2.options = {
-                                    ...this.graph2.options,
-                                    xaxis: {
-                                        categories:
-                                            response.map(
-                                                (item) =>
-                                                    item.date
-                                            ),
-                                    },
-                                };
-                                this.graph2.series = [
-                                    {
-                                        name: "Workflows",
-                                        data: response.map(
-                                            (item) => item.value
-                                        ),
-                                    },
-                                ];
-                            }
-                        })
-                        .finally(() => {
-                            this.isLoadingWorkflows = false;
-                            this.setTotalExecution();
-                        });
-                },
-                setTotalExecution() {
-                    let totalExecution =
-                        this.usageUnitWorkflow *
-                            this.totalWorkflows +
-                        this.usageUnitWorkflowAutomatic *
-                            this.totalWorkflowsAutomatic;
-                    this.$emit(
-                        "setTotalExecution",
-                        totalExecution
-                    );
-                },
-                getWorkflowsAutomaticData() {
-                    let params = {
-                        start: this.start,
-                        end: this.end,
-                        usageType: ColTypeUsage.Automation,
-                    };
-                    this.isLoadingAutomation = true;
-                    DashboardServices.GetByUsageType(params)
-                        .then((response) => {
-                            if (response && !response.error) {
-                                this.graph.options = {
-                                    ...this.graph.options,
-                                    xaxis: {
-                                        categories:
-                                            response.map(
-                                                (item) =>
-                                                    item.date
-                                            ),
-                                    },
-                                };
-                                this.graph.series = [
-                                    {
-                                        name: "Automatic Workflows",
-                                        data: response.map(
-                                            (item) => item.value
-                                        ),
-                                    },
-                                ];
-                            }
-                        })
-                        .finally(() => {
-                            this.isLoadingAutomation = false;
-                        });
-                },
-                updateGraph(start, end) {
-                    this.start = start;
-                    this.end = end;
-                    this.getWorkflowsData();
-                    this.getWorkflowsAutomaticData();
-                },
-            },
-        };
+        },
+    };
 </script>

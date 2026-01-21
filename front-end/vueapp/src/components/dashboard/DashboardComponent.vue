@@ -144,13 +144,13 @@
     </main>
 </template>
 <script>
-    import TokensGraph from '@/components/dashboard/graphs/TokensGraph.vue';
-    import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGraph.vue';
-    import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
-    import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
-    import DashboardServices from '@/services/dashboard/DashboardServices';
+    import TokensGraph from "@/components/dashboard/graphs/TokensGraph.vue";
+    import PagesProcessedGraph from "@/components/dashboard/graphs/PagesProcessedGraph.vue";
+    import WorkflowsGraph from "@/components/dashboard/graphs/WorkflowsGraph.vue";
+    import DashboardDateFilter from "@/components/dashboard/DashboardDateFilter.vue";
+    import DashboardServices from "@/services/dashboard/DashboardServices";
     import store from "@/store";
-    import LoadingComponent from '@/components/global/LoadingComponent.vue';
+    import LoadingComponent from "@/components/global/LoadingComponent.vue";
     export default {
         components: {
             DashboardDateFilter,
@@ -161,7 +161,11 @@
         },
         data() {
             const today = new Date();
-            const first = new Date(today.getFullYear(), today.getMonth(), 1);
+            const first = new Date(
+                today.getFullYear(),
+                today.getMonth(),
+                1
+            );
             return {
                 isLoading: false,
                 showDateFilter: false,
@@ -196,38 +200,24 @@
                 }, 500);
             },
             presetDate() {
-                return this.$t(`dashboard.filters.${this.filters.preset}`);
+                return this.$t(
+                    `dashboard.filters.${this.filters.preset}`
+                );
             },
             getDashboardData() {
                 this.filterData(this.filters);
-                DashboardServices.GetUsageUnits(this.filters)
-                    .then((response) => {
-                        this.usageUnits = response;
-                    });
-                },
-                getPlan() {
-                    DashboardServices.GetPlan(
-                        store.state.userProfile.tenant
-                    ).then((response) => {
-                        this.plan = response.toUpperCase();
-                    });
-                },
-                setTotalTokens(total) {
-                    this.totalWTC += total;
-                },
-                setTotalWTC(total) {
-                    this.totalWTC += total;
-                },
-                proccessTenantMetrics() {
-                    this.isLoading = true;
-                    DashboardServices.ProcessMetricsByTenant()
-                        .then(() => {
-                            this.filterData(this.filters);
-                        })
-                        .finally(() => {
-                            this.isLoading = false;
-                        });
-                },
+                DashboardServices.GetUsageUnits(
+                    this.filters
+                ).then((response) => {
+                    this.usageUnits = response;
+                });
+            },
+            getPlan() {
+                DashboardServices.GetPlan(
+                    store.state.userProfile.tenant
+                ).then((response) => {
+                    this.plan = response.toUpperCase();
+                });
             },
             setTotalWTC(total) {
                 this.totalWTC += total;
@@ -237,7 +227,8 @@
                 DashboardServices.ProcessMetricsByTenant()
                     .then(() => {
                         this.filterData(this.filters);
-                    }).finally(() => {
+                    })
+                    .finally(() => {
                         this.isLoading = false;
                     });
             },
@@ -245,8 +236,8 @@
         mounted() {
             this.getDashboardData();
             this.getPlan();
-        }
-    }
+        },
+    };
 </script>
 <style scoped>
     .plan-box {

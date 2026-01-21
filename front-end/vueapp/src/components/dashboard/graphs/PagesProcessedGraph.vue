@@ -71,14 +71,14 @@
     </div>
 </template>
 <script>
-    import BarGraphComponent from '@/components/global/graphs/BarGraphComponent.vue';
-    import LoadingComponent from '@/components/global/LoadingComponent.vue';
-    import DashboardServices from '@/services/dashboard/DashboardServices';
-    import { ColTypeUsage } from '@/constants/ColTypeUsage';
+    import BarGraphComponent from "@/components/global/graphs/BarGraphComponent.vue";
+    import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import DashboardServices from "@/services/dashboard/DashboardServices";
+    import { ColTypeUsage } from "@/constants/ColTypeUsage";
     export default {
         components: {
             BarGraphComponent,
-            LoadingComponent
+            LoadingComponent,
         },
         props: {
             start: {
@@ -94,15 +94,15 @@
                 required: true,
             },
         },
-        emits: ['setTotalPages'],
+        emits: ["setTotalPages"],
         data: () => ({
             isLoaded: false,
             graph: {
                 options: {
                     chart: {
-                        id: 'sales-bar',
+                        id: "sales-bar",
                         toolbar: {
-                            show: false
+                            show: false,
                         },
                     },
                     plotOptions: {
@@ -114,79 +114,40 @@
                         enabled: false,
                     },
                     xaxis: {
-                        categories: []
+                        categories: [],
                     },
-                    colors: ['#10315B']
+                    colors: ["#10315B"],
                 },
-            },
-            emits: ["setTotalPages"],
-            data: () => ({
-                start: null,
-                end: null,
-                isLoading: true,
-                graph: {
-                    options: {
-                        chart: {
-                            id: "sales-bar",
-                            toolbar: {
-                                show: false,
-                            },
-                        },
-                        plotOptions: {
-                            bar: {
-                                borderRadius: 5,
-                            },
-                        },
-                        dataLabels: {
-                            enabled: false,
-                        },
-                        xaxis: {
-                            categories: [],
-                        },
-                        colors: ["#10315B"],
+                series: [
+                    {
+                        name: "Pages",
+                        data: [],
                     },
-                    series: [
-                        {
-                            name: "Pages",
-                            data: [],
-                        },
-                    ],
-                },
-            }),
-            computed: {
-                totalPages() {
-                    return this.graph.series[0].data.reduce(
-                        (a, b) => a + b,
-                        0
-                    );
-                },
-                usageUnitPages() {
-                    if (
-                        !Array.isArray(this.usageUnits) ||
-                        this.usageUnits.length === 0
-                    ) {
-                        return 0;
-                    }
-                    return (
-                        this.usageUnits.find(
-                            (item) =>
-                                item.usageTypeName ===
-                                ColTypeUsage.Page
-                        )?.value ?? 0
-                    );
-                },
+                ],
             },
         }),
         computed: {
             totalPages() {
-                return this.graph.series[0].data.reduce((a, b) => a + b, 0);
+                return this.graph.series[0].data.reduce(
+                    (a, b) => a + b,
+                    0
+                );
             },
             usageUnitPages() {
-                if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
+                if (
+                    !Array.isArray(this.usageUnits) ||
+                    this.usageUnits.length === 0
+                ) {
                     return 0;
                 }
-                return this.usageUnits.find(item => item.usageTypeName === ColTypeUsage.Page)?.value ?? 0;
-            }
+                return (
+                    this.usageUnits.find(
+                        (item) =>
+                            item.usageTypeName ===
+                            ColTypeUsage.Page
+                    )?.value ?? 0
+                );
+            },
         },
         created() {
             this.getPagesData();
@@ -197,7 +158,7 @@
                 let params = {
                     start: this.start,
                     end: this.end,
-                    usageType: ColTypeUsage.Page
+                    usageType: ColTypeUsage.Page,
                 };
                 DashboardServices.GetByUsageType(params)
                     .then((response) => {
@@ -205,13 +166,21 @@
                             this.graph.options = {
                                 ...this.graph.options,
                                 xaxis: {
-                                    categories: response.map(item => item.date)
-                                }
+                                    categories:
+                                        response.map(
+                                            (item) =>
+                                                item.date
+                                        ),
+                                },
                             };
-                            this.graph.series = [{
-                                name: 'Pages',
-                                data: response.map(item => item.value)
-                            }];
+                            this.graph.series = [
+                                {
+                                    name: "Pages",
+                                    data: response.map(
+                                        (item) => item.value
+                                    ),
+                                },
+                            ];
                         }
                     })
                     .finally(() => {
@@ -220,65 +189,16 @@
                     });
             },
             setTotalPages() {
-                this.$emit('setTotalPages', this.usageUnitPages * this.totalPages);
+                this.$emit(
+                    "setTotalPages",
+                    this.usageUnitPages * this.totalPages
+                );
             },
             updateGraph(start, end) {
                 this.start = start;
                 this.end = end;
                 this.getPagesData();
             },
-            watch: {
-                usageUnits() {
-                    this.setTotalPages();
-                },
-            },
-            methods: {
-                getPagesData() {
-                    this.isLoading = true;
-                    let params = {
-                        start: this.start,
-                        end: this.end,
-                        usageType: ColTypeUsage.Page,
-                    };
-                    DashboardServices.GetByUsageType(params)
-                        .then((response) => {
-                            if (response && !response.error) {
-                                this.graph.options = {
-                                    ...this.graph.options,
-                                    xaxis: {
-                                        categories:
-                                            response.map(
-                                                (item) =>
-                                                    item.date
-                                            ),
-                                    },
-                                };
-                                this.graph.series = [
-                                    {
-                                        name: "Pages",
-                                        data: response.map(
-                                            (item) => item.value
-                                        ),
-                                    },
-                                ];
-                            }
-                        })
-                        .finally(() => {
-                            this.isLoading = false;
-                            this.setTotalPages();
-                        });
-                },
-                setTotalPages() {
-                    this.$emit(
-                        "setTotalPages",
-                        this.usageUnitPages * this.totalPages
-                    );
-                },
-                updateGraph(start, end) {
-                    this.start = start;
-                    this.end = end;
-                    this.getPagesData();
-                },
-            },
-        };
+        },
+    };
 </script>
