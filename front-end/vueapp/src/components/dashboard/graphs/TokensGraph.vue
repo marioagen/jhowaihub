@@ -30,8 +30,8 @@
                 </div>
             </div>
             <h6>{{ $t("dashboard.graphs.tokenGraphSubtitle") }}</h6>
-            <LoadingComponent v-if="isLoading" />
-            <BarGraphComponent v-else :options="graph.options" :series="graph.series" />
+            <BarGraphComponent v-if="isLoaded" :options="graph.options" :series="graph.series" />
+            <LoadingComponent v-else />
         </div>
     </div>
 </template>
@@ -61,7 +61,7 @@ export default {
     },
     emits: ['setTotalTokens'],
     data: () => ({
-        isLoading: false,
+        isLoaded: false,
         IAList: [],
         currentIAIndex: 0,
         previousTotalTokens: 0,
@@ -128,7 +128,7 @@ export default {
         },
         getTokensData() {
             if (!this.currentIA) return;
-            this.isLoading = true;
+            this.isLoaded = false;
             let params = {
                 start: this.start,
                 end: this.end,
@@ -150,7 +150,7 @@ export default {
                     }
                 })
                 .finally(() => {
-                    this.isLoading = false;
+                    this.isLoaded = true;
                 });
         },
         getTotalCost() {
@@ -158,7 +158,7 @@ export default {
                 start: this.start,
                 end: this.end
             };
-            this.isLoading = true;
+            this.isLoaded = false;
             DashboardServices.GetTotalUsageCost(paramsTotalCost)
                 .then((response) => {
                     if (response && !response.error) {
@@ -167,7 +167,7 @@ export default {
                     }
                 })
                 .finally(() => {
-                    this.isLoading = false;
+                    this.isLoaded = true;
                 });
         },
         setTotalTokens() {

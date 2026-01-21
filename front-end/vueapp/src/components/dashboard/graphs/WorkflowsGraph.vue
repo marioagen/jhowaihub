@@ -19,8 +19,8 @@
                         </h4>
                     </div>
                 </div>
-                <LoadingComponent v-if="isLoadingWorkflows" />
-                <BarGraphComponent v-else :options="graph.options" :series="graph.series" />
+                <BarGraphComponent v-if="isLoadedWorkflows" :options="graph.options" :series="graph.series" />
+                <LoadingComponent v-else />
             </div>
             <hr />
             <div>
@@ -38,8 +38,8 @@
                         <h4 class="mb-0 fw-bold text-primary">{{ (totalWorkflows * usageUnitWorkflow).toFixed(5) }}</h4>
                     </div>
                 </div>
-                <LoadingComponent v-if="isLoadingAutomation" />
-                <BarGraphComponent v-else :options="graph2.options" :series="graph2.series" />
+                <BarGraphComponent v-if="isLoadedAutomation" :options="graph2.options" :series="graph2.series" />
+                <LoadingComponent v-else />
             </div>
         </div>
     </div>
@@ -71,7 +71,7 @@ export default {
     },
     emits: ['setTotalExecution'],
     data: () => ({
-        isLoadingWorkflows: false,
+        isLoadedWorkflows: false,
         graph: {
             options: {
                 chart: {
@@ -100,7 +100,7 @@ export default {
                 }
             ]
         },
-        isLoadingAutomation: false,
+        isLoadedAutomation: false,
         graph2: {
             options: {
                 chart: {
@@ -161,7 +161,7 @@ export default {
                 end: this.end,
                 usageType: ColTypeUsage.Execution
             };
-            this.isLoadingWorkflows = true;
+            this.isLoadedWorkflows = false;
             DashboardServices.GetByUsageType(params)
                 .then((response) => {
                     if (response && !response.error) {
@@ -178,7 +178,7 @@ export default {
                     }
                 })
                 .finally(() => {
-                    this.isLoadingWorkflows = false;
+                    this.isLoadedWorkflows = true;
                     this.setTotalExecution();
                 });
         },
@@ -193,7 +193,7 @@ export default {
                 end: this.end,
                 usageType: ColTypeUsage.Automation
             };
-            this.isLoadingAutomation = true;
+            this.isLoadedAutomation = false;
             DashboardServices.GetByUsageType(params)
                 .then((response) => {
                     if (response && !response.error) {
@@ -210,7 +210,7 @@ export default {
                     }
                 })
                 .finally(() => {
-                    this.isLoadingAutomation = false;
+                    this.isLoadedAutomation = true;
                 });
         },
         updateGraph(start, end) {

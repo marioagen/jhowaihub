@@ -16,8 +16,8 @@
                 </div>
             </div>
             <h6>{{ $t("dashboard.graphs.pagesGraphSubtitle") }}</h6>
-            <LoadingComponent v-if="isLoading" />
-            <BarGraphComponent v-else :options="graph.options" :series="graph.series" />
+            <BarGraphComponent v-if="isLoaded" :options="graph.options" :series="graph.series" />
+            <LoadingComponent v-else />
         </div>
     </div>
 </template>
@@ -48,7 +48,7 @@ export default {
     },
     emits: ['setTotalPages'],
     data: () => ({
-        isLoading: true,
+        isLoaded: false,
         graph: {
             options: {
                 chart: {
@@ -94,7 +94,7 @@ export default {
     },
     methods: {
         getPagesData() {
-            this.isLoading = true;
+            this.isLoaded = false;
             let params = {
                 start: this.start,
                 end: this.end,
@@ -116,7 +116,7 @@ export default {
                     }
                 })
                 .finally(() => {
-                    this.isLoading = false;
+                    this.isLoaded = true;
                     this.setTotalPages();
                 });
         },
