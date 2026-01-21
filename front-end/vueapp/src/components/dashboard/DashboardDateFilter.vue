@@ -175,9 +175,6 @@
                 this.filterData();
             },
         },
-        mounted() {
-            this.filterData();
-        },
     };
 </script>
 <style>

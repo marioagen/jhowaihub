@@ -259,6 +259,8 @@
             "You are about to delete <br/> a question from the system",
         numberOfQuestionsHasBeenExceeded:
             "Number of questions has been exceeded. Contact your plan administrator.",
+        selectToDelete:
+            "Select at least one question to perform the deletion.",
     },
     quizzes: {
         title: "Quizzes",
@@ -319,6 +321,8 @@
             "There is not enough credit to apply all questions in this questionnaire.",
         youAreAboutToDeleteQuestionnaire:
             "You are about to delete <br/> a questionnaire from the system",
+        selectToDelete:
+            "Select at least one questionnaire to perform the deletion.",
     },
     types: {
         title: "Types",
@@ -345,6 +349,8 @@
             invalid: "Invalid type",
             removeError: "Error removing type",
         },
+        selectToDelete:
+            "Select at least one type to perform the exclusion.",
     },
     management: {
         title: "User and Team Management",
@@ -988,6 +994,39 @@
             description:
                 "Check our complete documentation to explore all the potential of AI HUB.",
             button: "Access docs",
+        },
+    },
+    permissions: {
+        groups: {
+            questions: "Questions",
+            types: "Types",
+            quizzes: "Quizzes",
+            documents: "Documents",
+            management: "Management",
+            users: "Users",
+            teams: "Teams",
+            profiles: "Profiles",
+            workflow: "Workflow",
+            tools: "Tools",
+            dashboard: "Dashboard",
+            workflowStep: "Workflow Step",
+            prompts: "Prompts",
+        },
+        descriptions: {
+            questions: "View Questions",
+            types: "View Types",
+            quizzes: "View Quizzes",
+            documents: "View Documents",
+            management: "View Management Tables",
+            users: "View Users",
+            teams: "View Teams",
+            profiles: "View Profiles",
+            workflow: "View Workflow",
+            tools: "View Tools",
+            dashboard: "View Dashboard",
+            workflowStepView: "View Steps",
+            workflowStepAccess: "Access Steps",
+            prompts: "View Prompts",
         },
     },
 };

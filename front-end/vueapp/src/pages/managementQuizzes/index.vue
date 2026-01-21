@@ -6,9 +6,13 @@
             <div class="row">
                 <div class="col-12">
                     <h5 class="mb-0 fw-bold">
-                        {{ $t("management.title") }}
+                        {{ $t("managementQuizzes.title") }}
                     </h5>
-                    <p>{{ $t("management.subtitle") }}</p>
+                    <p>
+                        {{
+                            $t("managementQuizzes.subtitle")
+                        }}
+                    </p>
                     <TabsComponent
                         :tabs="tabsList"
                         color="custom"

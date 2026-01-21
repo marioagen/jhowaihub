@@ -130,7 +130,7 @@
                 "Buscar esteira de processamento...",
             clickToView: "Clique para visualizar",
             nothingFound:
-                "Nenhuma esteira de processamento encontrada. Caso não há nenhuma esteira vinculada, considere reenviar o arquivo vinculando uma esteira de processamento",
+                "Nenhuma esteira de processamento encontrada.",
             cancel: "Cancelar",
             errorToGetWorkflows:
                 "Erro ao buscar esteiras de processamento.",
@@ -271,6 +271,8 @@
             "Você está prestes a deletar <br/> uma pergunta do sistema",
         numberOfQuestionsHasBeenExceeded:
             "Número de perguntas foi excedido. Contate o administrador do plano.",
+        selectToDelete:
+            "Selecione ao menos uma questão para realizar a exclusão.",
     },
     quizzes: {
         title: "Questionários",
@@ -334,6 +336,8 @@
             "Não há crédito suficiente para aplicar todas as perguntas deste questionário.",
         youAreAboutToDeleteQuestionnaire:
             "Você está prestes a deletar <br/> um questionário do sistema",
+        selectToDelete:
+            "Selecione ao menos um questionário para realizar a exclusão.",
     },
     types: {
         title: "Tipos",
@@ -361,6 +365,8 @@
             invalid: "Tipo inválido",
             removeError: "Erro ao remover tipo",
         },
+        selectToDelete:
+            "Selecione ao menos um tipo para realizar a exclusão.",
     },
     managementQuizzes: {
         title: "Gestão de Questionário, questões e Tipos de Documentos",
@@ -1056,6 +1062,39 @@
             description:
                 "Consulte nossa documentação completa para explorar todo o potencial do AI HUB.",
             button: "Acessar docs",
+        },
+    },
+    permissions: {
+        groups: {
+            questions: "Perguntas",
+            types: "Tipos",
+            quizzes: "Questionários",
+            documents: "Documentos",
+            management: "Gestão",
+            users: "Usuários",
+            teams: "Times",
+            profiles: "Perfis",
+            workflow: "Esteira de processamento",
+            tools: "Ferramentas",
+            dashboard: "Dashboard",
+            workflowStep: "Etapa da esteira",
+            prompts: "Prompts",
+        },
+        descriptions: {
+            questions: "Visualizar Perguntas",
+            types: "Visualizar Tipos",
+            quizzes: "Visualizar Questionários",
+            documents: "Visualizar Documentos",
+            management: "Visualizar Gestão de tabelas",
+            users: "Visualizar Usuários",
+            teams: "Visualizar Times",
+            profiles: "Visualizar Perfis",
+            workflow: "Visualizar Esteira de processamento",
+            tools: "Visualizar Ferramentas",
+            dashboard: "Visualizar Dashboard",
+            workflowStepView: "Visualizar Etapas",
+            workflowStepAccess: "Acessar Etapas",
+            prompts: "Visualizar Prompts",
         },
     },
 };

@@ -267,6 +267,8 @@
             "Estás a punto de eliminar <br/> una pregunta del sistema",
         numberOfQuestionsHasBeenExceeded:
             "Se ha excedido el número de preguntas. Comuníquese con el administrador de su plan.",
+        selectToDelete:
+            "Seleccione al menos una pregunta para realizar la eliminación.",
     },
     quizzes: {
         title: "Cuestionarios",
@@ -331,6 +333,8 @@
             "No hay suficiente crédito para aplicar todas las preguntas de este cuestionario.",
         youAreAboutToDeleteQuestionnaire:
             "Estás a punto de eliminar <br/> un cuestionario del sistema",
+        selectToDelete:
+            "Seleccione al menos un cuestionario para realizar la eliminación.",
     },
     types: {
         title: "Tipos",
@@ -359,6 +363,8 @@
             invalid: "Tipo no valido",
             removeError: "Error al eliminar tipo",
         },
+        selectToDelete:
+            "Seleccione al menos un tipo para realizar la exclusión.",
     },
     management: {
         title: "Gestión de Usuarios y Equipos",
@@ -1031,6 +1037,39 @@
             description:
                 "Consulte nuestra documentación completa para explorar todo el potencial de AI HUB.",
             button: "Acceder docs",
+        },
+    },
+    permissions: {
+        groups: {
+            questions: "Preguntas",
+            types: "Tipos",
+            quizzes: "Cuestionarios",
+            documents: "Documentos",
+            management: "Gestión",
+            users: "Usuarios",
+            teams: "Equipos",
+            profiles: "Perfiles",
+            workflow: "Workflow",
+            tools: "Herramientas",
+            dashboard: "Dashboard",
+            workflowStep: "Workflow Step",
+            prompts: "Prompts",
+        },
+        descriptions: {
+            questions: "Ver Preguntas",
+            types: "Ver Tipos",
+            quizzes: "Ver Cuestionarios",
+            documents: "Ver Documentos",
+            management: "Ver Gestión de tablas",
+            users: "Ver Usuarios",
+            teams: "Ver Equipos",
+            profiles: "Ver Perfiles",
+            workflow: "Ver Workflow",
+            tools: "Ver Herramientas",
+            dashboard: "Ver Dashboard",
+            workflowStepView: "Ver Pasos",
+            workflowStepAccess: "Acceso Pasos",
+            prompts: "Ver Prompts",
         },
     },
 };

@@ -66,6 +66,7 @@
                                     showDateFilter = false
                                 "
                                 @filterData="filterData"
+                                :isLoading="isLoading"
                             />
                         </div>
                     </div>
@@ -103,56 +104,64 @@
                             :size="17"
                         />
                     </div>
-                    <h2 class="mb-0 fw-bold text-primary">
+                    <LoadingComponent v-if="isLoading" />
+                    <h2
+                        v-else
+                        class="mb-0 fw-bold text-primary"
+                    >
                         {{ totalWTC.toFixed(5) }}
                     </h2>
                 </div>
             </div>
             <TokensGraph
+                :start="filters.start"
+                :end="filters.end"
                 :key="datesChange"
                 :usageUnits="usageUnits"
-                @setTotalTokens="setTotalTokens"
                 :isLoading="isLoading"
+                @setTotalTokens="setTotalWTC"
                 ref="TokensGraph"
             />
             <PagesProcessedGraph
+                :start="filters.start"
+                :end="filters.end"
                 :key="datesChange"
                 :usageUnits="usageUnits"
-                @setTotalPages="setTotalWTC"
                 :isLoading="isLoading"
+                @setTotalPages="setTotalWTC"
                 ref="PagesProcessedGraph"
             />
             <WorkflowsGraph
+                :start="filters.start"
+                :end="filters.end"
                 :key="datesChange"
                 :usageUnits="usageUnits"
-                @setTotalExecution="setTotalWTC"
                 :isLoading="isLoading"
+                @setTotalExecution="setTotalWTC"
                 ref="WorkflowsGraph"
             />
         </div>
     </main>
 </template>
 <script>
-    import TokensGraph from "@/components/dashboard/graphs/TokensGraph.vue";
-    import PagesProcessedGraph from "@/components/dashboard/graphs/PagesProcessedGraph.vue";
-    import WorkflowsGraph from "@/components/dashboard/graphs/WorkflowsGraph.vue";
-    import DashboardDateFilter from "@/components/dashboard/DashboardDateFilter.vue";
-    import DashboardServices from "@/services/dashboard/DashboardServices";
+    import TokensGraph from '@/components/dashboard/graphs/TokensGraph.vue';
+    import PagesProcessedGraph from '@/components/dashboard/graphs/PagesProcessedGraph.vue';
+    import WorkflowsGraph from '@/components/dashboard/graphs/WorkflowsGraph.vue';
+    import DashboardDateFilter from '@/components/dashboard/DashboardDateFilter.vue';
+    import DashboardServices from '@/services/dashboard/DashboardServices';
     import store from "@/store";
+    import LoadingComponent from '@/components/global/LoadingComponent.vue';
     export default {
         components: {
             DashboardDateFilter,
             TokensGraph,
             WorkflowsGraph,
             PagesProcessedGraph,
+            LoadingComponent,
         },
         data() {
             const today = new Date();
-            const first = new Date(
-                today.getFullYear(),
-                today.getMonth(),
-                1
-            );
+            const first = new Date(today.getFullYear(), today.getMonth(), 1);
             return {
                 isLoading: false,
                 showDateFilter: false,
@@ -171,49 +180,54 @@
             toggleDateFilter() {
                 this.showDateFilter = !this.showDateFilter;
             },
-            filterData(filters) {
-                this.filters = filters;
-                this.totalWTC = 0;
-                this.$refs.TokensGraph.updateGraph(
-                    this.filters.start,
-                    this.filters.end
-                );
-                this.$refs.WorkflowsGraph.updateGraph(
-                    this.filters.start,
-                    this.filters.end
-                );
-                this.$refs.PagesProcessedGraph.updateGraph(
-                    this.filters.start,
-                    this.filters.end
-                );
-            },
             handleOutsideClick() {
                 if (this.showDateFilter) {
                     this.showDateFilter = false;
                 }
             },
+            filterData(filters) {
+                this.isLoading = true;
+                this.filters = filters;
+                this.totalWTC = 0;
+                this.datesChange++;
+
+                setTimeout(() => {
+                    this.isLoading = false;
+                }, 500);
+            },
             presetDate() {
-                return this.$t(
-                    `dashboard.filters.${this.filters.preset}`
-                );
+                return this.$t(`dashboard.filters.${this.filters.preset}`);
             },
             getDashboardData() {
                 this.filterData(this.filters);
-                DashboardServices.GetUsageUnits(
-                    this.filters
-                ).then((response) => {
-                    this.usageUnits = response;
-                });
-            },
-            getPlan() {
-                DashboardServices.GetPlan(
-                    store.state.userProfile.tenant
-                ).then((response) => {
-                    this.plan = response.toUpperCase();
-                });
-            },
-            setTotalTokens(total) {
-                this.totalWTC += total;
+                DashboardServices.GetUsageUnits(this.filters)
+                    .then((response) => {
+                        this.usageUnits = response;
+                    });
+                },
+                getPlan() {
+                    DashboardServices.GetPlan(
+                        store.state.userProfile.tenant
+                    ).then((response) => {
+                        this.plan = response.toUpperCase();
+                    });
+                },
+                setTotalTokens(total) {
+                    this.totalWTC += total;
+                },
+                setTotalWTC(total) {
+                    this.totalWTC += total;
+                },
+                proccessTenantMetrics() {
+                    this.isLoading = true;
+                    DashboardServices.ProcessMetricsByTenant()
+                        .then(() => {
+                            this.filterData(this.filters);
+                        })
+                        .finally(() => {
+                            this.isLoading = false;
+                        });
+                },
             },
             setTotalWTC(total) {
                 this.totalWTC += total;
@@ -223,8 +237,7 @@
                 DashboardServices.ProcessMetricsByTenant()
                     .then(() => {
                         this.filterData(this.filters);
-                    })
-                    .finally(() => {
+                    }).finally(() => {
                         this.isLoading = false;
                     });
             },
@@ -232,8 +245,8 @@
         mounted() {
             this.getDashboardData();
             this.getPlan();
-        },
-    };
+        }
+    }
 </script>
 <style scoped>
     .plan-box {
