@@ -63,22 +63,6 @@
     ],
     "tasks": [
         {
-            "label": "build",
-            "command": "dotnet",
-            "args": [
-                "build",
-                "-c",
-                "${input:buildConfiguration}",
-                "${workspaceFolder}/BBWT.sln"
-            ],
-            "type": "process",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": "$msCompile"
-        },
-        {
             "label": "build50",
             "command": "dotnet",
             "type": "process",
@@ -95,34 +79,6 @@
                 "isDefault": true
             },
             "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Test",
-            "type": "process",
-            "group": {
-                "kind": "test",
-                "isDefault": true
-            },
-            "command": "dotnet",
-            "args": [
-                "test",
-                "${workspaceFolder}/test/BBWT.Services.Test/BBWT.Services.Test.csproj"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "Run",
-            "type": "process",
-            "command": "dotnet",
-            "args": [
-                "run"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}/src/BBWT.Web/"
-            },
-            "problemMatcher": [
-                "$msCompile"
-            ]
         },
         {
             "label": "Restore",
@@ -173,47 +129,9 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "Prepare Docker image (publish first).",
-            "type": "shell",
-            "options": {
-                "cwd": "${workspaceFolder}/docker/"
-            },
-            "osx": {
-                "command": "if [[ ${input:dockerTag} == 'commit_sha' ]]; then TAG=$(git rev-parse --short HEAD); else TAG=${input:dockerTag}; fi; cp -R ../publish ./build && docker build -t bbwt3:${TAG} ."
-            },
-            "linux": {
-                "command": "if [[ ${input:dockerTag} == 'commit_sha' ]]; then TAG=$(git rev-parse --short HEAD); else TAG=${input:dockerTag}; fi; cp -R ../publish ./build && docker build -t bbwt3:${TAG} ."
-            },
-            "windows": {
-                "options": {
-                    "shell": {
-                        "executable": "powershell.exe",
-                        "args": [
-                            "-NoProfile",
-                            "-ExecutionPolicy",
-                            "Bypass",
-                            "-Command"
-                        ]
-                    }
-                },
-                "command": "if (${input:dockerTag} -eq 'commit_sha') {$TAG = $(git rev-parse --short HEAD)} else {$TAG = ${input:dockerTag}}; Copy-Item ${workspaceFolder}/publish -Filter *.* -Destination ${workspaceFolder}/build/ -Recurse ; if ($?) {docker build -t bbwt3:$TAG .}"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Docker Compose Up/Down.",
-            "command": "docker-compose",
-            "args": [
-                "-f",
-                "d:/source/blueberry/docker/${input:projectDockerCompose} ",
-                "${input:projectDockerComposeUpDown}"
-            ],
-            "type": "process"
-        },
-        {
             "label": "dotnet:list:outdated",
             "type": "shell",
-            "command": "cd /c/stefanini/updated/woopiai-hub && dotnet list BBWT.Server.sln package --outdated",
+            "command": "cd /c/stefanini/updated/woopiai-hub && dotnet list ...sln package --outdated",
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",
