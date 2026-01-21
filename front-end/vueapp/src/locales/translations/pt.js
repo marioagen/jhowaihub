@@ -113,7 +113,7 @@
                 "Este documento está associado a múltiplas esteiras de processamento.<br>Escolha qual deseja visualizar:",
             searchPlaceholder: "Buscar esteira de processamento...",
             clickToView: "Clique para visualizar",
-            nothingFound: "Nenhuma esteira de processamento encontrada. Caso não há nenhuma esteira vinculada, considere reenviar o arquivo vinculando uma esteira de processamento",
+            nothingFound: "Nenhuma esteira de processamento encontrada.",
             cancel: "Cancelar",
             errorToGetWorkflows: "Erro ao buscar esteiras de processamento.",
             errorUnexpected: "Erro inesperado.",
@@ -222,6 +222,7 @@
         descriptionOrQuestionId: "Descrição, ID ou insira uma nova pergunta para cadastrar",
         youAreAboutToDeleteQuestion: "Você está prestes a deletar <br/> uma pergunta do sistema",
         numberOfQuestionsHasBeenExceeded: "Número de perguntas foi excedido. Contate o administrador do plano.",
+        selectToDelete: "Selecione ao menos uma questão para realizar a exclusão.",
     },
     quizzes: {
         title: "Questionários",
@@ -272,6 +273,7 @@
         failedToApplyQuestionnaire: "Falha ao aplicar questionário.",
         thereIsNotEnoughCredit: "Não há crédito suficiente para aplicar todas as perguntas deste questionário.",
         youAreAboutToDeleteQuestionnaire: "Você está prestes a deletar <br/> um questionário do sistema",
+        selectToDelete: "Selecione ao menos um questionário para realizar a exclusão.",
     },
     types: {
         title: "Tipos",
@@ -295,6 +297,7 @@
             invalid: "Tipo inválido",
             removeError: "Erro ao remover tipo",
         },
+        selectToDelete: "Selecione ao menos um tipo para realizar a exclusão.",
     },
     managementQuizzes: {
         title: "Gestão de Questionário, questões e Tipos de Documentos",
