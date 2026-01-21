@@ -7,7 +7,7 @@ namespace WoopiAiHub.Repository
 {
     public class PermissionRepository : IPermissionRepository
     {
-        private const string WorkflowStepGroup = "Workflow-Step";
+        private const string WorkflowStepGroup = "permissions.groups.workflowStep";
         private readonly Context.ApplicationDbContext _context;
         public PermissionRepository(Context.ApplicationDbContext context)
         {
