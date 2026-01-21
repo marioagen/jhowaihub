@@ -16,7 +16,7 @@
                 </div>
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="row position-relative">
+                    <div class="row position-relative">
                     <div class="col" v-outsideClick="handleOutsideClick">
                         <button
                             class="btn btn-outlined-light btn-sm border d-flex align-items-center justify-content-between"
@@ -31,7 +31,6 @@
                             v-if="showDateFilter" 
                             class="position-absolute" 
                             style="z-index: 1050; width: 500px;"
-                            v-outsideClick="handleOutsideClick"
                         >
                             <DashboardDateFilter 
                                 @close="showDateFilter = false" 
@@ -44,7 +43,6 @@
                         <button 
                             class="btn btn-primary btn-sm" 
                             @click="proccessTenantMetrics()"
-                            v-outsideClick="handleOutsideClick"
                         >
                             <LucideIcon icon="RefreshCcw" :size="17" :class="{ 'animate-spin': isLoading }" />
                             {{ $t('dashboard.update') }}
