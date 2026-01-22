@@ -428,6 +428,8 @@
         userTokenMicrosoftInvalid: "Could not validate your authentication. Please log in again.",
         selectTenant: "Select the tenant to continue",
         continue: "Continue",
+        tenantDatabaseNotReady: "The environment is being prepared. Please try again in a few minutes.",
+        tenantNotFound: "Tenant not found.",
     },
     validation: {
         required: "Required field",

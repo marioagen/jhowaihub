@@ -120,6 +120,7 @@ namespace WoopiAiHub.UnitTests.Services
             var graphApiResponse = _fixture.FindValidUserGraphApiResponse();
             graphApiResponse.Content!.Mail = authenticateDto.Login;
             var responseCheckAccess = _fixture.FindValidResponseCheckAccessDto();
+            loginDto.Tenant = responseCheckAccess.Tenants.First().Name;
 
             var _mockTenantContextService = _mocker.GetMock<ITenantContextService>();
             var _mockHttpContext = _mocker.GetMock<HttpContext>();
@@ -151,7 +152,6 @@ namespace WoopiAiHub.UnitTests.Services
             _mockUserRepository
                 .Setup(x => x.FindUserProfilesByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(profiles);
-
             _mockPasswordHasher.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()))
                 .Returns(true);
 
@@ -277,7 +277,7 @@ namespace WoopiAiHub.UnitTests.Services
             var expectedRefreshToken = "new-refresh-token";
             var responseCheckAccess = _fixture.FindValidResponseCheckAccessDto();
             var profiles = new List<string> { "admin", "profile2" };
-            var tenant = "tenant-123";
+            var tenant = responseCheckAccess.Tenants.First().Name;
 
             var _mockUserRepository = _mocker.GetMock<IUserRepository>();
             var _mockRefreshTokenServices = _mocker.GetMock<IRefreshTokenServices>();

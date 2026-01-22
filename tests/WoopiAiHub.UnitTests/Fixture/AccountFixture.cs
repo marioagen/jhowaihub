@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 using Azure.Storage.Blobs.Models;
 using WoopiAiHub.Domain.DTOs.Request.Account;
+using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.UnitTests.Fixtures
 {
@@ -56,7 +57,8 @@ namespace WoopiAiHub.UnitTests.Fixtures
             .CustomInstantiator(f => new LoginDto
             {
                 Email = f.Person.Email,
-                Password = f.Internet.Password(8, true)
+                Password = f.Internet.Password(8, true),
+                Tenant = $"{f.Company.CompanyName()}_{f.Internet.Email()}"
             });
         }
 
@@ -77,7 +79,7 @@ namespace WoopiAiHub.UnitTests.Fixtures
             .CustomInstantiator(f => new ResponseCheckAccessDto
             {
                 HasAccess = true,
-                Tenants = [$"{f.Company.CompanyName()}_{f.Internet.Email()}"]
+                Tenants = [new TenantAccessDto($"{f.Company.CompanyName()}_{f.Internet.Email()}",true)]
             });
             return response;
         }

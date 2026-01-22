@@ -431,6 +431,8 @@
         userTokenMicrosoftInvalid: "No se pudo validar tu autenticación. Por favor, inicia sesión nuevamente.",
         selectTenant: "Selecciona el tenant para continuar",
         continue: "Continuar",
+        tenantDatabaseNotReady: "El ambiente se está preparando. Inténtelo de nuevo en unos minutos.",
+        tenantNotFound: "Tenant no encontrado.",
     },
     validation: {
         required: "Campo obligatorio",

@@ -41,6 +41,11 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         [Get("/api/Tenant/{tenantName}")]
         Task<TenantInfoDto> FindTenantByName([Header("KeyAccess")] string KeyAccess,
                                              [AliasAs("tenantName")] string tenantName);
+
+        [Put("/api/Tenant/{tenantName}/DatabaseCreated")]
+        Task<bool> DatabaseCreated([Header("KeyAccess")] string KeyAccess,
+                                   [AliasAs("tenantName")] string tenantName);
+
         [Post("/user/AssignByHub")]
         Task<Guid> AssignLicensesByHub([Header("KeyAccess")] string KeyAccess,
                                        RequestAssignLicensesByHub requestAssignLicensesByHub);
