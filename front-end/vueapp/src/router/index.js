@@ -1,4 +1,7 @@
-﻿import { createRouter, createWebHashHistory } from "vue-router";
+﻿import {
+    createRouter,
+    createWebHashHistory,
+} from "vue-router";
 
 import DocumentsUpload from "@/pages/documents/uploads.vue";
 import DocumentsPage from "@/pages/documents/index.vue";
@@ -289,7 +292,7 @@ const routes = [
         component: WorkflowManagement,
         meta: {
             layout: "default",
-            module: "Workflow",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -300,7 +303,7 @@ const routes = [
         component: NewWorkflow,
         meta: {
             layout: "default",
-            module: "Workflow",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -311,7 +314,7 @@ const routes = [
         component: EditWorkflow,
         meta: {
             layout: "default",
-            module: "Workflow",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -382,7 +385,7 @@ const routes = [
         },
         beforeEnter: authenticate,
         props: true,
-    }
+    },
 ];
 
 const router = createRouter({

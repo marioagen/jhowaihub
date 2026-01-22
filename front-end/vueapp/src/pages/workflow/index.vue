@@ -2,15 +2,29 @@
     <main>
         <div class="container-fluid mx-2">
             <div>
-                <div class="d-flex justify-content-between align-items-center mb-1">
+                <div
+                    class="d-flex justify-content-between align-items-center mb-1"
+                >
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("workflow.title") }}</h5>
+                        <h5 class="mb-0 fw-bold">
+                            {{ $t("workflow.title") }}
+                        </h5>
                         <p class="mb-1">
-                            <small class="text-muted">{{ $t("workflow.subtitle") }}</small>
+                            <small class="text-muted">
+                                {{
+                                    $t("workflow.subtitle")
+                                }}
+                            </small>
                         </p>
                     </div>
-                    <button class="btn btn-primary btn-sm" @click="redirectToNewUpload">
-                        <LucideIcon icon="Plus" :size="17" />
+                    <button
+                        class="btn btn-primary btn-sm"
+                        @click="redirectToNewUpload"
+                    >
+                        <LucideIcon
+                            icon="Plus"
+                            :size="17"
+                        />
                         {{ $t("documents.createBtn") }}
                     </button>
                 </div>
@@ -18,10 +32,22 @@
                     <div class="card-body p-3">
                         <div class="row">
                             <div class="col-6">
-                                <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
+                                <div
+                                    class="flex flex-col items-start gap-3 flex-1 align-items-center"
+                                >
                                     <div>
-                                        <LucideIcon icon="Clock" :size="14" class="me-2" />
-                                        <span>{{ $t("workflow.boardView") }}</span>
+                                        <LucideIcon
+                                            icon="Clock"
+                                            :size="14"
+                                            class="me-2"
+                                        />
+                                        <span>
+                                            {{
+                                                $t(
+                                                    "workflow.boardView"
+                                                )
+                                            }}
+                                        </span>
                                     </div>
                                     <div class="dropdown">
                                         <button
@@ -31,44 +57,125 @@
                                             aria-expanded="false"
                                         >
                                             <div>
-                                                <div class="fw-bold font-size-sm">{{ selectedOption.teamName }}</div>
-                                                <div class="text-muted font-size-xs">{{ selectedOption.name }}</div>
+                                                <div
+                                                    class="fw-bold font-size-sm"
+                                                >
+                                                    {{
+                                                        selectedOption.teamName
+                                                    }}
+                                                </div>
+                                                <div
+                                                    class="text-muted font-size-xs"
+                                                >
+                                                    {{
+                                                        selectedOption.name
+                                                    }}
+                                                </div>
                                             </div>
-                                            <LucideIcon icon="ChevronDown" :size="20" class="ms-2" />
+                                            <LucideIcon
+                                                icon="ChevronDown"
+                                                :size="20"
+                                                class="ms-2"
+                                            />
                                         </button>
-                                        <ul class="dropdown-menu p-2 workflow-list">
-                                            <li v-if="workflowList.length > 5" class="mb-1">
-                                                <div class="input-group input-group-sm">
-                                                    <span class="input-group-text p-1">
-                                                        <LucideIcon icon="Search" :size="16" class="me-1" />
+                                        <ul
+                                            class="dropdown-menu p-2 workflow-list"
+                                        >
+                                            <li
+                                                v-if="
+                                                    workflowList.length >
+                                                    5
+                                                "
+                                                class="mb-1"
+                                            >
+                                                <div
+                                                    class="input-group input-group-sm"
+                                                >
+                                                    <span
+                                                        class="input-group-text p-1"
+                                                    >
+                                                        <LucideIcon
+                                                            icon="Search"
+                                                            :size="
+                                                                16
+                                                            "
+                                                            class="me-1"
+                                                        />
                                                     </span>
                                                     <input
                                                         id="filter-workflow"
-                                                        v-model="workflowSearchText"
+                                                        v-model="
+                                                            workflowSearchText
+                                                        "
                                                         type="text"
                                                         name="filter"
                                                         class="form-control"
-                                                        @input="searchWorkflow"
+                                                        @input="
+                                                            searchWorkflow
+                                                        "
                                                         @click.stop=""
                                                     />
                                                 </div>
                                             </li>
-                                            <li v-for="item in filteredWorkflows" :key="item.id">
-                                                <a class="dropdown-item" @click="selectOption(item)">
-                                                    <div class="fw-bold">{{ item.teams.name }}</div>
-                                                    <div class="text-muted small">{{ item.name }}</div>
+                                            <li
+                                                v-for="item in filteredWorkflows"
+                                                :key="
+                                                    item.id
+                                                "
+                                            >
+                                                <a
+                                                    class="dropdown-item"
+                                                    @click="
+                                                        selectOption(
+                                                            item
+                                                        )
+                                                    "
+                                                >
+                                                    <div
+                                                        class="fw-bold"
+                                                    >
+                                                        {{
+                                                            item
+                                                                .teams
+                                                                .name
+                                                        }}
+                                                    </div>
+                                                    <div
+                                                        class="text-muted small"
+                                                    >
+                                                        {{
+                                                            item.name
+                                                        }}
+                                                    </div>
                                                 </a>
                                             </li>
                                         </ul>
                                     </div>
-                                    <div class="badge bg-secondary badge-custom">
-                                        <LucideIcon icon="Workflow" :size="14" class="me-2" stroke="#0d6efd" />
-                                        <span>{{ selectedOption.name || $t("workflow.selectWorkflow") }}</span>
+                                    <div
+                                        class="badge bg-secondary badge-custom"
+                                    >
+                                        <LucideIcon
+                                            icon="Workflow"
+                                            :size="14"
+                                            class="me-2"
+                                            stroke="#0d6efd"
+                                        />
+                                        <span>
+                                            {{
+                                                selectedOption.name ||
+                                                $t(
+                                                    "workflow.selectWorkflow"
+                                                )
+                                            }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-6">
-                                <WorkflowFilters @filter="filterData" class="ms-auto" />
+                                <WorkflowFilters
+                                    @filter="filterData"
+                                    class="ms-auto"
+                                />
                             </div>
                         </div>
                     </div>
@@ -78,30 +185,46 @@
                 </div>
                 <div v-else-if="hasList">
                     <div class="card custom-height">
-                        <div class="card-body d-flex flex-column p-2 card-container">
+                        <div
+                            class="card-body d-flex flex-column p-2 card-container"
+                        >
                             <div class="kanban-wrapper">
-                                <KanbanBoard 
+                                <KanbanBoard
                                     ref="kanbanBoardRef"
-                                    :kanbanData="kanbanCards" 
-                                    :users="users" 
-                                    @reload="reloadKanban" 
-                                    @cardMoved="handleCardMoved"
-                                    @cardUpdated="updateCard"
-                                    :isLoading="isLoadingKanban"
-                                    :cardIdsToUpdate="cardIdsToUpdate"
+                                    :kanbanData="
+                                        kanbanCards
+                                    "
+                                    :users="users"
+                                    @reload="reloadKanban"
+                                    @cardMoved="
+                                        handleCardMoved
+                                    "
+                                    @cardUpdated="
+                                        updateCard
+                                    "
+                                    :isLoading="
+                                        isLoadingKanban
+                                    "
+                                    :cardIdsToUpdate="
+                                        cardIdsToUpdate
+                                    "
                                 />
                             </div>
                         </div>
                     </div>
                 </div>
-                <div v-else class="text-center">
-                    <span class="text-primary">{{ $t("workflow.notFound") }}</span>
+                <div
+                    v-else
+                    class="text-center"
+                >
+                    <span class="text-primary">
+                        {{ $t("workflow.notFound") }}
+                    </span>
                 </div>
             </div>
         </div>
     </main>
 </template>
-
 <script>
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
@@ -135,7 +258,8 @@
                 isLoaded: false,
                 isLoadedUsers: false,
                 isLoadingKanban: true,
-                signalrEventExecutionChanged: "CardExecutionChanged",
+                signalrEventExecutionChanged:
+                    "CardExecutionChanged",
                 filters: {
                     orderBy: "",
                     input: null,
@@ -144,7 +268,7 @@
                 },
                 users: [],
                 cardIdsToUpdate: [],
-                updateCardsDebounceTimer: null
+                updateCardsDebounceTimer: null,
             };
         },
         components: {
@@ -160,9 +284,10 @@
         methods: {
             getWorkflowByUser() {
                 this.isLoadingKanban = true;
-                var email = this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email)
-                    .then((response) => {
+                var email =
+                    this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email).then(
+                    (response) => {
                         if (response.error !== undefined) {
                             this.$notify({
                                 title: "workflow.index",
@@ -178,16 +303,23 @@
                             return this.setSelectedWorkflow();
                         }
                         this.isLoadingKanban = false;
-                    });
+                    }
+                );
             },
             setSelectedWorkflow() {
-                const redicteWorkflowId = this.$route.query.id;
+                const redicteWorkflowId =
+                    this.$route.query.id;
                 let workflowToSelect = this.workflowList[0];
 
                 if (redicteWorkflowId !== undefined) {
-                    const foundWorkflow = this.workflowList.find((w) => w.id == redicteWorkflowId);
+                    const foundWorkflow =
+                        this.workflowList.find(
+                            (w) => w.id == redicteWorkflowId
+                        );
                     if (foundWorkflow) {
-                        return this.selectOption(foundWorkflow);
+                        return this.selectOption(
+                            foundWorkflow
+                        );
                     } else {
                         return this.$notify({
                             title: "workflow.index",
@@ -198,11 +330,17 @@
                     }
                 }
 
-                const lastSelected = this.$store.state.lastSelectedWorkflow;
+                const lastSelected =
+                    this.$store.state.lastSelectedWorkflow;
                 if (lastSelected) {
-                    const foundWorkflow = this.workflowList.find((w) => w.id === lastSelected.id);
+                    const foundWorkflow =
+                        this.workflowList.find(
+                            (w) => w.id === lastSelected.id
+                        );
                     if (foundWorkflow) {
-                        return this.selectOption(foundWorkflow);
+                        return this.selectOption(
+                            foundWorkflow
+                        );
                     }
                 }
 
@@ -210,7 +348,10 @@
             },
             getWorkflowStepsById(workflowId) {
                 this.isLoadingKanban = true;
-                WorkflowService.getWorkflowStepsById(workflowId, this.filters)
+                WorkflowService.getWorkflowStepsById(
+                    workflowId,
+                    this.filters
+                )
                     .then((response) => {
                         this.kanbanCards = response;
                     })
@@ -233,7 +374,10 @@
                         this.users = users;
                     })
                     .catch((error) => {
-                        LogService.showMessage("Error loading users:", error);
+                        LogService.showMessage(
+                            "Error loading users:",
+                            error
+                        );
                         this.users = [];
                     })
                     .finally(() => {
@@ -241,71 +385,108 @@
                     });
             },
             selectOption(workflow) {
-                    if (!workflow?.id) return;
+                if (!workflow?.id) return;
 
-                    this.isLoaded = false;
-                    this.isLoadedUsers = false;
+                this.isLoaded = false;
+                this.isLoadedUsers = false;
 
-                    this.$store.commit("setLastSelectedWorkflow", {
+                this.$store.commit(
+                    "setLastSelectedWorkflow",
+                    {
                         id: workflow.id,
                         name: workflow.name,
-                    });
+                    }
+                );
 
-                    this.selectedOption = {
-                        id: workflow.id,
-                        name: workflow.name,
-                    };
+                this.selectedOption = {
+                    id: workflow.id,
+                    name: workflow.name,
+                };
 
                 this.getWorkflowStepsById(workflow.id);
                 this.getUsersByTeams(workflow.teams);
             },
             reloadKanban() {
-                this.getWorkflowStepsById(this.selectedOption.id);
+                this.getWorkflowStepsById(
+                    this.selectedOption.id
+                );
             },
             handleCardMoved(cardMoveData) {
                 this.updateCard({
                     card: cardMoveData.card,
-                    currentStepOrder: cardMoveData.currentStepOrder,
-                    newStepOrder: cardMoveData.nextStepOrder
+                    currentStepOrder:
+                        cardMoveData.currentStepOrder,
+                    newStepOrder:
+                        cardMoveData.nextStepOrder,
                 });
             },
             updateCard(cardUpdateData) {
-                const steps = Array.isArray(this.kanbanCards) ? this.kanbanCards : (this.kanbanCards?.steps || []);
-                
+                const steps = Array.isArray(
+                    this.kanbanCards
+                )
+                    ? this.kanbanCards
+                    : this.kanbanCards?.steps || [];
+
                 if (steps.length === 0) return;
-                
-                const currentStep = steps.find(s => s.order === cardUpdateData.currentStepOrder);
+
+                const currentStep = steps.find(
+                    (s) =>
+                        s.order ===
+                        cardUpdateData.currentStepOrder
+                );
                 if (!currentStep) {
-                    LogService.showMessage('Could not find current step for card update');
+                    LogService.showMessage(
+                        "Could not find current step for card update"
+                    );
                     return;
                 }
-                
+
                 if (!currentStep.cards) {
                     currentStep.cards = [];
                 }
-                
-                const cardIndex = currentStep.cards.findIndex(c => c.id === cardUpdateData.card.id);
+
+                const cardIndex =
+                    currentStep.cards.findIndex(
+                        (c) =>
+                            c.id === cardUpdateData.card.id
+                    );
                 if (cardIndex === -1) {
-                    LogService.showMessage('Card not found in current step');
+                    LogService.showMessage(
+                        "Card not found in current step"
+                    );
                     return;
                 }
-                
-                const existingCard = currentStep.cards[cardIndex];
-                const shouldMove = cardUpdateData.newStepOrder !== undefined && cardUpdateData.newStepOrder !== cardUpdateData.currentStepOrder;
+
+                const existingCard =
+                    currentStep.cards[cardIndex];
+                const shouldMove =
+                    cardUpdateData.newStepOrder !==
+                        undefined &&
+                    cardUpdateData.newStepOrder !==
+                        cardUpdateData.currentStepOrder;
                 if (shouldMove) {
-                    const targetStep = steps.find(s => s.order === cardUpdateData.newStepOrder);
+                    const targetStep = steps.find(
+                        (s) =>
+                            s.order ===
+                            cardUpdateData.newStepOrder
+                    );
                     if (!targetStep) {
-                        LogService.showMessage('Could not find target step for card movement');
+                        LogService.showMessage(
+                            "Could not find target step for card movement"
+                        );
                         return;
                     }
-                    
+
                     const updatedCard = {
                         ...existingCard,
                         ...cardUpdateData.card,
                         stepId: targetStep.id,
-                        status: targetStep.status ? { ...targetStep.status } : (cardUpdateData.card.status || existingCard.status)
+                        status: targetStep.status
+                            ? { ...targetStep.status }
+                            : cardUpdateData.card.status ||
+                              existingCard.status,
                     };
-                    
+
                     currentStep.cards.splice(cardIndex, 1);
                     if (!targetStep.cards) {
                         targetStep.cards = [];
@@ -314,156 +495,249 @@
                 } else {
                     const updatedCard = {
                         ...existingCard,
-                        ...cardUpdateData.card
+                        ...cardUpdateData.card,
                     };
-                    
-                    currentStep.cards[cardIndex] = updatedCard;
+
+                    currentStep.cards[cardIndex] =
+                        updatedCard;
                 }
-                
+
                 if (Array.isArray(this.kanbanCards)) {
                     this.kanbanCards = [...steps];
                 } else if (this.kanbanCards) {
-                    this.kanbanCards = { ...this.kanbanCards, steps: [...steps] };
+                    this.kanbanCards = {
+                        ...this.kanbanCards,
+                        steps: [...steps],
+                    };
                 }
             },
-            updateSpecificCards(cardIds, signalRMessage = null) {
-                if (!cardIds || cardIds.length === 0) return;
-                
+            updateSpecificCards(
+                cardIds,
+                signalRMessage = null
+            ) {
+                if (!cardIds || cardIds.length === 0)
+                    return;
+
                 if (this.updateCardsDebounceTimer) {
-                    clearTimeout(this.updateCardsDebounceTimer);
+                    clearTimeout(
+                        this.updateCardsDebounceTimer
+                    );
                 }
-                
-                this.updateCardsDebounceTimer = setTimeout(() => {
-                    const steps = Array.isArray(this.kanbanCards) 
-                        ? this.kanbanCards 
-                        : (this.kanbanCards?.steps || []);
-                    
-                    if (steps.length === 0) return;
-                    
-                    cardIds.forEach(cardId => {
-                        let currentCard = null;
-                        let currentStepOrder = null;
-                        
-                        for (const step of steps) {
-                            if (step.cards) {
-                                const card = step.cards.find(c => c.id === cardId);
-                                if (card) {
-                                    currentCard = card;
-                                    currentStepOrder = step.order;
-                                    break;
+
+                this.updateCardsDebounceTimer = setTimeout(
+                    () => {
+                        const steps = Array.isArray(
+                            this.kanbanCards
+                        )
+                            ? this.kanbanCards
+                            : this.kanbanCards?.steps || [];
+
+                        if (steps.length === 0) return;
+
+                        cardIds.forEach((cardId) => {
+                            let currentCard = null;
+                            let currentStepOrder = null;
+
+                            for (const step of steps) {
+                                if (step.cards) {
+                                    const card =
+                                        step.cards.find(
+                                            (c) =>
+                                                c.id ===
+                                                cardId
+                                        );
+                                    if (card) {
+                                        currentCard = card;
+                                        currentStepOrder =
+                                            step.order;
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                        
-                        if (!currentCard) {
-                            LogService.showMessage(`Card ${cardId} not found in current state`);
-                            return;
-                        }
-                        
-                        let newStepOrder = currentStepOrder;
-                        if (signalRMessage && signalRMessage.stepId) {
-                            const targetStep = steps.find(s => s.id === signalRMessage.stepId);
-                            if (targetStep) {
-                                newStepOrder = targetStep.order;
+
+                            if (!currentCard) {
+                                LogService.showMessage(
+                                    `Card ${cardId} not found in current state`
+                                );
+                                return;
                             }
-                        }
-                        
-                        const updatedCardData = {
-                            ...currentCard
-                        };
-                        
-                        if (signalRMessage) {
-                            if (signalRMessage.percentage !== undefined) {
-                                updatedCardData.percentage = signalRMessage.percentage;
+
+                            let newStepOrder =
+                                currentStepOrder;
+                            if (
+                                signalRMessage &&
+                                signalRMessage.stepId
+                            ) {
+                                const targetStep =
+                                    steps.find(
+                                        (s) =>
+                                            s.id ===
+                                            signalRMessage.stepId
+                                    );
+                                if (targetStep) {
+                                    newStepOrder =
+                                        targetStep.order;
+                                }
                             }
-                            if (signalRMessage.toolName !== undefined) {
-                                updatedCardData.toolName = signalRMessage.toolName;
+
+                            const updatedCardData = {
+                                ...currentCard,
+                            };
+
+                            if (signalRMessage) {
+                                if (
+                                    signalRMessage.percentage !==
+                                    undefined
+                                ) {
+                                    updatedCardData.percentage =
+                                        signalRMessage.percentage;
+                                }
+                                if (
+                                    signalRMessage.toolName !==
+                                    undefined
+                                ) {
+                                    updatedCardData.toolName =
+                                        signalRMessage.toolName;
+                                }
                             }
-                        }
-                        
-                        this.updateCard({
-                            card: updatedCardData,
-                            currentStepOrder: currentStepOrder,
-                            newStepOrder: newStepOrder
+
+                            this.updateCard({
+                                card: updatedCardData,
+                                currentStepOrder:
+                                    currentStepOrder,
+                                newStepOrder: newStepOrder,
+                            });
                         });
-                    });
-                    
-                    setTimeout(() => {
-                        this.cardIdsToUpdate = [];
-                    }, 100);
-                }, 300);
+
+                        setTimeout(() => {
+                            this.cardIdsToUpdate = [];
+                        }, 100);
+                    },
+                    300
+                );
             },
             filterData(filters) {
                 this.filters = filters;
                 this.reloadKanban();
             },
             redirectToNewUpload() {
-                this.$router.push({ name: "DocumentsUpload" });
+                this.$router.push({
+                    name: "DocumentsUpload",
+                });
             },
             searchWorkflow() {
-                const searchText = this.workflowSearchText.toLowerCase();
-                this.filteredWorkflows = this.workflowList.filter(o =>
-                    (o.name && o.name.toLowerCase().includes(searchText)) ||
-                    (o.teams && o.teams.name && o.teams.name.toLowerCase().includes(searchText))
-                );
+                const searchText =
+                    this.workflowSearchText.toLowerCase();
+                this.filteredWorkflows =
+                    this.workflowList.filter(
+                        (o) =>
+                            (o.name &&
+                                o.name
+                                    .toLowerCase()
+                                    .includes(
+                                        searchText
+                                    )) ||
+                            (o.teams &&
+                                o.teams.name &&
+                                o.teams.name
+                                    .toLowerCase()
+                                    .includes(searchText))
+                    );
             },
         },
         created() {
             this.getWorkflowByUser();
-            GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
-            GlobalEventService.on("refresh-once", this.getWorkflowByUser);
+            GlobalEventService.on(
+                "all-uploads-complete",
+                this.getWorkflowByUser
+            );
+            GlobalEventService.on(
+                "refresh-once",
+                this.getWorkflowByUser
+            );
         },
         async mounted() {
             await signalRService.startConnection();
-            signalRService.on(this.signalrEventExecutionChanged, (message) => {
-                const steps = Array.isArray(this.kanbanCards)
-                    ? this.kanbanCards 
-                    : (this.kanbanCards?.steps || []);
-                
-                if (steps.length === 0) return;
-                
-                let foundCard = null;
-                let currentStepOrder = null;
+            signalRService.on(
+                this.signalrEventExecutionChanged,
+                (message) => {
+                    const steps = Array.isArray(
+                        this.kanbanCards
+                    )
+                        ? this.kanbanCards
+                        : this.kanbanCards?.steps || [];
 
-                for (const step of steps) {
-                    if (step.cards) {
-                        const card = step.cards.find((c) => c.id === message.cardId);
-                        if (card) {
-                            foundCard = card;
-                            currentStepOrder = step.order;
-                            break;
+                    if (steps.length === 0) return;
+
+                    let foundCard = null;
+                    let currentStepOrder = null;
+
+                    for (const step of steps) {
+                        if (step.cards) {
+                            const card = step.cards.find(
+                                (c) =>
+                                    c.id === message.cardId
+                            );
+                            if (card) {
+                                foundCard = card;
+                                currentStepOrder =
+                                    step.order;
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (!foundCard) {
-                    LogService.showMessage(`Card ${message.cardId} not found in SignalR update`);
-                    return;
-                }
-
-                foundCard.percentage = message.percentage;
-                foundCard.toolName = message.toolName;
-
-                if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
-                    if (!this.cardIdsToUpdate.includes(message.cardId)) {
-                        this.cardIdsToUpdate.push(message.cardId);
+                    if (!foundCard) {
+                        LogService.showMessage(
+                            `Card ${message.cardId} not found in SignalR update`
+                        );
+                        return;
                     }
-                    this.updateSpecificCards([message.cardId], message);
+
+                    foundCard.percentage =
+                        message.percentage;
+                    foundCard.toolName = message.toolName;
+
+                    if (
+                        message.percentage === 100.0 &&
+                        foundCard.stepId !== message.stepId
+                    ) {
+                        if (
+                            !this.cardIdsToUpdate.includes(
+                                message.cardId
+                            )
+                        ) {
+                            this.cardIdsToUpdate.push(
+                                message.cardId
+                            );
+                        }
+                        this.updateSpecificCards(
+                            [message.cardId],
+                            message
+                        );
+                    }
                 }
-            });
+            );
         },
         beforeUnmount() {
             if (this.updateCardsDebounceTimer) {
                 clearTimeout(this.updateCardsDebounceTimer);
             }
-            signalRService.off(this.signalrEventExecutionChanged);
+            signalRService.off(
+                this.signalrEventExecutionChanged
+            );
             signalRService.stopConnection();
-            GlobalEventService.off("all-uploads-complete", this.reloadKanban);
-            GlobalEventService.off("refresh-once", this.reloadKanban);
-        }
-    }
+            GlobalEventService.off(
+                "all-uploads-complete",
+                this.reloadKanban
+            );
+            GlobalEventService.off(
+                "refresh-once",
+                this.reloadKanban
+            );
+        },
+    };
 </script>
-
 <style scoped>
     .flex {
         display: flex;

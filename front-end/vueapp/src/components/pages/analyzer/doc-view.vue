@@ -1,10 +1,22 @@
 ﻿<template>
     <div class="col-md-6 doc-view-scroll">
-        <div class="mb-2" style="margin-top: 12px !important">
+        <div
+            class="mb-2"
+            style="margin-top: 12px !important"
+        >
             <div v-if="viewMode === $options.VIEW_MODE_PDF">
-                <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
-                <a @click="openTab" v-if="srcPdf">
-                    <i class="fas fa-expand text-primary" style="cursor: pointer" :title="$t('common.expand')"></i>
+                <strong class="form-label mb-1">
+                    PDF ORIGINAL&nbsp;&nbsp;
+                </strong>
+                <a
+                    @click="openTab"
+                    v-if="srcPdf"
+                >
+                    <i
+                        class="fas fa-expand text-primary"
+                        style="cursor: pointer"
+                        :title="$t('common.expand')"
+                    ></i>
                 </a>
                 <img
                     src="@/assets/img/go-to-text.png"
@@ -14,49 +26,105 @@
                     v-if="srcPdf && hasOcrText"
                 />
                 <!--
-                <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm mb-1 reindex-button"
+                    @click="openModal()"
+                >
                     <i class="fas fa-sync-alt"></i>
                     {{ $t("common.reprocess") }}
                 </button>
                 -->
-                <div class="view-pdf" v-if="srcPdf">
-                    <object :data="srcPdf + `#zoom=80`" type="application/pdf" width="100%" height="100%">
-                        <embed :src="srcPdf" type="application/pdf" />
+                <div
+                    class="view-pdf"
+                    v-if="srcPdf"
+                >
+                    <object
+                        :data="srcPdf + `#zoom=80`"
+                        type="application/pdf"
+                        width="100%"
+                        height="100%"
+                    >
+                        <embed
+                            :src="srcPdf"
+                            type="application/pdf"
+                        />
                     </object>
                 </div>
                 <div
                     class="mt-1 p-2"
                     v-if="errorPdf"
-                    style="border: 1px solid #dc3545; text-align: center; cursor: pointer"
+                    style="
+                        border: 1px solid #dc3545;
+                        text-align: center;
+                        cursor: pointer;
+                    "
                     @click="reloadPage"
                 >
-                    <span class="text-danger" style="text-decoration: none">
-                        <i class="fas fa-exclamation-circle"></i>
-                        {{ $t("documents.attentionPDFDisplayFailed") }}.
+                    <span
+                        class="text-danger"
+                        style="text-decoration: none"
+                    >
+                        <i
+                            class="fas fa-exclamation-circle"
+                        ></i>
+                        {{
+                            $t(
+                                "documents.attentionPDFDisplayFailed"
+                            )
+                        }}.
                     </span>
                 </div>
-                <div class="mt-1 p-2 loading-div" v-if="loading" @click="reloadPage">
+                <div
+                    class="mt-1 p-2 loading-div"
+                    v-if="loading"
+                    @click="reloadPage"
+                >
                     <div
                         class="spinner-border spinner-border-sm text-primary"
                         style="margin-right: 1%"
                         role="status"
                         v-if="loading"
                     ></div>
-                    <span class="text-primary" style="text-decoration: none">
-                        {{ $t("documents.loadingFilePleaseWait") }}.
+                    <span
+                        class="text-primary"
+                        style="text-decoration: none"
+                    >
+                        {{
+                            $t(
+                                "documents.loadingFilePleaseWait"
+                            )
+                        }}.
                     </span>
                 </div>
             </div>
-            <div v-else-if="viewMode === $options.VIEW_MODE_TEXT">
+            <div
+                v-else-if="
+                    viewMode === $options.VIEW_MODE_TEXT
+                "
+            >
                 <div>
                     <strong class="form-label mb-3">
-                        {{ upperFormat($t("documents.ocrText")) }}&nbsp;&nbsp;
+                        {{
+                            upperFormat(
+                                $t("documents.ocrText")
+                            )
+                        }}&nbsp;&nbsp;
                     </strong>
-                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingText"></i>
+                    <i
+                        class="fas fa-spinner fa-pulse text-primary"
+                        v-if="loadingText"
+                    ></i>
                     <img
                         src="@/assets/img/go-to-pdf.png"
-                        @click="viewMode = $options.VIEW_MODE_PDF"
-                        style="cursor: pointer; float: right"
+                        @click="
+                            viewMode =
+                                $options.VIEW_MODE_PDF
+                        "
+                        style="
+                            cursor: pointer;
+                            float: right;
+                        "
                         :title="$t('documents.pdfBack')"
                     />
                 </div>
@@ -68,18 +136,21 @@
                 ></textarea>
             </div>
         </div>
-        <modal-reprocess v-if="showModalForm" @close="closeModal" @formatData="updateModel" />
+        <modal-reprocess
+            v-if="showModalForm"
+            @close="closeModal"
+            @formatData="updateModel"
+        />
     </div>
 </template>
-
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import ModalReprocess from "@/components/pages/analyzer/modal-reprocess";
     import ModalAlert from "@/components/pages/analyzer/modal-alert";
-    import LogService from '@/services/log/logService';
+    import LogService from "@/services/log/logService";
 
-    const VIEW_MODE_PDF = 'pdf';
-    const VIEW_MODE_TEXT = 'text';
+    const VIEW_MODE_PDF = "pdf";
+    const VIEW_MODE_TEXT = "text";
 
     export default {
         name: "DocView",
@@ -115,58 +186,80 @@
             getDocument() {
                 this.srcPdf = null;
                 this.errorPdf = false;
-                DocumentsServices.findDocument(this.idAnalyzer)
-                    .then((response) => {
-                        if (response.error !== undefined) {
-                            this.$notify({
-                                title: "analyze.title",
-                                message:"analyze.failedLoadDocument",
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                        }
+                DocumentsServices.findDocument(
+                    this.idAnalyzer
+                ).then((response) => {
+                    if (response.error !== undefined) {
+                        this.$notify({
+                            title: "analyze.title",
+                            message:
+                                "analyze.failedLoadDocument",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    }
 
-                        this.srcPdf = window.URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
-                        this.loading = false;
-                    })
+                    this.srcPdf =
+                        window.URL.createObjectURL(
+                            new Blob([response], {
+                                type: "application/pdf",
+                            })
+                        );
+                    this.loading = false;
+                });
             },
             updateModel(model) {
                 this.dataView.Embeddings_model_name = model;
-                this.$emit("showNormalize", this.dataView, this.isReprocessing);
+                this.$emit(
+                    "showNormalize",
+                    this.dataView,
+                    this.isReprocessing
+                );
             },
             toggleToText() {
                 this.viewMode = VIEW_MODE_TEXT;
                 if (this.textContent == "") {
                     this.loadingText = true;
-                    DocumentsServices.getOcrText(this.idAnalyzer)
+                    DocumentsServices.getOcrText(
+                        this.idAnalyzer
+                    )
                         .then((response) => {
-                            if (response.error !== undefined) {
+                            if (
+                                response.error !== undefined
+                            ) {
                                 this.modalAlertShow = true;
                                 this.loadingText = false;
                                 return;
                             }
                             if (response.hasOcr) {
-                                this.textContent = response.content;
+                                this.textContent =
+                                    response.content;
                             } else {
-                                this.textContent = "OCR não disponível para este documento.";
+                                this.textContent =
+                                    "OCR não disponível para este documento.";
                             }
                             this.loadingText = false;
                         })
                         .catch((error) => {
-                            this.textContent = "Erro ao carregar texto do OCR.";
+                            this.textContent =
+                                "Erro ao carregar texto do OCR.";
                             this.loadingText = false;
                         });
                 }
             },
             checkOcrAvailability() {
-                DocumentsServices.getOcrText(this.idAnalyzer)
+                DocumentsServices.getOcrText(
+                    this.idAnalyzer
+                )
                     .then((response) => {
                         if (response && response.hasOcr) {
                             this.hasOcrText = true;
                         }
                     })
                     .catch((error) => {
-                        LogService.showMessage("Erro ao buscar texto do OCR.");
+                        LogService.showMessage(
+                            "Erro ao buscar texto do OCR."
+                        );
                     });
             },
             openTab() {
@@ -180,13 +273,19 @@
             },
             openModal() {
                 this.showModalForm = true;
-                this.dataView.Id = parseInt(this.idAnalyzer);
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+                this.dataView.Id = parseInt(
+                    this.idAnalyzer
+                );
+                document.getElementsByTagName(
+                    "BODY"
+                )[0].children[1].className += " active";
             },
             closeModal() {
                 this.showModalForm = false;
                 this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+                document.getElementsByTagName(
+                    "BODY"
+                )[0].children[1].className = "overlay";
             },
             normalizeDoc() {
                 window.onbeforeunload = function () {
@@ -197,13 +296,17 @@
                     Embeddings_model_name: "",
                 };
                 this.loadingNormalize = true;
-                DocumentsServices.normalizeDocument(paramsReq)
+                DocumentsServices.normalizeDocument(
+                    paramsReq
+                )
                     .then((response) => {
                         if (response.error !== undefined) {
                             window.onbeforeunload = null;
                         }
                         window.onbeforeunload = null;
-                        this.message = this.$t("documents.normalizingTheDocument");
+                        this.message = this.$t(
+                            "documents.normalizingTheDocument"
+                        );
                     })
                     .finally(() => {
                         this.loadingNormalize = false;
@@ -216,7 +319,6 @@
         },
     };
 </script>
-
 <style scoped>
     .fas,
     .far {

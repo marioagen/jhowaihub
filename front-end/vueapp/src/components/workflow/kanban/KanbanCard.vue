@@ -1,29 +1,67 @@
 <template>
-    <div class="card clickable" @click="redirectToAnalyzer">
+    <div
+        class="card clickable"
+        @click="redirectToAnalyzer"
+    >
         <div class="card-content">
             <div class="card-body pb-0 clickable">
                 <p>{{ dataCard.name }}</p>
                 <div class="mb-2">
-                    <LucideIcon icon="FileText" :size="12" class="me-1" />
-                    <small>{{ dataCard.description }}</small>
+                    <LucideIcon
+                        icon="FileText"
+                        :size="12"
+                        class="me-1"
+                    />
+                    <small>
+                        {{ dataCard.description }}
+                    </small>
                 </div>
                 <div class="mb-2">
-                    <LucideIcon icon="Calendar" :size="12" class="me-1" />
-                    <small>{{ formatDate(dataCard.created) }}</small>
+                    <LucideIcon
+                        icon="Calendar"
+                        :size="12"
+                        class="me-1"
+                    />
+                    <small>
+                        {{ formatDate(dataCard.created) }}
+                    </small>
                 </div>
                 <hr />
                 <div class="mb-2 overflow-x">
-                    <LucideIcon icon="User" size="12" class="me-1" />
-                    <small class="user">{{ $t("card.userApplicant") }}: {{ dataCard.owner }}</small>
+                    <LucideIcon
+                        icon="User"
+                        size="12"
+                        class="me-1"
+                    />
+                    <small class="user">
+                        {{ $t("card.userApplicant") }}:
+                        {{ dataCard.owner }}
+                    </small>
                 </div>
-                <div v-if="!isLastStep && dataCard.assignedUser && !showLoading" class="mb-2">
-                    <LucideIcon icon="User" size="12" class="me-1" />
-                    <small class="user">{{ $t("card.userApplicant") }}: {{ dataCard.assignedUser.name }}</small>
+                <div
+                    v-if="
+                        !isLastStep &&
+                        dataCard.assignedUser &&
+                        !showLoading
+                    "
+                    class="mb-2"
+                >
+                    <LucideIcon
+                        icon="User"
+                        size="12"
+                        class="me-1"
+                    />
+                    <small class="user">
+                        {{ $t("card.userApplicant") }}:
+                        {{ dataCard.assignedUser.name }}
+                    </small>
                     <button
                         type="button"
                         @click.stop="unassignUser"
                         class="btn btn-sm btn-unlink ms-1 px-1"
-                        v-tooltip.right="$t('card.unassignInfo')"
+                        v-tooltip.right="
+                            $t('card.unassignInfo')
+                        "
                     >
                         <LucideIcon
                             v-if="isUnassigningUser"
@@ -31,27 +69,69 @@
                             :size="16"
                             class="mr-2 animate-spin text-white"
                         />
-                        <LucideIcon v-else icon="Unlink" size="16" class="unlink-icon" />
+                        <LucideIcon
+                            v-else
+                            icon="Unlink"
+                            size="16"
+                            class="unlink-icon"
+                        />
                     </button>
                 </div>
             </div>
-            <div class="card-footer pt-0" :class="showLoading ? 'padding-loading ' : ''">
-                <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap" v-if="!showLoading">
-                    <div class="badge flex-shrink-1 mb-1" :style="badgeStyle(dataStep.status.color)">
+            <div
+                class="card-footer pt-0"
+                :class="
+                    showLoading ? 'padding-loading ' : ''
+                "
+            >
+                <div
+                    class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
+                    v-if="!showLoading"
+                >
+                    <div
+                        class="badge flex-shrink-1 mb-1"
+                        :style="
+                            badgeStyle(
+                                dataStep.status.color
+                            )
+                        "
+                    >
                         {{ dataStep.status.name }}
                     </div>
                     <div v-if="!isLastStep">
                         <button
-                            v-if="!isFirstStep || dataCard.assignedUser"
+                            v-if="
+                                !isFirstStep ||
+                                dataCard.assignedUser
+                            "
                             class="btn btn-sm btn-primary float-end"
                             @click.stop="advanceStep"
                         >
-                            <span>{{ $t("common.advance") }}</span>
-                            <LucideIcon icon="ChevronRight" :size="16" class="me-1" v-if="!isLoadingAnalysis" />
-                            <div class="spinner-grow text-light" role="status" v-if="isLoadingAnalysis"></div>
+                            <span>
+                                {{ $t("common.advance") }}
+                            </span>
+                            <LucideIcon
+                                icon="ChevronRight"
+                                :size="16"
+                                class="me-1"
+                                v-if="!isLoadingAnalysis"
+                            />
+                            <div
+                                class="spinner-grow text-light"
+                                role="status"
+                                v-if="isLoadingAnalysis"
+                            ></div>
                         </button>
-                        <div v-else-if="!dataCard.assignedUser && !showLoading">
-                            <div v-if="isAdmin" class="btn-group">
+                        <div
+                            v-else-if="
+                                !dataCard.assignedUser &&
+                                !showLoading
+                            "
+                        >
+                            <div
+                                v-if="isAdmin"
+                                class="btn-group"
+                            >
                                 <button
                                     type="button"
                                     class="btn btn-sm btn-primary assing-btn dropdown-toggle"
@@ -60,34 +140,83 @@
                                     @click.stop=""
                                 >
                                     <LucideIcon
-                                        v-if="isUpdatingAssignedUser"
+                                        v-if="
+                                            isUpdatingAssignedUser
+                                        "
                                         icon="Loader"
                                         :size="16"
                                         class="mr-2 animate-spin text-white"
                                     />
-                                    <span>{{ $t("card.assignBtn") }}</span>
-                                    <LucideIcon icon="ChevronRight" :size="15" class="ml-2 icon-closed" />
-                                    <LucideIcon icon="ChevronDown" :size="15" class="ml-2 icon-open" />
+                                    <span>
+                                        {{
+                                            $t(
+                                                "card.assignBtn"
+                                            )
+                                        }}
+                                    </span>
+                                    <LucideIcon
+                                        icon="ChevronRight"
+                                        :size="15"
+                                        class="ml-2 icon-closed"
+                                    />
+                                    <LucideIcon
+                                        icon="ChevronDown"
+                                        :size="15"
+                                        class="ml-2 icon-open"
+                                    />
                                 </button>
-                                <ul class="dropdown-menu p-2 users-list">
-                                    <li v-if="users.length > 5" class="mb-1">
-                                        <div class="input-group input-group-sm">
-                                            <span class="input-group-text p-1">
-                                                <LucideIcon icon="Search" :size="16" class="me-1" />
+                                <ul
+                                    class="dropdown-menu p-2 users-list"
+                                >
+                                    <li
+                                        v-if="
+                                            users.length > 5
+                                        "
+                                        class="mb-1"
+                                    >
+                                        <div
+                                            class="input-group input-group-sm"
+                                        >
+                                            <span
+                                                class="input-group-text p-1"
+                                            >
+                                                <LucideIcon
+                                                    icon="Search"
+                                                    :size="
+                                                        16
+                                                    "
+                                                    class="me-1"
+                                                />
                                             </span>
                                             <input
                                                 :id="`filter-user-${dataCard.id}`"
-                                                v-model="userSearchText"
+                                                v-model="
+                                                    userSearchText
+                                                "
                                                 type="text"
                                                 name="filter"
                                                 class="form-control"
-                                                @input="searchUser"
+                                                @input="
+                                                    searchUser
+                                                "
                                                 @click.stop=""
                                             />
                                         </div>
                                     </li>
-                                    <li v-for="user in filteredUsers" :key="user.id" @click.stop="assignUser(user.id)">
-                                        <span class="dropdown-item">{{ user.name }}</span>
+                                    <li
+                                        v-for="user in filteredUsers"
+                                        :key="user.id"
+                                        @click.stop="
+                                            assignUser(
+                                                user.id
+                                            )
+                                        "
+                                    >
+                                        <span
+                                            class="dropdown-item"
+                                        >
+                                            {{ user.name }}
+                                        </span>
                                     </li>
                                 </ul>
                             </div>
@@ -95,37 +224,67 @@
                                 v-else
                                 type="button"
                                 class="btn btn-sm btn-primary assing-btn"
-                                @click.stop="assignUser(loggedUserId)"
+                                @click.stop="
+                                    assignUser(loggedUserId)
+                                "
                             >
                                 <LucideIcon
-                                    v-if="isUpdatingAssignedUser"
+                                    v-if="
+                                        isUpdatingAssignedUser
+                                    "
                                     icon="Loader"
                                     :size="12"
                                     class="mr-2 animate-spin text-white"
                                 />
                                 {{ $t("card.assignBtn") }}
-                                <LucideIcon icon="NotebookPen" size="16" class="ml-2" />
+                                <LucideIcon
+                                    icon="NotebookPen"
+                                    size="16"
+                                    class="ml-2"
+                                />
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class="cover" v-if="showLoading">
+                <div
+                    class="cover"
+                    v-if="showLoading"
+                >
                     <div class="spinner-cover">
-                        <LucideIcon icon="Loader" :size="24" class="me-1 animate-spin" />
+                        <LucideIcon
+                            icon="Loader"
+                            :size="24"
+                            class="me-1 animate-spin"
+                        />
                     </div>
-                    <div v-if="showLoading" class="progress-content">
+                    <div
+                        v-if="showLoading"
+                        class="progress-content"
+                    >
                         <div class="mb-2">
-                            {{ $t("common.processing") }} {{ truncatedToolName }}
-                            <span class="float-end">{{ dataCard.percentage || 0 }}%</span>
+                            {{ $t("common.processing") }}
+                            {{ truncatedToolName }}
+                            <span class="float-end">
+                                {{
+                                    dataCard.percentage ||
+                                    0
+                                }}%
+                            </span>
                         </div>
                         <div class="progress">
                             <div
                                 class="progress-bar progress-bar-striped progress-bar-animated"
                                 role="progressbar"
-                                :aria-valuenow="dataCard.percentage || 0"
+                                :aria-valuenow="
+                                    dataCard.percentage || 0
+                                "
                                 aria-valuemin="0"
                                 aria-valuemax="100"
-                                :style="{ width: (dataCard.percentage || 0) + '%' }"
+                                :style="{
+                                    width:
+                                        (dataCard.percentage ||
+                                            0) + '%',
+                                }"
                             ></div>
                         </div>
                     </div>
@@ -134,7 +293,6 @@
         </div>
     </div>
 </template>
-
 <script>
     import CardsServices from "@/services/cards/CardsServices";
     import dates from "@/helpers/date";
@@ -183,19 +341,27 @@
                 return {
                     "--cor-base": color,
                     color: "var(--cor-base)",
-                    backgroundColor: "color-mix(in srgb, var(--cor-base) 30%, white)",
+                    backgroundColor:
+                        "color-mix(in srgb, var(--cor-base) 30%, white)",
                 };
             },
             async updateStatus() {
                 if (!this.isLastStep) {
                     var params = {
                         CardId: this.dataCard.id,
-                        NextStepOrder: this.dataStep.order + 1,
-                        WorkflowId: this.dataStep.workflowId,
+                        NextStepOrder:
+                            this.dataStep.order + 1,
+                        WorkflowId:
+                            this.dataStep.workflowId,
                     };
-                    const response = await CardsServices.updateStepAndStatus(params);
+                    const response =
+                        await CardsServices.updateStepAndStatus(
+                            params
+                        );
                     if (response?.error !== undefined) {
-                        throw new Error(response.error.response?.data?.labelError);
+                        throw new Error(
+                            response.error.response?.data?.labelError
+                        );
                     }
                 }
             },
@@ -205,7 +371,8 @@
                     UserId: userId,
                 };
                 this.isUpdatingAssignedUser = true;
-                const response = await CardsServices.assignUser(params);
+                const response =
+                    await CardsServices.assignUser(params);
                 if (response?.error !== undefined) {
                     this.$notify({
                         title: "Error",
@@ -214,11 +381,22 @@
                         icon: "CircleX",
                     });
                 } else {
-                    const assignedUser = Array.isArray(this.users) ? this.users.find((u) => u.id === userId) : null;
+                    const assignedUser = Array.isArray(
+                        this.users
+                    )
+                        ? this.users.find(
+                              (u) => u.id === userId
+                          )
+                        : null;
 
                     this.$emit("cardUpdated", {
-                        card: { ...this.dataCard, assignedUser: assignedUser || null },
-                        currentStepOrder: this.dataStep.order,
+                        card: {
+                            ...this.dataCard,
+                            assignedUser:
+                                assignedUser || null,
+                        },
+                        currentStepOrder:
+                            this.dataStep.order,
                         newStepOrder: this.dataStep.order,
                     });
                 }
@@ -226,7 +404,10 @@
             },
             async unassignUser() {
                 this.isUnassigningUser = true;
-                const response = await CardsServices.unassignUser(this.dataCard.id);
+                const response =
+                    await CardsServices.unassignUser(
+                        this.dataCard.id
+                    );
                 if (response?.error !== undefined) {
                     this.$notify({
                         title: "Error",
@@ -236,8 +417,12 @@
                     });
                 } else {
                     this.$emit("cardUpdated", {
-                        card: { ...this.dataCard, assignedUser: null },
-                        currentStepOrder: this.dataStep.order,
+                        card: {
+                            ...this.dataCard,
+                            assignedUser: null,
+                        },
+                        currentStepOrder:
+                            this.dataStep.order,
                         newStepOrder: this.dataStep.order,
                     });
                 }
@@ -251,7 +436,9 @@
                 } catch (e) {
                     this.$notify({
                         title: "Error",
-                        message: e.message || "An error occurred while advancing the step.",
+                        message:
+                            e.message ||
+                            "An error occurred while advancing the step.",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -263,7 +450,11 @@
                 if (!this.showLoading) {
                     this.$router.push({
                         name: "Analyzer",
-                        params: { documentId: this.dataCard.documentId, cardId: this.dataCard.id },
+                        params: {
+                            documentId:
+                                this.dataCard.documentId,
+                            cardId: this.dataCard.id,
+                        },
                         query: { page: this.backPage },
                     });
                 }
@@ -272,8 +463,15 @@
                 this.$emit("reload");
             },
             searchUser() {
-                const searchText = this.userSearchText.toLowerCase();
-                this.filteredUsers = this.users.filter((o) => o.name && o.name.toLowerCase().includes(searchText));
+                const searchText =
+                    this.userSearchText.toLowerCase();
+                this.filteredUsers = this.users.filter(
+                    (o) =>
+                        o.name &&
+                        o.name
+                            .toLowerCase()
+                            .includes(searchText)
+                );
             },
             setUsers() {
                 this.filteredUsers = this.users;
@@ -290,21 +488,28 @@
                 return this.dataCard.percentage < 100;
             },
             isAdmin() {
-                return this.$store.state.userProfile.isAdmin;
+                return this.$store.state.userProfile
+                    .isAdmin;
             },
             loggedUserId() {
-                const user = this.users.find((u) => u.email === this.$store.state.userProfile.login);
+                const user = this.users.find(
+                    (u) =>
+                        u.email ===
+                        this.$store.state.userProfile.login
+                );
                 return user ? user.id : null;
             },
             truncatedToolName() {
                 if (!this.dataCard?.toolName) return "";
-                const toolName = this.dataCard.toolName.trim();
-                return toolName.length > 10 ? toolName.substring(0, 10) + "..." : toolName;
+                const toolName =
+                    this.dataCard.toolName.trim();
+                return toolName.length > 10
+                    ? toolName.substring(0, 10) + "..."
+                    : toolName;
             },
         },
     };
 </script>
-
 <style scoped>
     .card {
         --kanban-card-title-size: 0.6rem;
@@ -515,7 +720,9 @@
     }
 
     .assing-btn {
-        background-color: var(--btn-primary-dark-bg) !important;
+        background-color: var(
+            --btn-primary-dark-bg
+        ) !important;
         color: var(--color-dropdown-menu);
     }
 

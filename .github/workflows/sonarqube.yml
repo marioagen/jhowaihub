@@ -1,82 +1,82 @@
-name: 'Sonarqube'
+name: "Sonarqube"
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-  push:
-    branches:
-      - 'master'
-      - 'develop'
-      - 'release'
+    pull_request:
+        types: [opened, synchronize, reopened]
+    push:
+        branches:
+            - "master"
+            - "develop"
+            - "release"
 
 jobs:
-  build-and-test:
-    name: "Sonarqube"
-    runs-on: ["azure"]
-    timeout-minutes: 30
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4.2.1
-          
-      - name: Setup Dotnet
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: |
-            6.0.x
-            8.0.x
-
-      - name: Nuget Restore
-        run: |
-          dotnet restore
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4.4.0
-        with:
-          java-version: 17
-          distribution: 'oracle'
-
-      - name: Install SonarQube scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ./sonar/scanner
-          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
-      
-      - name: Install dotnet-coverage
-        run: |
-          mkdir -p ./dotnet-coverage
-          dotnet tool install dotnet-coverage --version 17.13.1 --tool-path ./dotnet-coverage
-
-      - name: Sonar Properties
-        run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"woopiai-hub" \
-          /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
-          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
-          /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-          /d:sonar.exclusions=**/*.xml,**/*.config,**/src/assets/**,**/front-end/** \
-          /d:sonar.coverage.exclusions=**/back-end/WoopiAiHub.Repository/**,**/back-end/WoopiAiHub.Infrastructure/**,**/back-end/WoopiAiHub.Api/**,**/DependencyInjection/**,**/DTOs/**,**/Models/**,**/front-end/**,**/tests/E2E/** \
-          /d:sonar.cpd.exclusions=**/Migrations/**
-
-      - name: Build and analyze
-        run: |
-          dotnet build back-end/WoopiAiHub.Api/WoopiAiHub.Api.csproj
-          dotnet build external-api/FileRepository.Api/FileRepository.Api.csproj
-          dotnet build tests/WoopiAiHub.UnitTests/WoopiAiHub.UnitTests.csproj
-          ./dotnet-coverage/dotnet-coverage collect "dotnet test --no-restore --no-build --verbosity normal ." -f xml -o "coverage.xml"
-          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-
-      - name: Set report file path variable
-        id: report_path_var
-        run: |
-          echo $(pwd)/.sonarqube/out/.sonar/report-task.txt
-          cat $(pwd)/.sonarqube/out/.sonar/report-task.txt
-          echo "report_path=$(pwd)/.sonarqube/out/.sonar/report-task.txt" >>$GITHUB_OUTPUT
-
-      - name: SonarQube Quality Gate check
-        id: sonarqube-quality-gate-check
-        uses: stefanini-applications/sonarqube-quality-gate-action@master
+    build-and-test:
+        name: "Sonarqube"
+        runs-on: ["azure"]
         timeout-minutes: 30
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          scanMetadataReportFile: ${{ steps.report_path_var.outputs.report_path }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4.2.1
+
+            - name: Setup Dotnet
+              uses: actions/setup-dotnet@v2
+              with:
+                  dotnet-version: |
+                      6.0.x
+                      8.0.x
+
+            - name: Nuget Restore
+              run: |
+                  dotnet restore
+
+            - name: Set up JDK
+              uses: actions/setup-java@v4.4.0
+              with:
+                  java-version: 17
+                  distribution: "oracle"
+
+            - name: Install SonarQube scanner
+              if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+              run: |
+                  mkdir -p ./sonar/scanner
+                  dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+
+            - name: Install dotnet-coverage
+              run: |
+                  mkdir -p ./dotnet-coverage
+                  dotnet tool install dotnet-coverage --version 17.13.1 --tool-path ./dotnet-coverage
+
+            - name: Sonar Properties
+              run: |
+                  ./.sonar/scanner/dotnet-sonarscanner begin /k:"woopiai-hub" \
+                  /d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+                  /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
+                  /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+                  /d:sonar.exclusions=**/*.xml,**/*.config,**/src/assets/**,**/front-end/**,**/scripts/** \
+                  /d:sonar.coverage.exclusions=**/back-end/WoopiAiHub.Repository/**,**/back-end/WoopiAiHub.Infrastructure/**,**/back-end/WoopiAiHub.Api/**,**/DependencyInjection/**,**/DTOs/**,**/Models/**,**/front-end/**,**/tests/E2E/** \
+                  /d:sonar.cpd.exclusions=**/Migrations/**,**/scripts/**
+
+            - name: Build and analyze
+              run: |
+                  dotnet build back-end/WoopiAiHub.Api/WoopiAiHub.Api.csproj
+                  dotnet build external-api/FileRepository.Api/FileRepository.Api.csproj
+                  dotnet build tests/WoopiAiHub.UnitTests/WoopiAiHub.UnitTests.csproj
+                  ./dotnet-coverage/dotnet-coverage collect "dotnet test --no-restore --no-build --verbosity normal ." -f xml -o "coverage.xml"
+                  ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+            - name: Set report file path variable
+              id: report_path_var
+              run: |
+                  echo $(pwd)/.sonarqube/out/.sonar/report-task.txt
+                  cat $(pwd)/.sonarqube/out/.sonar/report-task.txt
+                  echo "report_path=$(pwd)/.sonarqube/out/.sonar/report-task.txt" >>$GITHUB_OUTPUT
+
+            - name: SonarQube Quality Gate check
+              id: sonarqube-quality-gate-check
+              uses: stefanini-applications/sonarqube-quality-gate-action@master
+              timeout-minutes: 30
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+              with:
+                  scanMetadataReportFile: ${{ steps.report_path_var.outputs.report_path }}

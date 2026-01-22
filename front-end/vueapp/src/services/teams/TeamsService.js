@@ -1,8 +1,9 @@
 import api from "@/services/api";
 
 export default {
-    getTeams(params) {    
-        return api.get("/Team/Paged/", { params: params })
+    getTeams(params) {
+        return api
+            .get("/Team/Paged/", { params: params })
             .then(({ data }) => {
                 return {
                     content: data.content,
@@ -19,14 +20,15 @@ export default {
             });
     },
     getTeamList() {
-        return api.get("/Team")
+        return api
+            .get("/Team")
             .then(({ data }) => {
                 return data;
             })
             .catch((error) => {
                 return {
                     error: error,
-                }
+                };
             });
     },
     deleteTeamById(teamId) {
@@ -38,18 +40,19 @@ export default {
             .catch((error) => {
                 return {
                     error: error,
-                }
+                };
             });
     },
     getTeamById(teamId) {
-        return api.get(`Team/${teamId}`)
+        return api
+            .get(`Team/${teamId}`)
             .then(({ data }) => {
                 return data;
             })
             .catch((e) => {
                 return {
                     error: e,
-                }
+                };
             });
-        },
+    },
 };

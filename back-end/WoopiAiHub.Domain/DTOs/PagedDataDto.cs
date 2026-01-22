@@ -11,6 +11,6 @@ namespace WoopiAiHub.Domain.DTOs
         public int Page { get; set; }
         public int PageSize { get; set; }
         public string? Search { get; set; }
-        public bool IsAscending { get; set; }
+        public bool IsAscending { get; set; } = true;
     }
 }

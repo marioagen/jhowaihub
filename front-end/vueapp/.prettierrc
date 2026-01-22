@@ -4,8 +4,9 @@
     "singleQuote": false,
     "tabWidth": 4,
     "trailingComma": "es5",
-    "printWidth": 120,
+    "printWidth": 60,
     "bracketSpacing": true,
     "vueIndentScriptAndStyle": true,
-    "htmlWhitespaceSensitivity": "ignore"
+    "htmlWhitespaceSensitivity": "ignore",
+    "singleAttributePerLine": true
 }
