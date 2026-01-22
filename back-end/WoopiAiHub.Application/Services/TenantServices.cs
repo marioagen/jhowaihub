@@ -52,7 +52,7 @@ namespace WoopiAiHub.Application.Services
             if (result)
             {
                 SeedInitialData(tenantSubscriptionDto, connectionString);
-                _marketPlaceApi.DatabaseCreated(_configuration["keyAccess"]!,
+                _marketPlaceApi.SendDatabaseCreatedNotification(_configuration["keyAccess"]!,
                                                tenantSubscriptionDto.Name!);
             }
         }

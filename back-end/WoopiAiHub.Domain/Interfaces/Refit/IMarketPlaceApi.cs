@@ -42,8 +42,8 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<TenantInfoDto> FindTenantByName([Header("KeyAccess")] string KeyAccess,
                                              [AliasAs("tenantName")] string tenantName);
 
-        [Put("/api/Tenant/{tenantName}/DatabaseCreated")]
-        Task<bool> DatabaseCreated([Header("KeyAccess")] string KeyAccess,
+        [Put("/api/Tenant/{tenantName}/UpdateDatabaseStatus")]
+        Task<bool> SendDatabaseCreatedNotification([Header("KeyAccess")] string KeyAccess,
                                    [AliasAs("tenantName")] string tenantName);
 
         [Post("/user/AssignByHub")]
