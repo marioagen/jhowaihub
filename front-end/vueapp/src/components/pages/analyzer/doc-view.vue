@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="col-md-8">
+    <div class="col-md-6 doc-view-scroll">
         <div class="mb-2" style="margin-top: 12px !important">
             <div v-if="viewMode === $options.VIEW_MODE_PDF">
                 <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
@@ -233,17 +233,27 @@
 
     .view-pdf {
         width: 100% !important;
-        height: calc(100vh - 138px) !important;
+        height: auto !important;
+        max-height: 70vh;
+        min-height: 300px;
+        aspect-ratio: 1/1.414;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
+
+        .view-pdf object,
+        .view-pdf embed {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100%;
+            max-height: 70vh;
+            display: block;
+        }
+
 
     .textarea-norm-full {
         height: calc(100vh - 138px) !important;
-    }
-
-    @media (min-width: 768px) and (max-width: 1024px) {
-        .view-pdf {
-            height: calc(100vh - 300px) !important;
-        }
     }
 
     .overlay {

@@ -308,8 +308,6 @@ export default {
    padding: 1rem;
    box-shadow: 0 4px 12px rgba(0, 115, 230, 0.15);
    animation: slideDown 0.3s ease;
-   max-height: 70vh;
-   overflow-y: auto;
  }
 
 @keyframes slideDown {
