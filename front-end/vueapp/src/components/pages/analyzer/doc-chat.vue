@@ -1,39 +1,25 @@
 <template>
     <div class="doc-chat-container">
-        <button
-            class="chat-toggle-button"
-            @click="toggleChat"
-            :class="{ expanded: isExpanded }"
-        >
+        <button class="chat-toggle-button" @click="toggleChat" :class="{ expanded: isExpanded }">
             <i class="fas fa-comment-dots"></i>
             {{ $t("analyze.askTheDoc") }}
         </button>
 
-        <div
-            v-if="isExpanded"
-            class="chat-panel"
-        >
+        <div v-if="isExpanded" class="chat-panel">
             <div class="chat-header">
                 <i class="fas fa-comment-dots"></i>
                 {{ $t("analyze.askTheDoc") }}
-                <button
-                    class="close-button"
-                    @click="toggleChat"
-                    :title="$t('common.close')"
-                >
+                <button class="close-button" @click="toggleChat" :title="$t('common.close')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-
             <div class="questionnaire-section">
                 <label class="input-label">
                     {{ $t("analyze.questionnaireToApply") }}
                 </label>
                 <div class="questionnaire-controls">
-                    <select
-                        v-model="selectedQuestionnaireId"
-                        class="questionnaire-select"
-                    >
+                    <select v-model="selectedQuestionnaireId"
+                            class="questionnaire-select">
                         <option :value="null">
                             {{
                                 $t(
@@ -41,39 +27,29 @@
                                 )
                             }}
                         </option>
-                        <option
-                            v-for="questionnaire in questionnaires"
-                            :key="questionnaire.id"
-                            :value="questionnaire.id"
-                        >
+                        <option v-for="questionnaire in questionnaires"
+                                :key="questionnaire.id"
+                                :value="questionnaire.id">
                             {{ questionnaire.title }}
                         </option>
                     </select>
-                    <button
-                        class="apply-button"
-                        @click="applyQuestionnaire"
-                        :disabled="
+                    <button class="apply-button"
+                            @click="applyQuestionnaire"
+                            :disabled="
                             !selectedQuestionnaireId ||
                             isApplyingQuestionnaire
-                        "
-                    >
-                        <div
-                            v-if="isApplyingQuestionnaire"
-                            class="spinner-border spinner-border-sm text-light"
-                            role="status"
-                        ></div>
-                        <i
-                            v-else
-                            class="fas fa-arrow-up"
-                        ></i>
+                        ">
+                        <div v-if="isApplyingQuestionnaire"
+                             class="spinner-border spinner-border-sm text-light"
+                             role="status"></div>
+                        <i v-else
+                           class="fas fa-arrow-up"></i>
                     </button>
                 </div>
             </div>
 
-            <div
-                v-if="questionnaireResults.length > 0"
-                class="results-section"
-            >
+            <div v-if="questionnaireResults.length > 0"
+                 class="results-section">
                 <div class="results-header">
                     <label class="input-label">
                         {{
@@ -82,23 +58,19 @@
                             )
                         }}
                     </label>
-                    <button
-                        class="close-results-button"
-                        @click="clearResults"
-                        :title="$t('analyze.closeResults')"
-                    >
+                    <button class="close-results-button"
+                            @click="clearResults"
+                            :title="$t('analyze.closeResults')">
                         <i class="fas fa-times"></i>
                         {{ $t("analyze.closeResults") }}
                     </button>
                 </div>
                 <div class="results-list">
-                    <div
-                        v-for="(
+                    <div v-for="(
                             result, index
                         ) in questionnaireResults"
-                        :key="index"
-                        class="result-card"
-                    >
+                         :key="index"
+                         class="result-card">
                         <div class="result-question">
                             <strong>
                                 {{ result.question }}
@@ -106,13 +78,9 @@
                         </div>
                         <div class="result-answer">
                             {{ result.answer }}
-                            <span
-                                v-if="result.confirmed"
-                                class="confirmed-badge"
-                            >
-                                <i
-                                    class="fas fa-check-circle"
-                                ></i>
+                            <span v-if="result.confirmed"
+                                  class="confirmed-badge">
+                                <i class="fas fa-check-circle"></i>
                                 {{
                                     $t("analyze.confirmed")
                                 }}
@@ -123,58 +91,44 @@
             </div>
 
             <div class="chat-input-section">
-                <textarea
-                    v-model="question"
-                    class="chat-textarea"
-                    :placeholder="
+                <textarea v-model="question"
+                          class="chat-textarea"
+                          :placeholder="
                         $t('analyze.typeYourQuestion')
                     "
-                    rows="4"
-                    @input="handleInput"
-                ></textarea>
+                          rows="4"
+                          @input="handleInput"></textarea>
 
-                <button
-                    v-if="question.trim()"
-                    class="send-button"
-                    @click="sendQuestion"
-                    :disabled="isSending"
-                >
-                    <LucideIcon
-                        icon="RefreshCcw"
-                        :size="17"
-                        :class="{
+                <button v-if="question.trim()"
+                        class="send-button"
+                        @click="sendQuestion"
+                        :disabled="isSending">
+                    <LucideIcon icon="RefreshCcw"
+                                :size="17"
+                                :class="{
                             'animate-spin': isSending,
                         }"
-                        v-if="isSending"
-                    />
-                    <LucideIcon
-                        icon="SendHorizontal"
-                        :size="17"
-                        v-if="!isSending"
-                    />
+                                v-if="isSending" />
+                    <LucideIcon icon="SendHorizontal"
+                                :size="17"
+                                v-if="!isSending" />
                     {{ $t("analyze.sendQuestion") }}
                 </button>
                 <div v-if="output != ''">
                     <label class="input-label">
                         {{ $t("common.output") }}
                     </label>
-                    <textarea
-                        v-model="output"
-                        class="chat-textarea"
-                        rows="4"
-                    ></textarea>
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary"
-                        @click="copy"
-                    >
+                    <textarea v-model="output"
+                              class="chat-textarea"
+                              rows="4"></textarea>
+                    <button type="button"
+                            class="btn btn-outline-primary"
+                            @click="copy">
                         {{ $t("analyze.copy") }}
                     </button>
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary"
-                        @click="clear"
-                    >
+                    <button type="button"
+                            class="btn btn-outline-primary"
+                            @click="clear">
                         {{ $t("analyze.clear") }}
                     </button>
                 </div>
@@ -459,14 +413,15 @@
         transition: all 0.3s ease;
     }
 
-    .chat-toggle-button:hover {
-        background: #e7f3ff;
-        border-color: #005bb5;
-    }
+        .chat-toggle-button:hover {
+            background: #e7f3ff;
+            border-color: #005bb5;
+        }
 
-    .chat-toggle-button.expanded {
-        display: none;
-    }
+        .chat-toggle-button.expanded {
+            display: none;
+        }
+
     .chat-panel {
         background: white;
         border: 2px solid #0073e6;
@@ -474,8 +429,6 @@
         padding: 1rem;
         box-shadow: 0 4px 12px rgba(0, 115, 230, 0.15);
         animation: slideDown 0.3s ease;
-        max-height: 70vh;
-        overflow-y: auto;
     }
 
     @keyframes slideDown {
@@ -507,14 +460,14 @@
         transition: all 0.3s ease;
     }
 
-    .chat-toggle-button:hover {
-        background: #e7f3ff;
-        border-color: #005bb5;
-    }
+        .chat-toggle-button:hover {
+            background: #e7f3ff;
+            border-color: #005bb5;
+        }
 
-    .chat-toggle-button.expanded {
-        display: none;
-    }
+        .chat-toggle-button.expanded {
+            display: none;
+        }
 
     .close-button:hover {
         color: #333;
@@ -544,14 +497,14 @@
         transition: border-color 0.3s ease;
     }
 
-    .chat-textarea:focus {
-        outline: none;
-        border-color: #0073e6;
-    }
+        .chat-textarea:focus {
+            outline: none;
+            border-color: #0073e6;
+        }
 
-    .chat-textarea::placeholder {
-        color: #999;
-    }
+        .chat-textarea::placeholder {
+            color: #999;
+        }
 
     .send-button {
         align-self: flex-start;
@@ -567,15 +520,15 @@
         transition: all 0.3s ease;
     }
 
-    .send-button:hover:not(:disabled) {
-        background: #005bb5;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
-    }
+        .send-button:hover:not(:disabled) {
+            background: #005bb5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
+        }
 
-    .send-button:disabled {
-        opacity: 0.6;
-    }
+        .send-button:disabled {
+            opacity: 0.6;
+        }
 
     .questionnaire-section {
         display: flex;
@@ -605,10 +558,10 @@
         width: 50%;
     }
 
-    .questionnaire-select:focus {
-        outline: none;
-        border-color: #0073e6;
-    }
+        .questionnaire-select:focus {
+            outline: none;
+            border-color: #0073e6;
+        }
 
     .apply-button {
         width: 48px;
@@ -626,16 +579,16 @@
         flex-shrink: 0;
     }
 
-    .apply-button:hover:not(:disabled) {
-        background: #005bb5;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
-    }
+        .apply-button:hover:not(:disabled) {
+            background: #005bb5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
+        }
 
-    .apply-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+        .apply-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
     .results-section {
         margin-bottom: 2rem;
@@ -664,15 +617,15 @@
         transition: all 0.3s ease;
     }
 
-    .close-results-button:hover {
-        background: #e9ecef;
-        border-color: #ccc;
-        color: #333;
-    }
+        .close-results-button:hover {
+            background: #e9ecef;
+            border-color: #ccc;
+            color: #333;
+        }
 
-    .close-results-button i {
-        font-size: 0.75rem;
-    }
+        .close-results-button i {
+            font-size: 0.75rem;
+        }
 
     .results-list {
         display: flex;
@@ -685,24 +638,24 @@
         padding-right: 0.5rem;
     }
 
-    /* Scrollbar styling */
-    .results-list::-webkit-scrollbar {
-        width: 8px;
-    }
+        /* Scrollbar styling */
+        .results-list::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    .results-list::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
+        .results-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
 
-    .results-list::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 4px;
-    }
+        .results-list::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
 
-    .results-list::-webkit-scrollbar-thumb:hover {
-        background: #999;
-    }
+            .results-list::-webkit-scrollbar-thumb:hover {
+                background: #999;
+            }
 
     .result-card {
         background: #f8f9fa;
@@ -712,9 +665,9 @@
         transition: box-shadow 0.3s ease;
     }
 
-    .result-card:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
+        .result-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
 
     .result-question {
         color: #333;
@@ -742,6 +695,7 @@
         font-size: 0.75rem;
         font-weight: 500;
     }
+
     @media (max-width: 768px) {
         .chat-panel {
             background: white;
@@ -763,34 +717,9 @@
                 transform: translateY(0);
             }
         }
-
-        .chat-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #0073e6;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #e0e0e0;
-            position: relative;
-        }
-
-        .close-button {
-            position: absolute;
-            right: 0;
-            background: transparent;
-            border: none;
-            color: #666;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0.25rem;
-            transition: color 0.3s ease;
-        }
-
-        .close-button:hover {
-            color: #333;
-        }
+            .close-button:hover {
+                color: #333;
+            }
 
         .chat-input-section {
             display: flex;
@@ -816,14 +745,14 @@
             transition: border-color 0.3s ease;
         }
 
-        .chat-textarea:focus {
-            outline: none;
-            border-color: #0073e6;
-        }
+            .chat-textarea:focus {
+                outline: none;
+                border-color: #0073e6;
+            }
 
-        .chat-textarea::placeholder {
-            color: #999;
-        }
+            .chat-textarea::placeholder {
+                color: #999;
+            }
 
         .send-button {
             align-self: flex-start;
@@ -839,15 +768,15 @@
             transition: all 0.3s ease;
         }
 
-        .send-button:hover:not(:disabled) {
-            background: #005bb5;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
-        }
+            .send-button:hover:not(:disabled) {
+                background: #005bb5;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
+            }
 
-        .send-button:disabled {
-            opacity: 0.6;
-        }
+            .send-button:disabled {
+                opacity: 0.6;
+            }
 
         .questionnaire-section {
             display: flex;
@@ -876,10 +805,10 @@
             transition: border-color 0.3s ease;
         }
 
-        .questionnaire-select:focus {
-            outline: none;
-            border-color: #0073e6;
-        }
+            .questionnaire-select:focus {
+                outline: none;
+                border-color: #0073e6;
+            }
 
         .apply-button {
             width: 48px;
@@ -897,16 +826,16 @@
             flex-shrink: 0;
         }
 
-        .apply-button:hover:not(:disabled) {
-            background: #005bb5;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
-        }
+            .apply-button:hover:not(:disabled) {
+                background: #005bb5;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 115, 230, 0.3);
+            }
 
-        .apply-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+            .apply-button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
 
         .results-section {
             margin-bottom: 2rem;
@@ -935,15 +864,15 @@
             transition: all 0.3s ease;
         }
 
-        .close-results-button:hover {
-            background: #e9ecef;
-            border-color: #ccc;
-            color: #333;
-        }
+            .close-results-button:hover {
+                background: #e9ecef;
+                border-color: #ccc;
+                color: #333;
+            }
 
-        .close-results-button i {
-            font-size: 0.75rem;
-        }
+            .close-results-button i {
+                font-size: 0.75rem;
+            }
 
         .results-list {
             display: flex;
@@ -956,24 +885,24 @@
             padding-right: 0.5rem;
         }
 
-        /* Scrollbar styling */
-        .results-list::-webkit-scrollbar {
-            width: 8px;
-        }
+            /* Scrollbar styling */
+            .results-list::-webkit-scrollbar {
+                width: 8px;
+            }
 
-        .results-list::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
+            .results-list::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
 
-        .results-list::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
+            .results-list::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 4px;
+            }
 
-        .results-list::-webkit-scrollbar-thumb:hover {
-            background: #999;
-        }
+                .results-list::-webkit-scrollbar-thumb:hover {
+                    background: #999;
+                }
 
         .result-card {
             background: #f8f9fa;
@@ -983,9 +912,9 @@
             transition: box-shadow 0.3s ease;
         }
 
-        .result-card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
+            .result-card:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            }
 
         .result-question {
             color: #333;
@@ -1074,4 +1003,29 @@
             transform: rotate(360deg);
         }
     }
+
+    .chat-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #0073e6;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e0e0e0;
+        position: relative;
+    }
+
+    .close-button {
+        position: absolute;
+        right: 0;
+        background: transparent;
+        border: none;
+        color: #666;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0.25rem;
+        transition: color 0.3s ease;
+    }
+
 </style>

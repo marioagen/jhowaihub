@@ -33,7 +33,7 @@
                         @clearMyInterval="clearMyInterval" v-if="!isExpandedHistory" />
 
                     <doc-view @showNormalize="normalize" id="docView" />
-                    <div :class="'col-md-4'" id="docHistory">
+                    <div :class="'col-md-6'" id="docHistory">
                         <step-analysis-view :document-id="parseInt(idAnalyzer)" :card-id="parseInt(idCard)"
                             @show-alert-toast="showAlertToast" />
                     </div>
@@ -198,4 +198,11 @@ export default {
         display: none;
     }
 }
+
+    #docHistory {
+        overflow-y: auto;
+        max-height: 70vh;
+        min-height: 300px; /* Opcional: altura mínima para não ficar pequeno demais */
+        height: auto !important;
+    }
 </style>
