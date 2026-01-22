@@ -309,7 +309,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns>The name of the tenant if found and validated.</returns>
         /// <exception cref="AppException">Thrown if the tenant is not found in the collection, or if the tenant's database is not ready or cannot be
         /// accessed.</exception>
-        private string FindAndValidateTenant(string tenant, ICollection<TenantAccessDto> tenants) 
+        private static string FindAndValidateTenant(string tenant, ICollection<TenantAccessDto> tenants) 
         {
             var tenantFound = tenants.FirstOrDefault(t => t.Name.Equals(tenant, StringComparison.OrdinalIgnoreCase));
             if (tenantFound == null)
