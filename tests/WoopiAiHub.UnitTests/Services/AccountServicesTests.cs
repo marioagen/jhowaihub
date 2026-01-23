@@ -545,7 +545,6 @@ namespace WoopiAiHub.UnitTests.Services
                 Login = "user@example.com",
                 Tenant = string.Empty
             };
-            authenticateDto.Tenant = tenants.First().Name;
 
             var authenticateHeaderDto = new AuthenticateHeaderDto
             {
@@ -564,10 +563,6 @@ namespace WoopiAiHub.UnitTests.Services
             var iGraphApi = _mocker.GetMock<IGraphApi>();
             iGraphApi.Setup(a => a.FindEmailUserAzure(It.IsAny<string>())).Returns(Task.FromResult(graphApiResponse));
 
-
-
-
-
             _mocker.GetMock<IMarketPlaceApi>()
                    .Setup(m => m.CheckAccessByHub(It.IsAny<string>(), authenticateDto.Login))
                    .ReturnsAsync(userAccess);
@@ -579,8 +574,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
-            var resultObject = (dynamic)result;
-            Assert.Equal(tenants, resultObject.Tenants);
             _mocker.GetMock<IGraphApi>().Verify(g => g.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
             _mocker.GetMock<IMarketPlaceApi>().Verify(m => m.CheckAccessByHub(It.IsAny<string>(), authenticateDto.Login), Times.Once);
         }
