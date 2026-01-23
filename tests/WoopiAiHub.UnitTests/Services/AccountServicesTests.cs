@@ -52,6 +52,12 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Authenticate_LoginSSO_Success()
         {
             // Arrange
+            var tenants = new List<TenantAccessDto>
+                {
+                    new TenantAccessDto("Tenant1", true ),
+                    new TenantAccessDto ("Tenant2",true )
+                };
+
             var permissions = new List<string> { "read", "write" };
             var permissionDic = new Dictionary<string, List<string>>
             {
@@ -61,10 +67,12 @@ namespace WoopiAiHub.UnitTests.Services
             var user = AccountFixture.FindValidUser();
             var authenticateHeaderDto = AccountFixture.FindValidAuthenticateHeaderDto();
             var authenticateDto = AccountFixture.FindValidAuthenticateDto();
+            authenticateDto.Tenant = tenants.First().Name;
 
             var graphApiResponse = _fixture.FindValidUserGraphApiResponse();
             graphApiResponse.Content!.Mail = authenticateDto.Login;
             var responseCheckAccess = _fixture.FindValidResponseCheckAccessDto();
+            responseCheckAccess.Tenants = tenants;
 
             var _mockTenantContextService = _mocker.GetMock<ITenantContextService>();
             var _mockHttpContext = _mocker.GetMock<HttpContext>();
@@ -76,13 +84,14 @@ namespace WoopiAiHub.UnitTests.Services
             var iMarketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
             var _mockPermissionRepository = _mocker.GetMock<IPermissionRepository>();
             var _mockHttpContextAccessor = _mocker.GetMock<IHttpContextAccessor>();
+            var _passwordHasherMock = _mocker.GetMock<IPasswordHasher>();
 
             _mockHttpContext.Setup(x => x.Response).Returns(_mockHttpResponse.Object);
             _mockHttpResponse.Setup(x => x.Cookies).Returns(_mockResponseCookies.Object);
             _mockHttpContextAccessor.Setup(x => x.HttpContext).Returns(_mockHttpContext.Object);
 
             iGraphApi.Setup(a => a.FindEmailUserAzure(It.IsAny<string>())).Returns(Task.FromResult(graphApiResponse));
-            iMarketPlaceApi.Setup(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(responseCheckAccess));
+            iMarketPlaceApi.Setup(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(responseCheckAccess);
             _mockRefreshTokenServices
                 .Setup(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
@@ -95,6 +104,8 @@ namespace WoopiAiHub.UnitTests.Services
             _mockUserRepository
                 .Setup(x => x.FindUserProfilesByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(profiles);
+            _passwordHasherMock.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()))
+                .Returns(true);
 
             var configMock = new Mock<IConfiguration>();
 
@@ -106,6 +117,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             iGraphApi.Verify(r => r.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
             iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _passwordHasherMock.Verify(a => a.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()), Times.Never);
         }
 
         [Fact(DisplayName = "Test authenticate Sucess")]
@@ -355,16 +367,16 @@ namespace WoopiAiHub.UnitTests.Services
             _mockRefreshTokenServices.Verify(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()), Times.AtLeast(2));
         }
 
-        [Fact(DisplayName = "Login should return tenants list when Tenant is empty and user has access to multiple tenants")]
-        [Trait("Login", "Success")]
-        public async Task Login_ShouldReturnTenantsList_WhenTenantIsEmptyAndUserHasMultipleTenants()
+        [Fact(DisplayName = "Login ShouldThrowAppException_WhenTenantNotFound")]
+        [Trait("Login", "Fail")]
+        public async Task Login_ShouldThrowAppException_WhenTenantNotFound()
         {
             // Arrange
             var loginDto = new LoginDto
             {
                 Email = "user@example.com",
                 Password = "password123",
-                Tenant = string.Empty
+                Tenant = "TenantNotExist"
             };
 
             var tenants = new List<TenantAccessDto>
@@ -387,10 +399,49 @@ namespace WoopiAiHub.UnitTests.Services
             var accountServices = _mocker.CreateInstance<AccountServices>();
 
             // Act
-            var result = await accountServices.Login(loginDto);
+            var exception = await Assert.ThrowsAsync<AppException>(() => accountServices.Login(loginDto));
 
             // Assert
-            Assert.NotNull(result);
+            Assert.Equal("Tenant not found", exception.Message);
+            marketPlaceApiMock.Verify(api => api.CheckAccessByHub(It.IsAny<string>(), loginDto.Email), Times.Once);
+        }
+
+        [Fact(DisplayName = "Login ShouldThrowAppException_WhenDatabaseNotCreated")]
+        [Trait("Login", "Fail")]
+        public async Task Login_ShouldThrowAppException_WhenDatabaseNotCreated()
+        {
+            // Arrange
+            var loginDto = new LoginDto
+            {
+                Email = "user@example.com",
+                Password = "password123",
+                Tenant = "Tenant1"
+            };
+
+            var tenants = new List<TenantAccessDto>
+                {
+                    new TenantAccessDto("Tenant1", false ),
+                    new TenantAccessDto ("Tenant2", true )
+                };
+
+            var userAccess = new ResponseCheckAccessDto
+            {
+                HasAccess = true,
+                Tenants = tenants
+            };
+
+            var marketPlaceApiMock = _mocker.GetMock<IMarketPlaceApi>();
+            marketPlaceApiMock
+                .Setup(api => api.CheckAccessByHub(It.IsAny<string>(), loginDto.Email))
+                .ReturnsAsync(userAccess);
+
+            var accountServices = _mocker.CreateInstance<AccountServices>();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<AppException>(() => accountServices.Login(loginDto));
+
+            // Assert
+            Assert.Equal("Tenant database is not ready or cannot be accessed.", exception.Message);
             marketPlaceApiMock.Verify(api => api.CheckAccessByHub(It.IsAny<string>(), loginDto.Email), Times.Once);
         }
 
@@ -476,6 +527,62 @@ namespace WoopiAiHub.UnitTests.Services
 
             iGraphApi.Verify(g => g.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
             marketPlaceApiMock.Verify(m => m.CheckAccessByHub(It.IsAny<string>(), authenticateDto.Login), Times.Once);
+        }
+
+        [Fact(DisplayName = "Login should return tenants list when Tenant is empty and user has access to multiple tenants")]
+        [Trait("Login", "Success")]
+        public async Task Login_ShouldReturnTenantsList_WhenTenantIsEmptyAndUserHasMultipleTenants()
+        {
+            // Arrange
+            var tenants = new List<TenantAccessDto>
+                {
+                    new TenantAccessDto("Tenant1", true ),
+                    new TenantAccessDto ("Tenant2",true )
+                };
+
+            var authenticateDto = new AuthenticateDto
+            {
+                Login = "user@example.com",
+                Tenant = string.Empty
+            };
+            authenticateDto.Tenant = tenants.First().Name;
+
+            var authenticateHeaderDto = new AuthenticateHeaderDto
+            {
+                Authorization = "Bearer token"
+            };
+
+            var userAccess = new ResponseCheckAccessDto
+            {
+                HasAccess = true,
+                Tenants = tenants
+            };
+
+            var graphApiResponse = _fixture.FindValidUserGraphApiResponse();
+            graphApiResponse.Content!.Mail = authenticateDto.Login;
+
+            var iGraphApi = _mocker.GetMock<IGraphApi>();
+            iGraphApi.Setup(a => a.FindEmailUserAzure(It.IsAny<string>())).Returns(Task.FromResult(graphApiResponse));
+
+
+
+
+
+            _mocker.GetMock<IMarketPlaceApi>()
+                   .Setup(m => m.CheckAccessByHub(It.IsAny<string>(), authenticateDto.Login))
+                   .ReturnsAsync(userAccess);
+
+            var accountServices = _mocker.CreateInstance<AccountServices>();
+
+            // Act
+            var result = await accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
+
+            // Assert
+            Assert.NotNull(result);
+            var resultObject = (dynamic)result;
+            Assert.Equal(tenants, resultObject.Tenants);
+            _mocker.GetMock<IGraphApi>().Verify(g => g.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
+            _mocker.GetMock<IMarketPlaceApi>().Verify(m => m.CheckAccessByHub(It.IsAny<string>(), authenticateDto.Login), Times.Once);
         }
     }
 }
