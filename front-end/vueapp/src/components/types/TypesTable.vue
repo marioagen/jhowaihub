@@ -1,11 +1,25 @@
 <template>
-    <div class="d-flex flex-column justify-content-between align-items-start mb-2">
+    <div
+        class="d-flex flex-column justify-content-between align-items-start mb-2"
+    >
         <div class="delete-container">
-            <button class="btn btn-outline-danger btn-sm delete-button" @click="openConfirmationMultiple" :disabled="!showMultiDelete">
-                <LucideIcon icon="Trash2" :size="15" />
+            <button
+                class="btn btn-outline-danger btn-sm delete-button"
+                @click="openConfirmationMultiple"
+                :disabled="!showMultiDelete"
+            >
+                <LucideIcon
+                    icon="Trash2"
+                    :size="15"
+                />
                 {{ $t("common.delete") }}
             </button>
-        <small v-if="!showMultiDelete" class="text-danger delete-tooltip">{{ $t("types.selectToDelete") }}</small>
+            <small
+                v-if="!showMultiDelete"
+                class="text-danger delete-tooltip"
+            >
+                {{ $t("types.selectToDelete") }}
+            </small>
         </div>
     </div>
     <div>
@@ -25,7 +39,10 @@
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openEditModal(data.row)">
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="openEditModal(data.row)"
+                        >
                             <LucideIcon icon="SquarePen" />
                             {{ $t("common.edit") }}
                         </a>
@@ -33,7 +50,9 @@
                     <li>
                         <a
                             class="dropdown-item d-flex align-items-center gap-2"
-                            @click="openConfirmation(data.row)"
+                            @click="
+                                openConfirmation(data.row)
+                            "
                         >
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
@@ -43,7 +62,11 @@
             </template>
         </TableComponent>
     </div>
-    <TypesModal :isEdit="true" @reload="reload" ref="TypesModal" />
+    <TypesModal
+        :isEdit="true"
+        @reload="reload"
+        ref="TypesModal"
+    />
     <ConfirmModal
         id="deleteConfirm"
         title="types.youAreAboutToDeleteType"
@@ -56,7 +79,6 @@
         @confirm="deleteType"
     />
 </template>
-
 <script>
     import date from "@/helpers/date";
     import TypesService from "@/services/types/TypesService";
@@ -79,9 +101,18 @@
                 columns: [
                     { key: "id", label: "common.id" },
                     { key: "name", label: "common.name" },
-                    { key: "created", label: "documents.inclusionDate" },
-                    { key: "emailCreator", label: "common.owner" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "created",
+                        label: "documents.inclusionDate",
+                    },
+                    {
+                        key: "emailCreator",
+                        label: "common.owner",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -107,7 +138,9 @@
                 this.table.isLoading = true;
                 this.searching = false;
                 let params = {
-                    search: this.searchInput.trim() ? this.searchInput.trim() : "",
+                    search: this.searchInput.trim()
+                        ? this.searchInput.trim()
+                        : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
                     isAscending: this.isAscending,
@@ -116,14 +149,17 @@
 
                 TypesService.getTypes(params)
                     .then((response) => {
-                        const content = response?.content || [];
-                        const pagination = response?.pagination || {};
+                        const content =
+                            response?.content || [];
+                        const pagination =
+                            response?.pagination || {};
 
                         this.table.data = content;
                         this.table.pagination = pagination;
                     })
                     .finally(() => {
-                        if (obj.type === "search") this.searching = true;
+                        if (obj.type === "search")
+                            this.searching = true;
                         this.table.isLoading = false;
                         this.searchInput = "";
                     });
@@ -138,7 +174,11 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getTypes({ search: "", page: this.queryPage, type: null });
+                this.getTypes({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             selectedRows(selectedRows) {
                 this.table.selectedRows = selectedRows;
@@ -151,27 +191,39 @@
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
-                const ids = this.table.selectedRows.map((item) => item.id);
+                const ids = this.table.selectedRows.map(
+                    (item) => item.id
+                );
                 this.selectedType = ids;
                 this.$refs.DeleteDialog.open();
             },
             deleteType() {
                 this.isDeleting = true;
-                TypesService.deleteTypeById(this.selectedType)
+                TypesService.deleteTypeById(
+                    this.selectedType
+                )
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getTypes({ search: "", page: 1, type: null });
+                            this.getTypes({
+                                search: "",
+                                page: 1,
+                                type: null,
+                            });
                             this.$notify({
                                 title: "Tipos",
-                                message: this.$t("types.removeSuccess"),
+                                message: this.$t(
+                                    "types.removeSuccess"
+                                ),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "Tipos",
-                                message: this.$t("types.errors.removeError"),
+                                message: this.$t(
+                                    "types.errors.removeError"
+                                ),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -185,19 +237,37 @@
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getTypes({ search: input, page: this.queryPage, type: null });
+                this.getTypes({
+                    search: input,
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             changePage(page) {
-                this.getTypes({ search: "", page: page, type: null });
+                this.getTypes({
+                    search: "",
+                    page: page,
+                    type: null,
+                });
             },
             reload() {
                 this.$refs.TypesModal.close();
-                this.getTypes({ search: "", page: this.queryPage, type: null });
+                this.getTypes({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
         },
         created() {
-            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getTypes({ search: "", page: this.queryPage, type: null });
+            this.queryPage = this.$route.query.page
+                ? this.$route.query.page
+                : 1;
+            this.getTypes({
+                search: "",
+                page: this.queryPage,
+                type: null,
+            });
         },
         computed: {
             showMultiDelete() {
@@ -206,9 +276,7 @@
         },
     };
 </script>
-
 <style scoped>
-
     .delete-container {
         position: relative;
         display: inline-block;
@@ -222,7 +290,9 @@
         opacity: 0;
         pointer-events: none;
         visibility: hidden;
-        transition: opacity 0.2s ease, visibility 0.2s ease;
+        transition:
+            opacity 0.2s ease,
+            visibility 0.2s ease;
         position: absolute;
         top: calc(100% + 8px);
         left: 0;
@@ -236,7 +306,7 @@
     }
 
     .delete-tooltip::before {
-        content: '';
+        content: "";
         position: absolute;
         bottom: 100%;
         left: 20px;
@@ -245,7 +315,7 @@
     }
 
     .delete-tooltip::after {
-        content: '';
+        content: "";
         position: absolute;
         bottom: 100%;
         left: 21px;

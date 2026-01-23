@@ -2,6 +2,10 @@ front-end/vueapp/dist
 front-end/vueapp/node_modules
 front-end/vueapp/package-lock.json
 
+# Root node_modules and package-lock.json (if generated)
+node_modules/
+package-lock.json
+
 .vs/
 bin/
 obj/

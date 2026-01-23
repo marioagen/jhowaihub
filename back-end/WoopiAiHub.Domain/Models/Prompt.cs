@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -21,7 +16,8 @@ namespace WoopiAiHub.Domain.Models
         [Column("IdUser", TypeName = "uniqueIdentifier")]
         public Guid IdUser { get; private set; } = Guid.Empty;
 
-        [Column("IsEdited", TypeName = "bit")] public bool IsEdited { get; private set; } = false;
+        [Column("IsEdited", TypeName = "bit")] 
+        public bool IsEdited { get; private set; } = false;
 
         [Column("IsImported", TypeName = "bit")]
         public bool IsImported { get; private set; } = false;

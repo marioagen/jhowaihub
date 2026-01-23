@@ -1,0 +1,23 @@
+{
+    "name": "woopiai-hub",
+    "version": "1.0.0",
+    "private": true,
+    "description": "WoopiAI Hub - Root package for formatting and linting",
+    "scripts": {
+        "format": "node scripts/format-changed.js root",
+        "format:all": "prettier --write \"**/*.{json,yml,yaml,md}\" --ignore-path .prettierignore",
+        "format:check": "prettier --check \"**/*.{json,yml,yaml,md}\" --ignore-path .prettierignore",
+        "format:frontend": "node scripts/format-changed.js frontend",
+        "format:frontend:all": "cd front-end/vueapp && npm run format",
+        "format:changed": "npm run format && npm run format:frontend",
+        "format:staged": "node scripts/format-staged.js",
+        "lint:frontend": "cd front-end/vueapp && npm run lint",
+        "setup:hooks": "node -e \"const {execSync} = require('child_process'); const os = require('os'); const path = require('path'); const isWindows = os.platform() === 'win32'; const scriptPath = path.resolve('scripts', isWindows ? 'setup-git-hooks.ps1' : 'setup-git-hooks.sh'); execSync(isWindows ? `powershell -ExecutionPolicy Bypass -File \"${scriptPath}\"` : `bash \"${scriptPath}\"`, {stdio: 'inherit', cwd: process.cwd()})\""
+    },
+    "devDependencies": {
+        "prettier": "^3.6.2"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    }
+}

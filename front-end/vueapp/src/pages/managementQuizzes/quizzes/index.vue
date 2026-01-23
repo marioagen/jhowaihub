@@ -2,38 +2,44 @@
     <main>
         <div class="container-fluid scroll-area mx-0 p-0">
             <div class="mt-3 mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div
+                    class="d-flex justify-content-between align-items-center mb-3"
+                >
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("quizzes.title") }}</h5>
+                        <h5 class="mb-0 fw-bold">
+                            {{ $t("quizzes.title") }}
+                        </h5>
                         <p>
-                            <small class="text-muted">{{ $t("quizzes.subtitle") }}</small>
+                            <small class="text-muted">
+                                {{ $t("quizzes.subtitle") }}
+                            </small>
                         </p>
                     </div>
-                    <button 
-                        class="btn btn-primary btn-sm" 
+                    <button
+                        class="btn btn-primary btn-sm"
                         @click="redirectToForm"
                     >
-                        <LucideIcon icon="Plus" :size="17" />
+                        <LucideIcon
+                            icon="Plus"
+                            :size="17"
+                        />
                         {{ $t("quizzes.createBtn") }}
                     </button>
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <SearchComponent 
-                            :entity="entitySearch" 
+                        <SearchComponent
+                            :entity="entitySearch"
                             :resetInput="resetInputSearch"
-                            @search="filterList" 
+                            @search="filterList"
                         />
                     </div>
                 </div>
-                <QuizzesTable 
-                    ref="QuizzesTable"
-                />
+                <QuizzesTable ref="QuizzesTable" />
             </div>
         </div>
-    </main>    
+    </main>
 </template>
-
 <script>
     import SearchComponent from "@/components/global/SearchComponent.vue";
     import QuizzesTable from "@/components/quizzes/QuizzesTable.vue";
@@ -49,19 +55,27 @@
         },
         components: {
             SearchComponent,
-            QuizzesTable
+            QuizzesTable,
         },
         methods: {
             setEntitySearch() {
                 this.entitySearch = {
                     screen: "quizzes",
-                    labelInput: this.$t("filters.quizzesInput"),
-                    placeholderInput: this.$t("filters.quizzesInput"),
-                    labelButton: this.$t("quizzes.createBtn"),
+                    labelInput: this.$t(
+                        "filters.quizzesInput"
+                    ),
+                    placeholderInput: this.$t(
+                        "filters.quizzesInput"
+                    ),
+                    labelButton: this.$t(
+                        "quizzes.createBtn"
+                    ),
                 };
             },
             filterList(obj) {
-                this.$refs.QuizzesTable.filterList(obj.search);
+                this.$refs.QuizzesTable.filterList(
+                    obj.search
+                );
             },
             redirectToForm() {
                 this.$router.push({ name: "NewQuizz" });
@@ -72,7 +86,6 @@
         },
     };
 </script>
-
 <style scoped>
     .content-center {
         align-items: center;

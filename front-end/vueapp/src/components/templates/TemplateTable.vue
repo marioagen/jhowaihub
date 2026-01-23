@@ -12,7 +12,10 @@
         >
             <template #cell-method="{ data }">
                 <div v-if="data.row.method">
-                    <span class="method-badge" :class="`method-${data.row.method.toLowerCase()}`">
+                    <span
+                        class="method-badge"
+                        :class="`method-${data.row.method.toLowerCase()}`"
+                    >
                         {{ data.row.method }}
                     </span>
                 </div>
@@ -21,13 +24,25 @@
             <template #cell-actions="{ data }">
                 <DropdownComponent>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="redirectToEdit(data.row.id)">
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="
+                                redirectToEdit(data.row.id)
+                            "
+                        >
                             <LucideIcon icon="SquarePen" />
                             {{ $t("common.edit") }}
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row.id)">
+                        <a
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            @click="
+                                openConfirmation(
+                                    data.row.id
+                                )
+                            "
+                        >
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
                         </a>
@@ -48,7 +63,6 @@
         @confirm="deleteTemplate"
     />
 </template>
-
 <script>
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
@@ -67,10 +81,16 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "method", label: "template.method" },
+                    {
+                        key: "method",
+                        label: "template.method",
+                    },
                     { key: "name", label: "template.name" },
                     { key: "url", label: "template.url" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -105,14 +125,16 @@
                         if (response.error !== undefined) {
                             this.$notify({
                                 title: "template.title",
-                                message: "template.notFound",
+                                message:
+                                    "template.notFound",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
                         }
 
                         this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        this.table.pagination =
+                            response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -142,13 +164,16 @@
                 }
 
                 this.isDeleting = true;
-                TemplateService.deleteTemplate(this.selectedTemplate)
+                TemplateService.deleteTemplate(
+                    this.selectedTemplate
+                )
                     .then(() => {
                         this.$refs.DeleteDialog.close();
                         this.getTemplates();
                         this.$notify({
                             title: "common.success",
-                            message: "template.removeSuccess",
+                            message:
+                                "template.removeSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
@@ -156,7 +181,10 @@
                     .catch((error) => {
                         this.$notify({
                             title: "common.error",
-                            message: error.response?.data?.labelError ?? "template.removeError",
+                            message:
+                                error.response?.data
+                                    ?.labelError ??
+                                "template.removeError",
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -172,7 +200,9 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
+            this.queryPage = this.$route.query.page
+                ? this.$route.query.page
+                : 1;
             this.getTemplates();
         },
     };
