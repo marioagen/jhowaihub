@@ -421,7 +421,6 @@ export default {
                         });
                     }
                     this.userData = response;
-                    // this.selectedProfiles = response.profiles.map(p => p.id);
                     this.selectedTeams =
                         response.teams.map((t) => t.id);
                 }
