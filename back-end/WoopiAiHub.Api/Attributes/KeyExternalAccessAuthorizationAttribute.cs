@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using WoopiAiHub.Domain.DTOs.Refit;
-using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Api.Attributes

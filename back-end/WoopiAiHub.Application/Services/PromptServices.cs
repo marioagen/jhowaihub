@@ -14,7 +14,6 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository;
 using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services
@@ -397,6 +396,15 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Invalid user id");
 
             return query;
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves all prompts in the basic format.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ICollection<PromptInternalDto>> FindAllInternal()
+        {
+            return await _promptRepository.FindAllInternal();
         }
 
         /// <summary>

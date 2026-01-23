@@ -94,6 +94,23 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Asynchronously retrieves all prompts in the basic format.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ICollection<PromptInternalDto>> FindAllInternal()
+        {
+            return await _context.Prompts
+                .Select(p => new PromptInternalDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description
+                })
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Find prompts by user id
         /// </summary>
         /// <param name="idUser"></param>
