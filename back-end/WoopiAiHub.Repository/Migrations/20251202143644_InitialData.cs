@@ -287,7 +287,6 @@ namespace WoopiAiHub.Repository.Migrations
            ");
 
            migrationBuilder.Sql(@"
-               -- Declare variables for IDs
                DECLARE @ProfileIdIA INT;
                DECLARE @ProfileIdAdmin INT;
                DECLARE @TeamIdAdmin INT;
@@ -298,7 +297,6 @@ namespace WoopiAiHub.Repository.Migrations
                DECLARE @StepIdProcessando INT;
                DECLARE @StepToolIdOcr INT;
 
-               -- Get IDs from earlier inserts in this migration
                SELECT @ProfileIdIA = Id FROM Profiles WHERE [Name] = 'IA';
                SELECT @ProfileIdAdmin = Id FROM Profiles WHERE [Name] = 'Admin';
                SELECT @TeamIdAdmin = Id FROM Teams WHERE [Name] = 'Admin';
@@ -306,13 +304,11 @@ namespace WoopiAiHub.Repository.Migrations
                SELECT @ToolIdOcr = Id FROM Tools WHERE [Name] = 'Ocr';
                SELECT @ToolIdEmbeddings = Id FROM Tools WHERE [Name] = 'Embeddings';
 
-               -- Insert Workflow
                INSERT INTO Workflows (Name, Enable, Created)
                VALUES ('Esteira padrão', 1, GETDATE());
                
                SET @WorkflowId = SCOPE_IDENTITY();
 
-               -- Insert Steps
                INSERT INTO Steps (WorkflowId, Name, [Order], ProfileId, StatusId, Created)
                VALUES (@WorkflowId, 'Processando', 1, @ProfileIdIA, @StatusIdAwaitingAnalysis, GETDATE());
                
@@ -324,7 +320,6 @@ namespace WoopiAiHub.Repository.Migrations
                INSERT INTO Steps (WorkflowId, Name, [Order], ProfileId, StatusId, Created)
                VALUES (@WorkflowId, 'Concluido', 3, @ProfileIdAdmin, @StatusIdAwaitingAnalysis, GETDATE());
 
-               -- Insert StepTools for OCR and Embeddings linked to the first step (Processando)
                INSERT INTO StepTools (StepId, ToolId, StepOrder, PositionX, PositionY, Created)
                VALUES (@StepIdProcessando, @ToolIdOcr, 1, 282.75, 183.05, GETDATE());
                
@@ -333,7 +328,6 @@ namespace WoopiAiHub.Repository.Migrations
                INSERT INTO StepTools (StepId, ToolId, StepOrder, PositionX, PositionY, DependsOnStepToolId, Created)
                VALUES (@StepIdProcessando, @ToolIdEmbeddings, 2, 623.75, 56.05, @StepToolIdOcr, GETDATE());
 
-               -- Link Workflow to Team (Admin team)
                INSERT INTO WorkflowTeams (WorkflowId, TeamId)
                VALUES (@WorkflowId, @TeamIdAdmin);
            ");
