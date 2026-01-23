@@ -44,7 +44,7 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
 
         [Put("/api/Tenant/{tenantName}/UpdateDatabaseStatus")]
         Task<bool> SendDatabaseCreatedNotification([Header("KeyAccess")] string KeyAccess,
-                                   [AliasAs("tenantName")] string tenantName);
+                                                   [AliasAs("tenantName")] string tenantName);
 
         [Post("/user/AssignByHub")]
         Task<Guid> AssignLicensesByHub([Header("KeyAccess")] string KeyAccess,
