@@ -3,8 +3,8 @@
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <img src="../../assets/img/woopiai-hub-logo.png"
-                        style="padding-bottom: 10px; height: 50px;" alt="WOOPI AI" />
+                    <img src="../../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px; height: 50px;"
+                        alt="WOOPI AI" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
                     <div class="text-center mt-3">
@@ -30,7 +30,8 @@
                                         class="form-control form-control-sm border-start-0"
                                         :class="{ 'is-invalid': errorMessage }" placeholder="user@mail.com" />
                                 </div>
-                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage }}</span>
+                                <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage
+                                    }}</span>
                             </Field>
                         </div>
 
@@ -115,18 +116,19 @@ export default {
             showPassword: false,
             credentials: {
                 email: "",
-                password: ""
+                password: "",
+                tenant: ""
             },
-            field: { 
-                username: "", 
-                password: "" 
+            field: {
+                username: "",
+                password: ""
             },
             errorMessage: "",
             tenants: [],
             typeLogin: ""
         };
     },
-    methods: { 
+    methods: {
         continueLogin(tenant, typeLogin) {
             this.credentials.tenant = tenant;
             if (typeLogin === "SSO") {
@@ -181,6 +183,7 @@ export default {
                     this.redirectToDocument();
                 })
                 .catch((error) => {
+                    this.credentials.tenant = "";
                     const labelKey = error.response?.data?.labelError ?? 'unexpectedError';
                     const exists = this.$te(labelKey);
                     const message = exists ? this.$t(labelKey) : this.$t('unexpectedError');
@@ -190,6 +193,7 @@ export default {
                         message,
                         variant: 'danger',
                         icon: 'CircleX',
+                        duration: 6000
                     });
                 })
                 .finally(() => {
@@ -214,7 +218,7 @@ export default {
                         title: "login.error",
                         message: "unexpectedError",
                         variant: 'danger',
-                        icon: 'CircleX',
+                        icon: 'CircleX'
                     });
                     this.isLoadingSSO = false;
                 })
@@ -305,12 +309,13 @@ export default {
                         keyMongoAccess: "",
                         isAdmin: tokenData.isAdmin
                     };
-                    
+
                     this.$store.commit("updateUserProfile", { amount: dataUser });
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
                 })
                 .catch((error) => {
+                    this.credentials.tenant = "";
                     const labelKey = error.response?.data?.labelError ?? 'unexpectedError';
                     const exists = this.$te(labelKey);
                     const message = exists ? this.$t(labelKey) : this.$t('unexpectedError');
@@ -320,6 +325,7 @@ export default {
                         message,
                         variant: 'danger',
                         icon: 'CircleX',
+                        duration: 6000
                     });
                 })
                 .finally(() => {

@@ -546,6 +546,8 @@
             "Não foi possível validar sua autenticação. Por favor, faça login novamente.",
         selectTenant: "Selecione o tenant para continuar",
         continue: "Continuar",
+        tenantDatabaseNotReady: "O ambiente está sendo preparado. Por favor, tente novamente em alguns minutos.",
+        tenantNotFound: "Tenant não encontrado."
     },
     validation: {
         required: "Campo obrigatório",
