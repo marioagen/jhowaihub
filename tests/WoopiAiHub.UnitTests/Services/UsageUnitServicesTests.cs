@@ -28,7 +28,7 @@ namespace WoopiAiHub.UnitTests.Services
                 new UsageUnitDto{ Id = 1,Name = "Unit 1", ModelEmbeddingId = null, ModelEmbeddingName = string.Empty, UsageTypeId = 1, UsageTypeName = "Teste", Value = (decimal)0.006 },
             };
 
-            _usageUnitRepositoryMock.Setup(repo => repo.FindAllAsync(null))
+            _usageUnitRepositoryMock.Setup(repo => repo.FindAllAsync())
                                     .ReturnsAsync(usageUnits);
 
             // Act
@@ -37,14 +37,14 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.NotNull(result);
             Assert.Single(result);
-            _usageUnitRepositoryMock.Verify(repo => repo.FindAllAsync(null), Times.Once);
+            _usageUnitRepositoryMock.Verify(repo => repo.FindAllAsync(), Times.Once);
         }
 
         [Fact]
         public async Task FindAllAsync_ShouldReturnEmptyList_WhenNoUsageUnitsExist()
         {
             // Arrange
-            _usageUnitRepositoryMock.Setup(repo => repo.FindAllAsync(null))
+            _usageUnitRepositoryMock.Setup(repo => repo.FindAllAsync())
                 .ReturnsAsync(Enumerable.Empty<UsageUnitDto>());
 
             // Act
@@ -53,7 +53,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.NotNull(result);
             Assert.Empty(result);
-            _usageUnitRepositoryMock.Verify(repo => repo.FindAllAsync(null), Times.Once);
+            _usageUnitRepositoryMock.Verify(repo => repo.FindAllAsync(), Times.Once);
         }
     }
 }

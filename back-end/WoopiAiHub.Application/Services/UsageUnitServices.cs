@@ -19,9 +19,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="dateFilterDto"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<UsageUnitDto>> FindAllAsync(DateFilterDto? dateFilterDto = null)
+        public async Task<IEnumerable<UsageUnitDto>> FindAllAsync()
         {
-            return await _usageUnitRepository.FindAllAsync(dateFilterDto);
+            return await _usageUnitRepository.FindAllAsync();
         }
     }
 }

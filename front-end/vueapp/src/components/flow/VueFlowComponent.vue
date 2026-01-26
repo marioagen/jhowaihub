@@ -102,6 +102,11 @@
                 required: false,
                 default: null,
             },
+            step: {
+                type: Object,
+                required: false,
+                default: null,
+            },
             stepOrder: {
                 type: Number,
                 required: false,
@@ -165,16 +170,6 @@
             },
             async getFlow() {
                 try {
-                    if (
-                        this.hasStepTools &&
-                        this.stepId != 0
-                    ) {
-                        this.step =
-                            await WorkflowService.getStepById(
-                                this.stepId
-                            );
-                    }
-
                     let stepTools = this.step
                         ? this.step.stepTools
                         : [];
