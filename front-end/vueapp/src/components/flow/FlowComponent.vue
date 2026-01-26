@@ -17,7 +17,7 @@
                         <div class="col-10">
                             <div>
                                 <h5 class="mb-0 fw-bold">
-                                    {{ $t("flow.title") }}
+                                    {{ $t("flow.title") }} <span v-if="step"> - {{ step.name }}</span>
                                 </h5>
                                 <p>
                                     <small
@@ -49,8 +49,10 @@
             </div>
             <hr />
             <VueFlowComponent
+                v-if="step !== null"
                 :isEdit="isEdit"
                 :stepId="stepId"
+                :step="step"
                 :stepOrder="stepOrder"
                 @openNodeConfig="openNodeConfig"
                 ref="VueflowComponent"
@@ -425,6 +427,7 @@
                 previousStepTools: [],
                 selectedDependencies: [],
                 nodes: [],
+                step: null,
             };
         },
         components: {
@@ -958,6 +961,26 @@
                         ) || false
                 );
             },
+            async fetchStepName() {
+                if (this.workflowId) {
+                    try {                                
+                        if (
+                            this.hasStepTools &&
+                            this.stepId != 0
+                        ) {
+                            this.step =
+                                await WorkflowService.getStepById(
+                                    this.stepId
+                                );
+                        }
+                    } catch (error) {
+                         console.error("Error fetching step name:", error);
+                    }
+                }
+            },
+        },
+        mounted() {
+            this.fetchStepName();
         },
         computed: {
             selectedItem() {
