@@ -242,7 +242,7 @@ export default {
         },
         passwordRules() {
             return {
-                required: this.isEdit,
+                required: !this.isEdit,
                 custom_password: true,
                 min: 6,
                 max: 50,
@@ -250,7 +250,7 @@ export default {
         },
         confirmedPasswordRules() {
             return {
-                required: this.isEdit,
+                required: !this.isEdit,
                 confirmed: "userPassword",
                 min: 6,
                 max: 50,
