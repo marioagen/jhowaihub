@@ -814,6 +814,36 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("StepToolParameters", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.SubscriptionPeriod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsProcessed");
+
+                    b.Property<DateTime>("PeriodEnd")
+                        .HasColumnType("datetime")
+                        .HasColumnName("PeriodEnd");
+
+                    b.Property<DateTime>("PeriodStart")
+                        .HasColumnType("datetime")
+                        .HasColumnName("PeriodStart");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SubscriptionPeriods", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Team", b =>
                 {
                     b.Property<int>("Id")

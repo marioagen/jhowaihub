@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -18,7 +18,6 @@ namespace WoopiAiHub.Repository.Migrations
                    VALUES ('Admin', GETDATE());
                END
            ");
-
 
             migrationBuilder.Sql(@"
                IF NOT EXISTS (SELECT 1 FROM Profiles WHERE [Name] = 'IA')
@@ -285,6 +284,52 @@ namespace WoopiAiHub.Repository.Migrations
                    INSERT INTO UsageUnits (Name, UsageTypeId, ModelEmbeddingId, Value, Created)
                    VALUES ('Unit', @UsageTypeIdToken, @EmbeddingIdTextEmbedding3Large, 0.0001,  GETDATE());
                END
+           ");
+
+           migrationBuilder.Sql(@"
+               DECLARE @ProfileIdIA INT;
+               DECLARE @ProfileIdAdmin INT;
+               DECLARE @TeamIdAdmin INT;
+               DECLARE @StatusIdAwaitingAnalysis INT;
+               DECLARE @ToolIdOcr INT;
+               DECLARE @ToolIdEmbeddings INT;
+               DECLARE @WorkflowId INT;
+               DECLARE @StepIdProcessando INT;
+               DECLARE @StepToolIdOcr INT;
+
+               SELECT @ProfileIdIA = Id FROM Profiles WHERE [Name] = 'IA';
+               SELECT @ProfileIdAdmin = Id FROM Profiles WHERE [Name] = 'Admin';
+               SELECT @TeamIdAdmin = Id FROM Teams WHERE [Name] = 'Admin';
+               SELECT @StatusIdAwaitingAnalysis = Id FROM Status WHERE [Name] = 'AwaitingAnalysis';
+               SELECT @ToolIdOcr = Id FROM Tools WHERE [Name] = 'Ocr';
+               SELECT @ToolIdEmbeddings = Id FROM Tools WHERE [Name] = 'Embeddings';
+
+               INSERT INTO Workflows (Name, Enable, Created)
+               VALUES ('Esteira padrão', 1, GETDATE());
+               
+               SET @WorkflowId = SCOPE_IDENTITY();
+
+               INSERT INTO Steps (WorkflowId, Name, [Order], ProfileId, StatusId, Created)
+               VALUES (@WorkflowId, 'Processando', 1, @ProfileIdIA, @StatusIdAwaitingAnalysis, GETDATE());
+               
+               SET @StepIdProcessando = SCOPE_IDENTITY();
+
+               INSERT INTO Steps (WorkflowId, Name, [Order], ProfileId, StatusId, Created)
+               VALUES (@WorkflowId, 'Revisão', 2, @ProfileIdAdmin, @StatusIdAwaitingAnalysis, GETDATE());
+
+               INSERT INTO Steps (WorkflowId, Name, [Order], ProfileId, StatusId, Created)
+               VALUES (@WorkflowId, 'Concluido', 3, @ProfileIdAdmin, @StatusIdAwaitingAnalysis, GETDATE());
+
+               INSERT INTO StepTools (StepId, ToolId, StepOrder, PositionX, PositionY, Created)
+               VALUES (@StepIdProcessando, @ToolIdOcr, 1, 282.75, 183.05, GETDATE());
+               
+               SET @StepToolIdOcr = SCOPE_IDENTITY();
+
+               INSERT INTO StepTools (StepId, ToolId, StepOrder, PositionX, PositionY, DependsOnStepToolId, Created)
+               VALUES (@StepIdProcessando, @ToolIdEmbeddings, 2, 623.75, 56.05, @StepToolIdOcr, GETDATE());
+
+               INSERT INTO WorkflowTeams (WorkflowId, TeamId)
+               VALUES (@WorkflowId, @TeamIdAdmin);
            ");
         }
 

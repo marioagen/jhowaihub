@@ -163,7 +163,6 @@ export default {
     border-radius: 8px;
     padding: 1rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    overflow-y: scroll;
     max-height: calc(100vh - 330px);
 }
 

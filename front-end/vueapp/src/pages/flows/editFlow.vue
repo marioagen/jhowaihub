@@ -9,18 +9,16 @@
         :hasStepTools="routeHasStepTools"
     />
 </template>
-
 <script>
-    import FlowComponent from '@/components/flow/FlowComponent.vue';
+    import FlowComponent from "@/components/flow/FlowComponent.vue";
     export default {
         name: "EditFlow",
         components: {
-            FlowComponent
+            FlowComponent,
         },
         data() {
             return {
-                persistData: {
-                },
+                persistData: {},
             };
         },
         computed: {
@@ -31,17 +29,23 @@
                 return parseInt(this.$route.params.stepId);
             },
             routeStepOrder() {
-                return parseInt(this.$route.params.stepOrder);
+                return parseInt(
+                    this.$route.params.stepOrder
+                );
             },
             routePhase() {
                 return parseInt(this.$route.params.phase);
             },
             routeWorkflowId() {
-                return this.$route.params.workflowId ? parseInt(this.$route.params.workflowId) : null;
+                return this.$route.params.workflowId
+                    ? parseInt(
+                          this.$route.params.workflowId
+                      )
+                    : null;
             },
             routeHasStepTools() {
                 return this.$route.params.hasStepTools;
             },
         },
-    }
+    };
 </script>

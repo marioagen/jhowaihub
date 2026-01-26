@@ -1,0 +1,173 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+    },
+    "inputs": [
+        {
+            "id": "buildConfiguration",
+            "default": "Debug",
+            "description": "Build configuration to use. Either 'Debug' or 'Release'.",
+            "options": ["Debug", "Release"],
+            "type": "pickString"
+        },
+        {
+            "id": "runtimeIdentifier",
+            "default": "linux-x64",
+            "description": "Runtime identifier (RID) to publish for.",
+            "options": ["linux-x64", "win-x64", "osx-x64"],
+            "type": "pickString"
+        },
+        {
+            "id": "dockerTag",
+            "default": "commit_sha",
+            "description": "Tag name for docker image. Use 'commit_sha' to use short commit hash.",
+            "type": "promptString"
+        },
+        {
+            "id": "projectDockerCompose",
+            "default": "taith",
+            "description": "project select the project to run the docker compose.",
+            "options": [
+                "docker-compose.mysql.yml",
+                "docker-compose.sqlServer.yml",
+                "SF.docker-compose.mysql.ym",
+                "docker-compose.localStack.yml"
+            ],
+            "type": "pickString"
+        },
+        {
+            "id": "projectDockerComposeUpDown",
+            "default": "up",
+            "description": "Select if the docker compose wll up or down.",
+            "options": ["up", "down"],
+            "type": "pickString"
+        }
+    ],
+    "tasks": [
+        {
+            "label": "build50",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "-c",
+                "${input:buildConfiguration}",
+                "${workspaceFolder}/back-end/WoopiAiHub.Api/WoopiAiHub.Api.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Restore",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["restore"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Clean",
+            "type": "process",
+            "command": "dotnet",
+            "args": ["clean"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Publish (runtime independent) - output: ./publish/",
+            "type": "process",
+            "command": "dotnet",
+            "group": "build",
+            "args": [
+                "publish",
+                "--configuration",
+                "${input:buildConfiguration}",
+                "--runtime",
+                "${input:runtimeIdentifier}",
+                "-o",
+                "${workspaceFolder}/publish/"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Publish (runtime dependent) - output: ./publish/",
+            "type": "process",
+            "command": "dotnet",
+            "group": "build",
+            "args": [
+                "publish",
+                "--configuration",
+                "${input:buildConfiguration}",
+                "--output",
+                "${workspaceFolder}/publish/"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "dotnet:list:outdated",
+            "type": "shell",
+            "command": "cd /c/stefanini/updated/woopiai-hub && dotnet list ...sln package --outdated",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "azurite",
+            "type": "shell",
+            "command": "azurite --silent --location c:\\azurite --debug c:\\azurite\\debug.log",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "execute-external-api",
+            "type": "shell",
+            "command": "cd \"${workspaceFolder}/external-api/FileRepository.Api\" && dotnet build && dotnet run",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "execute-external-api-func",
+            "type": "shell",
+            "command": "cd \"${workspaceFolder}/external-api/FileRepository.Functions\" && dotnet build && func start",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "execute-front-end",
+            "type": "shell",
+            "command": "cd \"${workspaceFolder}/front-end/vueapp\" && npm run dev",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "run-all",
+            "dependsOn": ["azurite", "execute-external-api", "execute-external-api-func", "execute-front-end"],
+            "dependsOrder": "parallel"
+        }
+    ]
+}

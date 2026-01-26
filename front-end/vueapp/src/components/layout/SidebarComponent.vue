@@ -1,13 +1,23 @@
 <template>
-    <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
+    <aside
+        class="sidebar d-flex flex-column flex-shrink-0 background-white text-black"
+    >
         <div
             class="sidebar-header d-flex align-items-center"
-            :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'"
+            :class="
+                isCollapsed
+                    ? 'justify-content-center'
+                    : 'justify-content-start'
+            "
             style="height: 60px; padding: 0 10px"
         >
             <router-link
                 class="d-flex align-items-center text-decoration-none"
-                :class="isCollapsed ? 'justify-content-center' : 'w-100'"
+                :class="
+                    isCollapsed
+                        ? 'justify-content-center'
+                        : 'w-100'
+                "
                 :to="{ name: 'Home' }"
             >
                 <img
@@ -28,36 +38,63 @@
             </router-link>
         </div>
         <div class="horizontal-separator-fixed"></div>
-        <div class="collapse-toggle-container" @click="$emit('toggle-collapse')">
-            <button class="btn toggle-button" type="button" aria-label="Toggle sidebar">
-                <LucideIcon v-if="isCollapsed" icon="ChevronRight" />
-                <LucideIcon v-else icon="ChevronLeft" />
+        <div
+            class="collapse-toggle-container"
+            @click="$emit('toggle-collapse')"
+        >
+            <button
+                class="btn toggle-button"
+                type="button"
+                aria-label="Toggle sidebar"
+            >
+                <LucideIcon
+                    v-if="isCollapsed"
+                    icon="ChevronRight"
+                />
+                <LucideIcon
+                    v-else
+                    icon="ChevronLeft"
+                />
             </button>
         </div>
         <div class="sidebar-horizontal-separator"></div>
-        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+        <ul
+            class="btn-toggle-nav list-unstyled fw-normal pb-1 small"
+        >
             <li
                 v-for="item in filteredMenuItems"
                 :key="item.labelKey"
                 class="mb-1"
-                :class="{ 'is-active': isRouteActive(item) }"
+                :class="{
+                    'is-active': isRouteActive(item),
+                }"
             >
                 <router-link
                     :class="[
                         'd-flex align-items-center custom-menu-item link-dark rounded',
                         isRouteActive(item) ? 'active' : '',
-                        isCollapsed ? 'justify-content-center' : '',
+                        isCollapsed
+                            ? 'justify-content-center'
+                            : '',
                     ]"
                     :to="item.to"
                 >
-                    <LucideIcon strokeWidth="2" :icon="item.icon.name" :color="item.icon.color" />
-                    <span v-show="!isCollapsed" class="ms-2">{{ $t(item.labelKey) }}</span>
+                    <LucideIcon
+                        strokeWidth="2"
+                        :icon="item.icon.name"
+                        :color="item.icon.color"
+                    />
+                    <span
+                        v-show="!isCollapsed"
+                        class="ms-2"
+                    >
+                        {{ $t(item.labelKey) }}
+                    </span>
                 </router-link>
             </li>
         </ul>
     </aside>
 </template>
-
 <script>
     import { hasPermission } from "@/utils/permissions";
     export default {
@@ -80,21 +117,30 @@
                     {
                         activeKey: "Home",
                         to: "/home",
-                        icon: { name: "Home", color: "#0d6efd" },
+                        icon: {
+                            name: "Home",
+                            color: "#0d6efd",
+                        },
                         labelKey: "common.home",
                     },
                     {
                         permission: "Dashboard",
                         activeKey: "Dashboard",
                         to: "/dashboard",
-                        icon: { name: "LayoutGrid", color: "#f43f5e" },
+                        icon: {
+                            name: "LayoutGrid",
+                            color: "#f43f5e",
+                        },
                         labelKey: "pages.dashboard",
                     },
                     {
                         permission: "Management",
                         activeKey: "DocumentList",
                         to: "/management",
-                        icon: { name: "Users", color: "#ff6900" },
+                        icon: {
+                            name: "Users",
+                            color: "#ff6900",
+                        },
                         labelKey: "pages.management",
                     },
                     {
@@ -117,14 +163,15 @@
                         labelKey: "pages.workflows",
                     },
                     {
-                        permission: "Workflow",
+                        permission: "WorkflowManagement",
                         activeKey: "WorkflowManagement",
                         to: "/workflow/management",
                         icon: {
                             name: "Workflow",
                             color: "#00bba7",
                         },
-                        labelKey: "pages.workflowManagement",
+                        labelKey:
+                            "pages.workflowManagement",
                     },
                     {
                         permission: "Quizzes",
@@ -161,11 +208,14 @@
         },
         computed: {
             filteredMenuItems() {
-                return this.menuItems.filter(item => {
+                return this.menuItems.filter((item) => {
                     if (!item.permission) {
                         return true;
                     }
-                    return hasPermission(item.permission, "View");
+                    return hasPermission(
+                        item.permission,
+                        "View"
+                    );
                 });
             },
         },
@@ -176,7 +226,6 @@
         },
     };
 </script>
-
 <style scoped>
     .collapse-toggle-container:hover,
     .collapse-toggle-container .btn.toggle-button:hover {

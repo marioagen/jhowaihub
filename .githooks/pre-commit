@@ -1,0 +1,16 @@
+#!/bin/sh
+# Pre-commit hook to format staged files
+# This hook runs the format-staged.js script
+
+node scripts/format-staged.js
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+    echo ""
+    echo "❌ Pre-commit hook failed!"
+    echo "Please fix the formatting errors above and try again."
+    exit $exit_code
+fi
+
+exit 0
+

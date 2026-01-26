@@ -6,5 +6,7 @@
         public const string UserWithoutAccess = "login.userWithoutAccess";
         public const string UserIncorrectPassword = "login.userIncorrectPassword";
         public const string UserTokenMicrosoftInvalid = "login.userTokenMicrosoftInvalid";
+        public const string TenantDatabaseNotReady = "login.tenantDatabaseNotReady";
+        public const string TenantNotFound = "login.tenantNotFound";
     }
 }

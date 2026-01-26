@@ -23,10 +23,7 @@
                         </a>
                     </li>
                     <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="openConfirmation(data.row)"
-                        >
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
                         </a>
@@ -130,10 +127,10 @@
             },
             editTeam(team) {
                 this.$router.push({
-                    name: 'EditTeam',
+                    name: "EditTeam",
                     params: {
                         id: team.id,
-                    }
+                    },
                 });
             },
             openConfirmation(team) {
@@ -149,26 +146,25 @@
                             this.$refs.DeleteDialog.close();
                             this.getTeams({ search: "", page: 1, type: null });
                             return this.$notify({
-                                title: 'management.teams.title',
-                                message: 'management.teams.deleteSuccess',
-                                variant: 'success',
-                                icon: 'CircleCheckBig',
+                                title: "management.teams.title",
+                                message: "management.teams.deleteSuccess",
+                                variant: "success",
+                                icon: "CircleCheckBig",
                             });
-                        }
-                        else if (response.error.response.data.errorCode == 5) {
-                             return this.$notify({
-                                title: 'management.teams.title',
-                                message: 'management.teams.deleteDocError',
-                                variant: 'danger',
-                                icon: 'CircleX',
+                        } else if (response.error.response.data.errorCode == 5) {
+                            return this.$notify({
+                                title: "management.teams.title",
+                                message: "management.teams.deleteDocError",
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
 
                         this.$notify({
-                            title: 'management.teams.title',
-                            message: 'management.teams.errors.deleteError',
-                            variant: 'danger',
-                            icon: 'CircleX',
+                            title: "management.teams.title",
+                            message: "management.teams.errors.deleteError",
+                            variant: "danger",
+                            icon: "CircleX",
                         });
                     })
                     .finally(() => {

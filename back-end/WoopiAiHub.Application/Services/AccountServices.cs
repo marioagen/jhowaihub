@@ -17,6 +17,8 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Infrastructure.Multitenancy;
 using Newtonsoft.Json;
+using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -70,14 +72,21 @@ namespace WoopiAiHub.Application.Services
             var userAccess = await CheckMarketplaceAccess(loginDto.Email);
             if (userAccess != null && userAccess.HasAccess)
             {
-                if (string.IsNullOrEmpty(loginDto.Tenant) && userAccess.Tenants.Count > 1)
+                if (string.IsNullOrEmpty(loginDto.Tenant))
                 {
-                    return new
+                    if (userAccess.Tenants.Count > 0)
                     {
-                        userAccess.Tenants
-                    };
+                        return new
+                        {
+                            userAccess.Tenants
+                        };
+                    }
+                    throw new AppException(null,
+                                           "User without access.",
+                                           Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
                 }
-                var tenant = string.IsNullOrEmpty(loginDto.Tenant) ? userAccess.Tenants.First() : loginDto.Tenant;
+
+                var tenant = FindAndValidateTenant(loginDto.Tenant, userAccess.Tenants);
 
                 return await ProceedLogin(loginDto, tenant, true);
             }
@@ -153,14 +162,22 @@ namespace WoopiAiHub.Application.Services
                 var userAccess = await CheckMarketplaceAccess(authenticateDto.Login);
                 if (userAccess != null && userAccess.HasAccess)
                 {
-                    if (string.IsNullOrEmpty(authenticateDto.Tenant) && userAccess.Tenants.Count > 1)
+                    if (string.IsNullOrEmpty(authenticateDto.Tenant))
                     {
-                        return new
+                        if (userAccess.Tenants.Count > 0)
                         {
-                            userAccess.Tenants
-                        };
+                            return new
+                            {
+                                userAccess.Tenants
+                            };
+                        }
+                        throw new AppException(null,
+                                               "User without access.",
+                                               Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
                     }
-                    var tenant = string.IsNullOrEmpty(authenticateDto.Tenant) ? userAccess.Tenants.First() : authenticateDto.Tenant;
+
+                    var tenant = FindAndValidateTenant(authenticateDto.Tenant, userAccess.Tenants);
+
                     var loginDto = new LoginDto
                     {
                         Email = authenticateDto.Login,
@@ -235,14 +252,14 @@ namespace WoopiAiHub.Application.Services
             var userAccess = await CheckMarketplaceAccess(userEmail);
             if (userAccess != null && userAccess.HasAccess)
             {
-                var tenant = userAccess.Tenants.FirstOrDefault(t => t.Equals(headerTenant));
+                var tenant = userAccess.Tenants.FirstOrDefault(t => t.Name.Equals(headerTenant));
 
                 var httpContext = _httpContextAccessor.HttpContext ??
                                   throw new InvalidOperationException(_messageHttpContextNotAvailable);
 
-                await _tenantContextService.InitializeTenantAsync(tenant);
+                await _tenantContextService.InitializeTenantAsync(tenant!.Name);
                 await _tenantContextService.TrySetTenantConnectionAsync(httpContext,
-                                                                        tenant);
+                                                                        tenant.Name);
                 var permissions = await _permissionRepository.FindUserPermissionsAsync(userEmail);
 
                 var tokens = await GenerateTokensAsync(userEmail, permissions);
@@ -282,6 +299,33 @@ namespace WoopiAiHub.Application.Services
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Searches for a tenant by name within the provided collection and validates its accessibility.
+        /// </summary>
+        /// <param name="tenant">The name of the tenant to locate. Comparison is case-insensitive.</param>
+        /// <param name="tenants">A collection of <see cref="TenantAccessDto"/> objects representing available tenants.</param>
+        /// <returns>The name of the tenant if found and validated.</returns>
+        /// <exception cref="AppException">Thrown if the tenant is not found in the collection, or if the tenant's database is not ready or cannot be
+        /// accessed.</exception>
+        private static string FindAndValidateTenant(string tenant, ICollection<TenantAccessDto> tenants) 
+        {
+            var tenantFound = tenants.FirstOrDefault(t => t.Name.Equals(tenant, StringComparison.OrdinalIgnoreCase));
+            if (tenantFound == null)
+            {
+                throw new AppException(null,
+                       "Tenant not found",
+                        Domain.Utils.ErrorLabels.Login.TenantNotFound);
+            }
+
+            if (!tenantFound.IsDatabaseCreated)
+            {
+                throw new AppException(null,
+                        "Tenant database is not ready or cannot be accessed.",
+                        Domain.Utils.ErrorLabels.Login.TenantDatabaseNotReady);
+            }
+            return tenantFound.Name;
         }
 
         /// <summary>

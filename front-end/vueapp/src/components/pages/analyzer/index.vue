@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <main>
         <div class="container-fluid mt-4">
             <div>
@@ -24,18 +24,39 @@
                         <i class="fas fa-file-alt me-1 text-primary"></i>
                         {{ documentName }}
                     </span>
+                        <div class="btn-group-sm margin-left" role="group">
+                            <input type="radio" class="btn-check" name="view" id="view-doc" autocomplete="off"
+                                   v-model="viewMode" value="doc">
+                            <label class="btn btn-outline-primary" for="view-doc">
+                                <LucideIcon icon="PanelLeft" />
+                            </label>
+
+                            <input type="radio" class="btn-check" name="view" id="view-both" autocomplete="off"
+                                   v-model="viewMode" value="both">
+                            <label class="btn btn-outline-primary" for="view-both">
+                                <LucideIcon icon="Columns2" />
+                            </label>
+
+                            <input type="radio" class="btn-check" name="view" id="view-history" autocomplete="off"
+                                   v-model="viewMode" value="history">
+                            <label class="btn btn-outline-primary" for="view-history">
+                                <LucideIcon icon="PanelRight" />
+                            </label>
+                        </div>
                 </div>
                 <div class="row">
 
                     <prompt-view :hashDocument="hashDocument" :historyListOrder="historyListOrder"
-                        @showHistory="showHistory" @unshiftHistoryList="unshiftHistoryList"
-                        @pushHistoryList="pushHistoryList" @showAlertToast="showAlertToast"
-                        @clearMyInterval="clearMyInterval" v-if="!isExpandedHistory" />
+                                 @showHistory="showHistory" @unshiftHistoryList="unshiftHistoryList"
+                                 @pushHistoryList="pushHistoryList" @showAlertToast="showAlertToast"
+                                 @clearMyInterval="clearMyInterval" v-if="!isExpandedHistory" />
 
-                    <doc-view @showNormalize="normalize" id="docView" />
-                    <div :class="'col-md-4'" id="docHistory">
+                    <doc-view @showNormalize="normalize" id="docView" v-if="viewMode === 'doc' || viewMode === 'both'" :documentView="viewMode"/>
+                    <div :id="'docHistory'"
+                         :class="viewMode === 'both' ? 'col-md-6' : 'col-12'">
                         <step-analysis-view :document-id="parseInt(idAnalyzer)" :card-id="parseInt(idCard)"
-                            @show-alert-toast="showAlertToast" />
+                                            @show-alert-toast="showAlertToast"
+                                            v-if="viewMode === 'history' || viewMode === 'both'"/>
                     </div>
                 </div>
             </div>
@@ -88,6 +109,7 @@ export default {
             showLoading: false,
             workflowName: "",
             documentName: "",
+            viewMode: 'both',
         };
     },
     components: {
@@ -198,4 +220,19 @@ export default {
         display: none;
     }
 }
+
+    #docHistory {
+        overflow-y: auto;
+        max-height: 70vh;
+        min-height: 300px; /* Opcional: altura mínima para não ficar pequeno demais */
+        height: auto !important;
+    }
+    .btn-check:checked + .btn {
+        background-color: #0d6efd !important; /* azul bootstrap */
+        color: white !important;
+        border-color: #0d6efd !important;
+    }
+    .margin-left{
+        margin-left:auto;
+    }
 </style>

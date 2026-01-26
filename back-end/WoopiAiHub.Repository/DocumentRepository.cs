@@ -71,7 +71,7 @@ namespace WoopiAiHub.Repository
                 ReferenceFile = d.ReferenceFile,
                 Status = d.Status,
                 Created = d.Created,
-                WorkflowProgress = d.Workflows.Select(w => new DocumentWorkflowProgressDto
+                WorkflowProgress = d.Workflows.Where(w => w.Enable).Select(w => new DocumentWorkflowProgressDto
                 {
                     WorkflowName = w.Name,
                     TotalSteps = w.Steps.Count(),

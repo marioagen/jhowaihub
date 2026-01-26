@@ -26,10 +26,7 @@
                         </a>
                     </li>
                     <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="openConfirmation(data.row)"
-                        >
+                        <a class="dropdown-item d-flex align-items-center gap-2" @click="openConfirmation(data.row)">
                             <LucideIcon icon="Trash2" />
                             {{ $t("common.delete") }}
                         </a>
@@ -152,10 +149,10 @@
             },
             redirectToForm(profile) {
                 this.$router.push({
-                    name: 'EditProfile',
+                    name: "EditProfile",
                     params: {
                         id: profile.id,
-                    }
+                    },
                 });
             },
             openConfirmation(profile) {

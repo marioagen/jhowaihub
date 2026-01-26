@@ -1,10 +1,22 @@
-﻿<template>
-    <div class="col-md-8">
-        <div class="mb-2" style="margin-top: 12px !important">
+<template>
+    <div class="doc-view-scroll" :class="documentView === 'both' ? 'col-md-6' : 'col-12'">
+        <div
+            class="mb-2"
+            style="margin-top: 12px !important"
+        >
             <div v-if="viewMode === $options.VIEW_MODE_PDF">
-                <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
-                <a @click="openTab" v-if="srcPdf">
-                    <i class="fas fa-expand text-primary" style="cursor: pointer" :title="$t('common.expand')"></i>
+                <strong class="form-label mb-1">
+                    PDF ORIGINAL&nbsp;&nbsp;
+                </strong>
+                <a
+                    @click="openTab"
+                    v-if="srcPdf"
+                >
+                    <i
+                        class="fas fa-expand text-primary"
+                        style="cursor: pointer"
+                        :title="$t('common.expand')"
+                    ></i>
                 </a>
                 <img
                     src="@/assets/img/go-to-text.png"
@@ -14,49 +26,105 @@
                     v-if="srcPdf && hasOcrText"
                 />
                 <!--
-                <button type="button" class="btn btn-primary btn-sm mb-1 reindex-button" @click="openModal()">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm mb-1 reindex-button"
+                    @click="openModal()"
+                >
                     <i class="fas fa-sync-alt"></i>
                     {{ $t("common.reprocess") }}
                 </button>
                 -->
-                <div class="view-pdf" v-if="srcPdf">
-                    <object :data="srcPdf + `#zoom=80`" type="application/pdf" width="100%" height="100%">
-                        <embed :src="srcPdf" type="application/pdf" />
+                <div
+                    class="view-pdf"
+                    v-if="srcPdf"
+                >
+                    <object
+                        :data="srcPdf + `#zoom=80`"
+                        type="application/pdf"
+                        width="100%"
+                        height="100%"
+                    >
+                        <embed
+                            :src="srcPdf"
+                            type="application/pdf"
+                        />
                     </object>
                 </div>
                 <div
                     class="mt-1 p-2"
                     v-if="errorPdf"
-                    style="border: 1px solid #dc3545; text-align: center; cursor: pointer"
+                    style="
+                        border: 1px solid #dc3545;
+                        text-align: center;
+                        cursor: pointer;
+                    "
                     @click="reloadPage"
                 >
-                    <span class="text-danger" style="text-decoration: none">
-                        <i class="fas fa-exclamation-circle"></i>
-                        {{ $t("documents.attentionPDFDisplayFailed") }}.
+                    <span
+                        class="text-danger"
+                        style="text-decoration: none"
+                    >
+                        <i
+                            class="fas fa-exclamation-circle"
+                        ></i>
+                        {{
+                            $t(
+                                "documents.attentionPDFDisplayFailed"
+                            )
+                        }}.
                     </span>
                 </div>
-                <div class="mt-1 p-2 loading-div" v-if="loading" @click="reloadPage">
+                <div
+                    class="mt-1 p-2 loading-div"
+                    v-if="loading"
+                    @click="reloadPage"
+                >
                     <div
                         class="spinner-border spinner-border-sm text-primary"
                         style="margin-right: 1%"
                         role="status"
                         v-if="loading"
                     ></div>
-                    <span class="text-primary" style="text-decoration: none">
-                        {{ $t("documents.loadingFilePleaseWait") }}.
+                    <span
+                        class="text-primary"
+                        style="text-decoration: none"
+                    >
+                        {{
+                            $t(
+                                "documents.loadingFilePleaseWait"
+                            )
+                        }}.
                     </span>
                 </div>
             </div>
-            <div v-else-if="viewMode === $options.VIEW_MODE_TEXT">
+            <div
+                v-else-if="
+                    viewMode === $options.VIEW_MODE_TEXT
+                "
+            class="scroll-text">
                 <div>
                     <strong class="form-label mb-3">
-                        {{ upperFormat($t("documents.ocrText")) }}&nbsp;&nbsp;
+                        {{
+                            upperFormat(
+                                $t("documents.ocrText")
+                            )
+                        }}&nbsp;&nbsp;
                     </strong>
-                    <i class="fas fa-spinner fa-pulse text-primary" v-if="loadingText"></i>
+                    <i
+                        class="fas fa-spinner fa-pulse text-primary"
+                        v-if="loadingText"
+                    ></i>
                     <img
                         src="@/assets/img/go-to-pdf.png"
-                        @click="viewMode = $options.VIEW_MODE_PDF"
-                        style="cursor: pointer; float: right"
+                        @click="
+                            viewMode =
+                                $options.VIEW_MODE_PDF
+                        "
+                        style="
+                            cursor: pointer;
+                            float: right;
+                        "
                         :title="$t('documents.pdfBack')"
                     />
                 </div>
@@ -68,24 +136,34 @@
                 ></textarea>
             </div>
         </div>
-        <modal-reprocess v-if="showModalForm" @close="closeModal" @formatData="updateModel" />
+        <modal-reprocess
+            v-if="showModalForm"
+            @close="closeModal"
+            @formatData="updateModel"
+        />
     </div>
 </template>
-
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
     import ModalReprocess from "@/components/pages/analyzer/modal-reprocess";
     import ModalAlert from "@/components/pages/analyzer/modal-alert";
-    import LogService from '@/services/log/logService';
+    import LogService from "@/services/log/logService";
 
-    const VIEW_MODE_PDF = 'pdf';
-    const VIEW_MODE_TEXT = 'text';
+    const VIEW_MODE_PDF = "pdf";
+    const VIEW_MODE_TEXT = "text";
 
     export default {
         name: "DocView",
         VIEW_MODE_PDF,
         VIEW_MODE_TEXT,
+        props: {
+            documentView: {
+                type: String,
+                required: true,
+            }
+        },
         data() {
+
             return {
                 idAnalyzer: this.$route.params.documentId,
                 viewMode: VIEW_MODE_PDF,
@@ -115,58 +193,80 @@
             getDocument() {
                 this.srcPdf = null;
                 this.errorPdf = false;
-                DocumentsServices.findDocument(this.idAnalyzer)
-                    .then((response) => {
-                        if (response.error !== undefined) {
-                            this.$notify({
-                                title: "analyze.title",
-                                message:"analyze.failedLoadDocument",
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                        }
+                DocumentsServices.findDocument(
+                    this.idAnalyzer
+                ).then((response) => {
+                    if (response.error !== undefined) {
+                        this.$notify({
+                            title: "analyze.title",
+                            message:
+                                "analyze.failedLoadDocument",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    }
 
-                        this.srcPdf = window.URL.createObjectURL(new Blob([response], { type: "application/pdf" }));
-                        this.loading = false;
-                    })
+                    this.srcPdf =
+                        window.URL.createObjectURL(
+                            new Blob([response], {
+                                type: "application/pdf",
+                            })
+                        );
+                    this.loading = false;
+                });
             },
             updateModel(model) {
                 this.dataView.Embeddings_model_name = model;
-                this.$emit("showNormalize", this.dataView, this.isReprocessing);
+                this.$emit(
+                    "showNormalize",
+                    this.dataView,
+                    this.isReprocessing
+                );
             },
             toggleToText() {
                 this.viewMode = VIEW_MODE_TEXT;
                 if (this.textContent == "") {
                     this.loadingText = true;
-                    DocumentsServices.getOcrText(this.idAnalyzer)
+                    DocumentsServices.getOcrText(
+                        this.idAnalyzer
+                    )
                         .then((response) => {
-                            if (response.error !== undefined) {
+                            if (
+                                response.error !== undefined
+                            ) {
                                 this.modalAlertShow = true;
                                 this.loadingText = false;
                                 return;
                             }
                             if (response.hasOcr) {
-                                this.textContent = response.content;
+                                this.textContent =
+                                    response.content;
                             } else {
-                                this.textContent = "OCR não disponível para este documento.";
+                                this.textContent =
+                                    "OCR não disponível para este documento.";
                             }
                             this.loadingText = false;
                         })
                         .catch((error) => {
-                            this.textContent = "Erro ao carregar texto do OCR.";
+                            this.textContent =
+                                "Erro ao carregar texto do OCR.";
                             this.loadingText = false;
                         });
                 }
             },
             checkOcrAvailability() {
-                DocumentsServices.getOcrText(this.idAnalyzer)
+                DocumentsServices.getOcrText(
+                    this.idAnalyzer
+                )
                     .then((response) => {
                         if (response && response.hasOcr) {
                             this.hasOcrText = true;
                         }
                     })
                     .catch((error) => {
-                        LogService.showMessage("Erro ao buscar texto do OCR.");
+                        LogService.showMessage(
+                            "Erro ao buscar texto do OCR."
+                        );
                     });
             },
             openTab() {
@@ -180,13 +280,19 @@
             },
             openModal() {
                 this.showModalForm = true;
-                this.dataView.Id = parseInt(this.idAnalyzer);
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+                this.dataView.Id = parseInt(
+                    this.idAnalyzer
+                );
+                document.getElementsByTagName(
+                    "BODY"
+                )[0].children[1].className += " active";
             },
             closeModal() {
                 this.showModalForm = false;
                 this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
+                document.getElementsByTagName(
+                    "BODY"
+                )[0].children[1].className = "overlay";
             },
             normalizeDoc() {
                 window.onbeforeunload = function () {
@@ -197,13 +303,17 @@
                     Embeddings_model_name: "",
                 };
                 this.loadingNormalize = true;
-                DocumentsServices.normalizeDocument(paramsReq)
+                DocumentsServices.normalizeDocument(
+                    paramsReq
+                )
                     .then((response) => {
                         if (response.error !== undefined) {
                             window.onbeforeunload = null;
                         }
                         window.onbeforeunload = null;
-                        this.message = this.$t("documents.normalizingTheDocument");
+                        this.message = this.$t(
+                            "documents.normalizingTheDocument"
+                        );
                     })
                     .finally(() => {
                         this.loadingNormalize = false;
@@ -216,11 +326,15 @@
         },
     };
 </script>
-
 <style scoped>
     .fas,
     .far {
         font-weight: 900 !important;
+    }
+
+    .scroll-text{
+        overflow-y: auto;
+        max-height: 65vh;
     }
 
     .text-primary {
@@ -233,46 +347,61 @@
 
     .view-pdf {
         width: 100% !important;
-        height: calc(100vh - 138px) !important;
-    }
-
-    .textarea-norm-full {
-        height: calc(100vh - 138px) !important;
-    }
-
-    @media (min-width: 768px) and (max-width: 1024px) {
-        .view-pdf {
-            height: calc(100vh - 300px) !important;
-        }
-    }
-
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.7);
+        height: auto !important;
+        max-height: 65vh;
+        min-height: 300px;
+        aspect-ratio: 1/1.414;
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 9999;
+    }
+    @media (max-width: 768px) {
+        .view-pdf {
+            width: 90% !important;
+        }
     }
 
-    .overlay-content {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 5px;
-        text-align: center;
-    }
+        .view-pdf object,
+        .view-pdf embed {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100%;
+            max-height: 70vh;
+            display: block;
+        }
 
-    .loading-div {
-        border: 1px solid #0d6efd;
-        text-align: center;
-        cursor: pointer;
-    }
 
-    .reindex-button {
-        margin-left: 5%;
-    }
+        .textarea-norm-full {
+            height: calc(100vh - 138px) !important;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .overlay-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .loading-div {
+            border: 1px solid #0d6efd;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .reindex-button {
+            margin-left: 5%;
+        }
 </style>

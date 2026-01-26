@@ -1,32 +1,49 @@
 <template>
-    <ModalComponent id="typeModal" :isLoading="isLoading" @save="save" ref="TypeModal">
+    <ModalComponent
+        id="typeModal"
+        :isLoading="isLoading"
+        @save="save"
+        ref="TypeModal"
+    >
         <template #header>
             <div class="modal-header">
-                <h5 class="modal-title">{{ $t(titleText) }}</h5>
-                <button class="btn-close" data-bs-dismiss="modal" @click="close" />
+                <h5 class="modal-title">
+                    {{ $t(titleText) }}
+                </h5>
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    @click="close"
+                />
             </div>
         </template>
-
         <template #body>
             <div class="modal-body">
                 <label>Name</label>
-                <input v-model="typeData.name" class="form-control form-control-sm" />
+                <input
+                    v-model="typeData.name"
+                    class="form-control form-control-sm"
+                />
             </div>
         </template>
-
         <template #footer>
             <div class="modal-footer">
-                <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="close">
+                <button
+                    class="btn btn-outline-primary btn-table btn-sm table-btn"
+                    @click="close"
+                >
                     {{ $t("common.cancel") }}
                 </button>
-                <button class="btn btn-primary btn-sm" @click="save">
+                <button
+                    class="btn btn-primary btn-sm"
+                    @click="save"
+                >
                     {{ $t(saveText) }}
                 </button>
             </div>
         </template>
     </ModalComponent>
 </template>
-
 <script>
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import TypesService from "@/services/types/TypesService";
@@ -52,10 +69,14 @@
         }),
         computed: {
             titleText() {
-                return this.isEdit ? "types.editTitleType" : "types.saveTitleType";
+                return this.isEdit
+                    ? "types.editTitleType"
+                    : "types.saveTitleType";
             },
             saveText() {
-                return this.isEdit ? "common.edit" : "types.saveType";
+                return this.isEdit
+                    ? "common.edit"
+                    : "types.saveType";
             },
         },
         methods: {
@@ -84,16 +105,23 @@
                 TypesService.addType(this.typeData.name)
                     .then((result) => {
                         if (result.success) {
-                            this.$emit("reload", result.data);
+                            this.$emit(
+                                "reload",
+                                result.data
+                            );
                             return this.$notify({
                                 title: "Tipos",
-                                message: this.$t("types.createSuccess"),
+                                message: this.$t(
+                                    "types.createSuccess"
+                                ),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         }
                         const messageKey =
-                            result.status === 409 ? "types.typeDocAlreadyExists" : "types.errors.invalid";
+                            result.status === 409
+                                ? "types.typeDocAlreadyExists"
+                                : "types.errors.invalid";
                         this.$notify({
                             title: "Tipos",
                             message: this.$t(messageKey),
@@ -110,17 +138,24 @@
                 TypesService.editType(this.typeData)
                     .then((result) => {
                         if (result.success) {
-                            this.$emit("reload", result.data);
+                            this.$emit(
+                                "reload",
+                                result.data
+                            );
                             return this.$notify({
                                 title: "Tipos",
-                                message: this.$t("types.editSuccess"),
+                                message: this.$t(
+                                    "types.editSuccess"
+                                ),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         }
 
                         const messageKey =
-                            result.status === 409 ? "types.typeDocAlreadyExists" : "types.errors.invalid";
+                            result.status === 409
+                                ? "types.typeDocAlreadyExists"
+                                : "types.errors.invalid";
                         this.$notify({
                             title: "Tipos",
                             message: this.$t(messageKey),

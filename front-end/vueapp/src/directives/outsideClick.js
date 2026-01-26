@@ -1,14 +1,25 @@
 export default {
     beforeMount(el, binding) {
         el.__clickOutsideHandler__ = (event) => {
-            if (!(el === event.target || el.contains(event.target))) {
+            if (
+                !(
+                    el === event.target ||
+                    el.contains(event.target)
+                )
+            ) {
                 binding.value(event);
             }
         };
-        document.addEventListener("mousedown", el.__clickOutsideHandler__);
+        document.addEventListener(
+            "click",
+            el.__clickOutsideHandler__
+        );
     },
     unmounted(el) {
-        document.removeEventListener("mousedown", el.__clickOutsideHandler__);
+        document.removeEventListener(
+            "click",
+            el.__clickOutsideHandler__
+        );
         el.__clickOutsideHandler__ = null;
-    }
+    },
 };

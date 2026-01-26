@@ -11,8 +11,8 @@
             <div class="modal-body">
                 <label>{{ $t("login.selectTenant") }}</label>
                 <select v-model="tenant" class="form-select form-select-sm">
-                    <option v-for="item in tenants" :key="item" :value="item">
-                        {{ item }}
+                    <option v-for="item in tenants" :key="item" :value="item.name">
+                        {{ item.name }}
                     </option>
                 </select>
             </div>
@@ -49,10 +49,10 @@ export default {
         }
     },
     data: () => ({
-        tenant:  ""
+        tenant: ""
     }),
     methods: {
-        open() {            
+        open() {
             this.$refs.TenantModal.open();
         },
         close() {
