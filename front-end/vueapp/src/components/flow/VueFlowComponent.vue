@@ -464,30 +464,24 @@
                 );
 
                 if (promptNodes.length > 0) {
-                    try {
-                        const prompts =
-                            await PromptService.getPrompts();
-                        promptNodes.forEach((node) => {
-                            const promptId =
-                                node.data.parameters[0]
+                     const prompts =
+                        await PromptService.getPrompts();
+                     promptNodes.forEach((node) => {
+                         const promptId =
+                            node.data.parameters[0]
                                     .value;
-                            if (promptId) {
-                                const prompt = prompts.find(
-                                    (p) =>
-                                        p.id.toString() ===
-                                        promptId.toString()
+                         if (promptId) {
+                            const prompt = prompts.find(
+                                (p) =>
+                                    p.id.toString() ===
+                                    promptId.toString()
                                 );
-                                if (prompt) {
-                                    node.data.subtitle =
-                                        prompt.name;
-                                }
+                            if (prompt) {
+                                 node.data.subtitle =
+                                 prompt.name;
                             }
-                        });
-                    } catch (error) {
-                        LogService.showMessage(
-                            "Error fetching prompts for subtitles"
-                        );
-                    }
+                         }
+                     });
                 }
             },
         },
