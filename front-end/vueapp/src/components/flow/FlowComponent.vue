@@ -294,6 +294,7 @@
                             <select
                                 class="form-select"
                                 v-model="idSelected"
+                                @change="onPromptSelect"
                             >
                                 <option
                                     v-for="item in promptlist"
@@ -652,6 +653,10 @@
                 if (this.idSelected) {
                     this.parameters[0].value =
                         this.idSelected.toString();
+                    const selectedPrompt = this.promptlist.find(p => p.id === this.idSelected);
+                    if (selectedPrompt) {
+                        this.nodeFlow.data.subtitle = selectedPrompt.name;
+                    }
                 }
 
                 if (
@@ -957,6 +962,15 @@
                             targetToolType.toLowerCase()
                         ) || false
                 );
+            },
+            onPromptSelect() {
+                const selectedPrompt = this.promptlist.find(
+                    (p) => p.id === this.idSelected
+                );
+                if (selectedPrompt) {
+                    this.nodeFlow.data.subtitle =
+                        selectedPrompt.name;
+                }
             },
         },
         computed: {
