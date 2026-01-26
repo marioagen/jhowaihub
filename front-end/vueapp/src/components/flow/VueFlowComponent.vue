@@ -125,7 +125,6 @@
         },
         data() {
             return {
-                step: null,
                 toolsList: [],
                 nodes: [],
                 edges: [],
