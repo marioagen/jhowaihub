@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Application.Services;
@@ -29,9 +29,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("UsageUnits")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [SwaggerOperation("Returns usage units")]
-        public async Task<IActionResult> FindAllUsageUnits([FromQuery] DateFilterDto dateFilterDto)
+        public async Task<IActionResult> FindAllUsageUnits()
         {
-            var result = await _usageUnitServices.FindAllAsync(dateFilterDto);
+            var result = await _usageUnitServices.FindAllAsync();
             return Ok(result);
         }
 

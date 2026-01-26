@@ -53,9 +53,7 @@ export default {
     },
     GetUsageUnits(filters) {
         return api
-            .get(`/Dashboard/UsageUnits`, {
-                params: filters,
-            })
+            .get(`/Dashboard/UsageUnits`)
             .then(({ data }) => {
                 return data;
             })
