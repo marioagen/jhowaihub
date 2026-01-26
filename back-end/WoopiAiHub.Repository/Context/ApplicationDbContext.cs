@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Mappings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -103,6 +103,86 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<ApiTemplate>(new ApiTemplateMap().Configure);
             modelBuilder.Entity<SubscriptionPeriod>(new SubscriptionPeriodMap().Configure);
             base.OnModelCreating(modelBuilder);
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var auditEntries = OnBeforeSaveChanges();
+            var result = await base.SaveChangesAsync(cancellationToken);
+            await OnAfterSaveChangesAsync(auditEntries);
+            return result;
+        }
+
+        private List<AuditLog> OnBeforeSaveChanges()
+        {
+            ChangeTracker.DetectChanges();
+            var auditLogs = new List<AuditLog>();
+
+            // Obtenha o ID do usuário atual (via Injeção de Dependência no seu DbContext)
+            //int currentUserId = _currentUserService.GetUserId();
+
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                    continue;
+
+                var tableName = entry.Metadata.GetTableName() ?? entry.Entity.GetType().Name;
+                var actionType = entry.State.ToString();
+
+                var changes = new Dictionary<string, object?>();
+
+                foreach (var property in entry.Properties)
+                {
+                    string propertyName = property.Metadata.Name;
+
+                    switch (entry.State)
+                    {
+                        case EntityState.Added:
+                            changes[propertyName] = property.CurrentValue;
+                            break;
+
+                        case EntityState.Deleted:
+                            changes[propertyName] = property.OriginalValue;
+                            break;
+
+                        case EntityState.Modified:
+                            if (property.IsModified)
+                            {
+                                changes[propertyName] = new
+                                {
+                                    Old = property.OriginalValue,
+                                    New = property.CurrentValue
+                                };
+                            }
+                            break;
+                    }
+                }
+
+                if (changes.Count > 0)
+                {
+                    var actionJson = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        Operation = actionType,
+                        Changes = changes
+                    });
+
+                    // MOCK
+                    var log = new AuditLog(0, DateTime.UtcNow, tableName, new Guid("da0ab022-9039-4387-8c3e-7dbed821facc"), actionJson);
+                    //var log = new AuditLog(0, DateTime.UtcNow, tableName, currentUserId, actionJson);
+                    auditLogs.Add(log);
+                }
+            }
+
+            return auditLogs;
+        }
+
+        private async Task OnAfterSaveChangesAsync(List<AuditLog> auditEntries)
+        {
+            if (auditEntries == null || auditEntries.Count == 0)
+                return;
+
+            this.Set<AuditLog>().AddRange(auditEntries);
+            await base.SaveChangesAsync();
         }
     }
 }
