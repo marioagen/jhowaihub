@@ -25,7 +25,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="dateFilterDto"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<UsageUnitDto>> FindAllAsync(DateFilterDto? dateFilterDto = null)
+        public async Task<IEnumerable<UsageUnitDto>> FindAllAsync()
         {
             var query = await _context.UsageUnits
                                       .AsNoTracking()
