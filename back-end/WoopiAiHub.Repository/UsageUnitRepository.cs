@@ -27,35 +27,21 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<IEnumerable<UsageUnitDto>> FindAllAsync(DateFilterDto? dateFilterDto = null)
         {
-            var query = _context.UsageUnits.AsNoTracking();
+            var query = await _context.UsageUnits
+                                      .AsNoTracking()
+                                      .Select(uu => new UsageUnitDto
+                                      {
+                                          Id = uu.Id,
+                                          Name = uu.Name,
+                                          UsageTypeId = uu.UsageTypeId,
+                                          UsageTypeName = uu.UsageType!.Name,
+                                          ModelEmbeddingId = uu.ModelEmbeddingId,
+                                          ModelEmbeddingName = uu.ModelEmbedding!.Name,
+                                          Value = uu.Value
+                                      })
+                                      .ToListAsync();
 
-            if (dateFilterDto != null)
-            {
-                var startDate = DateHelper.ParseDate(dateFilterDto.Start);
-                if (startDate.HasValue)
-                {
-                    query = query.Where(x => x.Created.Date >= startDate.Value.Date);
-                }
-
-                var endDate = DateHelper.ParseDate(dateFilterDto.End);
-                if (endDate.HasValue)
-                {
-                    query = query.Where(x => x.Created.Date <= endDate.Value.Date);
-                }
-            }
-
-            return await query
-                .Select(uu => new UsageUnitDto
-                {
-                    Id = uu.Id,
-                    Name = uu.Name,
-                    UsageTypeId = uu.UsageTypeId,
-                    UsageTypeName = uu.UsageType!.Name,
-                    ModelEmbeddingId = uu.ModelEmbeddingId,
-                    ModelEmbeddingName = uu.ModelEmbedding!.Name,
-                    Value = uu.Value
-                })
-                .ToListAsync();
+            return query;
         }
     }
 }
