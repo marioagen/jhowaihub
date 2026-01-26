@@ -6,6 +6,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface IUsageUnitRepository
     {
-        Task<IEnumerable<UsageUnitDto>> FindAllAsync(DateFilterDto? dateFilterDto = null);
+        Task<IEnumerable<UsageUnitDto>> FindAllAsync();
     }
 }
