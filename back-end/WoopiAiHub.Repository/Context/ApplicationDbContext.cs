@@ -1,7 +1,10 @@
-using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository.Mappings;
+using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository.Mappings;
+using WoopiAiHub.Repository.Util;
 
 namespace WoopiAiHub.Repository.Context
 {
@@ -55,6 +58,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<UsageDaily> UsageDailies { get; set; }
         public DbSet<ApiTemplate> ApiTemplates { get; set; }
         public DbSet<SubscriptionPeriod> SubscriptionPeriods { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -109,7 +113,15 @@ namespace WoopiAiHub.Repository.Context
         {
             var auditEntries = OnBeforeSaveChanges();
             var result = await base.SaveChangesAsync(cancellationToken);
-            await OnAfterSaveChangesAsync(auditEntries);
+            OnAfterSaveChanges(auditEntries);
+            return result;
+        }
+
+        public override int SaveChanges()
+        {
+            var auditEntries = OnBeforeSaveChanges();
+            var result = base.SaveChanges();
+            OnAfterSaveChanges(auditEntries);
             return result;
         }
 
@@ -131,30 +143,58 @@ namespace WoopiAiHub.Repository.Context
 
                 var changes = new Dictionary<string, object?>();
 
-                foreach (var property in entry.Properties)
+                PropertyValues? databaseValues = null;
+                if (entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
                 {
-                    string propertyName = property.Metadata.Name;
+                    databaseValues = entry.GetDatabaseValues();
+                }
 
-                    switch (entry.State)
+                bool isManyToManyInternal = entry.Metadata.ClrType == typeof(Dictionary<string, object>)
+                    || entry.Metadata.ClrType == null;
+
+                if (isManyToManyInternal)
+                {
+                    foreach (var prop in entry.Properties)
                     {
-                        case EntityState.Added:
-                            changes[propertyName] = property.CurrentValue;
-                            break;
+                        changes[prop.Metadata.Name] = prop.CurrentValue;
+                    }
+                }
+                else
+                {
+                    foreach (var property in entry.Properties)
+                    {
+                        if (entry.State == EntityState.Added && property.Metadata.IsPrimaryKey())
+                            continue;
 
-                        case EntityState.Deleted:
-                            changes[propertyName] = property.OriginalValue;
-                            break;
+                        string propertyName = property.Metadata.Name;
 
-                        case EntityState.Modified:
-                            if (property.IsModified)
-                            {
-                                changes[propertyName] = new
+                        switch (entry.State)
+                        {
+                            case EntityState.Added:
+                                changes[propertyName] = property.CurrentValue;
+                                break;
+
+                            case EntityState.Deleted:
+                                changes[propertyName] = databaseValues?[propertyName];
+                                break;
+
+                            case EntityState.Modified:
+                                if (property.IsModified)
                                 {
-                                    Old = property.OriginalValue,
-                                    New = property.CurrentValue
-                                };
-                            }
-                            break;
+                                    var oldValue = databaseValues?[propertyName];
+                                    var newValue = property.CurrentValue;
+
+                                    if (!AuditExtensions.ValidateEqualValues(oldValue, newValue))
+                                    {
+                                        changes[propertyName] = new
+                                        {
+                                            Old = oldValue,
+                                            New = newValue
+                                        };
+                                    }
+                                }
+                                break;
+                        }
                     }
                 }
 
@@ -167,7 +207,7 @@ namespace WoopiAiHub.Repository.Context
                     });
 
                     // MOCK
-                    var log = new AuditLog(0, DateTime.UtcNow, tableName, new Guid("da0ab022-9039-4387-8c3e-7dbed821facc"), actionJson);
+                    var log = new AuditLog(0, DateTime.Now, tableName, actionJson, new Guid("da0ab022-9039-4387-8c3e-7dbed821facc"));
                     //var log = new AuditLog(0, DateTime.UtcNow, tableName, currentUserId, actionJson);
                     auditLogs.Add(log);
                 }
@@ -176,13 +216,13 @@ namespace WoopiAiHub.Repository.Context
             return auditLogs;
         }
 
-        private async Task OnAfterSaveChangesAsync(List<AuditLog> auditEntries)
+        private void OnAfterSaveChanges(List<AuditLog> auditEntries)
         {
             if (auditEntries == null || auditEntries.Count == 0)
                 return;
 
-            this.Set<AuditLog>().AddRange(auditEntries);
-            await base.SaveChangesAsync();
+            Set<AuditLog>().AddRange(auditEntries);
+            base.SaveChanges();
         }
     }
 }

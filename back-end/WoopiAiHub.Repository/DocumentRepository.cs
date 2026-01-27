@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -140,11 +140,11 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool Delete(List<int> ids)
         {
-            var documents = _context.Documents.Where(a => ids.Contains(a.Id));
+            var documents = _context.Documents.Where(a => ids.Contains(a.Id)).ToList();
             
             if (documents.Any())
             {
-                documents.ExecuteDelete();
+                _context.Documents.RemoveRange(documents);
                 _context.SaveChanges();
                 return true;
             }
@@ -225,12 +225,18 @@ namespace WoopiAiHub.Repository
             }
 
             var WorkflowDocuments = _context.Set<Dictionary<string, object>>("WorkflowDocuments");
-            var deletedCount = WorkflowDocuments
+            var relationships = WorkflowDocuments
                 .Where(workflowDocuments => documentIds.Contains((int)workflowDocuments["DocumentId"]))
-                .ExecuteDelete();
+                .ToList();
 
-            _context.SaveChanges();
-            return deletedCount > 0;
+            if (relationships.Any())
+            {
+                WorkflowDocuments.RemoveRange(relationships);
+                _context.SaveChanges();
+                return true;
+            }
+
+            return false;
         }
     }
 }
