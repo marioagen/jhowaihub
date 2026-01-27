@@ -8,7 +8,7 @@ namespace WoopiAiHub.Domain.Models
         public string TableName { get; private set; } = string.Empty;
 
         [Column("UserId")]
-        public Guid? UserId { get; private set; }
+        public Guid UserId { get; private set; }
 
         [Column("UserName", TypeName = "varchar(100)")]
         public string UserName { get; private set; } = string.Empty;
@@ -19,11 +19,12 @@ namespace WoopiAiHub.Domain.Models
 
         public virtual User? User { get; set; }
 
-        public AuditLog(int id, DateTime created, string tableName, string action, Guid? userId)
+        public AuditLog(int id, DateTime created, string tableName, string action, Guid userId, string userName)
             : base(id, created)
         {
             TableName = tableName;
             UserId = userId;
+            UserName = userName;
             Action = action;
         }
     }

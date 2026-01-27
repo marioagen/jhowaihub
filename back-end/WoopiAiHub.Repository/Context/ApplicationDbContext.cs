@@ -1,8 +1,8 @@
-using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Mappings;
 using WoopiAiHub.Repository.Util;
 
@@ -106,6 +106,7 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<UsageType>(new UsageTypeMap().Configure);
             modelBuilder.Entity<ApiTemplate>(new ApiTemplateMap().Configure);
             modelBuilder.Entity<SubscriptionPeriod>(new SubscriptionPeriodMap().Configure);
+            modelBuilder.Entity<AuditLog>(new AuditLogMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
 
@@ -130,8 +131,13 @@ namespace WoopiAiHub.Repository.Context
             ChangeTracker.DetectChanges();
             var auditLogs = new List<AuditLog>();
 
-            // Obtenha o ID do usuário atual (via Injeção de Dependência no seu DbContext)
-            //int currentUserId = _currentUserService.GetUserId();
+            var requestEmail = _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.XEmail].ToString();
+            if (string.IsNullOrEmpty(requestEmail))
+                return auditLogs;
+
+            var user = Users.FirstOrDefault(u => u.Email == requestEmail);
+            if (user == null)
+                return auditLogs;
 
             foreach (var entry in ChangeTracker.Entries())
             {
@@ -206,10 +212,7 @@ namespace WoopiAiHub.Repository.Context
                         Changes = changes
                     });
 
-                    // MOCK
-                    var log = new AuditLog(0, DateTime.Now, tableName, actionJson, new Guid("da0ab022-9039-4387-8c3e-7dbed821facc"));
-                    //var log = new AuditLog(0, DateTime.UtcNow, tableName, currentUserId, actionJson);
-                    auditLogs.Add(log);
+                    auditLogs.Add(new AuditLog(0, DateTime.Now, tableName, actionJson, user.Id, user.Name));
                 }
             }
 
