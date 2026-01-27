@@ -1079,7 +1079,8 @@
             workflow: "Esteira de processamento",
             tools: "Ferramentas",
             dashboard: "Dashboard",
-            workflowStep: "Etapa da esteira",
+            workflowstep: "Etapa da esteira",
+            workflowmanagement: "Gestão de Esteira",
             prompts: "Prompts",
         },
         descriptions: {
