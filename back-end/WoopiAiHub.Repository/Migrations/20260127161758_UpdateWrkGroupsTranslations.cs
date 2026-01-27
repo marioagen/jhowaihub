@@ -70,6 +70,58 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
 
+					migrationBuilder.Sql(@"
+                UPDATE Permissions 
+                SET [Group] = 'permissions.groups.questions'
+                WHERE [Group] = 'Questions';
+
+                UPDATE Permissions 
+                SET [Group] = 'permissions.groups.types'
+                WHERE [Group] = 'Types';
+
+                UPDATE Permissions 
+                SET [Group] = 'permissions.groups.quizzes'
+                WHERE [Group] = 'Quizzes';
+
+                UPDATE Permissions 
+                SET [Group] = 'permissions.groups.documents'
+                WHERE [Group] = 'Documents';
+
+                UPDATE Permissions 
+                SET [Group] = 'permissions.groups.management'
+                WHERE [Group] = 'Management';
+
+                UPDATE Permissions 
+                SET [Group] = 'permissions.groups.users'
+                WHERE [Group] = 'Users';
+
+                UPDATE Permissions 
+                SET [Group] = 'permissions.groups.teams'
+                WHERE [Group] = 'Teams';
+
+                UPDATE Permissions
+                SET [Group] = 'permissions.groups.profiles'
+                WHERE [Group] = 'Profiles';
+
+                UPDATE Permissions
+                SET [Group] = 'permissions.groups.workflow'
+                WHERE [Group] = 'Workflow';
+
+                UPDATE Permissions
+                SET [Group] = 'permissions.groups.tools'
+                WHERE [Group] = 'Tools';
+
+                UPDATE Permissions
+                SET [Group] = 'permissions.groups.workflowStep'
+                WHERE [Group] = 'Workflow-Step';
+                
+                UPDATE Permissions
+                SET [Group] = 'permissions.groups.dashboard'
+                WHERE [Group] = 'Dashboard';
+
+                UPDATE Permissions
+                SET [Group] = 'permissions.groups.prompts'
+                WHERE [Group] = 'Prompts';");
         }
     }
 }
