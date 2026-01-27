@@ -452,7 +452,6 @@
         mounted() {
             this.getWorkflows();
             this.getPermissions();
-            this.getWorkflowPermissions();
             this.setupEdit();
         },
         methods: {
@@ -466,11 +465,19 @@
                 this.isLoadingPermissions = true;
                 PermissionsService.getPermissions()
                     .then((response) => {
-                        this.permissionsList =
-                            response.permissions;
+                        const workflowStepGroup = response.permissions.find(
+                            group => group.group === 'Workflow-Step'
+                        );
+                        
+                        this.permissionsWorkflowList = workflowStepGroup?.permissions || [];
+                        
+                        this.permissionsList = response.permissions.filter(
+                            group => group.group !== 'Workflow-Step'
+                        );
                     })
                     .finally(() => {
                         this.isLoadingPermissions = false;
+                        this.isLoadingWorkflowPermissions = false;
                     });
             },
             getWorkflowPermissions() {
