@@ -92,6 +92,8 @@
     import LogService from "@/services/log/logService";
     import ToolsServices from "@/services/tools/ToolsServices";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import PromptService from "@/services/prompts/PromptsService";
+    import ToolType from "@/constants/ToolType";
 
     export default {
         name: "VueFlowComponent",
@@ -125,7 +127,6 @@
         },
         data() {
             return {
-                step: null,
                 toolsList: [],
                 nodes: [],
                 edges: [],
@@ -197,6 +198,14 @@
                                 stepToolId: stepTool.id,
                                 dependencies:
                                     stepTool.dependencies,
+                                subtitle:
+                                    stepTool.parameters &&
+                                    stepTool.parameters.length >
+                                        0
+                                        ? stepTool
+                                              .parameters[0]
+                                              .promptName
+                                        : "",
                             },
                             sourcePosition: "right",
                             targetPosition: "left",
@@ -237,6 +246,8 @@
                         ...mappedNodes,
                     ];
                     this.edges = mappedEdges;
+
+                    await this.enrichNodesWithSubtitles(this.nodes);
                 } catch (e) {
                     LogService.showMessage(
                         "Erro ao carregar fluxo"
@@ -394,6 +405,7 @@
                         toolId: nodeData.id,
                         stepToolId: null,
                         dependencies: [],
+                        subtitle: "",
                     },
                 };
                 this.vueFlowInstance?.addNodes([newNode]);
@@ -436,6 +448,35 @@
             showCollapse() {
                 this.isActiveCollapse =
                     !this.isActiveCollapse;
+            },
+            async enrichNodesWithSubtitles(nodes) {
+                const promptNodes = nodes.filter(
+                    (n) =>
+                        n.data?.toolType ===
+                            ToolType.Prompt &&
+                        n.data?.parameters?.length > 0
+                );
+
+                if (promptNodes.length > 0) {
+                     const prompts =
+                        await PromptService.getPrompts();
+                     promptNodes.forEach((node) => {
+                         const promptId =
+                            node.data.parameters[0]
+                                    .value;
+                         if (promptId) {
+                            const prompt = prompts.find(
+                                (p) =>
+                                    p.id.toString() ===
+                                    promptId.toString()
+                                );
+                            if (prompt) {
+                                 node.data.subtitle =
+                                 prompt.name;
+                            }
+                         }
+                     });
+                }
             },
         },
         mounted() {
