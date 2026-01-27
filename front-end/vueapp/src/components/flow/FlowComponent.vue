@@ -965,7 +965,6 @@
                 if (this.workflowId) {
                     try {                                
                         if (
-                            this.hasStepTools &&
                             this.stepId != 0
                         ) {
                             this.step =
