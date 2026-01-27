@@ -1012,6 +1012,7 @@
             tools: "Tools",
             dashboard: "Dashboard",
             workflowStep: "Workflow Step",
+            workflowmanagement: "Workflow Management",
             prompts: "Prompts",
         },
         descriptions: {

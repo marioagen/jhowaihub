@@ -154,7 +154,7 @@
                                         <strong>
                                             {{
                                                 $t(
-                                                    group.group
+                                                    'permissions.groups.'+group.group.toLowerCase().replace(/-/g, "")
                                                 )
                                             }}
                                         </strong>
@@ -308,7 +308,7 @@
                                         <span
                                             class="fw-semibold"
                                         >
-                                            {{ step.name }}
+                                            {{ step.name }} 
                                         </span>
                                     </div>
                                     <div class="col-10">
