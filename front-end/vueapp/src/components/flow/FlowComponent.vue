@@ -962,8 +962,6 @@
                 );
             },
             async fetchStepName() {
-                console.log(this.workflowId);
-                
                 if (this.workflowId) {
                     try {                                
                         if (
