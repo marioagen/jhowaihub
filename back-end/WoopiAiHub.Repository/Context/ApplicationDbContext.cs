@@ -1,7 +1,10 @@
-﻿using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository.Mappings;
+using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository.Mappings;
+using WoopiAiHub.Repository.Util;
 
 namespace WoopiAiHub.Repository.Context
 {
@@ -55,6 +58,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<UsageDaily> UsageDailies { get; set; }
         public DbSet<ApiTemplate> ApiTemplates { get; set; }
         public DbSet<SubscriptionPeriod> SubscriptionPeriods { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -103,6 +107,122 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<ApiTemplate>(new ApiTemplateMap().Configure);
             modelBuilder.Entity<SubscriptionPeriod>(new SubscriptionPeriodMap().Configure);
             base.OnModelCreating(modelBuilder);
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var auditEntries = OnBeforeSaveChanges();
+            var result = await base.SaveChangesAsync(cancellationToken);
+            OnAfterSaveChanges(auditEntries);
+            return result;
+        }
+
+        public override int SaveChanges()
+        {
+            var auditEntries = OnBeforeSaveChanges();
+            var result = base.SaveChanges();
+            OnAfterSaveChanges(auditEntries);
+            return result;
+        }
+
+        private List<AuditLog> OnBeforeSaveChanges()
+        {
+            ChangeTracker.DetectChanges();
+            var auditLogs = new List<AuditLog>();
+
+            // Obtenha o ID do usuário atual (via Injeção de Dependência no seu DbContext)
+            //int currentUserId = _currentUserService.GetUserId();
+
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                    continue;
+
+                var tableName = entry.Metadata.GetTableName() ?? entry.Entity.GetType().Name;
+                var actionType = entry.State.ToString();
+
+                var changes = new Dictionary<string, object?>();
+
+                PropertyValues? databaseValues = null;
+                if (entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
+                {
+                    databaseValues = entry.GetDatabaseValues();
+                }
+
+                bool isManyToManyInternal = entry.Metadata.ClrType == typeof(Dictionary<string, object>)
+                    || entry.Metadata.ClrType == null;
+
+                if (isManyToManyInternal)
+                {
+                    foreach (var prop in entry.Properties)
+                    {
+                        changes[prop.Metadata.Name] = prop.CurrentValue;
+                    }
+                }
+                else
+                {
+                    foreach (var property in entry.Properties)
+                    {
+                        if (entry.State == EntityState.Added && property.Metadata.IsPrimaryKey())
+                            continue;
+
+                        string propertyName = property.Metadata.Name;
+
+                        switch (entry.State)
+                        {
+                            case EntityState.Added:
+                                changes[propertyName] = property.CurrentValue;
+                                break;
+
+                            case EntityState.Deleted:
+                                changes[propertyName] = databaseValues?[propertyName];
+                                break;
+
+                            case EntityState.Modified:
+                                if (property.IsModified)
+                                {
+                                    var oldValue = databaseValues?[propertyName];
+                                    var newValue = property.CurrentValue;
+
+                                    if (!AuditExtensions.ValidateEqualValues(oldValue, newValue))
+                                    {
+                                        changes[propertyName] = new
+                                        {
+                                            Old = oldValue,
+                                            New = newValue
+                                        };
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+
+                if (changes.Count > 0)
+                {
+                    var actionJson = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        Operation = actionType,
+                        Changes = changes
+                    });
+
+                    // MOCK
+                    var log = new AuditLog(0, DateTime.Now, tableName, actionJson, new Guid("da0ab022-9039-4387-8c3e-7dbed821facc"));
+                    //var log = new AuditLog(0, DateTime.UtcNow, tableName, currentUserId, actionJson);
+                    auditLogs.Add(log);
+                }
+            }
+
+            return auditLogs;
+        }
+
+        private void OnAfterSaveChanges(List<AuditLog> auditEntries)
+        {
+            if (auditEntries == null || auditEntries.Count == 0)
+                return;
+
+            Set<AuditLog>().AddRange(auditEntries);
+            base.SaveChanges();
         }
     }
 }
