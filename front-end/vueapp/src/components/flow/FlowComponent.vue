@@ -296,6 +296,7 @@
                             <select
                                 class="form-select"
                                 v-model="idSelected"
+                                @change="onPromptSelect"
                             >
                                 <option
                                     v-for="item in promptlist"
@@ -655,6 +656,10 @@
                 if (this.idSelected) {
                     this.parameters[0].value =
                         this.idSelected.toString();
+                    const selectedPrompt = this.promptlist.find(p => p.id === this.idSelected);
+                    if (selectedPrompt) {
+                        this.nodeFlow.data.subtitle = selectedPrompt.name;
+                    }
                 }
 
                 if (
@@ -965,7 +970,6 @@
                 if (this.workflowId) {
                     try {                                
                         if (
-                            this.hasStepTools &&
                             this.stepId != 0
                         ) {
                             this.step =
@@ -976,6 +980,15 @@
                     } catch (error) {
                          console.error("Error fetching step name:", error);
                     }
+                }
+            },
+            onPromptSelect() {
+                const selectedPrompt = this.promptlist.find(
+                    (p) => p.id === this.idSelected
+                );
+                if (selectedPrompt) {
+                    this.nodeFlow.data.subtitle =
+                        selectedPrompt.name;
                 }
             },
         },

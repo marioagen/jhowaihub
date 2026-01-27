@@ -1055,6 +1055,7 @@
             tools: "Herramientas",
             dashboard: "Dashboard",
             workflowStep: "Workflow Step",
+            workflowmanagement: "Gestión de Flujos de Trabajo",
             prompts: "Prompts",
         },
         descriptions: {

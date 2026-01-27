@@ -3,7 +3,12 @@
     <Handle v-if="!node.data.isStartNode" type="target" position="left" class="hub-handle" />
     <div class="item-left me-2">
       <LucideIcon :icon="node.data.icon" :color="node.data.color" />
-      <h5 class="mb-0">{{ node.label }}</h5>
+      <div>
+        <h5 class="mb-0">{{ node.label }}</h5>
+        <small v-if="node.data.subtitle" :title="node.data.subtitle" class="text-muted" style="font-size: 0.7rem;">{{
+          truncateText(node.data.subtitle)
+          }}</small>
+      </div>
     </div>
     <div class="item-right" v-if="!node.data.isStartNode">
       <LucideIcon v-if="node.data.isEditableInput" :icon="'Settings'" class="settings" :size="16" @click="$emit('openNodeConfig', node)" />
@@ -29,7 +34,12 @@ export default {
     Handle,
     LucideIcon
    },
-   methods: {}
+   methods: {
+    truncateText(text) {
+      if (!text) return ''
+      return text.length > 10 ? text.substring(0, 10) + '...' : text
+    }
+   }
 }
 </script>
 <style>
