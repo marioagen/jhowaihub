@@ -1,4 +1,4 @@
-﻿const english = {
+const english = {
     welcomeMsg: "Welcome",
     Admin: "Admin",
     transferListTitle: "Selection list",
@@ -812,6 +812,10 @@
         importPredefined: "Import predefined",
         importError: "Error importing prompts",
         importSuccess: "Prompts imported successfully",
+        refinePrompt: "Refine Prompt",
+        refineSuccess: "Prompt refined successfully",
+        refineError: "Failed to refine prompt",
+        emptyPromptError: "The prompt field cannot be empty",
     },
     template: {
         title: "API Templates",

@@ -189,5 +189,22 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
             var result = await _promptServices.ImportPromptsByIds(templateIds, headersDto.EmailCreator);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Refine a prompt using AI
+        /// </summary>
+        /// <param name="promptText"></param>
+        /// <param name="headersDto"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("RefinePrompt")]
+        [SwaggerOperation("Endpoint that receives a prompt and refines it using AI")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        public async Task<IActionResult> RefinePrompt([FromBody] string promptText,
+                                                      [FromHeader] HeadersDto headersDto)
+        {
+            var result = await _promptServices.AiPromptRefinement(promptText, headersDto.Tenant);
+            return Ok(result);
+        }
     }
 }

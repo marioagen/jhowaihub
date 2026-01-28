@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
@@ -6,12 +6,14 @@ using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
@@ -29,11 +31,16 @@ namespace WoopiAiHub.UnitTests.Services
             var mockPromptSettings = new Mock<IOptions<PromptSettings>>();
             mockPromptSettings.Setup(x => x.Value).Returns(new PromptSettings
             {
-                TemplateFileName = "name.json",
-                Folder = "folder"
+                TemplateFileName = "name.json", Folder = "folder"
+            });
+            var mockChatSettings = new Mock<IOptions<ChatCompletionSettings>>();
+            mockChatSettings.Setup(x => x.Value).Returns(new ChatCompletionSettings
+            {
+                Model = "model", ApiVersion = "v1", MaxTokens = 100, Temperature = 0.5f
             });
 
             _mocker.Use(mockPromptSettings);
+            _mocker.Use(mockChatSettings);
 
             _promptServices = _mocker.CreateInstance<PromptServices>();
         }
@@ -110,7 +117,11 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "user@teste.com";
             var promptDto = new PromptDto
             {
-                Id = 1, Name = "Antigo", Description = "Desc", Text = "Texto", IdUser = Guid.NewGuid(),
+                Id = 1,
+                Name = "Antigo",
+                Description = "Desc",
+                Text = "Texto",
+                IdUser = Guid.NewGuid(),
                 Created = DateTime.Now
             };
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
@@ -185,7 +196,11 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var promptDto = new PromptDto
             {
-                Id = 1, Name = "Teste", Description = "Desc", Text = "Texto", IdUser = Guid.NewGuid(),
+                Id = 1,
+                Name = "Teste",
+                Description = "Desc",
+                Text = "Texto",
+                IdUser = Guid.NewGuid(),
                 Created = DateTime.Now
             };
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
@@ -221,7 +236,11 @@ namespace WoopiAiHub.UnitTests.Services
             {
                 new PromptDto
                 {
-                    Id = 1, Name = "Teste", Description = "Desc", Text = "Texto", IdUser = idUser,
+                    Id = 1,
+                    Name = "Teste",
+                    Description = "Desc",
+                    Text = "Texto",
+                    IdUser = idUser,
                     Created = DateTime.Now
                 }
             }.AsQueryable();
@@ -421,12 +440,18 @@ namespace WoopiAiHub.UnitTests.Services
                 {
                     new PromptTemplateDto
                     {
-                        Id = Guid.NewGuid(), Name = "Template 1", Description = "Desc 1", Text = "Text 1",
+                        Id = Guid.NewGuid(),
+                        Name = "Template 1",
+                        Description = "Desc 1",
+                        Text = "Text 1",
                         Created = DateTime.Now
                     },
                     new PromptTemplateDto
                     {
-                        Id = Guid.NewGuid(), Name = "Template 2", Description = "Desc 2", Text = "Text 2",
+                        Id = Guid.NewGuid(),
+                        Name = "Template 2",
+                        Description = "Desc 2",
+                        Text = "Text 2",
                         Created = DateTime.Now
                     }
                 }
@@ -482,7 +507,10 @@ namespace WoopiAiHub.UnitTests.Services
                 {
                     new PromptTemplateDto
                     {
-                        Id = promptId, Name = "Template 1", Description = "Desc 1", Text = "Text 1",
+                        Id = promptId,
+                        Name = "Template 1",
+                        Description = "Desc 1",
+                        Text = "Text 1",
                         Created = DateTime.Now
                     }
                 }
@@ -590,6 +618,55 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             Assert.Empty(result);
             _mocker.GetMock<IPromptRepository>().Verify(r => r.FindAllInternal(), Times.Once);
+        }
+
+        [Fact(DisplayName = "AiPromptRefinement success")]
+        [Trait("AiPromptRefinement", "Success")]
+        public async Task AiPromptRefinement_Success()
+        {
+            //Arrange
+            var prompt = "Minha regra de negócio";
+            var tenantId = "tenantId";
+            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+            var chatCompletionResponse = new ChatCompletionResponseDto
+            {
+                Choices = new List<ChatChoiceDto>
+                {
+                    new ChatChoiceDto { Message = new ChatMessageResponseDto { Content = "Prompt refinado" } }
+                }
+            };
+
+            _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
+            _mocker.GetMock<IChatCompletionApi>()
+                .Setup(a => a.GetChatCompletion(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<ChatCompletionDto>()))
+                .ReturnsAsync(chatCompletionResponse);
+
+            //Act
+            var result = await _promptServices.AiPromptRefinement(prompt, tenantId);
+
+            //Assert
+            Assert.Equal("Prompt refinado", result);
+        }
+
+        [Fact(DisplayName = "AiPromptRefinement should throw argument exception when tenant info is invalid")]
+        [Trait("AiPromptRefinement", "Fail")]
+        public async Task AiPromptRefinement_ShouldThrowArgumentException_InvalidTenantInfo()
+        {
+            //Arrange
+            var prompt = "Minha regra de negócio";
+            var tenantId = "tenantId";
+            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = null, AiGatewayKey = null };
+
+            _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
+
+            //Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _promptServices.AiPromptRefinement(prompt, tenantId));
         }
     }
 }
