@@ -147,25 +147,21 @@
                         @click="nextPhase"
                         type="button"
                     >
-                        {{ $t("workflow.next") }}
-                        <LucideIcon
-                            icon="ChevronRight"
-                            :size="16"
-                        />
-                    </button>
-                    <button
-                        v-else
-                        class="btn btn-success"
-                        @click="finalize"
-                        type="button"
-                    >
+                        {{ $t("workflow.saveStep") }}
                         <LucideIcon
                             icon="Save"
                             :size="16"
                         />
+                    </button>
+                    <button v-else
+                            class="btn btn-success"
+                            @click="finalize"
+                            type="button">
+                        <LucideIcon icon="Check"
+                                    :size="16" />
                         {{
                             isEdit
-                                ? $t("workflow.saveChanges")
+                                ? $t("workflow.finalize")
                                 : $t(
                                       "workflow.createWorkflow"
                                   )
@@ -175,6 +171,20 @@
             </div>
         </div>
     </main>
+    <ConfirmModal
+        id="confirm-leave-wizard-modal"
+        :isLoading="isLoading"
+        title="common.caution"
+        message="workflow.leaveMessage"
+        confirmText="common.confirm"
+        cancelText="common.cancel"
+        confirmVariant="primary"
+        iconeName="AlertTriangle"
+        iconVariant="warning"
+        @confirm="confirmNavigation"
+        @cancel="cancelNavigation"
+        ref="confirmLeaveModal"
+    />
 </template>
 <script>
     import { useForm } from "vee-validate";
@@ -184,6 +194,7 @@
     import WorkflowService from "@/services/workflow/WorkflowService";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingComponent.vue";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
 
     export default {
         name: "WorkflowWizard",
@@ -192,6 +203,7 @@
             Phase2Steps,
             Phase3Tools,
             FullscreenLoadingComponent,
+            ConfirmModal,
         },
         props: {
             isEdit: {
@@ -223,6 +235,8 @@
                 phase2Data: null,
                 phase3Data: null,
                 profilesList: [],
+                canLeave: false,
+                pendingNavegation: null,
             };
         },
         computed: {
@@ -261,8 +275,10 @@
             },
             async previousPhase() {
                 if (this.currentPhase > 1) {
-                    this.currentPhase--;
-                    await this.reloadCurrentPhaseData();
+                    this.checkNavigation(() => {
+                        this.currentPhase--;
+                        this.reloadCurrentPhaseData();
+                    });
                 }
             },
             async reloadCurrentPhaseData() {
@@ -390,14 +406,40 @@
                 }
             },
             finalize() {
+                this.canLeave = true;
                 this.redirectToIndex();
             },
             redirectToIndex() {
-                this.$router.push({
-                    name: "WorkflowManagement",
-                });
+                if (!this.canLeave) {
+                    this.checkNavigation(() => {
+                        this.canLeave = true;
+                        this.$router.push({
+                            name: "WorkflowManagement",
+                        });
+                    });
+                } else {
+                    this.$router.push({
+                        name: "WorkflowManagement",
+                    });
+                }
+            },
+            checkNavigation(next) {
+                this.pendingNavegation = next;
+                this.$refs.confirmLeaveModal.open();
+            },
+            confirmNavigation() {
+                this.$refs.confirmLeaveModal.close();
+                if (this.pendingNavegation) {
+                    this.pendingNavegation();
+                    this.pendingNavegation = null;
+                }
+            },
+            cancelNavigation() {
+                this.$refs.confirmLeaveModal.close();
+                this.pendingNavegation = null;
             },
             handleAddToolFlow(step, phase) {
+                this.canLeave = true;
                 // Salva dados locais antes de sair
                 localStorage.setItem(
                     "wizardPhase1Data",
@@ -424,6 +466,7 @@
                 });
             },
             handleEditToolFlow(step, phase) {
+                this.canLeave = true;
                 localStorage.setItem(
                     "wizardPhase1Data",
                     JSON.stringify(this.phase1Data)
@@ -622,6 +665,7 @@
                 return phase3DataReturn;
             },
         },
+
         created() {
             this.loadProfiles();
             this.loadWorkflowData();

@@ -1,4 +1,4 @@
-﻿const portuguese = {
+const portuguese = {
     welcomeMsg: "Bem-vindo",
     Admin: "Admin",
     transferListTitle: "Lista para selecionar",
@@ -724,6 +724,9 @@
             management:
                 "Gestão de Esteira de Processamentos",
         },
+        leaveMessage: "Você fez alterações nesta esteira que ainda não foram salvas, se sair agora todos os dados editados serão perdidos",
+        finalize: "Finalizar",
+        saveStep: "Salvar etapa",
     },
     card: {
         userAssigned: "Responsável",

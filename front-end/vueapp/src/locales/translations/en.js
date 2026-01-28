@@ -1,4 +1,4 @@
-﻿const english = {
+const english = {
     welcomeMsg: "Welcome",
     Admin: "Admin",
     transferListTitle: "Selection list",
@@ -674,6 +674,9 @@
             index: "Document Workflow",
             management: "Workflow Management",
         },
+        leaveMessage: "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
+        finalize: "Finalize",
+        saveStep:"Save step",
     },
     card: {
         userAssigned: "Assigned",

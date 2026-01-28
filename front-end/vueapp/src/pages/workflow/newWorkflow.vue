@@ -1,6 +1,5 @@
 <template>
-    <WorkflowWizard
-     :workflowId="routeId"/>
+    <WorkflowWizard ref="wizard" :workflowId="routeId" />
 </template>
 
 <script>
@@ -10,11 +9,23 @@
         components: {
             WorkflowWizard,
         },
-         computed: {
+        computed: {
             routeId() {
                 const id = this.$route.params.id;
                 return id ? parseInt(id) : undefined;
+            },
+        },
+        beforeRouteLeave(to, from, next) {
+            const wizard = this.$refs.wizard;
+            if (wizard && !wizard.canLeave) {
+                wizard.checkNavigation(() => {
+                    wizard.canLeave = true;
+                    this.$router.push(to);
+                });
+                next(false);
+            } else {
+                next();
             }
-        }
-    }
+        },
+    };
 </script>

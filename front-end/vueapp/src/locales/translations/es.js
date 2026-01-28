@@ -1,4 +1,4 @@
-﻿const spanish = {
+const spanish = {
     welcomeMsg: "Bienvenido",
     Admin: "Admin",
     transferListTitle: "Lista para seleccionar",
@@ -701,6 +701,9 @@
             index: "Flujo de trabajo de documentos",
             management: "Gestión de flujos de trabajo",
         },
+        leaveMessage: "Realizó cambios en este workflow que aún no se han guardado. Si sale ahora, se perderán todos los datos editados.",
+        finalize: "Finalizar",
+        saveStep: "Salvar etapa",
     },
     card: {
         userAssigned: "Responsable",
