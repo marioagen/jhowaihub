@@ -5,7 +5,8 @@
                 <div class="card flex-grow-1 kanban-column-card">
                     <div class="card-header d-flex justify-content-between align-items-center"
                         :class="findOrder(step.order)">
-                        <span>{{ step.name }}</span>
+                        <span>{{ step.name }}
+                        <span class="badge">{{ step.cards.length }}</span></span>
                         <div v-if="step.order === maxOrder" class="cursor-pointer" @click="toggleLastColumnVisibility">
                             <LucideIcon :icon="isLastColumnVisible
                                     ? 'Eye'
@@ -204,12 +205,21 @@ export default {
     -webkit-overflow-scrolling: touch;
 }
 
-.first-steps {
+.first-steps{
     background-color: #dbe9fc;
+}
+
+.first-steps > span > span {
+    background-color: #a7bad3!important;
 }
 
 .last-step {
     background-color: #dcfce7;
+    
+}
+.last-step > span > span {
+    background-color: #a1cfb1 !important;
+    
 }
 
 .bg-primary {
@@ -269,5 +279,10 @@ export default {
     white-space: normal;
     hyphens: auto;
     flex-shrink: 0;
+}
+
+.badge{
+    color: unset;
+    background-color: #ebebeb;
 }
 </style>
