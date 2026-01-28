@@ -131,92 +131,32 @@ namespace WoopiAiHub.Repository.Context
             ChangeTracker.DetectChanges();
             var auditLogs = new List<AuditLog>();
 
-            var requestEmail = _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.XEmail].ToString();
-            if (string.IsNullOrEmpty(requestEmail))
-                return auditLogs;
-
-            var user = Users.FirstOrDefault(u => u.Email == requestEmail);
+            var user = GetCurrentUser();
             if (user == null)
                 return auditLogs;
 
             foreach (var entry in ChangeTracker.Entries())
             {
-                if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                if (AuditExtensions.ShouldSkipEntry(entry))
                     continue;
 
-                var tableName = entry.Metadata.GetTableName() ?? entry.Entity.GetType().Name;
-                var actionType = entry.State.ToString();
-
-                var changes = new Dictionary<string, object?>();
-
-                PropertyValues? databaseValues = null;
-                if (entry.State == EntityState.Modified || entry.State == EntityState.Deleted)
+                var auditLog = AuditExtensions.CreateAuditLogFromEntry(entry, user);
+                if (auditLog != null)
                 {
-                    databaseValues = entry.GetDatabaseValues();
-                }
-
-                bool isManyToManyInternal = entry.Metadata.ClrType == typeof(Dictionary<string, object>)
-                    || entry.Metadata.ClrType == null;
-
-                if (isManyToManyInternal)
-                {
-                    foreach (var prop in entry.Properties)
-                    {
-                        changes[prop.Metadata.Name] = prop.CurrentValue;
-                    }
-                }
-                else
-                {
-                    foreach (var property in entry.Properties)
-                    {
-                        if (entry.State == EntityState.Added && property.Metadata.IsPrimaryKey())
-                            continue;
-
-                        string propertyName = property.Metadata.Name;
-
-                        switch (entry.State)
-                        {
-                            case EntityState.Added:
-                                changes[propertyName] = property.CurrentValue;
-                                break;
-
-                            case EntityState.Deleted:
-                                changes[propertyName] = databaseValues?[propertyName];
-                                break;
-
-                            case EntityState.Modified:
-                                if (property.IsModified)
-                                {
-                                    var oldValue = databaseValues?[propertyName];
-                                    var newValue = property.CurrentValue;
-
-                                    if (!AuditExtensions.ValidateEqualValues(oldValue, newValue))
-                                    {
-                                        changes[propertyName] = new
-                                        {
-                                            Old = oldValue,
-                                            New = newValue
-                                        };
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                }
-
-                if (changes.Count > 0)
-                {
-                    var actionJson = System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        Operation = actionType,
-                        Changes = changes
-                    });
-
-                    auditLogs.Add(new AuditLog(0, DateTime.Now, tableName, actionJson, user.Id, user.Name));
+                    auditLogs.Add(auditLog);
                 }
             }
 
             return auditLogs;
+        }
+
+        private User? GetCurrentUser()
+        {
+            var requestEmail = _httpContextAccessor?.HttpContext?.Request.Headers[HeaderNames.XEmail].ToString();
+            if (string.IsNullOrEmpty(requestEmail))
+                return null;
+
+            return Users.FirstOrDefault(u => u.Email == requestEmail);
         }
 
         private void OnAfterSaveChanges(List<AuditLog> auditEntries)

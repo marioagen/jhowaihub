@@ -142,7 +142,7 @@ namespace WoopiAiHub.Repository
         {
             var documents = _context.Documents.Where(a => ids.Contains(a.Id)).ToList();
             
-            if (documents.Any())
+            if (documents.Count > 0)
             {
                 _context.Documents.RemoveRange(documents);
                 _context.SaveChanges();
@@ -219,7 +219,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool ClearWorkflowRelationships(List<int> documentIds)
         {
-            if (documentIds == null || !documentIds.Any())
+            if (documentIds == null || documentIds.Count == 0)
             {
                 return false;
             }
@@ -229,7 +229,7 @@ namespace WoopiAiHub.Repository
                 .Where(workflowDocuments => documentIds.Contains((int)workflowDocuments["DocumentId"]))
                 .ToList();
 
-            if (relationships.Any())
+            if (relationships.Count > 0)
             {
                 WorkflowDocuments.RemoveRange(relationships);
                 _context.SaveChanges();

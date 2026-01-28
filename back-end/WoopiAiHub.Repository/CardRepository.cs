@@ -72,7 +72,7 @@ namespace WoopiAiHub.Repository
         public async Task<bool> DeleteByDocumentIds(List<int> documentIds)
         {
             var cards = await _context.Cards.Where(c => documentIds.Contains(c.DocumentId)).ToListAsync();
-            if (cards.Any())
+            if (cards.Count > 0)
             {
                 _context.Cards.RemoveRange(cards);
                 return await _context.SaveChangesAsync() > 0;

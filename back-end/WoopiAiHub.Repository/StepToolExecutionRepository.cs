@@ -137,7 +137,7 @@ namespace WoopiAiHub.Repository
                 .Where(a => ids!.Contains(a.Id))
                 .ToList();
 
-            if (executions.Any())
+            if (executions.Count > 0)
             {
                 _context.StepToolExecutions.RemoveRange(executions);
                 _context.SaveChanges();
@@ -163,7 +163,7 @@ namespace WoopiAiHub.Repository
                 .Where(e => cardIds!.Contains(e.CardId))
                 .ToList();
 
-            if (executions.Any())
+            if (executions.Count > 0)
             {
                 _context.StepToolExecutions.RemoveRange(executions);
                 _context.SaveChanges();
