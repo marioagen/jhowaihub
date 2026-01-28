@@ -635,7 +635,7 @@ namespace WoopiAiHub.UnitTests.Services
                     new ChatChoiceDto { Message = new ChatMessageResponseDto { Content = "Prompt refinado" } }
                 }
             };
-
+            _mocker.GetMock<IConfiguration>().Setup(c => c["PromptSettings:RefinementPrompt"]).Returns("Texto a ser convertido: {{Regra de negócio}}");
             _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
             _mocker.GetMock<IChatCompletionApi>()
                 .Setup(a => a.GetChatCompletion(
@@ -667,6 +667,25 @@ namespace WoopiAiHub.UnitTests.Services
             //Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(async () =>
                 await _promptServices.AiPromptRefinement(prompt, tenantId));
+        }
+
+        [Fact(DisplayName = "AiPromptRefinement should throw argument exception when refinement prompt is null or empty")]
+        [Trait("AiPromptRefinement", "Fail")]
+        public async Task AiPromptRefinement_ShouldThrowArgumentException_RefinementPromptNullOrEmpty()
+        {
+            //Arrange
+            var prompt = "Minha regra de negócio";
+            var tenantId = "tenantId";
+            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+
+            _mocker.GetMock<IConfiguration>().Setup(c => c["PromptSettings:RefinementPrompt"]).Returns(string.Empty);
+            _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
+
+            //Act & Assert
+            var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _promptServices.AiPromptRefinement(prompt, tenantId));
+
+            Assert.Equal("Refinement prompt template not found", exception.Message);
         }
     }
 }
