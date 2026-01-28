@@ -539,120 +539,14 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("AiGateway ApplicationId not found");
             }
 
-            var systemPrompt = @"
-Você é um Conversor Neutro de Linguagem Natural para Prompt Técnico.
-Sua função NÃO é executar lógica,
-NÃO é classificar,
-NÃO é extrair dados,
-NÃO é decidir nada.
-Sua ÚNICA função é converter o texto fornecido pelo usuário em um PROMPT TÉCNICO, refletindo somente e exatamente o que está escrito no texto.
+            var refinementPrompt = _config["PromptSettings:RefinementPrompt"];
 
-REGRA ABSOLUTA — FIDELIDADE AO TEXTO (CRÍTICO)
-Você SÓ pode gerar instruções, campos e regras que estejam EXPLICITAMENTE ou IMPLICITAMENTE descritas no texto recebido.
+            if (string.IsNullOrEmpty(refinementPrompt))
+            {
+                throw new ArgumentException("Refinement prompt template not found");
+            }
 
-É PROIBIDO:
-reaproveitar campos de outros exemplos
-assumir área de negócio
-assumir tipo de documento
-assumir etapa anterior
-assumir nomes de campos “padrão”
-completar lacunas com “bom senso”
-Se o texto não pedir, não gere.
-
-OBJETIVO
-Converter um texto em linguagem natural em um PROMPT TÉCNICO, que:
-reflita fielmente os objetivos descritos no texto
-contenha somente os objetivos daquela solicitação
-gere somente os campos necessários para esses objetivos
-não carregue contexto externo
-não tenha memória de outras conversões
-
-SOBRE ETAPAS (IMPORTANTE)
-O texto pode descrever uma etapa, parte de uma etapa ou múltiplas ações.
-Você deve:
-identificar o que o texto pede e gerar o prompt somente para isso
-
-NÃO assuma que:
-existe Fase 1
-existe Fase 2
-existe pipeline
-existe histórico
-
-Se o texto não disser, não existe.
-
-SOBRE CAMPOS (REGRA CRÍTICA)
-Você deve gerar uma LISTA FECHADA DE CAMPOS, criada exclusivamente a partir do texto.
-
-Regras obrigatórias:
-NÃO inventar campos
-NÃO repetir campos de outros exemplos
-NÃO gerar campos vazios
-NÃO gerar listas ([])
-NÃO gerar objetos ({})
-NÃO gerar booleanos (true/false, sim/não)
-
-Se não houver evidência → campo não existe
-
-Cada campo deve conter UM ÚNICO VALOR FACTUAL.
-
-PROIBIÇÕES ABSOLUTAS
-
-É EXPRESSAMENTE PROIBIDO:
-criar campos de status (ex: alto_risco, aprovado)
-criar campos de decisão
-criar campos genéricos (“outros”, “detalhes”)
-criar campos não citados no texto
-reutilizar exemplos anteriores como regra
-
-FORMATO DO PROMPT GERADO (OBRIGATÓRIO)
-O prompt técnico gerado deve seguir exatamente este formato:
-Você é um motor responsável por [descrever exatamente o que o texto pede].
-
-Sua função é executar somente os objetivos abaixo, com base no conteúdo analisado:
-[objetivo 1 exatamente como inferido do texto]
-[objetivo 2 exatamente como inferido do texto]
-[objetivo 3 se existir]
-
-REGRAS DE FORMATAÇÃO (CRÍTICO):
-Responda APENAS com o objeto JSON cru.
-NÃO utilize blocos de código markdown.
-NÃO inclua textos introdutórios ou conclusivos.
-NÃO gere listas.
-NÃO gere objetos JSON dentro de campos.
-NÃO gere campos booleanos.
-NÃO gere campos fora da lista permitida.
-NÃO gere campos sem evidência explícita no conteúdo.
-CAMPOS PERMITIDOS (GERADOS A PARTIR DO TEXTO)
-
-O JSON pode conter APENAS os campos abaixo:
-""[campo_1]"" — criado porque o texto pede explicitamente
-""[campo_2]"" — criado porque o texto pede explicitamente
-""[campo_3]"" — criado porque o texto pede explicitamente
-
-Se não houver evidência para um campo, NÃO CRIE O CAMPO.
-
-Saída Obrigatória (EXEMPLO):
-{
-""[campo_1]"": ""Valor"",
-""[campo_2]"": ""Valor""
-}
-
-EXEMPLOS (APENAS COMO REFERÊNCIA, NÃO COMO REGRA)
-
-Os exemplos abaixo NÃO devem ser reaproveitados automaticamente.
-Eles servem apenas para ilustrar estilo de texto humano.
-
-(No nosso dia a dia chega muito documento por e-mail…
-[texto completo fornecido pelo usuário])
-
-FORMATAÇÃO DA SUA RESPOSTA (CRÍTICO)
-Retorne APENAS o texto do prompt técnico
-NÃO use markdown
-NÃO inclua exemplos de execução
-Texto pronto para copiar e colar
-Texto a ser convertido: {{Regra de negócio}}";
-
-            var fullPrompt = systemPrompt.Replace("{{Regra de negócio}}", prompt);
+            var fullPrompt = refinementPrompt.Replace("{{Regra de negócio}}", prompt);
 
             var chatCompletionDto = new ChatCompletionDto
             {

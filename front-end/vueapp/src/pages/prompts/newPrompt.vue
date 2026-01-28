@@ -25,7 +25,8 @@
                             <div class="card-body">
                                 <h6 class="card-title mb-3">{{ $t('prompts.information') }}</h6>
                                 <div class="mb-3">
-                                    <label for="inputNamePrompt" class="form-label">{{ $t('prompts.namePrompt') }}</label>
+                                    <label for="inputNamePrompt" class="form-label">{{ $t('prompts.namePrompt')
+                                    }}</label>
                                     <Field name="name" :rules="'required|max:50'" v-slot="{ field, errorMessage }">
                                         <input v-bind="field" type="text" class="form-control"
                                             :placeholder="$t('prompts.placeholderNamePrompt')" id="inputNamePrompt"
@@ -35,8 +36,8 @@
                                     </Field>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="FormControlTextarea1"
-                                        class="form-label">{{ $t('common.description') }}</label>
+                                    <label for="FormControlTextarea1" class="form-label">{{ $t('common.description')
+                                    }}</label>
                                     <Field name="description" :rules="'required|max:100'"
                                         v-slot="{ field, errorMessage }">
                                         <textarea v-bind="field" type="text" class="form-control" id="inputNamePrompt"
@@ -65,8 +66,8 @@
                                         </button>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="FormControlTextarea2"
-                                            class="form-label">{{ $t('prompts.promptContent') }}</label>
+                                        <label for="FormControlTextarea2" class="form-label">{{
+                                            $t('prompts.promptContent') }}</label>
                                         <Field name="text" rules="required" v-slot="{ field, errorMessage }">
                                             <textarea v-bind="field" type="text" class="form-control"
                                                 id="FormControlTextarea2" rows="3" name="text"
@@ -76,7 +77,9 @@
                                         </Field>
                                         <button type="button" class="btn btn-sm btn-outline-primary mt-2"
                                             @click="refinePrompt" :disabled="isRefining">
-                                            <LucideIcon icon="Wand2" :size="17" class="me-2" />
+                                            <LucideIcon icon="Wand2" :size="17" class="me-2" v-if="!isRefining" />
+                                            <LucideIcon icon="LoaderCircle" :size="17" class="me-2 animate-spin"
+                                                v-else />
                                             <span class="fw-bold">{{ $t('prompts.refinePrompt') }}</span>
                                         </button>
                                     </div>
@@ -300,5 +303,19 @@ export default {
 <style scoped>
 .card {
     border-radius: 10px;
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>
