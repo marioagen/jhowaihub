@@ -144,6 +144,7 @@
                         labelKey: "pages.management",
                     },
                     {
+                        permission: "Documents",
                         activeKey: "DocumentList",
                         to: "/documents",
                         icon: {

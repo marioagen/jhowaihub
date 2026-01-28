@@ -36,16 +36,37 @@
                             </p>
                         </div>
                     </div>
-                    <div v-else class="kanban-column-body">
+                    <div
+                        v-else
+                        class="kanban-column-body"
+                    >
                         <div v-show="step.order !== maxOrder ||
                             isLastColumnVisible
                             ">
-                            <div v-for="card in step.cards" :key="card.id" class="card-body" :id="card.id">
-                                <KanbanCard :dataCard="card" :dataStep="step" :isFirstStep="step.order === minOrder
-                                    " :isLoading="isLoading" :isLastStep="step.order === maxOrder
-                                        " @reload="reloadList" @cardMoved="handleCardMoved" @cardUpdated="
+                            <div
+                                v-for="card in step.cards"
+                                :key="card.id"
+                                class="card-body"
+                                :id="card.id"
+                            >
+                                <KanbanCard
+                                    :dataCard="card"
+                                    :dataStep="step"
+                                    :isFirstStep="
+                                        step.order === minOrder
+                                    "
+                                    :isLoading="isLoading"
+                                    :isLastStep="
+                                        step.order === maxOrder
+                                    "
+                                    @reload="reloadList"
+                                    @cardMoved="handleCardMoved"
+                                    @cardUpdated="
                                         handleCardUpdated
-                                    " label="labelAnalyze" :users="users" />
+                                    "
+                                    label="common.analyze"
+                                    :users="users"
+                                />
                             </div>
                         </div>
                     </div>
@@ -217,69 +238,64 @@ export default {
     background-color: #dcfce7;
     
 }
+
 .last-step > span > span {
     background-color: #a1cfb1 !important;
     
 }
-
-.bg-primary {
-    background-color: #dbeafe !important;
-    color: #2b7fff !important;
-}
-
-.bg-primary {
-    background-color: #dbeafe !important;
-    color: #2b7fff !important;
-}
-
-.bg-warning {
-    background-color: #fef9c2 !important;
-    color: #a65f00 !important;
-}
-
-.bg-danger {
-    background-color: #ffedd4 !important;
-    color: #ca3500 !important;
-}
-
-.bg-success {
-    background-color: #d0fae5 !important;
-    color: #007a55 !important;
-}
-
-.cursor-pointer {
-    cursor: pointer;
-}
-
-@media (min-width: 768px) and (max-width: 991.98px) {
-    .kanban-col {
-        width: 100% !important;
-        display: block !important;
+    .bg-primary {
+        background-color: #dbeafe !important;
+        color: #2b7fff !important;
     }
-}
 
-.xsm-text {
-    font-size: 0.55rem;
-}
+    .bg-primary {
+        background-color: #dbeafe !important;
+        color: #2b7fff !important;
+    }
 
-/* Reduce spacing between kanban cards - adjust this value to make cards more/less compact */
-.kanban-col .card-body {
-    --kanban-card-gap: 0.25rem;
-    /* Spacing between cards - adjust this value */
-    padding-top: var(--kanban-card-gap) !important;
-    padding-bottom: var(--kanban-card-gap) !important;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-}
+    .bg-warning {
+        background-color: #fef9c2 !important;
+        color: #a65f00 !important;
+    }
 
-/* Ensure step names wrap properly within card-header boundaries */
-.card-header {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    hyphens: auto;
-    flex-shrink: 0;
-}
+    .bg-danger {
+        background-color: #ffedd4 !important;
+        color: #ca3500 !important;
+    }
+
+    .bg-success {
+        background-color: #d0fae5 !important;
+        color: #007a55 !important;
+    }
+
+    @media (min-width: 768px) and (max-width: 1024px) {
+        .kanban-col {
+            width: 100% !important;
+            display: block !important;
+        }
+    }
+
+    .xsm-text {
+        font-size: 0.55rem;
+    }
+
+    /* Reduce spacing between kanban cards - adjust this value to make cards more/less compact */
+    .kanban-col .card-body {
+        --kanban-card-gap: 0.25rem; /* Spacing between cards - adjust this value */
+        padding-top: var(--kanban-card-gap) !important;
+        padding-bottom: var(--kanban-card-gap) !important;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Ensure step names wrap properly within card-header boundaries */
+    .card-header {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        hyphens: auto;
+        flex-shrink: 0;
+    }
 
 .badge{
     color: unset;
