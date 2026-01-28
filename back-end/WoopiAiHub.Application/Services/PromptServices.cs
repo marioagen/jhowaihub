@@ -37,6 +37,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IChatCompletionApi _chatCompletionApi;
         private readonly ChatCompletionSettings _chatCompletionSettings;
+        private readonly IUsageDailyServices _usageDailyServices;
 
         public PromptServices(IUnitOfWork unitOfWork,
             IPromptRepository promptRepository,
@@ -52,7 +53,8 @@ namespace WoopiAiHub.Application.Services
             IConfiguration config,
             ITenantCacheServices tenantCacheServices,
             IChatCompletionApi chatCompletionApi,
-            IOptions<ChatCompletionSettings> chatCompletionSettings)
+            IOptions<ChatCompletionSettings> chatCompletionSettings,
+            IUsageDailyServices usageDailyServices)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
@@ -69,6 +71,7 @@ namespace WoopiAiHub.Application.Services
             _tenantCacheServices = tenantCacheServices;
             _chatCompletionApi = chatCompletionApi;
             _chatCompletionSettings = chatCompletionSettings.Value;
+            _usageDailyServices = usageDailyServices;
         }
 
 
@@ -538,7 +541,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="tenantId"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<string> AiPromptRefinement(string prompt, string tenantId)
+        public async Task<string> AiPromptRefinement(string prompt, string tenantId, string email)
         {
             var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenantId);
             if (tenantInfo!.AiGatewayApplicationId.HasValue is false || string.IsNullOrEmpty(tenantInfo.AiGatewayKey))
@@ -561,13 +564,15 @@ namespace WoopiAiHub.Application.Services
                 MaxTokens = _chatCompletionSettings.MaxTokens,
                 Messages = new List<ChatMessageDto> { new ChatMessageDto { Role = "system", Content = fullPrompt } }
             };
-
             var response = await _chatCompletionApi.GetChatCompletion(
                 tenantInfo.AiGatewayApplicationId.Value.ToString(),
                 _chatCompletionSettings.Model,
                 _chatCompletionSettings.ApiVersion,
                 tenantInfo.AiGatewayKey,
                 chatCompletionDto);
+
+            var tokens = response.Usage?.TotalTokens ?? 0;
+            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model);
 
             return response.Choices[0].Message.Content;
         }

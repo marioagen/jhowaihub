@@ -203,7 +203,7 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         public async Task<IActionResult> RefinePrompt([FromBody] string promptText,
                                                       [FromHeader] HeadersDto headersDto)
         {
-            var result = await _promptServices.AiPromptRefinement(promptText, headersDto.Tenant);
+            var result = await _promptServices.AiPromptRefinement(promptText, headersDto.Tenant, headersDto.EmailCreator);
             return Ok(result);
         }
     }
