@@ -321,7 +321,7 @@ namespace WoopiAiHub.Application.Services
 
             if (!tenantFound.IsDatabaseCreated)
             {
-                throw new AppException(null,
+                throw new AppException(ErrorCode.BusinessWarningOutput,
                         "Tenant database is not ready or cannot be accessed.",
                         Domain.Utils.ErrorLabels.Login.TenantDatabaseNotReady);
             }

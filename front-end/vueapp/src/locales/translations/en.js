@@ -500,6 +500,7 @@
         subtitle: "Access your account to manage documents",
         invalid: "Invalid field",
         error: "Error",
+        warning: "Attention",
         loading: "Loading...",
         sso: "Login with Microsoft",
         authSSO: "Authenticated with Microsoft",

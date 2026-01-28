@@ -521,6 +521,7 @@
             "Accede a tu cuenta para gestionar documentos",
         invalid: "Campo inválido",
         error: "Error",
+        warning: "Atención",
         loading: "Cargando...",
         sso: "Login con Microsoft",
         authSSO: "Autenticado en Microsoft",

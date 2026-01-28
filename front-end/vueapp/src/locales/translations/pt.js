@@ -533,6 +533,7 @@
             "Acesse sua conta para gerenciar documentos",
         invalid: "Campo inválidos",
         error: "Error",
+        warning: "Atenção",
         loading: "Carregando...",
         sso: "Login com Microsoft",
         authSSO: "Autenticado na Microsoft",
