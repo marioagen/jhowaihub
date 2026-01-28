@@ -531,6 +531,13 @@ namespace WoopiAiHub.Application.Services
             await _stepToolOutputRepository.CreateAsync(output);
         }
 
+        /// <summary>
+        /// Refine prompt using AI Gateway
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <param name="tenantId"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public async Task<string> AiPromptRefinement(string prompt, string tenantId)
         {
             var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenantId);
