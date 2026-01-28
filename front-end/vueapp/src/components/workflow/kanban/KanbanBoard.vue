@@ -70,7 +70,7 @@
                                 @cardUpdated="
                                     handleCardUpdated
                                 "
-                                label="labelAnalyze"
+                                label="common.analyze"
                                 :users="users"
                             />
                         </div>
@@ -249,7 +249,7 @@
         color: #007a55 !important;
     }
 
-    @media (min-width: 768px) and (max-width: 991.98px) {
+    @media (min-width: 768px) and (max-width: 1024px) {
         .kanban-col {
             width: 100% !important;
             display: block !important;
