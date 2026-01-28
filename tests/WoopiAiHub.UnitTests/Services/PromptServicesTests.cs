@@ -660,7 +660,7 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var prompt = "Minha regra de negócio";
             var tenantId = "tenantId";
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = null, AiGatewayKey = null };
+            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = null, AiGatewayKey = string.Empty };
 
             _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
 
