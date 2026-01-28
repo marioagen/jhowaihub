@@ -1,11 +1,16 @@
 <template>
     <div
-        class="card clickable"
-        @click="redirectToAnalyzer"
+        class="card"
     >
         <div class="card-content">
-            <div class="card-body pb-0 clickable">
-                <p>{{ dataCard.name }}</p>
+            <div class="card-body pb-0">
+                <div class="mb-1 title-text">
+                    {{ truncateText(dataCard.name) }}
+                    <div class="badge fr flex-shrink-1 mt-1"
+                        :style="badgeStyle(dataStep.status.color)">
+                        {{ dataStep.status.name }}
+                    </div>
+                </div>
                 <div class="mb-2">
                     <LucideIcon
                         icon="FileText"
@@ -88,15 +93,14 @@
                     class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
                     v-if="!showLoading"
                 >
-                    <div
-                        class="badge flex-shrink-1 mb-1"
-                        :style="
-                            badgeStyle(
-                                dataStep.status.color
-                            )
-                        "
-                    >
-                        {{ dataStep.status.name }}
+                    <div>
+                        <button type="button" class="btn btn-sm btn-primary" @click="redirectToAnalyzer">
+                            {{$t("common.analyze")}}
+                            <LucideIcon icon="FileClock"
+                                        :size="15"
+                                        class="ms-2"
+                                        />
+                        </button> 
                     </div>
                     <div v-if="!isLastStep">
                         <button
@@ -104,7 +108,7 @@
                                 !isFirstStep ||
                                 dataCard.assignedUser
                             "
-                            class="btn btn-sm btn-primary float-end"
+                            class="btn btn-sm btn-outline-primary float-end"
                             @click.stop="advanceStep"
                         >
                             <span>
@@ -134,7 +138,7 @@
                             >
                                 <button
                                     type="button"
-                                    class="btn btn-sm btn-primary assing-btn dropdown-toggle"
+                                    class="btn btn-sm btn-primary btn-outline-primary  dropdown-toggle"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                     @click.stop=""
@@ -479,6 +483,10 @@
             formatDate(date) {
                 return dates.formatDate(date);
             },
+            truncateText(text) {
+                if (!text) return ''
+                return text.length > 25 ? text.substring(0, 25) + '...' : text
+            }
         },
         mounted() {
             this.setUsers();
@@ -709,21 +717,14 @@
         height: 3rem;
     }
 
-    .clickable {
-        cursor: pointer;
+    .fr {
+        float:right
     }
 
     .spinner-grow {
         width: 1rem;
         height: 1rem;
         margin-left: 5px;
-    }
-
-    .assing-btn {
-        background-color: var(
-            --btn-primary-dark-bg
-        ) !important;
-        color: var(--color-dropdown-menu);
     }
 
     hr {
@@ -771,5 +772,9 @@
 
     .padding-loading {
         padding-bottom: 50px;
+    }
+
+    .title-text{
+        font-size: 13px;
     }
 </style>

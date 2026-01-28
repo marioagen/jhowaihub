@@ -76,11 +76,18 @@ namespace WoopiAiHub.Repository
             if (!ids?.Any() ?? true)
                 return false;
 
-            var deletedCount = _context.StepToolOutputs
+            var outputs = _context.StepToolOutputs
                 .Where(a => ids!.Contains(a.Id))
-                .ExecuteDelete();
+                .ToList();
 
-            return deletedCount > 0;
+            if (outputs.Count > 0)
+            {
+                _context.StepToolOutputs.RemoveRange(outputs);
+                _context.SaveChanges();
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -123,12 +130,18 @@ namespace WoopiAiHub.Repository
             if (!cardIds?.Any() ?? true)
                 return false;
 
-            var deletedCount = _context.StepToolOutputs
+            var outputs = _context.StepToolOutputs
                 .Where(o => cardIds!.Contains(o.CardId))
-                .ExecuteDelete();
+                .ToList();
 
-            _context.SaveChanges();
-            return deletedCount > 0;
+            if (outputs.Count > 0)
+            {
+                _context.StepToolOutputs.RemoveRange(outputs);
+                _context.SaveChanges();
+                return true;
+            }
+
+            return false;
         }
     }
 }

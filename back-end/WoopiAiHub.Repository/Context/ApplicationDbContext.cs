@@ -1,7 +1,10 @@
-﻿using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository.Mappings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
+using WoopiAiHub.Repository.Mappings;
+using WoopiAiHub.Repository.Util;
 
 namespace WoopiAiHub.Repository.Context
 {
@@ -55,6 +58,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<UsageDaily> UsageDailies { get; set; }
         public DbSet<ApiTemplate> ApiTemplates { get; set; }
         public DbSet<SubscriptionPeriod> SubscriptionPeriods { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -102,7 +106,103 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<UsageType>(new UsageTypeMap().Configure);
             modelBuilder.Entity<ApiTemplate>(new ApiTemplateMap().Configure);
             modelBuilder.Entity<SubscriptionPeriod>(new SubscriptionPeriodMap().Configure);
+            modelBuilder.Entity<AuditLog>(new AuditLogMap().Configure);
             base.OnModelCreating(modelBuilder);
+        }
+
+        /// <summary>
+        /// Asynchronously saves all changes made in this context to the underlying database, including any auditing
+        /// operations.
+        /// </summary>
+        /// <remarks>This override adds auditing logic before and after the changes are saved. Use this
+        /// method to persist changes and ensure audit information is recorded as part of the save process.</remarks>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous save operation.</param>
+        /// <returns>A task that represents the asynchronous save operation. The task result contains the number of state entries
+        /// written to the database.</returns>
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var auditEntries = OnBeforeSaveChanges();
+            var result = await base.SaveChangesAsync(cancellationToken);
+            OnAfterSaveChanges(auditEntries);
+            return result;
+        }
+
+        /// <summary>
+        /// Saves all changes made in this context to the underlying database, including any auditing operations.
+        /// </summary>
+        /// <remarks>This method performs additional auditing logic before and after saving changes. Use
+        /// this override to ensure that audit information is captured along with data modifications.</remarks>
+        /// <returns>The number of state entries written to the database.</returns>
+        public override int SaveChanges()
+        {
+            var auditEntries = OnBeforeSaveChanges();
+            var result = base.SaveChanges();
+            OnAfterSaveChanges(auditEntries);
+            return result;
+        }
+
+        /// <summary>
+        /// Generates a collection of audit log entries representing changes detected in the current context before
+        /// saving changes to the database.
+        /// </summary>
+        /// <remarks>This method should be called prior to saving changes to ensure that all relevant
+        /// modifications are captured for auditing purposes. Entries that are not auditable or when the current user
+        /// cannot be determined are excluded from the audit log.</remarks>
+        /// <returns>A list of <see cref="AuditLog"/> objects describing the pending changes. The list is empty if no auditable
+        /// changes are detected or if the current user is not available.</returns>
+        private List<AuditLog> OnBeforeSaveChanges()
+        {
+            ChangeTracker.DetectChanges();
+            var auditLogs = new List<AuditLog>();
+
+            var user = GetCurrentUser();
+            if (user == null)
+                return auditLogs;
+
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (AuditExtensions.ShouldSkipEntry(entry))
+                    continue;
+
+                var auditLog = AuditExtensions.CreateAuditLogFromEntry(entry, user);
+                if (auditLog != null)
+                {
+                    auditLogs.Add(auditLog);
+                }
+            }
+
+            return auditLogs;
+        }
+
+        /// <summary>
+        /// Retrieves the user associated with the current HTTP request based on the X-Email header.
+        /// </summary>
+        /// <remarks>This method relies on the presence of the X-Email header in the HTTP request to
+        /// identify the user. If the header is missing or does not correspond to a known user, the method returns <see
+        /// langword="null"/>.</remarks>
+        /// <returns>A <see cref="User"/> object representing the current user if the X-Email header is present and matches a
+        /// user; otherwise, <see langword="null"/>.</returns>
+        private User? GetCurrentUser()
+        {
+            var requestEmail = _httpContextAccessor?.HttpContext?.Request.Headers[HeaderNames.XEmail].ToString();
+            if (string.IsNullOrEmpty(requestEmail))
+                return null;
+
+            return Users.FirstOrDefault(u => u.Email == requestEmail);
+        }
+
+        /// <summary>
+        /// Performs post-processing after changes are saved by adding the specified audit log entries to the context
+        /// and persisting them to the database.
+        /// </summary>
+        /// <param name="auditEntries">The collection of audit log entries to be added and saved. If null or empty, no action is taken.</param>
+        private void OnAfterSaveChanges(List<AuditLog> auditEntries)
+        {
+            if (auditEntries == null || auditEntries.Count == 0)
+                return;
+
+            Set<AuditLog>().AddRange(auditEntries);
+            base.SaveChanges();
         }
     }
 }
