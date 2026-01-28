@@ -627,6 +627,7 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var prompt = "Minha regra de negócio";
             var tenantId = "tenantId";
+            var email = "exemple@email.com";
             var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
             var chatCompletionResponse = new ChatCompletionResponseDto
             {
@@ -647,7 +648,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(chatCompletionResponse);
 
             //Act
-            var result = await _promptServices.AiPromptRefinement(prompt, tenantId);
+            var result = await _promptServices.AiPromptRefinement(prompt, tenantId, email);
 
             //Assert
             Assert.Equal("Prompt refinado", result);
@@ -660,13 +661,14 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var prompt = "Minha regra de negócio";
             var tenantId = "tenantId";
+            var email = "exemple@email.com";
             var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = null, AiGatewayKey = string.Empty };
 
             _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
 
             //Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(async () =>
-                await _promptServices.AiPromptRefinement(prompt, tenantId));
+                await _promptServices.AiPromptRefinement(prompt, tenantId, email));
         }
 
         [Fact(DisplayName = "AiPromptRefinement should throw argument exception when refinement prompt is null or empty")]
@@ -676,6 +678,7 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var prompt = "Minha regra de negócio";
             var tenantId = "tenantId";
+            var email = "exemple@email.com";
             var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
 
             _mocker.GetMock<IConfiguration>().Setup(c => c["PromptSettings:RefinementPrompt"]).Returns(string.Empty);
@@ -683,7 +686,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             //Act & Assert
             var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
-                await _promptServices.AiPromptRefinement(prompt, tenantId));
+                await _promptServices.AiPromptRefinement(prompt, tenantId, email));
 
             Assert.Equal("Refinement prompt template not found", exception.Message);
         }
