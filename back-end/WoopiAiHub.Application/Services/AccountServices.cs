@@ -319,9 +319,9 @@ namespace WoopiAiHub.Application.Services
                         Domain.Utils.ErrorLabels.Login.TenantNotFound);
             }
 
-            if (!tenantFound.IsDatabaseCreated)
+            if (tenantFound.IsDatabaseCreated)
             {
-                throw new AppException(null,
+                throw new AppException(ErrorCode.BusinessWarningOutput,
                         "Tenant database is not ready or cannot be accessed.",
                         Domain.Utils.ErrorLabels.Login.TenantDatabaseNotReady);
             }
