@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,8 @@ using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository.Context;
+using WoopiAiHub.Repository.Util;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -91,6 +94,10 @@ namespace WoopiAiHub.Application.Services
             var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+            InitApplicationDb.RunApplicationMigration(dbContext);
 
             var usageDailyRepository = scope.ServiceProvider.GetRequiredService<IUsageDailyRepository>();
             var usageMonthRepository = scope.ServiceProvider.GetRequiredService<IUsageMonthRepository>();
