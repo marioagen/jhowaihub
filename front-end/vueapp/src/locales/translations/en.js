@@ -677,6 +677,13 @@ const english = {
         leaveMessage: "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
         finalize: "Finalize",
         saveStep:"Save step",
+        statusList: {
+            awaitinganalysis:"Awaiting Analysis",
+            analyzed:"Analyzed",
+            waitingforapproval:"Waiting for Approval",
+            approved:"Approved",
+            done:"Done",
+        }
     },
     card: {
         userAssigned: "Assigned",

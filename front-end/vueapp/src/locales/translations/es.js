@@ -704,6 +704,13 @@ const spanish = {
         leaveMessage: "Realizó cambios en este workflow que aún no se han guardado. Si sale ahora, se perderán todos los datos editados.",
         finalize: "Finalizar",
         saveStep: "Salvar etapa",
+        statusList: {
+            awaitinganalysis: "En espera de análisis",
+            analized: "Analizado",
+            waitingforapproval: "En espera de aprobación",
+            approved: "Aprobado",
+            done: "Listo",
+        }
     },
     card: {
         userAssigned: "Responsable",
