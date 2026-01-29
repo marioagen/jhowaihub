@@ -26,7 +26,7 @@ jobs:
 
       - name: Build Image
         working-directory: ./front-end/vueapp
-        run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
+        run: az acr build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
 
       - name: Azure login
         run: az login --identity
