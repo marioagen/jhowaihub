@@ -6,6 +6,5 @@ namespace WoopiAiHub.Domain.Interfaces.Utils
     public interface IApiDependencies
     {
         IMarketPlaceApi MarketPlaceApi { get; }
-        IKeyGeneratorApi KeyGeneratorApi { get; }
     }
 }

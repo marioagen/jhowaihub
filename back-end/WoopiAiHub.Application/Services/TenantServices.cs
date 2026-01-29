@@ -19,7 +19,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAcessor;
         private readonly IMarketPlaceApi _marketPlaceApi;
-        private readonly IKeyGeneratorApi _keyGeneratorApi;
         private readonly IServiceProvider _serviceProvider;
         private readonly ITenantCacheServices _tenantCacheService;
 
@@ -34,7 +33,6 @@ namespace WoopiAiHub.Application.Services
             _httpContextAcessor = coreDependencies.HttpContextAccessor;
             _tenantRepository = tenantRepository;
             _marketPlaceApi = apiDependencies.MarketPlaceApi;
-            _keyGeneratorApi = apiDependencies.KeyGeneratorApi;
             _serviceProvider = serviceProvider;
             _tenantCacheService = tenantCacheService;
         }
@@ -132,7 +130,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<string> InitializeTenant(string tenant)
+        public async Task InitializeTenant(string tenant)
         {
             if (string.IsNullOrEmpty(tenant))
             {
@@ -146,11 +144,7 @@ namespace WoopiAiHub.Application.Services
                 throw new InvalidOperationException("KeyAccess is not configured in the application settings.");
             }
 
-            string result = await _keyGeneratorApi.GetKey(keyAccess, tenant);
-
             await ApplyMigrations(keyAccess, tenant);
-
-            return result;
         }
 
         /// <summary>

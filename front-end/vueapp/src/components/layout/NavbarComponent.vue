@@ -117,13 +117,7 @@ export default {
         InitializeTenant(tenant) {
             let self = this;
 
-            return api.get("/Tenant/InitializeTenant/" + tenant).then(function (result) {
-                if (result.data) {
-                    self.$store.commit("updateUserProfileKeyMongo", {
-                        amount: result.data,
-                    });
-                }
-            });
+            return api.get("/Tenant/InitializeTenant/" + tenant);
         },
         getUserTenants(userEmail, savedTenant) {
             api.get("/Tenant/FindAllByUserEmail/" + userEmail)
