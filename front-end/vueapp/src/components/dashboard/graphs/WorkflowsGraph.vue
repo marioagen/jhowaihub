@@ -54,10 +54,8 @@
                             class="mb-0 fw-bold text-primary"
                         >
                             {{
-                                (
-                                    totalWorkflowsAutomatic *
-                                    usageUnitWorkflowAutomatic
-                                ).toFixed(5)
+                                totalWorkflowsAutomatic *
+                                usageUnitWorkflowAutomatic
                             }}
                         </h4>
                     </div>
@@ -123,10 +121,8 @@
                             class="mb-0 fw-bold text-primary"
                         >
                             {{
-                                (
-                                    totalWorkflows *
-                                    usageUnitWorkflow
-                                ).toFixed(5)
+                                totalWorkflows *
+                                usageUnitWorkflow
                             }}
                         </h4>
                     </div>

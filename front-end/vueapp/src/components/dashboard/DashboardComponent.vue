@@ -109,7 +109,7 @@
                         v-else
                         class="mb-0 fw-bold text-primary"
                     >
-                        {{ totalWTC.toFixed(5) }}
+                        {{ Math.trunc(totalWTC) }}
                     </h2>
                 </div>
             </div>

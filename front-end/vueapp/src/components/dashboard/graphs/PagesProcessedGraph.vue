@@ -49,7 +49,7 @@
                         {{
                             (
                                 totalPages * usageUnitPages
-                            ).toFixed(5)
+                            )
                         }}
                     </h4>
                 </div>
