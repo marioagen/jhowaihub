@@ -2,12 +2,13 @@
     <main>
         <div class="container-fluid scroll-area mx-2">
             <div class="row align-items-center">
-                <div class="col-auto">
+                <div class="col-10">
                     <div class="row">
-                        <div class="col-2">
+                        <div class="col-auto">
                             <button
-                                class="btn btn-outline-primary btn-table btn-sm table-btn"
+                                class="btn btn-outline-primary btn-table btn-sm"
                                 @click="redirectToIndex"
+                                type="button"
                             >
                                 <LucideIcon
                                     icon="ArrowLeft"
@@ -17,7 +18,10 @@
                         <div class="col-10">
                             <div>
                                 <h5 class="mb-0 fw-bold">
-                                    {{ $t("flow.title") }} <span v-if="step"> - {{ step.name }}</span>
+                                    {{ $t("flow.title") }}
+                                    <span v-if="step">
+                                        - {{ step.name }}
+                                    </span>
                                 </h5>
                                 <p>
                                     <small
@@ -34,7 +38,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-auto ms-auto">
+                <div
+                    class="col-2 ms-auto justify-content-end d-flex"
+                >
                     <button
                         class="btn btn-primary btn-sm me-2"
                         @click="save"
@@ -656,9 +662,13 @@
                 if (this.idSelected) {
                     this.parameters[0].value =
                         this.idSelected.toString();
-                    const selectedPrompt = this.promptlist.find(p => p.id === this.idSelected);
+                    const selectedPrompt =
+                        this.promptlist.find(
+                            (p) => p.id === this.idSelected
+                        );
                     if (selectedPrompt) {
-                        this.nodeFlow.data.subtitle = selectedPrompt.name;
+                        this.nodeFlow.data.subtitle =
+                            selectedPrompt.name;
                     }
                 }
 
@@ -968,17 +978,18 @@
             },
             async fetchStepName() {
                 if (this.workflowId) {
-                    try {                                
-                        if (
-                            this.stepId != 0
-                        ) {
+                    try {
+                        if (this.stepId != 0) {
                             this.step =
                                 await WorkflowService.getStepById(
                                     this.stepId
                                 );
                         }
                     } catch (error) {
-                         console.error("Error fetching step name:", error);
+                        console.error(
+                            "Error fetching step name:",
+                            error
+                        );
                     }
                 }
             },

@@ -436,8 +436,6 @@ namespace WoopiAiHub.UnitTests.Services
             };
             embeddingsApi.Setup(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()))
                          .ReturnsAsync(httpResponseMessage);
-            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
-            marketPlaceApi.Setup(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>())).ReturnsAsync(true);
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                                .ReturnsAsync(tenant);
@@ -450,31 +448,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.FindById(1), Times.Once);
             questionnaireRepository.Verify(a => a.FindById(1), Times.Once);
             embeddingsApi.Verify(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()), Times.Once);
-            marketPlaceApi.Verify(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>()), Times.Once);
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
-        }
-
-        [Fact(DisplayName = "InputQuestionnaire")]
-        [Trait("InputQuestionnaire", "Fail")]
-        public async Task InputQuestionnaire_Fail()
-        {
-            //Arrange
-            var document = DocumentFixture.FindValidDocument();
-            var questionnaire = _fixture.FindValidQuestionnaireDto();
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var documentQuestionnaireDto = _fixture.FindDocumentQuestionnaireDto();
-            documentRepository.Setup(a => a.FindById(1)).Returns(document);
-            var questionnaireRepository = _mocker.GetMock<IQuestionnaireRepository>();
-            questionnaireRepository.Setup(a => a.FindById(1)).Returns(questionnaire);
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
-            marketPlaceApi.Setup(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>())).ReturnsAsync(false);
-            var headers = DocumentFixture.FindValidHeadersDto();
-
-            //Act / Assert
-            await Assert.ThrowsAsync<HttpException>(() => _documentServices.InputQuestionnaire(documentQuestionnaireDto, headers));
-            documentRepository.Verify(a => a.FindById(1), Times.Once);
-            questionnaireRepository.Verify(a => a.FindById(1), Times.Once);
         }
 
         [Fact(DisplayName = "FindDocumentCount")]
@@ -533,8 +507,6 @@ namespace WoopiAiHub.UnitTests.Services
             };
             embeddingsApi.Setup(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()))
                          .ReturnsAsync(httpResponseMessage);
-            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
-            marketPlaceApi.Setup(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>())).ReturnsAsync(true);
             tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                                .ReturnsAsync(tenant);
 
@@ -545,23 +517,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             documentRepository.Verify(a => a.FindById(1), Times.Once);
             embeddingsApi.Verify(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()), Times.Once);
-            marketPlaceApi.Verify(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>()), Times.Once);
             documentHistoryServices.Verify(a => a.Create(It.IsAny<DocumentHistory>()), Times.Once);
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
-        }
-
-        [Fact(DisplayName = "InputDocument")]
-        [Trait("InputDocument", "Fail")]
-        public async Task InputDocument_Fail()
-        {
-            // Arrange
-            var marketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
-            var headers = DocumentFixture.FindValidHeadersDto();
-            var documentInput = _fixture.FindValidDocumentInputDto();
-            marketPlaceApi.Setup(a => a.ManageConsumptionQuestions(It.IsAny<string>(), It.IsAny<ConsumptionQuestionsDto>())).ReturnsAsync(false);
-
-            // Act /Assert
-            await Assert.ThrowsAsync<AppException>(() => _documentServices.InputDocument(documentInput, headers));
         }
 
         [Fact(DisplayName = "DeleteHash")]

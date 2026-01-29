@@ -1,4 +1,4 @@
-﻿const english = {
+const english = {
     welcomeMsg: "Welcome",
     Admin: "Admin",
     transferListTitle: "Selection list",
@@ -500,6 +500,7 @@
         subtitle: "Access your account to manage documents",
         invalid: "Invalid field",
         error: "Error",
+        warning: "Attention",
         loading: "Loading...",
         sso: "Login with Microsoft",
         authSSO: "Authenticated with Microsoft",
@@ -673,6 +674,9 @@
             index: "Document Workflow",
             management: "Workflow Management",
         },
+        leaveMessage: "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
+        finalize: "Finalize",
+        saveStep:"Save step",
     },
     card: {
         userAssigned: "Assigned",
@@ -812,6 +816,10 @@
         importPredefined: "Import predefined",
         importError: "Error importing prompts",
         importSuccess: "Prompts imported successfully",
+        refinePrompt: "Refine Prompt",
+        refineSuccess: "Prompt refined successfully",
+        refineError: "Failed to refine prompt",
+        emptyPromptError: "The prompt field cannot be empty",
     },
     template: {
         title: "API Templates",

@@ -1,4 +1,4 @@
-﻿const spanish = {
+const spanish = {
     welcomeMsg: "Bienvenido",
     Admin: "Admin",
     transferListTitle: "Lista para seleccionar",
@@ -521,6 +521,7 @@
             "Accede a tu cuenta para gestionar documentos",
         invalid: "Campo inválido",
         error: "Error",
+        warning: "Atención",
         loading: "Cargando...",
         sso: "Login con Microsoft",
         authSSO: "Autenticado en Microsoft",
@@ -700,6 +701,9 @@
             index: "Flujo de trabajo de documentos",
             management: "Gestión de flujos de trabajo",
         },
+        leaveMessage: "Realizó cambios en este workflow que aún no se han guardado. Si sale ahora, se perderán todos los datos editados.",
+        finalize: "Finalizar",
+        saveStep: "Salvar etapa",
     },
     card: {
         userAssigned: "Responsable",

@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.Utils
+namespace WoopiAiHub.Domain.Utils
 {
     public static class HeaderNames
     {
@@ -9,5 +9,6 @@
         public const string ApiKey = "Api-Key";
         public const string XFunctionsKey = "x-functions-key";
         public const string KeyAccess = "Key-Access";
+        public const string ChatCompletionApyKey = "api-key";
     }
 }
