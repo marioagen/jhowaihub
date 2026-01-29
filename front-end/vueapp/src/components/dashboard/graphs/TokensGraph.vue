@@ -25,6 +25,7 @@
                     />
                 </div>
                 <div
+                    v-if="currentIA"
                     class="d-flex align-items-center gap-2"
                 >
                     <button
@@ -88,12 +89,7 @@
                         }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{
-                            (
-                                totalTokens *
-                                usageUnitTokens
-                            ).toFixed(5)
-                        }}
+                        {{ totalTokens * usageUnitTokens }}
                     </h4>
                 </div>
             </div>
@@ -178,10 +174,8 @@
         computed: {
             currentIA() {
                 return (
-                    this.IAList[this.currentIAIndex] || {
-                        name: "No IA selected",
-                        id: 0,
-                    }
+                    this.IAList[this.currentIAIndex] ??
+                    undefined
                 );
             },
             totalTokens() {
@@ -218,6 +212,8 @@
                                 this.currentIAIndex = 0;
                                 this.getTokensData();
                                 this.getTotalCost();
+                            } else {
+                                this.isLoaded = true;
                             }
                         }
                     }
