@@ -23,16 +23,15 @@
                 </div>
                 <span v-else>-</span>
             </template>
-            <template #cell-actions="{ data }">
-                
+            <template #cell-actions="{ data }">                
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" class="text-primary" @click="getWorkFlowListByDocumentId(data.row.id)" v-tooltip="$t('workflow.access')">
+                    <a :class="actionClass" class="text-primary" @click="redirectToIndex(data.row)" v-tooltip="$t('workflow.access')">
                         <LucideIcon icon="ExternalLink" />
                     </a>
-                    <a :class="actionClass" @click="getWorkFlowListByDocumentId(data.row.id)" v-tooltip="$t('common.edit')">
+                    <a :class="actionClass" @click="redirectToEdit(data.row)" v-tooltip="$t('common.edit')">
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-danger"  style="color: red;" @click="getWorkFlowListByDocumentId(data.row.id)" v-tooltip="$t('common.delete')">
+                    <a :class="actionClass" class="text-danger"  style="color: red;" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
