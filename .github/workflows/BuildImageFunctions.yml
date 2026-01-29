@@ -24,8 +24,8 @@ jobs:
 
                   echo "imageVersion=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-            - name: Build Image
-              run: docker image build -f back-end/WoopiAiHub.Functions/Dockerfile -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
+            # - name: Build Image
+              # run: docker image build -f back-end/WoopiAiHub.Functions/Dockerfile -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
 
             - name: Azure login
               run: az login --identity
@@ -33,5 +33,8 @@ jobs:
             - name: ACR login
               run: az acr login -n acrapplications
 
-            - name: Push Image
-              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}}
+            # - name: Push Image
+              # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}}
+
+            - name: Build Image
+              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} --platform linux -f back-end/WoopiAiHub.Functions/Dockerfile .
