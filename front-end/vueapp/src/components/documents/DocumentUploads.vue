@@ -105,7 +105,7 @@
                                                 <LucideIcon icon="Search" size="16" />
                                             </span>
                                             <input type="text" class="form-control form-control-sm"
-                                                :placeholder="$t('filters.searchWorkflow')" v-model="searchTerm" />
+                                                :placeholder="$t('documents.workflowListModal.searchPlaceholder')" v-model="searchTerm" />
                                         </div>
                                     </div>
                                     <div class="mb-1 d-flex gap-2 p-2 rounded">

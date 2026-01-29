@@ -7,5 +7,6 @@
         public string FunctionGetFileBaseAddress { get; set; }
         public string GraphApiBaseAddress { get; set; }
         public string MarketPlaceBaseAddress { get; set; }
+        public string AiGatewayApiBaseAddress { get; set; }
     }
 }
