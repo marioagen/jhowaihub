@@ -366,6 +366,19 @@ const spanish = {
         selectToDelete:
             "Seleccione al menos un tipo para realizar la exclusión.",
     },
+    managementQuizzes: {
+        title: "Gestión de cuestionarios, preguntas y tipos de documentos",
+        subtitle: "Gestionar cuestionarios, equipos y permisos del sistema",
+        quizzes: {
+            title: "Cuestionarios"
+        },
+        questions: {
+            title: "Preguntas"
+        },
+        types: {
+            title: "Tipos"
+        },
+    },
     management: {
         title: "Gestión de Usuarios y Equipos",
         subtitle:

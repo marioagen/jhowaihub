@@ -57,26 +57,14 @@
                     class="ms-1"
                 />
             </template>
-            <template #cell-actions="{ data }">
-                <DropdownComponent>
-                    <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="
-                                getWorkFlowListByDocumentId(
+            <template #cell-actions="{ data }">                
+                <ActionTableListComponent v-slot="{ actionClass }">
+                    <a :class="actionClass" class="text-primary" @click="getWorkFlowListByDocumentId(
                                     data.row.id
-                                )
-                            "
-                        >
-                            <LucideIcon icon="Search" />
-                            {{
-                                $t(
-                                    "documents.actions.consult"
-                                )
-                            }}
-                        </a>
-                    </li>
-                </DropdownComponent>
+                                )" v-tooltip="$t('documents.actions.consult')">
+                        <LucideIcon icon="Search" />
+                    </a>
+                </ActionTableListComponent>
             </template>
         </TableComponent>
     </div>
@@ -111,13 +99,13 @@
     import BadgeComponent from "@/components/global/BadgeComponent";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent";
     import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
-    import DropdownComponent from "@/components/global/DropdownComponent.vue";
+    import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
     import DocumentWorkflowListModal from "@/components/documents/DocumentWorkflowListModal.vue";
 
     export default {
         name: "DocumentsTable",
         components: {
-            DropdownComponent,
+            ActionTableListComponent,
             EmbeddingDocument,
             BadgeOutlinedComponent,
             BadgeComponent,

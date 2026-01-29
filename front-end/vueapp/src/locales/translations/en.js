@@ -352,6 +352,19 @@ const english = {
         selectToDelete:
             "Select at least one type to perform the exclusion.",
     },
+    managementQuizzes: {
+        title: "Quiz Management, Questions and Document Types",
+        subtitle: "Manage quizzes, teams and system permissions",
+        quizzes: {
+            title: "Quizzes"
+        },
+        questions: {
+            title: "Questions"
+        },
+        types: {
+            title: "Types"
+        },
+    },
     management: {
         title: "User and Team Management",
         subtitle:

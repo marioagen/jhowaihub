@@ -36,29 +36,15 @@
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
-            <template #cell-actions="{ data }">
-                <DropdownComponent>
-                    <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="openEditModal(data.row)"
-                        >
-                            <LucideIcon icon="SquarePen" />
-                            {{ $t("common.edit") }}
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="
-                                openConfirmation(data.row)
-                            "
-                        >
-                            <LucideIcon icon="Trash2" />
-                            {{ $t("common.delete") }}
-                        </a>
-                    </li>
-                </DropdownComponent>
+            <template #cell-actions="{ data }">                                
+                <ActionTableListComponent v-slot="{ actionClass }">
+                    <a :class="actionClass" @click="openEditModal(data.row)" v-tooltip="$t('common.edit')">
+                        <LucideIcon icon="SquarePen" />
+                    </a>
+                    <a :class="actionClass" class="text-danger" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                        <LucideIcon icon="Trash2" />
+                    </a>
+                </ActionTableListComponent>
             </template>
         </TableComponent>
     </div>
@@ -85,12 +71,12 @@
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import TypesModal from "@/components/types/TypesModal.vue";
-    import DropdownComponent from "@/components/global/DropdownComponent.vue";
+    import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
 
     export default {
         name: "TypesTable",
         components: {
-            DropdownComponent,
+            ActionTableListComponent,
             TableComponent,
             ConfirmModal,
             TypesModal,

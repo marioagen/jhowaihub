@@ -732,7 +732,7 @@ const portuguese = {
             analyzed:"Análisado",
             waitingforapproval:"Esperando Aprovação",
             approved:"Aprovado",
-            done:"FInalizado",
+            done:"Finalizado",
         }
     },
     card: {
