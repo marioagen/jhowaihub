@@ -30,8 +30,6 @@ namespace WoopiAiHub.Application.DependencyInjection
             else if (string.IsNullOrWhiteSpace(externalSettings.MarketPlaceBaseAddress))
                 throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.MarketPlaceBaseAddress)}");
 
-            else if (string.IsNullOrWhiteSpace(externalSettings.KeyGeneratorApiBaseAddress))
-                throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.KeyGeneratorApiBaseAddress)}");
 
 
             services.AddRefitClient<IEmbeddingsApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.IndexerApiBaseAddress));
@@ -39,7 +37,6 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddRefitClient<IFunctionFileRetriever>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.FunctionGetFileBaseAddress));
             services.AddRefitClient<IGraphApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.GraphApiBaseAddress));
             services.AddRefitClient<IMarketPlaceApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.MarketPlaceBaseAddress));
-            services.AddRefitClient<IKeyGeneratorApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.KeyGeneratorApiBaseAddress));
 
             services.Configure<EncryptionSettings>(configuration.GetSection("EncryptionSettings"));
             services.Configure<PromptSettings>(configuration.GetSection("PromptSettings"));

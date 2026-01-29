@@ -21,7 +21,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         private readonly AutoMocker _mocker;
         private readonly EmbeddingsHandler _handler;
         private readonly Mock<ITenantCacheServices> _mockTenantCacheServices;
-        private readonly Mock<IKeyGeneratorApi> _mockKeyGeneratorApi;
         private readonly Mock<IConfiguration> _mockConfig;
         private readonly MessageQueues _messageQueues;
 
@@ -32,7 +31,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var options = Options.Create(_messageQueues);
             _mocker.Use<IOptions<MessageQueues>>(options);
             _mockTenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
-            _mockKeyGeneratorApi = _mocker.GetMock<IKeyGeneratorApi>();
             _mockConfig = _mocker.GetMock<IConfiguration>();
             _handler = _mocker.CreateInstance<EmbeddingsHandler>();
         }
