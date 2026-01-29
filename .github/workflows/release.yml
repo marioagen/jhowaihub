@@ -81,6 +81,9 @@ jobs:
             - name: Build Image
               run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }} --platform linux -f back-end/WoopiAiHub.Functions/Dockerfile .
 
+
+              
+        
             - name: Release
               uses: softprops/action-gh-release@v1
               with:
