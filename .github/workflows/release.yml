@@ -36,32 +36,50 @@ jobs:
             - name: ACR login
               run: az acr login -n acrapplications
 
+            # - name: Build Back Image
+              # working-directory: ./back-end
+              # run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }} .
+
+            # - name: Push Back Image
+              # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }}
+
+            # - name: Build Front Image
+              # working-directory: ./front-end/vueapp
+              # run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }} .
+
+            # - name: Push Front Image
+              # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }}
+
+            # - name: Build File-Repository Image
+              # working-directory: ./external-api
+              # run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }} .
+
+            # - name: Push File-Repository Image
+              # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }}
+
+            # - name: Build Functions Image
+              # run: docker image build -f back-end/WoopiAiHub.Functions/Dockerfile -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }} .
+
+            # - name: Push Functions Image
+              # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }}
+
+
+
+
             - name: Build Back Image
               working-directory: ./back-end
-              run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }} .
-
-            - name: Push Back Image
-              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }}
+              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameBackend}}:${{ steps.tag_version.outputs.new_tag }} --platform linux -f Dockerfile .
 
             - name: Build Front Image
               working-directory: ./front-end/vueapp
-              run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }} .
-
-            - name: Push Front Image
-              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }}
+              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }} --platform linux -f Dockerfile .
 
             - name: Build File-Repository Image
               working-directory: ./external-api
-              run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }} .
+              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }} --platform linux -f Dockerfile .
 
-            - name: Push File-Repository Image
-              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFileRepository}}:${{ steps.tag_version.outputs.new_tag }}
-
-            - name: Build Functions Image
-              run: docker image build -f back-end/WoopiAiHub.Functions/Dockerfile -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }} .
-
-            - name: Push Functions Image
-              run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }}
+            - name: Build Image
+              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFunctions}}:${{ steps.tag_version.outputs.new_tag }} --platform linux -f back-end/WoopiAiHub.Functions/Dockerfile .
 
             - name: Release
               uses: softprops/action-gh-release@v1
