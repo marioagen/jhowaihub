@@ -23,7 +23,7 @@ jobs:
           echo "imageName=woopiai-hub-frontend" >> $GITHUB_OUTPUT
 
           echo "imageVersion=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-        
+
       # - name: Build Image
         # working-directory: ./front-end/vueapp
         # run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .

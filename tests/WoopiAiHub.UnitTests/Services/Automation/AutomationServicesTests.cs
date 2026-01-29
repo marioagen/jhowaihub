@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.AutoMock;
 using Newtonsoft.Json;
 using Refit;
@@ -567,7 +567,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var automationDto = AutomationFixture.FindValidautomationServicesDto();
             var stepTool = AutomationFixture.FindValidStepTool();
 
-            var aiProfile = new Domain.Models.Profile("IA", 1, DateTime.UtcNow);
+            var aiProfile = new Domain.Models.Profile("Avanço automático", 1, DateTime.UtcNow);
 
             var currentStep = new Domain.Models.Step(1, DateTime.UtcNow, 1, "Current Step", 1, aiProfile.Id, 1);
             currentStep.Profile = aiProfile;
