@@ -230,30 +230,20 @@ namespace WoopiAiHub.Application.Services
 
             foreach (var description in questionnaire.Questions.Select(u => u.Description))
             {
-                bool availableBalanceToQuestion = await ManagerConsumptionQuestions(headersDto.EmailCreator,
-                    headersDto.Tenant,
-                    false);
-                if (availableBalanceToQuestion)
-                {
-                    var customQueryRequestDto = await this.CreateCustomQueryRequestDto(description,
+                var customQueryRequestDto = await this.CreateCustomQueryRequestDto(description,
                         headersDto.Tenant,
                         headersDto.Language);
-                    var apikey = _config["IndexerApiKey"]!;
+                var apikey = _config["IndexerApiKey"]!;
 
-                    var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
-                        documentDb.ReferenceFile.ToString(),
-                        customQueryRequestDto,
-                        apikey);
+                var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
+                    documentDb.ReferenceFile.ToString(),
+                    customQueryRequestDto,
+                    apikey);
 
-                    await this.ProcessRequestCustomQuery(resultRequest,
-                        documentQuestionnaireDto.IdDocument,
-                        description,
-                        headersDto.EmailCreator);
-                }
-                else
-                {
-                    throw new HttpException(402, "Payment required, missing credits to execute action ");
-                }
+                await this.ProcessRequestCustomQuery(resultRequest,
+                    documentQuestionnaireDto.IdDocument,
+                    description,
+                    headersDto.EmailCreator);
             }
 
             return true;
@@ -344,33 +334,24 @@ namespace WoopiAiHub.Application.Services
         public async Task<string> InputDocument(DocumentInputDto documentInputDto,
             HeadersDto headersDto)
         {
-            bool availableBalanceToQuestion = await ManagerConsumptionQuestions(headersDto.EmailCreator,
+            var documentDb = _documentRepository.FindById(documentInputDto.Id);
+            var customQueryRequestDto = await this.CreateCustomQueryRequestDto(documentInputDto.Input,
                 headersDto.Tenant,
-                false);
+                headersDto.Language);
 
-            if (availableBalanceToQuestion)
-            {
-                var documentDb = _documentRepository.FindById(documentInputDto.Id);
-                var customQueryRequestDto = await this.CreateCustomQueryRequestDto(documentInputDto.Input,
-                    headersDto.Tenant,
-                    headersDto.Language);
+            var apikey = _config["IndexerApiKey"]!;
 
-                var apikey = _config["IndexerApiKey"]!;
+            var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
+                documentDb.ReferenceFile.ToString(),
+                customQueryRequestDto,
+                apikey);
 
-                var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
-                    documentDb.ReferenceFile.ToString(),
-                    customQueryRequestDto,
-                    apikey);
+            var textResponse = await this.ProcessRequestCustomQuery(resultRequest,
+                documentInputDto.Id,
+                documentInputDto.Input,
+                headersDto.EmailCreator);
 
-                var textResponse = await this.ProcessRequestCustomQuery(resultRequest,
-                    documentInputDto.Id,
-                    documentInputDto.Input,
-                    headersDto.EmailCreator);
-
-                return textResponse;
-            }
-
-            throw new AppException(ErrorCode.NoCreditsAvailable, "No Credits to send a Question", null);
+            return textResponse;
         }
 
         /// <summary>
@@ -560,30 +541,6 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.RefitApiError, "Error while sending question to Embeddings API", null);
             }
-        }
-
-        /// <summary>
-        /// Manager Questions to Embedder
-        /// </summary>
-        /// <param name="emailCreator"></param>
-        /// <param name="tenant"></param>
-        /// <returns>
-        /// True => User have credits to send Questions
-        /// False => User don't have credits do send Questions
-        /// </returns>
-        private async Task<bool> ManagerConsumptionQuestions(string emailCreator,
-            string tenant,
-            bool isKeyOrigin)
-        {
-            return await _marketPlaceApi.ManageConsumptionQuestions(
-                _config[ConfigKeyAccessName]!,
-                new ConsumptionQuestionsDto()
-                {
-                    Email = emailCreator,
-                    Tenant = tenant,
-                    IsKeyOrigin = isKeyOrigin
-                }
-            );
         }
 
         /// <summary>

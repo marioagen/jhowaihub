@@ -57,7 +57,6 @@ namespace WoopiAiHub.UnitTests.Services
             // Mock de IApiDependencies
             var apiDependenciesMock = new Mock<IApiDependencies>();
             apiDependenciesMock.SetupGet(x => x.MarketPlaceApi).Returns(_mocker.GetMock<IMarketPlaceApi>().Object);
-            apiDependenciesMock.SetupGet(x => x.KeyGeneratorApi).Returns(_mocker.GetMock<IKeyGeneratorApi>().Object);
             _mocker.Use(apiDependenciesMock.Object);
 
             var _serviceProviderMock = new Mock<IServiceProvider>();

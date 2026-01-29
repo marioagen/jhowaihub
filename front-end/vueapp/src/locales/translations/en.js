@@ -1,4 +1,4 @@
-﻿const english = {
+const english = {
     welcomeMsg: "Welcome",
     Admin: "Admin",
     transferListTitle: "Selection list",
@@ -352,6 +352,19 @@
         selectToDelete:
             "Select at least one type to perform the exclusion.",
     },
+    managementQuizzes: {
+        title: "Quiz Management, Questions and Document Types",
+        subtitle: "Manage quizzes, teams and system permissions",
+        quizzes: {
+            title: "Quizzes"
+        },
+        questions: {
+            title: "Questions"
+        },
+        types: {
+            title: "Types"
+        },
+    },
     management: {
         title: "User and Team Management",
         subtitle:
@@ -500,6 +513,7 @@
         subtitle: "Access your account to manage documents",
         invalid: "Invalid field",
         error: "Error",
+        warning: "Attention",
         loading: "Loading...",
         sso: "Login with Microsoft",
         authSSO: "Authenticated with Microsoft",
@@ -673,6 +687,16 @@
             index: "Document Workflow",
             management: "Workflow Management",
         },
+        leaveMessage: "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
+        finalize: "Finalize",
+        saveStep:"Save step",
+        statusList: {
+            awaitinganalysis:"Awaiting Analysis",
+            analyzed:"Analyzed",
+            waitingforapproval:"Waiting for Approval",
+            approved:"Approved",
+            done:"Done",
+        }
     },
     card: {
         userAssigned: "Assigned",
@@ -812,6 +836,10 @@
         importPredefined: "Import predefined",
         importError: "Error importing prompts",
         importSuccess: "Prompts imported successfully",
+        refinePrompt: "Refine Prompt",
+        refineSuccess: "Prompt refined successfully",
+        refineError: "Failed to refine prompt",
+        emptyPromptError: "The prompt field cannot be empty",
     },
     template: {
         title: "API Templates",

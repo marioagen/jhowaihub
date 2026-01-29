@@ -70,9 +70,9 @@ namespace WoopiAiHub.Api.Controllers
         {
             try
             {
-                string keyMongoAccess = await _tenantServices.InitializeTenant(tenant);
+                await _tenantServices.InitializeTenant(tenant);
 
-                return Ok(keyMongoAccess);
+                return Ok();
             }
             catch (Exception ex)
             {

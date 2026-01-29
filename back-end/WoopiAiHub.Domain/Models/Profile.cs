@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
     public class Profile : BaseEntity
     {
-        public static readonly string IAFileName = "IA";
+        public static readonly string IAFileName = "Avanço automático";
 
         [Column("Name", TypeName = "varchar(100)")]
         public string Name { get; private set; } = string.Empty;
