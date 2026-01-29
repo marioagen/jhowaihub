@@ -727,6 +727,13 @@ const portuguese = {
         leaveMessage: "Você fez alterações nesta esteira que ainda não foram salvas, se sair agora todos os dados editados serão perdidos",
         finalize: "Finalizar",
         saveStep: "Salvar etapa",
+        statusList: {
+            awaitinganalysis:"Esperando Análise",
+            analyzed:"Análisado",
+            waitingforapproval:"Esperando Aprovação",
+            approved:"Aprovado",
+            done:"Finalizado",
+        }
     },
     card: {
         userAssigned: "Responsável",

@@ -8,7 +8,7 @@
                     {{ truncateText(dataCard.name) }}
                     <div class="badge fr flex-shrink-1 mt-1"
                         :style="badgeStyle(dataStep.status.color)">
-                        {{ dataStep.status.name }}
+                        {{ $t("workflow.statusList." + dataStep.status.name.toLowerCase()) }}
                     </div>
                 </div>
                 <div class="mb-2">

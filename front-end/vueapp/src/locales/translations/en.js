@@ -352,6 +352,19 @@ const english = {
         selectToDelete:
             "Select at least one type to perform the exclusion.",
     },
+    managementQuizzes: {
+        title: "Quiz Management, Questions and Document Types",
+        subtitle: "Manage quizzes, teams and system permissions",
+        quizzes: {
+            title: "Quizzes"
+        },
+        questions: {
+            title: "Questions"
+        },
+        types: {
+            title: "Types"
+        },
+    },
     management: {
         title: "User and Team Management",
         subtitle:
@@ -677,6 +690,13 @@ const english = {
         leaveMessage: "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
         finalize: "Finalize",
         saveStep:"Save step",
+        statusList: {
+            awaitinganalysis:"Awaiting Analysis",
+            analyzed:"Analyzed",
+            waitingforapproval:"Waiting for Approval",
+            approved:"Approved",
+            done:"Done",
+        }
     },
     card: {
         userAssigned: "Assigned",

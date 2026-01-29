@@ -366,6 +366,19 @@ const spanish = {
         selectToDelete:
             "Seleccione al menos un tipo para realizar la exclusión.",
     },
+    managementQuizzes: {
+        title: "Gestión de cuestionarios, preguntas y tipos de documentos",
+        subtitle: "Gestionar cuestionarios, equipos y permisos del sistema",
+        quizzes: {
+            title: "Cuestionarios"
+        },
+        questions: {
+            title: "Preguntas"
+        },
+        types: {
+            title: "Tipos"
+        },
+    },
     management: {
         title: "Gestión de Usuarios y Equipos",
         subtitle:
@@ -704,6 +717,13 @@ const spanish = {
         leaveMessage: "Realizó cambios en este workflow que aún no se han guardado. Si sale ahora, se perderán todos los datos editados.",
         finalize: "Finalizar",
         saveStep: "Salvar etapa",
+        statusList: {
+            awaitinganalysis: "En espera de análisis",
+            analized: "Analizado",
+            waitingforapproval: "En espera de aprobación",
+            approved: "Aprobado",
+            done: "Listo",
+        }
     },
     card: {
         userAssigned: "Responsable",
