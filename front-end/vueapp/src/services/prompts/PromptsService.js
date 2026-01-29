@@ -98,6 +98,17 @@ export default {
         return api.post('/Prompt/Import', templateIds)
             .then(({ data }) => data)
             .catch((error) => ({ error }));
+    },
+    refinePrompt(promptText) {
+        return api.post('/Prompt/RefinePrompt', promptText)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                }
+            });
     }
 }
 

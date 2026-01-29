@@ -871,6 +871,10 @@ const portuguese = {
         importPredefined: "Importar pré-definidos",
         importError: "Erro ao importar prompts",
         importSuccess: "Prompts importados com sucesso",
+        refinePrompt: "Refinar Prompt",
+        refineSuccess: "Prompt refinado com sucesso",
+        refineError: "Falha ao refinar prompt",
+        emptyPromptError: "O campo de prompt não pode estar vazio",
     },
     template: {
         title: "Templates de API",

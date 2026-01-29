@@ -9,8 +9,10 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
+using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
@@ -32,19 +34,27 @@ namespace WoopiAiHub.Application.Services
         private readonly IFunctionFileRetriever _functionFileRetriever;
         private readonly IConfiguration _config;
         private readonly PromptSettings _promptSettings;
+        private readonly ITenantCacheServices _tenantCacheServices;
+        private readonly IChatCompletionApi _chatCompletionApi;
+        private readonly ChatCompletionSettings _chatCompletionSettings;
+        private readonly IUsageDailyServices _usageDailyServices;
 
         public PromptServices(IUnitOfWork unitOfWork,
-                              IPromptRepository promptRepository,
-                              IValidatePrompt validatePrompt,
-                              IUserServices userServices,
-                              IStepToolExecutionRepository stepToolExecutionRepository,
-                              IStepToolOutputRepository stepToolOutputRepository,
-                              IHubNotifier hubNotifier,
-                              IDocumentHistoryRepository documentHistoryRepository,
-                              IWorkflowRepository workflowRepository,
-                              IFunctionFileRetriever functionFileRetriever,
-                              IOptions<PromptSettings> promptSettingsOptions,
-                              IConfiguration config)
+            IPromptRepository promptRepository,
+            IValidatePrompt validatePrompt,
+            IUserServices userServices,
+            IStepToolExecutionRepository stepToolExecutionRepository,
+            IStepToolOutputRepository stepToolOutputRepository,
+            IHubNotifier hubNotifier,
+            IDocumentHistoryRepository documentHistoryRepository,
+            IWorkflowRepository workflowRepository,
+            IFunctionFileRetriever functionFileRetriever,
+            IOptions<PromptSettings> promptSettingsOptions,
+            IConfiguration config,
+            ITenantCacheServices tenantCacheServices,
+            IChatCompletionApi chatCompletionApi,
+            IOptions<ChatCompletionSettings> chatCompletionSettings,
+            IUsageDailyServices usageDailyServices)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
@@ -54,10 +64,14 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _hubNotifier = hubNotifier;
             _documentHistoryRepository = documentHistoryRepository;
-            _workflowRepository=workflowRepository;
+            _workflowRepository = workflowRepository;
             _functionFileRetriever = functionFileRetriever;
             _config = config;
             _promptSettings = promptSettingsOptions.Value;
+            _tenantCacheServices = tenantCacheServices;
+            _chatCompletionApi = chatCompletionApi;
+            _chatCompletionSettings = chatCompletionSettings.Value;
+            _usageDailyServices = usageDailyServices;
         }
 
 
@@ -103,8 +117,8 @@ namespace WoopiAiHub.Application.Services
             var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
 
             var response = await _functionFileRetriever.Get(_promptSettings.TemplateFileName,
-                                                            functionApiKeyAuth!,
-                                                            _promptSettings.Folder);
+                functionApiKeyAuth!,
+                _promptSettings.Folder);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -158,8 +172,8 @@ namespace WoopiAiHub.Application.Services
             }).ToList();
 
             return ImportPrompts(importedPrompts, email);
-        }        
-        
+        }
+
         /// <summary>
         /// Import prompts from templates
         /// </summary>
@@ -211,6 +225,7 @@ namespace WoopiAiHub.Application.Services
             {
                 return false;
             }
+
             var createPromptResult = _promptRepository.CreateUniquePrompt(prompt);
             if (!createPromptResult)
             {
@@ -229,7 +244,7 @@ namespace WoopiAiHub.Application.Services
         public bool Update(PromptUpdateDto promptUpdateDto, string emailCreator)
         {
             _validatePrompt.ValidateOwnership(promptUpdateDto.Id,
-                                              emailCreator);
+                emailCreator);
 
             var promptDto = _promptRepository.FindById(promptUpdateDto.Id);
             if (promptDto == null)
@@ -258,7 +273,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         public PagedResultDto<PromptDto> FindByIdUserPaged(PagedDataDto pagedDataDto,
-                                                           string emailCreator)
+            string emailCreator)
         {
             var idUser = _userServices.FindIdByEmail(emailCreator);
             var query = _promptRepository.FindByIdUser(idUser);
@@ -269,9 +284,9 @@ namespace WoopiAiHub.Application.Services
             if (idUser == Guid.Empty)
                 throw new ArgumentException("Invalid user id");
 
-            query = pagedDataDto.IsAscending ?
-                query.OrderBy(nameof(Prompt.Name)) :
-                query.OrderBy(nameof(Prompt.Name) + " descending");
+            query = pagedDataDto.IsAscending
+                ? query.OrderBy(nameof(Prompt.Name))
+                : query.OrderBy(nameof(Prompt.Name) + " descending");
 
             var result = PromptPagination(query, new PagedDataDto());
 
@@ -285,16 +300,16 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         public PagedResultDto<PromptDto> FindAllPaged(PagedDataDto pagedDataDto,
-                                                      string emailCreator)
+            string emailCreator)
         {
             var idUser = _userServices.FindIdByEmail(emailCreator);
             if (pagedDataDto.Page > 0)
             {
                 var query = _promptRepository.FindAllWithOwnerStatus(idUser);
 
-                query = pagedDataDto.IsAscending ?
-                    query.OrderBy(nameof(Prompt.Name)) :
-                    query.OrderBy(nameof(Prompt.Name) + " descending");
+                query = pagedDataDto.IsAscending
+                    ? query.OrderBy(nameof(Prompt.Name))
+                    : query.OrderBy(nameof(Prompt.Name) + " descending");
 
                 var result = PromptPagination(query, pagedDataDto);
                 return result;
@@ -317,6 +332,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new ArgumentException("Delete prompt failed");
             }
+
             return result;
         }
 
@@ -327,7 +343,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="pagedDataDto"></param>
         /// <returns></returns>
         private static PagedResultDto<PromptDto> PromptPagination(IQueryable<PromptDto> query,
-                                                                  PagedDataDto pagedDataDto)
+            PagedDataDto pagedDataDto)
         {
             int pageCount, currentPage = 0;
 
@@ -352,15 +368,12 @@ namespace WoopiAiHub.Application.Services
                 pageCount = (int)Math.Ceiling((double)count / pagedDataDto.PageSize);
                 currentPage = pagedDataDto.Page <= pageCount ? pagedDataDto.Page : 1;
                 query = query.Skip((currentPage - 1) * pagedDataDto.PageSize)
-                             .Take(pagedDataDto.PageSize);
+                    .Take(pagedDataDto.PageSize);
             }
 
             return new PagedResultDto<PromptDto>()
             {
-                Items = query,
-                CurrentPage = currentPage,
-                TotalPages = pageCount,
-                Count = count
+                Items = query, CurrentPage = currentPage, TotalPages = pageCount, Count = count
             };
         }
 
@@ -377,6 +390,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new ArgumentException("Prompt not found");
             }
+
             return promptDto;
         }
 
@@ -453,17 +467,17 @@ namespace WoopiAiHub.Application.Services
         {
             var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(chatCompletionResponseDto.Data.ToString());
             var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
-                                                                                              dataDto.CardId);
+                dataDto.CardId);
             if (execution == null)
             {
                 throw new ArgumentException("StepToolExecution not found");
             }
 
-            var documentHistory = new DocumentHistory(execution.Card!.DocumentId, 
-                                                      "Prompt", 
-                                                      chatCompletionResponseDto.Choices[0].Message.Content,
-                                                      0, 
-                                                      DateTime.Now);
+            var documentHistory = new DocumentHistory(execution.Card!.DocumentId,
+                "Prompt",
+                chatCompletionResponseDto.Choices[0].Message.Content,
+                0,
+                DateTime.Now);
 
             _unitOfWork.BeginTransaction();
             try
@@ -478,7 +492,6 @@ namespace WoopiAiHub.Application.Services
                 _unitOfWork.Rollback();
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
-            
         }
 
         /// <summary>
@@ -490,7 +503,7 @@ namespace WoopiAiHub.Application.Services
         private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
         {
             var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId,
-                                                                                        execution.CardId);
+                execution.CardId);
             var percent = ((double)execution.StepTool.Order / count) * 100;
 
             execution.UpdateStatusExecution(StatusExecution.Ready);
@@ -498,7 +511,8 @@ namespace WoopiAiHub.Application.Services
 
             var tool = await _workflowRepository.FindToolByStepToolId(execution.StepTool.Id);
 
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, tool != null ? tool.Name : string.Empty);
+            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId,
+                tool != null ? tool.Name : string.Empty);
         }
 
         /// <summary>
@@ -518,6 +532,49 @@ namespace WoopiAiHub.Application.Services
             );
 
             await _stepToolOutputRepository.CreateAsync(output);
+        }
+
+        /// <summary>
+        /// Refine prompt using AI Gateway
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <param name="tenantId"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<string> AiPromptRefinement(string prompt, string tenantId, string email)
+        {
+            var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenantId);
+            if (tenantInfo!.AiGatewayApplicationId.HasValue is false || string.IsNullOrEmpty(tenantInfo.AiGatewayKey))
+            {
+                throw new ArgumentException("AiGateway ApplicationId not found");
+            }
+
+            var refinementPrompt = _config["PromptSettings:RefinementPrompt"];
+
+            if (string.IsNullOrEmpty(refinementPrompt))
+            {
+                throw new ArgumentException("Refinement prompt template not found");
+            }
+
+            var fullPrompt = refinementPrompt.Replace("{{Regra de negócio}}", prompt);
+
+            var chatCompletionDto = new ChatCompletionDto
+            {
+                Temperature = _chatCompletionSettings.Temperature,
+                MaxTokens = _chatCompletionSettings.MaxTokens,
+                Messages = new List<ChatMessageDto> { new ChatMessageDto { Role = "system", Content = fullPrompt } }
+            };
+            var response = await _chatCompletionApi.GetChatCompletion(
+                tenantInfo.AiGatewayApplicationId.Value.ToString(),
+                _chatCompletionSettings.Model,
+                _chatCompletionSettings.ApiVersion,
+                tenantInfo.AiGatewayKey,
+                chatCompletionDto);
+
+            var tokens = response.Usage?.TotalTokens ?? 0;
+            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model);
+
+            return response.Choices[0].Message.Content;
         }
     }
 }
