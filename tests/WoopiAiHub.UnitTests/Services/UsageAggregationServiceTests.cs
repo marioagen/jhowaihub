@@ -12,6 +12,8 @@ using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository.Context;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -28,12 +30,12 @@ namespace WoopiAiHub.UnitTests.Services
             // Setup configuration
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(c => c["KeyAccess"]).Returns("test-key");
-            
+
             // Mock GetConnectionString
             var mockConnectionSection = new Mock<IConfigurationSection>();
             mockConnectionSection.Setup(s => s["TemplateConnection"]).Returns("Server=localhost;Database=___NEWDB___;");
             configMock.Setup(c => c.GetSection("ConnectionStrings")).Returns(mockConnectionSection.Object);
-            
+
             _mocker.Use(configMock.Object);
 
             _service = _mocker.CreateInstance<UsageAggregationService>();
@@ -76,7 +78,7 @@ namespace WoopiAiHub.UnitTests.Services
             var mockHttpAccessor = new Mock<IHttpContextAccessor>();
             var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
             var mockUsageMonthRepo = new Mock<IUsageMonthRepository>();
-            
+
             // Mock IConfiguration in the scope
             var mockScopeConfig = new Mock<IConfiguration>();
             var mockConnectionSection = new Mock<IConfigurationSection>();
@@ -89,7 +91,16 @@ namespace WoopiAiHub.UnitTests.Services
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository))).Returns(mockUsageMonthRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository))).Returns(mockUsageMonthRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IConfiguration))).Returns(mockScopeConfig.Object);
+
+            // Mock ApplicationDbContext
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(mockHttpAccessor.Object, options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
 
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
             _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
@@ -111,12 +122,12 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(c => c["KeyAccess"]).Returns((string)null!);
-            
+
             // Mock GetConnectionString
             var mockConnectionSection = new Mock<IConfigurationSection>();
             mockConnectionSection.Setup(s => s["TemplateConnection"]).Returns("Server=localhost;Database=___NEWDB___;");
             configMock.Setup(c => c.GetSection("ConnectionStrings")).Returns(mockConnectionSection.Object);
-            
+
             _mocker.Use(configMock.Object);
 
             var service = _mocker.CreateInstance<UsageAggregationService>();
@@ -150,7 +161,7 @@ namespace WoopiAiHub.UnitTests.Services
             var mockHttpAccessor = new Mock<IHttpContextAccessor>();
             var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
             var mockUsageMonthRepo = new Mock<IUsageMonthRepository>();
-            
+
             // Mock IConfiguration in the scope
             var mockScopeConfig = new Mock<IConfiguration>();
             var mockConnectionSection = new Mock<IConfigurationSection>();
@@ -163,7 +174,16 @@ namespace WoopiAiHub.UnitTests.Services
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository))).Returns(mockUsageMonthRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository))).Returns(mockUsageMonthRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IConfiguration))).Returns(mockScopeConfig.Object);
+
+            // Mock ApplicationDbContext
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(mockHttpAccessor.Object, options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
 
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
             _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
