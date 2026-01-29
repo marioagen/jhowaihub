@@ -87,7 +87,6 @@ namespace WoopiAiHub.Repository
         /// <returns>A task that represents the asynchronous operation. The task result contains the total usage as an integer.</returns>
         public async Task<int> FindTotalUsageAsync(DateTime periodStart, DateTime periodEnd)
         {
-            // Query for records where ModelEmbeddingId is NULL (join only on UsageTypeId)
             var totalWithoutModelEmbedding = await _context.UsageMonths
                 .Where(um => um.Created >= periodStart && um.Created < periodEnd && um.ModelEmbeddingId == null)
                 .SelectMany(
@@ -97,7 +96,6 @@ namespace WoopiAiHub.Repository
                 )
                 .SumAsync();
 
-            // Query for records where ModelEmbeddingId is NOT NULL (join on both UsageTypeId and ModelEmbeddingId)
             var totalWithModelEmbedding = await _context.UsageMonths
                 .Where(um => um.Created >= periodStart && um.Created < periodEnd && um.ModelEmbeddingId != null)
                 .SelectMany(
