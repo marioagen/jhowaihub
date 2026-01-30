@@ -1025,6 +1025,9 @@ const english = {
                 "Check our complete documentation to explore all the potential of AI HUB.",
             button: "Access docs",
         },
+        whatsApp: {
+            support: "Contact support",
+        }
     },
     permissions: {
         groups: {
