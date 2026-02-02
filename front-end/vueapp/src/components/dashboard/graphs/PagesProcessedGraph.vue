@@ -46,11 +46,7 @@
                         }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{
-                            (
-                                totalPages * usageUnitPages
-                            )
-                        }}
+                        {{ totalPages * usageUnitPages }}
                     </h4>
                 </div>
             </div>
