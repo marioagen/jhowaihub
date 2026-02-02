@@ -114,12 +114,14 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("DeleteByIds", "Fail")]
         public async Task DeleteByIds_ReturnsFalse_WhenIsaAnalystProfile()
         {
+            // Arrange
             var ids = new List<int> { 1 };
-
             var profile = new Profile("Analyst", 1, DateTime.Now);
+            
+            // Act
             _profileRepoMock.Setup(r => r.FindByIds(ids)).Returns(new List<Profile> { profile });
 
-
+            // Assert
             await Assert.ThrowsAsync<AppException>(() => _profileServices.DeleteByIds(ids));
         }
 

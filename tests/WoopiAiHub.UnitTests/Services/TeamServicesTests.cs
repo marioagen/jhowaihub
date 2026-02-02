@@ -263,9 +263,11 @@ namespace WoopiAiHub.UnitTests.Services
                 new Team("Analyst", 999, DateTime.Now)
             };
 
+            // Act
             _teamRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(teams);
             _teamRepositoryMock.Setup(r => r.DeleteByIds(ids)).Returns(false);
 
+            // Assert
             Assert.Throws<AppException>(() => _service.DeleteByIds(ids));
         }
 
