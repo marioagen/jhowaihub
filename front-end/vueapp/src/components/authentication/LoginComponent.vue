@@ -159,14 +159,7 @@ export default {
                 .then((response) => {
 
                     if (response?.tenants?.length > 0) {
-                        if(response?.tenants?.length === 1){
-                            this.continueLogin(
-                                response.tenants.find(x => true).name,
-                                this.typeLogin
-                            );
-                            return;
-                        }
-
+                        
                         this.tenants = response.tenants;
                         this.$refs.TenantModal.open();
                         return;
@@ -329,10 +322,10 @@ export default {
                     const message = exists ? this.$t(labelKey) : this.$t('unexpectedError');
 
                     this.$notify({
-                        title: "login.error",
+                        title: error.response?.data?.errorCode == 11 ? 'login.warning' : 'login.error',
                         message,
-                        variant: 'danger',
-                        icon: 'CircleX',
+                        variant: error.response?.data?.errorCode == 11 ? 'warning' : 'danger',
+                        icon: error.response?.data?.errorCode == 11 ? 'CircleAlert' :'CircleX',
                         duration: 6000
                     });
                 })
