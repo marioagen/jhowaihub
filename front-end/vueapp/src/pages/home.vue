@@ -105,12 +105,13 @@
             </div>
         </div>
     </main>
+  <WhatsAppComponent/>
 </template>
 
 <script>
 import DashboardServices from '@/services/dashboard/DashboardServices';
 import store from "@/store";
-
+import WhatsAppComponent from '../components/global/WhatsAppComponent';
 export default {
     name: "HomePage",
     data() {
@@ -124,6 +125,9 @@ export default {
             },
             plan: ""
         };
+    },
+    components: {
+        WhatsAppComponent,
     },
     methods: {
         getPlan() {
