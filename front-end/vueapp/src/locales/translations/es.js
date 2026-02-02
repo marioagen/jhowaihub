@@ -1064,6 +1064,9 @@ const spanish = {
                 "Consulte nuestra documentación completa para explorar todo el potencial de AI HUB.",
             button: "Acceder docs",
         },
+        whatsApp: {
+            support: "Contacte con el soporte",
+        }
     },
     permissions: {
         groups: {
