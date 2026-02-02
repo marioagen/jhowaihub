@@ -1,18 +1,27 @@
 <template>
-    <a class="whatsapp-link"href="https://api.whatsapp.com/send/?phone=%2B5511918020002&text&type=phone_number&app_absent=0" target="_blank"
-      v-tooltip.up="$t('home.whatsApp.support')">
-      <i class="fab fa-whatsapp whatsapp-icon"></i>
+    <a
+        class="whatsapp-link"
+        :href="whatsappLink"
+        target="_blank"
+        v-tooltip.up="$t('home.whatsApp.support')"
+    >
+        <i class="fab fa-whatsapp whatsapp-icon"></i>
     </a>
 </template>
 <script>
-export default {
-  name: "WhatsAppComponent",
-  data() {
-    return {
-     
+    export default {
+        name: "WhatsAppComponent",
+        data() {
+            return {};
+        },
+        computed: {
+            whatsappLink() {
+                return (
+                    ENV_CONFIG?.VUE_APP_WHATSAPP_LINK || ""
+                );
+            },
+        },
     };
-  },
-};
 </script>
 <style scoped>
     .whatsapp-link {
@@ -22,7 +31,7 @@ export default {
         bottom: 40px;
         right: 40px;
         background-color: #25d366;
-        color: #FFF;
+        color: #fff;
         border-radius: 50px;
         text-align: center;
         font-size: 30px;

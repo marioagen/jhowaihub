@@ -9,6 +9,7 @@ const ENV_CONFIG = (() => {
         VUE_APP_HOME_VIDEO_URL: "",
         VUE_APP_HOME_GUIDE_URL: "",
         VUE_APP_HOME_DOCS_URL: "",
+        VUE_APP_WHATSAPP_LINK: "https://api.whatsapp.com/send/?phone=%2B5511918020002&text&type=phone_number&app_absent=0",
     };
 })();
 
