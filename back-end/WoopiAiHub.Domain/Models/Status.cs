@@ -1,4 +1,3 @@
-﻿using Microsoft.Extensions.Hosting;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
@@ -7,6 +6,10 @@ namespace WoopiAiHub.Domain.Models
     {
         [Column("Name", TypeName = "varchar(50)")]
         public string Name { get; private set; } = string.Empty;
+
+        [Column("Label", TypeName = "varchar(100)")]
+        public string? Label { get; private set; }
+
         [Column("Color", TypeName = "varchar(7)")]
         public string Color { get; private set; } = string.Empty;
 
