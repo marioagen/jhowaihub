@@ -228,12 +228,24 @@
         },
         computed: {
             totalWorkflows() {
+                if (
+                    !this.isLoadedWorkflows ||
+                    !this.graph2.series[0]?.data?.length
+                ) {
+                    return 0;
+                }
                 return this.graph2.series[0].data.reduce(
                     (a, b) => a + b,
                     0
                 );
             },
             totalWorkflowsAutomatic() {
+                if (
+                    !this.isLoadedAutomation ||
+                    !this.graph.series[0]?.data?.length
+                ) {
+                    return 0;
+                }
                 return this.graph.series[0].data.reduce(
                     (a, b) => a + b,
                     0
@@ -303,8 +315,16 @@
                     })
                     .finally(() => {
                         this.isLoadedWorkflows = true;
-                        this.setTotalExecution();
+                        this.checkAndEmitTotal();
                     });
+            },
+            checkAndEmitTotal() {
+                if (
+                    this.isLoadedWorkflows &&
+                    this.isLoadedAutomation
+                ) {
+                    this.setTotalExecution();
+                }
             },
             setTotalExecution() {
                 let totalExecution =
@@ -312,6 +332,7 @@
                         this.totalWorkflows +
                     this.usageUnitWorkflowAutomatic *
                         this.totalWorkflowsAutomatic;
+
                 this.$emit(
                     "setTotalExecution",
                     totalExecution
@@ -349,6 +370,7 @@
                     })
                     .finally(() => {
                         this.isLoadedAutomation = true;
+                        this.checkAndEmitTotal();
                     });
             },
             updateGraph(start, end) {
