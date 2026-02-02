@@ -1080,6 +1080,9 @@ const portuguese = {
                 "Consulte nossa documentação completa para explorar todo o potencial do AI HUB.",
             button: "Acessar docs",
         },
+        whatsApp: {
+            support: "Fale com o suporte",
+        }
     },
     permissions: {
         groups: {

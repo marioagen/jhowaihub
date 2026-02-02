@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -31,14 +31,15 @@ namespace WoopiAiHub.Repository
         public async Task<ICollection<StatusDto>> FindAll()
         {
             return await _context.Status
-                                 .AsNoTracking()
-                                 .Select(status => new StatusDto
-                                 {
-                                    Id = status.Id,
-                                    Name = status.Name,
-                                    Color = status.Color,
-                                 })
-                                 .ToListAsync();
+                .AsNoTracking()
+                .Select(status => new StatusDto
+                {
+                   Id = status.Id,
+                   Name = status.Name,
+                   Label = status.Label,
+                   Color = status.Color,
+                })
+                .ToListAsync();
         }
     }
 }
