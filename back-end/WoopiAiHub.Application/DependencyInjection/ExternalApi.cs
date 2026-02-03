@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 using WoopiAiHub.Domain.Interfaces.Refit;
@@ -29,7 +29,6 @@ namespace WoopiAiHub.Application.DependencyInjection
 
             else if (string.IsNullOrWhiteSpace(externalSettings.MarketPlaceBaseAddress))
                 throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.MarketPlaceBaseAddress)}");
-
 
             else if (string.IsNullOrWhiteSpace(externalSettings.AiGatewayApiBaseAddress))
                 throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.AiGatewayApiBaseAddress)}");
