@@ -40,7 +40,8 @@ export default {
                 return true;
             })
             .catch((e) => {
-                const message = e?.response?.data?.message || "Erro desconhecido";
+                console.log(e);
+                const message = e?.response?.data?.detail || "Erro desconhecido";
                 return {
                     error: message,
                 };
