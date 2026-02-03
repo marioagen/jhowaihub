@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
@@ -551,7 +551,7 @@ namespace WoopiAiHub.UnitTests.Services
             typeof(Step).GetProperty("Workflow")!.SetValue(step2, workflow);
             typeof(Workflow).GetProperty("Steps")!.SetValue(workflow, new List<Step> { step1, step2 });
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
+            var card = new Card(cardId, DateTime.Now, step2.Id, document.Id, "Card Test", 1, null);
             typeof(Card).GetProperty("Step")!.SetValue(card, step1);
             typeof(Card).GetProperty("Document")!.SetValue(card, document);
 
