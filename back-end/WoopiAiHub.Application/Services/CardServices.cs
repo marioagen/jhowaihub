@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -151,7 +151,7 @@ namespace WoopiAiHub.Application.Services
             var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
 
             var steps = BuildStepsFromWorkflow(workflow, card);
-            var lastProcessedStepId = GetLastProcessedStepId(steps);
+            var lastProcessedStepId = card.StepId.ToString();
 
             return new DocumentAnalyzeStepsDto
             {
@@ -359,18 +359,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Get the last proccesd step id from stop
-        /// </summary>
-        /// <param name="steps"></param>
-        /// <returns></returns>
-        private string GetLastProcessedStepId(List<DocumentStepDto> steps)
-        {
-            if (!steps.Any()) return string.Empty;
-
-            return steps.LastOrDefault()?.Id ?? string.Empty;
         }
 
         /// <summary>
