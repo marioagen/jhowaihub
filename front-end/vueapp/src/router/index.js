@@ -386,6 +386,39 @@ const routes = [
         beforeEnter: authenticate,
         props: true,
     },
+    {
+        path: "/templates",
+        name: "Templates",
+        component: TemplatePage,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates/new",
+        name: "TemplateNew",
+        component: TemplateDetail,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates/edit/:id",
+        name: "TemplateEdit",
+        component: TemplateDetail,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
 ];
 
 const router = createRouter({

@@ -362,6 +362,11 @@
             </div>
         </div>
     </main>
+    <TemplateModal
+        id="templateModal"
+        ref="TemplateDialog"
+        @confirm="deleteTemplate"
+    />
 </template>
 <script>
     import VueFlowComponent from "@/components/flow/VueFlowComponent.vue";
@@ -371,6 +376,7 @@
     import WorkflowService from "@/services/workflow/WorkflowService";
     import LogService from "@/services/log/logService";
     import ToolType from "@/constants/ToolType";
+    import TemplateModal from "@/components/templates/TemplateModal.vue";
 
     export default {
         name: "FlowPage",
@@ -440,6 +446,7 @@
         components: {
             VueFlowComponent,
             DependencySelector,
+            TemplateModal,
         },
         methods: {
             redirectToIndex() {
@@ -565,6 +572,9 @@
                 }
             },
             openNodeConfig(nodes, selectedNode) {
+                console.log(nodes);
+                console.log(selectedNode);
+
                 this.nodes = nodes;
                 this.nodeFlow = selectedNode;
                 this.parameters =
@@ -575,6 +585,11 @@
 
                 this.selectedDependencies =
                     selectedNode.data.dependencies;
+
+                if (this.isTargetTool(ToolType.API)) {
+                    this.$refs.TemplateDialog.open();
+                    return;
+                }
 
                 if (this.isTargetTool(ToolType.N8N)) {
                     this.loadingWebhooks = true;

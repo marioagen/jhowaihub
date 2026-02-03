@@ -547,8 +547,9 @@ const portuguese = {
             "Não foi possível validar sua autenticação. Por favor, faça login novamente.",
         selectTenant: "Selecione o tenant para continuar",
         continue: "Continuar",
-        tenantDatabaseNotReady: "O ambiente está sendo preparado. Por favor, tente novamente em alguns minutos.",
-        tenantNotFound: "Tenant não encontrado."
+        tenantDatabaseNotReady:
+            "O ambiente está sendo preparado. Por favor, tente novamente em alguns minutos.",
+        tenantNotFound: "Tenant não encontrado.",
     },
     validation: {
         required: "Campo obrigatório",
@@ -724,16 +725,17 @@ const portuguese = {
             management:
                 "Gestão de Esteira de Processamentos",
         },
-        leaveMessage: "Você fez alterações nesta esteira que ainda não foram salvas, se sair agora todos os dados editados serão perdidos",
+        leaveMessage:
+            "Você fez alterações nesta esteira que ainda não foram salvas, se sair agora todos os dados editados serão perdidos",
         finalize: "Finalizar",
         saveStep: "Salvar etapa",
         statusList: {
-            awaitinganalysis:"Esperando Análise",
-            analyzed:"Análisado",
-            waitingforapproval:"Esperando Aprovação",
-            approved:"Aprovado",
-            done:"Finalizado",
-        }
+            awaitinganalysis: "Esperando Análise",
+            analyzed: "Análisado",
+            waitingforapproval: "Esperando Aprovação",
+            approved: "Aprovado",
+            done: "Finalizado",
+        },
     },
     card: {
         userAssigned: "Responsável",
@@ -881,7 +883,8 @@ const portuguese = {
         refinePrompt: "Refinar Prompt",
         refineSuccess: "Prompt refinado com sucesso",
         refineError: "Falha ao refinar prompt",
-        emptyPromptError: "O campo de prompt não pode estar vazio",
+        emptyPromptError:
+            "O campo de prompt não pode estar vazio",
     },
     template: {
         title: "Templates de API",
@@ -941,7 +944,16 @@ const portuguese = {
         url: "URL",
         unselected: "Selecione um template",
         keyPlaceholder: "Key (o valor será {{nomeKey}})",
+        valuePlaceholder: "Digite o valor",
         invalidJsonFormat: "Formato JSON inválido",
+        selectTemplate: "Selecione um Template",
+        selectTemplatePlaceholder: "Escolha um template de API",
+        fillVariables: "Preencher Variáveis",
+        enterValue: "Digite o valor para",
+        loadError: "Erro ao carregar template",
+        modal: {
+            title: "Configurar Template de API",
+        },
     },
     analyze: {
         title: "Análise de Documentos",
@@ -1082,7 +1094,7 @@ const portuguese = {
         },
         whatsApp: {
             support: "Fale com o suporte",
-        }
+        },
     },
     permissions: {
         groups: {

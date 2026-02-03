@@ -354,15 +354,16 @@ const english = {
     },
     managementQuizzes: {
         title: "Quiz Management, Questions and Document Types",
-        subtitle: "Manage quizzes, teams and system permissions",
+        subtitle:
+            "Manage quizzes, teams and system permissions",
         quizzes: {
-            title: "Quizzes"
+            title: "Quizzes",
         },
         questions: {
-            title: "Questions"
+            title: "Questions",
         },
         types: {
-            title: "Types"
+            title: "Types",
         },
     },
     management: {
@@ -527,7 +528,8 @@ const english = {
             "Could not validate your authentication. Please log in again.",
         selectTenant: "Select the tenant to continue",
         continue: "Continue",
-        tenantDatabaseNotReady: "The environment is being prepared. Please try again in a few minutes.",
+        tenantDatabaseNotReady:
+            "The environment is being prepared. Please try again in a few minutes.",
         tenantNotFound: "Tenant not found.",
     },
     validation: {
@@ -687,16 +689,17 @@ const english = {
             index: "Document Workflow",
             management: "Workflow Management",
         },
-        leaveMessage: "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
+        leaveMessage:
+            "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
         finalize: "Finalize",
-        saveStep:"Save step",
+        saveStep: "Save step",
         statusList: {
-            awaitinganalysis:"Awaiting Analysis",
-            analyzed:"Analyzed",
-            waitingforapproval:"Waiting for Approval",
-            approved:"Approved",
-            done:"Done",
-        }
+            awaitinganalysis: "Awaiting Analysis",
+            analyzed: "Analyzed",
+            waitingforapproval: "Waiting for Approval",
+            approved: "Approved",
+            done: "Done",
+        },
     },
     card: {
         userAssigned: "Assigned",
@@ -839,7 +842,8 @@ const english = {
         refinePrompt: "Refine Prompt",
         refineSuccess: "Prompt refined successfully",
         refineError: "Failed to refine prompt",
-        emptyPromptError: "The prompt field cannot be empty",
+        emptyPromptError:
+            "The prompt field cannot be empty",
     },
     template: {
         title: "API Templates",
@@ -888,7 +892,16 @@ const english = {
         removeError: "Error removing template",
         unselected: "Select a template",
         keyPlaceholder: "Key (value will be {{keyName}})",
+        valuePlaceholder: "Enter value",
         invalidJsonFormat: "Invalid JSON format",
+        selectTemplate: "Select a Template",
+        selectTemplatePlaceholder: "Choose an API template",
+        fillVariables: "Fill Variables",
+        enterValue: "Enter value for",
+        loadError: "Error loading template",
+        modal: {
+            title: "Configure API Template",
+        },
     },
     analyze: {
         title: "Analyze Document",
@@ -1027,7 +1040,7 @@ const english = {
         },
         whatsApp: {
             support: "Contact support",
-        }
+        },
     },
     permissions: {
         groups: {

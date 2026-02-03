@@ -204,6 +204,16 @@
                         },
                         labelKey: "pages.prompts",
                     },
+                    {
+                        permission: "Templates",
+                        activeKey: "Templates",
+                        to: "/templates",
+                        icon: {
+                            name: "Zap",
+                            color: "#2f80ed",
+                        },
+                        labelKey: "pages.templates",
+                    },
                 ],
             };
         },

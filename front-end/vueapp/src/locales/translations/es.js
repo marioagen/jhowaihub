@@ -368,15 +368,16 @@ const spanish = {
     },
     managementQuizzes: {
         title: "Gestión de cuestionarios, preguntas y tipos de documentos",
-        subtitle: "Gestionar cuestionarios, equipos y permisos del sistema",
+        subtitle:
+            "Gestionar cuestionarios, equipos y permisos del sistema",
         quizzes: {
-            title: "Cuestionarios"
+            title: "Cuestionarios",
         },
         questions: {
-            title: "Preguntas"
+            title: "Preguntas",
         },
         types: {
-            title: "Tipos"
+            title: "Tipos",
         },
     },
     management: {
@@ -547,7 +548,8 @@ const spanish = {
             "No se pudo validar tu autenticación. Por favor, inicia sesión nuevamente.",
         selectTenant: "Selecciona el tenant para continuar",
         continue: "Continuar",
-        tenantDatabaseNotReady: "El ambiente se está preparando. Inténtelo de nuevo en unos minutos.",
+        tenantDatabaseNotReady:
+            "El ambiente se está preparando. Inténtelo de nuevo en unos minutos.",
         tenantNotFound: "Tenant no encontrado.",
     },
     validation: {
@@ -714,7 +716,8 @@ const spanish = {
             index: "Flujo de trabajo de documentos",
             management: "Gestión de flujos de trabajo",
         },
-        leaveMessage: "Realizó cambios en este workflow que aún no se han guardado. Si sale ahora, se perderán todos los datos editados.",
+        leaveMessage:
+            "Realizó cambios en este workflow que aún no se han guardado. Si sale ahora, se perderán todos los datos editados.",
         finalize: "Finalizar",
         saveStep: "Salvar etapa",
         statusList: {
@@ -723,7 +726,7 @@ const spanish = {
             waitingforapproval: "En espera de aprobación",
             approved: "Aprobado",
             done: "Listo",
-        }
+        },
     },
     card: {
         userAssigned: "Responsable",
@@ -922,7 +925,16 @@ const spanish = {
         removeError: "Error al eliminar plantilla",
         unselected: "Seleccione una plantilla",
         keyPlaceholder: "Key (el valor será {{nombreKey}})",
+        valuePlaceholder: "Ingrese el valor",
         invalidJsonFormat: "Formato JSON inválido",
+        selectTemplate: "Seleccione una Plantilla",
+        selectTemplatePlaceholder: "Elija una plantilla de API",
+        fillVariables: "Completar Variables",
+        enterValue: "Ingrese el valor para",
+        loadError: "Error al cargar plantilla",
+        modal: {
+            title: "Configurar plantilla API",
+        },
     },
     analyze: {
         title: "Análisis de Documentos",
@@ -1066,7 +1078,7 @@ const spanish = {
         },
         whatsApp: {
             support: "Contacte con el soporte",
-        }
+        },
     },
     permissions: {
         groups: {
@@ -1082,7 +1094,8 @@ const spanish = {
             tools: "Herramientas",
             dashboard: "Dashboard",
             workflowStep: "Workflow Step",
-            workflowmanagement: "Gestión de Flujos de Trabajo",
+            workflowmanagement:
+                "Gestión de Flujos de Trabajo",
             prompts: "Prompts",
         },
         descriptions: {
