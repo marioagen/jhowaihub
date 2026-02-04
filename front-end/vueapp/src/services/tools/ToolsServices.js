@@ -1,7 +1,7 @@
 import api from "@/services/api";
 
 export default {
-    getTools(params) {        
+    getTools(params) {
         return api
             .get("/Tool/Paged/", { params: params })
             .then(({ data }) => {
@@ -18,12 +18,13 @@ export default {
             })
             .catch((error) => {
                 return {
-                    error: error
-                }
+                    error: error,
+                };
             });
     },
     getToolsList() {
-        return api.get("/Tool")
+        return api
+            .get("/Tool")
             .then(({ data }) => {
                 return data;
             })
@@ -40,7 +41,9 @@ export default {
                 return true;
             })
             .catch((e) => {
-                const message = e?.response?.data?.message || "Erro desconhecido";
+                const message =
+                    e?.response?.data?.message ||
+                    "Erro desconhecido";
                 return {
                     error: message,
                 };
@@ -53,7 +56,9 @@ export default {
                 return true;
             })
             .catch((e) => {
-                const message = e?.response?.data?.message || "Erro desconhecido";
+                const message =
+                    e?.response?.data?.message ||
+                    "Erro desconhecido";
                 return {
                     error: message,
                 };
@@ -67,8 +72,8 @@ export default {
             })
             .catch((erro) => {
                 return {
-                    error: erro
-                }
+                    error: erro,
+                };
             });
     },
     validateConnector(params) {
@@ -78,7 +83,17 @@ export default {
                 return response.data;
             })
             .catch(() => {
-                return false; 
+                return false;
             });
-    }
+    },
+    createTemplateStepTool(dto) {
+        return api
+            .post("/Tool/Template", dto)
+            .then((response) => {
+                return response.data;
+            })
+            .catch(() => {
+                return false;
+            });
+    },
 };

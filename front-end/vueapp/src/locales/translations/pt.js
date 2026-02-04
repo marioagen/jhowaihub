@@ -947,12 +947,19 @@ const portuguese = {
         valuePlaceholder: "Digite o valor",
         invalidJsonFormat: "Formato JSON inválido",
         selectTemplate: "Selecione um Template",
-        selectTemplatePlaceholder: "Escolha um template de API",
+        selectTemplatePlaceholder:
+            "Escolha um template de API",
         fillVariables: "Preencher Variáveis",
         enterValue: "Digite o valor para",
         loadError: "Erro ao carregar template",
-        modal: {
+        configuration: {
             title: "Configurar Template de API",
+            subtitle:
+                "Selecione e configure um template de API",
+            savedSuccessfully:
+                "Configuração do template salva com sucesso",
+            saveError:
+                "Erro ao salvar configuração do template",
         },
     },
     analyze: {

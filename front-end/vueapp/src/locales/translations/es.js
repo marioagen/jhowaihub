@@ -928,12 +928,19 @@ const spanish = {
         valuePlaceholder: "Ingrese el valor",
         invalidJsonFormat: "Formato JSON inválido",
         selectTemplate: "Seleccione una Plantilla",
-        selectTemplatePlaceholder: "Elija una plantilla de API",
+        selectTemplatePlaceholder:
+            "Elija una plantilla de API",
         fillVariables: "Completar Variables",
         enterValue: "Ingrese el valor para",
         loadError: "Error al cargar plantilla",
-        modal: {
-            title: "Configurar plantilla API",
+        configuration: {
+            title: "Configurar plantilla de API",
+            subtitle:
+                "Seleccione y configure una plantilla de API",
+            savedSuccessfully:
+                "Configuración de la plantilla guardada con éxito",
+            saveError:
+                "Error al guardar la configuración de la plantilla",
         },
     },
     analyze: {

@@ -1,4 +1,5 @@
-﻿using WoopiAiHub.Application.Utils;
+using System.Text.Json;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -7,6 +8,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -14,16 +16,19 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IToolRepository _toolRepository;
         private readonly IToolTypeRepository _toolTypeRepository;
+        private readonly IStepToolRepository _stepToolTypeRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IEncryptionService _encryptionService;
 
         public ToolServices(IToolRepository toolRepository,
                             IToolTypeRepository toolTypeRepository,
+                            IStepToolRepository stepToolTypeRepository,
                             IApiClientFactory apiClientFactory,
                             IEncryptionService encryptionService)
         {
             _toolRepository = toolRepository;
             _toolTypeRepository = toolTypeRepository;
+            _stepToolTypeRepository = stepToolTypeRepository;
             _apiClientFactory = apiClientFactory;
             _encryptionService = encryptionService;
         }
@@ -280,6 +285,87 @@ namespace WoopiAiHub.Application.Services
             var response = await api.FindWorkflows(toolConnectorDto.ConnectorApiKey);
 
             return response.IsSuccessStatusCode;
+        }
+
+        /// <summary>
+        /// Creates a new template step tool parameter and associates it with the specified step tool.
+        /// </summary>
+        /// <param name="dto">An object containing the details required to create the template step tool parameter, including the step
+        /// tool identifier and parameter values.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the
+        /// parameter was successfully added; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="AppException">Thrown if the step tool specified by <paramref name="dto"/> does not exist.</exception>
+        public async Task<bool> CreateTemplateStepTool(ApiTemplateStepToolCreateDto dto)
+        {
+            var stepTool = await _stepToolTypeRepository.FindByIdWithParameters(dto.StepToolId) ?? throw new AppException(ErrorCode.NotFound, "StepTool not found", ToolLabel.NotFound);
+
+            var newParam = new StepToolParameter(
+                0,
+                DateTime.Now,
+                stepTool.Id,
+                false,
+                null,
+                _encryptionService.Encrypt(BuildTemplateParameterJson(dto))
+            );
+
+            stepTool.AddParameter(newParam);
+            return await _stepToolTypeRepository.Update(stepTool);
+        }
+
+        /// <summary>
+        /// Builds a JSON string representing the template parameters for an API step using the specified data transfer
+        /// object.
+        /// </summary>
+        /// <remarks>The returned JSON includes the HTTP method, URL, query parameters, headers, and body
+        /// as specified in the input object. Query and header templates are converted from key-value arrays to JSON
+        /// objects. If the body template is null or empty, the body property is omitted from the output.</remarks>
+        /// <param name="dto">An object containing the method, URL, query parameters, headers, and body template to be included in the
+        /// generated JSON.</param>
+        /// <returns>A JSON-formatted string containing the API template parameters. Properties with null values are omitted from
+        /// the output.</returns>
+        private static string BuildTemplateParameterJson(ApiTemplateStepToolCreateDto dto)
+        {
+            var template = new
+            {
+                method = dto.Method,
+                url = dto.Url,
+                query = ConvertKeyValueArrayToObject(dto.QueryTemplate),
+                headers = ConvertKeyValueArrayToObject(dto.HeaderTemplate),
+                body = dto.BodyTemplate
+            };
+
+            return JsonSerializer.Serialize(template, new JsonSerializerOptions
+            {
+                WriteIndented = false,
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+
+        /// <summary>
+        /// Converts a JSON array of key-value pairs into a dictionary of string keys and values.
+        /// </summary>
+        /// <remarks>The input JSON array must represent objects with 'Key' and 'Value' properties. If the
+        /// array is empty or deserialization fails, the method returns null.</remarks>
+        /// <param name="jsonArray">A JSON-formatted string representing an array of objects, each containing a key and value property. Can be
+        /// null or empty.</param>
+        /// <returns>A dictionary containing the key-value pairs from the JSON array, or null if the input is null, empty, or
+        /// contains no items.</returns>
+        private static Dictionary<string, string>? ConvertKeyValueArrayToObject(string? jsonArray)
+        {
+            if (string.IsNullOrEmpty(jsonArray))
+                return null;
+
+            var items = JsonSerializer.Deserialize<List<KeyValueDto>>(jsonArray);
+            if (items == null || items.Count == 0)
+                return null;
+
+            var result = new Dictionary<string, string>();
+            foreach (var item in items)
+            {
+                result[item.Key] = item.Value;
+            }
+
+            return result;
         }
     }
 }

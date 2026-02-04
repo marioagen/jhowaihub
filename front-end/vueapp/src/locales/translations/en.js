@@ -899,8 +899,14 @@ const english = {
         fillVariables: "Fill Variables",
         enterValue: "Enter value for",
         loadError: "Error loading template",
-        modal: {
+        configuration: {
             title: "Configure API Template",
+            subtitle:
+                "Select and configure an API template",
+            savedSuccessfully:
+                "Template configuration saved successfully",
+            saveError:
+                "Error saving template configuration",
         },
     },
     analyze: {

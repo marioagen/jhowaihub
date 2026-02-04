@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -258,6 +258,21 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> FindWorkflowByDocument([FromBody]RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
         {
             var workflow = await _workflowServices.FindWorkflowsByDocument(dto, ct);
+            return Ok(workflow);
+        }
+
+        /// <summary>
+        /// Creates a new workflow step tool for the specified step and returns the identifier of the created step tool.
+        /// </summary>
+        /// <param name="dto">The data transfer object containing the details required to create the workflow step tool. Cannot be null.</param>
+        /// <returns>An <see cref="IActionResult"/> containing the identifier of the newly created step tool if the operation is
+        /// successful.</returns>
+        [HttpPost("StepTool")]
+        [SwaggerOperation("Creates a new workflow step tool for the specified step and returns the id of the StepTool created")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateStepTool([FromBody] RequestCreateStepToolDto dto)
+        {
+            var workflow = await _workflowServices.CreateStepTool(dto);
             return Ok(workflow);
         }
     }

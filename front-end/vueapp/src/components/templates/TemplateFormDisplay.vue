@@ -6,23 +6,6 @@
                     <h6 class="card-title mb-3">
                         {{ $t("template.requestDetails") }}
                     </h6>
-                    <div class="mb-3">
-                        <label
-                            for="templateName"
-                            class="form-label"
-                        >
-                            {{
-                                $t("template.templateName")
-                            }}
-                        </label>
-                        <input
-                            :value="templateData.name"
-                            type="text"
-                            class="form-control"
-                            id="templateName"
-                            :disabled="readOnly || editable"
-                        />
-                    </div>
                     <div class="row mb-3">
                         <div class="col-md-3">
                             <label
@@ -348,7 +331,6 @@
                 type: Object,
                 required: true,
                 default: () => ({
-                    name: "",
                     method: "GET",
                     url: "",
                     queryParams: [],

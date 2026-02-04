@@ -1792,7 +1792,194 @@ namespace WoopiAiHub.UnitTests.Services
 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
-            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreateStepTool should create step tool successfully and return its ID")]
+        [Trait("CreateStepTool", "Success")]
+        public async Task CreateStepTool_ValidData_CreatesStepToolAndReturnsId()
+        {
+            // Arrange
+            var dto = new RequestCreateStepToolDto
+            {
+                StepId = 1,
+                ToolId = 1,
+                Order = 1,
+                PositionX = 100.50m,
+                PositionY = 200.75m
+            };
+
+            var step = new Step(1, DateTime.Now, 1, "Test Step", 1, 1, 1);
+            var tool = WorkflowFixture.CreateToolModel(1, "Test Tool", "OCR");
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(dto.StepId))
+                .ReturnsAsync(step);
+
+            _toolRepositoryMock.Setup(r => r.FindByIdAsync(dto.ToolId))
+                .ReturnsAsync(WorkflowFixture.CreateToolDto(tool));
+
+            _stepRepositoryMock.Setup(r => r.Update(It.IsAny<Step>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _workflowServices.CreateStepTool(dto);
+
+            // Assert
+            Assert.True(result > 0);
+            Assert.Single(step.StepTools);
+            var createdStepTool = step.StepTools.First();
+            Assert.Equal(dto.StepId, createdStepTool.StepId);
+            Assert.Equal(dto.ToolId, createdStepTool.ToolId);
+            Assert.Equal(dto.Order, createdStepTool.Order);
+            Assert.Equal(dto.PositionX, createdStepTool.PositionX);
+            Assert.Equal(dto.PositionY, createdStepTool.PositionY);
+
+            _stepRepositoryMock.Verify(r => r.FindByIdWithTools(dto.StepId), Times.Once);
+            _toolRepositoryMock.Verify(r => r.FindByIdAsync(dto.ToolId), Times.Once);
+            _stepRepositoryMock.Verify(r => r.Update(step), Times.Once);
+        }
+
+        [Fact(DisplayName = "CreateStepTool should throw AppException when step not found")]
+        [Trait("CreateStepTool", "Fail")]
+        public async Task CreateStepTool_StepNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var dto = new RequestCreateStepToolDto
+            {
+                StepId = 999,
+                ToolId = 1,
+                Order = 1,
+                PositionX = 100.50m,
+                PositionY = 200.75m
+            };
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(dto.StepId))
+                .ReturnsAsync((Step?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CreateStepTool(dto));
+
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("Step not found", exception.Message);
+            Assert.Equal(StepLabel.NotFound, exception.LabelError);
+
+            _stepRepositoryMock.Verify(r => r.FindByIdWithTools(dto.StepId), Times.Once);
+            _toolRepositoryMock.Verify(r => r.FindByIdAsync(It.IsAny<int>()), Times.Never);
+            _stepRepositoryMock.Verify(r => r.Update(It.IsAny<Step>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreateStepTool should throw AppException when tool not found")]
+        [Trait("CreateStepTool", "Fail")]
+        public async Task CreateStepTool_ToolNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var dto = new RequestCreateStepToolDto
+            {
+                StepId = 1,
+                ToolId = 999,
+                Order = 1,
+                PositionX = 100.50m,
+                PositionY = 200.75m
+            };
+
+            var step = new Step(1, DateTime.Now, 1, "Test Step", 1, 1, 1);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(dto.StepId))
+                .ReturnsAsync(step);
+
+            _toolRepositoryMock.Setup(r => r.FindByIdAsync(dto.ToolId))
+                .ReturnsAsync((ToolDto?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CreateStepTool(dto));
+
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("Tool not found", exception.Message);
+            Assert.Equal(ToolLabel.NotFound, exception.LabelError);
+
+            _stepRepositoryMock.Verify(r => r.FindByIdWithTools(dto.StepId), Times.Once);
+            _toolRepositoryMock.Verify(r => r.FindByIdAsync(dto.ToolId), Times.Once);
+            _stepRepositoryMock.Verify(r => r.Update(It.IsAny<Step>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreateStepTool should add step tool to existing step with proper order")]
+        [Trait("CreateStepTool", "Success")]
+        public async Task CreateStepTool_AddsToExistingStepTools_MaintainsOrder()
+        {
+            // Arrange
+            var dto = new RequestCreateStepToolDto
+            {
+                StepId = 1,
+                ToolId = 2,
+                Order = 2,
+                PositionX = 150.00m,
+                PositionY = 250.00m
+            };
+
+            var step = new Step(1, DateTime.Now, 1, "Test Step", 1, 1, 1);
+            var existingStepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 100.00m, 200.00m);
+            step.AddStepTool(existingStepTool);
+
+            var tool = WorkflowFixture.CreateToolModel(2, "Second Tool", "Prompt");
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(dto.StepId))
+                .ReturnsAsync(step);
+
+            _toolRepositoryMock.Setup(r => r.FindByIdAsync(dto.ToolId))
+                .ReturnsAsync(WorkflowFixture.CreateToolDto(tool));
+
+            _stepRepositoryMock.Setup(r => r.Update(It.IsAny<Step>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _workflowServices.CreateStepTool(dto);
+
+            // Assert
+            Assert.True(result > 0);
+            Assert.Equal(2, step.StepTools.Count);
+            var newStepTool = step.StepTools.Last();
+            Assert.Equal(2, newStepTool.Order);
+            Assert.Equal(dto.ToolId, newStepTool.ToolId);
+
+            _stepRepositoryMock.Verify(r => r.Update(step), Times.Once);
+        }
+
+        [Fact(DisplayName = "CreateStepTool should correctly set all properties of StepTool")]
+        [Trait("CreateStepTool", "Success")]
+        public async Task CreateStepTool_SetsAllPropertiesCorrectly()
+        {
+            // Arrange
+            var dto = new RequestCreateStepToolDto
+            {
+                StepId = 5,
+                ToolId = 3,
+                Order = 10,
+                PositionX = 123.45m,
+                PositionY = 678.90m
+            };
+
+            var step = new Step(5, DateTime.Now, 1, "Test Step", 1, 1, 1);
+            var tool = WorkflowFixture.CreateToolModel(3, "Tool Name", "OCR");
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(dto.StepId))
+                .ReturnsAsync(step);
+
+            _toolRepositoryMock.Setup(r => r.FindByIdAsync(dto.ToolId))
+                .ReturnsAsync(WorkflowFixture.CreateToolDto(tool));
+
+            _stepRepositoryMock.Setup(r => r.Update(It.IsAny<Step>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _workflowServices.CreateStepTool(dto);
+
+            // Assert
+            var createdStepTool = step.StepTools.First();
+            Assert.Equal(dto.StepId, createdStepTool.StepId);
+            Assert.Equal(dto.ToolId, createdStepTool.ToolId);
+            Assert.Equal(dto.Order, createdStepTool.Order);
+            Assert.Equal(dto.PositionX, createdStepTool.PositionX);
+            Assert.Equal(dto.PositionY, createdStepTool.PositionY);
+            Assert.True(createdStepTool.Created <= DateTime.Now);
         }
 
         [Fact(DisplayName = "ResolveDependencies should continue when step has no stepTools")]

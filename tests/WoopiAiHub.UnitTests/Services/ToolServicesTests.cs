@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.AutoMock;
 using Refit;
 using System.Linq.Dynamic.Core;
@@ -24,6 +24,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly ToolServices _toolServices;
         private readonly Mock<IToolRepository> _toolRepositoryMock;
         private readonly Mock<IToolTypeRepository> _toolTypeRepositoryMock;
+        private readonly Mock<IStepToolRepository> _stepToolRepositoryMock;
         private readonly Mock<IApiClientFactory> _apiClientFactoryMock;
         private readonly Mock<In8NConnector> _in8nConnectorMock;
         private readonly Mock<IEncryptionService> _encryptionServiceMock;
@@ -36,6 +37,7 @@ namespace WoopiAiHub.UnitTests.Services
             _in8nConnectorMock = _mocker.GetMock<In8NConnector>();
             _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             _toolTypeRepositoryMock = _mocker.GetMock<IToolTypeRepository>();
+            _stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             _encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
 
             _encryptionServiceMock.Setup(e => e.Encrypt(It.IsAny<string>()))
@@ -436,6 +438,151 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.False(result);
+        }
+
+        [Fact(DisplayName = "CreateTemplateStepTool should throw AppException when StepTool not found")]
+        [Trait("CreateTemplateStepTool", "Fail")]
+        public async Task CreateTemplateStepTool_StepToolNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var dto = ToolFixture.FindValidApiTemplateStepToolCreateDto();
+            _stepToolRepositoryMock.Setup(repo => repo.FindByIdWithParameters(dto.StepToolId))
+                                   .ReturnsAsync((StepTool?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _toolServices.CreateTemplateStepTool(dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("StepTool not found", exception.Message);
+            _stepToolRepositoryMock.Verify(repo => repo.FindByIdWithParameters(dto.StepToolId), Times.Once);
+            _stepToolRepositoryMock.Verify(repo => repo.Update(It.IsAny<StepTool>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreateTemplateStepTool should create parameter with correct JSON structure")]
+        [Trait("CreateTemplateStepTool", "Success")]
+        public async Task CreateTemplateStepTool_ValidDto_CreatesParameterWithCorrectJson()
+        {
+            // Arrange
+            var dto = ToolFixture.FindValidApiTemplateStepToolCreateDto();
+            var stepTool = StepToolFixture.FindValidStepTool();
+            
+            _stepToolRepositoryMock.Setup(repo => repo.FindByIdWithParameters(dto.StepToolId))
+                                   .ReturnsAsync(stepTool);
+            _stepToolRepositoryMock.Setup(repo => repo.Update(It.IsAny<StepTool>()))
+                                   .ReturnsAsync(true);
+
+            // Act
+            var result = await _toolServices.CreateTemplateStepTool(dto);
+
+            // Assert
+            Assert.True(result);
+            Assert.Single(stepTool.Parameters);
+            
+            var parameter = stepTool.Parameters.First();
+            Assert.Equal(stepTool.Id, parameter.StepToolId);
+            Assert.False(parameter.RequiredFile);
+            Assert.Null(parameter.WebhookId);
+            Assert.Contains("\"method\"", parameter.Value);
+            Assert.Contains("\"url\"", parameter.Value);
+            Assert.Contains("\"query\"", parameter.Value);
+            Assert.Contains("\"headers\"", parameter.Value);
+            Assert.Contains("\"body\"", parameter.Value);
+            
+            _stepToolRepositoryMock.Verify(repo => repo.FindByIdWithParameters(dto.StepToolId), Times.Once);
+            _stepToolRepositoryMock.Verify(repo => repo.Update(stepTool), Times.Once);
+        }
+
+        [Fact(DisplayName = "CreateTemplateStepTool should convert key-value arrays to objects")]
+        [Trait("CreateTemplateStepTool", "Success")]
+        public async Task CreateTemplateStepTool_ValidDto_ConvertsKeyValueArrays()
+        {
+            // Arrange
+            var dto = ToolFixture.FindValidApiTemplateStepToolCreateDto();
+            var stepTool = StepToolFixture.FindValidStepTool();
+            
+            _stepToolRepositoryMock.Setup(repo => repo.FindByIdWithParameters(dto.StepToolId))
+                                   .ReturnsAsync(stepTool);
+            _stepToolRepositoryMock.Setup(repo => repo.Update(It.IsAny<StepTool>()))
+                                   .ReturnsAsync(true);
+
+            // Act
+            var result = await _toolServices.CreateTemplateStepTool(dto);
+
+            // Assert
+            Assert.True(result);
+            var parameter = stepTool.Parameters.First();
+            
+            Assert.Contains("\"userId\"", parameter.Value);
+            Assert.Contains("{{userId}}", parameter.Value);
+            Assert.Contains("\"Authorization\"", parameter.Value);
+            Assert.Contains("Bearer {{token}}", parameter.Value);
+            
+            _stepToolRepositoryMock.Verify(repo => repo.Update(stepTool), Times.Once);
+        }
+
+        [Fact(DisplayName = "CreateTemplateStepTool should handle null optional fields")]
+        [Trait("CreateTemplateStepTool", "Success")]
+        public async Task CreateTemplateStepTool_NullOptionalFields_CreatesValidJson()
+        {
+            // Arrange
+            var dto = ToolFixture.FindValidApiTemplateStepToolCreateDto();
+            dto.QueryTemplate = null;
+            dto.HeaderTemplate = null;
+            dto.BodyTemplate = null;
+            
+            var stepTool = StepToolFixture.FindValidStepTool();
+            
+            _stepToolRepositoryMock.Setup(repo => repo.FindByIdWithParameters(dto.StepToolId))
+                                   .ReturnsAsync(stepTool);
+            _stepToolRepositoryMock.Setup(repo => repo.Update(It.IsAny<StepTool>()))
+                                   .ReturnsAsync(true);
+
+            // Act
+            var result = await _toolServices.CreateTemplateStepTool(dto);
+
+            // Assert
+            Assert.True(result);
+            var parameter = stepTool.Parameters.First();
+            
+            Assert.Contains("\"method\"", parameter.Value);
+            Assert.Contains("\"url\"", parameter.Value);
+            Assert.DoesNotContain("\"query\"", parameter.Value);
+            Assert.DoesNotContain("\"headers\"", parameter.Value);
+            Assert.DoesNotContain("\"body\"", parameter.Value);
+            
+            _stepToolRepositoryMock.Verify(repo => repo.Update(stepTool), Times.Once);
+        }
+
+        [Fact(DisplayName = "CreateTemplateStepTool should handle empty string optional fields")]
+        [Trait("CreateTemplateStepTool", "Success")]
+        public async Task CreateTemplateStepTool_EmptyOptionalFields_CreatesValidJson()
+        {
+            // Arrange
+            var dto = ToolFixture.FindValidApiTemplateStepToolCreateDto();
+            dto.QueryTemplate = string.Empty;
+            dto.HeaderTemplate = string.Empty;
+            dto.BodyTemplate = string.Empty;
+            
+            var stepTool = StepToolFixture.FindValidStepTool();
+            
+            _stepToolRepositoryMock.Setup(repo => repo.FindByIdWithParameters(dto.StepToolId))
+                                   .ReturnsAsync(stepTool);
+            _stepToolRepositoryMock.Setup(repo => repo.Update(It.IsAny<StepTool>()))
+                                   .ReturnsAsync(true);
+
+            // Act
+            var result = await _toolServices.CreateTemplateStepTool(dto);
+
+            // Assert
+            Assert.True(result);
+            var parameter = stepTool.Parameters.First();
+            
+            Assert.Contains("\"method\"", parameter.Value);
+            Assert.Contains("\"url\"", parameter.Value);
+            Assert.DoesNotContain("\"query\"", parameter.Value);
+            Assert.DoesNotContain("\"headers\"", parameter.Value);
+            Assert.DoesNotContain("\"body\"", parameter.Value);
+            
+            _stepToolRepositoryMock.Verify(repo => repo.Update(stepTool), Times.Once);
         }
     }
 }

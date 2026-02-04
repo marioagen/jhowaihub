@@ -362,11 +362,6 @@
             </div>
         </div>
     </main>
-    <TemplateModal
-        id="templateModal"
-        ref="TemplateDialog"
-        @confirm="deleteTemplate"
-    />
 </template>
 <script>
     import VueFlowComponent from "@/components/flow/VueFlowComponent.vue";
@@ -376,7 +371,6 @@
     import WorkflowService from "@/services/workflow/WorkflowService";
     import LogService from "@/services/log/logService";
     import ToolType from "@/constants/ToolType";
-    import TemplateModal from "@/components/templates/TemplateModal.vue";
 
     export default {
         name: "FlowPage",
@@ -446,7 +440,6 @@
         components: {
             VueFlowComponent,
             DependencySelector,
-            TemplateModal,
         },
         methods: {
             redirectToIndex() {
@@ -587,7 +580,46 @@
                     selectedNode.data.dependencies;
 
                 if (this.isTargetTool(ToolType.API)) {
-                    this.$refs.TemplateDialog.open();
+                    if (selectedNode.data.stepToolId) {
+                        this.$router.push({
+                            name: "TemplateConfiguration",
+                            params: {
+                                stepToolId:
+                                    selectedNode.data
+                                        .stepToolId,
+                            },
+                        });
+                        return;
+                    }
+
+                    const dto = {
+                        toolId: selectedNode.data.toolId,
+                        stepId: this.stepId,
+                        order: selectedNode.data.order,
+                        positionX: selectedNode.position.x,
+                        positionY: selectedNode.position.y,
+                    };
+
+                    WorkflowService.createStepTool(dto)
+                        .then((result) => {
+                            this.$router.push({
+                                name: "TemplateConfiguration",
+                                params: {
+                                    stepToolId: result,
+                                },
+                            });
+                        })
+                        .catch((e) => {
+                            this.$notify({
+                                title: "flow.title",
+                                message:
+                                    e.message ||
+                                    "flow.formFlow.progressFlowFail",
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        });
+
                     return;
                 }
 
