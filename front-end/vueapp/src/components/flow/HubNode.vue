@@ -4,10 +4,10 @@
     <div class="item-left me-2">
       <LucideIcon :icon="node.data.icon" :color="node.data.color" />
       <div>
-        <h5 class="mb-0">{{ node.label }}</h5>
-        <small v-if="node.data.subtitle" :title="node.data.subtitle" class="text-muted" style="font-size: 0.7rem;">{{
-          truncateText(node.data.subtitle)
-          }}</small>
+        <h5 v-if="node.data.subtitle" :title="node.data.subtitle">{{
+          node.data.subtitle
+          }}</h5>
+        <h6 class="mb-0" :title="node.label" :class="node.data.subtitle ? 'text-muted' : ''">{{ node.label }}</h6>
       </div>
     </div>
     <div class="item-right" v-if="!node.data.isStartNode">
@@ -33,12 +33,6 @@ export default {
   components: {
     Handle,
     LucideIcon
-   },
-   methods: {
-    truncateText(text) {
-      if (!text) return ''
-      return text.length > 10 ? text.substring(0, 10) + '...' : text
-    }
    }
 }
 </script>
