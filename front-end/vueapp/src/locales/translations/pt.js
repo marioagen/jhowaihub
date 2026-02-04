@@ -728,11 +728,11 @@ const portuguese = {
         finalize: "Finalizar",
         saveStep: "Salvar etapa",
         statusList: {
-            awaitinganalysis:"Esperando Análise",
-            analyzed:"Análisado",
-            waitingforapproval:"Esperando Aprovação",
-            approved:"Aprovado",
-            done:"Finalizado",
+            awaitinganalysis: "Esperando Análise",
+            analyzed: "Análisado",
+            waitingforapproval: "Esperando Aprovação",
+            approved: "Aprovado",
+            done: "Finalizado",
         }
     },
     card: {
@@ -844,6 +844,10 @@ const portuguese = {
                 "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
             dependenciesRequired:
                 "Selecione ao menos uma dependência",
+            promptRequired:
+                "Selecione ao menos um prompt",
+            configurationSaved:
+                "Configuração salva com sucesso",
         },
     },
     prompts: {

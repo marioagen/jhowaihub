@@ -837,6 +837,10 @@ const spanish = {
                 "No se pudo recuperar la configuración del workflow. Verifica la URL y la clave API de la herramienta",
             dependenciesRequired:
                 "Seleccione al menos una dependencia",
+            promptRequired:
+                "Seleccione al menos un prompt",
+            configurationSaved:
+                "Configuración guardada exitosamente",
         },
     },
     prompts: {

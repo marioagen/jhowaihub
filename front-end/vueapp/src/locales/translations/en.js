@@ -689,13 +689,13 @@ const english = {
         },
         leaveMessage: "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
         finalize: "Finalize",
-        saveStep:"Save step",
+        saveStep: "Save step",
         statusList: {
-            awaitinganalysis:"Awaiting Analysis",
-            analyzed:"Analyzed",
-            waitingforapproval:"Waiting for Approval",
-            approved:"Approved",
-            done:"Done",
+            awaitinganalysis: "Awaiting Analysis",
+            analyzed: "Analyzed",
+            waitingforapproval: "Waiting for Approval",
+            approved: "Approved",
+            done: "Done",
         }
     },
     card: {
@@ -804,6 +804,10 @@ const english = {
                 "Failed to retrieve workflow configuration. Check tool URL and API key",
             dependenciesRequired:
                 "Select at least one dependency",
+            promptRequired:
+                "Select at least one prompt",
+            configurationSaved:
+                "Configuration saved successfully",
         },
     },
     prompts: {
