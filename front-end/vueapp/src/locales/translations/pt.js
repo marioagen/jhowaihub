@@ -1,25 +1,78 @@
 const portuguese = {
-    welcomeMsg: "Bem-vindo",
     Admin: "Admin",
-    transferListTitle: "Lista para selecionar",
-    transferListPlaceholder: "Busque na lista",
-    unexpectedError:
-        "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
+    analyze: {
+        answer: "Resposta",
+        applyQuestionnaire: "Aplicar Questionário",
+        askAI: "PERGUNTE À IA",
+        askTheAi: "Pergunte a IA",
+        askTheDoc: "Pergunte ao Doc",
+        clear: "Limpar",
+        closeResults: "Fechar Respostas",
+        confirmed: "Confirmado",
+        conversationWithDocument:
+            "Conversa com o Documento",
+        copy: "Copiar",
+        document: "Documento",
+        errorApplyingQuestionnaire:
+            "Erro ao aplicar questionário",
+        errorLoadDocumentData:
+            "Erro ao carregar dados do documento",
+        errorLoadingQuestionnaires:
+            "Erro ao carregar questionários",
+        extractedData: "Dados extraídos",
+        failedEditOutput: "O output não pode ser editado",
+        failedLoadDocument: "Falha ao carregar documento",
+        failedNoResponse:
+            "Falha, sem resposta do servidor.",
+        failedToLoadHistory: "Falha ao carregar histórico.",
+        findingTheBestAnswer:
+            "Encontrando a melhor resposta",
+        nextStep: "Próxima etapa",
+        noDataInDocument: "Não há dados disponíveis",
+        pleaseSelectQuestionnaire:
+            "Por favor, selecione um questionário",
+        previousStep: "Etapa anterior",
+        question: "Pergunta",
+        questionnaireResults: "SAÍDA",
+        questionnaireToApply: "QUESTIONÁRIO A APLICAR",
+        selectQuestionnaire: "Selecione um questionário...",
+        sendQuestion: "Enviar Pergunta",
+        subtitle: "Gerencia análises de documentos",
+        successApplyingQuestionnaire:
+            "Questionário aplicado com sucesso",
+        successEditOutput: "Output editado com sucesso",
+        title: "Análise de Documentos",
+        typeYourQuestion:
+            "Digite sua pergunta sobre o documento...",
+        workflow: "Esteira de Processamento",
+    },
+    card: {
+        assignBtn: "Atribuir",
+        cardsOpened: "Existem cards abertos nesta esteira",
+        unassignInfo: "Desatribuir documento",
+        userApplicant: "Solicitante",
+        userAssigned: "Responsável",
+    },
     common: {
         action: "Ação",
+        actions: "Ações",
         advance: "Avançar",
+        all: "Tudo",
+        almost: "Você está quase lá!",
         analyze: "Analisar",
         analyzed: "Analisado",
-        almost: "Você está quase lá!",
         apply: "Aplicar",
         back: "Voltar",
         cancel: "Cancelar",
+        caution: "Atenção!",
+        character: "caractere",
+        characters: "caracteres",
+        clearSelection: "Limpar seleção",
+        close: "Fechar",
         confirm: "Confirmar",
         consult: "Consultar",
-        create: "Criar",
-        close: "Fechar",
-        clearSelection: "Limpar seleção",
         copy: "Copiar texto",
+        create: "Criar",
         delete: "Excluir",
         description: "Descrição",
         edit: "Editar",
@@ -27,1096 +80,1037 @@ const portuguese = {
         editedFail: "Falha ao editar",
         error: "Erro",
         expand: "Expandir",
+        failed: "falhou!",
+        home: "Home",
+        id: "ID",
+        lines: "Linhas por página",
         loading: "Carregando",
         manage: "Gerenciar",
         model: "Modelo",
         name: "Nome",
         new: "Novo",
+        notAllowed: "Não permitido",
         notice: "Aviso",
-        output: "Saída",
         order: "Ordenar",
+        output: "Saída",
         owner: "Proprietário",
         processing: "Processando",
         reprocess: "Reprocessar",
         save: "Salvar",
-        send: "Enviar",
         select: "Selecione",
-        selected: "Selecionada",
-        selectedList: "Lista selecionada",
-        actions: "Ações",
-        signOut: "Sair",
-        status: "Status",
-        success: "Sucesso",
-        upload: "Carregar",
-        home: "Home",
-        failed: "falhou!",
-        caution: "Atenção!",
-        character: "caractere",
-        characters: "caracteres",
-        lines: "Linhas por página",
-        showingToTotal: "de",
-        notAllowed: "Não permitido",
-        thisActionCannotBeUndone:
-            "Esta ação não poderá ser desfeita. Tem certeza que deseja removê-lo?",
-        textCopiedToClipboard:
-            "Texto copiado para a área de transferência.",
-        id: "ID",
-        all: "Tudo",
         selectAll: "Selecionar Todos",
         selectAnItemFromTheList:
             "Selecione um item da lista.",
+        selected: "Selecionada",
+        selectedList: "Lista selecionada",
+        send: "Enviar",
+        showingToTotal: "de",
+        signOut: "Sair",
+        status: "Status",
+        success: "Sucesso",
+        textCopiedToClipboard:
+            "Texto copiado para a área de transferência.",
+        thisActionCannotBeUndone:
+            "Esta ação não poderá ser desfeita. Tem certeza que deseja removê-lo?",
+        upload: "Carregar",
         warning: "Atenção",
     },
-    modals: {
-        message: "Tem certeza?",
+    dashboard: {
+        changeTenant: "Alternar Tenant",
+        created: "Criado em:",
+        downloadCsv: "Baixar CSV",
+        downloadSuccessfully: "Download com sucesso",
+        exportBtn: "Exportar CSV",
+        filters: {
+            currentMonth: "Este mês",
+            lastMonth: "Mês passado",
+            previousNinety: "Últimos 90 dias",
+            previousSeven: "Últimos 7 dias",
+        },
+        graphs: {
+            pagesGraphSubtitle: "Consumo Diário",
+            pagesGraphTitle:
+                "Páginas de Documento Processadas (OCR)",
+            pagesTooltip:
+                "Quantidade de páginas de documentos que passaram pelo processo de Reconhecimento Óptico de Caracteres (OCR), que converte imagens de texto em texto editável.",
+            periodTotal: "Totalizador no Período",
+            tokenGraphSubtitle: "Consumo Diário de Tokens",
+            tokenGraphTitle: "Consumo de Tokens de IA",
+            tokensTooltip:
+                "Visualização do consumo de tokens para os diferentes modelos de Inteligência Artificial. Tokens são as unidades de processamento de texto utilizadas pelos modelos.",
+            totalPages: "Total de Páginas Processadas",
+            totalTokens: "Total de Tokens Consumidos",
+            totalWorkflow:
+                "Total de Execuções de Automação de IA",
+            totalWorkflowAutomatic:
+                "Total de Execuções Woopi AI",
+            unitValue: "Valor unitário no plano atual:",
+            workflowAutomaticTooltip:
+                "Número de vezes que os fluxos de automação de IA foram executados.",
+            workflowsAutomaticGraphTitle:
+                "Execuções de Esteira de Automação de IA",
+            workflowsGraphTitle:
+                "Execuções de Esteiras de Processamento Woopi AI",
+            workflowTooltip:
+                "Número de vezes que os fluxos de automação criados na plataforma Woopi AI foram executados.",
+        },
+        model: "Modelos",
+        subtitle: "Woopi AI",
+        title: "Dashboard de Consumo e Bilhetagem",
+        totalWTC: "Total WTC",
+        update: "Atualizar",
+        WTCText:
+            "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
     },
     documents: {
-        step: "Etapa",
-        title: "Documentos",
-        subtitle:
-            "Gerencie documentos e extraia informações",
-        notFound: "Documentos não encontrados",
-        removeTitle:
-            "Você está prestes a deletar uma documento do sistema",
-        createBtn: "Novo documento",
-        removeSuccess: "Documento removido com sucesso",
-        removeError: "Erro ao remover documento",
-        errors: {
-            invalidType: "Tipo de documento inválido",
-            removeTypeError:
-                "Erro ao remover tipo de documento",
-            uploadError: "Algo deu errado",
-            uploadFailure: "Falha no upload",
-            uploadedFilesError:
-                "Falha ao fazer upload dos arquivos!",
-            unselectedDocuments:
-                "Nenhum documento selecionado",
-        },
-        createdDate: "Data de upload",
-        teams: "Time",
-        workflows: "Esteira de Processamentos",
-        statusList: {
-            notAnalyzed: "Esperando análise",
-        },
         actions: {
             consult: "Consultar",
         },
-        upload: {
-            title: "Novo Documento",
-            subtitle:
-                "Faça upload de novos documentos para análise",
-            cardTitle: "Carregar Documento",
-            dropZone:
-                "Arraste e solte seus arquivos PDF abaixo para começar ou clique na área para navegar",
-            removeAllDropzone:
-                "Remover arquivos do dropzone",
-            linkWorkflow:
-                "Associar a Esteira de Processamento",
-            linkSubtitle:
-                "Selecione pelo menos uma esteira de processamento para associar ao documento.",
-            noWorkflowFound:
-                "Nenhuma esteira de processamento vinculada aos seus times do usuário",
-            selectionList: "Lista de seleção",
-            warningWorkflowNotListed:
-                "A esteira de processamento não apareceu na lista? É porque seus times não tem uma esteira associada a eles.",
-            noFileChosen: "Nenhum arquivo escolhido",
-            noTeamChosen: "Nenhum time escolhido",
-        },
-        workflowListModal: {
-            title: "Selecione a esteira de processamento",
-            titleMessage:
-                "Este documento está associado a múltiplas esteiras de processamento.<br>Escolha qual deseja visualizar:",
-            searchPlaceholder:
-                "Buscar esteira de processamento...",
-            clickToView: "Clique para visualizar",
-            nothingFound:
-                "Nenhuma esteira de processamento encontrada.",
-            cancel: "Cancelar",
-            errorToGetWorkflows:
-                "Erro ao buscar esteiras de processamento.",
-            errorUnexpected: "Erro inesperado.",
-        },
-        documentName: "Nome do documento",
-        documentType: "Tipo de documento",
-        documentNameOrDescription:
-            "Nome ou descrição do documento",
-        documentTypeAlreadyExists:
-            "Este tipo de documento já existe",
-        documentTypeSuccess:
-            "Tipo de documento inserido com sucesso",
-        documentTypeRemoveSuccess:
-            "Tipo de documento removido com sucesso",
-        documentTypeEditSuccess:
-            "Tipo de documento atualizado com sucesso",
-        documentHasAlreadyBeenStandardizedPreviously:
-            "O Documento já foi normalizado anteriormente. <br/> Aguarde, você será redirecionado para a página inicial.",
-        documentTranscript: "Transcrição do documento",
-        ocrText: "Texto OCR",
-        descriptionDocumentNote:
-            "Descrição (Única para múltiplos documentos)",
-        noDocumentsWereFound:
-            "Nenhum documento foi localizado",
-        backToListDocuments: "Voltar para documentos",
-        teamsTitleDocuments: "Associar com times",
-        teamsSubtextDocuments:
-            "Selecione pelo menos um time para associar ao documento.",
-        noTeamsFound:
-            "Nenhum time vinculado ao seu usuário",
         allTeams: "Todos os times",
-        noTeams: "Nenhum time disponível",
-        totalDocuments: "Total de documentos",
-        selectedTeams: "Times selecionados",
-        youAreAboutToDeleteDocument:
-            "Você está prestes a deletar <br/> o documento do sistema",
-        youAreAboutToDeleteDocumentQuery:
-            "Você está prestes a deletar <br/> o histórico de consulta do sistema",
-        searchDocument: "Buscar documento",
-        generalInformation: "Carregar documento",
-        historic: "Registro de respostas",
-        inclusionDate: "Data de inclusão",
-        listing: "Listagem",
-        loadingTheText: "Carregando o texto",
-        loadingFilePleaseWait:
-            "Carregando o arquivo, por favor aguarde",
-        mostRecent: "Mais recentes",
-        mostOlder: "Mais antigos",
-        pdfBack: "Voltar para o PDF",
-        queryWithoutHistory: "Consulta sem histórico",
-        reduceHistory: "Reduzir histórico",
-        expandHistory: "Expandir histórico",
-        closeHistory: "Fechar histórico",
-        deleteHistory: "Deletar histórico",
-        viewHistory: "Exibir histórico",
-        sendingTheDocument:
-            "Enviando o documento, aguarde.",
-        preparingTheDocument: "Preparando o documento..",
-        normalizingTheDocument:
-            "Normalizando o documento, aguarde.",
-        failedToNormalize: "Falha ao normalizar",
-        standardizedFullText: "Texto integral normalizado",
-        theFileMayBeCorrupt:
-            "O Arquivo pode estar <br/> corrompido ou com erro. <br/> Por favor, tente novamente.",
-        theFileMayBeUnreadableOrHaveAnError:
-            "O Arquivo pode estar <br/> ilegível ou com erro. <br/> Por favor, tente novamente.",
+        anInconsistencyWasIdentifiedInTheDocument:
+            "Uma inconsistência foi identificada no documento. Por favor, reprocesse para ter melhores resultados",
         attentionDependingOnTheSpeed:
             "Atenção, dependendo da velocidade da sua conexão com a Internet e do tamanho do arquivo carregado, essa operação pode demorar alguns minutos.",
         attentionPDFDisplayFailed:
             "Ocorreu uma falha ao carregar o PDF. Clique aqui para tentar novamente",
-        anInconsistencyWasIdentifiedInTheDocument:
-            "Uma inconsistência foi identificada no documento. Por favor, reprocesse para ter melhores resultados",
-        uploadPdf:
-            "Arraste e solte seus arquivos PDF abaixo para começar ou clique na área para navegar",
-        uploadedFiles: "Todos os arquivos carregados",
-        uploadComplete: "Carregamento completo",
-        showingFilesUpload: " arquivos baixados",
-        removeAllFilesDropzone:
-            "Remover todos os arquivos da fila?",
-        thisActionRemoveAllFiles:
-            "Essa ação removerá todos os arquivos selecionados para upload",
-        notReloadThePage:
-            "Para não interromper o processo de upload, não recarregue a página",
-        selectAFile: "Selecione um arquivo.",
-        numberOfPagesHasBeenExceeded:
-            "Número de páginas foi excedido. Contate o administrador do plano.",
+        backToListDocuments: "Voltar para documentos",
+        closeHistory: "Fechar histórico",
+        closeSidebar: "Fechar barra lateral",
+        createBtn: "Novo documento",
+        createdDate: "Data de upload",
+        deleteHistory: "Deletar histórico",
+        descriptionDocumentNote:
+            "Descrição (Única para múltiplos documentos)",
         descriptionExceeded:
             "A descrição excede o máximo de 250 caracteres.",
-        closeSidebar: "Fechar barra lateral",
+        documentHasAlreadyBeenStandardizedPreviously:
+            "O Documento já foi normalizado anteriormente. <br/> Aguarde, você será redirecionado para a página inicial.",
+        documentName: "Nome do documento",
+        documentNameOrDescription:
+            "Nome ou descrição do documento",
+        documentTranscript: "Transcrição do documento",
+        documentType: "Tipo de documento",
+        documentTypeAlreadyExists:
+            "Este tipo de documento já existe",
+        documentTypeEditSuccess:
+            "Tipo de documento atualizado com sucesso",
+        documentTypeRemoveSuccess:
+            "Tipo de documento removido com sucesso",
+        documentTypeSuccess:
+            "Tipo de documento inserido com sucesso",
+        errors: {
+            invalidType: "Tipo de documento inválido",
+            removeTypeError:
+                "Erro ao remover tipo de documento",
+            unselectedDocuments:
+                "Nenhum documento selecionado",
+            uploadedFilesError:
+                "Falha ao fazer upload dos arquivos!",
+            uploadError: "Algo deu errado",
+            uploadFailure: "Falha no upload",
+        },
+        expandHistory: "Expandir histórico",
+        failedToNormalize: "Falha ao normalizar",
+        generalInformation: "Carregar documento",
+        historic: "Registro de respostas",
+        inclusionDate: "Data de inclusão",
+        listing: "Listagem",
+        loadingFilePleaseWait:
+            "Carregando o arquivo, por favor aguarde",
+        loadingTheText: "Carregando o texto",
+        mostOlder: "Mais antigos",
+        mostRecent: "Mais recentes",
+        noDocumentsWereFound:
+            "Nenhum documento foi localizado",
+        normalizingTheDocument:
+            "Normalizando o documento, aguarde.",
+        noTeams: "Nenhum time disponível",
+        noTeamsFound:
+            "Nenhum time vinculado ao seu usuário",
+        notFound: "Documentos não encontrados",
+        notReloadThePage:
+            "Para não interromper o processo de upload, não recarregue a página",
+        numberOfPagesHasBeenExceeded:
+            "Número de páginas foi excedido. Contate o administrador do plano.",
+        ocrText: "Texto OCR",
+        pdfBack: "Voltar para o PDF",
+        preparingTheDocument: "Preparando o documento..",
+        queryWithoutHistory: "Consulta sem histórico",
+        reduceHistory: "Reduzir histórico",
+        removeAllFilesDropzone:
+            "Remover todos os arquivos da fila?",
+        removeError: "Erro ao remover documento",
+        removeSuccess: "Documento removido com sucesso",
+        removeTitle:
+            "Você está prestes a deletar uma documento do sistema",
+        searchDocument: "Buscar documento",
+        selectAFile: "Selecione um arquivo.",
+        selectedTeams: "Times selecionados",
         selectToDelete:
             "Selecione ao menos um documento para realizar a exclusão.",
-    },
-    questions: {
-        title: "Perguntas",
-        subtitle: "Gerencie perguntas do sistema",
-        notFound: "Não há perguntas cadastradas",
-        createBtn: "Criar pergunta",
-        createSuccess: "Pergunta criada com sucesso",
-        editSuccess: "Pergunta editada com sucesso",
-        removeTitle:
-            "Você está prestes a deletar uma pergunta do sistema",
-        removeSuccess: "Pergunta removida com sucesso",
-        errors: {
-            createError: "Erro ao criar pergunta",
-            editError: "Erro ao editar pergunta",
-            removeError: "Erro ao remover pergunta",
-            duplicated: "Pergunta duplicada",
-            invalid: "Pergunta inválida",
+        sendingTheDocument:
+            "Enviando o documento, aguarde.",
+        showingFilesUpload: " arquivos baixados",
+        standardizedFullText: "Texto integral normalizado",
+        statusList: {
+            notAnalyzed: "Esperando análise",
         },
-        createdData: "Data de criação",
-        modalCreate: {
-            title: "Criação de pergunta",
-            save: "Criar pergunta",
-        },
-        modalEdit: {
-            title: "Editar pergunta",
-            save: "Salvar edição",
-        },
-        availableList: "Perguntas disponíveis",
-        questionNotFound: "Pergunta não encontrada",
-        noQuestionsRegistered:
-            "Não existem perguntas cadastradas",
-        noMoreQuestionsAvailable:
-            "Não existem mais perguntas disponíveis",
-        noQuestionsWereFound:
-            "Nenhuma pergunta foi localizada",
-        noQuestionsWereSelected:
-            "Nenhuma pergunta foi selecionada.",
-        editQuestion: "Editar pergunta",
-        sendQuestion: "Enviar pergunta",
-        selectQuestions: "Selecione as perguntas",
-        searchQuestion: "Buscar pergunta",
-        viewQuestions: "Visualizar perguntas",
-        descriptionOrQuestionId:
-            "Descrição, ID ou insira uma nova pergunta para cadastrar",
-        youAreAboutToDeleteQuestion:
-            "Você está prestes a deletar <br/> uma pergunta do sistema",
-        numberOfQuestionsHasBeenExceeded:
-            "Número de perguntas foi excedido. Contate o administrador do plano.",
-        selectToDelete:
-            "Selecione ao menos uma questão para realizar a exclusão.",
-    },
-    quizzes: {
-        title: "Questionários",
-        subtitle: "Gerencie questionários do sistema",
-        notFound: "Não há questionários cadastradas",
-        createBtn: "Criar questionário",
-        createSuccess: "Questionário criado com sucesso",
-        editSuccess: "Questionário editado com sucesso",
-        removeTitle:
-            "Você está prestes a deletar um questionário do sistema",
-        removeSuccess: "Questionário removido com sucesso",
-        errors: {
-            createError: "Erro ao criar questionário",
-            editError: "Erro ao editar questionário",
-            removeError: "Erro ao remover o questionário",
-            duplicated: "Nome do questionário duplicado",
-            invalid: "Questionário inválido",
-        },
-        tableTitle: "List de questionários",
-        type: "Tipo de documento",
-        questions: "Perguntas",
-        createdDate: "Data de inclusão",
-        formName: "Nome do questionário",
-        formSelect: "Selecione o tipo de documento",
-        formNamePlaceholder:
-            "Digite o nome do questionário",
-        basicInfo: "Informações Básicas",
-        basicInfoSubtitle:
-            "Configure as informações básicas do questionário",
-        questionsSection: {
-            title: "Seleção de Perguntas",
-            subtitle:
-                "Selecione as perguntas que farão parte deste questionário",
-        },
-        formCreate: {
-            title: "Novo Questionário",
-            subtitle:
-                "Salve as informações do novo questionário",
-        },
-        formEdit: {
-            title: "Edição de Questionário",
-            subtitle:
-                "Atualize as informações do questionário",
-        },
-        questionnaireSearch:
-            "Nome, ID , Tipo de documento ou insira um novo questionário para cadastrar",
-        questionnaireAppliedSuccessfully:
-            "Questionário aplicado com sucesso, aguarde.",
-        questionnaireAndAi: "Questionários e IA",
-        noQuestionnairesWereFound:
-            "Nenhum questionário foi localizado",
-        applyQuestionnaire: "Aplicar questionário",
-        applyingQuestionnaire: "Aplicando questionário",
-        applyingQuestionnaireWait:
-            "Aplicando questionário, aguarde.",
-        selectQuestionnaire: "Selecione um questionário",
-        searchQuestionnaire: "Buscar questionário",
-        failedToApplyQuestionnaire:
-            "Falha ao aplicar questionário.",
-        thereIsNotEnoughCredit:
-            "Não há crédito suficiente para aplicar todas as perguntas deste questionário.",
-        youAreAboutToDeleteQuestionnaire:
-            "Você está prestes a deletar <br/> um questionário do sistema",
-        selectToDelete:
-            "Selecione ao menos um questionário para realizar a exclusão.",
-    },
-    types: {
-        title: "Tipos",
-        subtitle: "Gerencie tipos de documentos do sistema",
-        createBtn: "Criar tipo",
-        typeDoc: "Tipo de Documento",
-        typeDocAlreadyExists: "Tipo duplicado",
-        typeNameOrId:
-            "Nome, ID ou insira um novo tipo para cadastrar",
-        noDocumentTypeWasFound:
-            "Nenhum tipo de documento foi localizado",
-        searchTypes: "Buscar tipos",
-        newType: "Criar tipo",
-        youAreAboutToDeleteDocumentType:
-            "Você está prestes a deletar <br/> um tipo de documento do sistema",
-        youAreAboutToDeleteType:
-            "Você está prestes a deletar um tipo do sistema",
-        editTitleType: "Edição de tipo",
-        saveTitleType: "Criação de tipo",
-        saveType: "Criar tipo",
-        createSuccess: "Tipo criado com sucesso",
-        editSuccess: "Tipo atualizado com sucesso",
-        removeSuccess: "Tipo removido com sucesso",
-        errors: {
-            invalid: "Tipo inválido",
-            removeError: "Erro ao remover tipo",
-        },
-        selectToDelete:
-            "Selecione ao menos um tipo para realizar a exclusão.",
-    },
-    managementQuizzes: {
-        title: "Gestão de Questionário, questões e Tipos de Documentos",
+        step: "Etapa",
         subtitle:
-            "Gerencie questionário, times e permissões do sistema",
-        quizzes: {
-            title: "Questionários",
-        },
-        questions: {
-            title: "Perguntas",
-        },
-        types: {
-            title: "Tipos",
-        },
-    },
-    management: {
-        title: "Gestão de Usuários e Times",
-        subtitle:
-            "Gerencie usuários, times e permissões do sistema",
-        users: {
-            title: "Usuários",
-            subtitle: "Gerencie os usuários do sistema",
-            createBtn: "Novo Usuário",
-            createTitle: "Novo Usuário",
-            createSubtitle:
-                "Crie um novo usuário para o sistema",
-            editTitle: "Editar Usuário",
-            editSubtitle:
-                "Atualize as informações do usuário selecionado",
-            saveSuccess: "Usuário salvo com sucesso",
-            deleteSuccess: "Usuário removido com sucesso",
-            errors: {
-                invalid: "Usuário inválido",
-                emailDuplicated: "Email já cadastrado",
-                saveError: "Erro ao salvar usuário",
-            },
-            manageUsers: "Gestão de usuários",
-            usersMessage: "Gerencie os usuários do sistema",
-            newUser: "Novo usuário",
-            editUser: "Editar usuário",
-            user: "Usuário",
-            noUsersWasFound:
-                "Nenhum usuário foi localizado",
-            searchUsers: "Buscar usuários...",
-            typeUserName: "Digite o nome do usuário",
-            typeUserEmail: "Digite o email do usuário",
-            newUserMessage:
-                "Criar ou editar um usuário no sistema",
-            newTeamUserMessage:
-                "Crie um novo usuário que será automaticamente selecionado",
-            createTeamUser: "Criar Usuário",
-            selectedUsers: "Usuários selecionados",
-            youAreAboutToDeleteUser:
-                "Você está prestes a deletar um usuário do sistema",
-            email: "Email",
-            typeEmail: "usuario{'@'}suaempresa.com",
-            typeName: "Digite o nome completo",
-            password: "Senha",
-            typePassword: "Digite a senha",
-            confirmedPassword: "Confirmar senha",
-            typeConfirmedPassword:
-                "Digite a confirmação da senha",
-        },
-        teams: {
-            title: "Times",
-            subtitle: "Gerencie os times do sistema",
-            createBtn: "Novo Time",
-            createTitle: "Novo Time",
-            createSubtitle:
-                "Crie um novo time para o sistema",
-            editTitle: "Editar Time",
-            editSubtitle:
-                "Atualize as informações do time selecionado",
-            saveSuccess: "Time salvo com sucesso",
-            deleteSuccess: "Time deletado com sucesso",
-            errors: {
-                invalid: "Time inválido",
-                saveError: "Erro ao salvar time",
-                deleteError: "Erro ao deletar time",
-                duplicated: "Time já cadastrado",
-                fetchError: "Error ao buscar times",
-                teamAlreadyExists: "Time já cadastrado",
-                deleteDocError:
-                    "Não foi possível deletar o time: existem documentos relacionados",
-            },
-            teamsMessage:
-                "Gerencie os times e suas equipes",
-            team: "Time",
-            noTeamWasFound: "Nenhum time foi localizado",
-            newTeam: "Novo time",
-            newTeamMessage: "Crie um novo time no sistema",
-            typeTeamName: "Digite o nome do time",
-            teamName: "Time",
-            members: "Membros",
-            teamMembers: "Membros do time",
-            youAreAboutToDeleteTeam:
-                "Você está prestes a deletar um Time do sistema",
-            searchTeams: "Buscar times",
-        },
-        profiles: {
-            index: "Perfis",
-            title: "Perfis e Permissões",
+            "Gerencie documentos e extraia informações",
+        teams: "Time",
+        teamsSubtextDocuments:
+            "Selecione pelo menos um time para associar ao documento.",
+        teamsTitleDocuments: "Associar com times",
+        theFileMayBeCorrupt:
+            "O Arquivo pode estar <br/> corrompido ou com erro. <br/> Por favor, tente novamente.",
+        theFileMayBeUnreadableOrHaveAnError:
+            "O Arquivo pode estar <br/> ilegível ou com erro. <br/> Por favor, tente novamente.",
+        thisActionRemoveAllFiles:
+            "Essa ação removerá todos os arquivos selecionados para upload",
+        title: "Documentos",
+        totalDocuments: "Total de documentos",
+        upload: {
+            cardTitle: "Carregar Documento",
+            dropZone:
+                "Arraste e solte seus arquivos PDF abaixo para começar ou clique na área para navegar",
+            linkSubtitle:
+                "Selecione pelo menos uma esteira de processamento para associar ao documento.",
+            linkWorkflow:
+                "Associar a Esteira de Processamento",
+            noFileChosen: "Nenhum arquivo escolhido",
+            noTeamChosen: "Nenhum time escolhido",
+            noWorkflowFound:
+                "Nenhuma esteira de processamento vinculada aos seus times do usuário",
+            removeAllDropzone:
+                "Remover arquivos do dropzone",
+            selectionList: "Lista de seleção",
             subtitle:
-                "Gerencie os perfis e permissões do sistema",
-            createBtn: "Novo Perfil",
-            createTitle: "Novo Perfil",
-            createSubtitle:
-                "Crie um novo perfil para o sistema",
-            editTitle: "Editar Perfil",
-            editSubtitle:
-                "Atualize as informações do perfil selecionado",
-            saveSuccess: "Perfil salvo com sucesso",
-            editSuccess: "Perfil editado com sucesso",
-            deleteSuccess: "Perfil deletado com sucesso",
-            errors: {
-                invalid: "Perfil inválido",
-                saveError: "Erro ao salvar perfil",
-                editError: "Erro ao editar perfil",
-                deleteError: "Erro ao deletar perfil",
-                removeError: "Erro ao remover perfil",
-                addError: "Erro ao criar perfil",
-                editProfileError: "Erro ao editar perfil",
-            },
-            permissionsWorkflow:
-                "Permissões de Esteira de Processamento",
-            profilePermissions: "Perfis e permissões",
-            newProfile: "Novo perfil",
-            profile: "Perfil",
-            profiles: "Perfis",
-            permissions: "Permissões",
-            profilesMessage:
-                "Gerencie os perfis e permissões do sistema",
-            noProfilesWereFound:
-                "Nenhum perfil foi localizado",
-            searchProfiles: "Buscar perfis",
-            typeProfileName: "Digite o nome do perfil",
-            createProfile: "Criar perfil",
-            editProfile: "Editar perfil",
-            selectedProfiles: "Perfis selecionados",
-            youAreAboutToDeleteProfile:
-                "Você está prestes a deletar um perfil do sistema",
-            editTitleProfile: "Edição de perfil",
-            editSubTitleProfile:
-                "Atualize as informações do perfil no sistema",
-            saveTitleProfile: "Novo perfil",
-            saveSubTitleProfile:
-                "Crie um novo perfil no sistema",
-            profileAddSuccess:
-                "Perfil inserido com sucesso",
-            profileEditSuccess:
-                "Perfil atualizado com sucesso",
-            profileRemoveSuccess:
-                "Perfil removido com sucesso",
-            searchPermissions: "Buscar permissões...",
-            noPermissionChosen:
-                "Nenhuma permissão selecionada",
+                "Faça upload de novos documentos para análise",
+            title: "Novo Documento",
+            warningWorkflowNotListed:
+                "A esteira de processamento não apareceu na lista? É porque seus times não tem uma esteira associada a eles.",
         },
-    },
-    login: {
-        index: "Login",
-        title: "Fazer Login",
-        password: "Senha",
-        subtitle:
-            "Acesse sua conta para gerenciar documentos",
-        invalid: "Campo inválidos",
-        error: "Error",
-        warning: "Atenção",
-        loading: "Carregando...",
-        sso: "Login com Microsoft",
-        authSSO: "Autenticado na Microsoft",
-        validateClient: "Cliente validado",
-        userNotFound: "Usuário não encontrado.",
-        userWithoutAccess:
-            "Usuário sem permissão de acesso.",
-        userIncorrectPassword:
-            "A senha informada está incorreta.",
-        userTokenMicrosoftInvalid:
-            "Não foi possível validar sua autenticação. Por favor, faça login novamente.",
-        selectTenant: "Selecione o tenant para continuar",
-        continue: "Continuar",
-        tenantDatabaseNotReady: "O ambiente está sendo preparado. Por favor, tente novamente em alguns minutos.",
-        tenantNotFound: "Tenant não encontrado."
-    },
-    validation: {
-        required: "Campo obrigatório",
-        email: "Email inválido",
-        min: "Mínimo de {limit} caracteres",
-        max: "Máximo de {limit} caracteres",
-        fillInThisField: "Preencha este campo.",
-        confirmedFieldDiffers:
-            "O campo de confirmação difere do original",
-        fullname: "Digite pelo menos nome e sobrenome",
-        password_min:
-            "A senha deve ter no mínimo 6 caracteres.",
-        password_lowercase:
-            "A senha deve conter pelo menos uma letra minúscula.",
-        password_uppercase:
-            "A senha deve conter pelo menos uma letra maiúscula.",
-        password_number:
-            "A senha deve conter pelo menos um número.",
-        password_special:
-            "A senha deve conter pelo menos um caractere especial.",
-        password_confirmed:
-            "A confirmação da senha não confere.",
-        hasInvalid: "Campos inválidos",
-        oneStep:
-            "Ao menos um step é necessário para salvar",
-        oneElementArray: "Selecione ao menos uma opção",
+        uploadComplete: "Carregamento completo",
+        uploadedFiles: "Todos os arquivos carregados",
+        uploadPdf:
+            "Arraste e solte seus arquivos PDF abaixo para começar ou clique na área para navegar",
+        viewHistory: "Exibir histórico",
+        workflowListModal: {
+            cancel: "Cancelar",
+            clickToView: "Clique para visualizar",
+            errorToGetWorkflows:
+                "Erro ao buscar esteiras de processamento.",
+            errorUnexpected: "Erro inesperado.",
+            nothingFound:
+                "Nenhuma esteira de processamento encontrada.",
+            searchPlaceholder:
+                "Buscar esteira de processamento...",
+            title: "Selecione a esteira de processamento",
+            titleMessage:
+                "Este documento está associado a múltiplas esteiras de processamento.<br>Escolha qual deseja visualizar:",
+        },
+        workflows: "Esteira de Processamentos",
+        youAreAboutToDeleteDocument:
+            "Você está prestes a deletar <br/> o documento do sistema",
+        youAreAboutToDeleteDocumentQuery:
+            "Você está prestes a deletar <br/> o histórico de consulta do sistema",
     },
     filters: {
+        assignment: {
+            allUsers: "Todos os usuários",
+            currentUser: "Meus documentos",
+        },
         documentInput:
             "Buscar por documento, descrição ou usuário, ...",
-        workflowInput: "Buscar por documento",
-        toolInput: "Buscar por name da ferramenta",
+        mostOld: "Mais antigo",
+        mostRecent: "Mais recente",
+        nameAZ: "Nome (A-Z)",
+        nameZA: "Nome (Z-A)",
         questionsInput: "Buscar pergunta",
         quizzesInput: "Buscar questionário",
+        sortBy: "Ordenar por",
         teamsSelect: {
             all: "Todos os times",
             none: "Selecione um time",
-        },
-        usersSelect: {
-            all: "Todos os usuários",
-            none: "Selecione um usuário",
-        },
-        typesSelect: {
-            all: "Todos os tipos",
-            none: "Selecione um tipo",
-        },
-        assignment: {
-            currentUser: "Meus documentos",
-            allUsers: "Todos os usuários",
-        },
-        workflowSelect: {
-            withWorkflow: "Todos com esteira associadas",
-            none: "Selecione uma esteira de processamento",
         },
         templates: {
             all: "Métodos HTTP",
             searchBtn: "Buscar",
         },
-        sortBy: "Ordenar por",
-        mostRecent: "Mais recente",
-        mostOld: "Mais antigo",
-        nameAZ: "Nome (A-Z)",
-        nameZA: "Nome (Z-A)",
+        toolInput: "Buscar por name da ferramenta",
+        typesSelect: {
+            all: "Todos os tipos",
+            none: "Selecione um tipo",
+        },
+        usersSelect: {
+            all: "Todos os usuários",
+            none: "Selecione um usuário",
+        },
+        workflowInput: "Buscar por documento",
+        workflowSelect: {
+            none: "Selecione uma esteira de processamento",
+            withWorkflow: "Todos com esteira associadas",
+        },
     },
-    unauthorized: {
-        title: "Você não tem permissão para acessar esta tela.",
-        returnToHome: "Retornar",
+    flow: {
+        downloadJson: "Baixar JSON",
+        flowListEnd: "Finalizar fluxo",
+        formCreate: {
+            subtitle:
+                "Crie uma nova ferramenta para processar documentos",
+            title: "Fluxo de Automação",
+        },
+        formEdit: {
+            subtitle:
+                "Atualize as informações da ferramenta selecionada",
+            title: "Fluxo de Automação:",
+        },
+        formFlow: {
+            connectorWorkflowConfigFail:
+                "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
+            connectorWorkflowFail:
+                "Conector da esteira de processamento não respondeu. Verifique a URL e a chave da API da ferramenta",
+            dependenciesRequired:
+                "Selecione ao menos uma dependência",
+            editFlowNodeFail: "Falha ao editar o nodo",
+            editFlowNodeSuccess: "Nodo editado com sucesso",
+            progressFlowFail:
+                "Não foi possível inserir fluxo",
+            progressFlowSuccess:
+                "Fluxo inserido com sucesso",
+            progressFlowUpdateFail:
+                "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
+        },
+        hideTools: "Ocultar Ferramentas",
+        save: "Salvar",
+        showTools: "Adicionar Ferramentas",
+        sidebar: {
+            addDependency: "Adicionar Dependência",
+            allDependenciesSelected:
+                "Todas as dependências já foram selecionadas",
+            deleteDependency: "Remover Dependência",
+            dependencies: "Dependências",
+            dependenciesHint:
+                "Selecione as ferramentas anteriores cujas saídas você deseja usar como entrada",
+            filter: "Selecione um webhook",
+            inputs: "Entradas",
+            noDependencies: "Nenhuma ferramenta disponível",
+        },
+        sidebarTitle: "Configurar I/O:",
+        start: "Início",
+        subtitle: "",
+        title: "Fluxo de Automação",
+        upload: "Upload",
+    },
+    home: {
+        docsCard: {
+            button: "Acessar docs",
+            description:
+                "Consulte nossa documentação completa para explorar todo o potencial do AI HUB.",
+            title: "Explore a Documentação",
+        },
+        planLabel: "Você adquiriu o",
+        planName: "Plano Enterprise",
+        planThankYou:
+            "Agradecemos por escolher a nossa plataforma!",
+        platformCard: {
+            button: "Ver vídeo",
+            description:
+                "Assista a um tour guiado de 5 minutos sobre as principais funcionalidades.",
+            title: "Conheça a Plataforma",
+        },
+        quickStartTitle: "Trilha de Iniciação Rápida",
+        subtitle:
+            "Sua jornada para automatizar e otimizar processos com inteligência artificial começa agora.",
+        title: "Bem-vindo ao WOOPI AI!",
+        whatsApp: {
+            support: "Fale com o suporte",
+        },
+        workflowCard: {
+            button: "Iniciar guia",
+            description:
+                "Siga nosso guia passo-a-passo para criar sua primeira automação em minutos.",
+            title: "Sua Primeira Esteira de Processamento",
+        },
+    },
+    login: {
+        authSSO: "Autenticado na Microsoft",
+        continue: "Continuar",
+        error: "Error",
+        index: "Login",
+        invalid: "Campo inválidos",
+        loading: "Carregando...",
+        password: "Senha",
+        selectTenant: "Selecione o tenant para continuar",
+        sso: "Login com Microsoft",
+        subtitle:
+            "Acesse sua conta para gerenciar documentos",
+        tenantDatabaseNotReady:
+            "O ambiente está sendo preparado. Por favor, tente novamente em alguns minutos.",
+        tenantNotFound: "Tenant não encontrado.",
+        title: "Fazer Login",
+        userIncorrectPassword:
+            "A senha informada está incorreta.",
+        userNotFound: "Usuário não encontrado.",
+        userTokenMicrosoftInvalid:
+            "Não foi possível validar sua autenticação. Por favor, faça login novamente.",
+        userWithoutAccess:
+            "Usuário sem permissão de acesso.",
+        validateClient: "Cliente validado",
+        warning: "Atenção",
+    },
+    management: {
+        profiles: {
+            createBtn: "Novo Perfil",
+            createProfile: "Criar perfil",
+            createSubtitle:
+                "Crie um novo perfil para o sistema",
+            createTitle: "Novo Perfil",
+            deleteSuccess: "Perfil deletado com sucesso",
+            editProfile: "Editar perfil",
+            editSubtitle:
+                "Atualize as informações do perfil selecionado",
+            editSubTitleProfile:
+                "Atualize as informações do perfil no sistema",
+            editSuccess: "Perfil editado com sucesso",
+            editTitle: "Editar Perfil",
+            editTitleProfile: "Edição de perfil",
+            errors: {
+                addError: "Erro ao criar perfil",
+                deleteError: "Erro ao deletar perfil",
+                editError: "Erro ao editar perfil",
+                editProfileError: "Erro ao editar perfil",
+                invalid: "Perfil inválido",
+                removeError: "Erro ao remover perfil",
+                saveError: "Erro ao salvar perfil",
+            },
+            index: "Perfis",
+            newProfile: "Novo perfil",
+            noPermissionChosen:
+                "Nenhuma permissão selecionada",
+            noProfilesWereFound:
+                "Nenhum perfil foi localizado",
+            permissions: "Permissões",
+            permissionsWorkflow:
+                "Permissões de Esteira de Processamento",
+            profile: "Perfil",
+            profileAddSuccess:
+                "Perfil inserido com sucesso",
+            profileEditSuccess:
+                "Perfil atualizado com sucesso",
+            profilePermissions: "Perfis e permissões",
+            profileRemoveSuccess:
+                "Perfil removido com sucesso",
+            profiles: "Perfis",
+            profilesMessage:
+                "Gerencie os perfis e permissões do sistema",
+            saveSubTitleProfile:
+                "Crie um novo perfil no sistema",
+            saveSuccess: "Perfil salvo com sucesso",
+            saveTitleProfile: "Novo perfil",
+            searchPermissions: "Buscar permissões...",
+            searchProfiles: "Buscar perfis",
+            selectedProfiles: "Perfis selecionados",
+            subtitle:
+                "Gerencie os perfis e permissões do sistema",
+            title: "Perfis e Permissões",
+            typeProfileName: "Digite o nome do perfil",
+            youAreAboutToDeleteProfile:
+                "Você está prestes a deletar um perfil do sistema",
+        },
+        subtitle:
+            "Gerencie usuários, times e permissões do sistema",
+        teams: {
+            createBtn: "Novo Time",
+            createSubtitle:
+                "Crie um novo time para o sistema",
+            createTitle: "Novo Time",
+            deleteSuccess: "Time deletado com sucesso",
+            editSubtitle:
+                "Atualize as informações do time selecionado",
+            editTitle: "Editar Time",
+            errors: {
+                deleteDocError:
+                    "Não foi possível deletar o time: existem documentos relacionados",
+                deleteError: "Erro ao deletar time",
+                duplicated: "Time já cadastrado",
+                fetchError: "Error ao buscar times",
+                invalid: "Time inválido",
+                saveError: "Erro ao salvar time",
+                teamAlreadyExists: "Time já cadastrado",
+            },
+            members: "Membros",
+            newTeam: "Novo time",
+            newTeamMessage: "Crie um novo time no sistema",
+            noTeamWasFound: "Nenhum time foi localizado",
+            saveSuccess: "Time salvo com sucesso",
+            searchTeams: "Buscar times",
+            subtitle: "Gerencie os times do sistema",
+            team: "Time",
+            teamMembers: "Membros do time",
+            teamName: "Time",
+            teamsMessage:
+                "Gerencie os times e suas equipes",
+            title: "Times",
+            typeTeamName: "Digite o nome do time",
+            youAreAboutToDeleteTeam:
+                "Você está prestes a deletar um Time do sistema",
+        },
+        title: "Gestão de Usuários e Times",
+        users: {
+            confirmedPassword: "Confirmar senha",
+            createBtn: "Novo Usuário",
+            createSubtitle:
+                "Crie um novo usuário para o sistema",
+            createTeamUser: "Criar Usuário",
+            createTitle: "Novo Usuário",
+            deleteSuccess: "Usuário removido com sucesso",
+            editSubtitle:
+                "Atualize as informações do usuário selecionado",
+            editTitle: "Editar Usuário",
+            editUser: "Editar usuário",
+            email: "Email",
+            errors: {
+                emailDuplicated: "Email já cadastrado",
+                invalid: "Usuário inválido",
+                saveError: "Erro ao salvar usuário",
+            },
+            manageUsers: "Gestão de usuários",
+            newTeamUserMessage:
+                "Crie um novo usuário que será automaticamente selecionado",
+            newUser: "Novo usuário",
+            newUserMessage:
+                "Criar ou editar um usuário no sistema",
+            noUsersWasFound:
+                "Nenhum usuário foi localizado",
+            password: "Senha",
+            saveSuccess: "Usuário salvo com sucesso",
+            searchUsers: "Buscar usuários...",
+            selectedUsers: "Usuários selecionados",
+            subtitle: "Gerencie os usuários do sistema",
+            title: "Usuários",
+            typeConfirmedPassword:
+                "Digite a confirmação da senha",
+            typeEmail: "usuario{'@'}suaempresa.com",
+            typeName: "Digite o nome completo",
+            typePassword: "Digite a senha",
+            typeUserEmail: "Digite o email do usuário",
+            typeUserName: "Digite o nome do usuário",
+            user: "Usuário",
+            usersMessage: "Gerencie os usuários do sistema",
+            youAreAboutToDeleteUser:
+                "Você está prestes a deletar um usuário do sistema",
+        },
+    },
+    managementQuizzes: {
+        questions: {
+            title: "Perguntas",
+        },
+        quizzes: {
+            title: "Questionários",
+        },
+        subtitle:
+            "Gerencie questionário, times e permissões do sistema",
+        title: "Gestão de Questionário, questões e Tipos de Documentos",
+        types: {
+            title: "Tipos",
+        },
+    },
+    modals: {
+        message: "Tem certeza?",
+    },
+    pages: {
+        dashboard: "Dashboard",
+        documents: "Documentos",
+        management: "Gestão de Usuários",
+        prompts: "Prompts",
+        questions: "Perguntas",
+        quizzes: "Questionários",
+        templates: "Templates de API",
+        tools: "Ferramentas",
+        types: "Tipos",
+        workflowManagement: "Gestão de Esteiras",
+        workflows: "Esteiras de Processamento",
     },
     pagination: {
         next: "Próximo",
         previous: "Anterior",
     },
-    workflow: {
-        index: "Esteira de Processamento",
-        title: "Board de Processamento de Documentos",
-        editTitle: "Editor de Esteira de Processamento",
-        subtitle:
-            "Visualize o fluxo de documentos através das etapas de processamento",
-        subtitleEditor:
-            "Gerencie e configure as esteiras de processamento de documentos",
-        manage: "Gerenciar Esteira de Processamento:",
-        boardView: "Visualizando esteira de processamento:",
-        steps: "Etapas do Esteira de Processamento",
-        error: "Erro ao buscar esteiras de processamento",
-        addBtn: "Adicionar Etapa",
-        addBtnDescription:
-            "Clique para criar uma nova etapa",
-        createNewStep: "Nova etapa",
-        responsableTeam: "Time responsável",
-        stepTitle: "Etapa do Esteira de Processamento",
-        stepSubtitle: "Configure as regras e responsáveis",
-        managementTitle:
-            "Gestão de Esteiras de Processamento",
-        managementSubtitle:
-            "Gerencie e configure esteiras de processamento de documentos",
-        access: "Acessar",
-        teams: "Times associados",
-        actions: "Ações",
-        notFound:
-            "Nenhuma esteira de processamento foi encontrada",
-        name: "Nome da esteira",
-        namePlaceholder: "Ex: Aprovação de Contratos",
-        profiles: "Perfil responsável",
-        selectWorkflow:
-            "Selecione uma esteira de processamento",
-        selectProfile: "Selecione um perfil",
-        selectStatus: "Selecione um status",
-        createBtn: "Nova Esteira de Processamento",
-        deleteBtn: "Excluir",
-        createSuccess:
-            "Esteira de processamento criada com sucesso",
-        createError:
-            "Erro ao criar esteira de processamento",
-        editSuccess:
-            "Esteira de processamento editada com sucesso",
-        editError:
-            "Erro ao editar esteira de processamento",
-        removeSuccess:
-            "Esteira de processamento removida com sucesso",
-        removeError:
-            "Erro ao remover esteira de processamento",
-        stepFlow: "Automação de documentos",
-        nameAndAssociations: "Nome e Associações",
-        tools: "Ferramentas",
-        basicInfo: "Informações Básicas",
-        associatedTeams: "Times Associados",
-        stepsTitle: "Etapas do Esteira de Processamento",
-        stepNamePlaceholder: "Nome da etapa",
-        addStep: "Adicionar Etapa",
-        addStepDescription:
-            "Clique para criar uma nova etapa",
-        toolFlowsTitle: "Adicionar Fluxo de Ferramentas",
-        noStepsAvailable:
-            "Nenhuma etapa disponível. Por favor, adicione etapas na fase anterior.",
-        responsible: "Responsável",
-        configuredTools: "Ferramentas configuradas",
-        addToolFlow: "Adicionar Fluxo de Ferramentas",
-        editToolFlow: "Editar Fluxo de Ferramentas",
-        removeToolFlow: "Remover Fluxo",
-        previous: "Anterior",
-        next: "Próximo",
-        createWorkflow: "Criar Esteira de Processamento",
-        saveChanges: "Salvar Alterações",
-        phase1Success:
-            "Informações básicas salvas com sucesso",
-        phase1Error: "Erro ao salvar informações básicas",
-        phase2Success: "Etapas salvas com sucesso",
-        phase2Error: "Erro ao salvar etapas",
-        phase3Success: "Ferramentas salvas com sucesso",
-        phase3Error: "Erro ao salvar ferramentas",
-        loadError:
-            "Erro ao carregar Esteira de Processamento",
-        formCreate: {
-            title: "Criar Esteira de Processamento",
-            subtitle:
-                "Siga as etapas para configurar seu Esteira de Processamento.",
+    permissions: {
+        descriptions: {
+            dashboard: "Visualizar Dashboard",
+            documents: "Visualizar Documentos",
+            management: "Visualizar Gestão de tabelas",
+            profiles: "Visualizar Perfis",
+            prompts: "Visualizar Prompts",
+            questions: "Visualizar Perguntas",
+            quizzes: "Visualizar Questionários",
+            teams: "Visualizar Times",
+            tools: "Visualizar Ferramentas",
+            types: "Visualizar Tipos",
+            users: "Visualizar Usuários",
+            workflow: "Visualizar Esteira de processamento",
+            workflowStepAccess: "Acessar Etapas",
+            workflowStepView: "Visualizar Etapas",
         },
-        formEdit: {
-            title: "Editar Esteira de Processamento",
-            subtitle:
-                "Siga as etapas para configurar seu Esteira de Processamento.",
+        groups: {
+            dashboard: "Dashboard",
+            documents: "Documentos",
+            management: "Gestão",
+            profiles: "Perfis",
+            prompts: "Prompts",
+            questions: "Perguntas",
+            quizzes: "Questionários",
+            teams: "Times",
+            tools: "Ferramentas",
+            types: "Tipos",
+            users: "Usuários",
+            workflow: "Esteira de processamento",
+            workflowmanagement: "Gestão de Esteira",
+            workflowstep: "Etapa da esteira",
         },
-        labelWatchingWorkflow:
-            "Visualizando Esteira de Processamento:",
-        labelWorkflowDocs:
-            "Esteira de Processamento de documentos",
-        labelWorkflowBoard:
-            "Board de Processamento de Documentos",
-        labelWorkflowSubTitle:
-            "Visualize o fluxo de documentos através das etapas de processamento",
-        sidebar: {
-            index: "Esteira de Processamento de documentos",
-            management:
-                "Gestão de Esteira de Processamentos",
-        },
-        leaveMessage: "Você fez alterações nesta esteira que ainda não foram salvas, se sair agora todos os dados editados serão perdidos",
-        finalize: "Finalizar",
-        saveStep: "Salvar etapa",
-        statusList: {
-            awaitinganalysis:"Esperando Análise",
-            analyzed:"Análisado",
-            waitingforapproval:"Esperando Aprovação",
-            approved:"Aprovado",
-            done:"Finalizado",
-        }
-    },
-    card: {
-        userAssigned: "Responsável",
-        userApplicant: "Solicitante",
-        assignBtn: "Atribuir",
-        unassignInfo: "Desatribuir documento",
-        cardsOpened: "Existem cards abertos nesta esteira",
-    },
-    tools: {
-        index: "Ferramentas",
-        title: "Ferramentas",
-        subtitle:
-            "Gerencie e configure suas ferramentas de processamento de documentos",
-        notFound: "Não há ferramentas cadastradas",
-        toolNotFound: "Ferramenta não encontrada",
-        dependencyToolNotFound:
-            "Ferramenta de dependência não encontrada",
-        createBtn: "Nova Ferramenta",
-        editBtn: "Salvar alterações",
-        type: "Tipo",
-        entry: "Entrada",
-        created: "Criado em",
-        createSuccess: "Ferramenta criada com sucesso",
-        createError: "Erro ao criar Ferramenta",
-        editSuccess: "Ferramenta editada com sucesso",
-        editError: "Erro ao editar Ferramenta",
-        removeSuccess: "Ferramenta removida com sucesso",
-        removeError: "Erro ao remover Ferramenta",
-        removeTitle:
-            "Você está prestes a deletar uma ferramenta do sistema",
-        dependencyRequired:
-            "A ferramenta de Prompt requer ao menos uma dependência",
-        ocrDependencyRequired:
-            "A ferramenta de Prompt requer uma dependência de uma ferramenta de OCR",
-        form: {
-            name: "Nome da Ferramenta",
-            types: "Tipo da Ferramenta",
-            typesSelect: "Selecione tipo da Ferramenta",
-            entries: "Entrada (Input)",
-            entriesSelect: "Selecione o tipo de entrada",
-            entriesEditable: "Entrada editável",
-            outputSelect: "Selecione o tipo de saida",
-            connectorUrl: "n8n URL",
-            connectorApiKey: "Chave de API",
-            validatingConnector:
-                "Validando url do  conector",
-            invalidConnector:
-                "Conector não respondeu. Url ou chave inválidas",
-            validConnector: "Conector está ativo",
-        },
-        formCreate: {
-            title: "Nova Ferramenta",
-            subtitle:
-                "Crie uma nova ferramenta para processar documentos",
-        },
-        formEdit: {
-            title: "Editar Ferramenta",
-            subtitle:
-                "Atualize as informações da ferramenta selecionada",
-        },
-        validationError: "Erro ao validar campos",
-    },
-    flow: {
-        title: "Fluxo de Automação",
-        subtitle: "",
-        save: "Salvar",
-        downloadJson: "Baixar JSON",
-        upload: "Upload",
-        start: "Início",
-        showTools: "Adicionar Ferramentas",
-        hideTools: "Ocultar Ferramentas",
-        flowListEnd: "Finalizar fluxo",
-        formCreate: {
-            title: "Fluxo de Automação",
-            subtitle:
-                "Crie uma nova ferramenta para processar documentos",
-        },
-        formEdit: {
-            title: "Fluxo de Automação:",
-            subtitle:
-                "Atualize as informações da ferramenta selecionada",
-        },
-        sidebarTitle: "Configurar I/O:",
-        sidebar: {
-            filter: "Selecione um webhook",
-            inputs: "Entradas",
-            dependencies: "Dependências",
-            dependenciesHint:
-                "Selecione as ferramentas anteriores cujas saídas você deseja usar como entrada",
-            addDependency: "Adicionar Dependência",
-            noDependencies: "Nenhuma ferramenta disponível",
-            allDependenciesSelected:
-                "Todas as dependências já foram selecionadas",
-            deleteDependency: "Remover Dependência",
-        },
-        formFlow: {
-            progressFlowSuccess:
-                "Fluxo inserido com sucesso",
-            progressFlowFail:
-                "Não foi possível inserir fluxo",
-            progressFlowUpdateFail:
-                "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
-            editFlowNodeSuccess: "Nodo editado com sucesso",
-            editFlowNodeFail: "Falha ao editar o nodo",
-            connectorWorkflowFail:
-                "Conector da esteira de processamento não respondeu. Verifique a URL e a chave da API da ferramenta",
-            connectorWorkflowConfigFail:
-                "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
-            dependenciesRequired:
-                "Selecione ao menos uma dependência",
-        },
-    },
-    prompts: {
-        title: "Prompts",
-        createPrompt: "Criar prompt",
-        subtitle: "Gerencia prompts do sistema",
-        myPromptsBadge: "Meus prompts",
-        newPrompt: "Novo prompt",
-        namePrompt: "Nome do prompt",
-        information: "Informações básicas",
-        subtitleNew: "Criar um novo prompt de IA",
-        promptContent: "Conteúdo do prompt",
-        placeholderNamePrompt: "Insira o nome do prompt",
-        searchPrompt: "Buscar prompt",
-        labelLoadMore: "Carregar mais",
-        searchPrompts: "Buscar prompts",
-        noPromptsListWereFound:
-            "Nenhum prompt foi encontrado",
-        createSuccess: "Prompt criado com sucesso",
-        createError: "Falha ao criar prompt",
-        updateSuccess: "Prompt atualizado com sucesso",
-        updateError: "Falha ao atualizar prompt",
-        deleteSuccess: "Prompt deletado com sucesso",
-        deleteError: "Falha ao deletar prompt",
-        removeAllPrompts: "Remover prompts",
-        importTitle: "Importar prompts",
-        importSubtitle:
-            "Selecione prompts pré-definidos do sistema",
-        importButton: "Importar",
-        selectAllTemplates: "Selecionar todos os templates",
-        viewComplete: "Ver completo",
-        importPredefined: "Importar pré-definidos",
-        importError: "Erro ao importar prompts",
-        importSuccess: "Prompts importados com sucesso",
-        refinePrompt: "Refinar Prompt",
-        refineSuccess: "Prompt refinado com sucesso",
-        refineError: "Falha ao refinar prompt",
-        emptyPromptError: "O campo de prompt não pode estar vazio",
-    },
-    template: {
-        title: "Templates de API",
-        tableTitle: "Templates",
-        subtitle:
-            "Gerencie, teste e edite seus templates de requisição API.",
-        createTemplate: "Criar novo template",
-        notFound: "Nenhum template registrado",
-        method: "Método",
-        name: "Nome",
-        url: "URL",
-        createBtn: "Salvar Template",
-        cancelBtn: "Cancelar",
-        importCurl: "Importar cURL",
-        requestDetails: "Detalhes da Requisição",
-        requestBody: "Corpo da Requisição",
-        templateName: "Nome do Template",
-        templateNamePlaceholder:
-            "ex. Processamento de OCR de Usuário",
-        endpointUrl: "URL do Endpoint",
-        endpointUrlPlaceholder:
-            "https://api.exemplo.com/v1/recurso",
-        queryParams: "Parâmetros de Query",
-        headers: "Cabeçalhos",
-        queryParameters: "Parâmetros de Query",
-        addParam: "Adicionar Parâmetro",
-        noQueryParameters:
-            "Sem parâmetros de query. Adicione um ou digite na URL.",
-        bodySubtitle:
-            "Digite '{' para ver as variáveis disponíveis.",
-        variablesTip:
-            "Dica: Use variáveis como '{{ocr}}' ou '{{prompt}}' que serão substituídas no momento da execução.",
-        formCreate: {
-            title: "Criar Template",
-            subtitle:
-                "Configure o modelo da sua requisição API.",
-        },
-        formEdit: {
-            title: "Editar Template",
-            subtitle:
-                "Atualize o modelo da sua requisição API.",
-        },
-        createSuccess: "Template criado com sucesso",
-        createError: "Erro ao criar template",
-        editSuccess: "Template atualizado com sucesso",
-        editError: "Erro ao atualizar template",
-        removeSuccess: "Template removido com sucesso",
-        removeError: "Erro ao remover template",
-        title: "Templates de API",
-        tableTitle: "Templates",
-        subtitle:
-            "Gerencie, teste e edite seus templates de requisição de API.",
-        createBtn: "Salvar template",
-        notFound: "Nenhum template encontrado",
-        method: "Método",
-        name: "Nome",
-        url: "URL",
-        unselected: "Selecione um template",
-        keyPlaceholder: "Key (o valor será {{nomeKey}})",
-        invalidJsonFormat: "Formato JSON inválido",
-    },
-    analyze: {
-        title: "Análise de Documentos",
-        subtitle: "Gerencia análises de documentos",
-        errorLoadDocumentData:
-            "Erro ao carregar dados do documento",
-        failedEditOutput: "O output não pode ser editado",
-        successEditOutput: "Output editado com sucesso",
-        extractedData: "Dados extraídos",
-        askTheDoc: "Pergunte ao Doc",
-        conversationWithDocument:
-            "Conversa com o Documento",
-        askAI: "PERGUNTE À IA",
-        typeYourQuestion:
-            "Digite sua pergunta sobre o documento...",
-        sendQuestion: "Enviar Pergunta",
-        clear: "Limpar",
-        copy: "Copiar",
-        previousStep: "Etapa anterior",
-        nextStep: "Próxima etapa",
-        noDataInDocument: "Não há dados disponíveis",
-        failedLoadDocument: "Falha ao carregar documento",
-        questionnaireToApply: "QUESTIONÁRIO A APLICAR",
-        selectQuestionnaire: "Selecione um questionário...",
-        applyQuestionnaire: "Aplicar Questionário",
-        questionnaireResults: "SAÍDA",
-        question: "Pergunta",
-        answer: "Resposta",
-        errorLoadingQuestionnaires:
-            "Erro ao carregar questionários",
-        errorApplyingQuestionnaire:
-            "Erro ao aplicar questionário",
-        successApplyingQuestionnaire:
-            "Questionário aplicado com sucesso",
-        pleaseSelectQuestionnaire:
-            "Por favor, selecione um questionário",
-        confirmed: "Confirmado",
-        closeResults: "Fechar Respostas",
-        workflow: "Esteira de Processamento",
-        document: "Documento",
-        askTheAi: "Pergunte a IA",
-        findingTheBestAnswer:
-            "Encontrando a melhor resposta",
-        failedNoResponse:
-            "Falha, sem resposta do servidor.",
-        failedToLoadHistory: "Falha ao carregar histórico.",
-    },
-    pages: {
-        dashboard: "Dashboard",
-        management: "Gestão de Usuários",
-        documents: "Documentos",
-        workflows: "Esteiras de Processamento",
-        workflowManagement: "Gestão de Esteiras",
-        types: "Tipos",
-        questions: "Perguntas",
-        quizzes: "Questionários",
-        tools: "Ferramentas",
-        prompts: "Prompts",
-        templates: "Templates de API",
-    },
-    dashboard: {
-        title: "Dashboard de Consumo e Bilhetagem",
-        subtitle: "Woopi AI",
-        exportBtn: "Exportar CSV",
-        totalWTC: "Total WTC",
-        update: "Atualizar",
-        WTCText:
-            "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
-        filters: {
-            currentMonth: "Este mês",
-            lastMonth: "Mês passado",
-            previousSeven: "Últimos 7 dias",
-            previousNinety: "Últimos 90 dias",
-        },
-        graphs: {
-            tokenGraphTitle: "Consumo de Tokens de IA",
-            tokenGraphSubtitle: "Consumo Diário de Tokens",
-            pagesGraphTitle:
-                "Páginas de Documento Processadas (OCR)",
-            pagesGraphSubtitle: "Consumo Diário",
-            workflowsAutomaticGraphTitle:
-                "Execuções de Esteira de Automação de IA",
-            workflowsGraphTitle:
-                "Execuções de Esteiras de Processamento Woopi AI",
-            tokensTooltip:
-                "Visualização do consumo de tokens para os diferentes modelos de Inteligência Artificial. Tokens são as unidades de processamento de texto utilizadas pelos modelos.",
-            pagesTooltip:
-                "Quantidade de páginas de documentos que passaram pelo processo de Reconhecimento Óptico de Caracteres (OCR), que converte imagens de texto em texto editável.",
-            workflowAutomaticTooltip:
-                "Número de vezes que os fluxos de automação de IA foram executados.",
-            workflowTooltip:
-                "Número de vezes que os fluxos de automação criados na plataforma Woopi AI foram executados.",
-            totalTokens: "Total de Tokens Consumidos",
-            totalPages: "Total de Páginas Processadas",
-            totalWorkflowAutomatic:
-                "Total de Execuções Woopi AI",
-            totalWorkflow:
-                "Total de Execuções de Automação de IA",
-            unitValue: "Valor unitário no plano atual:",
-            periodTotal: "Totalizador no Período",
-        },
-        downloadCsv: "Baixar CSV",
-        downloadSuccessfully: "Download com sucesso",
-        model: "Modelos",
-        changeTenant: "Alternar Tenant",
-        created: "Criado em:",
     },
     plan: {
         current: "Plano Atual",
         enterprise: "Plano Enterprise",
     },
-    home: {
-        title: "Bem-vindo ao WOOPI AI!",
-        subtitle:
-            "Sua jornada para automatizar e otimizar processos com inteligência artificial começa agora.",
-        planLabel: "Você adquiriu o",
-        planName: "Plano Enterprise",
-        planThankYou:
-            "Agradecemos por escolher a nossa plataforma!",
-        quickStartTitle: "Trilha de Iniciação Rápida",
-        platformCard: {
-            title: "Conheça a Plataforma",
-            description:
-                "Assista a um tour guiado de 5 minutos sobre as principais funcionalidades.",
-            button: "Ver vídeo",
-        },
-        workflowCard: {
-            title: "Sua Primeira Esteira de Processamento",
-            description:
-                "Siga nosso guia passo-a-passo para criar sua primeira automação em minutos.",
-            button: "Iniciar guia",
-        },
-        docsCard: {
-            title: "Explore a Documentação",
-            description:
-                "Consulte nossa documentação completa para explorar todo o potencial do AI HUB.",
-            button: "Acessar docs",
-        },
-        whatsApp: {
-            support: "Fale com o suporte",
-        }
+    prompts: {
+        createError: "Falha ao criar prompt",
+        createPrompt: "Criar prompt",
+        createSuccess: "Prompt criado com sucesso",
+        deleteError: "Falha ao deletar prompt",
+        deleteSuccess: "Prompt deletado com sucesso",
+        emptyPromptError:
+            "O campo de prompt não pode estar vazio",
+        importButton: "Importar",
+        importError: "Erro ao importar prompts",
+        importPredefined: "Importar pré-definidos",
+        importSubtitle:
+            "Selecione prompts pré-definidos do sistema",
+        importSuccess: "Prompts importados com sucesso",
+        importTitle: "Importar prompts",
+        information: "Informações básicas",
+        labelLoadMore: "Carregar mais",
+        myPromptsBadge: "Meus prompts",
+        namePrompt: "Nome do prompt",
+        newPrompt: "Novo prompt",
+        noPromptsListWereFound:
+            "Nenhum prompt foi encontrado",
+        placeholderNamePrompt: "Insira o nome do prompt",
+        promptContent: "Conteúdo do prompt",
+        refineError: "Falha ao refinar prompt",
+        refinePrompt: "Refinar Prompt",
+        refineSuccess: "Prompt refinado com sucesso",
+        removeAllPrompts: "Remover prompts",
+        searchPrompt: "Buscar prompt",
+        searchPrompts: "Buscar prompts",
+        selectAllTemplates: "Selecionar todos os templates",
+        subtitle: "Gerencia prompts do sistema",
+        subtitleNew: "Criar um novo prompt de IA",
+        title: "Prompts",
+        updateError: "Falha ao atualizar prompt",
+        updateSuccess: "Prompt atualizado com sucesso",
+        viewComplete: "Ver completo",
     },
-    permissions: {
-        groups: {
-            questions: "Perguntas",
-            types: "Tipos",
-            quizzes: "Questionários",
-            documents: "Documentos",
-            management: "Gestão",
-            users: "Usuários",
-            teams: "Times",
-            profiles: "Perfis",
-            workflow: "Esteira de processamento",
-            tools: "Ferramentas",
-            dashboard: "Dashboard",
-            workflowstep: "Etapa da esteira",
-            workflowmanagement: "Gestão de Esteira",
-            prompts: "Prompts",
+    questions: {
+        availableList: "Perguntas disponíveis",
+        createBtn: "Criar pergunta",
+        createdData: "Data de criação",
+        createSuccess: "Pergunta criada com sucesso",
+        descriptionOrQuestionId:
+            "Descrição, ID ou insira uma nova pergunta para cadastrar",
+        editQuestion: "Editar pergunta",
+        editSuccess: "Pergunta editada com sucesso",
+        errors: {
+            createError: "Erro ao criar pergunta",
+            duplicated: "Pergunta duplicada",
+            editError: "Erro ao editar pergunta",
+            invalid: "Pergunta inválida",
+            removeError: "Erro ao remover pergunta",
         },
-        descriptions: {
-            questions: "Visualizar Perguntas",
-            types: "Visualizar Tipos",
-            quizzes: "Visualizar Questionários",
-            documents: "Visualizar Documentos",
-            management: "Visualizar Gestão de tabelas",
-            users: "Visualizar Usuários",
-            teams: "Visualizar Times",
-            profiles: "Visualizar Perfis",
-            workflow: "Visualizar Esteira de processamento",
-            tools: "Visualizar Ferramentas",
-            dashboard: "Visualizar Dashboard",
-            workflowStepView: "Visualizar Etapas",
-            workflowStepAccess: "Acessar Etapas",
-            prompts: "Visualizar Prompts",
+        modalCreate: {
+            save: "Criar pergunta",
+            title: "Criação de pergunta",
         },
+        modalEdit: {
+            save: "Salvar edição",
+            title: "Editar pergunta",
+        },
+        noMoreQuestionsAvailable:
+            "Não existem mais perguntas disponíveis",
+        noQuestionsRegistered:
+            "Não existem perguntas cadastradas",
+        noQuestionsWereFound:
+            "Nenhuma pergunta foi localizada",
+        noQuestionsWereSelected:
+            "Nenhuma pergunta foi selecionada.",
+        notFound: "Não há perguntas cadastradas",
+        numberOfQuestionsHasBeenExceeded:
+            "Número de perguntas foi excedido. Contate o administrador do plano.",
+        questionNotFound: "Pergunta não encontrada",
+        removeSuccess: "Pergunta removida com sucesso",
+        removeTitle:
+            "Você está prestes a deletar uma pergunta do sistema",
+        searchQuestion: "Buscar pergunta",
+        selectQuestions: "Selecione as perguntas",
+        selectToDelete:
+            "Selecione ao menos uma questão para realizar a exclusão.",
+        sendQuestion: "Enviar pergunta",
+        subtitle: "Gerencie perguntas do sistema",
+        title: "Perguntas",
+        viewQuestions: "Visualizar perguntas",
+        youAreAboutToDeleteQuestion:
+            "Você está prestes a deletar <br/> uma pergunta do sistema",
+    },
+    quizzes: {
+        applyingQuestionnaire: "Aplicando questionário",
+        applyingQuestionnaireWait:
+            "Aplicando questionário, aguarde.",
+        applyQuestionnaire: "Aplicar questionário",
+        basicInfo: "Informações Básicas",
+        basicInfoSubtitle:
+            "Configure as informações básicas do questionário",
+        createBtn: "Criar questionário",
+        createdDate: "Data de inclusão",
+        createSuccess: "Questionário criado com sucesso",
+        editSuccess: "Questionário editado com sucesso",
+        errors: {
+            createError: "Erro ao criar questionário",
+            duplicated: "Nome do questionário duplicado",
+            editError: "Erro ao editar questionário",
+            invalid: "Questionário inválido",
+            removeError: "Erro ao remover o questionário",
+        },
+        failedToApplyQuestionnaire:
+            "Falha ao aplicar questionário.",
+        formCreate: {
+            subtitle:
+                "Salve as informações do novo questionário",
+            title: "Novo Questionário",
+        },
+        formEdit: {
+            subtitle:
+                "Atualize as informações do questionário",
+            title: "Edição de Questionário",
+        },
+        formName: "Nome do questionário",
+        formNamePlaceholder:
+            "Digite o nome do questionário",
+        formSelect: "Selecione o tipo de documento",
+        noQuestionnairesWereFound:
+            "Nenhum questionário foi localizado",
+        notFound: "Não há questionários cadastradas",
+        questionnaireAndAi: "Questionários e IA",
+        questionnaireAppliedSuccessfully:
+            "Questionário aplicado com sucesso, aguarde.",
+        questionnaireSearch:
+            "Nome, ID , Tipo de documento ou insira um novo questionário para cadastrar",
+        questions: "Perguntas",
+        questionsSection: {
+            subtitle:
+                "Selecione as perguntas que farão parte deste questionário",
+            title: "Seleção de Perguntas",
+        },
+        removeSuccess: "Questionário removido com sucesso",
+        removeTitle:
+            "Você está prestes a deletar um questionário do sistema",
+        searchQuestionnaire: "Buscar questionário",
+        selectQuestionnaire: "Selecione um questionário",
+        selectToDelete:
+            "Selecione ao menos um questionário para realizar a exclusão.",
+        subtitle: "Gerencie questionários do sistema",
+        tableTitle: "List de questionários",
+        thereIsNotEnoughCredit:
+            "Não há crédito suficiente para aplicar todas as perguntas deste questionário.",
+        title: "Questionários",
+        type: "Tipo de documento",
+        youAreAboutToDeleteQuestionnaire:
+            "Você está prestes a deletar <br/> um questionário do sistema",
+    },
+    template: {
+        addParam: "Adicionar Parâmetro",
+        bodySubtitle:
+            "Digite '{' para ver as variáveis disponíveis.",
+        cancelBtn: "Cancelar",
+        createBtn: "Salvar template",
+        createError: "Erro ao criar template",
+        createSuccess: "Template criado com sucesso",
+        createTemplate: "Criar novo template",
+        editError: "Erro ao atualizar template",
+        editSuccess: "Template atualizado com sucesso",
+        endpointUrl: "URL do Endpoint",
+        endpointUrlPlaceholder:
+            "https://api.exemplo.com/v1/recurso",
+        formCreate: {
+            subtitle:
+                "Configure o modelo da sua requisição API.",
+            title: "Criar Template",
+        },
+        formEdit: {
+            subtitle:
+                "Atualize o modelo da sua requisição API.",
+            title: "Editar Template",
+        },
+        headers: "Cabeçalhos",
+        importCurl: "Importar cURL",
+        invalidJsonFormat: "Formato JSON inválido",
+        keyPlaceholder: "Key (o valor será {{nomeKey}})",
+        method: "Método",
+        name: "Nome",
+        noQueryParameters:
+            "Sem parâmetros de query. Adicione um ou digite na URL.",
+        notFound: "Nenhum template encontrado",
+        queryParameters: "Parâmetros de Query",
+        queryParams: "Parâmetros de Query",
+        removeError: "Erro ao remover template",
+        removeSuccess: "Template removido com sucesso",
+        requestBody: "Corpo da Requisição",
+        requestDetails: "Detalhes da Requisição",
+        subtitle:
+            "Gerencie, teste e edite seus templates de requisição de API.",
+        tableTitle: "Templates",
+        templateName: "Nome do Template",
+        templateNamePlaceholder:
+            "ex. Processamento de OCR de Usuário",
+        title: "Templates de API",
+        unselected: "Selecione um template",
+        url: "URL",
+        variablesTip:
+            "Dica: Use variáveis como '{{ocr}}' ou '{{prompt}}' que serão substituídas no momento da execução.",
+    },
+    tools: {
+        createBtn: "Nova Ferramenta",
+        created: "Criado em",
+        createError: "Erro ao criar Ferramenta",
+        createSuccess: "Ferramenta criada com sucesso",
+        dependencyRequired:
+            "A ferramenta de Prompt requer ao menos uma dependência",
+        dependencyToolNotFound:
+            "Ferramenta de dependência não encontrada",
+        editBtn: "Salvar alterações",
+        editError: "Erro ao editar Ferramenta",
+        editSuccess: "Ferramenta editada com sucesso",
+        entry: "Entrada",
+        form: {
+            connectorApiKey: "Chave de API",
+            connectorUrl: "n8n URL",
+            entries: "Entrada (Input)",
+            entriesEditable: "Entrada editável",
+            entriesSelect: "Selecione o tipo de entrada",
+            invalidConnector:
+                "Conector não respondeu. Url ou chave inválidas",
+            name: "Nome da Ferramenta",
+            outputSelect: "Selecione o tipo de saida",
+            types: "Tipo da Ferramenta",
+            typesSelect: "Selecione tipo da Ferramenta",
+            validatingConnector:
+                "Validando url do  conector",
+            validConnector: "Conector está ativo",
+        },
+        formCreate: {
+            subtitle:
+                "Crie uma nova ferramenta para processar documentos",
+            title: "Nova Ferramenta",
+        },
+        formEdit: {
+            subtitle:
+                "Atualize as informações da ferramenta selecionada",
+            title: "Editar Ferramenta",
+        },
+        index: "Ferramentas",
+        notFound: "Não há ferramentas cadastradas",
+        ocrDependencyRequired:
+            "A ferramenta de Prompt requer uma dependência de uma ferramenta de OCR",
+        removeError: "Erro ao remover Ferramenta",
+        removeSuccess: "Ferramenta removida com sucesso",
+        removeTitle:
+            "Você está prestes a deletar uma ferramenta do sistema",
+        subtitle:
+            "Gerencie e configure suas ferramentas de processamento de documentos",
+        title: "Ferramentas",
+        toolNotFound: "Ferramenta não encontrada",
+        type: "Tipo",
+        validationError: "Erro ao validar campos",
+    },
+    transferListPlaceholder: "Busque na lista",
+    transferListTitle: "Lista para selecionar",
+    types: {
+        createBtn: "Criar tipo",
+        createSuccess: "Tipo criado com sucesso",
+        editSuccess: "Tipo atualizado com sucesso",
+        editTitleType: "Edição de tipo",
+        errors: {
+            invalid: "Tipo inválido",
+            removeError: "Erro ao remover tipo",
+        },
+        newType: "Criar tipo",
+        noDocumentTypeWasFound:
+            "Nenhum tipo de documento foi localizado",
+        removeSuccess: "Tipo removido com sucesso",
+        saveTitleType: "Criação de tipo",
+        saveType: "Criar tipo",
+        searchTypes: "Buscar tipos",
+        selectToDelete:
+            "Selecione ao menos um tipo para realizar a exclusão.",
+        subtitle: "Gerencie tipos de documentos do sistema",
+        title: "Tipos",
+        typeDoc: "Tipo de Documento",
+        typeDocAlreadyExists: "Tipo duplicado",
+        typeNameOrId:
+            "Nome, ID ou insira um novo tipo para cadastrar",
+        youAreAboutToDeleteDocumentType:
+            "Você está prestes a deletar <br/> um tipo de documento do sistema",
+        youAreAboutToDeleteType:
+            "Você está prestes a deletar um tipo do sistema",
+    },
+    unauthorized: {
+        returnToHome: "Retornar",
+        title: "Você não tem permissão para acessar esta tela.",
+    },
+    unexpectedError:
+        "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
+    validation: {
+        confirmedFieldDiffers:
+            "O campo de confirmação difere do original",
+        email: "Email inválido",
+        fillInThisField: "Preencha este campo.",
+        fullname: "Digite pelo menos nome e sobrenome",
+        hasInvalid: "Campos inválidos",
+        max: "Máximo de {limit} caracteres",
+        min: "Mínimo de {limit} caracteres",
+        oneElementArray: "Selecione ao menos uma opção",
+        oneStep:
+            "Ao menos um step é necessário para salvar",
+        password_confirmed:
+            "A confirmação da senha não confere.",
+        password_lowercase:
+            "A senha deve conter pelo menos uma letra minúscula.",
+        password_min:
+            "A senha deve ter no mínimo 6 caracteres.",
+        password_number:
+            "A senha deve conter pelo menos um número.",
+        password_special:
+            "A senha deve conter pelo menos um caractere especial.",
+        password_uppercase:
+            "A senha deve conter pelo menos uma letra maiúscula.",
+        required: "Campo obrigatório",
+    },
+    welcomeMsg: "Bem-vindo",
+    workflow: {
+        access: "Acessar",
+        actions: "Ações",
+        addBtn: "Adicionar Etapa",
+        addBtnDescription:
+            "Clique para criar uma nova etapa",
+        addStep: "Adicionar Etapa",
+        addStepDescription:
+            "Clique para criar uma nova etapa",
+        addToolFlow: "Adicionar Fluxo de Ferramentas",
+        associatedTeams: "Times Associados",
+        basicInfo: "Informações Básicas",
+        boardView: "Visualizando esteira de processamento:",
+        configuredTools: "Ferramentas configuradas",
+        createBtn: "Nova Esteira de Processamento",
+        createError:
+            "Erro ao criar esteira de processamento",
+        createNewStep: "Nova etapa",
+        createSuccess:
+            "Esteira de processamento criada com sucesso",
+        createWorkflow: "Criar Esteira de Processamento",
+        deleteBtn: "Excluir",
+        editError:
+            "Erro ao editar esteira de processamento",
+        editSuccess:
+            "Esteira de processamento editada com sucesso",
+        editTitle: "Editor de Esteira de Processamento",
+        editToolFlow: "Editar Fluxo de Ferramentas",
+        error: "Erro ao buscar esteiras de processamento",
+        finalize: "Finalizar",
+        formCreate: {
+            subtitle:
+                "Siga as etapas para configurar seu Esteira de Processamento.",
+            title: "Criar Esteira de Processamento",
+        },
+        formEdit: {
+            subtitle:
+                "Siga as etapas para configurar seu Esteira de Processamento.",
+            title: "Editar Esteira de Processamento",
+        },
+        index: "Esteira de Processamento",
+        labelWatchingWorkflow:
+            "Visualizando Esteira de Processamento:",
+        labelWorkflowBoard:
+            "Board de Processamento de Documentos",
+        labelWorkflowDocs:
+            "Esteira de Processamento de documentos",
+        labelWorkflowSubTitle:
+            "Visualize o fluxo de documentos através das etapas de processamento",
+        leaveMessage:
+            "Você fez alterações nesta esteira que ainda não foram salvas, se sair agora todos os dados editados serão perdidos",
+        loadError:
+            "Erro ao carregar Esteira de Processamento",
+        manage: "Gerenciar Esteira de Processamento:",
+        managementSubtitle:
+            "Gerencie e configure esteiras de processamento de documentos",
+        managementTitle:
+            "Gestão de Esteiras de Processamento",
+        name: "Nome da esteira",
+        nameAndAssociations: "Nome e Associações",
+        namePlaceholder: "Ex: Aprovação de Contratos",
+        next: "Próximo",
+        noStepsAvailable:
+            "Nenhuma etapa disponível. Por favor, adicione etapas na fase anterior.",
+        notFound:
+            "Nenhuma esteira de processamento foi encontrada",
+        phase1Error: "Erro ao salvar informações básicas",
+        phase1Success:
+            "Informações básicas salvas com sucesso",
+        phase2Error: "Erro ao salvar etapas",
+        phase2Success: "Etapas salvas com sucesso",
+        phase3Error: "Erro ao salvar ferramentas",
+        phase3Success: "Ferramentas salvas com sucesso",
+        previous: "Anterior",
+        profiles: "Perfil responsável",
+        removeError:
+            "Erro ao remover esteira de processamento",
+        removeSuccess:
+            "Esteira de processamento removida com sucesso",
+        removeToolFlow: "Remover Fluxo",
+        responsableTeam: "Time responsável",
+        responsible: "Responsável",
+        saveChanges: "Salvar Alterações",
+        saveStep: "Salvar etapa",
+        selectProfile: "Selecione um perfil",
+        selectStatus: "Selecione um status",
+        selectWorkflow:
+            "Selecione uma esteira de processamento",
+        sidebar: {
+            index: "Esteira de Processamento de documentos",
+            management:
+                "Gestão de Esteira de Processamentos",
+        },
+        statusList: {
+            analyzed: "Análisado",
+            approved: "Aprovado",
+            awaitinganalysis: "Esperando Análise",
+            done: "Finalizado",
+            waitingforapproval: "Esperando Aprovação",
+        },
+        stepFlow: "Automação de documentos",
+        stepNamePlaceholder: "Nome da etapa",
+        steps: "Etapas do Esteira de Processamento",
+        stepsTitle: "Etapas do Esteira de Processamento",
+        stepSubtitle: "Configure as regras e responsáveis",
+        stepTitle: "Etapa do Esteira de Processamento",
+        subtitle:
+            "Visualize o fluxo de documentos através das etapas de processamento",
+        subtitleEditor:
+            "Gerencie e configure as esteiras de processamento de documentos",
+        teams: "Times associados",
+        title: "Board de Processamento de Documentos",
+        toolFlowsTitle: "Adicionar Fluxo de Ferramentas",
+        tools: "Ferramentas",
     },
 };
 
