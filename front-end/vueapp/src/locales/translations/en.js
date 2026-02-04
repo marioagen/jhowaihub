@@ -863,6 +863,7 @@ const english = {
         dependencyRequired:
             "Prompt tool requires at least one dependency",
         dependencyToolNotFound: "Dependency tool not found",
+        duplicated: "Duplicated tool name",
         editBtn: "Save changes",
         editError: "Error updating tool",
         editSuccess: "Tool updated successfully",

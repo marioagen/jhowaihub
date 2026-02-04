@@ -888,6 +888,7 @@ const portuguese = {
             "A ferramenta de Prompt requer ao menos uma dependência",
         dependencyToolNotFound:
             "Ferramenta de dependência não encontrada",
+        duplicated: "Nome da ferramenta duplicado",
         editBtn: "Salvar alterações",
         editError: "Erro ao editar Ferramenta",
         editSuccess: "Ferramenta editada com sucesso",
