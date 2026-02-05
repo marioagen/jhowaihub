@@ -1,10 +1,59 @@
-﻿import axios from "axios";
+import axios from "axios";
 import qs from "qs";
 import router from "@/router";
 import store from "@/store";
 import { pageview } from "vue-gtag";
+import { jwtDecode } from "jwt-decode";
 
 const api = axios.create();
+
+/** Timer for proactive token refresh (refresh before expiry to avoid 401). */
+let _refreshTimerId = null;
+
+/**
+ * Cancels any scheduled proactive token refresh (e.g. on logout).
+ */
+export function cancelTokenRefresh() {
+    if (_refreshTimerId) {
+        clearTimeout(_refreshTimerId);
+        _refreshTimerId = null;
+    }
+}
+
+/**
+ * Schedules a single proactive refresh of the access token before it expires.
+ * Call after login and after each successful refresh so the user stays logged in.
+ */
+export function scheduleTokenRefresh() {
+    cancelTokenRefresh();
+    const token = store.state?.userProfile?.tokenApi;
+    if (!token) return;
+    try {
+        const decoded = jwtDecode(token);
+        const exp = decoded.exp;
+        if (!exp) return;
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        const secondsUntilExpiry = exp - nowSeconds;
+        const refreshBeforeSeconds = 60;
+        const delayMs = Math.max(1000, (secondsUntilExpiry - refreshBeforeSeconds) * 1000);
+        _refreshTimerId = setTimeout(async () => {
+            _refreshTimerId = null;
+            try {
+                const rs = await api.post("/Account/refresh-token", null);
+                if (rs?.data?.token) {
+                    store.commit("updateUserProfile", {
+                        amount: { ...store.state.userProfile, tokenApi: rs.data.token },
+                    });
+                    scheduleTokenRefresh();
+                }
+            } catch (_) {
+                // Proactive refresh failed; next API call will trigger 401 and interceptor will handle it
+            }
+        }, delayMs);
+    } catch (_) {
+        // Invalid token, don't schedule
+    }
+}
 let baseUrlApi = ENV_CONFIG.VUE_APP_BASE_URL_API;
 baseUrlApi = baseUrlApi.replace(/\/$/, "") + "/api";
 api.defaults.baseURL = baseUrlApi;
@@ -39,46 +88,40 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
     response => response,
-    async (error) => {        
-        const maxRequests = 2;
+    async (error) => {
+        const maxRefreshAttempts = 3;
         const originalRequest = error.config;
-        if (originalRequest.url !== "/Account/Login-sso" &&  originalRequest.url != "/Account/Login" && originalRequest.url != "/Account/refresh-token" && originalRequest.url != "/Account/logout" && error.response) {
-            if (error.response.status === 401 && !originalRequest._retry) {
-                originalRequest._retry = true;
-                if (!originalRequest._retry) {
-                    originalRequest._retry = true;
-                    originalRequest._retryCount = 1;
-                } else {
-                    originalRequest._retryCount += 1;
-                }
-            
-                if (originalRequest._retryCount > maxRequests) {
-                    console.log("Número máximo de tentativas de atualização do token atingido.");
-                    router.push({ name: "Logout" });
-                    return Promise.reject(error);
-                }
+        const isAuthEndpoint =
+            originalRequest.url === "/Account/Login-sso" ||
+            originalRequest.url === "/Account/Login" ||
+            originalRequest.url === "/Account/refresh-token" ||
+            originalRequest.url === "/Account/logout";
 
-                try {
-                    const rs = await api.post("/Account/refresh-token", null);
-                    if (rs && rs.data && rs.data.token) {
-                        store.commit("updateUserProfile", {
-                            amount: {
-                                ...store.state.userProfile,
-                                tokenApi: rs.data.token
-                            }
-                        });
+        if (!isAuthEndpoint && error.response?.status === 401) {
+            originalRequest._refreshCount = (originalRequest._refreshCount || 0) + 1;
 
-                        originalRequest.headers["Authorization"] = `Bearer ${rs.data.token}`;
-                        return api.request(originalRequest);
-                    } else {
-                        router.push({ name: "Logout" });
-                        return Promise.reject(error);
-                    }
-                } catch (refreshError) {
-                    console.log(refreshError);
-                    router.push({ name: "Logout" });
-                    return Promise.reject(refreshError);
+            if (originalRequest._refreshCount > maxRefreshAttempts) {
+                console.warn("Número máximo de tentativas de atualização do token atingido.");
+                router.push({ name: "Logout" });
+                return Promise.reject(error);
+            }
+
+            try {
+                const rs = await api.post("/Account/refresh-token", null);
+                if (rs?.data?.token) {
+                    store.commit("updateUserProfile", {
+                        amount: { ...store.state.userProfile, tokenApi: rs.data.token },
+                    });
+                    scheduleTokenRefresh();
+                    originalRequest.headers["Authorization"] = `Bearer ${rs.data.token}`;
+                    return api.request(originalRequest);
                 }
+                router.push({ name: "Logout" });
+                return Promise.reject(error);
+            } catch (refreshError) {
+                console.warn("Falha ao renovar token:", refreshError?.response?.status ?? refreshError);
+                router.push({ name: "Logout" });
+                return Promise.reject(refreshError);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Application.Services
@@ -6,14 +7,21 @@ namespace WoopiAiHub.Application.Services
     public class RefreshTokenServices : IRefreshTokenServices
     {
         private readonly IDistributedCache _cache;
-        private static readonly DistributedCacheEntryOptions CacheOptions = new()
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(7)
-        };
+        private readonly IConfiguration _config;
 
-        public RefreshTokenServices(IDistributedCache cache)
+        public RefreshTokenServices(IDistributedCache cache, IConfiguration config)
         {
             _cache = cache;
+            _config = config;
+        }
+
+        private DistributedCacheEntryOptions GetCacheOptions()
+        {
+            var days = _config.GetValue("JWT:RefreshTokenExpirationDays", 7);
+            return new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(days)
+            };
         }
 
         /// <summary>
@@ -27,7 +35,7 @@ namespace WoopiAiHub.Application.Services
         public async Task SaveAsync(string userEmail, string refreshToken)
         {
             var key = GetKey(refreshToken);
-            await _cache.SetStringAsync(key, userEmail, CacheOptions);
+            await _cache.SetStringAsync(key, userEmail, GetCacheOptions());
         }
 
         /// <summary>
