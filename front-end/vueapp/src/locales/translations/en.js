@@ -369,6 +369,10 @@ const english = {
                 "Flow inserted successfully",
             progressFlowUpdateFail:
                 "Failed to update flow. Flow already contains output data for tools.",
+            promptRequired:
+                "Select at least one prompt",
+            configurationSaved:
+                "Configuration saved successfully"
         },
         hideTools: "Hide Tools",
         showTools: "Add Tools",

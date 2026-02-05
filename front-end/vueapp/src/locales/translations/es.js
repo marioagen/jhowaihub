@@ -384,6 +384,10 @@ const spanish = {
                 "Flujo insertado exitosamente",
             progressFlowUpdateFail:
                 "No se pudo actualizar el flujo. El flujo ya contiene datos de salida para las herramientas.",
+            promptRequired:
+                "Seleccione al menos un prompt",
+            configurationSaved:
+                "Configuración guardada exitosamente"
         },
         hideTools: "Ocultar Herramientas",
         showTools: "Agregar Herramientas",

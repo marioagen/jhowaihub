@@ -381,6 +381,10 @@ const portuguese = {
                 "Fluxo inserido com sucesso",
             progressFlowUpdateFail:
                 "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
+            promptRequired:
+                "Selecione ao menos um prompt",
+            configurationSaved:
+                "Configuração salva com sucesso"
         },
         hideTools: "Ocultar Ferramentas",
         save: "Salvar",
