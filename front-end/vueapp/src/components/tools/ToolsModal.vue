@@ -289,13 +289,23 @@
                                 icon: "CircleCheckBig",
                             });
                         }
-                        else{
-                            this.$notify({
-                                title: "tools.index",
-                                message: result.error,
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
+                        else {
+                            if (result.error == 1) {
+                                this.$notify({
+                                    title: "tools.index",
+                                    message: "tools.duplicated",
+                                    variant: "danger",
+                                    icon: "CircleX",
+                                });
+                            }
+                            else {
+                                this.$notify({
+                                    title: "tools.index",
+                                    message: "tools.createError",
+                                    variant: "danger",
+                                    icon: "CircleX",
+                                });
+                            }
                         }
                     })
                     .finally(() => {
@@ -316,12 +326,12 @@
                                 icon: "CircleCheckBig",
                             });
                         }
-                        else{
+                        else {
                             this.$notify({
-                                title: "tools.index",
-                                message:  result.error,
-                                variant: "danger",
-                                icon: "CircleX",
+                                 title: "tools.index",
+                                 message: "tools.editError",
+                                 variant: "danger",
+                                 icon: "CircleX",
                             });
                         }
                     })
