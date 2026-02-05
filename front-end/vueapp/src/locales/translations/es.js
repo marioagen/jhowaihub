@@ -891,6 +891,7 @@ const spanish = {
             "La herramienta de Prompt requiere al menos una dependencia",
         dependencyToolNotFound:
             "Herramienta de dependencia no encontrada",
+        duplicated: "Nombre de herramienta duplicado",
         editBtn: "Guardar cambios",
         editError: "Error al actualizar la herramienta",
         editSuccess: "Herramienta actualizada con éxito",

@@ -40,7 +40,7 @@ export default {
                 return true;
             })
             .catch((e) => {
-                const message = e?.response?.data?.detail || "Erro desconhecido";
+                const message = e?.response?.data?.errorCode
                 return {
                     error: message,
                 };
@@ -53,7 +53,7 @@ export default {
                 return true;
             })
             .catch((e) => {
-                const message = e?.response?.data?.message || "Erro desconhecido";
+                const message = e?.response?.data?.errorCode
                 return {
                     error: message,
                 };
