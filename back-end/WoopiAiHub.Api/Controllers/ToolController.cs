@@ -104,20 +104,5 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _toolServices.ValidateConnector(toolConnectorDto);
             return Ok(result);
         }
-
-        /// <summary>
-        /// Creates a new template step tool using the specified data transfer object.
-        /// </summary>
-        /// <param name="dto">An object containing the details required to create the template step tool. Cannot be null.</param>
-        /// <returns>An <see cref="IActionResult"/> that contains a boolean value indicating whether the template step tool was
-        /// created successfully.</returns>
-        [HttpPost("Template")]
-        [SwaggerOperation("Creates a new template step tool using the specified data transfer object")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> CreateTemplateStepTool([FromBody] ApiTemplateStepToolCreateDto dto)
-        {
-            var result = await _toolServices.CreateTemplateStepTool(dto);
-            return Ok(result);
-        }
     }
 }

@@ -940,33 +940,5 @@ namespace WoopiAiHub.Application.Services
             }
             return workflow;
         }
-
-        /// <summary>
-        /// Creates a new step tool association for the specified step and tool.
-        /// </summary>
-        /// <param name="dto">An object containing the details required to create the step tool, including the step ID, tool ID, order,
-        /// and position coordinates. Cannot be null.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the identifier of the newly
-        /// created step tool.</returns>
-        /// <exception cref="AppException">Thrown if the specified step or tool does not exist.</exception>
-        public async Task<int> CreateStepTool(RequestCreateStepToolDto dto)
-        {
-            var step = await _stepRepository.FindByIdWithTools(dto.StepId) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
-            _ = await _toolRepository.FindByIdAsync(dto.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
-
-            var newStepTool = new StepTool(
-                0,
-                DateTime.Now,
-                dto.StepId,
-                dto.ToolId,
-                dto.Order,
-                dto.PositionX,
-                dto.PositionY
-            );
-
-            step.AddStepTool(newStepTool);
-            await _stepRepository.Update(step);
-            return newStepTool.Id;
-        }
     }
 }

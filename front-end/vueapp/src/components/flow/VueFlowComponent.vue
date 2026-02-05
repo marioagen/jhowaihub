@@ -169,6 +169,9 @@
                 this.nodes = [this.createStartNode()];
                 this.edges = [];
             },
+            reloadFlow() {
+                this.getFlow();
+            },
             async getFlow() {
                 try {
                     let stepTools = this.step
@@ -200,8 +203,8 @@
                                     stepTool.dependencies,
                                 subtitle:
                                     stepTool.parameters &&
-                                    stepTool.parameters.length >
-                                        0
+                                    stepTool.parameters
+                                        .length > 0
                                         ? stepTool
                                               .parameters[0]
                                               .promptName
@@ -247,7 +250,9 @@
                     ];
                     this.edges = mappedEdges;
 
-                    await this.enrichNodesWithSubtitles(this.nodes);
+                    await this.enrichNodesWithSubtitles(
+                        this.nodes
+                    );
                 } catch (e) {
                     LogService.showMessage(
                         "Erro ao carregar fluxo"
@@ -458,24 +463,23 @@
                 );
 
                 if (promptNodes.length > 0) {
-                     const prompts =
+                    const prompts =
                         await PromptService.getPrompts();
-                     promptNodes.forEach((node) => {
-                         const promptId =
-                            node.data.parameters[0]
-                                    .value;
-                         if (promptId) {
+                    promptNodes.forEach((node) => {
+                        const promptId =
+                            node.data.parameters[0].value;
+                        if (promptId) {
                             const prompt = prompts.find(
                                 (p) =>
                                     p.id.toString() ===
                                     promptId.toString()
-                                );
+                            );
                             if (prompt) {
-                                 node.data.subtitle =
-                                 prompt.name;
+                                node.data.subtitle =
+                                    prompt.name;
                             }
-                         }
-                     });
+                        }
+                    });
                 }
             },
         },
@@ -483,6 +487,11 @@
             this.getToolsList();
             this.getFlow();
         },
+        expose: [
+            "updateNodeInput",
+            "buildFlowPayload",
+            "reloadFlow",
+        ],
     };
 </script>
 <style>

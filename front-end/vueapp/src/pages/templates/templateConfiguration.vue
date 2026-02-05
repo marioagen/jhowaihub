@@ -101,7 +101,7 @@
                         >
                             <button
                                 type="button"
-                                :class="`btn btn-${confirmVariant}`"
+                                class="btn btn-primary"
                                 :disabled="
                                     isLoading ||
                                     !selectedTemplate
@@ -156,9 +156,6 @@
             };
         },
         computed: {
-            confirmVariant() {
-                return "primary";
-            },
             computedUrl() {
                 if (
                     !this.selectedTemplate ||
@@ -223,32 +220,117 @@
                 this.editableBody = "";
             },
             loadExistingStepToolParameter() {
-                const stepToolId =
-                    this.$route.params.stepToolId;
-                if (!stepToolId) return;
+                const flowStateJson = localStorage.getItem(
+                    "flow_state_params"
+                );
 
-                this.isLoading = true;
-                ToolsServices.getStepToolById(stepToolId)
-                    .then((data) => {
-                        if (data && data.templateToolId) {
-                            this.selectedTemplateId =
-                                data.templateToolId;
-                            this.onTemplateSelect();
+                if (!flowStateJson) {
+                    return;
+                }
 
-                            // TODO: Criar lógica para pegar params e preencher campos
-                        }
-                    })
-                    .catch(() => {
-                        this.$notify({
-                            title: "common.error",
-                            message: "template.loadError",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    })
-                    .finally(() => {
+                try {
+                    const flowState =
+                        JSON.parse(flowStateJson);
+                    const selectedNode =
+                        flowState.selectedNode;
+
+                    if (
+                        !selectedNode ||
+                        !selectedNode.data.parameters ||
+                        selectedNode.data.parameters
+                            .length === 0
+                    ) {
+                        return;
+                    }
+
+                    const parameter =
+                        selectedNode.data.parameters[0];
+                    if (!parameter.value) {
+                        return;
+                    }
+
+                    this.isLoading = true;
+
+                    const savedConfig = JSON.parse(
+                        parameter.value
+                    );
+
+                    if (savedConfig.query) {
+                        this.editableQueryParams =
+                            Object.entries(
+                                savedConfig.query
+                            ).map(([key, value]) => ({
+                                key,
+                                value,
+                            }));
+                    }
+
+                    if (savedConfig.headers) {
+                        this.editableHeaders =
+                            Object.entries(
+                                savedConfig.headers
+                            ).map(([key, value]) => ({
+                                key,
+                                value,
+                            }));
+                    }
+
+                    if (savedConfig.body) {
+                        this.editableBody =
+                            typeof savedConfig.body ===
+                            "string"
+                                ? savedConfig.body
+                                : JSON.stringify(
+                                      savedConfig.body,
+                                      null,
+                                      2
+                                  );
+                    }
+
+                    if (savedConfig.templateId) {
+                        const checkTemplates = setInterval(
+                            () => {
+                                if (
+                                    this.templates.length >
+                                    0
+                                ) {
+                                    clearInterval(
+                                        checkTemplates
+                                    );
+
+                                    const matchingTemplate =
+                                        this.templates.find(
+                                            (t) =>
+                                                t.id ===
+                                                savedConfig.templateId
+                                        );
+
+                                    if (matchingTemplate) {
+                                        this.selectedTemplateId =
+                                            matchingTemplate.id;
+                                        this.selectedTemplate =
+                                            matchingTemplate;
+                                    }
+                                    this.isLoading = false;
+                                }
+                            },
+                            100
+                        );
+
+                        setTimeout(() => {
+                            clearInterval(checkTemplates);
+                            this.isLoading = false;
+                        }, 5000);
+                    } else {
                         this.isLoading = false;
-                    });
+                    }
+                } catch (error) {
+                    console.error(
+                        "Error loading existing parameters:",
+                        error
+                    );
+                    this.isLoading = false;
+                }
             },
             loadTemplates() {
                 this.isLoading = true;
@@ -356,11 +438,101 @@
                     return [];
                 }
             },
+            formatTemplateJson(json, templateId) {
+                const formatted = {
+                    templateId: templateId,
+                    method: json.method,
+                    url: json.url,
+                };
+
+                if (json.queryTemplate) {
+                    try {
+                        const queryArray =
+                            typeof json.queryTemplate ===
+                            "string"
+                                ? JSON.parse(
+                                      json.queryTemplate
+                                  )
+                                : json.queryTemplate;
+
+                        const queryObj = {};
+                        queryArray.forEach((param) => {
+                            if (
+                                param.key &&
+                                param.value !== undefined
+                            ) {
+                                queryObj[param.key] =
+                                    param.value;
+                            }
+                        });
+
+                        if (
+                            Object.keys(queryObj).length > 0
+                        ) {
+                            formatted.query = queryObj;
+                        }
+                    } catch (e) {
+                        console.error(
+                            "Error parsing queryTemplate:",
+                            e
+                        );
+                    }
+                }
+
+                if (json.headerTemplate) {
+                    try {
+                        const headerArray =
+                            typeof json.headerTemplate ===
+                            "string"
+                                ? JSON.parse(
+                                      json.headerTemplate
+                                  )
+                                : json.headerTemplate;
+
+                        const headerObj = {};
+                        headerArray.forEach((header) => {
+                            if (
+                                header.key &&
+                                header.value !== undefined
+                            ) {
+                                headerObj[header.key] =
+                                    header.value;
+                            }
+                        });
+
+                        if (
+                            Object.keys(headerObj).length >
+                            0
+                        ) {
+                            formatted.headers = headerObj;
+                        }
+                    } catch (e) {
+                        console.error(
+                            "Error parsing headerTemplate:",
+                            e
+                        );
+                    }
+                }
+
+                if (json.bodyTemplate) {
+                    try {
+                        formatted.body =
+                            typeof json.bodyTemplate ===
+                            "string"
+                                ? JSON.parse(
+                                      json.bodyTemplate
+                                  )
+                                : json.bodyTemplate;
+                    } catch (e) {
+                        formatted.body = json.bodyTemplate;
+                    }
+                }
+
+                return JSON.stringify(formatted);
+            },
             handleConfirm() {
                 this.isLoading = true;
-                const dto = {
-                    stepToolId:
-                        this.$route.params.stepToolId,
+                const json = {
                     method: this.selectedTemplate.method,
                     url: this.computedUrl,
                     bodyTemplate: this.editableBody,
@@ -378,41 +550,65 @@
                             : null,
                 };
 
-                ToolsServices.createTemplateStepTool(dto)
-                    .then((result) => {
-                        if (!result) {
-                            this.$notify({
-                                title: "common.error",
-                                message:
-                                    "template.configuration.saveError",
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                            return;
-                        }
+                const formattedJson =
+                    this.formatTemplateJson(
+                        json,
+                        this.selectedTemplateId
+                    );
 
-                        this.$notify({
-                            title: "common.success",
-                            message:
-                                "template.configuration.savedSuccessfully",
-                            variant: "success",
-                            icon: "CheckCircle",
-                        });
-                        this.handleNavigateBack();
-                    })
-                    .catch((e) => {
-                        this.$notify({
-                            title: "common.error",
-                            message:
-                                e.response?.data?.message ||
-                                "template.configuration.saveError",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
+                const newParam = {
+                    stepToolId:
+                        this.$route.params.stepToolId,
+                    value: formattedJson,
+                };
+
+                const flowStateJson = localStorage.getItem(
+                    "flow_state_params"
+                );
+
+                if (!flowStateJson) {
+                    this.$notify({
+                        title: "common.error",
+                        message:
+                            "template.configuration.saveError",
+                        variant: "danger",
+                        icon: "CircleX",
                     });
+                    this.isLoading = false;
+                    this.handleNavigateBack();
+                    return;
+                }
+
+                const flowState = JSON.parse(flowStateJson);
+
+                let node = flowState.nodes.find(
+                    (n) =>
+                        n.id === flowState.selectedNode.id
+                );
+
+                if (!node) {
+                    this.$notify({
+                        title: "common.error",
+                        message:
+                            "template.configuration.saveError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                    this.isLoading = false;
+                    this.handleNavigateBack();
+                    return;
+                }
+
+                node.data.parameters = [newParam];
+                flowState.selectedNode = undefined;
+
+                localStorage.setItem(
+                    "flow_state_params",
+                    JSON.stringify(flowState)
+                );
+
+                this.isLoading = false;
+                this.handleNavigateBack();
             },
             handleCancel() {
                 this.handleNavigateBack();

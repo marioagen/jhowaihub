@@ -431,6 +431,17 @@ const routes = [
         },
         beforeEnter: authenticate,
     },
+    {
+        path: "/flow/tools/template",
+        name: "TemplateConfiguration",
+        component: TemplateConfiguration,
+        meta: {
+            layout: "default",
+            module: "Workflow",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
 ];
 
 const router = createRouter({

@@ -565,9 +565,6 @@
                 }
             },
             openNodeConfig(nodes, selectedNode) {
-                console.log(nodes);
-                console.log(selectedNode);
-
                 this.nodes = nodes;
                 this.nodeFlow = selectedNode;
                 this.parameters =
@@ -580,46 +577,25 @@
                     selectedNode.data.dependencies;
 
                 if (this.isTargetTool(ToolType.API)) {
-                    if (selectedNode.data.stepToolId) {
-                        this.$router.push({
-                            name: "TemplateConfiguration",
-                            params: {
-                                stepToolId:
-                                    selectedNode.data
-                                        .stepToolId,
-                            },
-                        });
-                        return;
-                    }
-
-                    const dto = {
-                        toolId: selectedNode.data.toolId,
-                        stepId: this.stepId,
-                        order: selectedNode.data.order,
-                        positionX: selectedNode.position.x,
-                        positionY: selectedNode.position.y,
+                    const state = {
+                        selectedNode: selectedNode,
+                        previousStepTools:
+                            this.previousStepTools,
+                        selectedDependencies:
+                            this.selectedDependencies,
+                        nodes: nodes,
+                        edges: this.$refs.VueflowComponent
+                            .edges,
+                        step: this.step,
                     };
+                    localStorage.setItem(
+                        "flow_state_params",
+                        JSON.stringify(state)
+                    );
 
-                    WorkflowService.createStepTool(dto)
-                        .then((result) => {
-                            this.$router.push({
-                                name: "TemplateConfiguration",
-                                params: {
-                                    stepToolId: result,
-                                },
-                            });
-                        })
-                        .catch((e) => {
-                            this.$notify({
-                                title: "flow.title",
-                                message:
-                                    e.message ||
-                                    "flow.formFlow.progressFlowFail",
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                        });
-
+                    this.$router.push({
+                        name: "TemplateConfiguration",
+                    });
                     return;
                 }
 
@@ -1025,18 +1001,11 @@
             },
             async fetchStepName() {
                 if (this.workflowId) {
-                    try {
-                        if (this.stepId != 0) {
-                            this.step =
-                                await WorkflowService.getStepById(
-                                    this.stepId
-                                );
-                        }
-                    } catch (error) {
-                        console.error(
-                            "Error fetching step name:",
-                            error
-                        );
+                    if (this.stepId != 0) {
+                        this.step =
+                            await WorkflowService.getStepById(
+                                this.stepId
+                            );
                     }
                 }
             },
@@ -1049,9 +1018,97 @@
                         selectedPrompt.name;
                 }
             },
+            loadStorageFlowState() {
+                const flowStateJson = localStorage.getItem(
+                    "flow_state_params"
+                );
+                if (!flowStateJson || !this.step) {
+                    return;
+                }
+
+                const flowState = JSON.parse(flowStateJson);
+
+                if (
+                    flowState.nodes &&
+                    this.step.stepTools
+                ) {
+                    flowState.nodes.forEach((node) => {
+                        if (node.id === "start") {
+                            return;
+                        }
+
+                        let stepTool =
+                            this.step.stepTools.find(
+                                (st) =>
+                                    st.id.toString() ===
+                                    node.id
+                            );
+
+                        if (stepTool) {
+                            stepTool.parameters =
+                                node.data.parameters || [];
+                            stepTool.dependencies =
+                                node.data.dependencies ||
+                                [];
+                            stepTool.positionX =
+                                node.position.x;
+                            stepTool.positionY =
+                                node.position.y;
+                        } else {
+                            const newStepTool = {
+                                id: parseInt(node.id) || 0,
+                                positionX: node.position.x,
+                                positionY: node.position.y,
+                                toolId: node.data.toolId,
+                                order: node.data.order,
+                                parameters:
+                                    node.data.parameters ||
+                                    [],
+                                dependencies:
+                                    node.data
+                                        .dependencies || [],
+                                tool: {
+                                    id: node.data.toolId,
+                                    name: node.label,
+                                    isEditableInput:
+                                        node.data
+                                            .isEditableInput,
+                                    toolType:
+                                        node.data.toolType,
+                                },
+                            };
+
+                            this.step.stepTools.push(
+                                newStepTool
+                            );
+                        }
+                    });
+                }
+
+                this.$nextTick(() => {
+                    if (this.$refs.VueflowComponent) {
+                        this.$refs.VueflowComponent.reloadFlow();
+
+                        this.$notify({
+                            title: "flow.title",
+                            message:
+                                "Template configurado com sucesso",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    }
+                });
+
+                localStorage.removeItem(
+                    "flow_state_params"
+                );
+            },
         },
-        mounted() {
-            this.fetchStepName();
+        async mounted() {
+            await this.fetchStepName();
+            setTimeout(() => {
+                this.loadStorageFlowState();
+            }, 100);
         },
         computed: {
             selectedItem() {

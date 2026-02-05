@@ -244,16 +244,4 @@ export default {
                 };
             });
     },
-    createStepTool(dto) {
-        return api
-            .post(`/Workflow/StepTool`, dto)
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
-    },
 };
