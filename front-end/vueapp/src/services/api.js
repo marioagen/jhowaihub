@@ -4,15 +4,12 @@ import router from "@/router";
 import store from "@/store";
 import { pageview } from "vue-gtag";
 import { jwtDecode } from "jwt-decode";
+import LogService from "@/services/log/logService";
 
 const api = axios.create();
 
-/** Timer for proactive token refresh (refresh before expiry to avoid 401). */
 let _refreshTimerId = null;
 
-/**
- * Cancels any scheduled proactive token refresh (e.g. on logout).
- */
 export function cancelTokenRefresh() {
     if (_refreshTimerId) {
         clearTimeout(_refreshTimerId);
@@ -20,10 +17,6 @@ export function cancelTokenRefresh() {
     }
 }
 
-/**
- * Schedules a single proactive refresh of the access token before it expires.
- * Call after login and after each successful refresh so the user stays logged in.
- */
 export function scheduleTokenRefresh() {
     cancelTokenRefresh();
     const token = store.state?.userProfile?.tokenApi;
@@ -47,11 +40,15 @@ export function scheduleTokenRefresh() {
                     scheduleTokenRefresh();
                 }
             } catch (_) {
-                // Proactive refresh failed; next API call will trigger 401 and interceptor will handle it
+                LogService.showMessage(
+                    "Erro ao renovar o token"
+                );
             }
         }, delayMs);
     } catch (_) {
-        // Invalid token, don't schedule
+        LogService.showMessage(
+            "Erro rodar a tarefa de renovação de token"
+        );
     }
 }
 let baseUrlApi = ENV_CONFIG.VUE_APP_BASE_URL_API;
