@@ -62,12 +62,13 @@
             class="btn-toggle-nav list-unstyled fw-normal pb-1 small"
         >
             <li
-                v-for="item in filteredMenuItems"
+                v-for="(item, index) in filteredMenuItems"
                 :key="item.labelKey"
-                class="mb-1"
+                class="mb-1 sidebar-menu-item-enter"
                 :class="{
                     'is-active': isRouteActive(item),
                 }"
+                :style="{ '--item-index': index }"
             >
                 <router-link
                     :class="[
@@ -402,5 +403,24 @@
 
     .custom-menu-item:not(.active) {
         opacity: 0.8;
+    }
+
+    .sidebar-menu-item-enter {
+        opacity: 0;
+        transform: translateX(-12px);
+        animation: sidebar-item-enter 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94)
+            forwards;
+        animation-delay: calc(var(--item-index) * 45ms);
+    }
+
+    @keyframes sidebar-item-enter {
+        from {
+            opacity: 0;
+            transform: translateX(-12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
 </style>
