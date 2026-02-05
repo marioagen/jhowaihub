@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
@@ -43,7 +43,6 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x["Jwt:Issuer"]).Returns("http://localhost");
             configMock.Setup(x => x["Jwt:Audience"]).Returns("http://localhost");
 
-            // Mock JWT configuration sections for GetValue<int> calls
             var mockJwtAccessTokenSection = new Mock<IConfigurationSection>();
             mockJwtAccessTokenSection.Setup(x => x.Value).Returns("60");
             configMock.Setup(x => x.GetSection("JWT:AccessTokenExpirationMinutes")).Returns(mockJwtAccessTokenSection.Object);
