@@ -33,7 +33,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             this._fixture = accountFixture;
             _mocker = new AutoMocker();
-            
+
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(x => x["JWT:Key"]).Returns(Guid.NewGuid().ToString());
             configMock.Setup(x => x["KeyAccess"]).Returns("mockKey");
@@ -42,6 +42,16 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x["JWT:Key"]).Returns(Guid.NewGuid().ToString());
             configMock.Setup(x => x["Jwt:Issuer"]).Returns("http://localhost");
             configMock.Setup(x => x["Jwt:Audience"]).Returns("http://localhost");
+
+            // Mock JWT configuration sections for GetValue<int> calls
+            var mockJwtAccessTokenSection = new Mock<IConfigurationSection>();
+            mockJwtAccessTokenSection.Setup(x => x.Value).Returns("60");
+            configMock.Setup(x => x.GetSection("JWT:AccessTokenExpirationMinutes")).Returns(mockJwtAccessTokenSection.Object);
+
+            var mockJwtRefreshTokenSection = new Mock<IConfigurationSection>();
+            mockJwtRefreshTokenSection.Setup(x => x.Value).Returns("7");
+            configMock.Setup(x => x.GetSection("JWT:RefreshTokenExpirationDays")).Returns(mockJwtRefreshTokenSection.Object);
+
             _mocker.Use(configMock);
 
             _accountServices = _mocker.CreateInstance<AccountServices>();
@@ -292,7 +302,7 @@ namespace WoopiAiHub.UnitTests.Services
             {
                 { "group1", permissions}
             };
-            
+
             var expectedRefreshToken = "new-refresh-token";
             var responseCheckAccess = _fixture.FindValidResponseCheckAccessDto();
             var profiles = new List<string> { "admin", "profile2" };
@@ -511,7 +521,7 @@ namespace WoopiAiHub.UnitTests.Services
             var userAccess = new ResponseCheckAccessDto
             {
                 HasAccess = true,
-                Tenants = new List<TenantAccessDto>() 
+                Tenants = new List<TenantAccessDto>()
             };
             marketPlaceApiMock
                 .Setup(m => m.CheckAccessByHub(It.IsAny<string>(), authenticateDto.Login))

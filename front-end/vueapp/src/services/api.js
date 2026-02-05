@@ -34,32 +34,24 @@ export function scheduleTokenRefresh() {
         if (!exp) return;
         const nowSeconds = Math.floor(Date.now() / 1000);
         const secondsUntilExpiry = exp - nowSeconds;
-        const refreshBeforeSeconds = 90; // Increased from 60s to 90s for better safety margin
+        const refreshBeforeSeconds = 60;
         const delayMs = Math.max(1000, (secondsUntilExpiry - refreshBeforeSeconds) * 1000);
-        
-        console.log(`[Token Refresh] Agendado para ${Math.floor(delayMs / 1000)}s (${Math.floor(delayMs / 60000)} minutos)`);
-        
         _refreshTimerId = setTimeout(async () => {
             _refreshTimerId = null;
-            console.log("[Token Refresh] Executando refresh proativo...");
             try {
                 const rs = await api.post("/Account/refresh-token", null);
                 if (rs?.data?.token) {
-                    console.log("[Token Refresh] Token renovado com sucesso");
                     store.commit("updateUserProfile", {
                         amount: { ...store.state.userProfile, tokenApi: rs.data.token },
                     });
                     scheduleTokenRefresh();
-                } else {
-                    console.warn("[Token Refresh] Resposta sem token válido");
                 }
-            } catch (error) {
-                console.warn("[Token Refresh] Falha no refresh proativo:", error?.response?.status ?? error.message);
+            } catch (_) {
                 // Proactive refresh failed; next API call will trigger 401 and interceptor will handle it
             }
         }, delayMs);
-    } catch (error) {
-        console.warn("[Token Refresh] Token inválido, não foi possível agendar refresh:", error.message);
+    } catch (_) {
+        // Invalid token, don't schedule
     }
 }
 let baseUrlApi = ENV_CONFIG.VUE_APP_BASE_URL_API;
