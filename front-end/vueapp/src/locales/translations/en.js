@@ -356,10 +356,14 @@ const english = {
             title: "Automation Flow:",
         },
         formFlow: {
+            configurationSaved:
+                "Configuration saved successfully",
+            configureToolParameters: "Configure the parameters of this tool",
             connectorWorkflowConfigFail:
                 "Failed to retrieve workflow configuration. Check tool URL and API key",
             connectorWorkflowFail:
                 "Workflow connector did not respond. Check tool URL and API key",
+            createNewPrompt: "Create new prompt",
             dependenciesRequired:
                 "Select at least one dependency",
             editFlowNodeFail: "Failed to edit node",
@@ -369,6 +373,10 @@ const english = {
                 "Flow inserted successfully",
             progressFlowUpdateFail:
                 "Failed to update flow. Flow already contains output data for tools.",
+            prompts: "Prompts",
+            promptRequired:
+                "Select at least one prompt",
+            selectPrompt: "Select a prompt",
         },
         hideTools: "Hide Tools",
         showTools: "Add Tools",
