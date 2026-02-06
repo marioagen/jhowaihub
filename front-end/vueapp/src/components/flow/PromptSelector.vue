@@ -12,7 +12,7 @@
                         <div class="col-10">
                             <div>
                                 <h5 class="mb-0 fw-bold">{{ nodeData.label }}</h5>
-                                <small class="text-muted">Configure os parâmetros desta ferramenta</small>
+                                <small class="text-muted">{{ $t('flow.formFlow.configureToolParameters') }}</small>
                             </div>
                         </div>
                     </div>
@@ -30,10 +30,10 @@
                         <DependencySelector :previousStepTools="previousStepTools" v-model="selectedDependencies" />
                     </div>
                     <div class="mb-4">
-                        <h6 class="fw-bold mb-3">Prompts</h6>
+                        <h6 class="fw-bold mb-3">{{ $t('flow.formFlow.prompts') }}</h6>
                         <div class="mb-3">
                             <select class="form-select" v-model="selectedPromptId">
-                                <option :value="null" disabled>Selecione um prompt</option>
+                                <option :value="null" disabled>{{ $t('flow.formFlow.selectPrompt') }}</option>
                                 <option v-for="prompt in promptList" :key="prompt.id" :value="prompt.id">
                                     {{ prompt.name }}
                                 </option>
@@ -42,7 +42,7 @@
                         <button v-if="!showCreateForm" class="btn btn-outline-primary w-100 border-dashed"
                             @click="showCreateForm = true">
                             <LucideIcon icon="Plus" :size="16" class="me-2" />
-                            Criar novo prompt
+                            {{ $t('flow.formFlow.createNewPrompt') }}
                         </button>
                     </div>
                     <div v-if="showCreateForm">

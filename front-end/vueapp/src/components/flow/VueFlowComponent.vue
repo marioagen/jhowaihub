@@ -150,24 +150,16 @@ export default {
                             order: stepTool.order,
                             icon: "Activity",
                             color: "blue",
-                            parameters:
-                                stepTool.parameters,
-                            isEditableInput:
-                                stepTool.tool
-                                    .isEditableInput,
-                            toolType:
-                                stepTool.tool.toolType,
+                            parameters: stepTool.parameters,
+                            isEditableInput: stepTool.tool.isEditableInput,
+                            toolType: stepTool.tool.toolType,
                             toolId: stepTool.toolId,
                             stepToolId: stepTool.id,
-                            dependencies:
-                                stepTool.dependencies,
+                            dependencies: stepTool.dependencies,
                             subtitle:
                                 stepTool.parameters &&
-                                    stepTool.parameters.length >
-                                    0
-                                    ? stepTool
-                                        .parameters[0]
-                                        .promptName
+                                    stepTool.parameters.length > 0
+                                    ? stepTool.parameters[0].promptName
                                     : "",
                         },
                         sourcePosition: "right",
@@ -180,9 +172,7 @@ export default {
                     .map((tool, index) => ({
                         id: `${tool.id}-${stepTools[index + 1].id}`,
                         source: tool.id.toString(),
-                        target: stepTools[
-                            index + 1
-                        ].id.toString(),
+                        target: stepTools[index + 1].id.toString(),
                         animated: false,
                         type: "special",
                     }));
@@ -204,10 +194,7 @@ export default {
                     });
                 }
 
-                this.nodes = [
-                    startNode,
-                    ...mappedNodes,
-                ];
+                this.nodes = [startNode, ...mappedNodes];
                 this.edges = mappedEdges;
 
                 await this.enrichNodesWithSubtitles(this.nodes);
@@ -236,44 +223,23 @@ export default {
                 const node = this.nodes[idx];
                 this.nodes.forEach((n) => {
                     if (n.order > node.data.order) {
-                        n.data.dependencies = (
-                            n.data.dependencies || []
-                        ).filter(
-                            (d) =>
-                                !(
-                                    d.stepOrder ===
-                                    this.step
-                                        .order &&
-                                    d.stepToolOrder ===
-                                    node.data.order
-                                )
-                        );
+                        n.data.dependencies = (n.data.dependencies || [])
+                            .filter((d) =>
+                                !(d.stepOrder === this.step.order &&
+                                    d.stepToolOrder === node.data.order)
+                            );
                     }
                 });
 
                 this.$store.state.tempWorkflow.list.forEach(
                     (step) => {
-                        if (
-                            step.order > this.step.order
-                        ) {
+                        if (step.order > this.step.order) {
                             step.stepTools.forEach(
                                 (stepTool) => {
-                                    stepTool.dependencies =
-                                        (
-                                            stepTool.dependencies ||
-                                            []
-                                        ).filter(
-                                            (d) =>
-                                                !(
-                                                    d.stepOrder ===
-                                                    this
-                                                        .step
-                                                        .order &&
-                                                    d.stepToolOrder ===
-                                                    node
-                                                        .data
-                                                        .order
-                                                )
+                                    stepTool.dependencies = (stepTool.dependencies || [])
+                                        .filter((d) =>
+                                            !(d.stepOrder === this.step.order &&
+                                                d.stepToolOrder === node.data.order)
                                         );
                                 }
                             );
@@ -287,9 +253,7 @@ export default {
             parameters,
             dependencies
         ) {
-            const idx = this.nodes.findIndex(
-                (node) => node.id === nodeId
-            );
+            const idx = this.nodes.findIndex((node) => node.id === nodeId);
             if (idx !== -1) {
                 this.nodes[idx] = {
                     ...this.nodes[idx],
@@ -302,54 +266,31 @@ export default {
             }
         },
         deleteEdge(edgeId) {
-            this.edges = this.edges.filter(
-                (edge) => edge.id !== edgeId
-            );
+            this.edges = this.edges.filter((edge) => edge.id !== edgeId);
         },
         openNodeConfig(node) {
-            const idx = this.nodes.findIndex(
-                (n) => n.id === node.id
-            );
-            this.$emit(
-                "openNodeConfig",
-                this.nodes,
-                this.nodes[idx]
-            );
+            const idx = this.nodes.findIndex((n) => n.id === node.id);
+            this.$emit("openNodeConfig", this.nodes, this.nodes[idx]);
         },
         onConnect(params) {
-            this.vueFlowInstance?.addEdges([
-                { ...params, type: "special" },
-            ]);
+            this.vueFlowInstance?.addEdges([{ ...params, type: "special" }]);
         },
         onDragOver(event) {
             event.preventDefault();
             event.dataTransfer.dropEffect = "move";
         },
         onDragStart(event, nodeData) {
-            event.dataTransfer.setData(
-                "application/node-data",
-                JSON.stringify(nodeData)
-            );
+            event.dataTransfer.setData("application/node-data", JSON.stringify(nodeData));
             event.dataTransfer.effectAllowed = "move";
         },
         onDrop(event) {
             event.preventDefault();
-            const reactFlowBounds =
-                event.currentTarget.getBoundingClientRect();
-            const nodeData = JSON.parse(
-                event.dataTransfer.getData(
-                    "application/node-data"
-                )
-            );
-            const position =
-                this.vueFlowInstance.project({
-                    x:
-                        event.clientX -
-                        reactFlowBounds.left,
-                    y:
-                        event.clientY -
-                        reactFlowBounds.top,
-                });
+            const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+            const nodeData = JSON.parse(event.dataTransfer.getData("application/node-data"));
+            const position = this.vueFlowInstance.project({
+                x: event.clientX - reactFlowBounds.left,
+                y: event.clientY - reactFlowBounds.top,
+            });
             const newNode = {
                 id: (this.nodes.length + 1).toString(),
                 type: "hub",
@@ -381,61 +322,35 @@ export default {
                     toolId: node.toolId,
                     tool: {
                         name: node.label,
-                        isEditableInput:
-                            node.data.isEditableInput,
+                        isEditableInput: node.data.isEditableInput,
                         toolType: node.data.toolType,
                     },
-                    positionX: parseFloat(
-                        node.position.x.toFixed(2)
-                    ),
-                    positionY: parseFloat(
-                        node.position.y.toFixed(2)
-                    ),
+                    positionX: parseFloat(node.position.x.toFixed(2)),
+                    positionY: parseFloat(node.position.y.toFixed(2)),
                     order: index + 1,
                     status: "Active",
                     parameters: node.data.parameters,
-                    dependsOnStepToolId:
-                        node.data.stepToolId &&
-                            node.data.stepToolId > 0
-                            ? node.data.stepToolId
-                            : null,
-                    dependencies: (
-                        node.data.dependencies || []
-                    ).map((d) => ({
+                    dependsOnStepToolId: node.data.stepToolId && node.data.stepToolId > 0 ? node.data.stepToolId : null,
+                    dependencies: (node.data.dependencies || []).map((d) => ({
                         stepOrder: d.stepOrder ?? null,
-                        stepToolOrder:
-                            d.stepToolOrder ?? null,
+                        stepToolOrder: d.stepToolOrder ?? null,
                     })),
                 }));
         },
         showCollapse() {
-            this.isActiveCollapse =
-                !this.isActiveCollapse;
+            this.isActiveCollapse = !this.isActiveCollapse;
         },
         async enrichNodesWithSubtitles(nodes) {
-            const promptNodes = nodes.filter(
-                (n) =>
-                    n.data?.toolType ===
-                    ToolType.Prompt &&
-                    n.data?.parameters?.length > 0
-            );
+            const promptNodes = nodes.filter((n) => n.data?.toolType === ToolType.Prompt && n.data?.parameters?.length > 0);
 
             if (promptNodes.length > 0) {
-                const prompts =
-                    await PromptService.getPrompts();
+                const prompts = await PromptService.getPrompts();
                 promptNodes.forEach((node) => {
-                    const promptId =
-                        node.data.parameters[0]
-                            .value;
+                    const promptId = node.data.parameters[0].value;
                     if (promptId) {
-                        const prompt = prompts.find(
-                            (p) =>
-                                p.id.toString() ===
-                                promptId.toString()
-                        );
+                        const prompt = prompts.find((p) => p.id.toString() === promptId.toString());
                         if (prompt) {
-                            node.data.subtitle =
-                                prompt.name;
+                            node.data.subtitle = prompt.name;
                         }
                     }
                 });

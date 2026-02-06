@@ -301,28 +301,20 @@ export default {
                 toolId: this.nodeFlow.data.toolId,
                 workflowId: this.connector,
             };
-            AutomationServices.getWorkflowWebhookInputs(
-                params
-            )
+            AutomationServices.getWorkflowWebhookInputs(params)
                 .then((response) => {
                     if (response.error === undefined) {
                         this.formFields = response;
                         this.formData = [];
                         if (dataFromParameters) {
-                            this.formData = JSON.parse(
-                                this.parameters[0].value
-                            );
+                            this.formData = JSON.parse(this.parameters[0].value);
                         } else {
-                            this.formData =
-                                this.transformToObject(
-                                    response
-                                );
+                            this.formData = this.transformToObject(response);
                         }
                     } else {
                         this.$notify({
                             title: "flow.title",
-                            message:
-                                "flow.formFlow.connectorWorkflowFail",
+                            message: "flow.formFlow.connectorWorkflowFail",
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -336,23 +328,13 @@ export default {
             const result = {};
             fields.forEach((field) => {
                 if (field.type === "array") {
-                    if (
-                        field.children &&
-                        field.children.length > 0
-                    ) {
-                        result[field.name] = [
-                            this.transformToObject(
-                                field.children
-                            ),
-                        ];
+                    if (field.children && field.children.length > 0) {
+                        result[field.name] = [this.transformToObject(field.children)];
                     } else {
                         result[field.name] = [];
                     }
                 } else {
-                    result[field.name] =
-                        this.getDefaultValue(
-                            field.type
-                        );
+                    result[field.name] = this.getDefaultValue(field.type);
                 }
             });
 
@@ -367,45 +349,30 @@ export default {
             }
         },
         fillFormFields() {
-            if (
-                this.parameters.length > 0 &&
-                this.parameters.value
-            ) {
-                const data = JSON.parse(
-                    this.parameters.value
-                );
+            if (this.parameters.length > 0 && this.parameters.value) {
+                const data = JSON.parse(this.parameters.value);
                 this.fillValues(this.formFields, data);
             }
         },
         async openNodeConfig(nodes, selectedNode) {
             this.nodes = nodes;
             this.nodeFlow = selectedNode;
-            this.parameters =
-                selectedNode.data.parameters;
+            this.parameters = selectedNode.data.parameters;
             this.toolType = selectedNode.data.toolType;
 
             await this.loadPreviousStepTools(selectedNode);
 
-            this.selectedDependencies =
-                selectedNode.data.dependencies;
+            this.selectedDependencies = selectedNode.data.dependencies;
 
             if (this.isTargetTool(ToolType.N8N)) {
                 this.loadingWebhooks = true;
                 this.resetFormConnector();
-                AutomationServices.getWorkflows(
-                    selectedNode.data.toolId
-                )
+                AutomationServices.getWorkflows(selectedNode.data.toolId)
                     .then((result) => {
-                        if (
-                            result.error === undefined
-                        ) {
+                        if (result.error === undefined) {
                             this.connectors = result;
-                            this.parameters =
-                                selectedNode.data.parameters;
-                            if (
-                                this.parameters
-                                    .length === 0
-                            ) {
+                            this.parameters = selectedNode.data.parameters;
+                            if (this.parameters.length === 0) {
                                 this.parameters.push({
                                     stepToolId: 0,
                                     value: null,
@@ -413,15 +380,13 @@ export default {
                                     webhookId: null,
                                 });
                             } else {
-                                this.connector =
-                                    this.parameters[0].webhookId;
+                                this.connector = this.parameters[0].webhookId;
                                 this.getInputs(true);
                             }
                         } else {
                             this.$notify({
                                 title: "flow.title",
-                                message:
-                                    "flow.formFlow.connectorWorkflowFail",
+                                message: "flow.formFlow.connectorWorkflowFail",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -461,36 +426,24 @@ export default {
         },
         closeSidebar() {
             const sidebarEl = this.$refs.sidebar;
-            const sidebar =
-                bootstrap.Offcanvas.getInstance(
-                    sidebarEl
-                );
+            const sidebar = bootstrap.Offcanvas.getInstance(sidebarEl);
             if (sidebar) {
                 sidebar.hide();
             }
         },
         updateNode() {
             if (this.idSelected) {
-                this.parameters[0].value =
-                    this.idSelected.toString();
-                const selectedPrompt =
-                    this.promptlist.find(
-                        (p) => p.id === this.idSelected
-                    );
+                this.parameters[0].value = this.idSelected.toString();
+                const selectedPrompt = this.promptlist.find((p) => p.id === this.idSelected);
                 if (selectedPrompt) {
-                    this.nodeFlow.data.subtitle =
-                        selectedPrompt.name;
+                    this.nodeFlow.data.subtitle = selectedPrompt.name;
                 }
             }
 
-            if (
-                !this.selectedDependencies ||
-                this.selectedDependencies.length === 0
-            ) {
+            if (!this.selectedDependencies || this.selectedDependencies.length === 0) {
                 this.$notify({
                     title: "common.warning",
-                    message:
-                        "flow.formFlow.dependenciesRequired",
+                    message: "flow.formFlow.dependenciesRequired",
                     variant: "warning",
                     icon: "TriangleAlert",
                 });
@@ -509,16 +462,14 @@ export default {
             try {
                 return this.$notify({
                     title: "flow.title",
-                    message:
-                        "flow.formFlow.editFlowNodeSuccess",
+                    message: "flow.formFlow.editFlowNodeSuccess",
                     variant: "success",
                     icon: "CircleCheckBig",
                 });
             } catch (e) {
                 this.$notify({
                     title: "flow.title",
-                    message:
-                        "flow.formFlow.editFlowNodeFail",
+                    message: "flow.formFlow.editFlowNodeFail",
                     variant: "danger",
                     icon: "CircleX",
                 });
@@ -526,20 +477,11 @@ export default {
         },
         updateNodeWithForm() {
             this.parameters[0].requiredFile = false;
-            if (
-                Object.prototype.hasOwnProperty.call(
-                    this.formData,
-                    "requiredFile"
-                )
-            ) {
-                this.parameters[0].requiredFile =
-                    this.formData["requiredFile"];
+            if (Object.prototype.hasOwnProperty.call(this.formData, "requiredFile")) {
+                this.parameters[0].requiredFile = this.formData["requiredFile"];
             }
-            this.parameters[0].value = JSON.stringify(
-                this.formData
-            );
-            this.parameters[0].webhookId =
-                this.connector;
+            this.parameters[0].value = JSON.stringify(this.formData);
+            this.parameters[0].webhookId = this.connector;
 
             this.$refs.VueflowComponent.updateNodeInput(
                 this.nodeFlow.id,
@@ -559,29 +501,21 @@ export default {
                             this.workflowId
                         );
                     if (workflow.error) {
-                        throw new Error(
-                            "Failed to load workflow data"
-                        );
+                        throw new Error("Failed to load workflow data");
                     }
                     const allSteps = workflow.steps.map(
                         (step) => {
-                            if (
-                                step.order ===
-                                this.stepOrder
-                            ) {
+                            if (step.order === this.stepOrder) {
                                 return {
                                     id: step.id || 0,
                                     order: step.order,
-                                    stepTools:
-                                        nodesList,
+                                    stepTools: nodesList,
                                 };
                             }
                             return {
                                 id: step.id || 0,
                                 order: step.order,
-                                stepTools:
-                                    step.stepTools ||
-                                    [],
+                                stepTools: step.stepTools || [],
                             };
                         }
                     );
@@ -591,31 +525,19 @@ export default {
                         steps: allSteps,
                     };
 
-                    const result =
-                        await WorkflowService.updatePhase3(
-                            params
-                        );
+                    const result = await WorkflowService.updatePhase3(params);
                     if (result.error !== undefined) {
-                        if (
-                            result.error.response
-                                ?.data &&
-                            result.error.response?.data
-                                ?.labelError
-                        ) {
+                        if (result.error.response?.data && result.error.response?.data?.labelError) {
                             return this.$notify({
                                 title: "flow.title",
-                                message:
-                                    result.error
-                                        .response.data
-                                        .labelError,
+                                message: result.error.response.data.labelError,
                                 variant: "danger",
                                 icon: "CircleX",
                             });
                         }
                         return this.$notify({
                             title: "flow.title",
-                            message:
-                                "flow.formFlow.progressFlowUpdateFail",
+                            message: "flow.formFlow.progressFlowUpdateFail",
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -624,17 +546,14 @@ export default {
                 this.redirectToIndex();
                 return this.$notify({
                     title: "flow.title",
-                    message:
-                        "flow.formFlow.progressFlowSuccess",
+                    message: "flow.formFlow.progressFlowSuccess",
                     variant: "success",
                     icon: "CircleCheckBig",
                 });
             } catch (e) {
                 this.$notify({
                     title: "flow.title",
-                    message:
-                        e.message ||
-                        "flow.formFlow.progressFlowFail",
+                    message: e.message || "flow.formFlow.progressFlowFail",
                     variant: "danger",
                     icon: "CircleX",
                 });
@@ -642,52 +561,27 @@ export default {
         },
         fillValues(fields, data) {
             fields.forEach((field) => {
-                if (
-                    Object.prototype.hasOwnProperty.call(
-                        data,
-                        field.name
-                    )
-                ) {
+                if (Object.prototype.hasOwnProperty.call(data, field.name)) {
                     const value = data[field.name];
-
-                    if (
-                        field.type === "array" &&
-                        Array.isArray(value)
-                    ) {
+                    if (field.type === "array" && Array.isArray(value)) {
                         field.value = value.map(
                             (item) => {
-                                const clonedChildren =
-                                    field.children
-                                        ? field.children.map(
-                                            (c) => ({
-                                                ...c,
-                                                value: null,
-                                                children:
-                                                    c.children
-                                                        ? [
-                                                            ...c.children,
-                                                        ]
-                                                        : [],
-                                            })
-                                        )
-                                        : [];
+                                const clonedChildren = field.children
+                                    ? field.children.map(
+                                        (c) => ({
+                                            ...c,
+                                            value: null,
+                                            children: c.children ? [...c.children] : [],
+                                        })
+                                    )
+                                    : [];
 
-                                this.fillValues(
-                                    clonedChildren,
-                                    item
-                                );
+                                this.fillValues(clonedChildren, item);
                                 return clonedChildren;
                             }
                         );
-                    } else if (
-                        field.children &&
-                        field.children.length > 0 &&
-                        typeof value === "object"
-                    ) {
-                        this.fillValues(
-                            field.children,
-                            value
-                        );
+                    } else if (field.children && field.children.length > 0 && typeof value === "object") {
+                        this.fillValues(field.children, value);
                     } else {
                         field.value = value;
                     }
@@ -698,68 +592,40 @@ export default {
             let workflowSteps = [];
             if (this.workflowId) {
                 try {
-                    const workflow =
-                        await WorkflowService.getWorkflowById(
-                            this.workflowId
-                        );
+                    const workflow = await WorkflowService.getWorkflowById(this.workflowId);
                     if (!workflow.error) {
-                        workflowSteps =
-                            workflow.steps || [];
+                        workflowSteps = workflow.steps || [];
                     }
                 } catch (error) {
-                    LogService.showMessage(
-                        "Error loading workflow steps: " +
-                        error
-                    );
+                    LogService.showMessage("Error loading workflow steps: " + error);
                 }
             }
 
             if (workflowSteps.length === 0) {
-                workflowSteps =
-                    this.$store.state.tempWorkflow
-                        .list || [];
+                workflowSteps = this.$store.state.tempWorkflow.list || [];
             }
 
-            const relevantSteps = workflowSteps.filter(
-                (step) => step.order <= this.stepOrder
-            );
+            const relevantSteps = workflowSteps.filter((step) => step.order <= this.stepOrder);
 
-            if (
-                !relevantSteps ||
-                relevantSteps.length === 0
-            ) {
+            if (!relevantSteps || relevantSteps.length === 0) {
                 this.previousStepTools = [];
                 return;
             }
 
-            const maxOrder = Math.max(
-                ...relevantSteps.map(
-                    (step) => step.order
-                )
-            );
-            const nodesToolIds = this.nodes
-                .map((n) => n.data?.toolId)
-                .filter(Boolean);
+            const maxOrder = Math.max(...relevantSteps.map((step) => step.order));
+            const nodesToolIds = this.nodes.map((n) => n.data?.toolId).filter(Boolean);
 
             this.previousStepTools = relevantSteps.map(
                 (step) => ({
                     id: step.id,
-                    name:
-                        step?.name ||
-                        step.name ||
-                        "Unnamed Tool",
+                    name: step?.name || step.name || "Unnamed Tool",
                     order: step.order,
-                    stepTools: (
-                        step.stepTools || []
-                    ).filter(
+                    stepTools: (step.stepTools || []).filter(
                         (stepTool) =>
                             step.order < maxOrder ||
                             (step.order === maxOrder &&
-                                stepTool.order <
-                                node.data.order &&
-                                nodesToolIds.includes(
-                                    stepTool.tool?.id
-                                ))
+                                stepTool.order < node.data.order &&
+                                nodesToolIds.includes(stepTool.tool?.id))
                     ),
                 })
             );
@@ -784,26 +650,17 @@ export default {
             if (this.workflowId) {
                 try {
                     if (this.stepId != 0) {
-                        this.step =
-                            await WorkflowService.getStepById(
-                                this.stepId
-                            );
+                        this.step = await WorkflowService.getStepById(this.stepId);
                     }
                 } catch (error) {
-                    console.error(
-                        "Error fetching step name:",
-                        error
-                    );
+                    LogService.showMessage("Error fetching step name: " + error);
                 }
             }
         },
         onPromptSelect() {
-            const selectedPrompt = this.promptlist.find(
-                (p) => p.id === this.idSelected
-            );
+            const selectedPrompt = this.promptlist.find((p) => p.id === this.idSelected);
             if (selectedPrompt) {
-                this.nodeFlow.data.subtitle =
-                    selectedPrompt.name;
+                this.nodeFlow.data.subtitle = selectedPrompt.name;
             }
         },
     },
@@ -813,10 +670,7 @@ export default {
     computed: {
         selectedItem() {
             if (this.idSelected != 0)
-                return this.promptlist.find(
-                    (item) =>
-                        item.id === this.idSelected
-                );
+                return this.promptlist.find((item) => item.id === this.idSelected);
             return null;
         },
         isN8NTool() {

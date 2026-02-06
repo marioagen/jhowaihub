@@ -10,7 +10,7 @@
                         </button>
                         <div>
                             <div class="fw-semibold">{{ isEditMode ? $t('prompts.editPrompt') : $t('prompts.newPrompt')
-                                }}
+                            }}
                             </div>
                             <div class="text-muted small">{{ isEditMode ? $t('prompts.subtitleEdit') :
                                 $t('prompts.subtitleNew') }}</div>
@@ -33,18 +33,18 @@
                                         :placeholder="$t('prompts.placeholderNamePrompt')" id="inputNamePrompt"
                                         aria-describedby="" name="name" :class="{ 'is-invalid': errorMessage }" />
                                     <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage
-                                    }}</span>
+                                        }}</span>
                                 </Field>
                             </div>
                             <div class="mb-3">
                                 <label for="FormControlTextarea1" class="form-label">{{ $t('common.description')
-                                }}</label>
+                                    }}</label>
                                 <Field name="description" :rules="'required|max:100'" v-slot="{ field, errorMessage }">
                                     <textarea v-bind="field" type="text" class="form-control" id="inputNamePrompt"
                                         aria-describedby="" rows="3" name="description"
                                         :class="{ 'is-invalid': errorMessage }" />
                                     <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage
-                                    }}</span>
+                                        }}</span>
                                 </Field>
                             </div>
 
@@ -67,7 +67,7 @@
 
                             <div class="d-flex justify-content-end gap-2 mt-3">
                                 <button class="btn btn-secondary" type="button" @click="cancel">{{ $t('common.cancel')
-                                    }}</button>
+                                }}</button>
                                 <button class="btn btn-primary" type="submit">
                                     <LucideIcon icon="Save" :size="17" class="me-2" />{{ $t('common.save') }}
                                 </button>
@@ -186,7 +186,7 @@ export default {
 
                     this.$notify({
                         title: 'prompts.title',
-                        message: 'prompts.updateSuccess', // Message from original file says updateSuccess for create too? Checking original... yes it says 'prompts.updateSuccess' in createPrompt success block.
+                        message: 'prompts.updateSuccess',
                         variant: 'success',
                         icon: 'CircleCheckBig',
                     });
