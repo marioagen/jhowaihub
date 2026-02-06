@@ -44,6 +44,8 @@ import HomePage from "@/pages/home.vue";
 import TemplatePage from "@/pages/templates/index.vue";
 import TemplateDetail from "@/pages/templates/templateDetail.vue";
 
+import PromptSelector from "@/components/flow/PromptSelector.vue";
+
 import { hasPermission } from "@/utils/permissions";
 
 function authenticate(to, from, next) {
@@ -385,6 +387,17 @@ const routes = [
         },
         beforeEnter: authenticate,
         props: true,
+    },
+    {
+        path: "/flow/prompt-selector",
+        name: "PromptSelector",
+        component: PromptSelector,
+        meta: {
+            layout: "default",
+            module: "Workflow",
+            action: "View",
+        },
+        beforeEnter: authenticate,
     },
 ];
 

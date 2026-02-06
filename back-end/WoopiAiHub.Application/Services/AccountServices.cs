@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -349,7 +349,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Generates an access token for the api that lasts for 1 hour
+        /// Generates an access token for the api with configurable expiration (default 1 hour).
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
@@ -358,6 +358,7 @@ namespace WoopiAiHub.Application.Services
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var expirationMinutes = _config.GetValue("JWT:AccessTokenExpirationMinutes", 60);
 
             var claims = new[]
             {
@@ -368,7 +369,7 @@ namespace WoopiAiHub.Application.Services
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
                 _config["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddMinutes(5),
+                expires: DateTime.Now.AddMinutes(expirationMinutes),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -409,12 +410,13 @@ namespace WoopiAiHub.Application.Services
                 new Claim("permissions", permissionsJson)
             };
 
+            var expirationMinutes = _config.GetValue("JWT:AccessTokenExpirationMinutes", 60);
             var jwtToken = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
                 notBefore: DateTime.Now,
-                expires: DateTime.Now.AddMinutes(5),
+                expires: DateTime.Now.AddMinutes(expirationMinutes),
                 signingCredentials: credentials
             );
 
@@ -489,13 +491,14 @@ namespace WoopiAiHub.Application.Services
         {
             if (_httpContextAccessor.HttpContext == null)
                 return false;
+            var expirationDays = _config.GetValue("JWT:RefreshTokenExpirationDays", 7);
             _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 Path = "/",
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddDays(expirationDays)
             });
             return true;
         }

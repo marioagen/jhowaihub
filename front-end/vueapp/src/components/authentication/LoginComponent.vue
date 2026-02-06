@@ -94,6 +94,7 @@
 import { Field, useForm } from "vee-validate";
 import { getJWTPermissions } from "@/utils/permissions";
 import AuthService from "@/services/authenticate/AuthService";
+import { scheduleTokenRefresh } from "@/services/api";
 import TenantModal from "@/components/authentication/TenantModal.vue";
 
 export default {
@@ -180,6 +181,7 @@ export default {
                     };
 
                     this.$store.commit("updateUserProfile", { amount: dataUser });
+                    scheduleTokenRefresh();
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
                 })
@@ -312,6 +314,7 @@ export default {
                     };
 
                     this.$store.commit("updateUserProfile", { amount: dataUser });
+                    scheduleTokenRefresh();
                     window.localStorage.setItem("project", JSON.stringify({ isLogged: true }));
                     this.redirectToDocument();
                 })

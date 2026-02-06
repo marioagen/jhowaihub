@@ -1,7 +1,12 @@
 <template>
     <div class="app-layout d-flex flex-column h-100" style="height: 100vh">
         <div class="d-flex flex-grow-1" style="overflow: hidden; position: relative; height: 100%">
-            <div :class="['sidebar-wrapper', { collapsed: isSidebarCollapsed }]">
+            <div
+                :class="[
+                    'sidebar-wrapper',
+                    { collapsed: isSidebarCollapsed, 'sidebar-loading': !isSidebarVisible },
+                ]"
+            >
                 <SidebarComponent
                     :key="languageChange"
                     :isCollapsed="isSidebarCollapsed"
@@ -55,9 +60,15 @@
                 toastShow: false,
                 sidebarData: "",
                 isSidebarCollapsed: window.innerWidth < SIDEBAR_COLLAPSE_WIDTH,
+                isSidebarVisible: false,
             };
         },
         mounted() {
+            this.$nextTick(() => {
+                requestAnimationFrame(() => {
+                    this.isSidebarVisible = true;
+                });
+            });
             window.addEventListener("resize", this.checkWindowSize);
             GlobalEventService.on("uploadInProgress", this.handleUploadInProgress);
             GlobalEventService.on("uploadComplete", this.handleUploadComplete);
@@ -95,3 +106,16 @@
         },
     };
 </script>
+<style scoped>
+.sidebar-wrapper {
+    transition:
+        transform 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        width 0.3s ease;
+}
+
+.sidebar-wrapper.sidebar-loading {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+</style>

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
 using System.Text;
@@ -18,6 +19,9 @@ namespace WoopiAiHub.UnitTests.Services
         public RefreshTokenServicesTests()
         {
             _mocker = new AutoMocker();
+            var configData = new Dictionary<string, string?> { ["JWT:RefreshTokenExpirationDays"] = "7" };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configData!).Build();
+            _mocker.Use<IConfiguration>(config);
             _refreshTokenServices = _mocker.CreateInstance<RefreshTokenServices>();
         }
 

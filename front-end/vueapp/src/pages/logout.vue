@@ -1,6 +1,7 @@
 <script>
 import store from "@/store";
 import AuthService from "@/services/authenticate/AuthService";
+import { cancelTokenRefresh } from "@/services/api";
 
 export default {
     name: "Logout",
@@ -10,6 +11,7 @@ export default {
                 console.warn("Erro ao deslogar no back-end:", err);
             })
             .finally(() => {
+                cancelTokenRefresh();
                 document.documentElement.className = "css-theme-light";
                 window.localStorage.removeItem("theme");
                 window.localStorage.removeItem("project");

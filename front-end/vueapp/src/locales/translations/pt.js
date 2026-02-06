@@ -367,10 +367,14 @@ const portuguese = {
             title: "Fluxo de Automação:",
         },
         formFlow: {
+            configurationSaved:
+                "Configuração salva com sucesso",
+            configureToolParameters: "Configure os parâmetros desta ferramenta",
             connectorWorkflowConfigFail:
                 "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
             connectorWorkflowFail:
                 "Conector da esteira de processamento não respondeu. Verifique a URL e a chave da API da ferramenta",
+            createNewPrompt: "Criar novo prompt",
             dependenciesRequired:
                 "Selecione ao menos uma dependência",
             editFlowNodeFail: "Falha ao editar o nodo",
@@ -381,6 +385,10 @@ const portuguese = {
                 "Fluxo inserido com sucesso",
             progressFlowUpdateFail:
                 "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
+            prompts: "Prompts",
+            promptRequired:
+                "Selecione ao menos um prompt",
+            selectPrompt: "Selecione um prompt",
         },
         hideTools: "Ocultar Ferramentas",
         save: "Salvar",
@@ -888,6 +896,7 @@ const portuguese = {
             "A ferramenta de Prompt requer ao menos uma dependência",
         dependencyToolNotFound:
             "Ferramenta de dependência não encontrada",
+        duplicated: "Nome da ferramenta duplicado",
         editBtn: "Salvar alterações",
         editError: "Erro ao editar Ferramenta",
         editSuccess: "Ferramenta editada com sucesso",

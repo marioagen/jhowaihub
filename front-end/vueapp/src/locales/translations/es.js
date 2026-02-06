@@ -369,10 +369,14 @@ const spanish = {
             title: "Flujo de Automatización:",
         },
         formFlow: {
+            configurationSaved:
+                "Configuración guardada exitosamente",
+            configureToolParameters: "Configure los parámetros de esta herramienta",
             connectorWorkflowConfigFail:
                 "No se pudo recuperar la configuración del workflow. Verifica la URL y la clave API de la herramienta",
             connectorWorkflowFail:
                 "El conector del workflow no respondió. Verifica la URL y la clave API de la herramienta",
+            createNewPrompt: "Crear nuevo prompt",
             dependenciesRequired:
                 "Seleccione al menos una dependencia",
             editFlowNodeFail: "No se pudo editar el nodo",
@@ -384,6 +388,10 @@ const spanish = {
                 "Flujo insertado exitosamente",
             progressFlowUpdateFail:
                 "No se pudo actualizar el flujo. El flujo ya contiene datos de salida para las herramientas.",
+            prompts: "Prompts",
+            promptRequired:
+                "Seleccione al menos un prompt",
+            selectPrompt: "Seleccione un prompt",
         },
         hideTools: "Ocultar Herramientas",
         showTools: "Agregar Herramientas",
@@ -891,6 +899,7 @@ const spanish = {
             "La herramienta de Prompt requiere al menos una dependencia",
         dependencyToolNotFound:
             "Herramienta de dependencia no encontrada",
+        duplicated: "Nombre de herramienta duplicado",
         editBtn: "Guardar cambios",
         editError: "Error al actualizar la herramienta",
         editSuccess: "Herramienta actualizada con éxito",
