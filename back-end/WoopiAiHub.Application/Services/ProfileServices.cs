@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using System.Linq;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -181,6 +182,13 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public async Task<bool> DeleteByIds(List<int> ids)
         {
+            var repository = _profileRepository.FindByIds(ids);
+            var isAnalyst = repository.Any(t => t.Name.Equals("analyst", StringComparison.OrdinalIgnoreCase));
+            if (isAnalyst)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.InvalidValue, "Can't delete Analyst profile", null);
+            }
+
             await _stepProfilePermissionsServices.DeleteByIds(ids);
             return await _profileRepository.DeleteByIdsAsync(ids);
         }

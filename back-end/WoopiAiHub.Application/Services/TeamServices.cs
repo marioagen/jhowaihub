@@ -257,6 +257,12 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(Domain.Enum.ErrorCode.InvalidValue, "Can't delete Admin team", null);
             }
 
+            var isAnalyst = teams.Any(t => t.Name.Equals("analyst", StringComparison.OrdinalIgnoreCase));
+            if (isAnalyst)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.InvalidValue, "Can't delete Analyst team", null);
+            }
+
             bool hasDocuments = teams.Any(d => d.Workflows.Count > 0);
             if (hasDocuments)
             {

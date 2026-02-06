@@ -2,82 +2,151 @@
     <div class="phase-container">
         <div class="row">
             <div class="col">
-                <p class="section-title">{{ $t("workflow.stepsTitle") }}</p>
+                <p class="section-title">
+                    {{ $t("workflow.stepsTitle") }}
+                </p>
             </div>
             <div class="col-auto">
-                <button class="btn btn-primary btn-sm" type="button" @click="addStep">
-                    <LucideIcon icon="Plus" :size="15" />
+                <button
+                    class="btn btn-primary btn-sm"
+                    type="button"
+                    @click="addStep"
+                >
+                    <LucideIcon
+                        icon="Plus"
+                        :size="15"
+                    />
                     {{ $t("workflow.createNewStep") }}
                 </button>
             </div>
         </div>
         <div v-if="isLoadingProfiles || isLoadingStatus">
             <div class="d-flex justify-content-center">
-                <div class="spinner-border text-primary" role="status"></div>
+                <div
+                    class="spinner-border text-primary"
+                    role="status"
+                ></div>
             </div>
         </div>
-        <div v-else class="row">
-            <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
-                <div v-for="step in activeStepsList"
-                     :key="step.id ? `id-${step.id}` : `tmp-${step.tempId}`"
-                     class="step-card card shadow-sm rounded-3">
-
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
+        <div
+            v-else
+            class="row"
+        >
+            <div
+                class="d-flex gap-3 overflow-auto flex-nowrap pb-2"
+            >
+                <div
+                    v-for="step in activeStepsList"
+                    :key="
+                        step.id
+                            ? `id-${step.id}`
+                            : `tmp-${step.tempId}`
+                    "
+                    class="step-card card shadow-sm rounded-3"
+                >
+                    <div
+                        class="card-header d-flex justify-content-between align-items-center"
+                    >
+                        <div
+                            class="d-flex align-items-center"
+                        >
                             <div class="step-number">
                                 {{ step.order }}
                             </div>
                             <!-- NAME -->
-                            <Field v-model="step.name" :name="`steps[${step.tempId}].name`"
-                                   rules="required"
-                                   v-slot="{ field, errors }">
-                                <div class="d-flex flex-column">
-                                    <input type="text"
-                                           class="input-title"
-                                           v-bind="field"
-                                           v-model="step.name"
-                                           :placeholder="$t('workflow.stepNamePlaceholder')" />
-                                    <span v-if="errors[0]" class="validation-message text-danger mt-1">
+                            <Field
+                                v-model="step.name"
+                                :name="`steps[${step.tempId}].name`"
+                                rules="required"
+                                v-slot="{ field, errors }"
+                            >
+                                <div
+                                    class="d-flex flex-column"
+                                >
+                                    <input
+                                        type="text"
+                                        class="input-title"
+                                        v-bind="field"
+                                        v-model="step.name"
+                                        :placeholder="
+                                            $t(
+                                                'workflow.stepNamePlaceholder'
+                                            )
+                                        "
+                                    />
+                                    <span
+                                        v-if="errors[0]"
+                                        class="validation-message text-danger mt-1"
+                                    >
                                         {{ errors[0] }}
                                     </span>
                                 </div>
                             </Field>
                         </div>
 
-                        <button type="button"
-                                class="btn btn-link btn-sm"
-                                @click="removeStep(step)">
+                        <button
+                            type="button"
+                            class="btn btn-link btn-sm"
+                            @click="removeStep(step)"
+                        >
                             <LucideIcon icon="X" />
                         </button>
                     </div>
 
                     <div class="card-body">
-
                         <!-- STATUS -->
                         <div class="mb-3">
-                            <label class="form-label text-muted small">
+                            <label
+                                class="form-label text-muted small"
+                            >
                                 {{ $t("common.status") }}
                             </label>
 
-                            <Field v-model="step.statusId" :name="`steps[${step.tempId}}].statusId`"
-                                   rules="required"
-                                   v-slot="{ field, errors }">
-                                <div class="d-flex flex-column">
-                                    <select class="form-select form-select-sm"
-                                            v-bind="field"
-                                            v-model="step.statusId">
+                            <Field
+                                v-model="step.statusId"
+                                :name="`steps[${step.tempId}}].statusId`"
+                                rules="required"
+                                v-slot="{ field, errors }"
+                            >
+                                <div
+                                    class="d-flex flex-column"
+                                >
+                                    <select
+                                        class="form-select form-select-sm"
+                                        v-bind="field"
+                                        v-model="
+                                            step.statusId
+                                        "
+                                    >
                                         <option value="">
-                                            {{ $t("workflow.selectStatus") }}
+                                            {{
+                                                $t(
+                                                    "workflow.selectStatus"
+                                                )
+                                            }}
                                         </option>
 
-                                        <option v-for="s in statusList"
-                                                :key="s.id"
-                                                :value="String(s.id)">
-                                            {{ s.name }}
+                                        <option
+                                            v-for="s in statusList"
+                                            :key="s.id"
+                                            :value="
+                                                String(s.id)
+                                            "
+                                        >
+                                            {{
+                                                s.label
+                                                    ? $t(
+                                                          s.label
+                                                      )
+                                                    : s.name
+                                            }}
                                         </option>
                                     </select>
 
-                                    <span v-if="errors[0]" class="text-danger small mt-1">
+                                    <span
+                                        v-if="errors[0]"
+                                        class="text-danger small mt-1"
+                                    >
                                         {{ errors[0] }}
                                     </span>
                                 </div>
@@ -86,35 +155,70 @@
 
                         <!-- PROFILE -->
                         <div class="mb-2">
-                            <label class="form-label text-muted small">
-                                {{ $t("workflow.profiles") }}
+                            <label
+                                class="form-label text-muted small"
+                            >
+                                {{
+                                    $t("workflow.profiles")
+                                }}
                             </label>
 
-                            <Field v-model="step.profileId" :name="`steps[${step.tempId}].profileId`"
-                                   rules="required"
-                                   v-slot="{ field, errors }">
-                                <div class="d-flex flex-column">
-                                    <div class="input-group">
-                                        <span class="input-group-text border-end-0 bg-white">
-                                            <LucideIcon icon="Users" :size="16" />
+                            <Field
+                                v-model="step.profileId"
+                                :name="`steps[${step.tempId}].profileId`"
+                                rules="required"
+                                v-slot="{ field, errors }"
+                            >
+                                <div
+                                    class="d-flex flex-column"
+                                >
+                                    <div
+                                        class="input-group"
+                                    >
+                                        <span
+                                            class="input-group-text border-end-0 bg-white"
+                                        >
+                                            <LucideIcon
+                                                icon="Users"
+                                                :size="16"
+                                            />
                                         </span>
 
-                                        <select class="form-select form-select-sm border-start-0"
-                                                v-bind="field"
-                                                v-model="step.profileId">
-                                            <option value="">
-                                                {{ $t("workflow.selectProfile") }}
+                                        <select
+                                            class="form-select form-select-sm border-start-0"
+                                            v-bind="field"
+                                            v-model="
+                                                step.profileId
+                                            "
+                                        >
+                                            <option
+                                                value=""
+                                            >
+                                                {{
+                                                    $t(
+                                                        "workflow.selectProfile"
+                                                    )
+                                                }}
                                             </option>
 
-                                            <option v-for="p in profilesList"
-                                                    :key="p.id"
-                                                    :value="String(p.id)">
+                                            <option
+                                                v-for="p in profilesList"
+                                                :key="p.id"
+                                                :value="
+                                                    String(
+                                                        p.id
+                                                    )
+                                                "
+                                            >
                                                 {{ p.text }}
                                             </option>
                                         </select>
                                     </div>
 
-                                    <span v-if="errors[0]" class="text-danger small mt-1">
+                                    <span
+                                        v-if="errors[0]"
+                                        class="text-danger small mt-1"
+                                    >
                                         {{ errors[0] }}
                                     </span>
                                 </div>
@@ -122,13 +226,26 @@
                         </div>
                     </div>
                 </div>
-                <div class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0"
-                     @click="addStep">
+                <div
+                    class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0"
+                    @click="addStep"
+                >
                     <div class="icon-circle mb-2">
-                        <LucideIcon icon="Plus" :size="16" />
+                        <LucideIcon
+                            icon="Plus"
+                            :size="16"
+                        />
                     </div>
-                    <h6 class="fw-semibold mb-1">{{ $t("workflow.addStep") }}</h6>
-                    <p class="text-muted small mb-0">{{ $t("workflow.addStepDescription") }}</p>
+                    <h6 class="fw-semibold mb-1">
+                        {{ $t("workflow.addStep") }}
+                    </h6>
+                    <p class="text-muted small mb-0">
+                        {{
+                            $t(
+                                "workflow.addStepDescription"
+                            )
+                        }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -148,18 +265,22 @@
         props: {
             initialSteps: {
                 type: Array,
-                default: () => []
-            }
+                default: () => [],
+            },
         },
         data() {
             return {
-                steps: this.initialSteps.length > 0
-                    ? this.initialSteps.map(s => ({
-                        ...s,
-                        tempId: s.tempId ?? crypto.randomUUID(),
-                        isActive: s.isActive !== false
-                    }))
-                    : [],
+                steps:
+                    this.initialSteps.length > 0
+                        ? this.initialSteps.map((s) => ({
+                              ...s,
+                              tempId:
+                                  s.tempId ??
+                                  crypto.randomUUID(),
+                              isActive:
+                                  s.isActive !== false,
+                          }))
+                        : [],
                 profilesList: [],
                 statusList: [],
                 isLoadingProfiles: true,
@@ -170,7 +291,9 @@
 
         computed: {
             activeStepsList() {
-                return this.steps.filter(s => s.isActive !== false);
+                return this.steps.filter(
+                    (s) => s.isActive !== false
+                );
             },
         },
 
@@ -179,23 +302,27 @@
                 this.steps.push({
                     id: 0,
                     tempId: crypto.randomUUID(),
-                    name: '',
+                    name: "",
                     order: this.steps.length + 1,
-                    profileId: '',
-                    statusId: '',
+                    profileId: "",
+                    statusId: "",
                     isActive: true,
                 });
             },
             reorderList() {
-                this.activeStepsList.forEach((step, index) => {
-                    step.order = index + 1;
-                });
+                this.activeStepsList.forEach(
+                    (step, index) => {
+                        step.order = index + 1;
+                    }
+                );
             },
 
             removeStep(step) {
-                const idx = this.steps.findIndex(s =>
-                    (s.id && s.id === step.id) ||
-                    (s.tempId && s.tempId === step.tempId)
+                const idx = this.steps.findIndex(
+                    (s) =>
+                        (s.id && s.id === step.id) ||
+                        (s.tempId &&
+                            s.tempId === step.tempId)
                 );
                 if (idx !== -1) {
                     this.steps[idx].isActive = false;
@@ -206,24 +333,35 @@
             getData() {
                 return {
                     steps: this.steps
-                        .filter(s => s.isActive !== false)
+                        .filter((s) => s.isActive !== false)
                         .map((step, index) => ({
                             id: step.id || 0,
                             name: step.name,
                             order: index + 1,
-                            profileId: step.profileId ? parseInt(step.profileId) : null,
-                            statusId: step.statusId ? parseInt(step.statusId) : null,
-                            hasStepTools: step.hasStepTools || false,
+                            profileId: step.profileId
+                                ? parseInt(step.profileId)
+                                : null,
+                            statusId: step.statusId
+                                ? parseInt(step.statusId)
+                                : null,
+                            hasStepTools:
+                                step.hasStepTools || false,
                             isActive: true,
-                        }))
+                        })),
                 };
             },
             getProfiles() {
                 this.isLoadingProfiles = true;
                 ProfilesService.getProfilesList()
                     .then((response) => {
-                        if (response.error !== undefined) return;
-                        this.profilesList = response.map(r => ({ id: r.id, text: r.name }));
+                        if (response.error !== undefined)
+                            return;
+                        this.profilesList = response.map(
+                            (r) => ({
+                                id: r.id,
+                                text: r.name,
+                            })
+                        );
                     })
                     .finally(() => {
                         this.isLoadingProfiles = false;
@@ -233,7 +371,8 @@
                 this.isLoadingStatus = true;
                 StatusService.getStatus()
                     .then((response) => {
-                        if (response.error !== undefined) return;
+                        if (response.error !== undefined)
+                            return;
                         this.statusList = response;
                     })
                     .finally(() => {
@@ -245,7 +384,7 @@
             this.getProfiles();
             this.getStatus();
         },
-    }
+    };
 </script>
 
 <style scoped>
@@ -276,7 +415,7 @@
         width: 28px;
         height: 28px;
         border-radius: 50%;
-        background-color: #2F80ED;
+        background-color: #2f80ed;
         color: white;
         font-weight: bold;
         margin-right: 8px;
@@ -289,10 +428,10 @@
         padding: 4px;
     }
 
-        .input-title:focus {
-            outline: none;
-            border-bottom: 1px solid #2F80ED;
-        }
+    .input-title:focus {
+        outline: none;
+        border-bottom: 1px solid #2f80ed;
+    }
 
     .add-step-card {
         min-width: 240px;
@@ -303,9 +442,9 @@
         transition: background-color 0.2s;
     }
 
-        .add-step-card:hover {
-            background-color: #f9fafb;
-        }
+    .add-step-card:hover {
+        background-color: #f9fafb;
+    }
 
     .icon-circle {
         width: 32px;

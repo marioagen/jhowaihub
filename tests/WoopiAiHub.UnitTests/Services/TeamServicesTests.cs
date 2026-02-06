@@ -253,6 +253,24 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
         }
 
+        [Fact(DisplayName = "DeleteByIds should return false when IDs is has a Analyst team")]
+        [Trait("DeleteByIds", "Failure")]
+        public void DeleteByIds_InvalidIds_WhenIsaAnalystTeam()
+        {
+            // Arrange
+            var ids = new List<int> { 999 };
+            var teams = new List<Team>(){
+                new Team("Analyst", 999, DateTime.Now)
+            };
+
+            // Act
+            _teamRepositoryMock.Setup(r => r.FindByIds(ids)).Returns(teams);
+            _teamRepositoryMock.Setup(r => r.DeleteByIds(ids)).Returns(false);
+
+            // Assert
+            Assert.Throws<AppException>(() => _service.DeleteByIds(ids));
+        }
+
         [Fact(DisplayName = "DeleteByIds should return false when IDs do not exist")]
         [Trait("DeleteByIds", "Failure")]
         public void DeleteByIds_InvalidIds_ReturnsFalse()

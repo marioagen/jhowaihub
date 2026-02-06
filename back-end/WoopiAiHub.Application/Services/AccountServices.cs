@@ -74,16 +74,21 @@ namespace WoopiAiHub.Application.Services
             {
                 if (string.IsNullOrEmpty(loginDto.Tenant))
                 {
-                    if (userAccess.Tenants.Count > 0)
+                    if (userAccess.Tenants.Count == 0)
+                    {
+                        throw new AppException(null,
+                                               "User without access.",
+                                               Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
+                    }
+                    if (userAccess.Tenants.Count > 1)
                     {
                         return new
                         {
                             userAccess.Tenants
                         };
                     }
-                    throw new AppException(null,
-                                           "User without access.",
-                                           Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
+
+                    loginDto.Tenant = userAccess.Tenants.First().Name;
                 }
 
                 var tenant = FindAndValidateTenant(loginDto.Tenant, userAccess.Tenants);
@@ -164,16 +169,21 @@ namespace WoopiAiHub.Application.Services
                 {
                     if (string.IsNullOrEmpty(authenticateDto.Tenant))
                     {
-                        if (userAccess.Tenants.Count > 0)
+                        if (userAccess.Tenants.Count == 0)
+                        {
+                            throw new AppException(null,
+                                                   "User without access.",
+                                                   Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
+                        }
+                        if (userAccess.Tenants.Count > 1)
                         {
                             return new
                             {
                                 userAccess.Tenants
                             };
                         }
-                        throw new AppException(null,
-                                               "User without access.",
-                                               Domain.Utils.ErrorLabels.Login.UserWithoutAccess);
+
+                        authenticateDto.Tenant = userAccess.Tenants.First().Name;
                     }
 
                     var tenant = FindAndValidateTenant(authenticateDto.Tenant, userAccess.Tenants);
@@ -309,7 +319,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns>The name of the tenant if found and validated.</returns>
         /// <exception cref="AppException">Thrown if the tenant is not found in the collection, or if the tenant's database is not ready or cannot be
         /// accessed.</exception>
-        private static string FindAndValidateTenant(string tenant, ICollection<TenantAccessDto> tenants) 
+        private static string FindAndValidateTenant(string tenant, ICollection<TenantAccessDto> tenants)
         {
             var tenantFound = tenants.FirstOrDefault(t => t.Name.Equals(tenant, StringComparison.OrdinalIgnoreCase));
             if (tenantFound == null)

@@ -9,6 +9,7 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
+using WoopiAiHub.Application.Utils;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -49,8 +50,7 @@ namespace WoopiAiHub.UnitTests.Services
             var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true, Search = "A" };
             var profiles = new List<ProfileDto>
             {
-                new ProfileDto { Id = 1, Name = "A" },
-                new ProfileDto { Id = 2, Name = "B" }
+                new ProfileDto { Id = 1, Name = "A" }, new ProfileDto { Id = 2, Name = "B" }
             }.AsQueryable();
 
             _profileRepoMock.Setup(r => r.FindAllPaged(pagedData)).Returns(profiles);
@@ -69,7 +69,8 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = new ProfileCreateDto { Name = "Novo", PermissionsIds = new List<int> { 1 } };
             var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
 
-            _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
+            _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds))
+                .ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.CreateUniqueProfile(It.IsAny<Profile>())).Returns(true);
 
             var result = await _profileServices.CreateUniqueProfile(dto);
@@ -86,7 +87,8 @@ namespace WoopiAiHub.UnitTests.Services
             var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
 
             _profileRepoMock.Setup(r => r.FindByIdReturnModel(dto.Id)).Returns(profile);
-            _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
+            _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds))
+                .ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.Update(profile)).Returns(true);
 
             var result = await _profileServices.Update(dto);
@@ -96,14 +98,31 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Test DeleteByIds and returns true when success")]
         [Trait("DeleteByIds", "Success")]
-        public async void DeleteByIds_ReturnsTrue_WhenSuccess()
+        public async Task DeleteByIds_ReturnsTrue_WhenSuccess()
         {
             var ids = new List<int> { 1, 2 };
+            var profile = new Profile("Profile", 1, DateTime.Now);
+            _profileRepoMock.Setup(r => r.FindByIds(ids)).Returns(new List<Profile> { profile });
             _profileRepoMock.Setup(r => r.DeleteByIdsAsync(ids)).ReturnsAsync(true);
 
             var result = await _profileServices.DeleteByIds(ids);
 
             Assert.True(result);
+        }
+
+        [Fact(DisplayName = "Test DeleteByIds and returns false when a profile to be deleted is Analyst")]
+        [Trait("DeleteByIds", "Fail")]
+        public async Task DeleteByIds_ReturnsFalse_WhenIsaAnalystProfile()
+        {
+            // Arrange
+            var ids = new List<int> { 1 };
+            var profile = new Profile("Analyst", 1, DateTime.Now);
+            
+            // Act
+            _profileRepoMock.Setup(r => r.FindByIds(ids)).Returns(new List<Profile> { profile });
+
+            // Assert
+            await Assert.ThrowsAsync<AppException>(() => _profileServices.DeleteByIds(ids));
         }
 
         [Fact(DisplayName = "Test FindById and throw exception when not id is not found")]
@@ -139,7 +158,8 @@ namespace WoopiAiHub.UnitTests.Services
         {
             var dto = new ProfileCreateDto { Name = "Duplicado", PermissionsIds = new List<int>() };
             var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
-            _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
+            _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds))
+                .ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.CreateUniqueProfile(It.IsAny<Profile>())).Returns(false);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _profileServices.CreateUniqueProfile(dto));
@@ -165,7 +185,8 @@ namespace WoopiAiHub.UnitTests.Services
             var profile = new Profile("Antigo", 1, DateTime.Now) { Permissions = new List<Permission>() };
             var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
 
-            _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds)).ReturnsAsync(new List<Permission> { permission });
+            _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds))
+                .ReturnsAsync(new List<Permission> { permission });
             _profileRepoMock.Setup(r => r.FindByIdReturnModel(dto.Id)).Returns(profile);
             _profileRepoMock.Setup(r => r.Update(profile)).Returns(false);
 
@@ -179,8 +200,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var profiles = new List<ProfileDto>
             {
-                new ProfileDto { Id = 1, Name = "Profile1" },
-                new ProfileDto { Id = 2, Name = "Profile2" }
+                new ProfileDto { Id = 1, Name = "Profile1" }, new ProfileDto { Id = 2, Name = "Profile2" }
             };
             _profileRepoMock.Setup(repo => repo.FindAll()).ReturnsAsync(profiles);
 
@@ -199,8 +219,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var profiles = new List<ProfileDto>
             {
-                new ProfileDto { Id = 1, Name = "Profile1" },
-                new ProfileDto { Id = 2, Name = "Profile2" }
+                new ProfileDto { Id = 1, Name = "Profile1" }, new ProfileDto { Id = 2, Name = "Profile2" }
             };
             _profileRepoMock.Setup(repo => repo.FindAll()).ReturnsAsync(profiles);
 
@@ -221,8 +240,7 @@ namespace WoopiAiHub.UnitTests.Services
             var pagedData = new PagedDataDto { Page = 1, PageSize = 10, IsAscending = true, Search = "" };
             var profiles = new List<ProfileDto>
             {
-                new ProfileDto { Id = 1, Name = "Profile1" },
-                new ProfileDto { Id = 2, Name = "Profile2" }
+                new ProfileDto { Id = 1, Name = "Profile1" }, new ProfileDto { Id = 2, Name = "Profile2" }
             }.AsQueryable();
 
             _profileRepoMock.Setup(r => r.FindAllPaged(pagedData)).Returns(profiles);

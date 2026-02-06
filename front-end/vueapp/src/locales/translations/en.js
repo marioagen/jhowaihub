@@ -1,26 +1,78 @@
 const english = {
-    welcomeMsg: "Welcome",
     Admin: "Admin",
-    transferListTitle: "Selection list",
-    transferListPlaceholder: "Search in list",
-    unexpectedError:
-        "An unexpected error occurred. Please contact the system administrator.",
+    analyze: {
+        answer: "Answer",
+        applyQuestionnaire: "Apply Questionnaire",
+        askAI: "ASK AI",
+        askTheAi: "Ask AI",
+        askTheDoc: "Ask the Document",
+        clear: "Clear",
+        closeResults: "Close Results",
+        confirmed: "Confirmed",
+        conversationWithDocument:
+            "Conversation with the Document",
+        copy: "Copy",
+        document: "Document",
+        errorApplyingQuestionnaire:
+            "Error applying questionnaire",
+        errorLoadDocumentData:
+            "Error loading document data",
+        errorLoadingQuestionnaires:
+            "Error loading questionnaires",
+        extractedData: "Extracted Data",
+        failedEditOutput: "The output could not be edited.",
+        failedLoadDocument: "Failed to load document",
+        failedNoResponse:
+            "Failed, no response from the server.",
+        failedToLoadHistory: "Failed to load history.",
+        findingTheBestAnswer: "Finding the best answer",
+        nextStep: "Next Step",
+        noDataInDocument: "No data available",
+        pleaseSelectQuestionnaire:
+            "Please select a questionnaire",
+        previousStep: "Previous Step",
+        question: "Question",
+        questionnaireResults: "OUTPUT",
+        questionnaireToApply: "QUESTIONNAIRE TO APPLY",
+        selectQuestionnaire: "Select a questionnaire...",
+        sendQuestion: "Send Question",
+        subtitle: "Manage document analysis",
+        successApplyingQuestionnaire:
+            "Questionnaire applied successfully",
+        successEditOutput: "Output edited successfully",
+        title: "Analyze Document",
+        typeYourQuestion:
+            "Type your question about the document...",
+        workflow: "Workflow",
+    },
+    card: {
+        assignBtn: "Assign",
+        cardsOpened:
+            "There are open cards in this Workflow",
+        unassignInfo: "Unassign document",
+        userApplicant: "Applicant",
+        userAssigned: "Assigned",
+    },
     common: {
         action: "Action",
         actions: "Actions",
         advance: "Advance",
+        all: "All",
+        almost: "You're almost there!",
         analyze: "Analyze",
         analyzed: "Analyzed",
-        almost: "You're almost there!",
         apply: "Apply",
         back: "Back",
         cancel: "Cancel",
+        caution: "Caution!",
+        character: "character",
+        characters: "characters",
+        clearSelection: "Clear selection",
+        close: "Close",
         confirm: "Confirm",
         consult: "Consult",
-        create: "Create",
-        close: "Close",
-        clearSelection: "Clear selection",
         copy: "Copy text",
+        create: "Create",
         delete: "Delete",
         description: "Description",
         edit: "Edit",
@@ -28,1037 +80,992 @@ const english = {
         editedFail: "Edit failed",
         error: "Error",
         expand: "Expand",
+        failed: "failed!",
+        home: "Home",
+        id: "ID",
+        lines: "Lines per page",
         loading: "Loading",
         manage: "Manage",
         model: "Model",
         name: "Name",
         new: "New",
+        notAllowed: "Not allowed",
         notice: "Notice",
-        output: "Output",
         order: "Order",
+        output: "Output",
         owner: "Owner",
         processing: "Processing",
         reprocess: "Reprocess",
         save: "Save",
-        send: "Send",
         select: "Select",
-        selected: "Selected",
-        selectedList: "Selected list",
-        signOut: "Sign out",
-        status: "Status",
-        success: "Success",
-        upload: "Upload",
-        home: "Home",
-        failed: "failed!",
-        caution: "Caution!",
-        character: "character",
-        characters: "characters",
-        lines: "Lines per page",
-        showingToTotal: "of",
-        notAllowed: "Not allowed",
-        thisActionCannotBeUndone:
-            "This action cannot be undone. Are you sure you want to remove it?",
-        textCopiedToClipboard: "Text copied to clipboard.",
-        id: "ID",
-        all: "All",
         selectAll: "Select All",
         selectAnItemFromTheList:
             "Select an item from the list.",
+        selected: "Selected",
+        selectedList: "Selected list",
+        send: "Send",
+        showingToTotal: "of",
+        signOut: "Sign out",
+        status: "Status",
+        success: "Success",
+        textCopiedToClipboard: "Text copied to clipboard.",
+        thisActionCannotBeUndone:
+            "This action cannot be undone. Are you sure you want to remove it?",
+        upload: "Upload",
         warning: "Atention",
     },
-    modals: {
-        message: "Are you sure?",
+    dashboard: {
+        changeTenant: "Toggle Tenant",
+        created: "Created at:",
+        downloadCsv: "Download CSV",
+        downloadSuccessfully: "Download successfully",
+        exportBtn: "Export CSV",
+        filters: {
+            currentMonth: "This Month",
+            lastMonth: "Last Month",
+            previousNinety: "Last 90 Days",
+            previousSeven: "Last 7 Days",
+        },
+        graphs: {
+            pagesGraphSubtitle: "Daily Consumption",
+            pagesGraphTitle:
+                "Processed Document Pages (OCR)",
+            pagesTooltip:
+                "Number of document pages processed through Optical Character Recognition (OCR), which converts text images into editable text.",
+            periodTotal: "Period Total",
+            tokenGraphSubtitle: "Daily Token Consumption",
+            tokenGraphTitle: "AI Token Consumption",
+            tokensTooltip:
+                "View of token consumption for different Artificial Intelligence models. Tokens are the text processing units used by the models.",
+            totalPages: "Total Pages Processed",
+            totalTokens: "Total Tokens Consumed",
+            totalWorkflow: "Total AI Automation Executions",
+            totalWorkflowAutomatic:
+                "Total Woopi AI Executions",
+            unitValue: "Unit value in the current plan:",
+            workflowAutomaticTooltip:
+                "Number of times AI automation workflows were executed.",
+            workflowsAutomaticGraphTitle:
+                "AI Automation Workflow Executions",
+            workflowsGraphTitle:
+                "Woopi AI Workflow Executions",
+            workflowTooltip:
+                "Number of times workflows created in the Woopi AI platform were executed.",
+        },
+        model: "Models",
+        subtitle: "Woopi AI",
+        title: "Consumption and Ticketing Dashboard",
+        totalWTC: "Total WTC",
+        update: "Update",
+        WTCText:
+            "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan's multipliers. This is not a financial value.",
     },
     documents: {
-        step: "Step",
-        title: "Documents",
-        subtitle:
-            "Manage documents and extract information",
-        notFound: "No documents found",
-        removeTitle:
-            "You are about to delete a document from the system",
-        createBtn: "New document",
-        removeSuccess: "Document successfully removed",
-        removeError: "Error removing document",
-        errors: {
-            invalidType: "Invalid document type",
-            removeTypeError: "Error removing document type",
-            uploadError: "Something is wrong",
-            uploadFailure: "Upload failure",
-            uploadedFilesError: "Fail to upload files!",
-            unselectedDocuments: "No documents selected",
-        },
-        createdDate: "Upload date",
-        teams: "Team",
-        workflows: "Workflows",
-        statusList: {
-            notAnalyzed: "Waiting for analysis",
-        },
         actions: {
             consult: "Consult",
         },
-        upload: {
-            title: "New Document",
-            subtitle: "Upload new documents for analysis",
-            cardTitle: "Upload Document",
-            dropZone:
-                "Drag and drop your PDF files below to start, or click the area to browse",
-            removeAllDropzone: "Remove files from dropzone",
-            linkWorkflow: "Link to workflow",
-            linkSubtitle:
-                "Select at least one workflow to associate with the document.",
-            noWorkflowFound:
-                "No workflow linked to your user teams",
-            selectionList: "Selection list",
-            warningWorkflowNotListed:
-                "Workflow not listed? That's because your teams don't have one associated.",
-            noFileChosen: "No file chosen",
-            noTeamChosen: "No team chosen",
-        },
-        workflowListModal: {
-            title: "Select Workflow",
-            titleMessage:
-                "This document is associated with multiple workflows. Choose which one you want to view:",
-            searchPlaceholder: "Search workflow...",
-            clickToView: "Click to view",
-            nothingFound:
-                "No workflows found. If there is no linked workflow, consider resubmitting the file linking with a workflow",
-            cancel: "Cancel",
-            errorToGetWorkflows:
-                "Error searching for workflows.",
-            errorUnexpected: "Unexpected error.",
-        },
-        documentName: "Document name",
-        documentType: "Document type",
-        documentNameOrDescription:
-            "Document name or description",
-        documentTypeAlreadyExists:
-            "This document type already exists",
-        documentTypeSuccess:
-            "Document type inserted successfully",
-        documentTypeRemoveSuccess:
-            "Document type successfully removed",
-        documentTypeEditSuccess:
-            "Document type updated successfully",
-        documentHasAlreadyBeenStandardizedPreviously:
-            "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
-        documentTranscript: "Document transcription",
-        ocrText: "OCR Text",
-        descriptionDocumentNote:
-            "Description (Unique for multiple documents)",
-        noDocumentsWereFound: "No documents were found",
-        backToListDocuments: "Back to documents",
-        teamsTitleDocuments: "Associate with teams",
-        teamsSubtextDocuments:
-            "Select at least one team to associate with the document.",
-        noTeamsFound: "No team linked to your user",
         allTeams: "All teams",
-        noTeams: "No teams available",
-        totalDocuments: "Total documents",
-        selectedTeams: "Selected teams",
-        youAreAboutToDeleteDocument:
-            "You are about to delete <br/> the document from the system",
-        youAreAboutToDeleteDocumentQuery:
-            "You are about to delete <br/> the query history from the system",
-        searchDocument: "Search document",
-        generalInformation: "Upload Document",
-        historic: "Responses log",
-        inclusionDate: "Inclusion date",
-        listing: "Listing",
-        loadingTheText: "Loading the text",
-        loadingFilePleaseWait: "Loading file, please wait",
-        mostRecent: "Most recent",
-        mostOlder: "Most older",
-        pdfBack: "Back to PDF",
-        queryWithoutHistory: "Query without history",
-        reduceHistory: "Reduce history",
-        expandHistory: "Expand history",
-        closeHistory: "Close history",
-        deleteHistory: "Delete history",
-        viewHistory: "View history",
-        sendingTheDocument:
-            "Sending the document, please wait.",
-        preparingTheDocument: "Preparing the document..",
-        normalizingTheDocument:
-            "Normalizing the document, wait.",
-        failedToNormalize: "Failed to normalize",
-        standardizedFullText: "Standardized full text",
-        theFileMayBeCorrupt:
-            "The file may be <br/> corrupt or have an error. <br/> Please try again.",
-        theFileMayBeUnreadableOrHaveAnError:
-            "The file may be <br/> unreadable or have an error. <br/> Please try again.",
+        anInconsistencyWasIdentifiedInTheDocument:
+            "An inconsistency was identified in the document. Please reprocess to achieve better results",
         attentionDependingOnTheSpeed:
             "Attention, depending on the speed of your Internet connection and the size of the uploaded file, this operation may take a few minutes.",
         attentionPDFDisplayFailed:
             "An error occurred while loading the PDF. Click here to try again",
-        anInconsistencyWasIdentifiedInTheDocument:
-            "An inconsistency was identified in the document. Please reprocess to achieve better results",
-        uploadPdf:
-            "Drag and drop your PDF files below to get started or click on the area to browse",
-        uploadedFiles: "All files are uploaded!",
-        uploadComplete: "Upload complete",
-        showingFilesUpload: "uploaded files",
-        removeAllFilesDropzone:
-            "Remove all files from the queue?",
-        thisActionRemoveAllFiles:
-            "This action will remove all files selected for upload",
-        notReloadThePage:
-            "To avoid interrupting the upload process, do not reload the page",
-        selectAFile: "Select a file.",
-        numberOfPagesHasBeenExceeded:
-            "Number of pages has been exceeded. Contact your plan administrator.",
+        backToListDocuments: "Back to documents",
+        closeHistory: "Close history",
+        closeSidebar: "Close sidebar",
+        createBtn: "New document",
+        createdDate: "Upload date",
+        deleteHistory: "Delete history",
+        descriptionDocumentNote:
+            "Description (Unique for multiple documents)",
         descriptionExceeded:
             "Description exceeds the maximum of 250 characters.",
-        closeSidebar: "Close sidebar",
+        documentHasAlreadyBeenStandardizedPreviously:
+            "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
+        documentName: "Document name",
+        documentNameOrDescription:
+            "Document name or description",
+        documentTranscript: "Document transcription",
+        documentType: "Document type",
+        documentTypeAlreadyExists:
+            "This document type already exists",
+        documentTypeEditSuccess:
+            "Document type updated successfully",
+        documentTypeRemoveSuccess:
+            "Document type successfully removed",
+        documentTypeSuccess:
+            "Document type inserted successfully",
+        errors: {
+            invalidType: "Invalid document type",
+            removeTypeError: "Error removing document type",
+            unselectedDocuments: "No documents selected",
+            uploadedFilesError: "Fail to upload files!",
+            uploadError: "Something is wrong",
+            uploadFailure: "Upload failure",
+        },
+        expandHistory: "Expand history",
+        failedToNormalize: "Failed to normalize",
+        generalInformation: "Upload Document",
+        historic: "Responses log",
+        inclusionDate: "Inclusion date",
+        listing: "Listing",
+        loadingFilePleaseWait: "Loading file, please wait",
+        loadingTheText: "Loading the text",
+        mostOlder: "Most older",
+        mostRecent: "Most recent",
+        noDocumentsWereFound: "No documents were found",
+        normalizingTheDocument:
+            "Normalizing the document, wait.",
+        noTeams: "No teams available",
+        noTeamsFound: "No team linked to your user",
+        notFound: "No documents found",
+        notReloadThePage:
+            "To avoid interrupting the upload process, do not reload the page",
+        numberOfPagesHasBeenExceeded:
+            "Number of pages has been exceeded. Contact your plan administrator.",
+        ocrText: "OCR Text",
+        pdfBack: "Back to PDF",
+        preparingTheDocument: "Preparing the document..",
+        queryWithoutHistory: "Query without history",
+        reduceHistory: "Reduce history",
+        removeAllFilesDropzone:
+            "Remove all files from the queue?",
+        removeError: "Error removing document",
+        removeSuccess: "Document successfully removed",
+        removeTitle:
+            "You are about to delete a document from the system",
+        searchDocument: "Search document",
+        selectAFile: "Select a file.",
+        selectedTeams: "Selected teams",
         selectToDelete:
             "Select at least one document to perform deletion.",
-    },
-    questions: {
-        title: "Questions",
-        subtitle: "Manage system questions",
-        notFound: "No questions registered",
-        createBtn: "Create question",
-        createSuccess: "Question created successfully",
-        editSuccess: "Question edited successfully",
-        removeTitle:
-            "You are about to delete a system question",
-        removeSuccess: "Question removed successfully",
-        errors: {
-            createError: "Error creating question",
-            editError: "Error editing question",
-            removeError: "Error removing question",
-            duplicated: "Duplicated question",
-            invalid: "Invalid question",
+        sendingTheDocument:
+            "Sending the document, please wait.",
+        showingFilesUpload: "uploaded files",
+        standardizedFullText: "Standardized full text",
+        statusList: {
+            notAnalyzed: "Waiting for analysis",
         },
-        createdData: "Creation date",
-        modalCreate: {
-            title: "Create question",
-            save: "Create question",
-        },
-        modalEdit: {
-            title: "Edit question",
-            save: "Save changes",
-        },
-        availableList: "Available questions",
-        questionNotFound: "Question not found",
-        noQuestionsRegistered:
-            "There are no questions registered",
-        noMoreQuestionsAvailable:
-            "There are no more questions available",
-        noQuestionsWereFound: "No questions were found",
-        noQuestionsWereSelected:
-            "No questions were selected.",
-        editQuestion: "Edit question",
-        sendQuestion: "Send question",
-        selectQuestions: "Select questions",
-        searchQuestion: "Search question",
-        viewQuestions: "View questions",
-        descriptionOrQuestionId:
-            "Description, ID or enter a new question to register",
-        youAreAboutToDeleteQuestion:
-            "You are about to delete <br/> a question from the system",
-        numberOfQuestionsHasBeenExceeded:
-            "Number of questions has been exceeded. Contact your plan administrator.",
-        selectToDelete:
-            "Select at least one question to perform the deletion.",
-    },
-    quizzes: {
-        title: "Quizzes",
-        subtitle: "Manage system quizzes",
-        notFound: "No quizzes registered",
-        createBtn: "Create quiz",
-        createSuccess: "Quiz created successfully",
-        editSuccess: "Quiz updated successfully",
-        removeTitle:
-            "You are about to delete a quiz from the system",
-        removeSuccess: "Quiz removed successfully",
-        errors: {
-            createError: "Error creating quiz",
-            editError: "Error updating quiz",
-            removeError: "Error removing the quiz",
-            duplicated: "Duplicated questionnaire name",
-            invalid: "Invalid questionnaire",
-        },
-        tableTitle: "Quiz list",
-        type: "Document type",
-        questions: "Questions",
-        createdDate: "Creation date",
-        formName: "Quiz name",
-        formSelect: "Select document type",
-        formNamePlaceholder: "Enter quiz name",
-        basicInfo: "Basic Information",
-        basicInfoSubtitle:
-            "Configure the basic information of the quiz",
-        questionsSection: {
-            title: "Question Selection",
-            subtitle:
-                "Select the questions that will be part of this quiz",
-        },
-        formCreate: {
-            title: "New Quiz",
-            subtitle: "Save the new quiz information",
-        },
-        formEdit: {
-            title: "Edit Quiz",
-            subtitle: "Update the quiz information",
-        },
-        questionnaireSearch:
-            "Name, ID , Document type or insert a new questionnaire to register",
-        questionnaireAppliedSuccessfully:
-            "Questionnaire applied successfully, please wait.",
-        questionnaireAndAi: "Questionnaire and AI",
-        noQuestionnairesWereFound:
-            "No questionnaires were found",
-        applyQuestionnaire: "Apply questionnaire",
-        applyingQuestionnaire: "Applying questionnaire",
-        applyingQuestionnaireWait:
-            "Applying questionnaire, please wait.",
-        selectQuestionnaire: "Select a questionnaire",
-        searchQuestionnaire: "Search questionnaire",
-        failedToApplyQuestionnaire:
-            "Failed to apply questionnaire.",
-        thereIsNotEnoughCredit:
-            "There is not enough credit to apply all questions in this questionnaire.",
-        youAreAboutToDeleteQuestionnaire:
-            "You are about to delete <br/> a questionnaire from the system",
-        selectToDelete:
-            "Select at least one questionnaire to perform the deletion.",
-    },
-    types: {
-        title: "Types",
-        subtitle: "Manage system document types",
-        createBtn: "Create type",
-        typeDoc: "Document Type",
-        typeDocAlreadyExists: "Duplicated Type",
-        typeNameOrId:
-            "Name, ID or enter a new type to register",
-        noDocumentTypeWasFound:
-            "No document type was found",
-        searchTypes: "Search types",
-        newType: "Create type",
-        youAreAboutToDeleteDocumentType:
-            "You are about to delete <br/> a document type from the system",
-        youAreAboutToDeleteType: "Delete type",
-        editTitleType: "Edit type",
-        saveTitleType: "Create type",
-        saveType: "Create",
-        createSuccess: "Type created successfully",
-        editSuccess: "Type updated successfully",
-        removeSuccess: "Type removed successfully",
-        errors: {
-            invalid: "Invalid type",
-            removeError: "Error removing type",
-        },
-        selectToDelete:
-            "Select at least one type to perform the exclusion.",
-    },
-    managementQuizzes: {
-        title: "Quiz Management, Questions and Document Types",
-        subtitle: "Manage quizzes, teams and system permissions",
-        quizzes: {
-            title: "Quizzes"
-        },
-        questions: {
-            title: "Questions"
-        },
-        types: {
-            title: "Types"
-        },
-    },
-    management: {
-        title: "User and Team Management",
+        step: "Step",
         subtitle:
-            "Manage system users, teams, and permissions",
-        users: {
-            title: "Users",
-            subtitle: "Manage system users",
-            createBtn: "New User",
-            createTitle: "New User",
-            createSubtitle:
-                "Create a new user for the system",
-            editTitle: "Edit User",
-            editSubtitle:
-                "Update the selected user's information",
-            saveSuccess: "User saved successfully",
-            deleteSuccess: "User deleted successfully",
-            errors: {
-                invalid: "Invalid user",
-                emailDuplicated: "Email already registered",
-                saveError: "Error saving user",
-            },
-            manageUsers: "User management",
-            usersMessage: "Manage system users",
-            newUser: "New user",
-            editUser: "Edit user",
-            user: "User",
-            noUsersWasFound: "No user was found",
-            searchUsers: "Search users...",
-            typeUserName: "Enter the user name ",
-            typeUserEmail: "Enter the user email",
-            newUserMessage:
-                "Create or edit an user in the system",
-            newTeamUserMessage:
-                "Create a new user that will be automatically selected",
-            createTeamUser: "Create User",
-            selectedUsers: "Selected users",
-            youAreAboutToDeleteUser: "Delete user",
-            email: "Email",
-            typeEmail: "user{'@'}yourcompany.com",
-            typeName: "Enter full name",
-            password: "Password",
-            typePassword: "Enter password",
-            confirmedPassword: "Confirm password",
-            typeConfirmedPassword:
-                "Enter password confirmation",
+            "Manage documents and extract information",
+        teams: "Team",
+        teamsSubtextDocuments:
+            "Select at least one team to associate with the document.",
+        teamsTitleDocuments: "Associate with teams",
+        theFileMayBeCorrupt:
+            "The file may be <br/> corrupt or have an error. <br/> Please try again.",
+        theFileMayBeUnreadableOrHaveAnError:
+            "The file may be <br/> unreadable or have an error. <br/> Please try again.",
+        thisActionRemoveAllFiles:
+            "This action will remove all files selected for upload",
+        title: "Documents",
+        totalDocuments: "Total documents",
+        upload: {
+            cardTitle: "Upload Document",
+            dropZone:
+                "Drag and drop your PDF files below to start, or click the area to browse",
+            linkSubtitle:
+                "Select at least one workflow to associate with the document.",
+            linkWorkflow: "Link to workflow",
+            noFileChosen: "No file chosen",
+            noTeamChosen: "No team chosen",
+            noWorkflowFound:
+                "No workflow linked to your user teams",
+            removeAllDropzone: "Remove files from dropzone",
+            selectionList: "Selection list",
+            subtitle: "Upload new documents for analysis",
+            title: "New Document",
+            warningWorkflowNotListed:
+                "Workflow not listed? That's because your teams don't have one associated.",
         },
-        teams: {
-            title: "Teams",
-            subtitle: "Manage system teams",
-            createBtn: "New Team",
-            createTitle: "New Team",
-            createSubtitle:
-                "Create a new team for the system",
-            editTitle: "Edit Team",
-            editSubtitle:
-                "Update the selected team's information",
-            saveSuccess: "Team saved successfully",
-            deleteSuccess: "Team deleted successfully",
-            errors: {
-                invalid: "Invalid team",
-                saveError: "Error saving team",
-                deleteError: "Error deleting team",
-                duplicated: "Team already registered",
-                fetchError: "Error fetching teams",
-                teamAlreadyExists:
-                    "Team already registered",
-                deleteDocError:
-                    "Could not delete the team: there are related documents",
-            },
-            teamsMessage: "Manage teams and their members",
-            team: "Team",
-            noTeamWasFound: "No team was found",
-            newTeam: "New team",
-            newTeamMessage:
-                "Create a new team in the system",
-            typeTeamName: "Enter the team name",
-            teamName: "Team",
-            members: "Members",
-            teamMembers: "Team members",
-            youAreAboutToDeleteTeam:
-                "You are about to delete a Team from the system",
-            searchTeams: "Search teams",
+        uploadComplete: "Upload complete",
+        uploadedFiles: "All files are uploaded!",
+        uploadPdf:
+            "Drag and drop your PDF files below to get started or click on the area to browse",
+        viewHistory: "View history",
+        workflowListModal: {
+            cancel: "Cancel",
+            clickToView: "Click to view",
+            errorToGetWorkflows:
+                "Error searching for workflows.",
+            errorUnexpected: "Unexpected error.",
+            nothingFound:
+                "No workflows found. If there is no linked workflow, consider resubmitting the file linking with a workflow",
+            searchPlaceholder: "Search workflow...",
+            title: "Select Workflow",
+            titleMessage:
+                "This document is associated with multiple workflows. Choose which one you want to view:",
         },
-        profiles: {
-            index: "Profiles",
-            title: "Profiles and Permissions",
-            subtitle:
-                "Manage system profiles and permissions",
-            createBtn: "New Profile",
-            createTitle: "New Profile",
-            createSubtitle:
-                "Create a new profile for the system",
-            editTitle: "Edit Profile",
-            editSubtitle:
-                "Update the selected profile's information",
-            saveSuccess: "Profile saved successfully",
-            editSuccess: "Profile updated successfully",
-            deleteSuccess: "Profile deleted successfully",
-            errors: {
-                invalid: "Invalid profile",
-                saveError: "Error saving profile",
-                editError: "Error updating profile",
-                deleteError: "Error deleting profile",
-                removeError:
-                    "Error while removinmg profile",
-                addError: "Erro while creating profile",
-                editProfileError:
-                    "Erro while editing profile",
-            },
-            permissionsWorkflow: "Workflow Permissions",
-            profilePermissions: "Profiles and Permissions",
-            newProfile: "New Profile",
-            profile: "Profile",
-            profiles: "Profiles",
-            permissions: "Permissions",
-            profilesMessage:
-                "Manage profiles and permissions from system",
-            noProfilesWereFound: "No profile was found",
-            searchProfiles: "Search profiles",
-            typeProfileName: "Enter the profile name",
-            createProfile: "Create profile",
-            editProfile: "Edit profile",
-            selectedProfiles: "Selected profiles",
-            youAreAboutToDeleteProfile:
-                "You are about to delete a profile from the system",
-            editTitleProfile: "Editing profile",
-            editSubTitleProfile:
-                "Update the profile's information in the system",
-            saveTitleProfile: "New profile",
-            saveSubTitleProfile:
-                "Create a new profile in the system",
-            profileAddSuccess:
-                "Profile inserted successfully",
-            profileEditSuccess:
-                "Profile updated successfully",
-            profileRemoveSuccess:
-                "Profile removed successfully",
-            searchPermissions: "Search permissions...",
-            noPermissionChosen: "No permission selected",
-        },
-    },
-    login: {
-        index: "Login",
-        title: "Sign In",
-        password: "Password",
-        subtitle: "Access your account to manage documents",
-        invalid: "Invalid field",
-        error: "Error",
-        warning: "Attention",
-        loading: "Loading...",
-        sso: "Login with Microsoft",
-        authSSO: "Authenticated with Microsoft",
-        validateClient: "Client validated",
-        userNotFound: "User not found.",
-        userWithoutAccess:
-            "User does not have access permission.",
-        userIncorrectPassword:
-            "The entered password is incorrect.",
-        userTokenMicrosoftInvalid:
-            "Could not validate your authentication. Please log in again.",
-        selectTenant: "Select the tenant to continue",
-        continue: "Continue",
-        tenantDatabaseNotReady: "The environment is being prepared. Please try again in a few minutes.",
-        tenantNotFound: "Tenant not found.",
-    },
-    validation: {
-        required: "Required field",
-        email: "Invalid email",
-        min: "Minimum of {limit} characters",
-        max: "Maximum of {limit} characters",
-        fillInThisField: "Fill in this field.",
-        confirmedFieldDiffers:
-            "The confirmed field differs from the original",
-        fullname: "Enter at least first and last name",
-        password_min:
-            "Password must be at least 6 characters.",
-        password_lowercase:
-            "Password must contain at least one lowercase letter.",
-        password_uppercase:
-            "Password must contain at least one uppercase letter.",
-        password_number:
-            "Password must contain at least one number.",
-        password_special:
-            "Password must contain at least one special character.",
-        password_confirmed:
-            "Password confirmation does not match.",
-        hasInvalid: "Invalid fields",
-        oneStep: "At least one step is required to save",
-        oneElementArray: "Select at least one option",
+        workflows: "Workflows",
+        youAreAboutToDeleteDocument:
+            "You are about to delete <br/> the document from the system",
+        youAreAboutToDeleteDocumentQuery:
+            "You are about to delete <br/> the query history from the system",
     },
     filters: {
+        assignment: {
+            allUsers: "All users",
+            currentUser: "My documents",
+        },
         documentInput:
             "Search by document, description or user, ...",
-        workflowInput:
-            "Search by document, description or requester",
-        toolInput: "Search by tool name",
+        mostOld: "Most old",
+        mostRecent: "Most recent",
+        nameAZ: "Name (A-Z)",
+        nameZA: "Name (Z-A)",
         questionsInput: "Search question",
         quizzesInput: "Search quiz",
+        sortBy: "Sort by",
         teamsSelect: {
             all: "All teams",
             none: "Select a team",
-        },
-        usersSelect: {
-            all: "All users",
-            none: "Select a user",
-        },
-        typesSelect: {
-            all: "All types",
-            none: "Select a type",
-        },
-        assignment: {
-            currentUser: "My documents",
-            allUsers: "All users",
-        },
-        workflowSelect: {
-            withWorkflow: "All with associated workflow",
-            none: "Select a workflow",
         },
         templates: {
             all: "HTTP methods",
             searchBtn: "Search",
         },
-        sortBy: "Sort by",
-        mostRecent: "Most recent",
-        mostOld: "Most old",
-        nameAZ: "Name (A-Z)",
-        nameZA: "Name (Z-A)",
+        toolInput: "Search by tool name",
+        typesSelect: {
+            all: "All types",
+            none: "Select a type",
+        },
+        usersSelect: {
+            all: "All users",
+            none: "Select a user",
+        },
+        workflowInput:
+            "Search by document, description or requester",
+        workflowSelect: {
+            none: "Select a workflow",
+            withWorkflow: "All with associated workflow",
+        },
     },
-    unauthorized: {
-        title: "You do not have permission to access this screen.",
-        returnToHome: "Return",
+    flow: {
+        downloadJson: "Download JSON",
+        flowListEnd: "Finish Flow",
+        formCreate: {
+            subtitle:
+                "Create a new tool to process documents",
+            title: "Automation Flow",
+        },
+        formEdit: {
+            subtitle:
+                "Update the information of the selected tool",
+            title: "Automation Flow:",
+        },
+        formFlow: {
+            connectorWorkflowConfigFail:
+                "Failed to retrieve workflow configuration. Check tool URL and API key",
+            connectorWorkflowFail:
+                "Workflow connector did not respond. Check tool URL and API key",
+            dependenciesRequired:
+                "Select at least one dependency",
+            editFlowNodeFail: "Failed to edit node",
+            editFlowNodeSuccess: "Node edited successfully",
+            progressFlowFail: "Failed to insert flow",
+            progressFlowSuccess:
+                "Flow inserted successfully",
+            progressFlowUpdateFail:
+                "Failed to update flow. Flow already contains output data for tools.",
+        },
+        hideTools: "Hide Tools",
+        showTools: "Add Tools",
+        sidebar: {
+            addDependency: "Add Dependency",
+            allDependenciesSelected:
+                "All dependencies already selected",
+            deleteDependency: "Remove Dependency",
+            dependencies: "Dependencies",
+            dependenciesHint:
+                "Select previous tools whose outputs you want to use as input",
+            filter: "Select webhook",
+            inputs: "Inputs",
+            noDependencies: "No tools available",
+        },
+        sidebarTitle: "Configure I/O:",
+        start: "Start",
+        subtitle: "",
+        title: "Automation Flow",
+        upload: "Upload",
+    },
+    home: {
+        docsCard: {
+            button: "Access docs",
+            description:
+                "Check our complete documentation to explore all the potential of AI HUB.",
+            title: "Explore the Documentation",
+        },
+        planLabel: "You have acquired the",
+        planName: "Enterprise Plan",
+        planThankYou:
+            "Thank you for choosing our platform!",
+        platformCard: {
+            button: "Watch video",
+            description:
+                "Watch a 5-minute guided tour about the main features.",
+            title: "Discover the Platform",
+        },
+        quickStartTitle: "Quick Start Guide",
+        subtitle:
+            "Your journey to automate and optimize processes with artificial intelligence starts now.",
+        title: "Welcome to WOOPI AI!",
+        whatsApp: {
+            support: "Contact support",
+        },
+        workflowCard: {
+            button: "Start guide",
+            description:
+                "Follow our step-by-step guide to create your first automation in minutes.",
+            title: "Your First Workflow",
+        },
+    },
+    login: {
+        authSSO: "Authenticated with Microsoft",
+        continue: "Continue",
+        error: "Error",
+        index: "Login",
+        invalid: "Invalid field",
+        loading: "Loading...",
+        password: "Password",
+        selectTenant: "Select the tenant to continue",
+        sso: "Login with Microsoft",
+        subtitle: "Access your account to manage documents",
+        tenantDatabaseNotReady:
+            "The environment is being prepared. Please try again in a few minutes.",
+        tenantNotFound: "Tenant not found.",
+        title: "Sign In",
+        userIncorrectPassword:
+            "The entered password is incorrect.",
+        userNotFound: "User not found.",
+        userTokenMicrosoftInvalid:
+            "Could not validate your authentication. Please log in again.",
+        userWithoutAccess:
+            "User does not have access permission.",
+        validateClient: "Client validated",
+        warning: "Attention",
+    },
+    management: {
+        profiles: {
+            createBtn: "New Profile",
+            createProfile: "Create profile",
+            createSubtitle:
+                "Create a new profile for the system",
+            createTitle: "New Profile",
+            deleteSuccess: "Profile deleted successfully",
+            editProfile: "Edit profile",
+            editSubtitle:
+                "Update the selected profile's information",
+            editSubTitleProfile:
+                "Update the profile's information in the system",
+            editSuccess: "Profile updated successfully",
+            editTitle: "Edit Profile",
+            editTitleProfile: "Editing profile",
+            errors: {
+                addError: "Erro while creating profile",
+                deleteError: "Error deleting profile",
+                editError: "Error updating profile",
+                editProfileError:
+                    "Erro while editing profile",
+                invalid: "Invalid profile",
+                removeError:
+                    "Error while removinmg profile",
+                saveError: "Error saving profile",
+            },
+            index: "Profiles",
+            newProfile: "New Profile",
+            noPermissionChosen: "No permission selected",
+            noProfilesWereFound: "No profile was found",
+            permissions: "Permissions",
+            permissionsWorkflow: "Workflow Permissions",
+            profile: "Profile",
+            profileAddSuccess:
+                "Profile inserted successfully",
+            profileEditSuccess:
+                "Profile updated successfully",
+            profilePermissions: "Profiles and Permissions",
+            profileRemoveSuccess:
+                "Profile removed successfully",
+            profiles: "Profiles",
+            profilesMessage:
+                "Manage profiles and permissions from system",
+            saveSubTitleProfile:
+                "Create a new profile in the system",
+            saveSuccess: "Profile saved successfully",
+            saveTitleProfile: "New profile",
+            searchPermissions: "Search permissions...",
+            searchProfiles: "Search profiles",
+            selectedProfiles: "Selected profiles",
+            subtitle:
+                "Manage system profiles and permissions",
+            title: "Profiles and Permissions",
+            typeProfileName: "Enter the profile name",
+            youAreAboutToDeleteProfile:
+                "You are about to delete a profile from the system",
+        },
+        subtitle:
+            "Manage system users, teams, and permissions",
+        teams: {
+            createBtn: "New Team",
+            createSubtitle:
+                "Create a new team for the system",
+            createTitle: "New Team",
+            deleteSuccess: "Team deleted successfully",
+            editSubtitle:
+                "Update the selected team's information",
+            editTitle: "Edit Team",
+            errors: {
+                deleteDocError:
+                    "Could not delete the team: there are related documents",
+                deleteError: "Error deleting team",
+                duplicated: "Team already registered",
+                fetchError: "Error fetching teams",
+                invalid: "Invalid team",
+                saveError: "Error saving team",
+                teamAlreadyExists:
+                    "Team already registered",
+            },
+            members: "Members",
+            newTeam: "New team",
+            newTeamMessage:
+                "Create a new team in the system",
+            noTeamWasFound: "No team was found",
+            saveSuccess: "Team saved successfully",
+            searchTeams: "Search teams",
+            subtitle: "Manage system teams",
+            team: "Team",
+            teamMembers: "Team members",
+            teamName: "Team",
+            teamsMessage: "Manage teams and their members",
+            title: "Teams",
+            typeTeamName: "Enter the team name",
+            youAreAboutToDeleteTeam:
+                "You are about to delete a Team from the system",
+        },
+        title: "User and Team Management",
+        users: {
+            confirmedPassword: "Confirm password",
+            createBtn: "New User",
+            createSubtitle:
+                "Create a new user for the system",
+            createTeamUser: "Create User",
+            createTitle: "New User",
+            deleteSuccess: "User deleted successfully",
+            editSubtitle:
+                "Update the selected user's information",
+            editTitle: "Edit User",
+            editUser: "Edit user",
+            email: "Email",
+            errors: {
+                emailDuplicated: "Email already registered",
+                invalid: "Invalid user",
+                saveError: "Error saving user",
+            },
+            manageUsers: "User management",
+            newTeamUserMessage:
+                "Create a new user that will be automatically selected",
+            newUser: "New user",
+            newUserMessage:
+                "Create or edit an user in the system",
+            noUsersWasFound: "No user was found",
+            password: "Password",
+            saveSuccess: "User saved successfully",
+            searchUsers: "Search users...",
+            selectedUsers: "Selected users",
+            subtitle: "Manage system users",
+            title: "Users",
+            typeConfirmedPassword:
+                "Enter password confirmation",
+            typeEmail: "user{'@'}yourcompany.com",
+            typeName: "Enter full name",
+            typePassword: "Enter password",
+            typeUserEmail: "Enter the user email",
+            typeUserName: "Enter the user name ",
+            user: "User",
+            usersMessage: "Manage system users",
+            youAreAboutToDeleteUser: "Delete user",
+        },
+    },
+    managementQuizzes: {
+        questions: {
+            title: "Questions",
+        },
+        quizzes: {
+            title: "Quizzes",
+        },
+        subtitle:
+            "Manage quizzes, teams and system permissions",
+        title: "Quiz Management, Questions and Document Types",
+        types: {
+            title: "Types",
+        },
+    },
+    modals: {
+        message: "Are you sure?",
+    },
+    pages: {
+        dashboard: "Dashboard",
+        documents: "Documents",
+        management: "User Management",
+        prompts: "Prompts",
+        questions: "Questions",
+        quizzes: "Quizzes",
+        templates: "API Templates",
+        tools: "Tools",
+        types: "Types",
+        workflowManagement: "Workflow Management",
+        workflows: "Document Workflows",
     },
     pagination: {
         next: "Next",
         previous: "Previous",
     },
-    workflow: {
-        index: "Workflow",
-        title: "Document Processing Board",
-        editTitle: "Workflow Editor",
-        subtitle:
-            "View the flow of documents through the processing stages",
-        subtitleEditor:
-            "Manage and configure document processing workflows",
-        manage: "Manage workflow:",
-        boardView: "Viewing workflow:",
-        steps: "Workflow Steps",
-        error: "Error fetching workflows",
-        addBtn: "Add Step",
-        addBtnDescription: "Click to create a new step",
-        createNewStep: "New Step",
-        responsableTeam: "Responsible Team",
-        stepTitle: "Workflow Step",
-        stepSubtitle: "Set up rules and responsibilities",
-        managementTitle: "Workflow Management",
-        managementSubtitle:
-            "Manage and configure document processing workflows",
-        access: "Access",
-        teams: "Associated teams",
-        notFound: "No workflow was found",
-        name: "Workflow Name",
-        namePlaceholder: "Ex: Contract Approval",
-        profiles: "Responsible Profile",
-        selectWorkflow: "Select a workflow",
-        selectProfile: "Select a profile",
-        selectStatus: "Select a status",
-        createBtn: "New Workflow",
-        deleteBtn: "Delete",
-        createSuccess: "Workflow created successfully",
-        createError: "Error creating workflow",
-        editSuccess: "Workflow edited successfully",
-        editError: "Error editing workflow",
-        removeSuccess: "Workflow removed successfully",
-        removeError: "Error removing workflow",
-        stepFlow: "Document Automation",
-        nameAndAssociations: "Name and Associations",
-        tools: "Tools",
-        basicInfo: "Basic Information",
-        associatedTeams: "Associated Teams",
-        stepsTitle: "Workflow Steps",
-        stepNamePlaceholder: "Step Name",
-        addStep: "Add Step",
-        addStepDescription: "Click to create a new step",
-        toolFlowsTitle: "Add Tool Flow",
-        noStepsAvailable:
-            "No steps available. Please add steps in the previous phase.",
-        responsible: "Responsible",
-        configuredTools: "Configured Tools",
-        addToolFlow: "Add Tool Flow",
-        editToolFlow: "Edit Tool Flow",
-        removeToolFlow: "Remove Flow",
-        previous: "Previous",
-        next: "Next",
-        createWorkflow: "Create Workflow",
-        saveChanges: "Save Changes",
-        phase1Success:
-            "Basic information saved successfully",
-        phase1Error: "Error saving basic information",
-        phase2Success: "Steps saved successfully",
-        phase2Error: "Error saving steps",
-        phase3Success: "Tools saved successfully",
-        phase3Error: "Error saving tools",
-        loadError: "Error loading workflow",
-        formCreate: {
-            title: "Create Workflow",
-            subtitle:
-                "Follow the steps to configure your workflow.",
+    permissions: {
+        descriptions: {
+            dashboard: "View Dashboard",
+            documents: "View Documents",
+            management: "View Management Tables",
+            profiles: "View Profiles",
+            prompts: "View Prompts",
+            questions: "View Questions",
+            quizzes: "View Quizzes",
+            teams: "View Teams",
+            tools: "View Tools",
+            types: "View Types",
+            users: "View Users",
+            workflow: "View Workflow",
+            workflowStepAccess: "Access Steps",
+            workflowStepView: "View Steps",
         },
-        formEdit: {
-            title: "Edit Workflow",
-            subtitle:
-                "Follow the steps to configure your workflow.",
+        groups: {
+            dashboard: "Dashboard",
+            documents: "Documents",
+            management: "Management",
+            profiles: "Profiles",
+            prompts: "Prompts",
+            questions: "Questions",
+            quizzes: "Quizzes",
+            teams: "Teams",
+            tools: "Tools",
+            types: "Types",
+            users: "Users",
+            workflow: "Workflow",
+            workflowmanagement: "Workflow Management",
+            workflowStep: "Workflow Step",
         },
-        labelWatchingWorkflow: "Viewing workflow:",
-        labelWorkflowDocs: "Documents Workflow",
-        labelWorkflowBoard: "Document Processing Board",
-        labelWorkflowSubTitle:
-            "Visualize the flow of documents through processing steps",
-        sidebar: {
-            index: "Document Workflow",
-            management: "Workflow Management",
-        },
-        leaveMessage: "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
-        finalize: "Finalize",
-        saveStep:"Save step",
-        statusList: {
-            awaitinganalysis:"Awaiting Analysis",
-            analyzed:"Analyzed",
-            waitingforapproval:"Waiting for Approval",
-            approved:"Approved",
-            done:"Done",
-        }
-    },
-    card: {
-        userAssigned: "Assigned",
-        userApplicant: "Applicant",
-        assignBtn: "Assign",
-        unassignInfo: "Unassign document",
-        cardsOpened:
-            "There are open cards in this Workflow",
-    },
-    tools: {
-        index: "Tools",
-        title: "Tools",
-        subtitle:
-            "Manage and configure your document processing tools",
-        notFound: "No tools registered",
-        toolNotFound: "Tool not found",
-        dependencyToolNotFound: "Dependency tool not found",
-        createBtn: "New Tool",
-        editBtn: "Save changes",
-        type: "Type",
-        entry: "Input",
-        created: "Created on",
-        createSuccess: "Tool created successfully",
-        createError: "Error creating tool",
-        editSuccess: "Tool updated successfully",
-        editError: "Error updating tool",
-        removeSuccess: "Tool removed successfully",
-        removeError: "Error removing tool",
-        removeTitle:
-            "You are about to delete a tool from the system",
-        dependencyRequired:
-            "Prompt tool requires at least one dependency",
-        ocrDependencyRequired:
-            "Prompt tool requires a dependency on an OCR tool",
-        form: {
-            name: "Tool Name",
-            types: "Tool Type",
-            typesSelect: "Select tool type",
-            entries: "Input",
-            entriesSelect: "Select input type",
-            entriesEditable: "Editable input",
-            outputSelect: "Select output type",
-            connectorUrl: "n8n URL",
-            connectorApiKey: "API Key",
-            validatingConnector: "Validating connector url",
-            invalidConnector:
-                "Connector did not respond. Invalid URL or key",
-            validConnector: "Connector is active",
-        },
-        formCreate: {
-            title: "New Tool",
-            subtitle:
-                "Create a new tool to process documents",
-        },
-        formEdit: {
-            title: "Edit Tool",
-            subtitle:
-                "Update the selected tool's information",
-        },
-        validationError: "Error validating fields",
-    },
-    flow: {
-        title: "Automation Flow",
-        subtitle: "",
-        downloadJson: "Download JSON",
-        upload: "Upload",
-        start: "Start",
-        showTools: "Add Tools",
-        hideTools: "Hide Tools",
-        flowListEnd: "Finish Flow",
-        formCreate: {
-            title: "Automation Flow",
-            subtitle:
-                "Create a new tool to process documents",
-        },
-        formEdit: {
-            title: "Automation Flow:",
-            subtitle:
-                "Update the information of the selected tool",
-        },
-        sidebarTitle: "Configure I/O:",
-        sidebar: {
-            filter: "Select webhook",
-            inputs: "Inputs",
-            dependencies: "Dependencies",
-            dependenciesHint:
-                "Select previous tools whose outputs you want to use as input",
-            addDependency: "Add Dependency",
-            noDependencies: "No tools available",
-            allDependenciesSelected:
-                "All dependencies already selected",
-            deleteDependency: "Remove Dependency",
-        },
-        formFlow: {
-            progressFlowSuccess:
-                "Flow inserted successfully",
-            progressFlowFail: "Failed to insert flow",
-            progressFlowUpdateFail:
-                "Failed to update flow. Flow already contains output data for tools.",
-            editFlowNodeSuccess: "Node edited successfully",
-            editFlowNodeFail: "Failed to edit node",
-            connectorWorkflowFail:
-                "Workflow connector did not respond. Check tool URL and API key",
-            connectorWorkflowConfigFail:
-                "Failed to retrieve workflow configuration. Check tool URL and API key",
-            dependenciesRequired:
-                "Select at least one dependency",
-        },
-    },
-    prompts: {
-        title: "Prompts",
-        createPrompt: "Create prompt",
-        subtitle: "Manage system prompts",
-        myPromptsBadge: "My prompts",
-        newPrompt: "New prompt",
-        namePrompt: "Prompt name",
-        information: "Basic information",
-        subtitleNew: "Create a new AI prompt",
-        promptContent: "Prompt content",
-        placeholderNamePrompt: "Enter the prompt name",
-        searchPrompt: "Search prompt",
-        labelLoadMore: "Load more",
-        searchPrompts: "Search prompts",
-        noPromptsListWereFound: "No prompts were found",
-        createSuccess: "Prompts created successfully",
-        createError: "Prompts create failed",
-        updateSuccess: "Prompts updated successfully",
-        updateError: "Prompts update failed",
-        deleteSuccess: "Prompts deleted successfully",
-        deleteError: "Prompts delete failed",
-        removeAllPrompts: "Delete prompts",
-        importTitle: "Import prompt",
-        importSubtitle: "Import a prompt from a file",
-        importButton: "Import",
-        selectAllTemplates: "Select all templates",
-        viewComplete: "View complete",
-        importPredefined: "Import predefined",
-        importError: "Error importing prompts",
-        importSuccess: "Prompts imported successfully",
-        refinePrompt: "Refine Prompt",
-        refineSuccess: "Prompt refined successfully",
-        refineError: "Failed to refine prompt",
-        emptyPromptError: "The prompt field cannot be empty",
-    },
-    template: {
-        title: "API Templates",
-        tableTitle: "Templates",
-        subtitle:
-            "Manage, test and edit your API request templates.",
-        createTemplate: "Create new template",
-        notFound: "No templates registered",
-        method: "Method",
-        name: "Name",
-        url: "URL",
-        createBtn: "Save Template",
-        cancelBtn: "Cancel",
-        importCurl: "Import cURL",
-        requestDetails: "Request Details",
-        requestBody: "Request Body",
-        templateName: "Template Name",
-        templateNamePlaceholder: "e.g. User OCR Processing",
-        endpointUrl: "Endpoint URL",
-        endpointUrlPlaceholder:
-            "https://api.example.com/v1/resource",
-        queryParams: "Query Params",
-        headers: "Headers",
-        queryParameters: "Query Parameters",
-        addParam: "Add Param",
-        noQueryParameters:
-            "No query parameters. Add one or type in the URL.",
-        bodySubtitle:
-            "Type '{' to see available variables.",
-        variablesTip:
-            "Tip: Use variables like {{ocr}} or {{prompt}} that will be replaced at execution time.",
-        formCreate: {
-            title: "Create Template",
-            subtitle:
-                "Configure your API request blueprint.",
-        },
-        formEdit: {
-            title: "Edit Template",
-            subtitle: "Update your API request blueprint.",
-        },
-        createSuccess: "Template created successfully",
-        createError: "Error creating template",
-        editSuccess: "Template updated successfully",
-        editError: "Error updating template",
-        removeSuccess: "Template removed successfully",
-        removeError: "Error removing template",
-        unselected: "Select a template",
-        keyPlaceholder: "Key (value will be {{keyName}})",
-        invalidJsonFormat: "Invalid JSON format",
-    },
-    analyze: {
-        title: "Analyze Document",
-        subtitle: "Manage document analysis",
-        errorLoadDocumentData:
-            "Error loading document data",
-        failedEditOutput: "The output could not be edited.",
-        successEditOutput: "Output edited successfully",
-        extractedData: "Extracted Data",
-        askTheDoc: "Ask the Document",
-        conversationWithDocument:
-            "Conversation with the Document",
-        askAI: "ASK AI",
-        typeYourQuestion:
-            "Type your question about the document...",
-        sendQuestion: "Send Question",
-        clear: "Clear",
-        copy: "Copy",
-        previousStep: "Previous Step",
-        nextStep: "Next Step",
-        noDataInDocument: "No data available",
-        failedLoadDocument: "Failed to load document",
-        questionnaireToApply: "QUESTIONNAIRE TO APPLY",
-        selectQuestionnaire: "Select a questionnaire...",
-        applyQuestionnaire: "Apply Questionnaire",
-        questionnaireResults: "OUTPUT",
-        question: "Question",
-        answer: "Answer",
-        errorLoadingQuestionnaires:
-            "Error loading questionnaires",
-        errorApplyingQuestionnaire:
-            "Error applying questionnaire",
-        successApplyingQuestionnaire:
-            "Questionnaire applied successfully",
-        pleaseSelectQuestionnaire:
-            "Please select a questionnaire",
-        confirmed: "Confirmed",
-        closeResults: "Close Results",
-        workflow: "Workflow",
-        document: "Document",
-        askTheAi: "Ask AI",
-        findingTheBestAnswer: "Finding the best answer",
-        failedNoResponse:
-            "Failed, no response from the server.",
-        failedToLoadHistory: "Failed to load history.",
-    },
-    pages: {
-        dashboard: "Dashboard",
-        management: "User Management",
-        documents: "Documents",
-        workflows: "Document Workflows",
-        workflowManagement: "Workflow Management",
-        types: "Types",
-        questions: "Questions",
-        quizzes: "Quizzes",
-        tools: "Tools",
-        prompts: "Prompts",
-        templates: "API Templates",
-    },
-    dashboard: {
-        title: "Consumption and Ticketing Dashboard",
-        subtitle: "Woopi AI",
-        exportBtn: "Export CSV",
-        totalWTC: "Total WTC",
-        update: "Update",
-        WTCText:
-            "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan's multipliers. This is not a financial value.",
-        filters: {
-            currentMonth: "This Month",
-            lastMonth: "Last Month",
-            previousSeven: "Last 7 Days",
-            previousNinety: "Last 90 Days",
-        },
-        graphs: {
-            tokenGraphTitle: "AI Token Consumption",
-            tokenGraphSubtitle: "Daily Token Consumption",
-            pagesGraphTitle:
-                "Processed Document Pages (OCR)",
-            pagesGraphSubtitle: "Daily Consumption",
-            workflowsAutomaticGraphTitle:
-                "AI Automation Workflow Executions",
-            workflowsGraphTitle:
-                "Woopi AI Workflow Executions",
-            tokensTooltip:
-                "View of token consumption for different Artificial Intelligence models. Tokens are the text processing units used by the models.",
-            pagesTooltip:
-                "Number of document pages processed through Optical Character Recognition (OCR), which converts text images into editable text.",
-            workflowAutomaticTooltip:
-                "Number of times AI automation workflows were executed.",
-            workflowTooltip:
-                "Number of times workflows created in the Woopi AI platform were executed.",
-            totalTokens: "Total Tokens Consumed",
-            totalPages: "Total Pages Processed",
-            totalWorkflowAutomatic:
-                "Total Woopi AI Executions",
-            totalWorkflow: "Total AI Automation Executions",
-            unitValue: "Unit value in the current plan:",
-            periodTotal: "Period Total",
-        },
-        downloadCsv: "Download CSV",
-        downloadSuccessfully: "Download successfully",
-        model: "Models",
-        changeTenant: "Toggle Tenant",
-        created: "Created at:",
     },
     plan: {
         current: "Current Plan",
         enterprise: "Enterprise Plan",
     },
-    home: {
-        title: "Welcome to WOOPI AI!",
-        subtitle:
-            "Your journey to automate and optimize processes with artificial intelligence starts now.",
-        planLabel: "You have acquired the",
-        planName: "Enterprise Plan",
-        planThankYou:
-            "Thank you for choosing our platform!",
-        quickStartTitle: "Quick Start Guide",
-        platformCard: {
-            title: "Discover the Platform",
-            description:
-                "Watch a 5-minute guided tour about the main features.",
-            button: "Watch video",
-        },
-        workflowCard: {
-            title: "Your First Workflow",
-            description:
-                "Follow our step-by-step guide to create your first automation in minutes.",
-            button: "Start guide",
-        },
-        docsCard: {
-            title: "Explore the Documentation",
-            description:
-                "Check our complete documentation to explore all the potential of AI HUB.",
-            button: "Access docs",
-        },
+    prompts: {
+        createError: "Prompts create failed",
+        createPrompt: "Create prompt",
+        createSuccess: "Prompts created successfully",
+        deleteError: "Prompts delete failed",
+        deleteSuccess: "Prompts deleted successfully",
+        emptyPromptError:
+            "The prompt field cannot be empty",
+        importButton: "Import",
+        importError: "Error importing prompts",
+        importPredefined: "Import predefined",
+        importSubtitle: "Import a prompt from a file",
+        importSuccess: "Prompts imported successfully",
+        importTitle: "Import prompt",
+        information: "Basic information",
+        labelLoadMore: "Load more",
+        myPromptsBadge: "My prompts",
+        namePrompt: "Prompt name",
+        newPrompt: "New prompt",
+        noPromptsListWereFound: "No prompts were found",
+        placeholderNamePrompt: "Enter the prompt name",
+        promptContent: "Prompt content",
+        refineError: "Failed to refine prompt",
+        refinePrompt: "Refine Prompt",
+        refineSuccess: "Prompt refined successfully",
+        removeAllPrompts: "Delete prompts",
+        searchPrompt: "Search prompt",
+        searchPrompts: "Search prompts",
+        selectAllTemplates: "Select all templates",
+        subtitle: "Manage system prompts",
+        subtitleNew: "Create a new AI prompt",
+        title: "Prompts",
+        updateError: "Prompts update failed",
+        updateSuccess: "Prompts updated successfully",
+        viewComplete: "View complete",
     },
-    permissions: {
-        groups: {
-            questions: "Questions",
-            types: "Types",
-            quizzes: "Quizzes",
-            documents: "Documents",
-            management: "Management",
-            users: "Users",
-            teams: "Teams",
-            profiles: "Profiles",
-            workflow: "Workflow",
-            tools: "Tools",
-            dashboard: "Dashboard",
-            workflowStep: "Workflow Step",
-            workflowmanagement: "Workflow Management",
-            prompts: "Prompts",
+    questions: {
+        availableList: "Available questions",
+        createBtn: "Create question",
+        createdData: "Creation date",
+        createSuccess: "Question created successfully",
+        descriptionOrQuestionId:
+            "Description, ID or enter a new question to register",
+        editQuestion: "Edit question",
+        editSuccess: "Question edited successfully",
+        errors: {
+            createError: "Error creating question",
+            duplicated: "Duplicated question",
+            editError: "Error editing question",
+            invalid: "Invalid question",
+            removeError: "Error removing question",
         },
-        descriptions: {
-            questions: "View Questions",
-            types: "View Types",
-            quizzes: "View Quizzes",
-            documents: "View Documents",
-            management: "View Management Tables",
-            users: "View Users",
-            teams: "View Teams",
-            profiles: "View Profiles",
-            workflow: "View Workflow",
-            tools: "View Tools",
-            dashboard: "View Dashboard",
-            workflowStepView: "View Steps",
-            workflowStepAccess: "Access Steps",
-            prompts: "View Prompts",
+        modalCreate: {
+            save: "Create question",
+            title: "Create question",
         },
+        modalEdit: {
+            save: "Save changes",
+            title: "Edit question",
+        },
+        noMoreQuestionsAvailable:
+            "There are no more questions available",
+        noQuestionsRegistered:
+            "There are no questions registered",
+        noQuestionsWereFound: "No questions were found",
+        noQuestionsWereSelected:
+            "No questions were selected.",
+        notFound: "No questions registered",
+        numberOfQuestionsHasBeenExceeded:
+            "Number of questions has been exceeded. Contact your plan administrator.",
+        questionNotFound: "Question not found",
+        removeSuccess: "Question removed successfully",
+        removeTitle:
+            "You are about to delete a system question",
+        searchQuestion: "Search question",
+        selectQuestions: "Select questions",
+        selectToDelete:
+            "Select at least one question to perform the deletion.",
+        sendQuestion: "Send question",
+        subtitle: "Manage system questions",
+        title: "Questions",
+        viewQuestions: "View questions",
+        youAreAboutToDeleteQuestion:
+            "You are about to delete <br/> a question from the system",
+    },
+    quizzes: {
+        applyingQuestionnaire: "Applying questionnaire",
+        applyingQuestionnaireWait:
+            "Applying questionnaire, please wait.",
+        applyQuestionnaire: "Apply questionnaire",
+        basicInfo: "Basic Information",
+        basicInfoSubtitle:
+            "Configure the basic information of the quiz",
+        createBtn: "Create quiz",
+        createdDate: "Creation date",
+        createSuccess: "Quiz created successfully",
+        editSuccess: "Quiz updated successfully",
+        errors: {
+            createError: "Error creating quiz",
+            duplicated: "Duplicated questionnaire name",
+            editError: "Error updating quiz",
+            invalid: "Invalid questionnaire",
+            removeError: "Error removing the quiz",
+        },
+        failedToApplyQuestionnaire:
+            "Failed to apply questionnaire.",
+        formCreate: {
+            subtitle: "Save the new quiz information",
+            title: "New Quiz",
+        },
+        formEdit: {
+            subtitle: "Update the quiz information",
+            title: "Edit Quiz",
+        },
+        formName: "Quiz name",
+        formNamePlaceholder: "Enter quiz name",
+        formSelect: "Select document type",
+        noQuestionnairesWereFound:
+            "No questionnaires were found",
+        notFound: "No quizzes registered",
+        questionnaireAndAi: "Questionnaire and AI",
+        questionnaireAppliedSuccessfully:
+            "Questionnaire applied successfully, please wait.",
+        questionnaireSearch:
+            "Name, ID , Document type or insert a new questionnaire to register",
+        questions: "Questions",
+        questionsSection: {
+            subtitle:
+                "Select the questions that will be part of this quiz",
+            title: "Question Selection",
+        },
+        removeSuccess: "Quiz removed successfully",
+        removeTitle:
+            "You are about to delete a quiz from the system",
+        searchQuestionnaire: "Search questionnaire",
+        selectQuestionnaire: "Select a questionnaire",
+        selectToDelete:
+            "Select at least one questionnaire to perform the deletion.",
+        subtitle: "Manage system quizzes",
+        tableTitle: "Quiz list",
+        thereIsNotEnoughCredit:
+            "There is not enough credit to apply all questions in this questionnaire.",
+        title: "Quizzes",
+        type: "Document type",
+        youAreAboutToDeleteQuestionnaire:
+            "You are about to delete <br/> a questionnaire from the system",
+    },
+    template: {
+        addParam: "Add Param",
+        bodySubtitle:
+            "Type '{' to see available variables.",
+        cancelBtn: "Cancel",
+        createBtn: "Save Template",
+        createError: "Error creating template",
+        createSuccess: "Template created successfully",
+        createTemplate: "Create new template",
+        editError: "Error updating template",
+        editSuccess: "Template updated successfully",
+        endpointUrl: "Endpoint URL",
+        endpointUrlPlaceholder:
+            "https://api.example.com/v1/resource",
+        formCreate: {
+            subtitle:
+                "Configure your API request blueprint.",
+            title: "Create Template",
+        },
+        formEdit: {
+            subtitle: "Update your API request blueprint.",
+            title: "Edit Template",
+        },
+        headers: "Headers",
+        importCurl: "Import cURL",
+        invalidJsonFormat: "Invalid JSON format",
+        keyPlaceholder: "Key (value will be {{keyName}})",
+        method: "Method",
+        name: "Name",
+        noQueryParameters:
+            "No query parameters. Add one or type in the URL.",
+        notFound: "No templates registered",
+        queryParameters: "Query Parameters",
+        queryParams: "Query Params",
+        removeError: "Error removing template",
+        removeSuccess: "Template removed successfully",
+        requestBody: "Request Body",
+        requestDetails: "Request Details",
+        subtitle:
+            "Manage, test and edit your API request templates.",
+        tableTitle: "Templates",
+        templateName: "Template Name",
+        templateNamePlaceholder: "e.g. User OCR Processing",
+        title: "API Templates",
+        unselected: "Select a template",
+        url: "URL",
+        variablesTip:
+            "Tip: Use variables like {{ocr}} or {{prompt}} that will be replaced at execution time.",
+    },
+    tools: {
+        createBtn: "New Tool",
+        created: "Created on",
+        createError: "Error creating tool",
+        createSuccess: "Tool created successfully",
+        dependencyRequired:
+            "Prompt tool requires at least one dependency",
+        dependencyToolNotFound: "Dependency tool not found",
+        editBtn: "Save changes",
+        editError: "Error updating tool",
+        editSuccess: "Tool updated successfully",
+        entry: "Input",
+        form: {
+            connectorApiKey: "API Key",
+            connectorUrl: "n8n URL",
+            entries: "Input",
+            entriesEditable: "Editable input",
+            entriesSelect: "Select input type",
+            invalidConnector:
+                "Connector did not respond. Invalid URL or key",
+            name: "Tool Name",
+            outputSelect: "Select output type",
+            types: "Tool Type",
+            typesSelect: "Select tool type",
+            validatingConnector: "Validating connector url",
+            validConnector: "Connector is active",
+        },
+        formCreate: {
+            subtitle:
+                "Create a new tool to process documents",
+            title: "New Tool",
+        },
+        formEdit: {
+            subtitle:
+                "Update the selected tool's information",
+            title: "Edit Tool",
+        },
+        index: "Tools",
+        notFound: "No tools registered",
+        ocrDependencyRequired:
+            "Prompt tool requires a dependency on an OCR tool",
+        removeError: "Error removing tool",
+        removeSuccess: "Tool removed successfully",
+        removeTitle:
+            "You are about to delete a tool from the system",
+        subtitle:
+            "Manage and configure your document processing tools",
+        title: "Tools",
+        toolNotFound: "Tool not found",
+        type: "Type",
+        validationError: "Error validating fields",
+    },
+    transferListPlaceholder: "Search in list",
+    transferListTitle: "Selection list",
+    types: {
+        createBtn: "Create type",
+        createSuccess: "Type created successfully",
+        editSuccess: "Type updated successfully",
+        editTitleType: "Edit type",
+        errors: {
+            invalid: "Invalid type",
+            removeError: "Error removing type",
+        },
+        newType: "Create type",
+        noDocumentTypeWasFound:
+            "No document type was found",
+        removeSuccess: "Type removed successfully",
+        saveTitleType: "Create type",
+        saveType: "Create",
+        searchTypes: "Search types",
+        selectToDelete:
+            "Select at least one type to perform the exclusion.",
+        subtitle: "Manage system document types",
+        title: "Types",
+        typeDoc: "Document Type",
+        typeDocAlreadyExists: "Duplicated Type",
+        typeNameOrId:
+            "Name, ID or enter a new type to register",
+        youAreAboutToDeleteDocumentType:
+            "You are about to delete <br/> a document type from the system",
+        youAreAboutToDeleteType: "Delete type",
+    },
+    unauthorized: {
+        returnToHome: "Return",
+        title: "You do not have permission to access this screen.",
+    },
+    unexpectedError:
+        "An unexpected error occurred. Please contact the system administrator.",
+    validation: {
+        confirmedFieldDiffers:
+            "The confirmed field differs from the original",
+        email: "Invalid email",
+        fillInThisField: "Fill in this field.",
+        fullname: "Enter at least first and last name",
+        hasInvalid: "Invalid fields",
+        max: "Maximum of {limit} characters",
+        min: "Minimum of {limit} characters",
+        oneElementArray: "Select at least one option",
+        oneStep: "At least one step is required to save",
+        password_confirmed:
+            "Password confirmation does not match.",
+        password_lowercase:
+            "Password must contain at least one lowercase letter.",
+        password_min:
+            "Password must be at least 6 characters.",
+        password_number:
+            "Password must contain at least one number.",
+        password_special:
+            "Password must contain at least one special character.",
+        password_uppercase:
+            "Password must contain at least one uppercase letter.",
+        required: "Required field",
+    },
+    welcomeMsg: "Welcome",
+    workflow: {
+        access: "Access",
+        addBtn: "Add Step",
+        addBtnDescription: "Click to create a new step",
+        addStep: "Add Step",
+        addStepDescription: "Click to create a new step",
+        addToolFlow: "Add Tool Flow",
+        associatedTeams: "Associated Teams",
+        basicInfo: "Basic Information",
+        boardView: "Viewing workflow:",
+        configuredTools: "Configured Tools",
+        createBtn: "New Workflow",
+        createError: "Error creating workflow",
+        createNewStep: "New Step",
+        createSuccess: "Workflow created successfully",
+        createWorkflow: "Create Workflow",
+        deleteBtn: "Delete",
+        editError: "Error editing workflow",
+        editSuccess: "Workflow edited successfully",
+        editTitle: "Workflow Editor",
+        editToolFlow: "Edit Tool Flow",
+        error: "Error fetching workflows",
+        finalize: "Finalize",
+        formCreate: {
+            subtitle:
+                "Follow the steps to configure your workflow.",
+            title: "Create Workflow",
+        },
+        formEdit: {
+            subtitle:
+                "Follow the steps to configure your workflow.",
+            title: "Edit Workflow",
+        },
+        index: "Workflow",
+        labelWatchingWorkflow: "Viewing workflow:",
+        labelWorkflowBoard: "Document Processing Board",
+        labelWorkflowDocs: "Documents Workflow",
+        labelWorkflowSubTitle:
+            "Visualize the flow of documents through processing steps",
+        leaveMessage:
+            "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
+        loadError: "Error loading workflow",
+        manage: "Manage workflow:",
+        managementSubtitle:
+            "Manage and configure document processing workflows",
+        managementTitle: "Workflow Management",
+        name: "Workflow Name",
+        nameAndAssociations: "Name and Associations",
+        namePlaceholder: "Ex: Contract Approval",
+        next: "Next",
+        noStepsAvailable:
+            "No steps available. Please add steps in the previous phase.",
+        notFound: "No workflow was found",
+        phase1Error: "Error saving basic information",
+        phase1Success:
+            "Basic information saved successfully",
+        phase2Error: "Error saving steps",
+        phase2Success: "Steps saved successfully",
+        phase3Error: "Error saving tools",
+        phase3Success: "Tools saved successfully",
+        previous: "Previous",
+        profiles: "Responsible Profile",
+        removeError: "Error removing workflow",
+        removeSuccess: "Workflow removed successfully",
+        removeToolFlow: "Remove Flow",
+        responsableTeam: "Responsible Team",
+        responsible: "Responsible",
+        saveChanges: "Save Changes",
+        saveStep: "Save step",
+        selectProfile: "Select a profile",
+        selectStatus: "Select a status",
+        selectWorkflow: "Select a workflow",
+        sidebar: {
+            index: "Document Workflow",
+            management: "Workflow Management",
+        },
+        statusList: {
+            analyzed: "Analyzed",
+            approved: "Approved",
+            awaitinganalysis: "Awaiting Analysis",
+            done: "Done",
+            waitingforapproval: "Waiting for Approval",
+        },
+        stepFlow: "Document Automation",
+        stepNamePlaceholder: "Step Name",
+        steps: "Workflow Steps",
+        stepsTitle: "Workflow Steps",
+        stepSubtitle: "Set up rules and responsibilities",
+        stepTitle: "Workflow Step",
+        subtitle:
+            "View the flow of documents through the processing stages",
+        subtitleEditor:
+            "Manage and configure document processing workflows",
+        teams: "Associated teams",
+        title: "Document Processing Board",
+        toolFlowsTitle: "Add Tool Flow",
+        tools: "Tools",
     },
 };
 

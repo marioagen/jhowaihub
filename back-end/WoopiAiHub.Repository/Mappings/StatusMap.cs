@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -16,6 +16,11 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasColumnType("varchar(50)")
                 .HasMaxLength(50)
                 .IsRequired();
+
+            builder.Property(ss => ss.Label)
+                .HasColumnType("varchar(100)")
+                .HasMaxLength(100)
+                .IsRequired(false);
 
             builder.Property(ss => ss.Created)
                 .HasColumnType("datetime")
