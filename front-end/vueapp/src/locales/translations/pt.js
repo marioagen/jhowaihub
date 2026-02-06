@@ -470,6 +470,7 @@ const portuguese = {
     },
     management: {
         profiles: {
+            analyst: "Analista",
             createBtn: "Novo Perfil",
             createProfile: "Criar perfil",
             createSubtitle:
@@ -530,6 +531,7 @@ const portuguese = {
         subtitle:
             "Gerencie usuários, times e permissões do sistema",
         teams: {
+            analyst: "Analista",
             createBtn: "Novo Time",
             createSubtitle:
                 "Crie um novo time para o sistema",

@@ -10,6 +10,14 @@
             :hasSelection="false"
             @change-page="changePage"
         >
+            <template #cell-name="{ data }">
+                <span v-if="data.row.name === 'Analyst'">
+                    {{ $t("management.profiles.analyst") }}
+                </span>
+                <span v-else>
+                    {{ data.row.name }}
+                </span>
+            </template>
             <template #cell-users="{ data }">
                 <LucideIcon icon="UsersRound" :size="15" />
                 {{ data.row.users.length }}

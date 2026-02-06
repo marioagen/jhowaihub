@@ -456,6 +456,7 @@ const english = {
     },
     management: {
         profiles: {
+            analyst: "Analyst",
             createBtn: "New Profile",
             createProfile: "Create profile",
             createSubtitle:
@@ -515,6 +516,7 @@ const english = {
         subtitle:
             "Manage system users, teams, and permissions",
         teams: {
+            analyst: "Analyst",
             createBtn: "New Team",
             createSubtitle:
                 "Create a new team for the system",
