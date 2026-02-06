@@ -44,6 +44,11 @@
                             </label>
                             <input
                                 :value="templateData.url"
+                                @input="
+                                    updateUrl(
+                                        $event.target.value
+                                    )
+                                "
                                 type="text"
                                 class="form-control"
                                 id="endpointUrl"
@@ -61,9 +66,9 @@
                         >
                             <button
                                 class="nav-link active"
-                                :id="`query-params-tab-${_uid}`"
+                                id="query-params-tab"
                                 data-bs-toggle="tab"
-                                :data-bs-target="`#query-params-${_uid}`"
+                                data-bs-target="#query-params"
                                 type="button"
                                 role="tab"
                             >
@@ -80,9 +85,9 @@
                         >
                             <button
                                 class="nav-link"
-                                :id="`headers-tab-${_uid}`"
+                                id="headers-tab"
                                 data-bs-toggle="tab"
-                                :data-bs-target="`#headers-${_uid}`"
+                                data-bs-target="#headers"
                                 type="button"
                                 role="tab"
                             >
@@ -93,7 +98,7 @@
                     <div class="tab-content">
                         <div
                             class="tab-pane fade show active"
-                            :id="`query-params-${_uid}`"
+                            id="query-params"
                             role="tabpanel"
                         >
                             <div
@@ -183,7 +188,7 @@
                         </div>
                         <div
                             class="tab-pane fade"
-                            :id="`headers-${_uid}`"
+                            id="headers"
                             role="tabpanel"
                         >
                             <div
@@ -358,6 +363,9 @@
             },
         },
         methods: {
+            updateUrl(value) {
+                this.$emit("update:url", value);
+            },
             updateQueryParam(index, value) {
                 this.$emit("update:queryParam", {
                     index,

@@ -83,6 +83,9 @@
                                     "
                                     :read-only="false"
                                     :editable="true"
+                                    @update:url="
+                                        handleUrlUpdate
+                                    "
                                     @update:queryParam="
                                         handleQueryParamUpdate
                                     "
@@ -136,7 +139,6 @@
 
 <script>
     import TemplateService from "@/services/template/TemplateService";
-    import ToolsServices from "@/services/tools/ToolsServices";
     import TemplateFormDisplay from "@/components/templates/TemplateFormDisplay.vue";
 
     export default {
@@ -153,6 +155,7 @@
                 editableQueryParams: [],
                 editableHeaders: [],
                 editableBody: "",
+                editableUrl: "",
             };
         },
         computed: {
@@ -164,8 +167,11 @@
                     return "";
                 }
 
-                const baseUrl =
-                    this.selectedTemplate.url.split("?")[0];
+                const baseUrl = this.editableUrl
+                    ? this.editableUrl.split("?")[0]
+                    : this.selectedTemplate.url.split(
+                          "?"
+                      )[0];
 
                 const validParams =
                     this.editableQueryParams.filter(
@@ -218,6 +224,7 @@
                 this.editableQueryParams = [];
                 this.editableHeaders = [];
                 this.editableBody = "";
+                this.editableUrl = "";
             },
             loadExistingStepToolParameter() {
                 const flowStateJson = localStorage.getItem(
@@ -254,6 +261,10 @@
                     const savedConfig = JSON.parse(
                         parameter.value
                     );
+
+                    if (savedConfig.url) {
+                        this.editableUrl = savedConfig.url;
+                    }
 
                     if (savedConfig.query) {
                         this.editableQueryParams =
@@ -352,10 +363,7 @@
             },
             onTemplateSelect() {
                 if (!this.selectedTemplateId) {
-                    this.selectedTemplate = null;
-                    this.editableQueryParams = [];
-                    this.editableHeaders = [];
-                    this.editableBody = "";
+                    this.resetForm();
                     return;
                 }
 
@@ -392,6 +400,11 @@
                 this.editableBody =
                     this.selectedTemplate.bodyTemplate ||
                     "";
+
+                this.editableUrl = "";
+            },
+            handleUrlUpdate(value) {
+                this.editableUrl = value;
             },
             handleQueryParamUpdate({ index, value }) {
                 if (this.editableQueryParams[index]) {

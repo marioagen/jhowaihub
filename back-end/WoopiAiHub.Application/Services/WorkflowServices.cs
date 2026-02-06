@@ -25,6 +25,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateStep _validateStep;
         private readonly IToolRepository _toolRepository;
+        private readonly IEncryptionService _encryptationService;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
@@ -39,6 +40,7 @@ namespace WoopiAiHub.Application.Services
             IUnitOfWork unitOfWork,
             IToolRepository toolRepository,
             IValidateStep validateStep,
+            IEncryptionService encryptationService,
             ILogger<WorkflowServices> logger 
         )
         {
@@ -52,6 +54,7 @@ namespace WoopiAiHub.Application.Services
             _validateStep = validateStep;
             _teamRepository = teamRepository;
             _toolRepository = toolRepository;
+            _encryptationService = encryptationService;
             _logger = logger;
         }
 
@@ -194,7 +197,7 @@ namespace WoopiAiHub.Application.Services
         /// cref="StepTool.Parameters"/> collection.</remarks>
         /// <param name="stepToolDto">The data transfer object containing the update information for the <see cref="StepTool"/>.</param>
         /// <returns>A new <see cref="StepTool"/> instance initialized with the specified update data.</returns>
-        private static StepTool CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
+        private async Task<StepTool> CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
         {
             var stepTool = new StepTool(
                 0,
@@ -206,12 +209,25 @@ namespace WoopiAiHub.Application.Services
                 stepToolDto.PositionY
             );
 
-            foreach (var parameter in stepToolDto.Parameters)
+            var tool = await _toolRepository.FindModelByIdAsync(stepToolDto.ToolId)  ?? throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
+            if (tool.ToolType?.Name == HandlersTypes.API)
             {
-                var requiredFile = parameter.RequiredFile ?? false;
-                stepTool.Parameters.Add(
-                    new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId,
-                        parameter.Value));
+                foreach (var parameter in stepToolDto.Parameters)
+                {
+                    var requiredFile = parameter.RequiredFile ?? false;
+                    stepTool.Parameters.Add(
+                        new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId, _encryptationService.Encrypt(parameter.Value)));
+                }
+            }
+            else
+            {
+                foreach (var parameter in stepToolDto.Parameters)
+                {
+                    var requiredFile = parameter.RequiredFile ?? false;
+                    stepTool.Parameters.Add(
+                        new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId,
+                            parameter.Value));
+                }
             }
 
             return stepTool;
@@ -495,6 +511,19 @@ namespace WoopiAiHub.Application.Services
         public StepDto FindStepById(int id)
         {
             var step = _workflowRepository.FindStepById(id);
+
+            var apiTools = step.StepTools.Where(w => w.Tool?.ToolType == HandlersTypes.API).ToList();
+            if(apiTools is not null && apiTools.Count > 0)
+            {
+                foreach(var apiTool in apiTools)
+                {
+                    foreach(var apiToolParam in apiTool.Parameters)
+                    {
+                        apiToolParam.Value = _encryptationService.Decrypt(apiToolParam.Value);
+                    }
+                }
+            }
+
             return step;
         }
 
@@ -701,7 +730,7 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                 {
-                    var stepTool = CreateAndConfigureStepTool(
+                    var stepTool = await CreateAndConfigureStepTool(
                         stepToolDto,
                         existingStep,
                         previousStepToolInStep,
@@ -787,13 +816,13 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Creates and configures a step tool with its dependencies.
         /// </summary>
-        private StepTool CreateAndConfigureStepTool(
+        private async Task<StepTool> CreateAndConfigureStepTool(
             StepToolUpdateDto stepToolDto,
             Step step,
             StepTool? previousStepToolInStep,
             StepTool? lastGlobalStepTool)
         {
-            var stepTool = CreateStepToolUpdate(stepToolDto);
+            var stepTool = await CreateStepToolUpdate(stepToolDto);
             stepTool.Step = step;
             stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
             return stepTool;
@@ -807,11 +836,7 @@ namespace WoopiAiHub.Application.Services
         {
             await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
 
-            var tool = await _toolRepository.FindModelByIdAsync(stepTool.ToolId);
-            if (tool == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
-            }
+            var tool = await _toolRepository.FindModelByIdAsync(stepTool.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
 
             var createdDependencies = await FindStepToolDependencies(workflow, stepTool, stepToolDto);
 
