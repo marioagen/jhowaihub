@@ -70,8 +70,12 @@ namespace WoopiAiHub.Repository
                 {
                     Name = q.Step!.Name,
                     Order = q.Step.Order,
+                },
+                Tool = new ToolDto
+                {
+                    Name = q.Tool.Name,
+                    ToolType = q.Tool.ToolType!.Name,
                 }
-
             }).FirstOrDefaultAsync(s => s.Id == id);
         }
 

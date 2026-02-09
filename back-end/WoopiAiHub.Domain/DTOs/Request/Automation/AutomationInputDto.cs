@@ -1,5 +1,3 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Text.Json.Serialization;
 using WoopiAiHub.Domain.DTOs.Messaging;
 
 namespace WoopiAiHub.Domain.DTOs.Request.Automation
@@ -7,7 +5,7 @@ namespace WoopiAiHub.Domain.DTOs.Request.Automation
     public record class AutomationInputDto
     {
         public string Url { get; set; } = string.Empty;
-        public string WebhookId { get; set; } = string.Empty;
+        public string? WebhookId { get; set; } = null;
         public bool RequiredFile { get; set; }
         public string? Tenant { get; set; }
         public string? Email { get; set; }
