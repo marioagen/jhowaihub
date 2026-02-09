@@ -5,9 +5,8 @@
         :workflowId="routeId"
     />
 </template>
-
 <script>
-    import WorkflowWizard from "@/components/workflow/wizard/WorkflowWizard.vue";
+    import WorkflowWizard from "@/components/documentsHub/workflows/wizard/WorkflowWizard.vue";
     export default {
         name: "EditWorkflow",
         components: {
