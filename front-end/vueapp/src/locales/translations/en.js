@@ -304,6 +304,17 @@ const english = {
         youAreAboutToDeleteDocumentQuery:
             "You are about to delete <br/> the query history from the system",
     },
+    documentsHub: {
+        title: "Processing workflows",
+        subtitle:
+            "View the flow of documents through processing steps",
+        workflows: {
+            title: "Processing workflows board",
+        },
+        documents: {
+            title: "Documents list",
+        },
+    },
     filters: {
         assignment: {
             allUsers: "All users",
@@ -358,7 +369,8 @@ const english = {
         formFlow: {
             configurationSaved:
                 "Configuration saved successfully",
-            configureToolParameters: "Configure the parameters of this tool",
+            configureToolParameters:
+                "Configure the parameters of this tool",
             connectorWorkflowConfigFail:
                 "Failed to retrieve workflow configuration. Check tool URL and API key",
             connectorWorkflowFail:
@@ -374,8 +386,7 @@ const english = {
             progressFlowUpdateFail:
                 "Failed to update flow. Flow already contains output data for tools.",
             prompts: "Prompts",
-            promptRequired:
-                "Select at least one prompt",
+            promptRequired: "Select at least one prompt",
             selectPrompt: "Select a prompt",
         },
         hideTools: "Hide Tools",

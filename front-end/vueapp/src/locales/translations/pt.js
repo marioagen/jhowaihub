@@ -115,6 +115,17 @@ const portuguese = {
         upload: "Carregar",
         warning: "Atenção",
     },
+    documentsHub: {
+        title: "Esteiras de processamento",
+        subtitle:
+            "Visualize o fluxo de documentos através das etapas de processamento",
+        workflows: {
+            title: "Board de Esteiras de processamento",
+        },
+        documents: {
+            title: "Lista de Documentos",
+        },
+    },
     dashboard: {
         changeTenant: "Alternar Tenant",
         created: "Criado em:",
@@ -369,7 +380,8 @@ const portuguese = {
         formFlow: {
             configurationSaved:
                 "Configuração salva com sucesso",
-            configureToolParameters: "Configure os parâmetros desta ferramenta",
+            configureToolParameters:
+                "Configure os parâmetros desta ferramenta",
             connectorWorkflowConfigFail:
                 "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
             connectorWorkflowFail:
@@ -386,8 +398,7 @@ const portuguese = {
             progressFlowUpdateFail:
                 "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
             prompts: "Prompts",
-            promptRequired:
-                "Selecione ao menos um prompt",
+            promptRequired: "Selecione ao menos um prompt",
             selectPrompt: "Selecione um prompt",
         },
         hideTools: "Ocultar Ferramentas",
