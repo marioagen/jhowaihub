@@ -30,17 +30,17 @@ namespace WoopiAiHub.Application.Services
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(
-            IWorkflowRepository workflowRepository, 
+            IWorkflowRepository workflowRepository,
             IProfileRepository profileRepository,
-            ITeamRepository teamRepository, 
+            ITeamRepository teamRepository,
             IStatusRepository statusRepository,
             IStepRepository stepRepository,
             IStepToolDependencyRepository stepToolDependencyRepository,
-            IStepToolOutputRepository stepToolOutputRepository, 
+            IStepToolOutputRepository stepToolOutputRepository,
             IUnitOfWork unitOfWork,
             IToolRepository toolRepository,
             IValidateStep validateStep,
-            ILogger<WorkflowServices> logger 
+            ILogger<WorkflowServices> logger
         )
         {
             _workflowRepository = workflowRepository;
@@ -995,6 +995,11 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Adds cloned steps to the new workflow.
+        /// </summary>
+        /// <param name="newWorkflow">The new workflow instance.</param>
+        /// <param name="sourceStepsOrdered">The ordered list of steps from the source workflow.</param>
         private static void AddClonedSteps(Workflow newWorkflow, List<Step> sourceStepsOrdered)
         {
             foreach (var sourceStep in sourceStepsOrdered)
@@ -1011,6 +1016,12 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Adds cloned step tools to the new workflow steps.
+        /// </summary>
+        /// <param name="newWorkflow">The new workflow instance.</param>
+        /// <param name="sourceStepsOrdered">The ordered list of steps from the source workflow.</param>
+        /// <returns>A tuple containing lists of new and source step tools for dependency mapping.</returns>
         private static (List<StepTool> NewStepTools, List<StepTool> SourceStepTools) AddClonedStepTools(
             Workflow newWorkflow,
             List<Step> sourceStepsOrdered)
@@ -1036,6 +1047,12 @@ namespace WoopiAiHub.Application.Services
             return (newStepToolsList, sourceStepToolsList);
         }
 
+        /// <summary>
+        /// Creates a deep copy of a step tool including its parameters.
+        /// </summary>
+        /// <param name="newStepId">The ID of the new step.</param>
+        /// <param name="sourceStepTool">The source step tool to clone.</param>
+        /// <returns>The new cloned StepTool instance.</returns>
         private static StepTool CreateClonedStepTool(int newStepId, StepTool sourceStepTool)
         {
             var newStepTool = new StepTool(
@@ -1062,6 +1079,11 @@ namespace WoopiAiHub.Application.Services
             return newStepTool;
         }
 
+        /// <summary>
+        /// Updates the in-memory dependencies (linked list) for the cloned step tools.
+        /// </summary>
+        /// <param name="newStepToolsList">List of new step tools.</param>
+        /// <param name="sourceStepToolsList">List of source step tools corresponding directly to the new list.</param>
         private void ApplyClonedDependencies(List<StepTool> newStepToolsList, List<StepTool> sourceStepToolsList)
         {
             var sourceIdToIndex = new Dictionary<int, int>();
@@ -1083,6 +1105,11 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Creates the database dependency records (StepToolDependency) for the cloned step tools.
+        /// </summary>
+        /// <param name="newStepToolsList">List of new step tools.</param>
+        /// <param name="sourceStepToolsList">List of source step tools corresponding directly to the new list.</param>
         private async Task CreateClonedStepToolDependencies(
             List<StepTool> newStepToolsList,
             List<StepTool> sourceStepToolsList)

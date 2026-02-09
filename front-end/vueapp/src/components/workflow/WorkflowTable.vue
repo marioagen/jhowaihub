@@ -62,16 +62,18 @@
         @cancel="closeCloneModal"
     >
         <template #body>
-            <div class="mb-3">
-                <label for="cloneWorkflowName" class="form-label">{{ $t("workflow.cloneNameLabel") }}</label>
-                <input
-                    id="cloneWorkflowName"
-                    v-model="cloneWorkflowName"
-                    type="text"
-                    class="form-control"
-                    :placeholder="$t('workflow.namePlaceholder')"
-                    @keyup.enter="confirmClone"
-                />
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="cloneWorkflowName" class="form-label">{{ $t("workflow.cloneNameLabel") }}</label>
+                    <input
+                        id="cloneWorkflowName"
+                        v-model="cloneWorkflowName"
+                        type="text"
+                        class="form-control"
+                        :placeholder="$t('workflow.namePlaceholder')"
+                        @keyup.enter="confirmClone"
+                    />
+                </div>
             </div>
         </template>
     </ModalComponent>
