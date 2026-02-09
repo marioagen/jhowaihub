@@ -1473,9 +1473,9 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             _toolRepositoryMock.SetupSequence(x => x.FindModelByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync(ocrTool)   
-                .ReturnsAsync(promptTool) 
-                .ReturnsAsync(ocrTool);  
+                .ReturnsAsync(ocrTool)
+                .ReturnsAsync(promptTool)
+                .ReturnsAsync(ocrTool);
 
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
@@ -1918,7 +1918,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ValidatePromptTool_HasOcrDependencyFalse_ThrowsAppException()
         {
             var stepDto = WorkflowFixture.FindValidStepDto();
-            
+
             var nonOcrStepToolDto = new StepToolUpdateDto
             {
                 Id = 0,
@@ -2060,7 +2060,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task HasOcrDependency_NoOcrDependency_ReturnsFalse()
         {
             var stepDto = WorkflowFixture.FindValidStepDto();
-            
+
             var nonOcrStepToolDto = new StepToolUpdateDto
             {
                 Id = 0,
@@ -2132,6 +2132,329 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
+
+        #region CloneAsync Tests
+
+        [Fact(DisplayName = "CloneAsync should throw AppException when name is empty")]
+        [Trait("CloneAsync", "Fail")]
+        public async Task CloneAsync_EmptyName_ThrowsAppException()
+        {
+            // Arrange
+            var dto = new WorkflowCloneRequestDto
+            {
+                SourceWorkflowId = 1,
+                NewName = ""
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CloneAsync(dto));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal("Workflow name is required", exception.Message);
+            Assert.Equal(WorkflowLabel.InvalidName, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CloneAsync should throw AppException when name is whitespace")]
+        [Trait("CloneAsync", "Fail")]
+        public async Task CloneAsync_WhitespaceName_ThrowsAppException()
+        {
+            // Arrange
+            var dto = new WorkflowCloneRequestDto
+            {
+                SourceWorkflowId = 1,
+                NewName = "   "
+            };
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CloneAsync(dto));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.InvalidName, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CloneAsync should throw AppException when source workflow not found")]
+        [Trait("CloneAsync", "Fail")]
+        public async Task CloneAsync_SourceWorkflowNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var dto = WorkflowFixture.CreateWorkflowCloneRequestDto(999, "Cloned Workflow");
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForClone(999))
+                .ReturnsAsync((Workflow?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CloneAsync(dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("Workflow not found", exception.Message);
+            Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CloneAsync should throw AppException when teams not found")]
+        [Trait("CloneAsync", "Fail")]
+        public async Task CloneAsync_TeamsNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var dto = WorkflowFixture.CreateWorkflowCloneRequestDto(1, "Cloned Workflow");
+            var sourceWorkflow = WorkflowFixture.CreateWorkflowForClone(1, 1);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForClone(1))
+                .ReturnsAsync(sourceWorkflow);
+
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team>()); // Empty list - teams not found
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CloneAsync(dto));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("One or more teams not found", exception.Message);
+            Assert.Equal(TeamLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CloneAsync should return new workflow ID when successful")]
+        [Trait("CloneAsync", "Success")]
+        public async Task CloneAsync_ValidWorkflow_ReturnsNewWorkflowId()
+        {
+            // Arrange
+            var dto = WorkflowFixture.CreateWorkflowCloneRequestDto(1, "Cloned Workflow");
+            var sourceWorkflow = WorkflowFixture.CreateWorkflowForClone(1, 1);
+            var team = new Team("Test Team", 1, DateTime.UtcNow);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForClone(1))
+                .ReturnsAsync(sourceWorkflow);
+
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team });
+
+            _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _workflowServices.CloneAsync(dto);
+
+            // Assert
+            Assert.True(result >= 0);
+            _workflowRepositoryMock.Verify(r => r.FindByIdForClone(1), Times.Once);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Once);
+            _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Once);
+            _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "CloneAsync should clone steps with correct order")]
+        [Trait("CloneAsync", "Success")]
+        public async Task CloneAsync_WithSteps_ClonesStepsInCorrectOrder()
+        {
+            // Arrange
+            var dto = WorkflowFixture.CreateWorkflowCloneRequestDto(1, "Cloned Workflow");
+            var sourceWorkflow = WorkflowFixture.CreateWorkflowForClone(1, 1);
+            var team = new Team("Test Team", 1, DateTime.UtcNow);
+
+            Workflow? capturedWorkflow = null;
+            _workflowRepositoryMock.Setup(r => r.FindByIdForClone(1))
+                .ReturnsAsync(sourceWorkflow);
+
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team });
+
+            _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>()))
+                .Callback<Workflow>(w => capturedWorkflow = w)
+                .ReturnsAsync(true);
+
+            _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _workflowServices.CloneAsync(dto);
+
+            // Assert
+            Assert.NotNull(capturedWorkflow);
+            Assert.Equal("Cloned Workflow", capturedWorkflow.Name);
+            Assert.Equal(2, sourceWorkflow.Steps.Count);
+
+            // Verify steps are added to the new workflow
+            _workflowRepositoryMock.Verify(r => r.Update(It.Is<Workflow>(w =>
+                w.Steps.Count == 2 &&
+                w.Steps.Any(s => s.Order == 1) &&
+                w.Steps.Any(s => s.Order == 2)
+            )), Times.AtLeastOnce);
+        }
+
+        [Fact(DisplayName = "CloneAsync should clone step tools with parameters")]
+        [Trait("CloneAsync", "Success")]
+        public async Task CloneAsync_WithStepTools_ClonesStepToolsAndParameters()
+        {
+            // Arrange
+            var dto = WorkflowFixture.CreateWorkflowCloneRequestDto(1, "Cloned Workflow");
+            var sourceWorkflow = WorkflowFixture.CreateWorkflowForClone(1, 1);
+            var team = new Team("Test Team", 1, DateTime.UtcNow);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForClone(1))
+                .ReturnsAsync(sourceWorkflow);
+
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team });
+
+            _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _workflowServices.CloneAsync(dto);
+
+            // Assert
+            var sourceStepTools = sourceWorkflow.Steps.SelectMany(s => s.StepTools).ToList();
+            Assert.Equal(3, sourceStepTools.Count); // 2 in step1, 1 in step2
+
+            // Verify each step tool has parameters
+            Assert.All(sourceStepTools.Take(2), st => Assert.NotEmpty(st.Parameters));
+
+            _workflowRepositoryMock.Verify(r => r.Update(It.Is<Workflow>(w =>
+                w.Steps.SelectMany(s => s.StepTools).Count() == 3
+            )), Times.AtLeastOnce);
+        }
+
+        [Fact(DisplayName = "CloneAsync should map dependencies correctly")]
+        [Trait("CloneAsync", "Success")]
+        public async Task CloneAsync_WithDependencies_MapsDependenciesCorrectly()
+        {
+            // Arrange
+            var dto = WorkflowFixture.CreateWorkflowCloneRequestDto(1, "Cloned Workflow");
+            var sourceWorkflow = WorkflowFixture.CreateWorkflowWithDependencies(1);
+            var team = new Team("Test Team", 1, DateTime.UtcNow);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForClone(1))
+                .ReturnsAsync(sourceWorkflow);
+
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team });
+
+            _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var createdDependencies = new List<StepToolDependency>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Callback<StepToolDependency>(dep => createdDependencies.Add(dep))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _workflowServices.CloneAsync(dto);
+
+            // Assert
+            // Source has 2 StepToolDependency records (stepTool2 depends on stepTool1, stepTool3 depends on stepTool2)
+            Assert.Equal(2, createdDependencies.Count);
+            _stepToolDependencyRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<StepToolDependency>()), Times.Exactly(2));
+        }
+
+        [Fact(DisplayName = "CloneAsync should rollback transaction on error")]
+        [Trait("CloneAsync", "Fail")]
+        public async Task CloneAsync_OnError_RollsBackTransaction()
+        {
+            // Arrange
+            var dto = WorkflowFixture.CreateWorkflowCloneRequestDto(1, "Cloned Workflow");
+            var sourceWorkflow = WorkflowFixture.CreateWorkflowForClone(1, 1);
+            var team = new Team("Test Team", 1, DateTime.UtcNow);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForClone(1))
+                .ReturnsAsync(sourceWorkflow);
+
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team });
+
+            _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ThrowsAsync(new Exception("Database error"));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<Exception>(() => _workflowServices.CloneAsync(dto));
+
+            _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+        }
+
+        [Fact(DisplayName = "CloneAsync should preserve team associations")]
+        [Trait("CloneAsync", "Success")]
+        public async Task CloneAsync_WithTeams_PreservesTeamAssociations()
+        {
+            // Arrange
+            var dto = WorkflowFixture.CreateWorkflowCloneRequestDto(1, "Cloned Workflow");
+            var team1 = new Team("Team 1", 1, DateTime.UtcNow);
+            var team2 = new Team("Team 2", 2, DateTime.UtcNow);
+
+            var sourceWorkflow = new Workflow(
+                1,
+                DateTime.UtcNow,
+                new List<Team> { team1, team2 },
+                "Source Workflow"
+            );
+
+            Workflow? capturedWorkflow = null;
+            _workflowRepositoryMock.Setup(r => r.FindByIdForClone(1))
+                .ReturnsAsync(sourceWorkflow);
+
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team1, team2 });
+
+            _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>()))
+                .Callback<Workflow>(w => capturedWorkflow = w)
+                .ReturnsAsync(true);
+
+            _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
+                .ReturnsAsync(1);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _workflowServices.CloneAsync(dto);
+
+            // Assert
+            Assert.NotNull(capturedWorkflow);
+            Assert.Equal(2, capturedWorkflow.Teams.Count);
+            _teamRepositoryMock.Verify(r => r.FindByIds(It.Is<ICollection<int>>(ids =>
+                ids.Count == 2 && ids.Contains(1) && ids.Contains(2)
+            )), Times.Once);
+        }
+
+        #endregion
 
     }
 }
