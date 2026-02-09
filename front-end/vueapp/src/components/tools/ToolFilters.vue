@@ -34,7 +34,7 @@
                     :key="toolType.id" 
                     :value="toolType.id"
                 >
-                    {{ toolType.name }}
+                    {{ toolTypeDisplayName(toolType.name) }}
                 </option>
             </select>
         </div>
@@ -56,6 +56,12 @@
             };
         },
         methods: {
+            toolTypeDisplayName(apiName) {
+                if (!apiName) return "";
+                const key = "tools.typeDisplay." + apiName;
+                const translated = this.$t(key);
+                return translated !== key ? translated : apiName;
+            },
             getToolTypes() {
                 ToolsTypesService.getToolTypes()
                     .then((response) => {
