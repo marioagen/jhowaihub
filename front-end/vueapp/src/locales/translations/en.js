@@ -668,6 +668,8 @@ const english = {
         enterprise: "Enterprise Plan",
     },
     prompts: {
+        cloneAction: "Clone",
+        cloneSuffix: "- Clone",
         createError: "Prompts create failed",
         createPrompt: "Create prompt",
         createSuccess: "Prompts created successfully",

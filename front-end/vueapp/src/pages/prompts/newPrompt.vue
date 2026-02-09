@@ -1,6 +1,6 @@
 <template>
     <main>
-        <PromptForm :id="idEdit" @saved="redirectToPromptList" @cancelled="redirectToPromptList" />
+        <PromptForm :id="idEdit" :cloneId="idClone" @saved="redirectToPromptList" @cancelled="redirectToPromptList" />
     </main>
 </template>
 
@@ -15,6 +15,7 @@ export default {
     data() {
         return {
             idEdit: null,
+            idClone: null,
         }
     },
     methods: {
@@ -24,8 +25,12 @@ export default {
     },
     mounted() {
         const queryId = this.$route.query.id;
+        const queryClone = this.$route.query.clone;
         if (queryId) {
             this.idEdit = parseInt(queryId);
+        }
+        if (queryClone) {
+            this.idClone = parseInt(queryClone);
         }
     },
 }

@@ -97,6 +97,11 @@ export default {
             required: false,
             default: null
         },
+        cloneId: {
+            type: Number,
+            required: false,
+            default: null
+        },
         embedded: {
             type: Boolean,
             default: false
@@ -144,6 +149,17 @@ export default {
                 this.form = { name: response.name, description: response.description, text: response.text, };
                 this.setValues(this.form);
                 this.idEdit = id;
+            });
+        },
+        loadCloneData(id) {
+            this.resetData();
+            PromptService.getPromptById(id).then((response) => {
+                this.form = {
+                    name: response.name + " " + this.$t('prompts.cloneSuffix'),
+                    description: response.description,
+                    text: response.text,
+                };
+                this.setValues(this.form);
             });
         },
         updatePrompt: function () {
@@ -260,6 +276,8 @@ export default {
     mounted() {
         if (this.id) {
             this.findById(this.id);
+        } else if (this.cloneId) {
+            this.loadCloneData(this.cloneId);
         }
     },
     watch: {
@@ -268,6 +286,11 @@ export default {
                 this.findById(newId);
             } else {
                 this.resetData();
+            }
+        },
+        cloneId(newId) {
+            if (newId) {
+                this.loadCloneData(newId);
             }
         }
     }
