@@ -26,6 +26,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateStep _validateStep;
         private readonly IToolRepository _toolRepository;
+        private readonly IStepToolRepository _stepToolRepository;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
@@ -35,6 +36,7 @@ namespace WoopiAiHub.Application.Services
             ITeamRepository teamRepository,
             IStatusRepository statusRepository,
             IStepRepository stepRepository,
+            IStepToolRepository stepToolRepository,
             IStepToolDependencyRepository stepToolDependencyRepository,
             IStepToolOutputRepository stepToolOutputRepository,
             IUnitOfWork unitOfWork,
@@ -47,6 +49,7 @@ namespace WoopiAiHub.Application.Services
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
+            _stepToolRepository = stepToolRepository;
             _stepToolDependencyRepository = stepToolDependencyRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
             _unitOfWork = unitOfWork;
@@ -978,7 +981,7 @@ namespace WoopiAiHub.Application.Services
                 await _workflowRepository.Update(newWorkflow);
 
                 var (newStepToolsList, sourceStepToolsList) = AddClonedStepTools(newWorkflow, sourceStepsOrdered);
-                await _workflowRepository.Update(newWorkflow);
+                await _stepToolRepository.CreateRangeAsync(newStepToolsList);
 
                 ApplyClonedDependencies(newStepToolsList, sourceStepToolsList);
                 await _unitOfWork.SaveChangesAsync();

@@ -314,7 +314,7 @@ namespace WoopiAiHub.UnitTests.Fixture
         {
             var f = new Faker("pt_BR");
             var team = new Team("Test Team", teamId, DateTime.UtcNow);
-            
+
             var workflow = new Workflow(
                 workflowId,
                 DateTime.UtcNow,
@@ -393,6 +393,14 @@ namespace WoopiAiHub.UnitTests.Fixture
                 300,
                 300
             );
+            stepTool3.Parameters.Add(new StepToolParameter(
+                3,
+                DateTime.UtcNow,
+                stepTool3.Id,
+                false,
+                null,
+                "param3_value"
+            ));
             stepTool3.UpdateDependencyStepTool(stepTool2);
 
             step2.AddStepTool(stepTool3);
@@ -407,7 +415,7 @@ namespace WoopiAiHub.UnitTests.Fixture
         {
             var f = new Faker("pt_BR");
             var team = new Team("Test Team", 1, DateTime.UtcNow);
-            
+
             var workflow = new Workflow(
                 workflowId,
                 DateTime.UtcNow,

@@ -34,6 +34,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly IValidateStep _validateStep;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IToolRepository> _toolRepositoryMock;
+        private readonly Mock<IStepToolRepository> _stepToolRepositoryMock;
         private readonly WorkflowServices _workflowServices;
 
         public WorkflowServicesTests()
@@ -49,6 +50,7 @@ namespace WoopiAiHub.UnitTests.Services
             _teamRepositoryMock = _mocker.GetMock<ITeamRepository>();
             _unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
             _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
+            _stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
 
             _validateWorkflow = new ValidateWorkflow(_workflowRepositoryMock.Object, _teamRepositoryMock.Object);
             _validateStep = new ValidateStep(_cardRepositoryMock.Object);
@@ -2229,6 +2231,9 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
                 .ReturnsAsync(true);
 
+            _stepToolRepositoryMock.Setup(r => r.CreateRangeAsync(It.IsAny<List<StepTool>>()))
+                .ReturnsAsync(true);
+
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
 
@@ -2244,6 +2249,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Verify(r => r.FindByIdForClone(1), Times.Once);
             _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Once);
             _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Once);
+            _stepToolRepositoryMock.Verify(r => r.CreateRangeAsync(It.IsAny<List<StepTool>>()), Times.Once);
             _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Rollback(), Times.Never);
@@ -2270,6 +2276,9 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(true);
 
             _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _stepToolRepositoryMock.Setup(r => r.CreateRangeAsync(It.IsAny<List<StepTool>>()))
                 .ReturnsAsync(true);
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
@@ -2316,6 +2325,10 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
                 .ReturnsAsync(true);
 
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            _stepToolRepositoryMock.Setup(r => r.CreateRangeAsync(It.IsAny<List<StepTool>>()))
+                .ReturnsAsync(true);
+
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
 
@@ -2330,12 +2343,11 @@ namespace WoopiAiHub.UnitTests.Services
             var sourceStepTools = sourceWorkflow.Steps.SelectMany(s => s.StepTools).ToList();
             Assert.Equal(3, sourceStepTools.Count); // 2 in step1, 1 in step2
 
-            // Verify each step tool has parameters
-            Assert.All(sourceStepTools.Take(2), st => Assert.NotEmpty(st.Parameters));
-
-            _workflowRepositoryMock.Verify(r => r.Update(It.Is<Workflow>(w =>
-                w.Steps.SelectMany(s => s.StepTools).Count() == 3
-            )), Times.AtLeastOnce);
+            // Verify step tools creation
+            _stepToolRepositoryMock.Verify(r => r.CreateRangeAsync(It.Is<List<StepTool>>(list =>
+                list.Count == 3 &&
+                list.All(st => st.Parameters.Count > 0) // Check parameters exist
+            )), Times.Once);
         }
 
         [Fact(DisplayName = "CloneAsync should map dependencies correctly")]
@@ -2357,6 +2369,9 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(true);
 
             _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _stepToolRepositoryMock.Setup(r => r.CreateRangeAsync(It.IsAny<List<StepTool>>()))
                 .ReturnsAsync(true);
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
@@ -2434,6 +2449,9 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(true);
 
             _workflowRepositoryMock.Setup(r => r.Update(It.IsAny<Workflow>()))
+                .ReturnsAsync(true);
+
+            _stepToolRepositoryMock.Setup(r => r.CreateRangeAsync(It.IsAny<List<StepTool>>()))
                 .ReturnsAsync(true);
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
