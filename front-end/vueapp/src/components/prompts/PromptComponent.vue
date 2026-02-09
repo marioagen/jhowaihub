@@ -42,14 +42,18 @@
                             class="text-primary mt-2" />
                         <span v-else class="dot mt-2 m-1"></span>
                         <span class="m-1">{{ item.name }}</span>
-                        <div class="custom-margin" v-if="item.isOwner">
+                        <div class="custom-margin">
                             <input class="form-check-input checkbox m-2" type="checkbox" value="" :id="item.id"
-                                @click="countChecks(item.id)">
+                                @click="countChecks(item.id)" v-if="item.isOwner">
                             <a href="#" class="m-1" id="dropdownIcon" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-ellipsis-v icon-ellipsis"></i>
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="dropdownIcon">
-                                <li @click="redirectToEditPrompt(item.id)"><a class="dropdown-item">{{ $t('common.edit')
+                                <li @click="redirectToEditPrompt(item.id)" v-if="item.isOwner"><a class="dropdown-item">{{
+                                    $t('common.edit')
+                                        }}</a></li>
+                                <li @click="redirectToClonePrompt(item.id)"><a class="dropdown-item">{{
+                                    $t('prompts.cloneAction')
                                         }}</a></li>
                             </ul>
                         </div>
@@ -146,6 +150,9 @@ export default {
         },
         redirectToNewPrompt: function (prompt) {
             this.$router.push({ name: 'PromptNew', query: { name: prompt } });
+        },
+        redirectToClonePrompt: function (id) {
+            this.$router.push({ name: 'PromptNew', query: { clone: id } });
         },
         redirectToEditPrompt: function (id) {
             this.$router.push({ name: 'PromptNew', query: { id: id } });

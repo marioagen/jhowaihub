@@ -472,6 +472,7 @@ const spanish = {
     },
     management: {
         profiles: {
+            analyst: "Analista",
             createBtn: "Nuevo Perfil",
             createProfile: "Crear perfil",
             createSubtitle:
@@ -533,6 +534,7 @@ const spanish = {
         subtitle:
             "Administra los usuarios, equipos y permisos del sistema",
         teams: {
+            analyst: "Analista",
             createBtn: "Nuevo Equipo",
             createSubtitle:
                 "Crea un nuevo equipo para el sistema",
@@ -691,6 +693,8 @@ const spanish = {
         enterprise: "Plan Enterprise",
     },
     prompts: {
+        cloneAction: "Clonar",
+        cloneSuffix: "- Clon",
         createError: "No se pudieron crear el prompt",
         createPrompt: "Crear prompt",
         createSuccess: "Prompt creado exitosamente",
