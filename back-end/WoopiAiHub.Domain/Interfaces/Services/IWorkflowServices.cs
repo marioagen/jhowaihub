@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
@@ -30,5 +30,13 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> UpdatePhase1(WorkflowUpdatePhase1Dto workflowUpdatePhase1Dto);
         StepDto FindStepById(int id);
         Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
+        /// <summary>
+        /// Creates a deep copy of an existing workflow with a new name.
+        /// Copies steps, step tools, parameters, dependencies and team associations.
+        /// Does not copy documents. The source workflow is not modified.
+        /// </summary>
+        /// <param name="dto">Contains source workflow id and the name for the new workflow.</param>
+        /// <returns>The ID of the newly created workflow.</returns>
+        Task<int> CloneAsync(WorkflowCloneRequestDto dto);
     }
 }

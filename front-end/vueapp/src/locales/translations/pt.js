@@ -1023,6 +1023,13 @@ const portuguese = {
         associatedTeams: "Times Associados",
         basicInfo: "Informações Básicas",
         boardView: "Visualizando esteira de processamento:",
+        clone: "Clonar",
+        cloneConfirm: "Clonar",
+        cloneError: "Erro ao clonar esteira de processamento",
+        cloneNameLabel: "Nome da nova esteira",
+        cloneSuccess: "Esteira de processamento clonada com sucesso",
+        cloneSuffix: "Cópia",
+        cloneTitle: "Clonar esteira de processamento",
         configuredTools: "Ferramentas configuradas",
         createBtn: "Nova Esteira de Processamento",
         createError:
