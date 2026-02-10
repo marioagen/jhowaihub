@@ -924,7 +924,7 @@ const english = {
         type: "Type",
         typeDisplay: {
             Prompt: "Agent",
-            Embedding: "Indexing",
+            Embeddings: "Indexing",
             OCR: "Digitizer Agent",
             N8N: "N8N",
         },

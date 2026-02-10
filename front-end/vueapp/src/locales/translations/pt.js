@@ -950,7 +950,7 @@ const portuguese = {
         type: "Tipo",
         typeDisplay: {
             Prompt: "Agente",
-            Embedding: "Indexação",
+            Embeddings: "Indexação",
             OCR: "Agente Digitalizador",
             N8N: "N8N",
         },

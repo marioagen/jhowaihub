@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -15,6 +15,11 @@ namespace WoopiAiHub.Repository.Mappings
             builder.Property(t => t.Name)
                    .HasColumnName("Name")
                    .HasColumnType("varchar(50)")
+                   .IsRequired();
+
+            builder.Property(t => t.Description)
+                   .HasColumnName("Description")
+                   .HasColumnType("varchar(100)")
                    .IsRequired();
 
             builder.Property(t => t.IsActive)
