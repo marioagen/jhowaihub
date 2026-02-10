@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -7,7 +7,7 @@ namespace WoopiAiHub.Domain.Models
         [Column("Name", TypeName = "varchar(50)")]
         public string Name { get; private set; } = string.Empty;
 
-        [Column("Description", TypeName = "varchar(95)")]
+        [Column("Description", TypeName = "nvarchar(500)")]
         public string Description { get; private set; } = string.Empty;
 
         [Column("Text", TypeName = "nvarchar(max)")]
