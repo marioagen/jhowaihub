@@ -301,6 +301,159 @@ namespace WoopiAiHub.UnitTests.Fixture
             return step;
         }
 
+        public static WorkflowCloneRequestDto CreateWorkflowCloneRequestDto(int sourceWorkflowId = 1, string newName = "Cloned Workflow")
+        {
+            return new WorkflowCloneRequestDto
+            {
+                SourceWorkflowId = sourceWorkflowId,
+                NewName = newName
+            };
+        }
+
+        public static Workflow CreateWorkflowForClone(int workflowId = 1, int teamId = 1)
+        {
+            var f = new Faker("pt_BR");
+            var team = new Team("Test Team", teamId, DateTime.UtcNow);
+
+            var workflow = new Workflow(
+                workflowId,
+                DateTime.UtcNow,
+                new List<Team> { team },
+                "Source Workflow"
+            );
+
+            // Add Step 1 with 2 StepTools
+            var step1 = new Step(
+                1,
+                DateTime.UtcNow,
+                workflowId,
+                "Step 1",
+                1,
+                1,
+                1
+            );
+
+            var stepTool1 = new StepTool(
+                1,
+                DateTime.UtcNow,
+                step1.Id,
+                1,
+                1,
+                100,
+                100
+            );
+            stepTool1.Parameters.Add(new StepToolParameter(
+                1,
+                DateTime.UtcNow,
+                stepTool1.Id,
+                false,
+                null,
+                "param1_value"
+            ));
+
+            var stepTool2 = new StepTool(
+                2,
+                DateTime.UtcNow,
+                step1.Id,
+                2,
+                2,
+                200,
+                200
+            );
+            stepTool2.Parameters.Add(new StepToolParameter(
+                2,
+                DateTime.UtcNow,
+                stepTool2.Id,
+                true,
+                null,
+                "param2_value"
+            ));
+            stepTool2.UpdateDependencyStepTool(stepTool1);
+
+            step1.AddStepTool(stepTool1);
+            step1.AddStepTool(stepTool2);
+
+            // Add Step 2 with 1 StepTool
+            var step2 = new Step(
+                2,
+                DateTime.UtcNow,
+                workflowId,
+                "Step 2",
+                2,
+                2,
+                1
+            );
+
+            var stepTool3 = new StepTool(
+                3,
+                DateTime.UtcNow,
+                step2.Id,
+                1,
+                1,
+                300,
+                300
+            );
+            stepTool3.Parameters.Add(new StepToolParameter(
+                3,
+                DateTime.UtcNow,
+                stepTool3.Id,
+                false,
+                null,
+                "param3_value"
+            ));
+            stepTool3.UpdateDependencyStepTool(stepTool2);
+
+            step2.AddStepTool(stepTool3);
+
+            workflow.AddStep(step1);
+            workflow.AddStep(step2);
+
+            return workflow;
+        }
+
+        public static Workflow CreateWorkflowWithDependencies(int workflowId = 1)
+        {
+            var f = new Faker("pt_BR");
+            var team = new Team("Test Team", 1, DateTime.UtcNow);
+
+            var workflow = new Workflow(
+                workflowId,
+                DateTime.UtcNow,
+                new List<Team> { team },
+                "Workflow with Dependencies"
+            );
+
+            var step = new Step(
+                1,
+                DateTime.UtcNow,
+                workflowId,
+                "Step with Dependencies",
+                1,
+                1,
+                1
+            );
+
+            var stepTool1 = new StepTool(1, DateTime.UtcNow, step.Id, 1, 1, 100, 100);
+            var stepTool2 = new StepTool(2, DateTime.UtcNow, step.Id, 2, 2, 200, 200);
+            var stepTool3 = new StepTool(3, DateTime.UtcNow, step.Id, 3, 3, 300, 300);
+
+            // Create dependency chain: stepTool1 -> stepTool2 -> stepTool3
+            stepTool2.UpdateDependencyStepTool(stepTool1);
+            stepTool3.UpdateDependencyStepTool(stepTool2);
+
+            // Add StepToolDependency records
+            stepTool2.Dependencies.Add(new StepToolDependency(1, DateTime.UtcNow, stepTool2.Id, stepTool1.Id));
+            stepTool3.Dependencies.Add(new StepToolDependency(2, DateTime.UtcNow, stepTool3.Id, stepTool2.Id));
+
+            step.AddStepTool(stepTool1);
+            step.AddStepTool(stepTool2);
+            step.AddStepTool(stepTool3);
+
+            workflow.AddStep(step);
+
+            return workflow;
+        }
+
         public static Tool CreateToolModel(int id, string name, string toolTypeName)
         {
             var tool = new Tool(

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -259,6 +259,22 @@ namespace WoopiAiHub.Api.Controllers
         {
             var workflow = await _workflowServices.FindWorkflowsByDocument(dto, ct);
             return Ok(workflow);
+        }
+
+        /// <summary>
+        /// Clones an existing workflow with a new name.
+        /// Creates a deep copy including steps, tools, configurations and team associations.
+        /// Does not copy documents. The source workflow is not modified.
+        /// </summary>
+        /// <param name="dto">Source workflow ID and name for the new workflow.</param>
+        /// <returns>The ID of the newly created workflow.</returns>
+        [HttpPost("Clone")]
+        [SwaggerOperation("Clone an existing workflow with a new name")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Clone([FromBody] WorkflowCloneRequestDto dto)
+        {
+            var newWorkflowId = await _workflowServices.CloneAsync(dto);
+            return Ok(newWorkflowId);
         }
     }
 }

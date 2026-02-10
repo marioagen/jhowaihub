@@ -145,6 +145,37 @@
                         labelKey: "pages.management",
                     },
                     {
+                        permission: "Prompts",
+                        activeKey: "Prompts",
+                        to: "/prompts",
+                        icon: {
+                            name: "Braces",
+                            color: "#8e51ff",
+                        },
+                        labelKey: "pages.prompts",
+                    },
+                    {
+                        permission: "Quizzes",
+                        activeKey: "ManagementQuizzes",
+                        to: "/management-quizzes",
+                        icon: {
+                            name: "ClipboardList",
+                            color: "#a259ff",
+                        },
+                        labelKey: "pages.quizzes",
+                    },
+                    {
+                        permission: "WorkflowManagement",
+                        activeKey: "WorkflowManagement",
+                        to: "/workflow/management",
+                        icon: {
+                            name: "Workflow",
+                            color: "#00bba7",
+                        },
+                        labelKey:
+                            "pages.workflowManagement",
+                    },
+                    {
                         permission: "Documents",
                         activeKey: "DocumentList",
                         to: "/documents",
@@ -165,27 +196,6 @@
                         labelKey: "pages.workflows",
                     },
                     {
-                        permission: "WorkflowManagement",
-                        activeKey: "WorkflowManagement",
-                        to: "/workflow/management",
-                        icon: {
-                            name: "Workflow",
-                            color: "#00bba7",
-                        },
-                        labelKey:
-                            "pages.workflowManagement",
-                    },
-                    {
-                        permission: "Quizzes",
-                        activeKey: "ManagementQuizzes",
-                        to: "/management-quizzes",
-                        icon: {
-                            name: "ClipboardList",
-                            color: "#a259ff",
-                        },
-                        labelKey: "pages.quizzes",
-                    },
-                    {
                         permission: "Tools",
                         activeKey: "Tools",
                         to: "/tools",
@@ -194,16 +204,6 @@
                             color: "#f59e0b",
                         },
                         labelKey: "pages.tools",
-                    },
-                    {
-                        permission: "Prompts",
-                        activeKey: "Prompts",
-                        to: "/prompts",
-                        icon: {
-                            name: "Braces",
-                            color: "#8e51ff",
-                        },
-                        labelKey: "pages.prompts",
                     },
                 ],
             };

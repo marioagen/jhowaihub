@@ -473,6 +473,7 @@ const portuguese = {
     },
     management: {
         profiles: {
+            analyst: "Analista",
             createBtn: "Novo Perfil",
             createProfile: "Criar perfil",
             createSubtitle:
@@ -533,6 +534,7 @@ const portuguese = {
         subtitle:
             "Gerencie usuários, times e permissões do sistema",
         teams: {
+            analyst: "Analista",
             createBtn: "Novo Time",
             createSubtitle:
                 "Crie um novo time para o sistema",
@@ -687,6 +689,8 @@ const portuguese = {
         enterprise: "Plano Enterprise",
     },
     prompts: {
+        cloneAction: "Clonar",
+        cloneSuffix: "- Clone",
         createError: "Falha ao criar agente",
         createPrompt: "Criar agente",
         createSuccess: "Agente criado com sucesso",
@@ -1033,6 +1037,13 @@ const portuguese = {
         associatedTeams: "Times Associados",
         basicInfo: "Informações Básicas",
         boardView: "Visualizando esteira de processamento:",
+        clone: "Clonar",
+        cloneConfirm: "Clonar",
+        cloneError: "Erro ao clonar esteira de processamento",
+        cloneNameLabel: "Nome da nova esteira",
+        cloneSuccess: "Esteira de processamento clonada com sucesso",
+        cloneSuffix: "Cópia",
+        cloneTitle: "Clonar esteira de processamento",
         configuredTools: "Ferramentas configuradas",
         createBtn: "Nova Esteira de Processamento",
         createError:

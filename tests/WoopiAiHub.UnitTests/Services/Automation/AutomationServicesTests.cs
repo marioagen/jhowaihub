@@ -585,7 +585,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
             stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync(stepTool);
 
-            cardRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(card);
+            cardRepositoryMock.Setup(r => r.FindByIdWithStepAndProfile(It.IsAny<int>())).ReturnsAsync(card);
             stepRepositoryMock.Setup(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId)).ReturnsAsync(nextStep);
             cardRepositoryMock.Setup(r => r.Update(It.IsAny<Domain.Models.Card>())).Returns(true);
             hubNotifierMock.Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>())).Returns(Task.CompletedTask);
@@ -595,7 +595,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);           
-            cardRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
+            cardRepositoryMock.Verify(r => r.FindByIdWithStepAndProfile(It.IsAny<int>()), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId), Times.Once);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Once);
             hubNotifierMock.Verify(h => h.CardProgessAsync(automationDto.Email, automationDto.CardId, 100.0, nextStep.Id, It.IsAny<string>()), Times.Once);
@@ -623,7 +623,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
             stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((StepTool?)null);
            
-            cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
+            cardRepositoryMock.Setup(r => r.FindByIdWithStepAndProfile(automationDto.CardId)).ReturnsAsync(card);
 
             // Act
             await _service.ContinueExecution(automationDto);
@@ -631,7 +631,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Assert
             stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
             
-            cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
+            cardRepositoryMock.Verify(r => r.FindByIdWithStepAndProfile(automationDto.CardId), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Never);
         }
