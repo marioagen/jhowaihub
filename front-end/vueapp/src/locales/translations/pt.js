@@ -141,9 +141,9 @@ const portuguese = {
         graphs: {
             pagesGraphSubtitle: "Consumo Diário",
             pagesGraphTitle:
-                "Páginas de Documento Processadas (OCR)",
+                "Páginas de Documento Processadas (Agente Digitalizador)",
             pagesTooltip:
-                "Quantidade de páginas de documentos que passaram pelo processo de Reconhecimento Óptico de Caracteres (OCR), que converte imagens de texto em texto editável.",
+                "Quantidade de páginas de documentos que passaram pelo processo do Agente Digitalizador, que converte imagens de texto em texto editável.",
             periodTotal: "Totalizador no Período",
             tokenGraphSubtitle: "Consumo Diário de Tokens",
             tokenGraphTitle: "Consumo de Tokens de IA",
@@ -231,6 +231,12 @@ const portuguese = {
         loadingTheText: "Carregando o texto",
         mostOlder: "Mais antigos",
         mostRecent: "Mais recentes",
+        ocrFetchError:
+            "Erro ao buscar texto do Agente Digitalizador.",
+        ocrLoadError:
+            "Erro ao carregar texto do Agente Digitalizador.",
+        ocrNotAvailable:
+            "Agente Digitalizador não disponível para este documento.",
         noDocumentsWereFound:
             "Nenhum documento foi localizado",
         normalizingTheDocument:
@@ -243,7 +249,7 @@ const portuguese = {
             "Para não interromper o processo de upload, não recarregue a página",
         numberOfPagesHasBeenExceeded:
             "Número de páginas foi excedido. Contate o administrador do plano.",
-        ocrText: "Texto OCR",
+        ocrText: "Texto do Agente Digitalizador",
         pdfBack: "Voltar para o PDF",
         preparingTheDocument: "Preparando o documento..",
         queryWithoutHistory: "Consulta sem histórico",
@@ -386,7 +392,7 @@ const portuguese = {
                 "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
             connectorWorkflowFail:
                 "Conector da esteira de processamento não respondeu. Verifique a URL e a chave da API da ferramenta",
-            createNewPrompt: "Criar novo prompt",
+            createNewPrompt: "Criar novo agente",
             dependenciesRequired:
                 "Selecione ao menos uma dependência",
             editFlowNodeFail: "Falha ao editar o nodo",
@@ -397,9 +403,9 @@ const portuguese = {
                 "Fluxo inserido com sucesso",
             progressFlowUpdateFail:
                 "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
-            prompts: "Prompts",
-            promptRequired: "Selecione ao menos um prompt",
-            selectPrompt: "Selecione um prompt",
+            prompts: "Agentes",
+            promptRequired: "Selecione ao menos um agente",
+            selectPrompt: "Selecione um agente",
         },
         hideTools: "Ocultar Ferramentas",
         save: "Salvar",
@@ -481,6 +487,7 @@ const portuguese = {
     },
     management: {
         profiles: {
+            analyst: "Analista",
             createBtn: "Novo Perfil",
             createProfile: "Criar perfil",
             createSubtitle:
@@ -541,6 +548,7 @@ const portuguese = {
         subtitle:
             "Gerencie usuários, times e permissões do sistema",
         teams: {
+            analyst: "Analista",
             createBtn: "Novo Time",
             createSubtitle:
                 "Crie um novo time para o sistema",
@@ -643,7 +651,7 @@ const portuguese = {
         dashboard: "Dashboard",
         documents: "Documentos",
         management: "Gestão de Usuários",
-        prompts: "Prompts",
+        prompts: "Agentes",
         questions: "Perguntas",
         quizzes: "Questionários",
         templates: "Templates de API",
@@ -662,7 +670,7 @@ const portuguese = {
             documents: "Visualizar Documentos",
             management: "Visualizar Gestão de tabelas",
             profiles: "Visualizar Perfis",
-            prompts: "Visualizar Prompts",
+            prompts: "Visualizar Agentes",
             questions: "Visualizar Perguntas",
             quizzes: "Visualizar Questionários",
             teams: "Visualizar Times",
@@ -678,7 +686,7 @@ const portuguese = {
             documents: "Documentos",
             management: "Gestão",
             profiles: "Perfis",
-            prompts: "Prompts",
+            prompts: "Agentes",
             questions: "Perguntas",
             quizzes: "Questionários",
             teams: "Times",
@@ -695,41 +703,46 @@ const portuguese = {
         enterprise: "Plano Enterprise",
     },
     prompts: {
-        createError: "Falha ao criar prompt",
-        createPrompt: "Criar prompt",
-        createSuccess: "Prompt criado com sucesso",
-        deleteError: "Falha ao deletar prompt",
-        deleteSuccess: "Prompt deletado com sucesso",
+        cloneAction: "Clonar",
+        cloneSuffix: "- Clone",
+        createError: "Falha ao criar agente",
+        createPrompt: "Criar agente",
+        createSuccess: "Agente criado com sucesso",
+        deleteError: "Falha ao deletar agente",
+        deleteSuccess: "Agente deletado com sucesso",
+        editPrompt: "Editar agente",
         emptyPromptError:
-            "O campo de prompt não pode estar vazio",
+            "O campo do agente não pode estar vazio",
         importButton: "Importar",
-        importError: "Erro ao importar prompts",
+        importError: "Erro ao importar agentes",
         importPredefined: "Importar pré-definidos",
         importSubtitle:
-            "Selecione prompts pré-definidos do sistema",
-        importSuccess: "Prompts importados com sucesso",
-        importTitle: "Importar prompts",
+            "Selecione agentes pré-definidos do sistema",
+        importSuccess: "Agentes importados com sucesso",
+        importTitle: "Importar agentes",
         information: "Informações básicas",
         labelLoadMore: "Carregar mais",
-        myPromptsBadge: "Meus prompts",
-        namePrompt: "Nome do prompt",
-        newPrompt: "Novo prompt",
+        myPromptsBadge: "Meus agentes",
+        namePrompt: "Nome do agente",
+        newPrompt: "Novo agente",
         noPromptsListWereFound:
-            "Nenhum prompt foi encontrado",
-        placeholderNamePrompt: "Insira o nome do prompt",
-        promptContent: "Conteúdo do prompt",
-        refineError: "Falha ao refinar prompt",
-        refinePrompt: "Refinar Prompt",
-        refineSuccess: "Prompt refinado com sucesso",
-        removeAllPrompts: "Remover prompts",
-        searchPrompt: "Buscar prompt",
-        searchPrompts: "Buscar prompts",
+            "Nenhum agente foi encontrado",
+        placeholderNamePrompt: "Insira o nome do agente",
+        promptContent: "Prompt de Instrução",
+        refineError: "Falha ao refinar agente",
+        refinePrompt: "Refinar Agente",
+        refineSuccess: "Agente refinado com sucesso",
+        removeAllPrompts: "Remover agentes",
+        searchPrompt: "Buscar agente",
+        searchPrompts: "Buscar agentes",
         selectAllTemplates: "Selecionar todos os templates",
-        subtitle: "Gerencia prompts do sistema",
-        subtitleNew: "Criar um novo prompt de IA",
-        title: "Prompts",
-        updateError: "Falha ao atualizar prompt",
-        updateSuccess: "Prompt atualizado com sucesso",
+        subtitle: "Gerencia agentes do sistema",
+        subtitleEdit:
+            "Atualize as informações do agente selecionado",
+        subtitleNew: "Criar um novo agente de IA",
+        title: "Agentes",
+        updateError: "Falha ao atualizar agente",
+        updateSuccess: "Agente atualizado com sucesso",
         viewComplete: "Ver completo",
     },
     questions: {
@@ -891,10 +904,13 @@ const portuguese = {
         tableTitle: "Templates",
         templateName: "Nome do Template",
         templateNamePlaceholder:
-            "ex. Processamento de OCR de Usuário",
+            "ex. Processamento de Agente Digitalizador de Usuário",
         title: "Templates de API",
         unselected: "Selecione um template",
         url: "URL",
+        variablesOcr: "Agente Digitalizador",
+        variablesEmbeddings: "Indexação",
+        variablesPrompt: "Agente",
         variablesTip:
             "Dica: Use variáveis como '{{ocr}}' ou '{{prompt}}' que serão substituídas no momento da execução.",
     },
@@ -904,7 +920,7 @@ const portuguese = {
         createError: "Erro ao criar Ferramenta",
         createSuccess: "Ferramenta criada com sucesso",
         dependencyRequired:
-            "A ferramenta de Prompt requer ao menos uma dependência",
+            "A ferramenta de Agente requer ao menos uma dependência",
         dependencyToolNotFound:
             "Ferramenta de dependência não encontrada",
         duplicated: "Nome da ferramenta duplicado",
@@ -941,7 +957,7 @@ const portuguese = {
         index: "Ferramentas",
         notFound: "Não há ferramentas cadastradas",
         ocrDependencyRequired:
-            "A ferramenta de Prompt requer uma dependência de uma ferramenta de OCR",
+            "A ferramenta de Agente requer uma dependência de uma ferramenta de Agente Digitalizador",
         removeError: "Erro ao remover Ferramenta",
         removeSuccess: "Ferramenta removida com sucesso",
         removeTitle:
@@ -951,6 +967,12 @@ const portuguese = {
         title: "Ferramentas",
         toolNotFound: "Ferramenta não encontrada",
         type: "Tipo",
+        typeDisplay: {
+            Prompt: "Agente",
+            Embeddings: "Indexação",
+            OCR: "Agente Digitalizador",
+            N8N: "N8N",
+        },
         validationError: "Erro ao validar campos",
     },
     transferListPlaceholder: "Busque na lista",
@@ -1030,6 +1052,15 @@ const portuguese = {
         associatedTeams: "Times Associados",
         basicInfo: "Informações Básicas",
         boardView: "Visualizando esteira de processamento:",
+        clone: "Clonar",
+        cloneConfirm: "Clonar",
+        cloneError:
+            "Erro ao clonar esteira de processamento",
+        cloneNameLabel: "Nome da nova esteira",
+        cloneSuccess:
+            "Esteira de processamento clonada com sucesso",
+        cloneSuffix: "Cópia",
+        cloneTitle: "Clonar esteira de processamento",
         configuredTools: "Ferramentas configuradas",
         createBtn: "Nova Esteira de Processamento",
         createError:

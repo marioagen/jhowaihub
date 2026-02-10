@@ -10,19 +10,45 @@
             :hasSelection="false"
             @change-page="changePage"
         >
+            <template #cell-name="{ data }">
+                <span
+                    v-if="data.row.name == UserType.Analyst"
+                >
+                    {{ $t("management.profiles.analyst") }}
+                </span>
+                <span v-else>
+                    {{ data.row.name }}
+                </span>
+            </template>
             <template #cell-users="{ data }">
-                <LucideIcon icon="UsersRound" :size="15" />
+                <LucideIcon
+                    icon="UsersRound"
+                    :size="15"
+                />
                 {{ data.row.users.length }}
             </template>
             <template #cell-permissions="{ data }">
-                {{ data.row.permissions.length }} {{ $t("common.showingToTotal") }} {{ this.permissionsCount }}
+                {{ data.row.permissions.length }}
+                {{ $t("common.showingToTotal") }}
+                {{ this.permissionsCount }}
             </template>
             <template #cell-actions="{ data }">
-                <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="redirectToForm(data.row)" v-tooltip="$t('common.edit')">
+                <ActionTableListComponent
+                    v-slot="{ actionClass }"
+                >
+                    <a
+                        :class="actionClass"
+                        @click="redirectToForm(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-danger" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -41,7 +67,6 @@
         @confirm="deleteProfile"
     />
 </template>
-
 <script>
     import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
@@ -49,6 +74,7 @@
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
+    import { UserType } from "@/constants/UserType";
 
     export default {
         name: "ProfilesTable",
@@ -62,10 +88,22 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "common.id" },
-                    { key: "name", label: "management.profiles.profile" },
-                    { key: "users", label: "management.users.title" },
-                    { key: "permissions", label: "management.profiles.permissions" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "name",
+                        label: "management.profiles.profile",
+                    },
+                    {
+                        key: "users",
+                        label: "management.users.title",
+                    },
+                    {
+                        key: "permissions",
+                        label: "management.profiles.permissions",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -85,6 +123,7 @@
             modalProfileShow: false,
             modalAlertShow: false,
             permissionsCount: 0,
+            UserType,
         }),
         methods: {
             getProfiles(obj) {
@@ -93,7 +132,9 @@
                 this.dataDocument = [];
                 this.listIds = [];
                 var paramsReq = {
-                    search: obj.search.trim() ? obj.search.trim() : "",
+                    search: obj.search.trim()
+                        ? obj.search.trim()
+                        : "",
                     pageSize: this.selectedOption,
                     page: obj.page,
                     isAscending: this.isAscending,
@@ -102,22 +143,27 @@
 
                 ProfilesService.getProfiles(paramsReq)
                     .then((response) => {
-                        const content = response?.content || [];
-                        const pagination = response?.pagination || {};
+                        const content =
+                            response?.content || [];
+                        const pagination =
+                            response?.pagination || {};
 
                         this.table.data = content;
                         this.table.pagination = pagination;
                     })
                     .finally(() => {
-                        if (obj.type === "search") this.searching = true;
+                        if (obj.type === "search")
+                            this.searching = true;
                         this.table.isLoading = false;
                     });
             },
             getPermissions(obj) {
                 PermissionsService.getPermissions()
                     .then((response) => {
-                        const permissions = response.permissions;
-                        this.permissionsCount = permissions.length;
+                        const permissions =
+                            response.permissions;
+                        this.permissionsCount =
+                            permissions.length;
                     })
                     .finally(() => {});
             },
@@ -128,17 +174,29 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
+                this.getProfiles({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             formatDate(str) {
                 return date.formatDate(str);
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getProfiles({ search: input, page: this.queryPage, type: null });
+                this.getProfiles({
+                    search: input,
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             handleTeamCreated: function () {
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
+                this.getProfiles({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
                 this.closeModalTeam();
             },
             redirectToForm(profile) {
@@ -154,25 +212,37 @@
                 this.$refs.DeleteDialog.open();
             },
             changePage(page) {
-                this.getProfiles({ search: "", page: page, type: null });
+                this.getProfiles({
+                    search: "",
+                    page: page,
+                    type: null,
+                });
             },
             deleteProfile() {
                 this.isDeleting = true;
-                ProfilesService.deleteProfileById(this.selectedProfile)
+                ProfilesService.deleteProfileById(
+                    this.selectedProfile
+                )
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getProfiles({ search: "", page: 1, type: null });
+                            this.getProfiles({
+                                search: "",
+                                page: 1,
+                                type: null,
+                            });
                             this.$notify({
                                 title: "Profiles",
-                                message: "management.profiles.deleteSuccess",
+                                message:
+                                    "management.profiles.deleteSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "Profiles",
-                                message: "management.profiles.errors.deleteError",
+                                message:
+                                    "management.profiles.errors.deleteError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -185,17 +255,26 @@
                     });
             },
             reload() {
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
+                this.getProfiles({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
         },
         created() {
-            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getProfiles({ search: "", page: this.queryPage, type: null });
+            this.queryPage = this.$route.query.page
+                ? this.$route.query.page
+                : 1;
+            this.getProfiles({
+                search: "",
+                page: this.queryPage,
+                type: null,
+            });
             this.getPermissions();
         },
     };
 </script>
-
 <style>
     .dropdown-toggle::after {
         display: none;

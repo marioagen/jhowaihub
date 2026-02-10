@@ -672,13 +672,18 @@
                 autocompletePosition: { top: 0, left: 0 },
                 selectedAutocompleteIndex: 0,
                 autocompleteOptions: [
-                    { label: "OCR", value: "{{ocr}}" },
                     {
-                        label: "EMBEDDINGS",
+                        labelKey: "template.variablesOcr",
+                        value: "{{ocr}}",
+                    },
+                    {
+                        labelKey:
+                            "template.variablesEmbeddings",
                         value: "{{embeddings}}",
                     },
                     {
-                        label: "PROMPT",
+                        labelKey:
+                            "template.variablesPrompt",
                         value: "{{prompt}}",
                     },
                     {
@@ -704,7 +709,14 @@
                 return this.routeId !== undefined;
             },
             filteredAutocompleteOptions() {
-                return this.autocompleteOptions;
+                return this.autocompleteOptions.map(
+                    (opt) => ({
+                        ...opt,
+                        label: opt.labelKey
+                            ? this.$t(opt.labelKey)
+                            : opt.label,
+                    })
+                );
             },
             getTemplateTitle() {
                 return this.isEditMode

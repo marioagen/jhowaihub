@@ -95,7 +95,7 @@ namespace WoopiAiHub.Application.Services
             string email
         )
         {
-            var card = await _cardRepository.FindById(updateCardStepStatusDto.CardId) ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var card = await _cardRepository.FindByIdWithDocument(updateCardStepStatusDto.CardId) ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
             var step = await _stepRepository.FindByOrderAndWorkflowId(
                 updateCardStepStatusDto.NextStepOrder,
@@ -197,7 +197,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private async Task<Card> FindCardWithRelationships(int cardId)
         {
-            var card = await _cardRepository.FindById(cardId);
+            var card = await _cardRepository.FindByIdWithDocumentAndWorkflow(cardId);
             if (card == null)
             {
                 throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);

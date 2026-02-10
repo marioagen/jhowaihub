@@ -26,27 +26,30 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateStep _validateStep;
         private readonly IToolRepository _toolRepository;
+        private readonly IStepToolRepository _stepToolRepository;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(
-            IWorkflowRepository workflowRepository, 
+            IWorkflowRepository workflowRepository,
             IProfileRepository profileRepository,
-            ITeamRepository teamRepository, 
+            ITeamRepository teamRepository,
             IStatusRepository statusRepository,
             IStepRepository stepRepository,
+            IStepToolRepository stepToolRepository,
             IStepToolDependencyRepository stepToolDependencyRepository,
-            IStepToolOutputRepository stepToolOutputRepository, 
+            IStepToolOutputRepository stepToolOutputRepository,
             IUnitOfWork unitOfWork,
             IToolRepository toolRepository,
             IValidateStep validateStep,
-            ILogger<WorkflowServices> logger 
+            ILogger<WorkflowServices> logger
         )
         {
             _workflowRepository = workflowRepository;
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
+            _stepToolRepository = stepToolRepository;
             _stepToolDependencyRepository = stepToolDependencyRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
             _unitOfWork = unitOfWork;
@@ -940,6 +943,204 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
             return workflow;
+        }
+
+        /// <summary>
+        /// Creates a deep copy of an existing workflow with a new name.
+        /// Copies steps, step tools, parameters, dependencies and team associations.
+        /// Does not copy documents. The source workflow is not modified.
+        /// </summary>
+        public async Task<int> CloneAsync(WorkflowCloneRequestDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.NewName))
+            {
+                throw new AppException(ErrorCode.RequiredField, "Workflow name is required", WorkflowLabel.InvalidName);
+            }
+
+            var source = await _workflowRepository.FindByIdForClone(dto.SourceWorkflowId);
+            if (source == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+
+            var teamIds = source.Teams.Select(t => t.Id).ToList();
+            var teamsList = _teamRepository.FindByIds(teamIds);
+            if (teamsList.Count != teamIds.Count)
+            {
+                throw new AppException(ErrorCode.NotFound, "One or more teams not found", TeamLabel.NotFound);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var newWorkflow = new Workflow(0, DateTime.UtcNow, teamsList, dto.NewName);
+                await _workflowRepository.Create(newWorkflow);
+
+                var sourceStepsOrdered = source.Steps.OrderBy(s => s.Order).ToList();
+                AddClonedSteps(newWorkflow, sourceStepsOrdered);
+                await _workflowRepository.Update(newWorkflow);
+
+                var (newStepToolsList, sourceStepToolsList) = AddClonedStepTools(newWorkflow, sourceStepsOrdered);
+                await _stepToolRepository.CreateRangeAsync(newStepToolsList);
+
+                ApplyClonedDependencies(newStepToolsList, sourceStepToolsList);
+                await _unitOfWork.SaveChangesAsync();
+
+                await CreateClonedStepToolDependencies(newStepToolsList, sourceStepToolsList);
+
+                _unitOfWork.Commit();
+                return newWorkflow.Id;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Adds cloned steps to the new workflow.
+        /// </summary>
+        /// <param name="newWorkflow">The new workflow instance.</param>
+        /// <param name="sourceStepsOrdered">The ordered list of steps from the source workflow.</param>
+        private static void AddClonedSteps(Workflow newWorkflow, List<Step> sourceStepsOrdered)
+        {
+            foreach (var sourceStep in sourceStepsOrdered)
+            {
+                var newStep = new Step(
+                    0,
+                    DateTime.UtcNow,
+                    newWorkflow.Id,
+                    sourceStep.Name,
+                    sourceStep.Order,
+                    sourceStep.ProfileId,
+                    sourceStep.StatusId);
+                newWorkflow.AddStep(newStep);
+            }
+        }
+
+        /// <summary>
+        /// Adds cloned step tools to the new workflow steps.
+        /// </summary>
+        /// <param name="newWorkflow">The new workflow instance.</param>
+        /// <param name="sourceStepsOrdered">The ordered list of steps from the source workflow.</param>
+        /// <returns>A tuple containing lists of new and source step tools for dependency mapping.</returns>
+        private static (List<StepTool> NewStepTools, List<StepTool> SourceStepTools) AddClonedStepTools(
+            Workflow newWorkflow,
+            List<Step> sourceStepsOrdered)
+        {
+            var newStepsOrdered = newWorkflow.Steps.OrderBy(s => s.Order).ToList();
+            var newStepToolsList = new List<StepTool>();
+            var sourceStepToolsList = new List<StepTool>();
+
+            for (var i = 0; i < sourceStepsOrdered.Count; i++)
+            {
+                var sourceStep = sourceStepsOrdered[i];
+                var newStep = newStepsOrdered[i];
+
+                foreach (var sourceStepTool in sourceStep.StepTools.OrderBy(st => st.Order))
+                {
+                    var newStepTool = CreateClonedStepTool(newStep.Id, sourceStepTool);
+                    newStep.AddStepTool(newStepTool);
+                    newStepToolsList.Add(newStepTool);
+                    sourceStepToolsList.Add(sourceStepTool);
+                }
+            }
+
+            return (newStepToolsList, sourceStepToolsList);
+        }
+
+        /// <summary>
+        /// Creates a deep copy of a step tool including its parameters.
+        /// </summary>
+        /// <param name="newStepId">The ID of the new step.</param>
+        /// <param name="sourceStepTool">The source step tool to clone.</param>
+        /// <returns>The new cloned StepTool instance.</returns>
+        private static StepTool CreateClonedStepTool(int newStepId, StepTool sourceStepTool)
+        {
+            var newStepTool = new StepTool(
+                0,
+                DateTime.UtcNow,
+                newStepId,
+                sourceStepTool.ToolId,
+                sourceStepTool.Order,
+                sourceStepTool.PositionX,
+                sourceStepTool.PositionY);
+
+            foreach (var param in sourceStepTool.Parameters)
+            {
+                var newParam = new StepToolParameter(
+                    0,
+                    DateTime.UtcNow,
+                    0,
+                    param.RequiredFile,
+                    param.WebhookId,
+                    param.Value);
+                newStepTool.Parameters.Add(newParam);
+            }
+
+            return newStepTool;
+        }
+
+        /// <summary>
+        /// Updates the in-memory dependencies (linked list) for the cloned step tools.
+        /// </summary>
+        /// <param name="newStepToolsList">List of new step tools.</param>
+        /// <param name="sourceStepToolsList">List of source step tools corresponding directly to the new list.</param>
+        private void ApplyClonedDependencies(List<StepTool> newStepToolsList, List<StepTool> sourceStepToolsList)
+        {
+            var sourceIdToIndex = new Dictionary<int, int>();
+            for (var i = 0; i < sourceStepToolsList.Count; i++)
+            {
+                sourceIdToIndex[sourceStepToolsList[i].Id] = i;
+            }
+
+            for (var i = 0; i < sourceStepToolsList.Count; i++)
+            {
+                var sourceStepTool = sourceStepToolsList[i];
+                var newStepTool = newStepToolsList[i];
+
+                if (sourceStepTool.DependsOnStepToolId is { } dependsOnId &&
+                    sourceIdToIndex.TryGetValue(dependsOnId, out var depIndex))
+                {
+                    newStepTool.UpdateDependencyStepTool(newStepToolsList[depIndex]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates the database dependency records (StepToolDependency) for the cloned step tools.
+        /// </summary>
+        /// <param name="newStepToolsList">List of new step tools.</param>
+        /// <param name="sourceStepToolsList">List of source step tools corresponding directly to the new list.</param>
+        private async Task CreateClonedStepToolDependencies(
+            List<StepTool> newStepToolsList,
+            List<StepTool> sourceStepToolsList)
+        {
+            var sourceIdToIndex = new Dictionary<int, int>();
+            for (var i = 0; i < sourceStepToolsList.Count; i++)
+            {
+                sourceIdToIndex[sourceStepToolsList[i].Id] = i;
+            }
+
+            for (var i = 0; i < sourceStepToolsList.Count; i++)
+            {
+                var sourceStepTool = sourceStepToolsList[i];
+                var newStepTool = newStepToolsList[i];
+
+                foreach (var dep in sourceStepTool.Dependencies)
+                {
+                    if (sourceIdToIndex.TryGetValue(dep.DependsOnStepToolId, out var depIndex))
+                    {
+                        var newDependency = new StepToolDependency(
+                            0,
+                            DateTime.UtcNow,
+                            newStepTool.Id,
+                            newStepToolsList[depIndex].Id);
+                        await _stepToolDependencyRepository.CreateAsync(newDependency);
+                    }
+                }
+            }
         }
     }
 }

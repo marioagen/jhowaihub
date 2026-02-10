@@ -145,14 +145,24 @@
                         labelKey: "pages.management",
                     },
                     {
-                        permission: "Workflow",
-                        activeKey: "Workflow",
-                        to: "/workflow",
+                        permission: "Prompts",
+                        activeKey: "Prompts",
+                        to: "/prompts",
                         icon: {
-                            name: "Workflow",
-                            color: "#615FFF",
+                            name: "Braces",
+                            color: "#8e51ff",
                         },
-                        labelKey: "pages.workflows",
+                        labelKey: "pages.prompts",
+                    },
+                    {
+                        permission: "Quizzes",
+                        activeKey: "ManagementQuizzes",
+                        to: "/management-quizzes",
+                        icon: {
+                            name: "ClipboardList",
+                            color: "#a259ff",
+                        },
+                        labelKey: "pages.quizzes",
                     },
                     {
                         permission: "WorkflowManagement",
@@ -166,14 +176,14 @@
                             "pages.workflowManagement",
                     },
                     {
-                        permission: "Quizzes",
-                        activeKey: "ManagementQuizzes",
-                        to: "/management-quizzes",
+                        permission: "Workflow",
+                        activeKey: "Workflow",
+                        to: "/workflow",
                         icon: {
-                            name: "ClipboardList",
-                            color: "#a259ff",
+                            name: "Workflow",
+                            color: "#615FFF",
                         },
-                        labelKey: "pages.quizzes",
+                        labelKey: "pages.workflows",
                     },
                     {
                         permission: "Tools",
@@ -184,16 +194,6 @@
                             color: "#f59e0b",
                         },
                         labelKey: "pages.tools",
-                    },
-                    {
-                        permission: "Prompts",
-                        activeKey: "Prompts",
-                        to: "/prompts",
-                        icon: {
-                            name: "Braces",
-                            color: "#8e51ff",
-                        },
-                        labelKey: "pages.prompts",
                     },
                 ],
             };

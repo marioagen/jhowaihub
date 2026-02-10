@@ -431,7 +431,7 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns>Task que representa a operação assíncrona</returns>
         private async Task CheckAndAdvanceAiProfileStepAsync(AutomationServicesDto automationServicesDto, StepTool dependentStepTool)
         {
-            var card = await _cardRepository.FindById(automationServicesDto.CardId);
+            var card = await _cardRepository.FindByIdWithStepAndProfile(automationServicesDto.CardId);
             if (card?.Step?.Profile == null)
                 return;
 

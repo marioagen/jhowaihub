@@ -1,6 +1,13 @@
 <template>
-    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
-        <LucideIcon icon="Trash2" :size="15" />
+    <button
+        v-if="showMultiDelete"
+        class="btn btn-outline-danger btn-sm mb-2 ms-2"
+        @click="openConfirmationMultiple"
+    >
+        <LucideIcon
+            icon="Trash2"
+            :size="15"
+        />
         {{ $t("common.delete") }}
     </button>
     <div>
@@ -20,12 +27,26 @@
             <template #cell-outputData="{ data }">
                 {{ data.row.outputData }}
             </template>
+            <template #cell-toolType="{ data }">
+                {{ toolTypeDisplayName(data.row.toolType) }}
+            </template>
             <template #cell-actions="{ data }">
-                <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="openEditModal(data.row)" v-tooltip="$t('common.edit')">
+                <ActionTableListComponent
+                    v-slot="{ actionClass }"
+                >
+                    <a
+                        :class="actionClass"
+                        @click="openEditModal(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-danger" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -33,9 +54,9 @@
         </TableComponent>
     </div>
     <ToolsModal
-        :isEdit="true" 
-        @reload="reload" 
-        ref="ToolsModal" 
+        :isEdit="true"
+        @reload="reload"
+        ref="ToolsModal"
     />
     <ConfirmModal
         id="deleteConfirm"
@@ -49,13 +70,12 @@
         @confirm="deleteTool"
     />
 </template>
-
 <script>
     import date from "@/helpers/date";
-    import ToolsService from '@/services/tools/ToolsServices';
+    import ToolsService from "@/services/tools/ToolsServices";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
-    import ToolsModal from "@/components/tools/ToolsModal.vue";    
+    import ToolsModal from "@/components/tools/ToolsModal.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
 
     export default {
@@ -64,7 +84,7 @@
             TableComponent,
             ConfirmModal,
             ToolsModal,
-            ActionTableListComponent
+            ActionTableListComponent,
         },
         data: () => ({
             table: {
@@ -72,10 +92,22 @@
                 columns: [
                     { key: "id", label: "common.id" },
                     { key: "name", label: "common.name" },
-                    { key: "toolType", label: "tools.type" },
-                    { key: "inputData", label: "tools.entry" },
-                    { key: "outputData", label: "common.output" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "toolType",
+                        label: "tools.type",
+                    },
+                    {
+                        key: "inputData",
+                        label: "tools.entry",
+                    },
+                    {
+                        key: "outputData",
+                        label: "common.output",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -94,21 +126,32 @@
             isDeleting: false,
         }),
         methods: {
+            toolTypeDisplayName(apiName) {
+                if (!apiName) return "";
+                const key = "tools.typeDisplay." + apiName;
+                const translated = this.$t(key);
+                return translated !== key
+                    ? translated
+                    : apiName;
+            },
             getTools() {
                 this.table.isLoading = true;
                 let params = {
                     search: this.filters.input,
                     page: this.table.pagination.currentPage,
-                    pageSize: this.table.pagination.itemsPerPage,
+                    pageSize:
+                        this.table.pagination.itemsPerPage,
                     isAscending: this.filters.isAsc,
                     toolTypeId: this.filters.toolTypeId,
                 };
 
                 ToolsService.getTools(params)
                     .then((response) => {
-                        const content = response?.content || [];
-                        const pagination = response?.pagination || {};
-                        
+                        const content =
+                            response?.content || [];
+                        const pagination =
+                            response?.pagination || {};
+
                         this.table.data = content;
                         this.table.pagination = pagination;
                     })
@@ -130,7 +173,9 @@
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
-                const ids = this.table.selectedRows.map((item) => item.id);
+                const ids = this.table.selectedRows.map(
+                    (item) => item.id
+                );
                 this.selectedTool = ids;
                 this.$refs.DeleteDialog.open();
             },
@@ -143,14 +188,16 @@
                             this.getTools();
                             this.$notify({
                                 title: "tools.index",
-                                message: "tools.removeSuccess",
+                                message:
+                                    "tools.removeSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "tools.index",
-                                message: "tools.removeError",
+                                message:
+                                    "tools.removeError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -175,7 +222,10 @@
             },
         },
         created() {
-            this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
+            this.table.pagination.currentPage = this.$route
+                .query.page
+                ? this.$route.query.page
+                : 1;
             this.getTools();
         },
         computed: {

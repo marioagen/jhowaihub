@@ -134,9 +134,9 @@ const spanish = {
         graphs: {
             pagesGraphSubtitle: "Consumo Diario",
             pagesGraphTitle:
-                "Páginas de Documentos Procesadas (OCR)",
+                "Páginas de Documentos Procesadas (Agente Digitalizador)",
             pagesTooltip:
-                "Cantidad de páginas procesadas mediante Reconocimiento Óptico de Caracteres (OCR), que convierte imágenes de texto en texto editable.",
+                "Cantidad de páginas procesadas mediante el Agente Digitalizador, que convierte imágenes de texto en texto editable.",
             periodTotal: "Total del Período",
             tokenGraphSubtitle: "Consumo Diario de Tokens",
             tokenGraphTitle: "Consumo de Tokens de IA",
@@ -224,6 +224,12 @@ const spanish = {
         loadingTheText: "Cargando el texto",
         mostOlder: "Más viejo",
         mostRecent: "Más reciente",
+        ocrFetchError:
+            "Error al buscar texto del Agente Digitalizador.",
+        ocrLoadError:
+            "Error al cargar texto del Agente Digitalizador.",
+        ocrNotAvailable:
+            "Agente Digitalizador no disponible para este documento.",
         noDocumentsWereFound:
             "No se encontraron documentos",
         normalizingTheDocument:
@@ -236,7 +242,7 @@ const spanish = {
             "Para evitar interrumpir el proceso de carga, no recargues la página",
         numberOfPagesHasBeenExceeded:
             "Se ha excedido el número de páginas. Comuníquese con el administrador de su plan.",
-        ocrText: "Texto OCR",
+        ocrText: "Texto del Agente Digitalizador",
         pdfBack: "Volver a PDF",
         preparingTheDocument: "Preparando el documento..",
         queryWithoutHistory: "Consulta sin historial",
@@ -388,7 +394,7 @@ const spanish = {
                 "No se pudo recuperar la configuración del workflow. Verifica la URL y la clave API de la herramienta",
             connectorWorkflowFail:
                 "El conector del workflow no respondió. Verifica la URL y la clave API de la herramienta",
-            createNewPrompt: "Crear nuevo prompt",
+            createNewPrompt: "Crear nuevo agente",
             dependenciesRequired:
                 "Seleccione al menos una dependencia",
             editFlowNodeFail: "No se pudo editar el nodo",
@@ -400,9 +406,9 @@ const spanish = {
                 "Flujo insertado exitosamente",
             progressFlowUpdateFail:
                 "No se pudo actualizar el flujo. El flujo ya contiene datos de salida para las herramientas.",
-            prompts: "Prompts",
-            promptRequired: "Seleccione al menos un prompt",
-            selectPrompt: "Seleccione un prompt",
+            prompts: "Agentes",
+            promptRequired: "Seleccione al menos un agente",
+            selectPrompt: "Seleccione un agente",
         },
         hideTools: "Ocultar Herramientas",
         showTools: "Agregar Herramientas",
@@ -483,6 +489,7 @@ const spanish = {
     },
     management: {
         profiles: {
+            analyst: "Analista",
             createBtn: "Nuevo Perfil",
             createProfile: "Crear perfil",
             createSubtitle:
@@ -544,6 +551,7 @@ const spanish = {
         subtitle:
             "Administra los usuarios, equipos y permisos del sistema",
         teams: {
+            analyst: "Analista",
             createBtn: "Nuevo Equipo",
             createSubtitle:
                 "Crea un nuevo equipo para el sistema",
@@ -649,7 +657,7 @@ const spanish = {
         dashboard: "Panel de Control",
         documents: "Documentos",
         management: "Gestión de Usuarios",
-        prompts: "Prompts",
+        prompts: "Agentes",
         questions: "Preguntas",
         quizzes: "Cuestionarios",
         templates: "Plantillas de API",
@@ -668,7 +676,7 @@ const spanish = {
             documents: "Ver Documentos",
             management: "Ver Gestión de tablas",
             profiles: "Ver Perfiles",
-            prompts: "Ver Prompts",
+            prompts: "Ver Agentes",
             questions: "Ver Preguntas",
             quizzes: "Ver Cuestionarios",
             teams: "Ver Equipos",
@@ -684,7 +692,7 @@ const spanish = {
             documents: "Documentos",
             management: "Gestión",
             profiles: "Perfiles",
-            prompts: "Prompts",
+            prompts: "Agentes",
             questions: "Preguntas",
             quizzes: "Cuestionarios",
             teams: "Equipos",
@@ -702,37 +710,42 @@ const spanish = {
         enterprise: "Plan Enterprise",
     },
     prompts: {
-        createError: "No se pudieron crear el prompt",
-        createPrompt: "Crear prompt",
-        createSuccess: "Prompt creado exitosamente",
-        deleteError: "No se pudieron eliminar los prompts",
-        deleteSuccess: "Prompts eliminados exitosamente",
+        cloneAction: "Clonar",
+        cloneSuffix: "- Clon",
+        createError: "Error al crear agente",
+        createPrompt: "Crear agente",
+        createSuccess: "Agente creado exitosamente",
+        deleteError: "Error al eliminar agentes",
+        deleteSuccess: "Agentes eliminados exitosamente",
+        editPrompt: "Editar agente",
         importButton: "Importar",
-        importError: "Error al importar prompts",
+        importError: "Error al importar agentes",
         importPredefined: "Importar predefinidos",
         importSubtitle:
-            "Selecione prompts predefinidos del sistema",
-        importSuccess: "Prompts importados exitosamente",
-        importTitle: "Importar prompt",
-        information: "Informacion basica",
+            "Seleccione agentes predefinidos del sistema",
+        importSuccess: "Agentes importados exitosamente",
+        importTitle: "Importar agentes",
+        information: "Información básica",
         labelLoadMore: "Cargar más",
-        myPromptsBadge: "Mi prompts",
-        namePrompt: "Nombre del prompt",
-        newPrompt: "Nuevo prompt",
-        noPromptsListWereFound: "No se encontraron prompts",
+        myPromptsBadge: "Mis agentes",
+        namePrompt: "Nombre del agente",
+        newPrompt: "Nuevo agente",
+        noPromptsListWereFound: "No se encontraron agentes",
         placeholderNamePrompt:
-            "Introduzca el nombre del prompt",
-        promptContent: "Contenido del prompt",
-        removeAllPrompts: "Eliminar prompts",
-        searchPrompt: "Buscar prompt",
-        searchPrompts: "Buscar prompts",
+            "Introduzca el nombre del agente",
+        promptContent: "Prompt de Instrucción",
+        removeAllPrompts: "Eliminar agentes",
+        searchPrompt: "Buscar agente",
+        searchPrompts: "Buscar agentes",
         selectAllTemplates:
-            "Selecionar todos los templates",
-        subtitle: "Gestiona los prompts del sistema",
-        subtitleNew: "Crear un nuevo prompt de IA",
-        title: "Prompts",
-        updateError: "No se pudieron actualizar el prompt",
-        updateSuccess: "Prompt actualizado exitosamente",
+            "Seleccionar todos los templates",
+        subtitle: "Gestiona los agentes del sistema",
+        subtitleEdit:
+            "Actualice la información del agente seleccionado",
+        subtitleNew: "Crear un nuevo agente de IA",
+        title: "Agentes",
+        updateError: "Error al actualizar agente",
+        updateSuccess: "Agente actualizado exitosamente",
         viewComplete: "Ver completo",
     },
     questions: {
@@ -894,10 +907,13 @@ const spanish = {
         tableTitle: "Plantillas",
         templateName: "Nombre de la Plantilla",
         templateNamePlaceholder:
-            "ej. Procesamiento OCR de Usuario",
+            "ej. Procesamiento de Agente Digitalizador de Usuario",
         title: "Plantillas de API",
         unselected: "Seleccione una plantilla",
         url: "URL",
+        variablesOcr: "Agente Digitalizador",
+        variablesEmbeddings: "Indexación",
+        variablesPrompt: "Agente",
         variablesTip:
             "Consejo: Use variables como {{ocr}} o {{prompt}} que serán reemplazadas en el momento de la ejecución.",
     },
@@ -907,7 +923,7 @@ const spanish = {
         createError: "Error al crear la herramienta",
         createSuccess: "Herramienta creada con éxito",
         dependencyRequired:
-            "La herramienta de Prompt requiere al menos una dependencia",
+            "La herramienta de Agente requiere al menos una dependencia",
         dependencyToolNotFound:
             "Herramienta de dependencia no encontrada",
         duplicated: "Nombre de herramienta duplicado",
@@ -945,7 +961,7 @@ const spanish = {
         index: "Herramientas",
         notFound: "No hay herramientas registradas",
         ocrDependencyRequired:
-            "La herramienta de Prompt requiere una dependencia de una herramienta de OCR",
+            "La herramienta de Agente requiere una dependencia de una herramienta de Agente Digitalizador",
         removeError: "Error al eliminar la herramienta",
         removeSuccess: "Herramienta eliminada con éxito",
         removeTitle:
@@ -955,6 +971,12 @@ const spanish = {
         title: "Herramientas",
         toolNotFound: "Herramienta no encontrada",
         type: "Tipo",
+        typeDisplay: {
+            Prompt: "Agente",
+            Embeddings: "Indexación",
+            OCR: "Agente Digitalizador",
+            N8N: "N8N",
+        },
         validationError: "Error al validar los campos",
     },
     transferListPlaceholder: "Buscar en la lista",
@@ -1035,6 +1057,13 @@ const spanish = {
         associatedTeams: "Equipos asociados",
         basicInfo: "Información Básica",
         boardView: "Visualizando workflow:",
+        clone: "Clonar",
+        cloneConfirm: "Clonar",
+        cloneError: "Error al clonar workflow",
+        cloneNameLabel: "Nombre del nuevo workflow",
+        cloneSuccess: "Workflow clonado con éxito",
+        cloneSuffix: "Copia",
+        cloneTitle: "Clonar workflow",
         configuredTools: "Herramientas configuradas",
         createBtn: "Nuevo Workflow",
         createError: "Error al crear workflow",
