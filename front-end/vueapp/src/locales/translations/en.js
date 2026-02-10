@@ -456,6 +456,7 @@ const english = {
     },
     management: {
         profiles: {
+            analyst: "Analyst",
             createBtn: "New Profile",
             createProfile: "Create profile",
             createSubtitle:
@@ -515,6 +516,7 @@ const english = {
         subtitle:
             "Manage system users, teams, and permissions",
         teams: {
+            analyst: "Analyst",
             createBtn: "New Team",
             createSubtitle:
                 "Create a new team for the system",
@@ -668,6 +670,8 @@ const english = {
         enterprise: "Enterprise Plan",
     },
     prompts: {
+        cloneAction: "Clone",
+        cloneSuffix: "- Clone",
         createError: "Prompts create failed",
         createPrompt: "Create prompt",
         createSuccess: "Prompts created successfully",
@@ -988,6 +992,13 @@ const english = {
         associatedTeams: "Associated Teams",
         basicInfo: "Basic Information",
         boardView: "Viewing workflow:",
+        clone: "Clone",
+        cloneConfirm: "Clone",
+        cloneError: "Error cloning workflow",
+        cloneNameLabel: "Name of the new workflow",
+        cloneSuccess: "Workflow cloned successfully",
+        cloneSuffix: "Copy",
+        cloneTitle: "Clone workflow",
         configuredTools: "Configured Tools",
         createBtn: "New Workflow",
         createError: "Error creating workflow",

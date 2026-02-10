@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.Models;
 
@@ -18,7 +18,8 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(u => u.Description)
                    .IsRequired()
-                   .HasMaxLength(95);
+                   .HasMaxLength(500)
+                   .HasColumnType("nvarchar(500)");
 
             builder.Property(u => u.Text)
                    .IsRequired()

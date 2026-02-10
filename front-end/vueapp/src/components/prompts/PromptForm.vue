@@ -39,10 +39,14 @@
                             <div class="mb-3">
                                 <label for="FormControlTextarea1" class="form-label">{{ $t('common.description')
                                     }}</label>
-                                <Field name="description" :rules="'required|max:100'" v-slot="{ field, errorMessage }">
-                                    <textarea v-bind="field" type="text" class="form-control" id="inputNamePrompt"
-                                        aria-describedby="" rows="3" name="description"
-                                        :class="{ 'is-invalid': errorMessage }" />
+                                <Field name="description" :rules="'required|max:500'" v-slot="{ field, errorMessage }">
+                                    <textarea v-bind="field" type="text" class="form-control" id="inputDescription"
+                                        aria-describedby="descriptionCounter" rows="3" name="description"
+                                        maxlength="500" :class="{ 'is-invalid': errorMessage }"
+                                        @input="field.onInput($event)" />
+                                    <div id="descriptionCounter" class="form-text text-end">
+                                        {{ (values.description || '').length }}/500
+                                    </div>
                                     <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage
                                         }}</span>
                                 </Field>
@@ -97,6 +101,11 @@ export default {
             required: false,
             default: null
         },
+        cloneId: {
+            type: Number,
+            required: false,
+            default: null
+        },
         embedded: {
             type: Boolean,
             default: false
@@ -144,6 +153,17 @@ export default {
                 this.form = { name: response.name, description: response.description, text: response.text, };
                 this.setValues(this.form);
                 this.idEdit = id;
+            });
+        },
+        loadCloneData(id) {
+            this.resetData();
+            PromptService.getPromptById(id).then((response) => {
+                this.form = {
+                    name: response.name + " " + this.$t('prompts.cloneSuffix'),
+                    description: response.description,
+                    text: response.text,
+                };
+                this.setValues(this.form);
             });
         },
         updatePrompt: function () {
@@ -260,6 +280,8 @@ export default {
     mounted() {
         if (this.id) {
             this.findById(this.id);
+        } else if (this.cloneId) {
+            this.loadCloneData(this.cloneId);
         }
     },
     watch: {
@@ -268,6 +290,11 @@ export default {
                 this.findById(newId);
             } else {
                 this.resetData();
+            }
+        },
+        cloneId(newId) {
+            if (newId) {
+                this.loadCloneData(newId);
             }
         }
     }

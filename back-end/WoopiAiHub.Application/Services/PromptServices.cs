@@ -197,7 +197,7 @@ namespace WoopiAiHub.Application.Services
                 0,
                 dto.Created,
                 dto.Name.Substring(0, Math.Min(dto.Name.Length, 50)),
-                dto.Description.Substring(0, Math.Min(dto.Description.Length, 95)),
+                dto.Description.Substring(0, Math.Min(dto.Description.Length, 500)),
                 dto.Text,
                 idUser,
                 isEdited: false,
