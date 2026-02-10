@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
 using Newtonsoft.Json;
@@ -64,7 +64,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
             output.StepTool = AutomationFixture.FindValidStepTool();
             output.StepTool.Tool = ToolFixture.FindValidToolModel();
-            output.StepTool.Tool.ToolType = new ToolType(1, DateTime.Now, HandlersTypes.Ocr, true);
+            output.StepTool.Tool.ToolType = new ToolType(1, DateTime.Now, HandlersTypes.Ocr, string.Empty, true);
 
             _mockToolRepository
                 .Setup(repo => repo.FindModelByStepToolIdAsync(It.IsAny<int>()))

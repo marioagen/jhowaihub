@@ -231,7 +231,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
-            var toolType = new ToolType(2, DateTime.Now, "Prompt", true);
+            var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
             var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
 
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
@@ -340,7 +340,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var ocrTool = new Tool(1, DateTime.Now, "OCR Tool", true, 1, 1, 1, false, null, null);
-            var ocrToolType = new ToolType(1, DateTime.Now, "OCR", true);
+            var ocrToolType = new ToolType(1, DateTime.Now, "OCR", string.Empty, true);
             var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
 
             typeof(Tool).GetProperty("ToolType")!.SetValue(ocrTool, ocrToolType);
@@ -387,7 +387,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var embeddingsTool = new Tool(1, DateTime.Now, "Embeddings Tool", true, 3, 1, 1, false, null, null);
-            var embeddingsToolType = new ToolType(3, DateTime.Now, "Embeddings", true);
+            var embeddingsToolType = new ToolType(3, DateTime.Now, "Embeddings", string.Empty, true);
             var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
 
             typeof(Tool).GetProperty("ToolType")!.SetValue(embeddingsTool, embeddingsToolType);
@@ -434,7 +434,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
-            var toolType = new ToolType(2, DateTime.Now, "Prompt", true);
+            var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
             var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
 
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
@@ -482,7 +482,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
-            var toolType = new ToolType(2, DateTime.Now, "Prompt", true);
+            var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
             var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
 
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
@@ -531,7 +531,7 @@ namespace WoopiAiHub.UnitTests.Services
             var step1 = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
             var step2 = new Step(2, DateTime.Now, 2, "Step 2", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
-            var toolType = new ToolType(2, DateTime.Now, "Prompt", true);
+            var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
             var stepTool1 = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
             var stepTool2 = new StepTool(2, DateTime.Now, 2, 1, 1, 0, 0);
 
@@ -584,7 +584,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
-            var toolType = new ToolType(2, DateTime.Now, "Prompt", true);
+            var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
             var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
 
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
@@ -628,7 +628,7 @@ namespace WoopiAiHub.UnitTests.Services
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
-            var toolType = new ToolType(2, DateTime.Now, "Prompt", true);
+            var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
             var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
 
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);

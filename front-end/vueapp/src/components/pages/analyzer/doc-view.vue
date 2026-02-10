@@ -243,13 +243,13 @@
                                     response.content;
                             } else {
                                 this.textContent =
-                                    "OCR não disponível para este documento.";
+                                    this.$t("documents.ocrNotAvailable");
                             }
                             this.loadingText = false;
                         })
                         .catch((error) => {
                             this.textContent =
-                                "Erro ao carregar texto do OCR.";
+                                this.$t("documents.ocrLoadError");
                             this.loadingText = false;
                         });
                 }
@@ -265,7 +265,7 @@
                     })
                     .catch((error) => {
                         LogService.showMessage(
-                            "Erro ao buscar texto do OCR."
+                            this.$t("documents.ocrFetchError")
                         );
                     });
             },
