@@ -10,6 +10,14 @@
             :hasSelection="false"
             @change-page="changePage"
         >
+            <template #cell-name="{ data }">
+                <span v-if="data.row.name == UserType.Analyst">
+                    {{ $t("management.profiles.analyst") }}
+                </span>
+                <span v-else>
+                    {{ data.row.name }}
+                </span>
+            </template>
             <template #cell-users="{ data }">
                 <LucideIcon icon="UsersRound" :size="15" />
                 {{ data.row.users.length }}
@@ -49,6 +57,7 @@
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
+    import { UserType } from "@/constants/UserType";
 
     export default {
         name: "ProfilesTable",
@@ -85,6 +94,7 @@
             modalProfileShow: false,
             modalAlertShow: false,
             permissionsCount: 0,
+            UserType
         }),
         methods: {
             getProfiles(obj) {
