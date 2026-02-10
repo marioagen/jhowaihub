@@ -244,4 +244,19 @@ export default {
                 };
             });
     },
+    cloneWorkflow(sourceWorkflowId, newName) {
+        return api
+            .post("/Workflow/Clone", {
+                sourceWorkflowId,
+                newName,
+            })
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
 };

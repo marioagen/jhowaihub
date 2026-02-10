@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -340,6 +340,30 @@ namespace WoopiAiHub.Repository
                       .ThenInclude(s => s.StepTools)
                           .ThenInclude(st => st.Dependencies)
                  .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
+        }
+
+        /// <summary>
+        /// Retrieves a workflow by ID with all data needed for cloning.
+        /// Includes teams, steps (with profile/status), step tools, parameters and dependencies.
+        /// Excludes documents, cards, executions and outputs.
+        /// </summary>
+        public async Task<Workflow?> FindByIdForClone(int id)
+        {
+            return await _context.Workflows
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(w => w.Teams)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.Profile)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.Status)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                        .ThenInclude(st => st.Parameters)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                        .ThenInclude(st => st.Dependencies)
+                .FirstOrDefaultAsync(w => w.Id == id && w.Enable);
         }
 
 
