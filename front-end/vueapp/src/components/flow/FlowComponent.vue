@@ -834,6 +834,9 @@
                         }
                     }
                     this.redirectToIndex();
+                    localStorage.removeItem(
+                        "flow_state_params"
+                    );
                     return this.$notify({
                         title: "flow.title",
                         message:

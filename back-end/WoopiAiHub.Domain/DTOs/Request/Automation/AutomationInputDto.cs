@@ -5,7 +5,7 @@ namespace WoopiAiHub.Domain.DTOs.Request.Automation
     public record class AutomationInputDto
     {
         public string Url { get; set; } = string.Empty;
-        public string? WebhookId { get; set; } = null;
+        public string WebhookId { get; set; } = string.Empty;
         public bool RequiredFile { get; set; }
         public string? Tenant { get; set; }
         public string? Email { get; set; }

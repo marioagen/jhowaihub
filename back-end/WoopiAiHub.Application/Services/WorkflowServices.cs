@@ -214,9 +214,21 @@ namespace WoopiAiHub.Application.Services
             {
                 foreach (var parameter in stepToolDto.Parameters)
                 {
+                    if (string.IsNullOrEmpty(parameter.Value))
+                    {
+                        continue;
+                    }
+
                     var requiredFile = parameter.RequiredFile ?? false;
+                    string paramValue = parameter.Value;
+
+                    if (!_encryptationService.IsEncrypted(parameter.Value))
+                    {
+                        paramValue = _encryptationService.Encrypt(parameter.Value);
+                    }
+
                     stepTool.Parameters.Add(
-                        new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId, _encryptationService.Encrypt(parameter.Value)));
+                        new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId, paramValue));
                 }
             }
             else

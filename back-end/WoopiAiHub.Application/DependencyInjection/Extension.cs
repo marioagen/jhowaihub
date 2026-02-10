@@ -50,6 +50,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IStepProfilePermissionsServices, StepProfilePermissionsServices>();
             services.AddScoped<IApiClientFactory, ApiClientFactory>();
             services.AddScoped<IN8NServices, N8NServices>();
+            services.AddScoped<IApiOutputServices, ApiOutputServices>();
             services.AddScoped<IPromptServices, PromptServices>();
             services.AddScoped<IValidatePrompt, ValidatePrompt>();
             services.AddScoped<IToolHandler, EmbeddingsHandler>();
@@ -72,6 +73,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddHostedService<PromptConsumer>();
             services.AddHostedService<SubscriptionConsumer>();
             services.AddHostedService<SubscriptionEndPeriodConsumer>();
+            services.AddHostedService<ApiOutputConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();
