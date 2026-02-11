@@ -153,7 +153,13 @@ namespace WoopiAiHub.Application.Services
             var card = await FindCardWithRelationships(cardId);
             var verifyAnswer = await VerifyCanAnswer(card);
             var document = card.Document ?? throw new ArgumentException("Document not found for the card");
-            var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
+            if (card.Step == null)
+            {
+                throw new ArgumentException($"Step not found for card {cardId}");
+            }
+
+            var workflow = await _workflowRepository.FindByIdForAnalyze(card.Step.WorkflowId) ??
+                           throw new ArgumentException($"Workflow not found for card {cardId}. StepId: {card.StepId}, Step is null: false");
 
             var steps = BuildStepsFromWorkflow(workflow, card);
             var lastProcessedStepId = card.StepId.ToString();

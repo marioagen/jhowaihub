@@ -325,7 +325,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Retrieves a workflow by its ID and includes only the necessaryrelated entities.
+        /// Retrieves a workflow by its ID and includes only the necessary related entities.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -340,6 +340,23 @@ namespace WoopiAiHub.Repository
                       .ThenInclude(s => s.StepTools)
                           .ThenInclude(st => st.Dependencies)
                  .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
+        }
+
+        /// <summary>
+        /// Retrieves a workflow with the specified identifier for analysis, including its associated steps.
+        /// </summary>
+        /// <remarks>The returned workflow includes its related steps for comprehensive analysis. Only
+        /// workflows that are enabled are considered.</remarks>
+        /// <param name="id">The unique identifier of the workflow to retrieve. Must be a positive integer.</param>
+        /// <returns>A <see cref="Workflow"/> object representing the workflow and its steps if a matching, enabled workflow is
+        /// found; otherwise, <see langword="null"/>.</returns>
+        public async Task<Workflow?> FindByIdForAnalyze(int id)
+        {
+            return await _context.Workflows
+                                 .AsSplitQuery()
+                                 .Include(w => w.Steps)
+                                 .FirstOrDefaultAsync(w => w.Id == id &&
+                                                           w.Enable.Equals(true));
         }
 
         /// <summary>
@@ -386,8 +403,8 @@ namespace WoopiAiHub.Repository
         public async Task<Phase1Dto> FindPhase1ById(int id)
         {
             var workflow = await _context.Workflows
-                .AsNoTracking()
                 .Where(w => w.Id == id && w.Enable)
+                .AsSplitQuery()
                 .Select(w => new Phase1Dto
                 {
                     Name = w.Name,
@@ -397,6 +414,7 @@ namespace WoopiAiHub.Repository
                         Name = t.Name,
                     }).ToList(),
                 })
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
             return workflow!;
         }
