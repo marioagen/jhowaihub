@@ -43,6 +43,7 @@ import HomePage from "@/pages/home.vue";
 
 import TemplatePage from "@/pages/templates/index.vue";
 import TemplateDetail from "@/pages/templates/templateDetail.vue";
+import TemplateConfiguration from "@/pages/templates/templateConfiguration.vue";
 
 import PromptSelector from "@/components/flow/PromptSelector.vue";
 
@@ -333,7 +334,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow/:stepOrder/:phase/:workflowId/:stepId/:hasStepTools",
+        path: "/flow/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
         name: "NewFlow",
         component: NewFlow,
         meta: {
@@ -392,6 +393,61 @@ const routes = [
         path: "/flow/prompt-selector",
         name: "PromptSelector",
         component: PromptSelector,
+        meta: {
+            layout: "default",
+            module: "Workflow",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates",
+        name: "Templates",
+        component: TemplatePage,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates/new",
+        name: "TemplateNew",
+        component: TemplateDetail,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates/edit/:id",
+        name: "TemplateEdit",
+        component: TemplateDetail,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/tools/:stepToolId/template",
+        name: "TemplateConfiguration",
+        component: TemplateConfiguration,
+        meta: {
+            layout: "default",
+            module: "Workflow",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/flow/tools/template",
+        name: "TemplateConfiguration",
+        component: TemplateConfiguration,
         meta: {
             layout: "default",
             module: "Workflow",

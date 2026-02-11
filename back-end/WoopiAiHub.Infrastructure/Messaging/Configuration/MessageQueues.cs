@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Infrastructure.Messaging.Configuration
+namespace WoopiAiHub.Infrastructure.Messaging.Configuration
 {
     public class MessageQueues
     {
@@ -17,6 +17,8 @@
         public string DeleteQueuePublisher { get; set; } = string.Empty;
         public string MarketplaceSubscriptionQueue { get; set; } = string.Empty;
         public string MarketplaceEndSubscriptionPeriodQueue { get; set; } = string.Empty;
+        public string ApiRequestQueue { get; set; } = string.Empty;
+        public string ApiRequestQueueResponse { get; set; } = string.Empty;
 
         public IEnumerable<string> Queues()
         {
@@ -36,7 +38,9 @@
                 DeleteQueueConsumer,
                 DeleteQueuePublisher,
                 MarketplaceSubscriptionQueue,
-                MarketplaceEndSubscriptionPeriodQueue
+                MarketplaceEndSubscriptionPeriodQueue,
+                ApiRequestQueue,
+                ApiRequestQueueResponse
             ];
         }
     }

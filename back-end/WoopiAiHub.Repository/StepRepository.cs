@@ -1,13 +1,8 @@
-﻿using Google.Api;
 using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
-using System.Linq;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -60,6 +55,21 @@ namespace WoopiAiHub.Repository
                            .Include(s => s.Cards)
                            .Include(s => s.Workflow)
                            .FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a step by its unique identifier, including its associated tools.
+        /// </summary>
+        /// <remarks>The returned step includes its related tools loaded from the database. This method
+        /// performs a database query and may return null if no step with the specified identifier exists.</remarks>
+        /// <param name="id">The unique identifier of the step to retrieve.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the step with its associated
+        /// tools if found; otherwise, null.</returns>
+        public async Task<Step?> FindByIdWithTools(int id)
+        {
+            return await _context.Steps
+                .Include(s => s.StepTools)
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
 
         /// <summary>

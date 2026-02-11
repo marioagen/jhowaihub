@@ -933,7 +933,7 @@
                 return coordinates;
             },
             redirectToTemplateList() {
-                this.$router.push({ name: "Template" });
+                this.$router.push({ name: "Templates" });
             },
             addQueryParam() {
                 this.form.queryParams.push({ key: "" });

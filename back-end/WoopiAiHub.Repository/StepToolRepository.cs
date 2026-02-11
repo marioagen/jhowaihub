@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -70,9 +70,28 @@ namespace WoopiAiHub.Repository
                 {
                     Name = q.Step!.Name,
                     Order = q.Step.Order,
+                },
+                Tool = new ToolDto
+                {
+                    Name = q.Tool.Name,
+                    ToolType = q.Tool.ToolType!.Name,
                 }
-
             }).FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        /// <summary>
+        /// Retrieves a step tool by its unique identifier, including its associated parameters.
+        /// </summary>
+        /// <remarks>The returned step tool includes its related parameters loaded from the data context.
+        /// This method performs a query that may return <see langword="null"/> if no matching step tool
+        /// exists.</remarks>
+        /// <param name="id">The unique identifier of the step tool to retrieve.</param>
+        /// <returns>A <see cref="StepTool"/> instance with its parameters if found; otherwise, <see langword="null"/>.</returns>
+        public async Task<StepTool?> FindByIdWithParameters(int id)
+        {
+            return _context.StepTools
+                .Include(st => st.Parameters)
+                .FirstOrDefault(st => st.Id == id);
         }
 
         /// <summary>
@@ -132,20 +151,17 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Updates an existing step in the database.
+        /// Updates the specified StepTool entity in the data store asynchronously.
         /// </summary>
-        /// <param name="step"></param>
-        /// <returns></returns>
-        public async Task<bool> Update(StepToolDto stepToolDto)
+        /// <remarks>If the specified entity does not exist in the data store, no update is performed and
+        /// the method returns <see langword="false"/>. This method does not throw an exception if the entity is not
+        /// found.</remarks>
+        /// <param name="stepTool">The StepTool entity to update. Must not be null and should have a valid primary key value corresponding to
+        /// an existing entity.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if the update
+        /// was successful; otherwise, <see langword="false"/>.</returns>
+        public async Task<bool> Update(StepTool stepTool)
         {
-            var stepTool = await _context.StepTools
-                .Include(st => st.Parameters)
-                .FirstOrDefaultAsync(st => st.Id == stepToolDto.Id);
-            if (stepTool == null)
-            {
-                return false;
-            }
-
             _context.StepTools.Update(stepTool);
             return await _context.SaveChangesAsync() > 0;
         }

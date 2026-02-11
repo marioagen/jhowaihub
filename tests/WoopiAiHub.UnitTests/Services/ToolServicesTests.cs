@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.AutoMock;
 using Refit;
 using System.Linq.Dynamic.Core;
@@ -24,6 +24,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly ToolServices _toolServices;
         private readonly Mock<IToolRepository> _toolRepositoryMock;
         private readonly Mock<IToolTypeRepository> _toolTypeRepositoryMock;
+        private readonly Mock<IStepToolRepository> _stepToolRepositoryMock;
         private readonly Mock<IApiClientFactory> _apiClientFactoryMock;
         private readonly Mock<In8NConnector> _in8nConnectorMock;
         private readonly Mock<IEncryptionService> _encryptionServiceMock;
@@ -36,6 +37,7 @@ namespace WoopiAiHub.UnitTests.Services
             _in8nConnectorMock = _mocker.GetMock<In8NConnector>();
             _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             _toolTypeRepositoryMock = _mocker.GetMock<IToolTypeRepository>();
+            _stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             _encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
 
             _encryptionServiceMock.Setup(e => e.Encrypt(It.IsAny<string>()))

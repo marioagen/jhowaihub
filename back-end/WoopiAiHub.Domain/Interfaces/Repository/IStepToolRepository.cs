@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
@@ -8,10 +8,11 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         bool DeleteByIds(IEnumerable<int> ids);
         bool DeleteByStepId(int stepId);
         Task<StepToolDto?> FindById(int id);
+        Task<StepTool?> FindByIdWithParameters(int id);
         IQueryable<StepToolDto> FindByIds(ICollection<int> ids);
         Task<bool> Create(StepTool stepTool);
         Task<bool> CreateRangeAsync(List<StepTool> stepTools);
-        Task<bool> Update(StepToolDto stepToolDto);
+        Task<bool> Update(StepTool stepTool);
         IQueryable<StepToolDto> FindAll();
         Task<List<StepTool>> FindStepToolsByStepIdsAsync(IEnumerable<int> stepIds);
         Task<StepTool?> FindDependentAsync(int id);

@@ -1,5 +1,3 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Text.Json.Serialization;
 using WoopiAiHub.Domain.DTOs.Messaging;
 
 namespace WoopiAiHub.Domain.DTOs.Request.Automation
