@@ -11,6 +11,10 @@ on:
 jobs:
   build-image:
     name: "Build image front-end"
+
+    environment:
+        name: ${{ github.ref_name == 'release' && 'qa' || 'dev' }}
+
     runs-on: ["azure-identity"]
     steps:
       - name: Checkout
@@ -39,4 +43,20 @@ jobs:
 
       - name: Build Image
         working-directory: ./front-end/vueapp
-        run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} --platform linux -f Dockerfile .
+        run: |
+          az acr build \
+            -r acrapplications \
+            --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} \
+            --platform linux \
+            -f Dockerfile \
+            --build-arg VUE_APP_NAME=${{vars.VUE_APP_NAME}} \
+            --build-arg VUE_APP_BASE_URL_API=${{vars.VUE_APP_BASE_URL_API}} \
+            --build-arg VUE_APP_WAITING_TIME_MSG_UPLD=${{vars.VUE_APP_WAITING_TIME_MSG_UPLD}} \
+            --build-arg VUE_APP_TIMER_REQ=${{vars.VUE_APP_TIMER_REQ}} \
+            --build-arg VUE_APP_GTAG_ID=${{vars.VUE_APP_GTAG_ID}} \
+            --build-arg VUE_APP_ENV_TYPE=${{vars.VUE_APP_ENV_TYPE}} \
+            --build-arg VUE_APP_HOME_VIDEO_URL=${{vars.VUE_APP_HOME_VIDEO_URL}} \
+            --build-arg VUE_APP_HOME_GUIDE_URL=${{vars.VUE_APP_HOME_GUIDE_URL}} \
+            --build-arg VUE_APP_HOME_DOCS_URL=${{vars.VUE_APP_HOME_DOCS_URL}} \
+            --build-arg VUE_APP_WHATSAPP_LINK=${{vars.VUE_APP_WHATSAPP_LINK}} \
+            .
