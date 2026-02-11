@@ -440,8 +440,8 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(95)
-                        .HasColumnType("varchar(95)")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("Description");
 
                     b.Property<Guid>("IdUser")

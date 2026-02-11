@@ -657,6 +657,7 @@ const spanish = {
         descriptions: {
             dashboard: "Ver Dashboard",
             documents: "Ver Documentos",
+            documentReject: "Rechazar documentos",
             management: "Ver Gestión de tablas",
             profiles: "Ver Perfiles",
             prompts: "Ver Prompts",

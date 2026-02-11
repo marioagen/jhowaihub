@@ -635,6 +635,7 @@ const english = {
         descriptions: {
             dashboard: "View Dashboard",
             documents: "View Documents",
+            documentReject: "Reject documents",
             management: "View Management Tables",
             profiles: "View Profiles",
             prompts: "View Prompts",

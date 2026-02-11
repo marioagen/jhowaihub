@@ -1,11 +1,11 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace WoopiAiHub.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class IncreasePromptDescriptionTo500 : Migration
+    public partial class AddDocumentRejectPermission : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,6 +19,14 @@ namespace WoopiAiHub.Repository.Migrations
                 oldClrType: typeof(string),
                 oldType: "varchar(95)",
                 oldMaxLength: 95);
+
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM Permissions WHERE [Name] = 'Action' AND [Description] = 'permissions.descriptions.documentReject')
+                BEGIN
+                    INSERT INTO Permissions (Name, Created, Description, [Group])
+                    VALUES ('Action', GETDATE(), 'permissions.descriptions.documentReject', 'Documents');
+                END
+            ");
         }
 
         /// <inheritdoc />
@@ -33,6 +41,9 @@ namespace WoopiAiHub.Repository.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(500)",
                 oldMaxLength: 500);
+
+            migrationBuilder.Sql(
+                "DELETE FROM Permissions WHERE [Name] = 'Action' AND [Description] = 'permissions.descriptions.documentReject' AND [Group] = 'Documents';");
         }
     }
 }

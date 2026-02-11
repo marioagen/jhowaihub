@@ -651,6 +651,7 @@ const portuguese = {
         descriptions: {
             dashboard: "Visualizar Dashboard",
             documents: "Visualizar Documentos",
+            documentReject: "Rejeitar documentos",
             management: "Visualizar Gestão de tabelas",
             profiles: "Visualizar Perfis",
             prompts: "Visualizar Prompts",
