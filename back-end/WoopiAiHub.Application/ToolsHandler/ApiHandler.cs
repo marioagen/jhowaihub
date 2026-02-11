@@ -18,12 +18,14 @@ namespace WoopiAiHub.Application.ToolsHandler
 {
     public class ApiHandler(IOptions<MessageQueues> messageQueues,
         IStepToolRepository stepToolRepository,
+        IApiTemplateRepository apiTemplateRepository,
         IEncryptionService encryptationService) : IToolHandler
     {
         public string Type => HandlersTypes.API;
         private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
         private readonly MessageQueues _messageQueues = messageQueues.Value;
         private readonly IStepToolRepository _stepToolRepository = stepToolRepository;
+        private readonly IApiTemplateRepository _apiTemplateRepository = apiTemplateRepository;
         private readonly IEncryptionService _encryptationService = encryptationService;
 
         /// <summary>
@@ -45,7 +47,7 @@ namespace WoopiAiHub.Application.ToolsHandler
             var stepTool = await _stepToolRepository.FindById(automationServicesDto!.StepToolId)
                 ?? throw new AppException(ErrorCode.NotFound, "StepTool not found", null);
 
-            var request = BuildApiRequest(stepTool, automationServicesDto, outputs, execution?.Id);
+            var request = await BuildApiRequest(stepTool, automationServicesDto, outputs, execution?.Id);
 
             return new ExecutionMessageDto
             {
@@ -62,7 +64,7 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// <param name="stepTool"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private ApiRequestDto BuildApiRequest(
+        private async Task<ApiRequestDto> BuildApiRequest(
             StepToolDto stepTool,
             AutomationServicesDto automation,
             ICollection<StepToolOutput> outputs,
@@ -84,6 +86,8 @@ namespace WoopiAiHub.Application.ToolsHandler
             var request = JsonSerializer.Deserialize<ApiRequestDto>(requestStr, _jsonOptions)
                 ?? throw new AppException(ErrorCode.InvalidValue, "Invalid API request configuration", null);
 
+            var template = await _apiTemplateRepository.FindById(request.TemplateId) ?? throw new AppException(ErrorCode.NotFound, "API template not found", null);
+
             if (!string.IsNullOrEmpty(request.Body))
             {
                 request.Body = ConvertOutputsToJson(outputs, request.Body);
@@ -94,6 +98,7 @@ namespace WoopiAiHub.Application.ToolsHandler
             request.Data = new MetaDataAutomationDto(automation.CardId, automation.StepToolId);
             request.ResponseQueue = _messageQueues.ApiRequestQueueResponse;
             request.ExecutionId = executionId ?? throw new AppException(ErrorCode.InvalidValue, "ExecutionId not defined", null);
+            request.TemplateName = template.Name;
 
             return request;
         }
@@ -137,7 +142,7 @@ namespace WoopiAiHub.Application.ToolsHandler
                         break;
                     case HandlersTypes.Prompt:
                         placeholder = "{{prompt}}";
-                        replaceValue = ExtractPromptText(output.Value);
+                        replaceValue = output.Value;
                         break;
                     default:
                         continue;
@@ -241,33 +246,6 @@ namespace WoopiAiHub.Application.ToolsHandler
             catch
             {
                 return string.Empty;
-            }
-        }
-
-        /// <summary>
-        /// Extracts the value of the "Text" property from a JSON-formatted string, or returns the original string if
-        /// the property is not present or the input is not valid JSON.
-        /// </summary>
-        /// <param name="outputValue">The string to parse for a JSON object containing a "Text" property. If not valid JSON, the original string
-        /// is returned.</param>
-        /// <returns>The value of the "Text" property if found; otherwise, the original input string.</returns>
-        private static string ExtractPromptText(string outputValue)
-        {
-            try
-            {
-                using var document = JsonDocument.Parse(outputValue);
-                var root = document.RootElement;
-                
-                if (root.TryGetProperty("Text", out var textProperty))
-                {
-                    return textProperty.GetString() ?? string.Empty;
-                }
-                
-                return outputValue;
-            }
-            catch
-            {
-                return outputValue;
             }
         }
     }

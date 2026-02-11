@@ -1,11 +1,11 @@
 using WoopiAiHub.Domain.DTOs.Messaging;
-using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.DTOs.Request.Automation
 {
     public record class ApiRequestDto
     {
-        public string Type { get; set; } = ConnectorNames.API;
+        public int TemplateId { get; set; }
+        public string TemplateName { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
         public string Method { get; set; } = string.Empty;
         public Dictionary<string, string>? Query { get; set; }

@@ -1,16 +1,28 @@
 <template>
     <div class="step-analysis-container">
-        <doc-chat :document-id="documentId"
-                  v-if="documentData && documentData.canAnswer"/>
-        <step-stepper v-if="documentData && documentData.steps && documentData.steps.length > 0"
-                      :steps="documentData.steps"
-                      :initial-step-id="documentData.lastProcessedStepId"
-                      @step-changed="handleStepChange" />
+        <doc-chat
+            :document-id="documentId"
+            v-if="documentData && documentData.canAnswer"
+        />
+        <step-stepper
+            v-if="
+                documentData &&
+                documentData.steps &&
+                documentData.steps.length > 0
+            "
+            :steps="documentData.steps"
+            :initial-step-id="
+                documentData.lastProcessedStepId
+            "
+            @step-changed="handleStepChange"
+        />
 
-        <extracted-fields v-if="currentStepData"
-                          :fields="currentStepData.outputs"
-                          :title="`${$t('analyze.extractedData')} - ${currentStepData.name}`"
-                          @field-updated="handleFieldUpdate" />
+        <extracted-fields
+            v-if="currentStepData"
+            :fields="currentStepData.outputs"
+            :title="`${$t('analyze.extractedData')} - ${currentStepData.name}`"
+            @field-updated="handleFieldUpdate"
+        />
     </div>
 </template>
 
@@ -20,7 +32,7 @@
     import DocChat from "@/components/pages/analyzer/doc-chat";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import CardsServices from "@/services/cards/CardsServices";
-    
+
     export default {
         name: "StepAnalysisView",
         components: {
@@ -49,39 +61,55 @@
             async loadDocumentData() {
                 this.loading = true;
                 try {
-                    await this.findByIdAnalyzeWithSteps(this.cardId);
+                    await this.findByIdAnalyzeWithSteps(
+                        this.cardId
+                    );
 
-                    if (this.documentData.lastProcessedStepId && this.documentData.steps.length > 0) {
-                        const lastStep = this.documentData.steps.find(
-                            s => s.id === this.documentData.lastProcessedStepId
-                        );
-                        this.currentStepData = lastStep || this.documentData.steps[0];
-                    } else if (this.documentData.steps.length > 0) {
-                        this.currentStepData = this.documentData.steps[0];
+                    if (
+                        this.documentData
+                            .lastProcessedStepId &&
+                        this.documentData.steps.length > 0
+                    ) {
+                        const lastStep =
+                            this.documentData.steps.find(
+                                (s) =>
+                                    s.id ===
+                                    this.documentData
+                                        .lastProcessedStepId
+                            );
+                        this.currentStepData =
+                            lastStep ||
+                            this.documentData.steps[0];
+                    } else if (
+                        this.documentData.steps.length > 0
+                    ) {
+                        this.currentStepData =
+                            this.documentData.steps[0];
                     }
                 } catch (error) {
-                        this.$notify({
-                            title: "analyze.title",
-                            message:"analyze.errorLoadDocumentData",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
+                    this.$notify({
+                        title: "analyze.title",
+                        message:
+                            "analyze.errorLoadDocumentData",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
                 } finally {
                     this.loading = false;
                 }
             },
             handleStepChange(step) {
                 this.currentStepData = step;
+                console.log(this.currentStepData);
             },
             handleFieldUpdate({ id, field, outputsJson }) {
-                let params = {}
+                let params = {};
                 if (outputsJson) {
                     params = {
                         id: id,
                         value: outputsJson,
                     };
-                }
-                else {
+                } else {
                     params = {
                         id: id,
                         value: field.value,
@@ -92,14 +120,16 @@
                         if (response == true) {
                             this.$notify({
                                 title: "analyze.title",
-                                message:"analyze.successEditOutput",
+                                message:
+                                    "analyze.successEditOutput",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "analyze.title",
-                                message:"analyze.failedEditOutput",
+                                message:
+                                    "analyze.failedEditOutput",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -109,15 +139,17 @@
                         this.loadDocumentData();
                     });
             },
-            async findByIdAnalyzeWithSteps(id){
-               await CardsServices.findByIdAnalyzeWithSteps(id)
+            async findByIdAnalyzeWithSteps(id) {
+                await CardsServices.findByIdAnalyzeWithSteps(
+                    id
+                )
                     .then((response) => {
                         this.documentData = response.data;
                     })
                     .catch((err) => {
-                        console.log(err)
+                        console.log(err);
                     });
-            }
+            },
         },
         mounted() {
             this.loadDocumentData();

@@ -38,6 +38,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             var content = JsonSerializer.Serialize(new
             {
+                outputDto.TemplateName,
                 outputDto.StatusCode,
                 outputDto.Content
             }, _jsonOptions);
