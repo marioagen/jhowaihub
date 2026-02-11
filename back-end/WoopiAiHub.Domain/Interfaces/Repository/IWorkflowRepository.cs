@@ -32,5 +32,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
         Task<bool> IsValidTeamUser(int cardId,
                                    Guid userId);
+        Task<Workflow?> FindByIdForAnalyze(int id);
     }
 }
