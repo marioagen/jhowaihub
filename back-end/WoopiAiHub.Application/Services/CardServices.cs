@@ -20,16 +20,19 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
+        private readonly IWorkflowRepository _workflowRepository;
 
         public CardServices(ICardRepository cardRepository,
-            IStepRepository stepRepository,
-            IAutomationServices automationServices,
-            IStepToolExecutionRepository stepToolExecutionRepository)
+                            IStepRepository stepRepository,
+                            IAutomationServices automationServices,
+                            IStepToolExecutionRepository stepToolExecutionRepository,
+                            IWorkflowRepository workflowRepository)
         {
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
+            _workflowRepository = workflowRepository;
         }
 
         /// <summary>
@@ -40,23 +43,25 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto)
         {
-            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
-            if (card == null)
-            {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
-            }
-
             if (updateAssingnedUserDto.UserId == Guid.Empty)
             {
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var isValidTeamUser =
-                card.Step?.Workflow?.Teams?.Any(t => t.Users.Any(u => u.Id.Equals(updateAssingnedUserDto.UserId)));
-            if (!isValidTeamUser.HasValue || !isValidTeamUser.Value)
+            var isValidTeamUser = await _workflowRepository.IsValidTeamUser(updateAssingnedUserDto.CardId,
+                                                                            updateAssingnedUserDto.UserId);
+
+            if (!isValidTeamUser)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found",
                     CardLabel.UserCannotBeAssigned);
+            }
+
+            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
+
+            if (card == null)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             }
 
             card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
