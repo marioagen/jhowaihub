@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using Microsoft.VisualBasic;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -469,7 +469,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 null
             );
 
-            var toolType = new ToolType(1, DateTime.UtcNow, toolTypeName, true);
+            var toolType = new ToolType(1, DateTime.UtcNow, toolTypeName, string.Empty, true);
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
 
             return tool;

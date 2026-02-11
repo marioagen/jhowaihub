@@ -25,11 +25,10 @@
                         <label>{{ $t("tools.form.types") }}</label>
                         <Field name="toolTypeId" rules="required" v-slot="{ field, errorMessage }">
                             <select v-bind="field" class="form-select form-select-sm"
-                                :class="{ 'is-invalid': errorMessage }"
-                                @change="changeToolType">
+                                :class="{ 'is-invalid': errorMessage }" @change="changeToolType">
                                 <option value="">{{ $t("tools.form.typesSelect") }}</option>
                                 <option v-for="(item, index) in typesList" :key="index" :value="item.id">
-                                    {{ item.name }}
+                                    {{ $t(item.description) }}
                                 </option>
                             </select>
                             <span v-if="errorMessage" class="validation-message text-danger">
@@ -41,11 +40,11 @@
                 <div v-if="isN8NConnectorToolType" class="row mb-3">
                     <div class="col-6">
                         <label>{{ $t("tools.form.connectorUrl") }}</label>
-                        <Field name="connectorUrl" :rules="isN8NConnectorToolType ? 'required' : ''" v-slot="{ field, errorMessage }">
+                        <Field name="connectorUrl" :rules="isN8NConnectorToolType ? 'required' : ''"
+                            v-slot="{ field, errorMessage }">
                             <input v-bind="field" class="form-control form-control-sm" autocomplete="off"
-                                :class="{ 'is-invalid': errorMessage }" 
-                                placeholder="https://your-n8n-instance.com" 
-                                @blur="validateConnector"/>
+                                :class="{ 'is-invalid': errorMessage }" placeholder="https://your-n8n-instance.com"
+                                @blur="validateConnector" />
                             <span v-if="errorMessage" class="validation-message text-danger">
                                 {{ errorMessage }}
                             </span>
@@ -53,17 +52,18 @@
                     </div>
                     <div class="col-6">
                         <label>{{ $t("tools.form.connectorApiKey") }}</label>
-                        <Field name="connectorApiKey" :rules="isN8NConnectorToolType && apiKeyRequired ? 'required' : ''" v-slot="{ field, errorMessage }">
-                            <input v-bind="field" type="password" class="form-control form-control-sm" 
-                                autocomplete="new-password"
-                                 @blur="validateConnector"
-                                :class="{ 'is-invalid': errorMessage }"/>
+                        <Field name="connectorApiKey"
+                            :rules="isN8NConnectorToolType && apiKeyRequired ? 'required' : ''"
+                            v-slot="{ field, errorMessage }">
+                            <input v-bind="field" type="password" class="form-control form-control-sm"
+                                autocomplete="new-password" @blur="validateConnector"
+                                :class="{ 'is-invalid': errorMessage }" />
                             <span v-if="errorMessage" class="validation-message text-danger">
                                 {{ errorMessage }}
                             </span>
                         </Field>
                     </div>
-                </div>                
+                </div>
                 <div class="row mb-3">
                     <div class="col-6">
                         <label>{{ $t("tools.form.entries") }}</label>
@@ -79,9 +79,11 @@
                                 {{ errorMessage }}
                             </span>
                         </Field>
-                        <Field v-slot="{ field }" name="isEditableInput" type="checkbox" :value="true" :unchecked-value="false">
+                        <Field v-slot="{ field }" name="isEditableInput" type="checkbox" :value="true"
+                            :unchecked-value="false">
                             <div class="form-check mt-1 p-0">
-                                <input type="checkbox" name="isEditableInput" v-bind="field" :value="true" id="isEditableInput"/>
+                                <input type="checkbox" name="isEditableInput" v-bind="field" :value="true"
+                                    id="isEditableInput" />
                                 <label class="form-check-label ps-1" for="isEditableInput">
                                     {{ $t("tools.form.entriesEditable") }}
                                 </label>
@@ -120,72 +122,72 @@
 </template>
 
 <script>
-    import { Field, useForm } from "vee-validate";
-    import ModalComponent from "@/components/global/ModalComponent.vue";
-    import ToolsService from "@/services/tools/ToolsServices";
-    import ToolsTypesService from '@/services/tools/ToolsTypesService';
-    import ToolsDataService from '@/services/tools/ToolsDataService';
-    import ToolType from '@/constants/ToolType';
+import { Field, useForm } from "vee-validate";
+import ModalComponent from "@/components/global/ModalComponent.vue";
+import ToolsService from "@/services/tools/ToolsServices";
+import ToolsTypesService from '@/services/tools/ToolsTypesService';
+import ToolsDataService from '@/services/tools/ToolsDataService';
+import ToolType from '@/constants/ToolType';
 
-    export default {
-        components: {
-            ModalComponent,
-            Field,
+export default {
+    components: {
+        ModalComponent,
+        Field,
+    },
+    setup() {
+        const { validate, setValues, values, resetForm } = useForm();
+        return { validate, setValues, values, resetForm };
+    },
+    emits: ["reload"],
+    props: {
+        isEdit: {
+            type: Boolean,
+            required: false,
+            default: false,
         },
-        setup() {
-            const { validate, setValues, values, resetForm } = useForm();
-            return { validate, setValues, values, resetForm };
+    },
+    data: () => ({
+        typesList: [],
+        inputsList: [],
+        outputsList: [],
+        isLoading: false,
+        isN8NConnectorToolType: false,
+        toolsData: {
+            id: "",
+            name: "",
+            toolTypeId: "",
+            inputDataId: "",
+            outputDataId: "",
+            isEditableInput: false,
+            connectorUrl: "",
+            connectorApiKey: ""
         },
-        emits: ["reload"],
-        props: {
-            isEdit: {
-                type: Boolean,
-                required: false,
-                default: false,
-            },
+    }),
+    computed: {
+        titleText() {
+            return this.isEdit ? "tools.formEdit.title" : "tools.formCreate.title";
         },
-        data: () => ({
-            typesList: [],
-            inputsList: [],
-            outputsList: [],
-            isLoading: false,
-            isN8NConnectorToolType: false,
-            toolsData: {
-                id: "",
-                name: "",
-                toolTypeId: "",
-                inputDataId: "",
-                outputDataId: "",
-                isEditableInput: false,
-                connectorUrl: "",
-                connectorApiKey: ""
-            },
-        }),
-        computed: {
-            titleText() {
-                return this.isEdit ? "tools.formEdit.title" : "tools.formCreate.title";
-            },
-            saveText() {
-                return this.isEdit ? "tools.editBtn" : "tools.createBtn";
-            },
-            apiKeyRequired(){
-                return this.isEdit && this.isN8NConnectorToolType ? false : true;
-            }
+        saveText() {
+            return this.isEdit ? "tools.editBtn" : "tools.createBtn";
         },
-        methods: {
-            async validateConnector(){                
-                if (this.values.connectorUrl && this.values.connectorApiKey){
-                    this.$notify({
-                        title: "tools.index",
-                        message: "tools.form.validatingConnector",
-                        variant: "warning",
-                        icon: "CircleAlert",
-                    });
-                    let params = {
-                        connectorUrl : this.values.connectorUrl,
-                        connectorApiKey : this.values.connectorApiKey
-                    }
-                    ToolsService.validateConnector(params)
+        apiKeyRequired() {
+            return this.isEdit && this.isN8NConnectorToolType ? false : true;
+        }
+    },
+    methods: {
+        async validateConnector() {
+            if (this.values.connectorUrl && this.values.connectorApiKey) {
+                this.$notify({
+                    title: "tools.index",
+                    message: "tools.form.validatingConnector",
+                    variant: "warning",
+                    icon: "CircleAlert",
+                });
+                let params = {
+                    connectorUrl: this.values.connectorUrl,
+                    connectorApiKey: this.values.connectorApiKey
+                }
+                ToolsService.validateConnector(params)
                     .then((result) => {
                         if (result) {
                             return this.$notify({
@@ -195,7 +197,7 @@
                                 icon: "CircleCheckBig",
                             });
                         }
-                        else{
+                        else {
                             this.$notify({
                                 title: "tools.index",
                                 message: "tools.form.invalidConnector",
@@ -204,146 +206,146 @@
                             });
                         }
                     })
-                }
-            },
-            changeToolType(){
-                this.isN8NConnectorToolType =
-                    (this.values.toolTypeId &&
-                        this.typesList
+            }
+        },
+        changeToolType() {
+            this.isN8NConnectorToolType =
+                (this.values.toolTypeId &&
+                    this.typesList
                         .find(t => t.id === this.values.toolTypeId)
                         ?.name?.toLowerCase()
                         ?.includes(ToolType.N8N.toLowerCase())) || false;
-            },
-            getToolTypes() {
-                ToolsTypesService.getToolTypes()
-                    .then((response) => {
-                        this.typesList = response;
-                    });
-            },
-            getToolDatas() {
-                ToolsDataService.getToollData()
-                    .then((response) => {
-                        this.inputsList = response;
-                        this.outputsList = response;
-                    });
-            },
-            open(tool = null) {
-                this.resetData();
-                if (tool !== null) {
-                    this.setValues({
-                        id: tool.id,
-                        name: tool.name,
-                        toolTypeId: tool.toolTypeId,
-                        inputDataId: tool.inputDataId,
-                        outputDataId: tool.outputDataId,
-                        isEditableInput: tool.isEditableInput,
-                        connectorUrl: tool.connectorUrl
-                    });
-                }
-                this.changeToolType();
-                this.$refs.ToolModal.open();
-            },
-            close() {
-                this.$refs.ToolModal.close();
-            },
-            resetData() {
-                this.resetForm({
-                    values: {
-                        id: "",
-                        name: "",
-                        toolTypeId: "",
-                        inputDataId: "",
-                        outputDataId: "",
-                        isEditableInput: false,
-                        connectorUrl: ""
-                    }
+        },
+        getToolTypes() {
+            ToolsTypesService.getToolTypes()
+                .then((response) => {
+                    this.typesList = response;
                 });
-            },
-            async save() {
-                const result = await this.validate();
-                if (!result.valid) {
-                    return this.$notify({
-                        title: "tools.index",
-                        message: "tools.validationError",
-                        variant: "warning",
-                        icon: "CircleAlert",
-                    });
+        },
+        getToolDatas() {
+            ToolsDataService.getToollData()
+                .then((response) => {
+                    this.inputsList = response;
+                    this.outputsList = response;
+                });
+        },
+        open(tool = null) {
+            this.resetData();
+            if (tool !== null) {
+                this.setValues({
+                    id: tool.id,
+                    name: tool.name,
+                    toolTypeId: tool.toolTypeId,
+                    inputDataId: tool.inputDataId,
+                    outputDataId: tool.outputDataId,
+                    isEditableInput: tool.isEditableInput,
+                    connectorUrl: tool.connectorUrl
+                });
+            }
+            this.changeToolType();
+            this.$refs.ToolModal.open();
+        },
+        close() {
+            this.$refs.ToolModal.close();
+        },
+        resetData() {
+            this.resetForm({
+                values: {
+                    id: "",
+                    name: "",
+                    toolTypeId: "",
+                    inputDataId: "",
+                    outputDataId: "",
+                    isEditableInput: false,
+                    connectorUrl: ""
                 }
+            });
+        },
+        async save() {
+            const result = await this.validate();
+            if (!result.valid) {
+                return this.$notify({
+                    title: "tools.index",
+                    message: "tools.validationError",
+                    variant: "warning",
+                    icon: "CircleAlert",
+                });
+            }
 
-                if (this.isEdit) {
-                    return this.editTool();
-                }
-                return this.createTool();
-            },
-            createTool() {
-                this.isLoading = true;                
-                ToolsService.createTool(this.values)
-                    .then((result) => {
-                        if (result.error === undefined) {
-                            this.$emit("reload");
-                            this.close();
-                            return this.$notify({
+            if (this.isEdit) {
+                return this.editTool();
+            }
+            return this.createTool();
+        },
+        createTool() {
+            this.isLoading = true;
+            ToolsService.createTool(this.values)
+                .then((result) => {
+                    if (result.error === undefined) {
+                        this.$emit("reload");
+                        this.close();
+                        return this.$notify({
+                            title: "tools.index",
+                            message: "tools.createSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    }
+                    else {
+                        if (result.error == 1) {
+                            this.$notify({
                                 title: "tools.index",
-                                message: "tools.createSuccess",
-                                variant: "success",
-                                icon: "CircleCheckBig",
-                            });
-                        }
-                        else {
-                            if (result.error == 1) {
-                                this.$notify({
-                                    title: "tools.index",
-                                    message: "tools.duplicated",
-                                    variant: "danger",
-                                    icon: "CircleX",
-                                });
-                            }
-                            else {
-                                this.$notify({
-                                    title: "tools.index",
-                                    message: "tools.createError",
-                                    variant: "danger",
-                                    icon: "CircleX",
-                                });
-                            }
-                        }
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            },            
-            editTool() {
-                this.isLoading = true;
-                ToolsService.editTool(this.values)
-                    .then((result) => {                        
-                        if (result.error === undefined) {
-                            this.$emit("reload");
-                            this.close();
-                            return this.$notify({
-                                title: "tools.index",
-                                message: "tools.editSuccess",
-                                variant: "success",
-                                icon: "CircleCheckBig",
+                                message: "tools.duplicated",
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                         else {
                             this.$notify({
-                                 title: "tools.index",
-                                 message: "tools.editError",
-                                 variant: "danger",
-                                 icon: "CircleX",
+                                title: "tools.index",
+                                message: "tools.createError",
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            },
+                    }
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
         },
-        created() {
-            this.resetData();
-            this.getToolTypes();
-            this.getToolDatas();
-        }
-    };
+        editTool() {
+            this.isLoading = true;
+            ToolsService.editTool(this.values)
+                .then((result) => {
+                    if (result.error === undefined) {
+                        this.$emit("reload");
+                        this.close();
+                        return this.$notify({
+                            title: "tools.index",
+                            message: "tools.editSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    }
+                    else {
+                        this.$notify({
+                            title: "tools.index",
+                            message: "tools.editError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    }
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+        },
+    },
+    created() {
+        this.resetData();
+        this.getToolTypes();
+        this.getToolDatas();
+    }
+};
 </script>

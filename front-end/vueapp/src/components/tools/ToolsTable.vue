@@ -20,6 +20,9 @@
             <template #cell-outputData="{ data }">
                 {{ data.row.outputData }}
             </template>
+            <template #cell-toolType="{ data }">
+                {{ toolTypeDisplayName(data.row.toolType) }}
+            </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
                     <a :class="actionClass" @click="openEditModal(data.row)" v-tooltip="$t('common.edit')">
@@ -94,6 +97,12 @@
             isDeleting: false,
         }),
         methods: {
+            toolTypeDisplayName(apiName) {
+                if (!apiName) return "";
+                const key = "tools.typeDisplay." + apiName;
+                const translated = this.$t(key);
+                return translated !== key ? translated : apiName;
+            },
             getTools() {
                 this.table.isLoading = true;
                 let params = {
