@@ -221,7 +221,7 @@ namespace WoopiAiHub.Repository
             var login = dto.Login?.ToLower();
             var query = _context.Workflows
                     .Include(w => w.Documents)
-                    .Include(w => w.Steps.Where(s => s.Cards.Any(c =>  c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
+                    .Include(w => w.Steps.Where(s => s.Cards.Any(c => c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
                         .ThenInclude(s => s.Cards.Where(c => c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
                         .ThenInclude(s => s.AssignedUser)
                 .AsNoTracking();
@@ -761,5 +761,27 @@ namespace WoopiAiHub.Repository
                                             }).FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Determines whether the specified user is a member of any team associated with the workflows of the document
+        /// linked to the given card.
+        /// </summary>
+        /// <remarks>The method returns <see langword="false"/> if the card does not exist, is not linked
+        /// to a document, or if the user is not found in any associated team.</remarks>
+        /// <param name="cardId">The unique identifier of the card whose associated document's teams are to be checked.</param>
+        /// <param name="userId">The unique identifier of the user to validate as a team member.</param>
+        /// <returns><see langword="true"/> if the user is a member of at least one team associated with the workflows of the
+        /// document linked to the specified card; otherwise, <see langword="false"/>.</returns>
+        public async Task<bool> IsValidTeamUser(int cardId,
+                                                Guid userId)
+        {
+            var isValidTeamUser = await _context.Cards
+                                                .Where(c => c.Id == cardId)
+                                                .SelectMany(c => c.Document!.Workflows)
+                                                .SelectMany(w => w.Teams)
+                                                .SelectMany(t => t.Users)
+                                                .AnyAsync(u => u.Id == userId);
+
+            return isValidTeamUser;
+        }
     }
 }

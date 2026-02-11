@@ -30,5 +30,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         StepDto FindStepById(int id);
         Task<ToolDto> FindToolByStepToolId(int id);
         Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
+        Task<bool> IsValidTeamUser(int cardId,
+                                   Guid userId);
     }
 }

@@ -76,6 +76,8 @@ namespace WoopiAiHub.Repository
         {
             return await _context.StepToolExecutions
                         .Include(s => s.StepTool)
+                            .ThenInclude(s => s!.Tool)
+                            .ThenInclude(t => t!.ToolType)
                         .Where(s => s.CardId == cardId)
                         .ToListAsync();
         }
