@@ -113,7 +113,7 @@
                                     {{ workflow.name }}
                                     <span
                                         v-if="workflowStatusLabel(workflow)"
-                                        class="badge status-badge bg-secondary text-white"
+                                        class="badge status-badge border border-primary text-primary"
                                     >
                                         {{ workflowStatusLabel(workflow) }}
                                     </span>
