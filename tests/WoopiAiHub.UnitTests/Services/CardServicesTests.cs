@@ -170,7 +170,7 @@ namespace WoopiAiHub.UnitTests.Services
                 await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.AssignUser(updateAssignedUserDto));
 
             // Assert
-            _cardRepositoryMock.Verify(repo => repo.FindById(updateAssignedUserDto.CardId), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.FindById(updateAssignedUserDto.CardId), Times.Never);
         }
 
         [Fact(DisplayName = "Tests update AssignedUser when User not in Team and throws AppException")]
@@ -210,6 +210,9 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
                 .ReturnsAsync(card);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+
+            var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            workflowRepositoryMock.Setup(r => r.IsValidTeamUser(updateAssignedUserDto.CardId, userId)).ReturnsAsync(true);
 
             // Act
             var result = await _cardServices.AssignUser(updateAssignedUserDto);
@@ -714,7 +717,7 @@ namespace WoopiAiHub.UnitTests.Services
             var updateDto = CardFixture.FindValidUpdateCardStepStatusDto();
             var card = CardFixture.FindValidCard();
             var step = CardFixture.FindValidStep();
-            
+
             var previousStepId = card.StepId;
             var previousStatusId = card.StatusId;
 

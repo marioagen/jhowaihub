@@ -48,6 +48,13 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
+            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
+
+            if (card == null)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            }
+
             var isValidTeamUser = await _workflowRepository.IsValidTeamUser(updateAssingnedUserDto.CardId,
                                                                             updateAssingnedUserDto.UserId);
 
@@ -55,13 +62,6 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found",
                     CardLabel.UserCannotBeAssigned);
-            }
-
-            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
-
-            if (card == null)
-            {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             }
 
             card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
@@ -263,7 +263,8 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var output in outputs)
                 {
-                    if (ShouldSkipOutput(output)) continue;
+                    if (ShouldSkipOutput(output))
+                        continue;
 
                     var extractedFields = ParseOutput(output);
                     stepDto.Outputs.AddRange(extractedFields);
@@ -278,7 +279,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private bool ShouldSkipOutput(StepToolOutput output)
         {
-            if (output.StepTool?.Tool == null) return true;
+            if (output.StepTool?.Tool == null)
+                return true;
 
             var toolTypeName = output.StepTool.Tool.ToolType?.Name;
             return toolTypeName == HandlersTypes.Ocr || toolTypeName == HandlersTypes.Embeddings;
