@@ -10,6 +10,14 @@
             :hasSelection="false"
             @change-page="changePage"
         >
+            <template #cell-name="{ data }">
+                <span v-if="data.row.name == UserType.Analyst">
+                    {{ $t("management.teams.analyst") }}
+                </span>
+                <span v-else>
+                    {{ data.row.name }}
+                </span>
+            </template>
             <template #cell-members="{ data }">
                 <LucideIcon icon="UsersRound" :size="15" />
                 {{ data.row.users.length }}
@@ -45,6 +53,7 @@
     import TeamsService from "@/services/teams/TeamsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
+    import { UserType } from "@/constants/UserType";
 
     export default {
         name: "TeamsTable",
@@ -79,6 +88,7 @@
             colType: 2,
             modalTeamShow: false,
             modalAlertShow: false,
+            UserType
         }),
         methods: {
             getTeams(obj) {

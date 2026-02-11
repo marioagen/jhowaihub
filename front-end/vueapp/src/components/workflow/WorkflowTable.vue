@@ -31,6 +31,9 @@
                     <a :class="actionClass" @click="redirectToEdit(data.row)" v-tooltip="$t('common.edit')">
                         <LucideIcon icon="SquarePen" />
                     </a>
+                    <a :class="actionClass" class="text-primary" @click="openCloneModal(data.row)" v-tooltip="$t('workflow.clone')">
+                        <LucideIcon icon="Copy" />
+                    </a>
                     <a :class="actionClass" class="text-danger"  style="color: red;" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
                         <LucideIcon icon="Trash2" />
                     </a>
@@ -49,11 +52,37 @@
         :isLoading="isDeleting"
         @confirm="deleteWorkflow"
     />
+    <ModalComponent
+        id="cloneWorkflowModal"
+        ref="CloneModal"
+        :title="'workflow.cloneTitle'"
+        :saveText="'workflow.cloneConfirm'"
+        :isLoading="isCloning"
+        @save="confirmClone"
+        @cancel="closeCloneModal"
+    >
+        <template #body>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="cloneWorkflowName" class="form-label">{{ $t("workflow.cloneNameLabel") }}</label>
+                    <input
+                        id="cloneWorkflowName"
+                        v-model="cloneWorkflowName"
+                        type="text"
+                        class="form-control"
+                        :placeholder="$t('workflow.namePlaceholder')"
+                        @keyup.enter="confirmClone"
+                    />
+                </div>
+            </div>
+        </template>
+    </ModalComponent>
 </template>
 
 <script>
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import ModalComponent from "@/components/global/ModalComponent.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent.vue";
@@ -64,6 +93,7 @@
             ActionTableListComponent,
             TableComponent,
             ConfirmModal,
+            ModalComponent,
         },
         data: () => ({
             table: {
@@ -92,6 +122,9 @@
                 userId: "",
             },
             isDeleting: false,
+            isCloning: false,
+            selectedWorkflowForClone: null,
+            cloneWorkflowName: "",
         }),
         methods: {
             getWorkflowList() {
@@ -144,6 +177,51 @@
             openConfirmation(workflow) {
                 this.selectedWorkflow = [workflow.id];
                 this.$refs.DeleteDialog.open();
+            },
+            openCloneModal(workflow) {
+                this.selectedWorkflowForClone = workflow;
+                this.cloneWorkflowName = `${workflow.name} - ${this.$t("workflow.cloneSuffix")}`;
+                this.$refs.CloneModal.open();
+            },
+            closeCloneModal() {
+                this.selectedWorkflowForClone = null;
+                this.cloneWorkflowName = "";
+                this.$refs.CloneModal.close();
+            },
+            confirmClone() {
+                if (!this.selectedWorkflowForClone || !this.cloneWorkflowName?.trim()) {
+                    return;
+                }
+                this.isCloning = true;
+                WorkflowService.cloneWorkflow(
+                    this.selectedWorkflowForClone.id,
+                    this.cloneWorkflowName.trim()
+                )
+                    .then((result) => {
+                        if (result.error === undefined) {
+                            this.$refs.CloneModal.close();
+                            this.closeCloneModal();
+                            this.getWorkflowList();
+                            this.$notify({
+                                title: this.$t("workflow.index"),
+                                message: this.$t("workflow.cloneSuccess"),
+                                variant: "success",
+                                icon: "CircleCheckBig",
+                            });
+                        } else {
+                            this.$notify({
+                                title: this.$t("workflow.index"),
+                                message:
+                                    result.error?.response?.data?.labelError ??
+                                    this.$t("workflow.cloneError"),
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        }
+                    })
+                    .finally(() => {
+                        this.isCloning = false;
+                    });
             },
             deleteWorkflow() {
                 this.isDeleting = true;

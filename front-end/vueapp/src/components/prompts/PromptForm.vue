@@ -39,10 +39,14 @@
                             <div class="mb-3">
                                 <label for="FormControlTextarea1" class="form-label">{{ $t('common.description')
                                     }}</label>
-                                <Field name="description" :rules="'required|max:100'" v-slot="{ field, errorMessage }">
-                                    <textarea v-bind="field" type="text" class="form-control" id="inputNamePrompt"
-                                        aria-describedby="" rows="3" name="description"
-                                        :class="{ 'is-invalid': errorMessage }" />
+                                <Field name="description" :rules="'required|max:500'" v-slot="{ field, errorMessage }">
+                                    <textarea v-bind="field" type="text" class="form-control" id="inputDescription"
+                                        aria-describedby="descriptionCounter" rows="3" name="description"
+                                        maxlength="500" :class="{ 'is-invalid': errorMessage }"
+                                        @input="field.onInput($event)" />
+                                    <div id="descriptionCounter" class="form-text text-end">
+                                        {{ (values.description || '').length }}/500
+                                    </div>
                                     <span class="validation-message text-danger" v-if="errorMessage">{{ errorMessage
                                         }}</span>
                                 </Field>

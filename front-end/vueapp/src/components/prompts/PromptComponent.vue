@@ -59,7 +59,13 @@
                         </div>
                     </div>
                 </div>
-                <p class="card-text">{{ item.description }}</p>
+                <p class="card-text d-flex align-items-start gap-1">
+                    <span>{{ item.description && item.description.length > 100 ? item.description.slice(0, 100) + '...' : item.description }}</span>
+                    <span v-if="item.description && item.description.length > 100" class="description-view-icon"
+                        v-tooltip="item.description" tabindex="0">
+                        <LucideIcon icon="Eye" :size="14" />
+                    </span>
+                </p>
             </div>
             <div class="card-footer">
                 <div class="date-info float-end">
@@ -443,6 +449,16 @@ tbody {
     background-color: #ff6900;
     border-radius: 50%;
     display: inline-block;
+}
+
+.description-view-icon {
+    flex-shrink: 0;
+    cursor: pointer;
+    color: var(--color-body-content);
+}
+
+.description-view-icon:hover {
+    opacity: 0.8;
 }
 
 .badge {

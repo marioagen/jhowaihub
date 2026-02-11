@@ -131,7 +131,7 @@
             <template #body>
                 <div class="modal-body-content m-3">
                     <p class="text-muted mb-3">{{ selectedTemplate?.description }}</p>
-                    <label>Conteúdo do prompt</label>
+                    <label>{{ $t("prompts.promptContent") }}</label>
                     <div class="prompt-content-full">
                         {{ selectedTemplate?.text }}
                     </div>

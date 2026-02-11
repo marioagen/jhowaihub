@@ -657,7 +657,7 @@ namespace WoopiAiHub.UnitTests.Services
             var document = new Document("Test Document", "Description", referenceFile, 
                 DocumentStatus.OCR, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
 
-            var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, true);
+            var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, string.Empty, true);
             var tool = new Tool(1, DateTime.UtcNow, "OCR Tool", true, 1, 1, 1, false, null, null);
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
 
