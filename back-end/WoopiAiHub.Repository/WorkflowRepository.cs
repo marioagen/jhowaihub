@@ -775,7 +775,8 @@ namespace WoopiAiHub.Repository
                                                 Guid userId)
         {
             var isValidTeamUser = await _context.Cards
-                                                .Where(c => c.Id == cardId && c.DocumentId != null)
+                                                .Where(c => c.Id == cardId &&
+                                                            c.DocumentId != null)
                                                 .SelectMany(c => c.Document.Workflows)
                                                 .SelectMany(w => w.Teams)
                                                 .SelectMany(t => t.Users)
