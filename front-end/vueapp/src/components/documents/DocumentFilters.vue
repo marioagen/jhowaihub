@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-8">
+        <div class="col-5">
             <div class="input-group">
                 <span
                     class="input-group-text border-end-0 bg-white"
@@ -36,6 +36,24 @@
                     />
                 </span>
             </div>
+        </div>
+        <div class="col-2">
+            <select
+                v-model="filters.statusId"
+                class="form-select form-select-sm w-100"
+                @change="filterData"
+            >
+                <option value="">
+                    {{ $t("filters.statusSelect.none") }}
+                </option>
+                <option
+                    v-for="status in statusList"
+                    :key="status.id"
+                    :value="status.id"
+                >
+                    {{ $t("workflow.statusList." + status.name?.toLowerCase()) || status.name }}
+                </option>
+            </select>
         </div>
         <div class="col-3">
             <select
@@ -98,6 +116,10 @@
                 type: [Object, Array],
                 required: true,
             },
+            statusList: {
+                type: Array,
+                default: () => [],
+            },
         },
         data() {
             return {
@@ -105,6 +127,7 @@
                     input: "",
                     workflowId: "",
                     workflows: [],
+                    statusId: "",
                     isAllUsers: true,
                     login: this.$store.state.userProfile
                         .login,

@@ -18,6 +18,7 @@
                     <div class="card-body">
                         <DocumentFilters 
                             :workflowsList="workflowsList"
+                            :statusList="statusList"
                             @filter="filterData"
                             ref="DocumentFilters"
                         />
@@ -36,6 +37,7 @@
     import DocumentFilters from "@/components/documents/DocumentFilters.vue";
     import DocumentsTable from "@/components/documents/DocumentsTable.vue";
     import WorkflowService from '@/services/workflow/WorkflowService';
+    import StatusService from '@/services/status/StatusService';
 
     export default {
         name: "DocumentsPage",
@@ -43,6 +45,7 @@
             return {
                 teamsList: [],
                 workflowsList: [],
+                statusList: [],
             };
         },
         components: {
@@ -84,6 +87,12 @@
                         this.workflowsList = response;
                     });
             },
+            async getStatuses() {
+                const response = await StatusService.getStatus();
+                if (response?.error === undefined && Array.isArray(response)) {
+                    this.statusList = response;
+                }
+            },
         },
         computed: {
             keyMongoAccess() {
@@ -94,6 +103,7 @@
             GlobalEventService.on("all-uploads-complete", this.reloadData);
             GlobalEventService.on("refresh-once", this.reloadData);
             this.getWorkflows();
+            await this.getStatuses();
         },
         beforeUnmount() {
             GlobalEventService.off("all-uploads-complete", this.reloadData);

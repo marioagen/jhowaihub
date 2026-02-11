@@ -1,4 +1,4 @@
-﻿using Google.Api;
+using Google.Api;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Linq;
@@ -161,6 +161,7 @@ namespace WoopiAiHub.Repository
                                  allUsers == true
                                  || (c.AssignedUser != null && c.AssignedUser.Email == login)
                              )
+                             && c.StatusId != 6
                          )
                         .Select(c => new CardDto
                         {

@@ -136,6 +136,23 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Updates only the status of a card, keeping the same step. Does not trigger automation.
+        /// </summary>
+        /// <param name="updateCardStatusDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
+        {
+            var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
+                ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+
+            card.UpdateStepAndSatus(card.StepId, updateCardStatusDto.StatusId);
+
+            var result = _cardRepository.Update(card);
+            return result;
+        }
+
+        /// <summary>
         /// Returns document information grouped by processing steps with extracted data.
         /// </summary>
         /// <param name="cardId">Card ID to analyze</param>

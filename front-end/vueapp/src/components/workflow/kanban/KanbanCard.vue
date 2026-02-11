@@ -93,7 +93,7 @@
                     class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
                     v-if="!showLoading"
                 >
-                    <div>
+                    <div class="d-flex align-items-center gap-2">
                         <button type="button" class="btn btn-sm btn-primary" @click="redirectToAnalyzer">
                             {{$t("common.analyze")}}
                             <LucideIcon icon="FileClock"
@@ -101,6 +101,15 @@
                                         class="ms-2"
                                         />
                         </button> 
+                        <button v-if="isLastStep"
+                                type="button"
+                                class="btn btn-sm btn-outline-success"
+                                @click.stop="openFinalizeConfirm">
+                            <LucideIcon icon="Check"
+                                        :size="15"
+                                        class="" />
+                            {{ $t("common.finalize") }}
+                        </button>
                     </div>
                     <div v-if="!isLastStep">
                         <button
@@ -295,23 +304,41 @@
                 </div>
             </div>
         </div>
+        <ConfirmModal
+            :id="`finalize-modal-${dataCard.id}`"
+            ref="finalizeConfirmModalRef"
+            :isLoading="isFinalizing"
+            :title="'card.finalizeConfirmTitle'"
+            :message="'card.finalizeConfirmMessage'"
+            :confirmText="'common.finalize'"
+            cancelText="common.cancel"
+            confirmVariant="success"
+            iconVariant="success"
+            iconeName="Check"
+            @confirm="onConfirmFinalize"
+        />
     </div>
 </template>
 <script>
     import CardsServices from "@/services/cards/CardsServices";
+    import StatusService from "@/services/status/StatusService";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import dates from "@/helpers/date";
 
     export default {
         name: "CardComponent",
-        emits: ["reload", "cardMoved", "cardUpdated"],
+        components: { ConfirmModal },
+        emits: ["reload", "cardMoved", "cardUpdated", "cardFinalized"],
         data: () => ({
             isLoadingAnalysis: false,
             isUpdatingAssignedUser: false,
             isUnassigningUser: false,
+            isFinalizing: false,
             statusProgress: null,
             signalrEventStatusChanged: "StatusChanged",
             userSearchText: "",
             filteredUsers: [],
+            finalizeStatusId: null,
         }),
         props: {
             dataCard: {
@@ -349,24 +376,26 @@
                         "color-mix(in srgb, var(--cor-base) 30%, white)",
                 };
             },
-            async updateStatus() {
-                if (!this.isLastStep) {
-                    var params = {
-                        CardId: this.dataCard.id,
-                        NextStepOrder:
-                            this.dataStep.order + 1,
-                        WorkflowId:
-                            this.dataStep.workflowId,
-                    };
-                    const response =
-                        await CardsServices.updateStepAndStatus(
-                            params
-                        );
-                    if (response?.error !== undefined) {
-                        throw new Error(
-                            response.error.response?.data?.labelError
-                        );
-                    }
+            async updateStatus(nextStepOrder = null) {
+                const targetOrder =
+                    nextStepOrder ??
+                    this.dataStep.order + 1;
+                if (this.isLastStep && nextStepOrder === null) {
+                    return;
+                }
+                var params = {
+                    CardId: this.dataCard.id,
+                    NextStepOrder: targetOrder,
+                    WorkflowId: this.dataStep.workflowId,
+                };
+                const response =
+                    await CardsServices.updateStepAndStatus(
+                        params
+                    );
+                if (response?.error !== undefined) {
+                    throw new Error(
+                        response.error.response?.data?.labelError
+                    );
                 }
             },
             async assignUser(userId) {
@@ -450,6 +479,56 @@
                     this.isLoadingAnalysis = false;
                 }
             },
+            openFinalizeConfirm() {
+                if (this.finalizeStatusId == null) {
+                    this.$notify({
+                        title: "Error",
+                        message: "Finalize status not found.",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                    return;
+                }
+                this.$refs.finalizeConfirmModalRef?.open();
+            },
+            async onConfirmFinalize() {
+                this.isFinalizing = true;
+                try {
+                    await this.updateStatusOnly();
+                    this.$refs.finalizeConfirmModalRef?.close();
+                    this.$emit("cardFinalized", {
+                        cardId: this.dataCard.id,
+                        currentStepOrder:
+                            this.dataStep.order,
+                    });
+                    this.reloadList();
+                } catch (e) {
+                    this.$notify({
+                        title: "Error",
+                        message:
+                            e.message ||
+                            "An error occurred while finalizing the step.",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isFinalizing = false;
+                }
+            },
+            async updateStatusOnly() {
+                const params = {
+                    CardId: this.dataCard.id,
+                    StatusId: this.finalizeStatusId,
+                };
+                const response =
+                    await CardsServices.updateStatusOnly(params);
+                if (response?.error !== undefined) {
+                    throw new Error(
+                        response.error.response?.data?.labelError
+                    );
+                }
+                console.log(this.dataCard);
+            },
             redirectToAnalyzer() {
                 if (!this.showLoading) {
                     this.$router.push({
@@ -488,8 +567,15 @@
                 return text.length > 25 ? text.substring(0, 25) + '...' : text
             }
         },
-        mounted() {
+        async mounted() {
             this.setUsers();
+            const statusResponse = await StatusService.getStatus();
+            if (statusResponse?.error === undefined && Array.isArray(statusResponse)) {
+                const finalize = statusResponse.find(
+                    (s) => s.name && s.name.toLowerCase() === "finalize"
+                );
+                if (finalize) this.finalizeStatusId = finalize.id;
+            }
         },
         computed: {
             showLoading() {

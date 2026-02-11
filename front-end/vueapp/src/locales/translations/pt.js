@@ -49,6 +49,8 @@ const portuguese = {
     card: {
         assignBtn: "Atribuir",
         cardsOpened: "Existem cards abertos nesta esteira",
+        finalizeConfirmMessage: "Você tem certeza que deseja finalizar esse documento?",
+        finalizeConfirmTitle: "Confirmar finalização",
         unassignInfo: "Desatribuir documento",
         userApplicant: "Solicitante",
         userAssigned: "Responsável",
@@ -61,6 +63,7 @@ const portuguese = {
         almost: "Você está quase lá!",
         analyze: "Analisar",
         analyzed: "Analisado",
+        finalize: "Finalizar",
         apply: "Aplicar",
         back: "Voltar",
         cancel: "Cancelar",
@@ -351,6 +354,9 @@ const portuguese = {
         workflowSelect: {
             none: "Selecione uma esteira de processamento",
             withWorkflow: "Todos com esteira associadas",
+        },
+        statusSelect: {
+            none: "Status do card",
         },
     },
     flow: {
@@ -1108,6 +1114,7 @@ const portuguese = {
             approved: "Aprovado",
             awaitinganalysis: "Esperando Análise",
             done: "Finalizado",
+            finalize: "Finalizar",
             waitingforapproval: "Esperando Aprovação",
         },
         stepFlow: "Automação de documentos",

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -223,7 +223,10 @@ namespace WoopiAiHub.Repository
                     .Include(w => w.Documents)
                     .Include(w => w.Steps.Where(s => s.Cards.Any(c =>  c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
                         .ThenInclude(s => s.Cards.Where(c => c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
-                        .ThenInclude(s => s.AssignedUser)
+                        .ThenInclude(c => c.AssignedUser)
+                    .Include(w => w.Steps.Where(s => s.Cards.Any(c => c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
+                        .ThenInclude(s => s.Cards.Where(c => c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
+                        .ThenInclude(c => c.Status)
                 .AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
@@ -247,17 +250,34 @@ namespace WoopiAiHub.Repository
             var resultDto = result
                 .SelectMany(workflow =>
                     workflow.Steps.SelectMany(step =>
-                        step.Cards.Select(card => new ResponseWorkflowByDocumentDto
-                        {
-                            Id = workflow.Id,
-                            Name = workflow.Name,
-                            CardId = card.Id,
-                            DocumentId = card.DocumentId,
-                            AssignedUserEmail = card.AssignedUser?.Email ?? string.Empty
-                        })
+                        step.Cards.Select(card => new { Workflow = workflow, Card = card })
                     )
                 )
+                .Select(x => new ResponseWorkflowByDocumentDto
+                {
+                    Id = x.Workflow.Id,
+                    Name = x.Workflow.Name,
+                    CardId = x.Card.Id,
+                    DocumentId = x.Card.DocumentId,
+                    AssignedUserEmail = x.Card.AssignedUser?.Email ?? string.Empty,
+                    StatusName = x.Card.Status?.Name ?? string.Empty
+                })
                 .ToList();
+
+            var cardIds = resultDto.Select(r => r.CardId).Distinct().ToList();
+            if (cardIds.Count > 0)
+            {
+                var statusByCardId = await _context.Cards
+                    .Where(c => cardIds.Contains(c.Id))
+                    .Select(c => new { c.Id, StatusName = c.Status != null ? c.Status.Name : "" })
+                    .ToDictionaryAsync(x => x.Id, x => x.StatusName ?? "", ct);
+
+                foreach (var dtoCard in resultDto)
+                {
+                    if (statusByCardId.TryGetValue(dtoCard.CardId, out var name) && !string.IsNullOrEmpty(name))
+                        dtoCard.StatusName = name;
+                }
+            }
 
             return resultDto;
         }

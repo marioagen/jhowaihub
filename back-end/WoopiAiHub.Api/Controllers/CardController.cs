@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -35,6 +35,20 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _cardServices.UpdateStepAndStatus(updateCardStepStatusDto,
                 headersDto.Tenant,
                 headersDto.EmailCreator);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Updates only the status of a card, keeping the same step.
+        /// </summary>
+        /// <param name="updateCardStatusDto"></param>
+        /// <returns></returns>
+        [HttpPut("UpdateStatus")]
+        [SwaggerOperation("Endpoint that updates only the card status")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
+        {
+            var result = await _cardServices.UpdateStatus(updateCardStatusDto);
             return Ok(result);
         }
 
