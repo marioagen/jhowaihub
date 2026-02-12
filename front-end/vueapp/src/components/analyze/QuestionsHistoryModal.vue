@@ -55,6 +55,7 @@
                                 class="form-control form-control-sm border-start-0"
                                 placeholder="Buscar em perguntas ou"
                                 v-model="searchQuery"
+                                @keyup.enter="applyFilters"
                             />
                         </div>
                     </div>
@@ -86,17 +87,18 @@
                     class="d-flex align-items-center justify-content-between mb-3"
                 >
                     <span class="text-muted small">
-                        Ordenado por: Mais recentes
+                        Ordenado por: {{ orderLabel }}
                     </span>
                     <button
                         type="button"
                         class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
+                        @click="toggleOrder"
                     >
                         <LucideIcon
                             icon="ArrowUpDown"
                             :size="14"
                         />
-                        Mais recentes
+                        {{ orderLabel }}
                     </button>
                 </div>
 
@@ -108,118 +110,144 @@
                     >
                         <LoadingComponent />
                     </div>
-                    <div
-                        v-else
-                        class="conversation-cards"
-                    >
-                        <div
-                            v-for="item in conversationCards"
-                            :key="item.id"
-                            class="conversation-card card border-0 rounded-3 bg-light mb-3"
-                        >
-                            <div class="card-body p-3">
-                                <div
-                                    class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
-                                >
+                    <template v-else>
+                        <div class="conversation-cards">
+                            <div
+                                v-for="item in conversationCards"
+                                :key="item.id"
+                                class="conversation-card card border-0 rounded-3 bg-light mb-3"
+                            >
+                                <div class="card-body p-3">
                                     <div
-                                        class="d-flex align-items-center text-muted small"
+                                        class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
                                     >
-                                        <LucideIcon
-                                            icon="User"
-                                            :size="14"
-                                            class="me-1"
-                                        />
-                                        <span>
-                                            {{
-                                                item.userName
-                                            }}
-                                        </span>
-                                        <span class="mx-1">
-                                            ·
-                                        </span>
-                                        <LucideIcon
-                                            icon="Clock"
-                                            :size="14"
-                                            class="me-1"
-                                        />
-                                        <span>
-                                            {{ item.date }}
-                                        </span>
-                                    </div>
-                                    <div
-                                        class="d-flex align-items-center gap-2"
-                                    >
-                                        <BadgeComponent
-                                            :text="item.tag"
-                                            variant="primary"
-                                            :clickable="
-                                                false
-                                            "
-                                            class="badge-tag-questionario"
-                                        />
-                                        <button
-                                            type="button"
-                                            class="btn btn-link btn-sm p-0 text-secondary"
-                                            title="Copiar"
-                                            @click="
-                                                copyQuestion(
-                                                    item.question
-                                                )
-                                            "
+                                        <div
+                                            class="d-flex align-items-center text-muted small"
                                         >
                                             <LucideIcon
-                                                icon="Copy"
-                                                :size="16"
+                                                icon="User"
+                                                :size="14"
+                                                class="me-1"
                                             />
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="mb-2">
-                                    <div
-                                        class="d-flex align-items-center gap-1 mb-1"
-                                    >
-                                        <LucideIcon
-                                            icon="MessageCircle"
-                                            :size="14"
-                                            class="text-secondary"
-                                        />
-                                        <span
-                                            class="fw-bold small text-uppercase"
+                                            <span>
+                                                {{
+                                                    item.userName
+                                                }}
+                                            </span>
+                                            <span
+                                                class="mx-1"
+                                            >
+                                                ·
+                                            </span>
+                                            <LucideIcon
+                                                icon="Clock"
+                                                :size="14"
+                                                class="me-1"
+                                            />
+                                            <span>
+                                                {{
+                                                    item.date
+                                                }}
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="d-flex align-items-center gap-2"
                                         >
-                                            Pergunta
-                                        </span>
+                                            <BadgeComponent
+                                                :text="
+                                                    item.tag
+                                                "
+                                                variant="primary"
+                                                :clickable="
+                                                    false
+                                                "
+                                                class="badge-tag-questionario"
+                                            />
+                                            <button
+                                                type="button"
+                                                class="btn btn-link btn-sm p-0 text-secondary"
+                                                title="Copiar"
+                                                @click="
+                                                    copyQuestion(
+                                                        item.question
+                                                    )
+                                                "
+                                            >
+                                                <LucideIcon
+                                                    icon="Copy"
+                                                    :size="
+                                                        16
+                                                    "
+                                                />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <p
-                                        class="mb-0 ps-3 small"
-                                    >
-                                        {{ item.question }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <div
-                                        class="d-flex align-items-center gap-1 mb-1"
-                                    >
-                                        <LucideIcon
-                                            icon="CheckCircle"
-                                            :size="14"
-                                            class="text-success"
-                                        />
-                                        <span
-                                            class="fw-bold small text-uppercase"
+                                    <div class="mb-2">
+                                        <div
+                                            class="d-flex align-items-center gap-1 mb-1"
                                         >
-                                            Resposta
-                                        </span>
+                                            <LucideIcon
+                                                icon="MessageCircle"
+                                                :size="14"
+                                                class="text-secondary"
+                                            />
+                                            <span
+                                                class="fw-bold small text-uppercase"
+                                            >
+                                                Pergunta
+                                            </span>
+                                        </div>
+                                        <p
+                                            class="mb-0 ps-3 small"
+                                        >
+                                            {{
+                                                item.question
+                                            }}
+                                        </p>
                                     </div>
-                                    <div
-                                        class="ps-3 small"
-                                        v-html="
-                                            item.answerHtml
-                                        "
-                                    ></div>
+                                    <div>
+                                        <div
+                                            class="d-flex align-items-center gap-1 mb-1"
+                                        >
+                                            <LucideIcon
+                                                icon="CheckCircle"
+                                                :size="14"
+                                                class="text-success"
+                                            />
+                                            <span
+                                                class="fw-bold small text-uppercase"
+                                            >
+                                                Resposta
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="ps-3 small"
+                                            v-html="
+                                                item.answerHtml
+                                            "
+                                        ></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <div
+                            v-if="hasMore"
+                            class="text-center py-3"
+                        >
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary btn-sm"
+                                :disabled="isLoadingCards"
+                                @click="loadMore"
+                            >
+                                {{
+                                    isLoadingCards
+                                        ? "A carregar…"
+                                        : "Ver mais"
+                                }}
+                            </button>
+                        </div>
+                    </template>
                 </div>
             </div>
         </template>
@@ -230,9 +258,7 @@
                 <span
                     class="text-muted small align-self-center"
                 >
-                    {{
-                        conversationCards.length
-                    }}
+                    {{ conversationCards.length }}
                     interações registradas
                 </span>
                 <button
@@ -265,19 +291,30 @@
             searchQuery: "",
             selectedUser: "",
             conversationCards: [],
+            currentTake: 10,
+            hasMore: false,
             filters: {
                 search: "",
                 user: "",
                 order: "desc",
-                orderBy: "date",
+                orderBy: "created",
             },
         }),
+        computed: {
+            orderLabel() {
+                return this.filters.order === "asc"
+                    ? "Mais antigos"
+                    : "Mais recentes";
+            },
+        },
         methods: {
             open(documentId) {
                 this.documentId = documentId;
                 this.searchQuery = "";
                 this.selectedUser = "";
                 this.conversationCards = [];
+                this.currentTake = 10;
+                this.hasMore = false;
                 this.$refs.questionsHistoryModalRef?.open();
                 this.getHistory();
             },
@@ -296,13 +333,21 @@
             },
             getHistory() {
                 this.isLoadingCards = true;
+                const filters = {
+                    take: this.currentTake,
+                    search: this.searchQuery,
+                    user: this.selectedUser,
+                    order: this.filters.order,
+                    orderBy: this.filters.orderBy,
+                };
                 DocumentsServices.getDocumentQuestionsHistory(
                     this.documentId,
-                    this.filters
+                    filters
                 )
                     .then((response) => {
                         if (response?.error) {
                             this.conversationCards = [];
+                            this.hasMore = false;
                             return;
                         }
                         const list = Array.isArray(response)
@@ -321,13 +366,32 @@
                                     entry.output || "",
                             })
                         );
+                        this.hasMore =
+                            list.length >= filters.take;
                     })
                     .catch(() => {
                         this.conversationCards = [];
+                        this.hasMore = false;
                     })
                     .finally(() => {
                         this.isLoadingCards = false;
                     });
+            },
+            loadMore() {
+                this.currentTake += 10;
+                this.getHistory();
+            },
+            applyFilters() {
+                this.currentTake = 10;
+                this.getHistory();
+            },
+            toggleOrder() {
+                this.filters.order =
+                    this.filters.order === "desc"
+                        ? "asc"
+                        : "desc";
+                this.currentTake = 10;
+                this.getHistory();
             },
         },
     };
