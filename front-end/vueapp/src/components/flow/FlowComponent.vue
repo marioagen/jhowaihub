@@ -10,37 +10,25 @@
                                 @click="redirectToIndex"
                                 type="button"
                             >
-                                <LucideIcon
-                                    icon="ArrowLeft"
-                                />
+                                <LucideIcon icon="ArrowLeft" />
                             </button>
                         </div>
                         <div class="col-10">
                             <div>
                                 <h5 class="mb-0 fw-bold">
                                     {{ $t("flow.title") }}
-                                    <span v-if="step">
-                                        - {{ step.name }}
-                                    </span>
+                                    <span v-if="step">- {{ step.name }}</span>
                                 </h5>
                                 <p>
-                                    <small
-                                        class="text-muted"
-                                    >
-                                        {{
-                                            $t(
-                                                "flow.subtitle"
-                                            )
-                                        }}
+                                    <small class="text-muted">
+                                        {{ $t("flow.subtitle") }}
                                     </small>
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div
-                    class="col-2 ms-auto justify-content-end d-flex"
-                >
+                <div class="col-2 ms-auto justify-content-end d-flex">
                     <button
                         class="btn btn-primary btn-sm me-2"
                         @click="save"
@@ -88,9 +76,7 @@
                 <div class="offcanvas-body">
                     <div
                         class="cover"
-                        v-if="
-                            loadingWebhooks || loadingInputs
-                        "
+                        v-if="loadingWebhooks || loadingInputs"
                     >
                         <div class="spinner-cover">
                             <LucideIcon
@@ -101,9 +87,7 @@
                         </div>
                     </div>
                     <DependencySelector
-                        :previousStepTools="
-                            previousStepTools
-                        "
+                        :previousStepTools="previousStepTools"
                         v-model="selectedDependencies"
                         ref="dependencyTools"
                     />
@@ -121,11 +105,7 @@
                                 value=""
                                 disabled
                             >
-                                {{
-                                    $t(
-                                        "flow.sidebar.filter"
-                                    )
-                                }}
+                                {{ $t("flow.sidebar.filter") }}
                             </option>
                             <option
                                 v-for="connector in connectors"
@@ -141,16 +121,8 @@
                         >
                             <div
                                 class="mb-3"
-                                v-if="
-                                    field.type ===
-                                        'string' ||
-                                    field.type === 'integer'
-                                "
-                                :type="
-                                    field.type === 'integer'
-                                        ? 'number'
-                                        : 'string'
-                                "
+                                v-if="field.type === 'string' || field.type === 'integer'"
+                                :type="field.type === 'integer' ? 'number' : 'string'"
                             >
                                 <label
                                     :for="field.name"
@@ -161,32 +133,20 @@
                                 <input
                                     class="form-control form-control-sm"
                                     :id="field.name"
-                                    v-model="
-                                        formData[field.name]
-                                    "
+                                    v-model="formData[field.name]"
                                 />
                             </div>
                             <div
-                                v-else-if="
-                                    field.type === 'boolean'
-                                "
+                                v-else-if="field.type === 'boolean'"
                                 class="form-check mb-3"
-                                :disabled="
-                                    loadingWebhooks ||
-                                    loadingInputs
-                                "
+                                :disabled="loadingWebhooks || loadingInputs"
                             >
                                 <input
                                     class="form-check-input"
                                     type="checkbox"
                                     :id="field.name"
-                                    v-model="
-                                        formData[field.name]
-                                    "
-                                    :disabled="
-                                        loadingWebhooks ||
-                                        loadingInputs
-                                    "
+                                    v-model="formData[field.name]"
+                                    :disabled="loadingWebhooks || loadingInputs"
                                 />
                                 <label
                                     class="form-check-label"
@@ -195,18 +155,10 @@
                                     {{ field.label }}
                                 </label>
                             </div>
-                            <div
-                                v-else-if="
-                                    field.type === 'array'
-                                "
-                            >
+                            <div v-else-if="field.type === 'array'">
                                 <h6>{{ field.label }}</h6>
                                 <div
-                                    v-for="(
-                                        item, index
-                                    ) in formData[
-                                        field.name
-                                    ]"
+                                    v-for="(item, index) in formData[field.name]"
                                     :key="index"
                                 >
                                     <div
@@ -215,56 +167,30 @@
                                         :key="child.name"
                                     >
                                         <label
-                                            v-if="
-                                                child.label
-                                            "
-                                            :for="
-                                                child.name
-                                            "
+                                            v-if="child.label"
+                                            :for="child.name"
                                             class="form-label"
-                                            :disabled="
-                                                loadingWebhooks ||
-                                                loadingInputs
-                                            "
+                                            :disabled="loadingWebhooks || loadingInputs"
                                         >
-                                            {{
-                                                child.label
-                                            }}
+                                            {{ child.label }}
                                         </label>
                                         <label
                                             v-else
-                                            :for="
-                                                child.name
-                                            "
+                                            :for="child.name"
                                             class="form-label text-capitalize"
                                         >
                                             {{ child.name }}
                                         </label>
                                         <input
                                             :id="child.name"
-                                            v-model="
-                                                formData[
-                                                    field
-                                                        .name
-                                                ][index][
-                                                    child
-                                                        .name
-                                                ]
-                                            "
-                                            :disabled="
-                                                loadingWebhooks ||
-                                                loadingInputs
-                                            "
+                                            v-model="formData[field.name][index][child.name]"
+                                            :disabled="loadingWebhooks || loadingInputs"
                                             class="form-control form-control-sm"
                                         />
                                     </div>
                                 </div>
                             </div>
-                            <div
-                                v-else-if="
-                                    field.type === 'text'
-                                "
-                            >
+                            <div v-else-if="field.type === 'text'">
                                 <label
                                     :for="field.name"
                                     class="form-label"
@@ -274,9 +200,7 @@
                                 <textarea
                                     class="form-control form-control-sm text-long"
                                     :id="field.name"
-                                    v-model="
-                                        formData[field.name]
-                                    "
+                                    v-model="formData[field.name]"
                                     rows="4"
                                 />
                             </div>
@@ -287,10 +211,7 @@
                                 type="button"
                                 class="btn btn-primary"
                                 @click="updateNodeWithForm"
-                                :disabled="
-                                    loadingWebhooks ||
-                                    loadingInputs
-                                "
+                                :disabled="loadingWebhooks || loadingInputs"
                             >
                                 {{ $t("common.save") }}
                             </button>
@@ -305,18 +226,14 @@
                         </h6>
                         <div
                             class="background-div"
-                            v-for="(
-                                param, index
-                            ) in parameters"
+                            v-for="(param, index) in parameters"
                             :key="index"
                         >
                             <textarea
                                 class="form-control"
                                 id="exampleFormControlTextarea1"
                                 rows="3"
-                                v-model="
-                                    parameters[index].value
-                                "
+                                v-model="parameters[index].value"
                             ></textarea>
                         </div>
 
@@ -415,9 +332,7 @@
         methods: {
             redirectToIndex() {
                 if (this.workflowId) {
-                    const routeName = this.isEdit
-                        ? "EditWorkflow"
-                        : "NewWorkflow";
+                    const routeName = this.isEdit ? "EditWorkflow" : "NewWorkflow";
                     const params = this.isEdit
                         ? { id: this.workflowId, phase: 3 }
                         : {
@@ -447,8 +362,7 @@
                 });
             },
             showCollapse() {
-                this.isActiveCollapse =
-                    !this.isActiveCollapse;
+                this.isActiveCollapse = !this.isActiveCollapse;
             },
             changeWebhook() {
                 this.getInputs(false);
@@ -459,28 +373,20 @@
                     toolId: this.nodeFlow.data.toolId,
                     workflowId: this.connector,
                 };
-                AutomationServices.getWorkflowWebhookInputs(
-                    params
-                )
+                AutomationServices.getWorkflowWebhookInputs(params)
                     .then((response) => {
                         if (response.error === undefined) {
                             this.formFields = response;
                             this.formData = [];
                             if (dataFromParameters) {
-                                this.formData = JSON.parse(
-                                    this.parameters[0].value
-                                );
+                                this.formData = JSON.parse(this.parameters[0].value);
                             } else {
-                                this.formData =
-                                    this.transformToObject(
-                                        response
-                                    );
+                                this.formData = this.transformToObject(response);
                             }
                         } else {
                             this.$notify({
                                 title: "flow.title",
-                                message:
-                                    "flow.formFlow.connectorWorkflowFail",
+                                message: "flow.formFlow.connectorWorkflowFail",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -494,23 +400,13 @@
                 const result = {};
                 fields.forEach((field) => {
                     if (field.type === "array") {
-                        if (
-                            field.children &&
-                            field.children.length > 0
-                        ) {
-                            result[field.name] = [
-                                this.transformToObject(
-                                    field.children
-                                ),
-                            ];
+                        if (field.children && field.children.length > 0) {
+                            result[field.name] = [this.transformToObject(field.children)];
                         } else {
                             result[field.name] = [];
                         }
                     } else {
-                        result[field.name] =
-                            this.getDefaultValue(
-                                field.type
-                            );
+                        result[field.name] = this.getDefaultValue(field.type);
                     }
                 });
 
@@ -525,46 +421,31 @@
                 }
             },
             fillFormFields() {
-                if (
-                    this.parameters.length > 0 &&
-                    this.parameters.value
-                ) {
-                    const data = JSON.parse(
-                        this.parameters.value
-                    );
+                if (this.parameters.length > 0 && this.parameters.value) {
+                    const data = JSON.parse(this.parameters.value);
                     this.fillValues(this.formFields, data);
                 }
             },
             async openNodeConfig(nodes, selectedNode) {
                 this.nodes = nodes;
                 this.nodeFlow = selectedNode;
-                this.parameters =
-                    selectedNode.data.parameters;
+                this.parameters = selectedNode.data.parameters;
                 this.toolType = selectedNode.data.toolType;
 
-                await this.loadPreviousStepTools(
-                    selectedNode
-                );
+                await this.loadPreviousStepTools(selectedNode);
 
-                this.selectedDependencies =
-                    selectedNode.data.dependencies;
+                this.selectedDependencies = selectedNode.data.dependencies;
 
                 if (this.isTargetTool(ToolType.API)) {
                     const state = {
                         selectedNode: selectedNode,
-                        previousStepTools:
-                            this.previousStepTools,
-                        selectedDependencies:
-                            this.selectedDependencies,
+                        previousStepTools: this.previousStepTools,
+                        selectedDependencies: this.selectedDependencies,
                         nodes: nodes,
-                        edges: this.$refs.VueflowComponent
-                            .edges,
+                        edges: this.$refs.VueflowComponent.edges,
                         step: this.step,
                     };
-                    localStorage.setItem(
-                        "flow_state_params",
-                        JSON.stringify(state)
-                    );
+                    localStorage.setItem("flow_state_params", JSON.stringify(state));
 
                     this.$router.push({
                         name: "TemplateConfiguration",
@@ -575,20 +456,12 @@
                 if (this.isTargetTool(ToolType.N8N)) {
                     this.loadingWebhooks = true;
                     this.resetFormConnector();
-                    AutomationServices.getWorkflows(
-                        selectedNode.data.toolId
-                    )
+                    AutomationServices.getWorkflows(selectedNode.data.toolId)
                         .then((result) => {
-                            if (
-                                result.error === undefined
-                            ) {
+                            if (result.error === undefined) {
                                 this.connectors = result;
-                                this.parameters =
-                                    selectedNode.data.parameters;
-                                if (
-                                    this.parameters
-                                        .length === 0
-                                ) {
+                                this.parameters = selectedNode.data.parameters;
+                                if (this.parameters.length === 0) {
                                     this.parameters.push({
                                         stepToolId: 0,
                                         value: null,
@@ -596,15 +469,13 @@
                                         webhookId: null,
                                     });
                                 } else {
-                                    this.connector =
-                                        this.parameters[0].webhookId;
+                                    this.connector = this.parameters[0].webhookId;
                                     this.getInputs(true);
                                 }
                             } else {
                                 this.$notify({
                                     title: "flow.title",
-                                    message:
-                                        "flow.formFlow.connectorWorkflowFail",
+                                    message: "flow.formFlow.connectorWorkflowFail",
                                     variant: "danger",
                                     icon: "CircleX",
                                 });
@@ -613,25 +484,17 @@
                         .finally(() => {
                             this.loadingWebhooks = false;
                         });
-                } else if (
-                    this.isTargetTool(ToolType.Prompt)
-                ) {
-                    const edges =
-                        this.$refs.VueflowComponent.edges;
+                } else if (this.isTargetTool(ToolType.Prompt)) {
+                    const edges = this.$refs.VueflowComponent.edges;
                     const state = {
                         selectedNode: selectedNode,
-                        previousStepTools:
-                            this.previousStepTools,
-                        selectedDependencies:
-                            this.selectedDependencies,
+                        previousStepTools: this.previousStepTools,
+                        selectedDependencies: this.selectedDependencies,
                         nodes: nodes,
                         edges: edges,
                         step: this.step,
                     };
-                    localStorage.setItem(
-                        "flow_state_params",
-                        JSON.stringify(state)
-                    );
+                    localStorage.setItem("flow_state_params", JSON.stringify(state));
                     this.$router.push({
                         name: "PromptSelector",
                     });
@@ -645,43 +508,29 @@
                     });
                 }
                 this.$refs.dependencyTools.reloadData();
-                this.sidebar = new bootstrap.Offcanvas(
-                    this.$refs.sidebar
-                );
+                this.sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
                 this.sidebar.show();
             },
             closeSidebar() {
                 const sidebarEl = this.$refs.sidebar;
-                const sidebar =
-                    bootstrap.Offcanvas.getInstance(
-                        sidebarEl
-                    );
+                const sidebar = bootstrap.Offcanvas.getInstance(sidebarEl);
                 if (sidebar) {
                     sidebar.hide();
                 }
             },
             updateNode() {
                 if (this.idSelected) {
-                    this.parameters[0].value =
-                        this.idSelected.toString();
-                    const selectedPrompt =
-                        this.promptlist.find(
-                            (p) => p.id === this.idSelected
-                        );
+                    this.parameters[0].value = this.idSelected.toString();
+                    const selectedPrompt = this.promptlist.find((p) => p.id === this.idSelected);
                     if (selectedPrompt) {
-                        this.nodeFlow.data.subtitle =
-                            selectedPrompt.name;
+                        this.nodeFlow.data.subtitle = selectedPrompt.name;
                     }
                 }
 
-                if (
-                    !this.selectedDependencies ||
-                    this.selectedDependencies.length === 0
-                ) {
+                if (!this.selectedDependencies || this.selectedDependencies.length === 0) {
                     this.$notify({
                         title: "common.warning",
-                        message:
-                            "flow.formFlow.dependenciesRequired",
+                        message: "flow.formFlow.dependenciesRequired",
                         variant: "warning",
                         icon: "TriangleAlert",
                     });
@@ -700,16 +549,14 @@
                 try {
                     return this.$notify({
                         title: "flow.title",
-                        message:
-                            "flow.formFlow.editFlowNodeSuccess",
+                        message: "flow.formFlow.editFlowNodeSuccess",
                         variant: "success",
                         icon: "CircleCheckBig",
                     });
                 } catch (e) {
                     this.$notify({
                         title: "flow.title",
-                        message:
-                            "flow.formFlow.editFlowNodeFail",
+                        message: "flow.formFlow.editFlowNodeFail",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -717,20 +564,11 @@
             },
             updateNodeWithForm() {
                 this.parameters[0].requiredFile = false;
-                if (
-                    Object.prototype.hasOwnProperty.call(
-                        this.formData,
-                        "requiredFile"
-                    )
-                ) {
-                    this.parameters[0].requiredFile =
-                        this.formData["requiredFile"];
+                if (Object.prototype.hasOwnProperty.call(this.formData, "requiredFile")) {
+                    this.parameters[0].requiredFile = this.formData["requiredFile"];
                 }
-                this.parameters[0].value = JSON.stringify(
-                    this.formData
-                );
-                this.parameters[0].webhookId =
-                    this.connector;
+                this.parameters[0].value = JSON.stringify(this.formData);
+                this.parameters[0].webhookId = this.connector;
 
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
@@ -742,93 +580,65 @@
             },
             async save() {
                 try {
-                    let nodesList =
-                        this.$refs.VueflowComponent.buildFlowPayload();
+                    let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
                     if (this.workflowId) {
-                        const workflow =
-                            await WorkflowService.getWorkflowById(
-                                this.workflowId
-                            );
+                        const workflow = await WorkflowService.getWorkflowById(this.workflowId);
                         if (workflow.error) {
-                            throw new Error(
-                                "Failed to load workflow data"
-                            );
+                            throw new Error("Failed to load workflow data");
                         }
-                        const allSteps = workflow.steps.map(
-                            (step) => {
-                                if (
-                                    step.order ===
-                                    this.stepOrder
-                                ) {
-                                    return {
-                                        id: step.id || 0,
-                                        order: step.order,
-                                        stepTools:
-                                            nodesList,
-                                    };
-                                }
+                        const allSteps = workflow.steps.map((step) => {
+                            if (step.order === this.stepOrder) {
                                 return {
                                     id: step.id || 0,
                                     order: step.order,
-                                    stepTools:
-                                        step.stepTools ||
-                                        [],
+                                    stepTools: nodesList,
                                 };
                             }
-                        );
+                            return {
+                                id: step.id || 0,
+                                order: step.order,
+                                stepTools: step.stepTools || [],
+                            };
+                        });
 
                         const params = {
                             workflowId: this.workflowId,
                             steps: allSteps,
                         };
 
-                        const result =
-                            await WorkflowService.updatePhase3(
-                                params
-                            );
+                        const result = await WorkflowService.updatePhase3(params);
                         if (result.error !== undefined) {
                             if (
-                                result.error.response
-                                    ?.data &&
-                                result.error.response?.data
-                                    ?.labelError
+                                result.error.response?.data &&
+                                result.error.response?.data?.labelError
                             ) {
                                 return this.$notify({
                                     title: "flow.title",
-                                    message:
-                                        result.error
-                                            .response.data
-                                            .labelError,
+                                    message: result.error.response.data.labelError,
                                     variant: "danger",
                                     icon: "CircleX",
                                 });
                             }
                             return this.$notify({
                                 title: "flow.title",
-                                message:
-                                    "flow.formFlow.progressFlowUpdateFail",
+                                message: "flow.formFlow.progressFlowUpdateFail",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
                         }
                     }
-                    localStorage.removeItem(
-                        "flow_state_params"
-                    );
+                    localStorage.removeItem("flow_state_params");
                     this.redirectToIndex();
                     return this.$notify({
                         title: "flow.title",
-                        message:
-                            "flow.formFlow.progressFlowSuccess",
+                        message: "flow.formFlow.progressFlowSuccess",
                         variant: "success",
                         icon: "CircleCheckBig",
                     });
                 } catch (e) {
                     this.$notify({
                         title: "flow.title",
-                        message:
-                            e.message ||
-                            "flow.formFlow.progressFlowFail",
+                        message: e.message || "flow.formFlow.progressFlowFail",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -836,51 +646,27 @@
             },
             fillValues(fields, data) {
                 fields.forEach((field) => {
-                    if (
-                        Object.prototype.hasOwnProperty.call(
-                            data,
-                            field.name
-                        )
-                    ) {
+                    if (Object.prototype.hasOwnProperty.call(data, field.name)) {
                         const value = data[field.name];
-                        if (
-                            field.type === "array" &&
-                            Array.isArray(value)
-                        ) {
-                            field.value = value.map(
-                                (item) => {
-                                    const clonedChildren =
-                                        field.children
-                                            ? field.children.map(
-                                                  (c) => ({
-                                                      ...c,
-                                                      value: null,
-                                                      children:
-                                                          c.children
-                                                              ? [
-                                                                    ...c.children,
-                                                                ]
-                                                              : [],
-                                                  })
-                                              )
-                                            : [];
+                        if (field.type === "array" && Array.isArray(value)) {
+                            field.value = value.map((item) => {
+                                const clonedChildren = field.children
+                                    ? field.children.map((c) => ({
+                                          ...c,
+                                          value: null,
+                                          children: c.children ? [...c.children] : [],
+                                      }))
+                                    : [];
 
-                                    this.fillValues(
-                                        clonedChildren,
-                                        item
-                                    );
-                                    return clonedChildren;
-                                }
-                            );
+                                this.fillValues(clonedChildren, item);
+                                return clonedChildren;
+                            });
                         } else if (
                             field.children &&
                             field.children.length > 0 &&
                             typeof value === "object"
                         ) {
-                            this.fillValues(
-                                field.children,
-                                value
-                            );
+                            this.fillValues(field.children, value);
                         } else {
                             field.value = value;
                         }
@@ -891,71 +677,41 @@
                 let workflowSteps = [];
                 if (this.workflowId) {
                     try {
-                        const workflow =
-                            await WorkflowService.getWorkflowById(
-                                this.workflowId
-                            );
+                        const workflow = await WorkflowService.getWorkflowById(this.workflowId);
                         if (!workflow.error) {
-                            workflowSteps =
-                                workflow.steps || [];
+                            workflowSteps = workflow.steps || [];
                         }
                     } catch (error) {
-                        LogService.showMessage(
-                            "Error loading workflow steps: " +
-                                error
-                        );
+                        LogService.showMessage("Error loading workflow steps: " + error);
                     }
                 }
 
                 if (workflowSteps.length === 0) {
-                    workflowSteps =
-                        this.$store.state.tempWorkflow
-                            .list || [];
+                    workflowSteps = this.$store.state.tempWorkflow.list || [];
                 }
 
-                const relevantSteps = workflowSteps.filter(
-                    (step) => step.order <= this.stepOrder
-                );
+                const relevantSteps = workflowSteps.filter((step) => step.order <= this.stepOrder);
 
-                if (
-                    !relevantSteps ||
-                    relevantSteps.length === 0
-                ) {
+                if (!relevantSteps || relevantSteps.length === 0) {
                     this.previousStepTools = [];
                     return;
                 }
 
-                const maxOrder = Math.max(
-                    ...relevantSteps.map(
-                        (step) => step.order
-                    )
-                );
-                const nodesToolIds = this.nodes
-                    .map((n) => n.data?.toolId)
-                    .filter(Boolean);
+                const maxOrder = Math.max(...relevantSteps.map((step) => step.order));
+                const nodesToolIds = this.nodes.map((n) => n.data?.toolId).filter(Boolean);
 
-                this.previousStepTools = relevantSteps.map(
-                    (step) => ({
-                        id: step.id,
-                        name:
-                            step?.name ||
-                            step.name ||
-                            "Unnamed Tool",
-                        order: step.order,
-                        stepTools: (
-                            step.stepTools || []
-                        ).filter(
-                            (stepTool) =>
-                                step.order < maxOrder ||
-                                (step.order === maxOrder &&
-                                    stepTool.order <
-                                        node.data.order &&
-                                    nodesToolIds.includes(
-                                        stepTool.tool?.id
-                                    ))
-                        ),
-                    })
-                );
+                this.previousStepTools = relevantSteps.map((step) => ({
+                    id: step.id,
+                    name: step?.name || step.name || "Unnamed Tool",
+                    order: step.order,
+                    stepTools: (step.stepTools || []).filter(
+                        (stepTool) =>
+                            step.order < maxOrder ||
+                            (step.order === maxOrder &&
+                                stepTool.order < node.data.order &&
+                                nodesToolIds.includes(stepTool.tool?.id))
+                    ),
+                }));
             },
             resetFormConnector() {
                 this.connectors = [];
@@ -965,45 +721,28 @@
                 this.connector = "";
             },
             isTargetTool(targetToolType) {
-                return (
-                    this.toolType
-                        ?.toLowerCase()
-                        .includes(
-                            targetToolType.toLowerCase()
-                        ) || false
-                );
+                return this.toolType?.toLowerCase().includes(targetToolType.toLowerCase()) || false;
             },
             async fetchStepName() {
                 if (this.workflowId) {
                     try {
                         if (this.stepId != 0) {
-                            this.step =
-                                await WorkflowService.getStepById(
-                                    this.stepId
-                                );
+                            this.step = await WorkflowService.getStepById(this.stepId);
                         }
                     } catch (error) {
-                        LogService.showMessage(
-                            "Error fetching step name: " +
-                                error
-                        );
+                        LogService.showMessage("Error fetching step name: " + error);
                     }
                 }
             },
             onPromptSelect() {
-                const selectedPrompt = this.promptlist.find(
-                    (p) => p.id === this.idSelected
-                );
+                const selectedPrompt = this.promptlist.find((p) => p.id === this.idSelected);
                 if (selectedPrompt) {
-                    this.nodeFlow.data.subtitle =
-                        selectedPrompt.name;
+                    this.nodeFlow.data.subtitle = selectedPrompt.name;
                 }
             },
         },
         loadStorageFlowState() {
-            const flowStateJson = localStorage.getItem(
-                "flow_state_params"
-            );
+            const flowStateJson = localStorage.getItem("flow_state_params");
             if (!flowStateJson || !this.step) {
                 return;
             }
@@ -1016,19 +755,13 @@
                         return;
                     }
 
-                    let stepTool = this.step.stepTools.find(
-                        (st) => st.id.toString() === node.id
-                    );
+                    let stepTool = this.step.stepTools.find((st) => st.id.toString() === node.id);
 
                     if (stepTool) {
-                        stepTool.parameters =
-                            node.data.parameters || [];
-                        stepTool.dependencies =
-                            node.data.dependencies || [];
-                        stepTool.positionX =
-                            node.position.x;
-                        stepTool.positionY =
-                            node.position.y;
+                        stepTool.parameters = node.data.parameters || [];
+                        stepTool.dependencies = node.data.dependencies || [];
+                        stepTool.positionX = node.position.x;
+                        stepTool.positionY = node.position.y;
                     } else {
                         const newStepTool = {
                             id: parseInt(node.id) || 0,
@@ -1036,25 +769,17 @@
                             positionY: node.position.y,
                             toolId: node.data.toolId,
                             order: node.data.order,
-                            parameters:
-                                node.data.parameters || [],
-                            dependencies:
-                                node.data.dependencies ||
-                                [],
+                            parameters: node.data.parameters || [],
+                            dependencies: node.data.dependencies || [],
                             tool: {
                                 id: node.data.toolId,
                                 name: node.label,
-                                isEditableInput:
-                                    node.data
-                                        .isEditableInput,
-                                toolType:
-                                    node.data.toolType,
+                                isEditableInput: node.data.isEditableInput,
+                                toolType: node.data.toolType,
                             },
                         };
 
-                        this.step.stepTools.push(
-                            newStepTool
-                        );
+                        this.step.stepTools.push(newStepTool);
                     }
                 });
             }
@@ -1065,8 +790,7 @@
 
                     this.$notify({
                         title: "flow.title",
-                        message:
-                            "Template configurado com sucesso",
+                        message: "Template configurado com sucesso",
                         variant: "success",
                         icon: "CircleCheckBig",
                     });
@@ -1084,10 +808,7 @@
         computed: {
             selectedItem() {
                 if (this.idSelected != 0)
-                    return this.promptlist.find(
-                        (item) =>
-                            item.id === this.idSelected
-                    );
+                    return this.promptlist.find((item) => item.id === this.idSelected);
                 return null;
             },
             isN8NTool() {

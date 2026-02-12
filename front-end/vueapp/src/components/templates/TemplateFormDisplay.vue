@@ -18,9 +18,7 @@
                                 :value="templateData.method"
                                 class="form-select"
                                 id="method"
-                                :disabled="
-                                    readOnly || editable
-                                "
+                                :disabled="readOnly || editable"
                             >
                                 <option
                                     v-for="method in methodsList"
@@ -36,19 +34,11 @@
                                 for="endpointUrl"
                                 class="form-label"
                             >
-                                {{
-                                    $t(
-                                        "template.endpointUrl"
-                                    )
-                                }}
+                                {{ $t("template.endpointUrl") }}
                             </label>
                             <input
                                 :value="templateData.url"
-                                @input="
-                                    updateUrl(
-                                        $event.target.value
-                                    )
-                                "
+                                @input="updateUrl($event.target.value)"
                                 type="text"
                                 class="form-control"
                                 id="endpointUrl"
@@ -72,11 +62,7 @@
                                 type="button"
                                 role="tab"
                             >
-                                {{
-                                    $t(
-                                        "template.queryParams"
-                                    )
-                                }}
+                                {{ $t("template.queryParams") }}
                             </button>
                         </li>
                         <li
@@ -101,49 +87,24 @@
                             id="query-params"
                             role="tabpanel"
                         >
-                            <div
-                                class="d-flex justify-content-between align-items-center mb-3"
-                            >
+                            <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="mb-0">
-                                    {{
-                                        $t(
-                                            "template.queryParameters"
-                                        )
-                                    }}
+                                    {{ $t("template.queryParameters") }}
                                 </h6>
                             </div>
-                            <div
-                                v-if="
-                                    templateData.queryParams
-                                        .length > 0
-                                "
-                            >
+                            <div v-if="templateData.queryParams.length > 0">
                                 <div
-                                    v-for="(
-                                        param, index
-                                    ) in templateData.queryParams"
+                                    v-for="(param, index) in templateData.queryParams"
                                     :key="index"
                                     class="row mb-2 align-items-center"
                                 >
-                                    <div
-                                        :class="
-                                            editable
-                                                ? 'col-6'
-                                                : 'col-12'
-                                        "
-                                    >
+                                    <div :class="editable ? 'col-6' : 'col-12'">
                                         <input
-                                            :value="
-                                                param.key
-                                            "
+                                            :value="param.key"
                                             type="text"
                                             class="form-control form-control-sm"
                                             disabled
-                                            :placeholder="
-                                                $t(
-                                                    'template.keyPlaceholder'
-                                                )
-                                            "
+                                            :placeholder="$t('template.keyPlaceholder')"
                                         />
                                     </div>
                                     <div
@@ -151,24 +112,11 @@
                                         class="col-6"
                                     >
                                         <input
-                                            :value="
-                                                param.value
-                                            "
-                                            @input="
-                                                updateQueryParam(
-                                                    index,
-                                                    $event
-                                                        .target
-                                                        .value
-                                                )
-                                            "
+                                            :value="param.value"
+                                            @input="updateQueryParam(index, $event.target.value)"
                                             type="text"
                                             class="form-control form-control-sm"
-                                            :placeholder="
-                                                $t(
-                                                    'template.valuePlaceholder'
-                                                )
-                                            "
+                                            :placeholder="$t('template.valuePlaceholder')"
                                         />
                                     </div>
                                 </div>
@@ -178,11 +126,7 @@
                                 class="text-center text-muted py-4"
                             >
                                 <small>
-                                    {{
-                                        $t(
-                                            "template.noQueryParameters"
-                                        )
-                                    }}
+                                    {{ $t("template.noQueryParameters") }}
                                 </small>
                             </div>
                         </div>
@@ -191,49 +135,24 @@
                             id="headers"
                             role="tabpanel"
                         >
-                            <div
-                                class="d-flex justify-content-between align-items-center mb-3"
-                            >
+                            <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="mb-0">
-                                    {{
-                                        $t(
-                                            "template.headers"
-                                        )
-                                    }}
+                                    {{ $t("template.headers") }}
                                 </h6>
                             </div>
-                            <div
-                                v-if="
-                                    templateData.headers
-                                        .length > 0
-                                "
-                            >
+                            <div v-if="templateData.headers.length > 0">
                                 <div
-                                    v-for="(
-                                        header, index
-                                    ) in templateData.headers"
+                                    v-for="(header, index) in templateData.headers"
                                     :key="index"
                                     class="row mb-2 align-items-center"
                                 >
-                                    <div
-                                        :class="
-                                            editable
-                                                ? 'col-6'
-                                                : 'col-12'
-                                        "
-                                    >
+                                    <div :class="editable ? 'col-6' : 'col-12'">
                                         <input
-                                            :value="
-                                                header.key
-                                            "
+                                            :value="header.key"
                                             type="text"
                                             class="form-control form-control-sm"
                                             disabled
-                                            :placeholder="
-                                                $t(
-                                                    'template.keyPlaceholder'
-                                                )
-                                            "
+                                            :placeholder="$t('template.keyPlaceholder')"
                                         />
                                     </div>
                                     <div
@@ -241,24 +160,11 @@
                                         class="col-6"
                                     >
                                         <input
-                                            :value="
-                                                header.value
-                                            "
-                                            @input="
-                                                updateHeader(
-                                                    index,
-                                                    $event
-                                                        .target
-                                                        .value
-                                                )
-                                            "
+                                            :value="header.value"
+                                            @input="updateHeader(index, $event.target.value)"
                                             type="text"
                                             class="form-control form-control-sm"
-                                            :placeholder="
-                                                $t(
-                                                    'template.valuePlaceholder'
-                                                )
-                                            "
+                                            :placeholder="$t('template.valuePlaceholder')"
                                         />
                                     </div>
                                 </div>
@@ -268,11 +174,7 @@
                                 class="text-center text-muted py-4"
                             >
                                 <small>
-                                    {{
-                                        $t(
-                                            "template.noQueryParameters"
-                                        )
-                                    }}
+                                    {{ $t("template.noQueryParameters") }}
                                 </small>
                             </div>
                         </div>
@@ -288,38 +190,26 @@
                             {{ $t("template.requestBody") }}
                         </h6>
                         <small class="text-muted">
-                            {{
-                                $t("template.bodySubtitle")
-                            }}
+                            {{ $t("template.bodySubtitle") }}
                         </small>
                     </div>
                     <div class="position-relative">
                         <textarea
                             :value="templateData.body"
-                            @input="
-                                updateBody(
-                                    $event.target.value
-                                )
-                            "
+                            @input="updateBody($event.target.value)"
                             class="form-control font-monospace"
                             rows="15"
-                            :disabled="
-                                readOnly && !editable
-                            "
+                            :disabled="readOnly && !editable"
                         ></textarea>
                     </div>
-                    <div
-                        class="alert alert-info mt-3 py-2 px-3 d-flex align-items-start"
-                    >
+                    <div class="alert alert-info mt-3 py-2 px-3 d-flex align-items-start">
                         <LucideIcon
                             icon="Lightbulb"
                             :size="16"
                             class="me-2 flex-shrink-0"
                         />
                         <small>
-                            {{
-                                $t("template.variablesTip")
-                            }}
+                            {{ $t("template.variablesTip") }}
                         </small>
                     </div>
                 </div>

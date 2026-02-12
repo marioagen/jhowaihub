@@ -36,15 +36,7 @@
                         <i class="fas fa-pen"></i>
                         {{ $t("common.edited") }}
                     </span>
-                    <span
-                        @click="
-                            open(
-                                fields[index].value,
-                                field.label,
-                                index
-                            )
-                        "
-                    >
+                    <span @click="open(fields[index].value, field.label, index)">
                         <LucideIcon
                             icon="Eye"
                             :size="16"
@@ -58,13 +50,7 @@
                     <input
                         type="text"
                         class="field-value"
-                        @input="
-                            (e) =>
-                                handleFieldEdit(
-                                    index,
-                                    e.target.value
-                                )
-                        "
+                        @input="(e) => handleFieldEdit(index, e.target.value)"
                         :readonly="!isEditing[index]"
                         v-model="fields[index].value"
                     />
@@ -82,12 +68,7 @@
                     >
                         <button
                             class="save-button"
-                            @click="
-                                saveEdit(
-                                    index,
-                                    field.outputId
-                                )
-                            "
+                            @click="saveEdit(index, field.outputId)"
                             :title="$t('common.save')"
                         >
                             <i class="fas fa-check"></i>
@@ -105,13 +86,7 @@
                     <textarea
                         type="text"
                         class="form-control mb-2"
-                        @input="
-                            (e) =>
-                                handleFieldEdit(
-                                    index,
-                                    e.target.value
-                                )
-                        "
+                        @input="(e) => handleFieldEdit(index, e.target.value)"
                         :readonly="!isEditing[index]"
                         v-model="fields[index].value"
                         rows="5"
@@ -130,12 +105,7 @@
                     >
                         <button
                             class="save-button"
-                            @click="
-                                saveEdit(
-                                    index,
-                                    field.outputId
-                                )
-                            "
+                            @click="saveEdit(index, field.outputId)"
                             :title="$t('common.save')"
                         >
                             <i class="fas fa-check"></i>
@@ -152,11 +122,7 @@
                 <div v-if="field.outputType == 'API'">
                     <div
                         v-if="field.label == 'TemplateName'"
-                        :class="
-                            index == 0
-                                ? 'field-header'
-                                : 'field-header border-top pt-4'
-                        "
+                        :class="index == 0 ? 'field-header' : 'field-header border-top pt-4'"
                     >
                         <h6 class="fw-bold mb-0">
                             {{ field.value }}
@@ -167,9 +133,7 @@
                             {{ field.label }}
                         </label>
                         <input
-                            v-if="
-                                field.label == 'StatusCode'
-                            "
+                            v-if="field.label == 'StatusCode'"
                             type="text"
                             class="field-value form-control mt-2"
                             readonly
@@ -229,8 +193,7 @@
         },
         methods: {
             startEditing(index) {
-                this.originalValues[index] =
-                    this.fields[index].value;
+                this.originalValues[index] = this.fields[index].value;
                 this.isEditing[index] = true;
             },
             handleFieldEdit(index, value) {
@@ -246,16 +209,12 @@
             saveEdit(index, id) {
                 this.isEditing[index] = false;
                 this.fields[index].isEdited = true;
-                if (
-                    this.fields[index].outputType === "N8N"
-                ) {
+                if (this.fields[index].outputType === "N8N") {
                     const outputsObj = {};
                     this.fields.forEach((field) => {
-                        outputsObj[field.label] =
-                            field.value;
+                        outputsObj[field.label] = field.value;
                     });
-                    const outputsJson =
-                        JSON.stringify(outputsObj);
+                    const outputsJson = JSON.stringify(outputsObj);
 
                     this.$emit("field-updated", {
                         id,
@@ -297,11 +256,9 @@
                 if (field.outputType === "N8N") {
                     const outputsObj = {};
                     this.fields.forEach((field) => {
-                        outputsObj[field.label] =
-                            field.value;
+                        outputsObj[field.label] = field.value;
                     });
-                    const outputsJson =
-                        JSON.stringify(outputsObj);
+                    const outputsJson = JSON.stringify(outputsObj);
 
                     this.$emit("field-updated", {
                         id: field.outputId,

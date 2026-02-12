@@ -5,15 +5,9 @@
             v-if="documentData && documentData.canAnswer"
         />
         <step-stepper
-            v-if="
-                documentData &&
-                documentData.steps &&
-                documentData.steps.length > 0
-            "
+            v-if="documentData && documentData.steps && documentData.steps.length > 0"
             :steps="documentData.steps"
-            :initial-step-id="
-                documentData.lastProcessedStepId
-            "
+            :initial-step-id="documentData.lastProcessedStepId"
             @step-changed="handleStepChange"
         />
 
@@ -61,36 +55,23 @@
             async loadDocumentData() {
                 this.loading = true;
                 try {
-                    await this.findByIdAnalyzeWithSteps(
-                        this.cardId
-                    );
+                    await this.findByIdAnalyzeWithSteps(this.cardId);
 
                     if (
-                        this.documentData
-                            .lastProcessedStepId &&
+                        this.documentData.lastProcessedStepId &&
                         this.documentData.steps.length > 0
                     ) {
-                        const lastStep =
-                            this.documentData.steps.find(
-                                (s) =>
-                                    s.id ===
-                                    this.documentData
-                                        .lastProcessedStepId
-                            );
-                        this.currentStepData =
-                            lastStep ||
-                            this.documentData.steps[0];
-                    } else if (
-                        this.documentData.steps.length > 0
-                    ) {
-                        this.currentStepData =
-                            this.documentData.steps[0];
+                        const lastStep = this.documentData.steps.find(
+                            (s) => s.id === this.documentData.lastProcessedStepId
+                        );
+                        this.currentStepData = lastStep || this.documentData.steps[0];
+                    } else if (this.documentData.steps.length > 0) {
+                        this.currentStepData = this.documentData.steps[0];
                     }
                 } catch (error) {
                     this.$notify({
                         title: "analyze.title",
-                        message:
-                            "analyze.errorLoadDocumentData",
+                        message: "analyze.errorLoadDocumentData",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -120,16 +101,14 @@
                         if (response == true) {
                             this.$notify({
                                 title: "analyze.title",
-                                message:
-                                    "analyze.successEditOutput",
+                                message: "analyze.successEditOutput",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "analyze.title",
-                                message:
-                                    "analyze.failedEditOutput",
+                                message: "analyze.failedEditOutput",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -140,9 +119,7 @@
                     });
             },
             async findByIdAnalyzeWithSteps(id) {
-                await CardsServices.findByIdAnalyzeWithSteps(
-                    id
-                )
+                await CardsServices.findByIdAnalyzeWithSteps(id)
                     .then((response) => {
                         this.documentData = response.data;
                     })
