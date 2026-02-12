@@ -110,7 +110,7 @@ namespace WoopiAiHub.Application.Services
             var previousStepId = card.StepId;
             var previousStatusId = card.StatusId;
 
-            card.UpdateStepAndSatus(step.Id, step.StatusId);
+            card.UpdateStepAndStatus(step.Id, step.StatusId);
             var result = _cardRepository.Update(card);
 
             if (result)
@@ -131,7 +131,7 @@ namespace WoopiAiHub.Application.Services
                 }
                 catch
                 {
-                    card.UpdateStepAndSatus(previousStepId, previousStatusId);
+                    card.UpdateStepAndStatus(previousStepId, previousStatusId);
                     _cardRepository.Update(card);
                     throw;
                 }
@@ -151,7 +151,7 @@ namespace WoopiAiHub.Application.Services
             var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
                 ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
-            card.UpdateStepAndSatus(card.StepId, updateCardStatusDto.StatusId);
+            card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
 
             var result = _cardRepository.Update(card);
             return result;

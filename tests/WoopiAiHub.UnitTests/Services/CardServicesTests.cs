@@ -786,10 +786,9 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindById(card.Id)).ReturnsAsync((Card)null);
 
             // Act
-            var result = await _cardServices.UpdateStatus(updateCardStatusDto);
+            await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStatus(updateCardStatusDto));
 
             // Assert
-            Assert.True(result);
             _cardRepositoryMock.Verify(s => s.FindById(It.IsAny<int>()), Times.Once);
         }
 
@@ -800,7 +799,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var card = CardFixture.FindValidCard();
             var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
-            _cardRepositoryMock.Setup(repo => repo.FindById(card.Id)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.FindById(1)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
 
             // Act
             var result = await _cardServices.UpdateStatus(updateCardStatusDto);
