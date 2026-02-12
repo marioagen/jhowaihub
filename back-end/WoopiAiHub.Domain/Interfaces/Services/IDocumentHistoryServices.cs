@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         bool Create(DocumentHistory documentHistory);
         JsonResult FindById(int idDocument,
                             string emailCreator);
-        IEnumerable<DocumentHistoryDto> FindByIdWithTake(int idDocument, int take);
+        IEnumerable<DocumentHistoryDto> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null);
         bool Delete(int idDocument,
                     string emailCreator);
         bool UpdateHistory(UpdateHistoryDto updateHistoryDto,

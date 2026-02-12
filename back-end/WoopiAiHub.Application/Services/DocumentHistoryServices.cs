@@ -49,10 +49,13 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="idDocument"></param>
         /// <param name="take"></param>
+        /// <param name="search">Optional. Filter by text in Input or Output.</param>
+        /// <param name="order">Optional. "asc" or "desc".</param>
+        /// <param name="orderBy">Optional. "created".</param>
         /// <returns></returns>
-        public IEnumerable<DocumentHistoryDto> FindByIdWithTake(int idDocument, int take)
+        public IEnumerable<DocumentHistoryDto> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null)
         {
-            var entries = _documentHistoryRepository.FindByIdWithTake(idDocument, take);
+            var entries = _documentHistoryRepository.FindByIdWithTake(idDocument, take, search, order, orderBy);
             return entries.Select(h => new DocumentHistoryDto
             {
                 Id = h.Id,

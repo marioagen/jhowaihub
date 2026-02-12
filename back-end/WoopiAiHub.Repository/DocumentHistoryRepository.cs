@@ -40,18 +40,28 @@ namespace WoopiAiHub.Repository
 
         /// <summary>
         /// Find the first N DocumentHistory entries by the id of the document (cumulative load: first 10, then 20, then 30...).
-        /// Ordered by Created descending (newest first).
+        /// Optional filter by search (Input or Output), order and orderBy (e.g. orderBy=created, order=desc).
         /// </summary>
         /// <param name="idDocument"></param>
         /// <param name="take"></param>
+        /// <param name="search">Optional. Filter by text in Input or Output.</param>
+        /// <param name="order">Optional. "asc" or "desc". Default desc.</param>
+        /// <param name="orderBy">Optional. "created". Default created.</param>
         /// <returns></returns>
-        public IEnumerable<DocumentHistory> FindByIdWithTake(int idDocument, int take)
+        public IEnumerable<DocumentHistory> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null)
         {
-            return _context.DocumentHistories
-                .Where(a => a.IdDocument == idDocument)
-                .OrderByDescending(a => a.Created)
-                .Take(take)
-                .AsNoTracking();
+            var query = _context.DocumentHistories.Where(a => a.IdDocument == idDocument);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(a => (a.Input != null && a.Input.Contains(term)) || (a.Output != null && a.Output.Contains(term)));
+            }
+
+            var isDesc = string.IsNullOrWhiteSpace(order) || order.Trim().Equals("desc", StringComparison.OrdinalIgnoreCase);
+            query = isDesc ? query.OrderByDescending(a => a.Created) : query.OrderBy(a => a.Created);
+
+            return query.Take(take).AsNoTracking();
         }
 
         /// <summary>
