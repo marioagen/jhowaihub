@@ -150,7 +150,8 @@
         methods: {
             getTeams() {
                 this.isLoadingTeams = true;
-                TeamsService.getTeamList()
+                // Usa endpoint otimizado que retorna apenas Id e Name
+                TeamsService.getTeamListSimple()
                     .then((response) => {
                         if (response.error !== undefined)
                             return;
