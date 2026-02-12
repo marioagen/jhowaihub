@@ -422,7 +422,7 @@
                             typeof json.bodyTemplate === "string"
                                 ? JSON.parse(json.bodyTemplate)
                                 : json.bodyTemplate;
-                    } catch (e) {
+                    } catch {
                         formatted.body = json.bodyTemplate;
                     }
                 }

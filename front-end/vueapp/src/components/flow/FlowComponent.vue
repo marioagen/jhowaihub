@@ -740,64 +740,66 @@
                     this.nodeFlow.data.subtitle = selectedPrompt.name;
                 }
             },
-        },
-        loadStorageFlowState() {
-            const flowStateJson = localStorage.getItem("flow_state_params");
-            if (!flowStateJson || !this.step) {
-                return;
-            }
+            loadStorageFlowState() {
+                const flowStateJson = localStorage.getItem("flow_state_params");
+                if (!flowStateJson || !this.step) {
+                    return;
+                }
 
-            const flowState = JSON.parse(flowStateJson);
+                const flowState = JSON.parse(flowStateJson);
 
-            if (flowState.nodes && this.step.stepTools) {
-                flowState.nodes.forEach((node) => {
-                    if (node.id === "start") {
-                        return;
-                    }
+                if (flowState.nodes && this.step.stepTools) {
+                    flowState.nodes.forEach((node) => {
+                        if (node.id === "start") {
+                            return;
+                        }
 
-                    let stepTool = this.step.stepTools.find((st) => st.id.toString() === node.id);
+                        let stepTool = this.step.stepTools.find(
+                            (st) => st.id.toString() === node.id
+                        );
 
-                    if (stepTool) {
-                        stepTool.parameters = node.data.parameters || [];
-                        stepTool.dependencies = node.data.dependencies || [];
-                        stepTool.positionX = node.position.x;
-                        stepTool.positionY = node.position.y;
-                    } else {
-                        const newStepTool = {
-                            id: parseInt(node.id) || 0,
-                            positionX: node.position.x,
-                            positionY: node.position.y,
-                            toolId: node.data.toolId,
-                            order: node.data.order,
-                            parameters: node.data.parameters || [],
-                            dependencies: node.data.dependencies || [],
-                            tool: {
-                                id: node.data.toolId,
-                                name: node.label,
-                                isEditableInput: node.data.isEditableInput,
-                                toolType: node.data.toolType,
-                            },
-                        };
+                        if (stepTool) {
+                            stepTool.parameters = node.data.parameters || [];
+                            stepTool.dependencies = node.data.dependencies || [];
+                            stepTool.positionX = node.position.x;
+                            stepTool.positionY = node.position.y;
+                        } else {
+                            const newStepTool = {
+                                id: parseInt(node.id) || 0,
+                                positionX: node.position.x,
+                                positionY: node.position.y,
+                                toolId: node.data.toolId,
+                                order: node.data.order,
+                                parameters: node.data.parameters || [],
+                                dependencies: node.data.dependencies || [],
+                                tool: {
+                                    id: node.data.toolId,
+                                    name: node.label,
+                                    isEditableInput: node.data.isEditableInput,
+                                    toolType: node.data.toolType,
+                                },
+                            };
 
-                        this.step.stepTools.push(newStepTool);
-                    }
-                });
-            }
-
-            this.$nextTick(() => {
-                if (this.$refs.VueflowComponent) {
-                    this.$refs.VueflowComponent.reloadFlow();
-
-                    this.$notify({
-                        title: "flow.title",
-                        message: "Template configurado com sucesso",
-                        variant: "success",
-                        icon: "CircleCheckBig",
+                            this.step.stepTools.push(newStepTool);
+                        }
                     });
                 }
-            });
 
-            localStorage.removeItem("flow_state_params");
+                this.$nextTick(() => {
+                    if (this.$refs.VueflowComponent) {
+                        this.$refs.VueflowComponent.reloadFlow();
+
+                        this.$notify({
+                            title: "flow.title",
+                            message: "Template configurado com sucesso",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    }
+                });
+
+                localStorage.removeItem("flow_state_params");
+            },
         },
         async mounted() {
             await this.fetchStepName();

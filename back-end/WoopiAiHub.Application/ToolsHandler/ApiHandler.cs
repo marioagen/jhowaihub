@@ -136,10 +136,6 @@ namespace WoopiAiHub.Application.ToolsHandler
                         placeholder = "{{ocr}}";
                         replaceValue = ExtractOcrText(output.Value);
                         break;
-                    case HandlersTypes.Embeddings:
-                        placeholder = "{{embeddings}}";
-                        replaceValue = ExtractEmbeddingsText(output.Value);
-                        break;
                     case HandlersTypes.Prompt:
                         placeholder = "{{prompt}}";
                         replaceValue = output.Value;
@@ -188,49 +184,6 @@ namespace WoopiAiHub.Application.ToolsHandler
                         if (embedding.TryGetProperty("Text", out var embedTextProperty))
                         {
                             var text = embedTextProperty.GetString();
-                            if (!string.IsNullOrEmpty(text))
-                            {
-                                texts.Add(text);
-                            }
-                        }
-                    }
-                    
-                    return texts.Count > 0 ? string.Join("\n\n", texts) : string.Empty;
-                }
-                
-                return string.Empty;
-            }
-            catch
-            {
-                return string.Empty;
-            }
-        }
-
-        /// <summary>
-        /// Extracts and concatenates the text content from the "DocumentEmbeddings" array in a JSON-formatted string.
-        /// </summary>
-        /// <param name="outputValue">A JSON-formatted string containing a "DocumentEmbeddings" array, where each element may include a "Text"
-        /// property.</param>
-        /// <returns>A single string containing the concatenated text values from all "Text" properties in the
-        /// "DocumentEmbeddings" array, separated by double newlines. Returns an empty string if no such text values are
-        /// found or if the input is not in the expected format.</returns>
-        private static string ExtractEmbeddingsText(string outputValue)
-        {
-            try
-            {
-                using var document = JsonDocument.Parse(outputValue);
-                var root = document.RootElement;
-                
-                if (root.TryGetProperty("DocumentEmbeddings", out var embeddingsArray) && 
-                    embeddingsArray.ValueKind == JsonValueKind.Array)
-                {
-                    var texts = new List<string>();
-                    
-                    foreach (var embedding in embeddingsArray.EnumerateArray())
-                    {
-                        if (embedding.TryGetProperty("Text", out var textProperty))
-                        {
-                            var text = textProperty.GetString();
                             if (!string.IsNullOrEmpty(text))
                             {
                                 texts.Add(text);

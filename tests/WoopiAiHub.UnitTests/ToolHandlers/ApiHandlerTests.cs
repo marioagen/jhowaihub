@@ -297,62 +297,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Contains("OCR Text 2", message.Body);
         }
 
-        [Fact(DisplayName = "BuildPayload should replace Embeddings placeholder in body")]
-        [Trait("BuildPayload", "Success")]
-        public async Task BuildPayload_ShouldReplaceEmbeddingsPlaceholder_InBody()
-        {
-            // Arrange
-            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var stepToolDto = CreateValidStepToolDto();
-            var apiTemplate = CreateValidApiTemplateDto();
-            var execution = AutomationFixture.FindValidStepToolExecution();
-
-            var embeddingsOutput = new
-            {
-                DocumentEmbeddings = new[]
-                {
-                    new { Text = "Embeddings Text 1" },
-                    new { Text = "Embeddings Text 2" }
-                }
-            };
-
-            var outputValue = JsonSerializer.Serialize(embeddingsOutput);
-            var output = CreateStepToolOutput(HandlersTypes.Embeddings, outputValue);
-            var outputs = new List<StepToolOutput> { output };
-
-            var apiRequest = new ApiRequestDto
-            {
-                TemplateId = apiTemplate.Id!.Value,
-                Url = apiTemplate.Url,
-                Method = apiTemplate.Method,
-                Body = "{\"text\": {{embeddings}}}"
-            };
-
-            var encryptedData = JsonSerializer.Serialize(apiRequest);
-
-            _mockStepToolRepository
-                .Setup(repo => repo.FindById(It.IsAny<int>()))
-                .ReturnsAsync(stepToolDto);
-
-            _mockEncryptionService
-                .Setup(service => service.Decrypt(It.IsAny<string>()))
-                .Returns(encryptedData);
-
-            _mockApiTemplateRepository
-                .Setup(repo => repo.FindById(It.IsAny<int>()))
-                .ReturnsAsync(apiTemplate);
-
-            // Act
-            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
-
-            // Assert
-            var message = result.Message as ApiRequestDto;
-            Assert.NotNull(message);
-            Assert.NotNull(message.Body);
-            Assert.Contains("Embeddings Text 1", message.Body);
-            Assert.Contains("Embeddings Text 2", message.Body);
-        }
-
         [Fact(DisplayName = "BuildPayload should replace Prompt placeholder in body")]
         [Trait("BuildPayload", "Success")]
         public async Task BuildPayload_ShouldReplacePromptPlaceholder_InBody()
