@@ -159,7 +159,7 @@ export default {
     async getDocumentQuestionsHistory(id, filters) {
         return await api
             .get(`/Document/History/${id}/batch`, {
-                params: { take: 10 },
+                params: filters,
             })
             .then((response) => {
                 return response.data;
