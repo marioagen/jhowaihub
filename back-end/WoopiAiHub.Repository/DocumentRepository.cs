@@ -54,7 +54,6 @@ namespace WoopiAiHub.Repository
             if (documentPagedDataDto.StatusId.HasValue && documentPagedDataDto.StatusId.Value > 0)
             {
                 var statusId = documentPagedDataDto.StatusId.Value;
-                // Done (5): steps often use AwaitingAnalysis, so no card has StatusId 5. Show documents with card in last step of a workflow.
                 const int StatusIdDone = 5;
                 if (statusId == StatusIdDone)
                 {

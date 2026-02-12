@@ -10,7 +10,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
             string email);
 
         Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto);
-
         Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto);
         Task<bool> UnassignUser(int cardId);
 
