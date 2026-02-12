@@ -22,6 +22,18 @@
                 >
                     <i class="fas fa-times"></i>
                 </button>
+                <div class="text-center mb-4">
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        @click="openQuestionsHistoryModal"
+                    >
+                        <LucideIcon
+                            icon="History"
+                            :size="16"
+                        />
+                    </button>
+                </div>
             </div>
             <div class="questionnaire-section">
                 <label class="input-label">
@@ -176,12 +188,18 @@
             </div>
         </div>
     </div>
+    <QuestionsHistoryModal ref="QuestionsHistoryModal" />
 </template>
 <script>
     import DocumentServices from "@/services/documents/DocumentsServices";
     import QuizzesService from "@/services/quizzes/QuizzesService";
+    import QuestionsHistoryModal from "@/components/analyze/QuestionsHistoryModal.vue";
+
     export default {
         name: "DocChat",
+        components: {
+            QuestionsHistoryModal,
+        },
         props: {
             documentId: {
                 type: Number,
@@ -419,6 +437,12 @@
             },
             clear() {
                 this.output = "";
+            },
+            openQuestionsHistoryModal() {
+                console.log("Temp button clicked");
+                this.$refs.QuestionsHistoryModal.open(
+                    this.documentId
+                );
             },
         },
         mounted() {
