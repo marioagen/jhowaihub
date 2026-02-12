@@ -89,9 +89,9 @@ namespace WoopiAiHub.Repository
         /// <returns>A <see cref="StepTool"/> instance with its parameters if found; otherwise, <see langword="null"/>.</returns>
         public async Task<StepTool?> FindByIdWithParameters(int id)
         {
-            return _context.StepTools
+            return await _context.StepTools
                 .Include(st => st.Parameters)
-                .FirstOrDefault(st => st.Id == id);
+                .FirstOrDefaultAsync(st => st.Id == id);
         }
 
         /// <summary>

@@ -528,7 +528,7 @@ namespace WoopiAiHub.Application.Services
             var step = _workflowRepository.FindStepById(id);
 
             var apiTools = step.StepTools.Where(w => w.Tool?.ToolType == HandlersTypes.API).ToList();
-            if(apiTools is not null && apiTools.Count > 0)
+            if (apiTools is not null && apiTools.Count > 0)
             {
                 foreach(var apiTool in apiTools)
                 {

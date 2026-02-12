@@ -19,7 +19,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         private readonly ApiOutputServices _service;
         private readonly Mock<IStepToolOutputRepository> _mockStepToolOutputRepository;
         private readonly Mock<IStepToolExecutionRepository> _mockStepToolExecutionRepository;
-        private readonly Mock<IDocumentHistoryRepository> _mockDocumentHistoryRepository;
         private readonly Mock<IWorkflowRepository> _mockWorkflowRepository;
         private readonly Mock<IHubNotifier> _mockHubNotifier;
 
@@ -28,7 +27,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             _mocker = new AutoMocker();
             _mockStepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
             _mockStepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
-            _mockDocumentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             _mockWorkflowRepository = _mocker.GetMock<IWorkflowRepository>();
             _mockHubNotifier = _mocker.GetMock<IHubNotifier>();
 
@@ -52,7 +50,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             _mockStepToolOutputRepository.Setup(repo => repo.CreateAsync(It.IsAny<StepToolOutput>()))
                 .ReturnsAsync(true);
             _mockWorkflowRepository.Setup(repo => repo.FindToolByStepToolId(It.IsAny<int>()))
-                .ReturnsAsync((ToolDto?)null);
+                .ReturnsAsync((ToolDto?)null!);
             _mockHubNotifier.Setup(notifier => notifier.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 

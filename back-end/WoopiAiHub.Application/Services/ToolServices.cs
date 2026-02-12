@@ -14,19 +14,16 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IToolRepository _toolRepository;
         private readonly IToolTypeRepository _toolTypeRepository;
-        private readonly IStepToolRepository _stepToolTypeRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IEncryptionService _encryptionService;
 
         public ToolServices(IToolRepository toolRepository,
                             IToolTypeRepository toolTypeRepository,
-                            IStepToolRepository stepToolTypeRepository,
                             IApiClientFactory apiClientFactory,
                             IEncryptionService encryptionService)
         {
             _toolRepository = toolRepository;
             _toolTypeRepository = toolTypeRepository;
-            _stepToolTypeRepository = stepToolTypeRepository;
             _apiClientFactory = apiClientFactory;
             _encryptionService = encryptionService;
         }

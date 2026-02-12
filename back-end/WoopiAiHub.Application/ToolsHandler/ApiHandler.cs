@@ -150,7 +150,7 @@ namespace WoopiAiHub.Application.ToolsHandler
 
                 if (result.Contains(placeholder, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!replaceValue.StartsWith("\"") && !replaceValue.EndsWith("\""))
+                    if (!replaceValue.StartsWith('\"') && !replaceValue.EndsWith('\"'))
                     {
                         replaceValue = JsonSerializer.Serialize(replaceValue, _jsonOptions);
                     }
