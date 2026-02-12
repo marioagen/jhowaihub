@@ -1,9 +1,10 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -18,6 +19,7 @@ namespace WoopiAiHub.Application.Services
             _documentHistoryRepository = documentHistoryRepository;
             _documentHistoryValidator = documentHistoryValidator;
         }
+        
 
         /// <summary>
         /// Validates if the DocumentHistory object is valid if so requests the repository layer to save the history
@@ -40,6 +42,26 @@ namespace WoopiAiHub.Application.Services
                                    string emailCreator)
         {
             return new JsonResult(_documentHistoryRepository.FindById(idDocument));
+        }
+
+        /// <summary>
+        /// Find the first N DocumentHistory entries by the id of the Document (cumulative load: 10, then 20, then 30...).
+        /// </summary>
+        /// <param name="idDocument"></param>
+        /// <param name="take"></param>
+        /// <returns></returns>
+        public IEnumerable<DocumentHistoryDto> FindByIdWithTake(int idDocument, int take)
+        {
+            var entries = _documentHistoryRepository.FindByIdWithTake(idDocument, take);
+            return entries.Select(h => new DocumentHistoryDto
+            {
+                Id = h.Id,
+                IdDocument = h.IdDocument,
+                Input = h.Input,
+                Output = h.Output,
+                IsEdited = h.IsEdited,
+                Created = h.Created
+            });
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using System.Linq.Dynamic.Core;
@@ -36,6 +36,22 @@ namespace WoopiAiHub.Repository
         public IEnumerable<DocumentHistory> FindById(int idDocument)
         {
             return _context.DocumentHistories.Where(a => a.IdDocument.Equals(idDocument)).AsNoTracking();
+        }
+
+        /// <summary>
+        /// Find the first N DocumentHistory entries by the id of the document (cumulative load: first 10, then 20, then 30...).
+        /// Ordered by Created descending (newest first).
+        /// </summary>
+        /// <param name="idDocument"></param>
+        /// <param name="take"></param>
+        /// <returns></returns>
+        public IEnumerable<DocumentHistory> FindByIdWithTake(int idDocument, int take)
+        {
+            return _context.DocumentHistories
+                .Where(a => a.IdDocument == idDocument)
+                .OrderByDescending(a => a.Created)
+                .Take(take)
+                .AsNoTracking();
         }
 
         /// <summary>

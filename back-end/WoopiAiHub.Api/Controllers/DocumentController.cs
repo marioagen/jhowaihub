@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Application.Dto;
+using WoopiAiHub.Application.Dto;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -209,6 +209,30 @@ namespace WoopiAiHub.Api.Controllers
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(FindDocumentHistory)} method");
                 return BadRequest("Error while finding history" + ex);
+            }
+        }
+
+        /// <summary>
+        /// Returns the first N document history entries by document id (cumulative load: pass take=10, then 20, then 30...).
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="take"></param>
+        /// <returns></returns>
+        [HttpGet("History/{id}/batch")]
+        [SwaggerOperation("Returns document history entries for a document, limited by take (load more: 10, 20, 30...)")]
+        [ProducesResponseType(typeof(IEnumerable<DocumentHistoryDto>), StatusCodes.Status200OK)]
+        public IActionResult GetDocumentHistoryBatch(int id,
+                                                     [FromQuery] int take = 10)
+        {
+            try
+            {
+                var result = _documentHistoryServices.FindByIdWithTake(id, take);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(GetDocumentHistoryBatch)} method");
+                return BadRequest("Error while finding history batch" + ex);
             }
         }
 
