@@ -469,9 +469,7 @@
                 } catch (e) {
                     this.$notify({
                         title: "Error",
-                        message:
-                            e.message ||
-                            "An error occurred while advancing the step.",
+                        message:this.$t("card.errorAdvancingCard"),
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -480,15 +478,6 @@
                 }
             },
             openFinalizeConfirm() {
-                if (this.finalizeStatusId == null) {
-                    this.$notify({
-                        title: "Error",
-                        message: "Finalize status not found.",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
-                    return;
-                }
                 this.$refs.finalizeConfirmModalRef?.open();
             },
             async onConfirmFinalize() {
@@ -507,7 +496,7 @@
                         title: "Error",
                         message:
                             e.message ||
-                            "An error occurred while finalizing the step.",
+                            this.$t("card.errorFinalizingCard"),
                         variant: "danger",
                         icon: "CircleX",
                     });

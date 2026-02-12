@@ -49,6 +49,8 @@ const portuguese = {
     card: {
         assignBtn: "Atribuir",
         cardsOpened: "Existem cards abertos nesta esteira",
+        errorAdvancingCard: "Ocorreu um erro ao avançar o card.",
+        errorFinalizingCard: "Ocorreu um erro ao finalizar o card.",
         finalizeConfirmMessage: "Você tem certeza que deseja finalizar esse documento?",
         finalizeConfirmTitle: "Confirmar finalização",
         unassignInfo: "Desatribuir documento",

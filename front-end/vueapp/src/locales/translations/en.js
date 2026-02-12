@@ -49,6 +49,8 @@ const english = {
         assignBtn: "Assign",
         cardsOpened:
             "There are open cards in this Workflow",
+        errorAdvancingCard: "An error occurred while advancing the card.",
+        errorFinalizingCard: "An error occurred while finalizing the card.",
         finalizeConfirmMessage: "Are you sure you want to finalize this document?",
         finalizeConfirmTitle: "Confirm finalization",
         unassignInfo: "Unassign document",

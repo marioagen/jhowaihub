@@ -264,21 +264,6 @@ namespace WoopiAiHub.Repository
                 })
                 .ToList();
 
-            var cardIds = resultDto.Select(r => r.CardId).Distinct().ToList();
-            if (cardIds.Count > 0)
-            {
-                var statusByCardId = await _context.Cards
-                    .Where(c => cardIds.Contains(c.Id))
-                    .Select(c => new { c.Id, StatusName = c.Status != null ? c.Status.Name : "" })
-                    .ToDictionaryAsync(x => x.Id, x => x.StatusName ?? "", ct);
-
-                foreach (var dtoCard in resultDto)
-                {
-                    if (statusByCardId.TryGetValue(dtoCard.CardId, out var name) && !string.IsNullOrEmpty(name))
-                        dtoCard.StatusName = name;
-                }
-            }
-
             return resultDto;
         }
 
