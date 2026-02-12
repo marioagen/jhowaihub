@@ -6,8 +6,6 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository;
-using TeamSimpleDto = WoopiAiHub.Domain.DTOs.Response.TeamSimpleDto;
 
 namespace WoopiAiHub.Application.Services
 {
