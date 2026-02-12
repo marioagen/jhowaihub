@@ -291,11 +291,9 @@
                 const index = this.currentModalIndex;
                 const field = this.fields[index];
 
-                // Update the field value
                 this.fields[index].value = newValue;
                 this.fields[index].isEdited = true;
 
-                // Follow the same logic as saveEdit
                 if (field.outputType === "N8N") {
                     const outputsObj = {};
                     this.fields.forEach((field) => {

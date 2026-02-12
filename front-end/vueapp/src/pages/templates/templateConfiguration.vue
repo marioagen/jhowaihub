@@ -335,11 +335,7 @@
                     } else {
                         this.isLoading = false;
                     }
-                } catch (error) {
-                    console.error(
-                        "Error loading existing parameters:",
-                        error
-                    );
+                } catch {
                     this.isLoading = false;
                 }
             },
@@ -484,11 +480,13 @@
                         ) {
                             formatted.query = queryObj;
                         }
-                    } catch (e) {
-                        console.error(
-                            "Error parsing queryTemplate:",
-                            e
-                        );
+                    } catch {
+                        this.$notify({
+                            title: "common.error",
+                            message: "template.loadError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
                     }
                 }
 

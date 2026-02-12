@@ -35,7 +35,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             _service = _mocker.CreateInstance<ApiOutputServices>();
         }
 
-        [Fact(DisplayName = "ProcessMessage should create StepToolOutput and DocumentHistory")]
+        [Fact(DisplayName = "ProcessMessage should create StepToolOutput")]
         [Trait("ProcessMessage", "Success")]
         public async Task ProcessMessage_ShouldCreateStepToolOutputAndDocumentHistory()
         {
@@ -51,8 +51,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Returns(Task.CompletedTask);
             _mockStepToolOutputRepository.Setup(repo => repo.CreateAsync(It.IsAny<StepToolOutput>()))
                 .ReturnsAsync(true);
-            _mockDocumentHistoryRepository.Setup(repo => repo.Create(It.IsAny<DocumentHistory>()))
-                .Returns(true);
             _mockWorkflowRepository.Setup(repo => repo.FindToolByStepToolId(It.IsAny<int>()))
                 .ReturnsAsync((ToolDto?)null);
             _mockHubNotifier.Setup(notifier => notifier.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>()))
@@ -69,8 +67,6 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             Assert.Equal(apiOutputDto.Email, result.Email);
             _mockStepToolOutputRepository.Verify(repo => repo.CreateAsync(It.Is<StepToolOutput>(
                 output => output.StepToolId == stepToolExecution.StepToolId && output.CardId == stepToolExecution.CardId)), Times.Once);
-            _mockDocumentHistoryRepository.Verify(repo => repo.Create(It.Is<DocumentHistory>(
-                history => history.IdDocument == stepToolExecution.Card!.DocumentId && history.Input == "API")), Times.Once);
         }
 
         [Fact(DisplayName = "ProcessMessage should throw AppException when execution not found")]

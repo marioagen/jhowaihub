@@ -510,9 +510,13 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         private static StepToolOutput CreateStepToolOutput(string toolType, string value)
         {
             var output = AutomationFixture.FindValidStepToolOutput(value);
-            output.StepTool = new StepTool(1, DateTime.UtcNow, 1, 1, 1, 1, 1);
-            output.StepTool.Tool = new Tool(1, DateTime.UtcNow, "Tool", true, 1, 1, 1, false, null, null);
-            output.StepTool.Tool.ToolType = new ToolType(1, DateTime.UtcNow, toolType, true);
+            output.StepTool = new StepTool(1, DateTime.UtcNow, 1, 1, 1, 1, 1)
+            {
+                Tool = new Tool(1, DateTime.UtcNow, "Tool", true, 1, 1, 1, false, null, null)
+                {
+                    ToolType = new ToolType(1, DateTime.UtcNow, toolType, string.Empty, true)
+                }
+            };
             return output;
         }
     }

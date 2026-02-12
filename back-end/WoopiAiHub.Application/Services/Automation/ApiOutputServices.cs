@@ -13,13 +13,11 @@ namespace WoopiAiHub.Application.Services.Automation
 {
     public class ApiOutputServices(IStepToolOutputRepository stepToolOutputRepository,
         IStepToolExecutionRepository stepToolExecutionRepository,
-        IDocumentHistoryRepository documentHistoryRepository,
         IWorkflowRepository workflowRepository,
         IHubNotifier hubNotifier) : IApiOutputServices
     {
         private readonly IStepToolOutputRepository _stepToolOutputRepository = stepToolOutputRepository;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository = stepToolExecutionRepository;
-        private readonly IDocumentHistoryRepository _documentHistoryRepository = documentHistoryRepository;
         private readonly IWorkflowRepository _workflowRepository = workflowRepository;
         private readonly IHubNotifier _hubNotifier = hubNotifier;
         private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
@@ -52,9 +50,6 @@ namespace WoopiAiHub.Application.Services.Automation
             );
 
             await _stepToolOutputRepository.CreateAsync(stepToolOutput);
-
-            var documentHistory = new DocumentHistory(execution.Card!.DocumentId, "API", content, 0, DateTime.Now);
-            _documentHistoryRepository.Create(documentHistory);
 
             await UpdateExecutionAsync(execution, outputDto.Email);
 
