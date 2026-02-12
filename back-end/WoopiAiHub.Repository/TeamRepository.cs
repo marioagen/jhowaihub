@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -99,7 +100,7 @@ namespace WoopiAiHub.Repository
                         })
                         .ToList(),
                     Profiles = t.Profiles!
-                        .Select( p => new ProfileDto
+                        .Select(p => new ProfileDto
                         {
                             Id = p.Id,
                             Name = p.Name,
@@ -268,16 +269,17 @@ namespace WoopiAiHub.Repository
         /// Optimized for performance when full team data is not needed.
         /// </summary>
         /// <returns>A queryable collection of TeamSimpleDto</returns>
-        public IQueryable<TeamSimpleDto> FindAllSimple()
+        public async Task<ICollection<TeamSimpleDto>> FindAllSimple()
         {
-            return _context.Teams
+            return await _context.Teams
                            .Select(t => new TeamSimpleDto
                            {
                                Id = t.Id,
                                Name = t.Name
                            })
                            .OrderBy(t => t.Name)
-                           .AsNoTracking();
+                           .AsNoTracking()
+                           .ToListAsync();
         }
     }
 }

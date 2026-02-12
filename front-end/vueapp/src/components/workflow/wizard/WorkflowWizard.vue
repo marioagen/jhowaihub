@@ -277,7 +277,6 @@
                 if (this.currentPhase > 1) {
                     this.checkNavigation(() => {
                         this.currentPhase--;
-                        // Carrega apenas os dados necessários da fase atual
                         if (this.currentPhase === 1 && (this.workflowIdInternal || this.isEdit)) {
                             this.loadPhase1Data();
                         } else if (this.currentPhase === 2 && this.workflowIdInternal) {
@@ -309,7 +308,6 @@
                             await WorkflowService.updatePhase1(
                                 params
                             );
-                        // Não precisa recarregar, apenas carrega dados da fase 2
                         await this.loadPhase2Data();
                     } else {
                         const workflowId =
@@ -325,7 +323,6 @@
                             workflowId;
                         this.phase1Data = data;
                         this.currentPhase = 2;
-                        // Não precisa recarregar tudo, apenas carrega dados da fase 2
                         await this.loadPhase2Data();
                         this.$notify({
                             title: "workflow.index",
@@ -433,7 +430,6 @@
             },
             handleAddToolFlow(step, phase) {
                 this.canLeave = true;
-                // Salva dados locais antes de sair
                 localStorage.setItem(
                     "wizardPhase1Data",
                     JSON.stringify(this.phase1Data)
@@ -446,7 +442,6 @@
                     "wizardPhase3Data",
                     JSON.stringify(this.phase3Data)
                 );
-                // Redireciona normalmente
                 this.$router.push({
                     name: "NewFlow",
                     params: {
@@ -515,7 +510,6 @@
                                 icon: "CircleX",
                             });
                         } else {
-                            // Recarrega apenas dados da fase 3
                             this.loadPhase3Data();
                             this.$notify({
                                 title: "flow.title",
@@ -545,7 +539,6 @@
                     this.currentPhase ??
                     this.$route.params.phase;
                 
-                // Se não tem workflowId e não é edição, não precisa carregar dados do workflow
                 if (!this.workflowIdInternal && !this.isEdit) {
                     return;
                 }
@@ -553,7 +546,6 @@
                 this.isLoading = true;
                 try {
                     if (this.currentPhase == 1) {
-                        // Apenas carrega dados do workflow se estiver editando
                         if (this.workflowIdInternal || this.isEdit) {
                             let result =
                                 await this.getPhase1Data();
@@ -584,7 +576,6 @@
                             })),
                         };
                     } else if (this.currentPhase == 3) {
-                        // Carrega profiles apenas quando necessário (phase 3)
                         await this.loadProfiles();
                         
                         let result =
@@ -728,7 +719,6 @@
                 if (!this.workflowIdInternal) return;
                 this.isLoading = true;
                 try {
-                    // Carrega profiles apenas quando necessário (phase 3)
                     await this.loadProfiles();
                     
                     let result = await this.getPhase2Data();
@@ -791,7 +781,6 @@
                         this.currentPhase =
                             Number(newPhase);
                         if (this.workflowIdInternal) {
-                            // Carrega apenas os dados necessários da fase atual
                             if (this.currentPhase === 1) {
                                 this.loadPhase1Data();
                             } else if (this.currentPhase === 2) {

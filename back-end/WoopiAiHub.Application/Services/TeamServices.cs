@@ -123,7 +123,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns>A collection of TeamSimpleDto</returns>
         public async Task<ICollection<TeamSimpleDto>> FindAllSimple()
         {
-            return await _teamRepository.FindAllSimple().ToListAsync();
+            return await _teamRepository.FindAllSimple();
         }
 
         /// <summary>
