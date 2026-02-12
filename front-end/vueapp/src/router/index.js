@@ -334,7 +334,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
+        path: "/flow/new/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
         name: "NewFlow",
         component: NewFlow,
         meta: {
@@ -345,7 +345,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
+        path: "/flow/edit/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
         name: "EditFlow",
         component: EditFlow,
         meta: {
