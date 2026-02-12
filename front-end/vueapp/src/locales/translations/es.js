@@ -1131,7 +1131,7 @@ const spanish = {
             approved: "Aprobado",
             awaitinganalysis: "En espera de análisis",
             done: "Listo",
-            finalize: "Finalizar",
+            finalize: "Terminado",
             waitingforapproval: "En espera de aprobación",
         },
         stepFlow: "Automatización de documentos",
