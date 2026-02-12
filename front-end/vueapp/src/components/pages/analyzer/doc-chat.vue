@@ -5,7 +5,10 @@
             @click="toggleChat"
             :class="{ expanded: isExpanded }"
         >
-            <i class="fas fa-comment-dots"></i>
+            <LucideIcon
+                icon="MessageCircleMore"
+                :size="20"
+            />
             {{ $t("analyze.askTheDoc") }}
         </button>
         <div
@@ -13,27 +16,26 @@
             class="chat-panel"
         >
             <div class="chat-header">
-                <i class="fas fa-comment-dots"></i>
+                <LucideIcon
+                    icon="History"
+                    :size="16"
+                    @click="openQuestionsHistoryModal"
+                />
+                <LucideIcon
+                    icon="MessageCircleMore"
+                    :size="16"
+                />
                 {{ $t("analyze.askTheDoc") }}
                 <button
                     class="close-button"
                     @click="toggleChat"
                     :title="$t('common.close')"
                 >
-                    <i class="fas fa-times"></i>
+                    <LucideIcon
+                        icon="X"
+                        :size="20"
+                    />
                 </button>
-                <div class="text-center mb-4">
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary btn-sm"
-                        @click="openQuestionsHistoryModal"
-                    >
-                        <LucideIcon
-                            icon="History"
-                            :size="16"
-                        />
-                    </button>
-                </div>
             </div>
             <div class="questionnaire-section">
                 <label class="input-label">
@@ -72,10 +74,11 @@
                             class="spinner-border spinner-border-sm text-light"
                             role="status"
                         ></div>
-                        <i
+                        <LucideIcon
                             v-else
-                            class="fas fa-arrow-up"
-                        ></i>
+                            icon="ArrowUp"
+                            :size="20"
+                        />
                     </button>
                 </div>
             </div>

@@ -59,7 +59,7 @@
 
                         <input
                             type="radio"
-                            class="btn-check"
+                            class="btn-check ms-2"
                             name="view"
                             id="view-both"
                             autocomplete="off"
