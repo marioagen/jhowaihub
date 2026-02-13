@@ -1,14 +1,23 @@
 <template>
-    <div
-        class="card"
-    >
+    <div class="card">
         <div class="card-content">
             <div class="card-body pb-0">
                 <div class="mb-1 title-text">
                     {{ truncateText(dataCard.name) }}
-                    <div class="badge fr flex-shrink-1 mt-1"
-                        :style="badgeStyle(dataStep.status.color)">
-                        {{ $t("workflow.statusList." + dataStep.status.name.toLowerCase()) }}
+                    <div
+                        class="badge fr flex-shrink-1 mt-1"
+                        :style="
+                            badgeStyle(
+                                dataStep.status.color
+                            )
+                        "
+                    >
+                        {{
+                            $t(
+                                "workflow.statusList." +
+                                    dataStep.status.name.toLowerCase()
+                            )
+                        }}
                     </div>
                 </div>
                 <div class="mb-2">
@@ -94,13 +103,18 @@
                     v-if="!showLoading"
                 >
                     <div>
-                        <button type="button" class="btn btn-sm btn-primary" @click="redirectToAnalyzer">
-                            {{$t("common.analyze")}}
-                            <LucideIcon icon="FileClock"
-                                        :size="15"
-                                        class="ms-2"
-                                        />
-                        </button> 
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            @click="redirectToAnalyzer"
+                        >
+                            {{ $t("common.analyze") }}
+                            <LucideIcon
+                                icon="FileClock"
+                                :size="15"
+                                class="ms-2"
+                            />
+                        </button>
                     </div>
                     <div v-if="!isLastStep">
                         <button
@@ -138,7 +152,7 @@
                             >
                                 <button
                                     type="button"
-                                    class="btn btn-sm btn-primary btn-outline-primary  dropdown-toggle"
+                                    class="btn btn-sm btn-primary btn-outline-primary dropdown-toggle"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                     @click.stop=""
@@ -484,9 +498,11 @@
                 return dates.formatDate(date);
             },
             truncateText(text) {
-                if (!text) return ''
-                return text.length > 25 ? text.substring(0, 25) + '...' : text
-            }
+                if (!text) return "";
+                return text.length > 25
+                    ? text.substring(0, 25) + "..."
+                    : text;
+            },
         },
         mounted() {
             this.setUsers();
@@ -718,7 +734,7 @@
     }
 
     .fr {
-        float:right
+        float: right;
     }
 
     .spinner-grow {
@@ -774,7 +790,7 @@
         padding-bottom: 50px;
     }
 
-    .title-text{
+    .title-text {
         font-size: 13px;
     }
 </style>

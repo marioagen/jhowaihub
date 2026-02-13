@@ -672,12 +672,32 @@
                 autocompletePosition: { top: 0, left: 0 },
                 selectedAutocompleteIndex: 0,
                 autocompleteOptions: [
-                    { labelKey: "template.variablesOcr", value: "{{ocr}}" },
-                    { labelKey: "template.variablesEmbeddings", value: "{{embeddings}}" },
-                    { labelKey: "template.variablesPrompt", value: "{{prompt}}" },
-                    { label: "AI MODEL", value: "{{ai_model}}" },
-                    { label: "TRANSLATION", value: "{{translation}}" },
-                    { label: "IMAGE DATA", value: "{{image_data}}" },
+                    {
+                        labelKey: "template.variablesOcr",
+                        value: "{{ocr}}",
+                    },
+                    {
+                        labelKey:
+                            "template.variablesEmbeddings",
+                        value: "{{embeddings}}",
+                    },
+                    {
+                        labelKey:
+                            "template.variablesPrompt",
+                        value: "{{prompt}}",
+                    },
+                    {
+                        label: "AI MODEL",
+                        value: "{{ai_model}}",
+                    },
+                    {
+                        label: "TRANSLATION",
+                        value: "{{translation}}",
+                    },
+                    {
+                        label: "IMAGE DATA",
+                        value: "{{image_data}}",
+                    },
                 ],
             };
         },
@@ -689,10 +709,14 @@
                 return this.routeId !== undefined;
             },
             filteredAutocompleteOptions() {
-                return this.autocompleteOptions.map((opt) => ({
-                    ...opt,
-                    label: opt.labelKey ? this.$t(opt.labelKey) : opt.label,
-                }));
+                return this.autocompleteOptions.map(
+                    (opt) => ({
+                        ...opt,
+                        label: opt.labelKey
+                            ? this.$t(opt.labelKey)
+                            : opt.label,
+                    })
+                );
             },
             getTemplateTitle() {
                 return this.isEditMode
