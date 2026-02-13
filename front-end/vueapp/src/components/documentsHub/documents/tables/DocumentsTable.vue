@@ -36,17 +36,6 @@
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
-            <template #cell-status="{ data }">
-                <BadgeComponent
-                    v-if="data.row.status === 0"
-                    text="documents.statusList.notAnalyzed"
-                />
-                <BadgeComponent
-                    v-else
-                    text="common.analyzed"
-                    variant="success"
-                />
-            </template>
             <template #cell-workflows="{ data }">
                 <BadgeOutlinedComponent
                     v-for="(workflowData, index) in data.row
@@ -138,10 +127,6 @@
                         label: "documents.createdDate",
                     },
                     {
-                        key: "status",
-                        label: "common.status",
-                    },
-                    {
                         key: "workflows",
                         label: "documents.workflows",
                     },
@@ -163,6 +148,7 @@
                 input: "",
                 workflowId: "",
                 workflows: [],
+                statusId: "",
                 isAsc: true,
                 isAllUsers: false,
                 login: null,
@@ -186,6 +172,9 @@
                     login: this.filters.login,
                     workflowIds: this.filters.workflows,
                 };
+                if (this.filters.statusId !== "" && this.filters.statusId != null) {
+                    params.statusId = Number(this.filters.statusId);
+                }
 
                 DocumentsServices.getDocuments(params)
                     .then((response) => {

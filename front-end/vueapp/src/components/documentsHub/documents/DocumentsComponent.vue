@@ -1,26 +1,20 @@
 <template>
     <div class="mt-3 mb-3">
-        <div
-            class="d-flex justify-content-end align-items-center mb-3"
-        >
-            <button
-                class="btn btn-primary btn-sm"
-                @click="redirectToNewUpload"
-            >
-                <LucideIcon
-                    icon="Plus"
-                    :size="17"
-                />
+        <div class="d-flex justify-content-end align-items-center mb-3">
+            <button class="btn btn-primary btn-sm"
+                    @click="redirectToNewUpload">
+                <LucideIcon icon="Plus"
+                            :size="17" />
                 {{ $t("documents.createBtn") }}
             </button>
         </div>
         <div class="card mb-3">
             <div class="card-body">
-                <DocumentFilters
-                    :workflowsList="workflowsList"
-                    @filter="filterData"
-                    ref="DocumentFilters"
-                />
+                <DocumentFilters :workflowsList="workflowsList"
+                                 @filter="filterData"
+                                 ref="DocumentFilters"
+                                 :statusList="statusList"
+ />
             </div>
         </div>
     </div>
@@ -31,6 +25,7 @@
     import DocumentFilters from "@/components/documentsHub/documents/filters/DocumentFilters.vue";
     import DocumentsTable from "@/components/documentsHub/documents/tables/DocumentsTable.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import StatusService from '@/services/status/StatusService';
 
     export default {
         name: "DocumentsPage",
@@ -83,6 +78,12 @@
                     }
                 );
             },
+            async getStatuses() {
+                const response = await StatusService.getStatus();
+                if (response?.error === undefined && Array.isArray(response)) {
+                    this.statusList = response;
+                }
+            },
         },
         computed: {
             keyMongoAccess() {
@@ -100,6 +101,7 @@
                 this.reloadData
             );
             this.getWorkflows();
+            await this.getStatuses();
         },
         beforeUnmount() {
             GlobalEventService.off(

@@ -49,6 +49,10 @@ const english = {
         assignBtn: "Assign",
         cardsOpened:
             "There are open cards in this Workflow",
+        errorAdvancingCard: "An error occurred while advancing the card.",
+        errorFinalizingCard: "An error occurred while finalizing the card.",
+        finalizeConfirmMessage: "Are you sure you want to finalize this document?",
+        finalizeConfirmTitle: "Confirm finalization",
         unassignInfo: "Unassign document",
         userApplicant: "Applicant",
         userAssigned: "Assigned",
@@ -61,6 +65,7 @@ const english = {
         almost: "You're almost there!",
         analyze: "Analyze",
         analyzed: "Analyzed",
+        finalize: "Finalize",
         apply: "Apply",
         back: "Back",
         cancel: "Cancel",
@@ -356,6 +361,9 @@ const english = {
         workflowSelect: {
             none: "Select a workflow",
             withWorkflow: "All with associated workflow",
+        },
+        statusSelect: {
+            none: "Card status",
         },
     },
     flow: {
@@ -1113,6 +1121,7 @@ const english = {
             approved: "Approved",
             awaitinganalysis: "Awaiting Analysis",
             done: "Done",
+            finalize: "Finalize",
             waitingforapproval: "Waiting for Approval",
         },
         stepFlow: "Document Automation",

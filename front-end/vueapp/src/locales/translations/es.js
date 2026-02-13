@@ -53,6 +53,10 @@ const spanish = {
         assignBtn: "Asignar",
         cardsOpened:
             "Hay tarjetas abiertas en este Workflow",
+        errorAdvancingCard: "Ocurrió un error al avanzar el card.",
+        errorFinalizingCard: "Ocurrió un error al finalizar el card.",
+        finalizeConfirmMessage: "¿Está seguro de que desea finalizar este documento?",
+        finalizeConfirmTitle: "Confirmar finalización",
         unassignInfo: "Desasignar documento",
         userApplicant: "Solicitante",
         userAssigned: "Responsable",
@@ -65,6 +69,7 @@ const spanish = {
         almost: "Ya casi has llegado!",
         analyze: "Analizar",
         analyzed: "Analizado",
+        finalize: "Finalizar",
         apply: "Aplicar",
         back: "Volver",
         cancel: "Cancelar",
@@ -370,6 +375,9 @@ const spanish = {
         workflowSelect: {
             none: "Selecciona un flujo de trabajo",
             withWorkflow: "Todos con workflow asociado",
+        },
+        statusSelect: {
+            none: "Estado del card",
         },
     },
     flow: {
@@ -1138,6 +1146,7 @@ const spanish = {
             approved: "Aprobado",
             awaitinganalysis: "En espera de análisis",
             done: "Listo",
+            finalize: "Terminado",
             waitingforapproval: "En espera de aprobación",
         },
         stepFlow: "Automatización de documentos",

@@ -453,7 +453,7 @@ namespace WoopiAiHub.Application.Services.Automation
                 return;
             }
 
-            card.UpdateStepAndSatus(nextStep.Id, nextStep.StatusId);
+            card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
             var updated = _cardRepository.Update(card);
 
             if (updated)
