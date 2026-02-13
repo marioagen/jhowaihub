@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Bogus;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -112,6 +112,20 @@ namespace WoopiAiHub.UnitTests.Fixture
             {
                 ConnectorUrl = _faker.Internet.Url(),
                 ConnectorApiKey = Guid.NewGuid().ToString(),
+            };
+        }
+
+        public static ApiTemplateStepToolCreateDto FindValidApiTemplateStepToolCreateDto()
+        {
+            var _faker = new Faker("pt_BR");
+            return new ApiTemplateStepToolCreateDto
+            {
+                StepToolId = _faker.Random.Int(1, 1000),
+                Method = "POST",
+                Url = _faker.Internet.Url(),
+                QueryTemplate = @"[{""key"":""userId"",""value"":""1234""}]",
+                HeaderTemplate = @"[{""key"":""Authorization"",""value"":""Bearer abcdefg""}]",
+                BodyTemplate = @"{""text"":""abcdefg""}",
             };
         }
     }
