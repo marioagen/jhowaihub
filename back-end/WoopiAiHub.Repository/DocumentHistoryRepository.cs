@@ -50,7 +50,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public IEnumerable<DocumentHistory> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null)
         {
-            var query = _context.DocumentHistories.Where(a => a.IdDocument == idDocument);
+            var query = _context.DocumentHistories
+                .Include(h => h.User)
+                .Where(a => a.IdDocument == idDocument);
 
             if (!string.IsNullOrWhiteSpace(search))
             {

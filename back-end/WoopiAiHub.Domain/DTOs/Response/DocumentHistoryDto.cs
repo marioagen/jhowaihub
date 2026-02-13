@@ -9,6 +9,7 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public bool IsEdited { get; set; }
         public int? Type { get; set; }
         public Guid? UserId { get; set; }
+        public string? UserName { get; set; }
         public DateTime Created { get; set; }
     }
 }

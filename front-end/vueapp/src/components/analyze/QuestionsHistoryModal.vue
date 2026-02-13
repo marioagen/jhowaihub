@@ -155,13 +155,17 @@
                                         >
                                             <BadgeComponent
                                                 :text="
-                                                    item.tag
+                                                    item.tagText
                                                 "
-                                                variant="primary"
+                                                :variant="
+                                                    item.tagVariant
+                                                "
                                                 :clickable="
                                                     false
                                                 "
-                                                class="badge-tag-questionario"
+                                                :class="
+                                                    item.tagClass
+                                                "
                                             />
                                             <button
                                                 type="button"
@@ -354,17 +358,30 @@
                             ? response
                             : [];
                         this.conversationCards = list.map(
-                            (entry) => ({
-                                id: entry.id,
-                                userName: "—",
-                                date: this.formatHistoryDate(
-                                    entry.created
-                                ),
-                                tag: "Questionário",
-                                question: entry.input || "",
-                                answerHtml:
-                                    entry.output || "",
-                            })
+                            (entry) => {
+                                const isQuestionario =
+                                    entry.type === 2;
+                                return {
+                                    id: entry.id,
+                                    userName:
+                                        entry.userName ||
+                                        "—",
+                                    date: this.formatHistoryDate(
+                                        entry.created
+                                    ),
+                                    tagText: isQuestionario
+                                        ? "Questionário"
+                                        : "Pergunta Livre",
+                                    tagVariant: "primary",
+                                    tagClass: isQuestionario
+                                        ? "badge-tag-questionario"
+                                        : "badge-tag-pergunta-livre",
+                                    question:
+                                        entry.input || "",
+                                    answerHtml:
+                                        entry.output || "",
+                                };
+                            }
                         );
                         this.hasMore =
                             list.length >= filters.take;
@@ -428,6 +445,11 @@
     .badge-tag-questionario {
         background-color: #e8e0f0 !important;
         color: #6b5b7a !important;
+    }
+
+    .badge-tag-pergunta-livre {
+        background-color: #cce5ff !important;
+        color: #004085 !important;
     }
 
     .modal-header .modal-title {

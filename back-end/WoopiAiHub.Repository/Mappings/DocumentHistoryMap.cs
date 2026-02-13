@@ -26,6 +26,12 @@ namespace WoopiAiHub.Repository.Mappings
             builder.Property(u => u.IsEdited)
                   .IsRequired();
 
+            builder.Property(u => u.Type)
+                  .IsRequired(false);
+
+            builder.Property(u => u.UserId)
+                  .IsRequired(false);
+
             builder.HasOne(u => u.Document)
                    .WithMany(s => s.DocumentHistories)
                    .HasForeignKey(c => c.IdDocument);
