@@ -47,12 +47,16 @@ namespace WoopiAiHub.Repository
         /// <param name="search">Optional. Filter by text in Input or Output.</param>
         /// <param name="order">Optional. "asc" or "desc". Default desc.</param>
         /// <param name="orderBy">Optional. "created". Default created.</param>
+        /// <param name="userId">Optional. Filter by user who created the history entry.</param>
         /// <returns></returns>
-        public IEnumerable<DocumentHistory> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null)
+        public IEnumerable<DocumentHistory> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null, Guid? userId = null)
         {
             var query = _context.DocumentHistories
                 .Include(h => h.User)
                 .Where(a => a.IdDocument == idDocument);
+
+            if (userId.HasValue)
+                query = query.Where(a => a.UserId == userId.Value);
 
             if (!string.IsNullOrWhiteSpace(search))
             {

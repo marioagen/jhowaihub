@@ -221,6 +221,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="search"></param>
         /// <param name="order"></param>
         /// <param name="orderBy"></param>
+        /// <param name="user">Optional. Filter by user ID who created the history entry.</param>
         /// <returns></returns>
         [HttpGet("History/{id}/batch")]
         [SwaggerOperation("Returns document history entries for a document, limited by take (load more: 10, 20, 30...)")]
@@ -229,11 +230,12 @@ namespace WoopiAiHub.Api.Controllers
                                                      [FromQuery] int take = 10,
                                                      [FromQuery] string? search = null,
                                                      [FromQuery] string? order = null,
-                                                     [FromQuery] string? orderBy = null)
+                                                     [FromQuery] string? orderBy = null,
+                                                     [FromQuery] Guid? user = null)
         {
             try
             {
-                var result = _documentHistoryServices.FindByIdWithTake(id, take, search, order, orderBy);
+                var result = _documentHistoryServices.FindByIdWithTake(id, take, search, order, orderBy, user);
                 return Ok(result);
             }
             catch (Exception ex)
