@@ -861,58 +861,71 @@ const portuguese = {
             "Você está prestes a deletar <br/> um questionário do sistema",
     },
     template: {
-        addParam: "Adicionar Parâmetro",
-        bodySubtitle:
-            "Digite '{' para ver as variáveis disponíveis.",
-        cancelBtn: "Cancelar",
-        createBtn: "Salvar template",
-        createError: "Erro ao criar template",
-        createSuccess: "Template criado com sucesso",
+        title: "Templates de API",
+        tableTitle: "Templates",
+        subtitle:
+            "Gerencie, teste e edite seus templates de requisição API.",
         createTemplate: "Criar novo template",
-        editError: "Erro ao atualizar template",
-        editSuccess: "Template atualizado com sucesso",
+        notFound: "Nenhum template registrado",
+        method: "Método",
+        name: "Nome",
+        url: "URL",
+        createBtn: "Salvar Template",
+        cancelBtn: "Cancelar",
+        importCurl: "Importar cURL",
+        requestDetails: "Detalhes da Requisição",
+        requestBody: "Corpo da Requisição",
+        templateName: "Nome do Template",
+        templateNamePlaceholder:
+            "ex. Processamento de OCR de Usuário",
         endpointUrl: "URL do Endpoint",
         endpointUrlPlaceholder:
             "https://api.exemplo.com/v1/recurso",
-        formCreate: {
-            subtitle:
-                "Configure o modelo da sua requisição API.",
-            title: "Criar Template",
-        },
-        formEdit: {
-            subtitle:
-                "Atualize o modelo da sua requisição API.",
-            title: "Editar Template",
-        },
+        queryParams: "Parâmetros de Query",
         headers: "Cabeçalhos",
-        importCurl: "Importar cURL",
-        invalidJsonFormat: "Formato JSON inválido",
-        keyPlaceholder: "Key (o valor será {{nomeKey}})",
-        method: "Método",
-        name: "Nome",
+        queryParameters: "Parâmetros de Query",
+        addParam: "Adicionar Parâmetro",
         noQueryParameters:
             "Sem parâmetros de query. Adicione um ou digite na URL.",
-        notFound: "Nenhum template encontrado",
-        queryParameters: "Parâmetros de Query",
-        queryParams: "Parâmetros de Query",
-        removeError: "Erro ao remover template",
-        removeSuccess: "Template removido com sucesso",
-        requestBody: "Corpo da Requisição",
-        requestDetails: "Detalhes da Requisição",
-        subtitle:
-            "Gerencie, teste e edite seus templates de requisição de API.",
-        tableTitle: "Templates",
-        templateName: "Nome do Template",
-        templateNamePlaceholder:
-            "ex. Processamento de Agente Digitalizador de Usuário",
-        title: "Templates de API",
-        unselected: "Selecione um template",
-        url: "URL",
-        variablesOcr: "Agente Digitalizador",
-        variablesEmbeddings: "Indexação",
-        variablesPrompt: "Agente",
+        bodySubtitle:
+            "Digite '{' para ver as variáveis disponíveis.",
         variablesTip:
             "Dica: Use variáveis como '{{ocr}}' ou '{{prompt}}' que serão substituídas no momento da execução.",
+        formCreate: {
+            title: "Criar Template",
+            subtitle:
+                "Configure o modelo da sua requisição API.",
+        },
+        formEdit: {
+            title: "Editar Template",
+            subtitle:
+                "Atualize o modelo da sua requisição API.",
+        },
+        createSuccess: "Template criado com sucesso",
+        createError: "Erro ao criar template",
+        editSuccess: "Template atualizado com sucesso",
+        editError: "Erro ao atualizar template",
+        removeSuccess: "Template removido com sucesso",
+        removeError: "Erro ao remover template",
+        unselected: "Selecione um template",
+        keyPlaceholder: "Key (o valor será {{nomeKey}})",
+        valuePlaceholder: "Digite o valor",
+        invalidJsonFormat: "Formato JSON inválido",
+        selectTemplate: "Selecione um Template",
+        selectTemplatePlaceholder:
+            "Escolha um template de API",
+        fillVariables: "Preencher Variáveis",
+        enterValue: "Digite o valor para",
+        loadError: "Erro ao carregar template",
+        configuration: {
+            title: "Configurar Template de API",
+            subtitle:
+                "Selecione e configure um template de API",
+            savedSuccessfully:
+                "Configuração do template salva com sucesso",
+            saveError:
+                "Erro ao salvar configuração do template",
+        },
     },
     tools: {
         createBtn: "Nova Ferramenta",

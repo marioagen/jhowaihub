@@ -97,5 +97,120 @@ namespace WoopiAiHub.UnitTests.Utils
             // Verify decryption with wrong key fails with AuthenticationTagMismatchException
             Assert.Throws<System.Security.Cryptography.AuthenticationTagMismatchException>(() => service2.Decrypt(encrypted1));
         }
+
+        [Fact(DisplayName = "IsEncrypted should return true for valid encrypted text")]
+        [Trait("IsEncrypted", "Success")]
+        public void IsEncrypted_ShouldReturnTrue_ForValidEncryptedText()
+        {
+            // Arrange
+            var options = Options.Create(new EncryptionSettings { Key = "test-encryption-key-for-testing" });
+            var service = new AesGcmEncryptionService(options);
+            var plainText = "my-secret-api-key";
+            var encrypted = service.Encrypt(plainText);
+
+            // Act
+            var result = service.IsEncrypted(encrypted);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "IsEncrypted should return false for plain text")]
+        [Trait("IsEncrypted", "Success")]
+        public void IsEncrypted_ShouldReturnFalse_ForPlainText()
+        {
+            // Arrange
+            var options = Options.Create(new EncryptionSettings { Key = "test-encryption-key-for-testing" });
+            var service = new AesGcmEncryptionService(options);
+            var plainText = "my-secret-api-key";
+
+            // Act
+            var result = service.IsEncrypted(plainText);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "IsEncrypted should return false for invalid base64")]
+        [Trait("IsEncrypted", "Validation")]
+        public void IsEncrypted_ShouldReturnFalse_ForInvalidBase64()
+        {
+            // Arrange
+            var options = Options.Create(new EncryptionSettings { Key = "test-encryption-key-for-testing" });
+            var service = new AesGcmEncryptionService(options);
+            var invalidBase64 = "invalid-base64-!!!";
+
+            // Act
+            var result = service.IsEncrypted(invalidBase64);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "IsEncrypted should return false for too short base64")]
+        [Trait("IsEncrypted", "Validation")]
+        public void IsEncrypted_ShouldReturnFalse_ForTooShortBase64()
+        {
+            // Arrange
+            var options = Options.Create(new EncryptionSettings { Key = "test-encryption-key-for-testing" });
+            var service = new AesGcmEncryptionService(options);
+            // Valid base64 but too short (less than NonceSize + TagSize = 28 bytes)
+            var shortBase64 = Convert.ToBase64String(new byte[20]);
+
+            // Act
+            var result = service.IsEncrypted(shortBase64);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "IsEncrypted should return false for empty string")]
+        [Trait("IsEncrypted", "Validation")]
+        public void IsEncrypted_ShouldReturnFalse_ForEmptyString()
+        {
+            // Arrange
+            var options = Options.Create(new EncryptionSettings { Key = "test-encryption-key-for-testing" });
+            var service = new AesGcmEncryptionService(options);
+
+            // Act
+            var result = service.IsEncrypted(string.Empty);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "IsEncrypted should return true for minimum valid length")]
+        [Trait("IsEncrypted", "Validation")]
+        public void IsEncrypted_ShouldReturnTrue_ForMinimumValidLength()
+        {
+            // Arrange
+            var options = Options.Create(new EncryptionSettings { Key = "test-encryption-key-for-testing" });
+            var service = new AesGcmEncryptionService(options);
+            // Create a base64 string with exactly NonceSize + TagSize bytes (28 bytes)
+            var minValidBytes = new byte[28];
+            var minValidBase64 = Convert.ToBase64String(minValidBytes);
+
+            // Act
+            var result = service.IsEncrypted(minValidBase64);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "IsEncrypted should return false for special characters")]
+        [Trait("IsEncrypted", "Validation")]
+        public void IsEncrypted_ShouldReturnFalse_ForSpecialCharacters()
+        {
+            // Arrange
+            var options = Options.Create(new EncryptionSettings { Key = "test-encryption-key-for-testing" });
+            var service = new AesGcmEncryptionService(options);
+            var specialChars = "!@#$%^&*()";
+
+            // Act
+            var result = service.IsEncrypted(specialChars);
+
+            // Assert
+            Assert.False(result);
+        }
     }
 }

@@ -1,4 +1,3 @@
-﻿using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
 
@@ -9,6 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> Create(Step step);
         Task<bool> Update(Step step);
         Task<Step?> FindById(int id);
+        Task<Step?> FindByIdWithTools(int id);
         ICollection<Step> FindByIds(IEnumerable<int> ids);
         bool DeleteByIds(IEnumerable<int> ids);
         Task<Step?> FindByOrderAndWorkflowId(int order,

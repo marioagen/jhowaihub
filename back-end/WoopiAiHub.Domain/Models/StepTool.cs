@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -132,6 +132,12 @@ namespace WoopiAiHub.Domain.Models
                 };
                 Dependencies.Add(dependency);
             }
+        }
+
+        public void AddParameter(StepToolParameter parameter)
+        {
+            ArgumentNullException.ThrowIfNull(parameter);
+            Parameters.Add(parameter);
         }
     }
 }
