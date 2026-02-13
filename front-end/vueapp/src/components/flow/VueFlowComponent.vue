@@ -128,6 +128,9 @@ export default {
                 type: "hub",
             };
         },
+        reloadFlow() {
+            this.getFlow();
+        },
         newFlow() {
             this.nodes = [this.createStartNode()];
             this.edges = [];
@@ -380,6 +383,11 @@ export default {
             this.getFlow();
         }
     },
+    expose: [
+        "updateNodeInput",
+        "buildFlowPayload",
+        "reloadFlow",
+    ],
 };
 </script>
 <style>

@@ -846,57 +846,71 @@ const english = {
             "You are about to delete <br/> a questionnaire from the system",
     },
     template: {
-        addParam: "Add Param",
-        bodySubtitle:
-            "Type '{' to see available variables.",
-        cancelBtn: "Cancel",
-        createBtn: "Save Template",
-        createError: "Error creating template",
-        createSuccess: "Template created successfully",
+        title: "API Templates",
+        tableTitle: "Templates",
+        subtitle:
+            "Manage, test and edit your API request templates.",
         createTemplate: "Create new template",
-        editError: "Error updating template",
-        editSuccess: "Template updated successfully",
+        notFound: "No templates registered",
+        method: "Method",
+        name: "Name",
+        url: "URL",
+        createBtn: "Save Template",
+        cancelBtn: "Cancel",
+        importCurl: "Import cURL",
+        requestDetails: "Request Details",
+        requestBody: "Request Body",
+        templateName: "Template Name",
+        templateNamePlaceholder: "e.g. User OCR Processing",
         endpointUrl: "Endpoint URL",
         endpointUrlPlaceholder:
             "https://api.example.com/v1/resource",
-        formCreate: {
-            subtitle:
-                "Configure your API request blueprint.",
-            title: "Create Template",
-        },
-        formEdit: {
-            subtitle: "Update your API request blueprint.",
-            title: "Edit Template",
-        },
+        queryParams: "Query Params",
         headers: "Headers",
-        importCurl: "Import cURL",
-        invalidJsonFormat: "Invalid JSON format",
-        keyPlaceholder: "Key (value will be {{keyName}})",
-        method: "Method",
-        name: "Name",
+        queryParameters: "Query Parameters",
+        addParam: "Add Param",
         noQueryParameters:
             "No query parameters. Add one or type in the URL.",
-        notFound: "No templates registered",
-        queryParameters: "Query Parameters",
-        queryParams: "Query Params",
-        removeError: "Error removing template",
+        bodySubtitle:
+            "Type '{' to see available variables.",
+        variablesTip:
+            "Tip: Use variables like {{ocr}} or {{prompt}} that will be replaced at execution time.",
+        formCreate: {
+            title: "Create Template",
+            subtitle:
+                "Configure your API request blueprint.",
+        },
+        formEdit: {
+            title: "Edit Template",
+            subtitle: "Update your API request blueprint.",
+        },
+        createSuccess: "Template created successfully",
+        createError: "Error creating template",
+        editSuccess: "Template updated successfully",
+        editError: "Error updating template",
         removeSuccess: "Template removed successfully",
-        requestBody: "Request Body",
-        requestDetails: "Request Details",
-        subtitle:
-            "Manage, test and edit your API request templates.",
-        tableTitle: "Templates",
-        templateName: "Template Name",
-        templateNamePlaceholder:
-            "e.g. User Digitizer Agent Processing",
-        title: "API Templates",
+        removeError: "Error removing template",
         unselected: "Select a template",
-        url: "URL",
+        keyPlaceholder: "Key (value will be {{keyName}})",
+        valuePlaceholder: "Enter value",
+        invalidJsonFormat: "Invalid JSON format",
         variablesOcr: "Digitizer Agent",
         variablesEmbeddings: "Indexing",
         variablesPrompt: "Agent",
-        variablesTip:
-            "Tip: Use variables like {{ocr}} or {{prompt}} that will be replaced at execution time.",
+        selectTemplate: "Select a Template",
+        selectTemplatePlaceholder: "Choose an API template",
+        fillVariables: "Fill Variables",
+        enterValue: "Enter value for",
+        loadError: "Error loading template",
+        configuration: {
+            title: "Configure API Template",
+            subtitle:
+                "Select and configure an API template",
+            savedSuccessfully:
+                "Template configuration saved successfully",
+            saveError:
+                "Error saving template configuration",
+        },
     },
     tools: {
         createBtn: "New Tool",

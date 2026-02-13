@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Services.Automation;
@@ -50,12 +50,14 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IStepProfilePermissionsServices, StepProfilePermissionsServices>();
             services.AddScoped<IApiClientFactory, ApiClientFactory>();
             services.AddScoped<IN8NServices, N8NServices>();
+            services.AddScoped<IApiOutputServices, ApiOutputServices>();
             services.AddScoped<IPromptServices, PromptServices>();
             services.AddScoped<IValidatePrompt, ValidatePrompt>();
             services.AddScoped<IToolHandler, EmbeddingsHandler>();
             services.AddScoped<IToolHandler, OcrHandler>();
             services.AddScoped<IToolHandler, PromptHandler>();
             services.AddScoped<IToolHandler, N8NHandler>();
+            services.AddScoped<IToolHandler, ApiHandler>();
             services.AddScoped<IEncryptionService, AesGcmEncryptionService>();
             services.AddScoped<IUsageDailyServices, UsageDailyServices>();
             services.AddScoped<IUsageMonthServices, UsageMonthServices>();
@@ -71,6 +73,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddHostedService<PromptConsumer>();
             services.AddHostedService<SubscriptionConsumer>();
             services.AddHostedService<SubscriptionEndPeriodConsumer>();
+            services.AddHostedService<ApiOutputConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

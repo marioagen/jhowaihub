@@ -91,6 +91,24 @@ namespace WoopiAiHub.Application.Utils
         }
 
         /// <summary>
+        /// Validates if a string is encrypted based on the expected format
+        /// </summary>
+        /// <param name="text">The text to validate</param>
+        /// <returns>True if the text appears to be encrypted in the expected format, false otherwise</returns>
+        public bool IsEncrypted(string text)
+        {
+            try
+            {
+                var encryptedBytes = Convert.FromBase64String(text);
+                return encryptedBytes.Length >= NonceSize + TagSize;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Derives a 256-bit key from the input string using SHA256
         /// </summary>
         /// <param name="keyString">Input key string</param>

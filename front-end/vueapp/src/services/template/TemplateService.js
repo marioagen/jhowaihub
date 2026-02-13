@@ -21,7 +21,20 @@ export default {
                 };
             });
     },
-
+    getAllTemplates() {
+        return api
+            .get("/ApiTemplate", {
+                params: { orderBy: "created desc" },
+            })
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                };
+            });
+    },
     getTemplateById(id) {
         return api
             .get(`/ApiTemplate/${id}`)
@@ -32,7 +45,6 @@ export default {
                 throw e;
             });
     },
-
     createTemplate(template) {
         return api
             .post("/ApiTemplate", template)
@@ -43,7 +55,6 @@ export default {
                 throw e;
             });
     },
-
     updateTemplate(template) {
         return api
             .put(`/ApiTemplate`, template)
@@ -54,7 +65,6 @@ export default {
                 throw e;
             });
     },
-
     deleteTemplate(id) {
         return api
             .delete(`/ApiTemplate/${id}`)
