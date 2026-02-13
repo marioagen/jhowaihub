@@ -5,13 +5,12 @@ on:
     branches:
       - 'develop'
       - 'release'
-    paths:
-      - 'front-end/**'
+    # paths:
+      # - 'front-end/**'
 
 jobs:
   build-image:
     name: "Build image front-end"
-
     runs-on: ["azure-identity"]
     steps:
       - name: Checkout
