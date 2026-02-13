@@ -137,9 +137,9 @@ namespace WoopiAiHub.Repository
         public bool DeleteByIds(List<int> ids)
         {
             var questionnaires = _context.Questionnaires.Where(a => ids.Contains(a.Id));
-            VerifyIfQuestionnaireIsUsedInTheWorkflowTools(ids);
+            var validationQuestionnaireUsedInTools = VerifyIfQuestionnaireIsUsedInTheWorkflowTools(ids);
 
-            if (questionnaires.Count() > 0)
+            if (questionnaires.Count() > 0 && !validationQuestionnaireUsedInTools)
             {
                 _context.Questionnaires.RemoveRange(questionnaires);
                 _context.SaveChanges();
@@ -151,20 +151,15 @@ namespace WoopiAiHub.Repository
             }
         }
 
-        private void VerifyIfQuestionnaireIsUsedInTheWorkflowTools(List<int> ids)
+        private bool VerifyIfQuestionnaireIsUsedInTheWorkflowTools(List<int> ids)
         {
             var idsString = ids.Select(i => i.ToString());
-            var questionairesUsedInTools = _context.StepTools
-                .Include(st => st.Tool)
-                .ThenInclude(st => st.ToolType)
-                .Where(st => st.Tool.ToolType.Name == HandlersTypes.Quiz)
+            return  _context.StepTools
+                .Include(st => st.Tool!)
+                .ThenInclude(t => t!.ToolType)
+                .Where(st => st.Tool!.ToolType!.Name == HandlersTypes.Quiz)
                 .Where(st => st.Parameters.Select(s => s.Value).Any(s => idsString.Contains(s)))
                 .Any();
-
-            if (questionairesUsedInTools)
-            {
-                throw new Exception("Some of the questionnaires are being used in tools and can't be deleted");
-            }
         }
 
         /// <summary>

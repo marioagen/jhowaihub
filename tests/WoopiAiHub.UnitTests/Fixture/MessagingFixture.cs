@@ -164,7 +164,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
-        internal static DocumentEmbeddingsQueryResponseDto? FindValidDocumentEmbeddingsQueryResponseDto()
+        internal static DocumentEmbeddingsQueryResponseDto FindValidDocumentEmbeddingsQueryResponseDto()
         {
             JObject mockJObject = new JObject();
             mockJObject.Add("CardId", 1);

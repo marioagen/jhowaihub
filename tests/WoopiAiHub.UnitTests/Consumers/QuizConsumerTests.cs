@@ -7,20 +7,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
 using WoopiAiHub.Application.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Domain.Models;
 using Xunit;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Text.Json;
-using Newtonsoft.Json.Linq;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.UnitTests.Fixture;
 
 namespace WoopiAiHub.UnitTests.Messaging
@@ -100,9 +92,7 @@ namespace WoopiAiHub.UnitTests.Messaging
         public async Task QuizConsumer_ConsumeAsync_ShouldConsumeMessage()
         {
             // Arrange
-            _documentServices
-                .Setup(x => x.InputToolQuestionnaire(It.IsAny<DocumentEmbeddingsQueryResponseDto>()))
-                .Returns(Task.FromResult(new Document(
+            var document = new Document(
                 "Doc",
                 "Ref",
                 "Link",
@@ -111,7 +101,10 @@ namespace WoopiAiHub.UnitTests.Messaging
                 1,
                 new List<Workflow>(),
                 DateTime.Now
-               )));
+               );
+            _ = _documentServices
+                .Setup(x => x.InputToolQuestionnaire(It.IsAny<DocumentEmbeddingsQueryResponseDto>()))
+                .Returns(Task.FromResult<Document?>(document));
 
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<DocumentEmbeddingsQueryResponseDto, Task>>()))
                          .Callback<string, Func<DocumentEmbeddingsQueryResponseDto, Task>>(async (queue, callback) =>

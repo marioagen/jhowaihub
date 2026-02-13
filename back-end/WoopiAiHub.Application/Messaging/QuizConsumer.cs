@@ -24,18 +24,15 @@ namespace WoopiAiHub.Application.Messaging
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<QuizConsumer> _logger;
         private readonly MessageQueues _queues;
-        private readonly ChatCompletionSettings _chatCompletionSettings;
 
         public QuizConsumer(IServiceScopeFactory scopeFactory,
                               IConfiguration configuration,
                               IMessageConsumer<DocumentEmbeddingsQueryResponseDto> consumer,
                               ILogger<QuizConsumer> logger,
-                              IOptions<MessageQueues> queues,
-                              IOptions<ChatCompletionSettings> chatCompletionSettings) : base(configuration)
+                              IOptions<MessageQueues> queues) : base(configuration)
         {
             _scopeFactory = scopeFactory;
             _queues = queues.Value;
-            _chatCompletionSettings = chatCompletionSettings.Value;
             _consumer = consumer;
             _logger = logger;
         }
@@ -58,7 +55,7 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
                     var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
-                    var document = await documentServices.InputToolQuestionnaire(message);
+                    await documentServices.InputToolQuestionnaire(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
