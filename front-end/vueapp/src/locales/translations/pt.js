@@ -993,6 +993,7 @@ const portuguese = {
             Embeddings: "Indexação",
             OCR: "Agente Digitalizador",
             N8N: "N8N",
+            Quiz: "Questionário",
         },
         validationError: "Erro ao validar campos",
     },

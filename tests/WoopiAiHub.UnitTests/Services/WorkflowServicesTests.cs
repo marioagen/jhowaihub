@@ -1990,6 +1990,83 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
+        [Fact(DisplayName = "ValidateQuizTool should throw when hasOcrDependency is false")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task ValidateQuizTool_HasEmbeddingDependencyFalse_ThrowsAppException()
+        {
+            // Arrange
+            var stepId = 1;
+            var stepOrder = 1;
+            
+            var nonEmbeddingStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 999,
+                Order = 1,
+                PositionX = 1,
+                PositionY = 1,
+                Parameters = new List<StepToolParameterUpdateDto>()
+            };
+
+            var quizStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 2,
+                Order = 2,
+                PositionX = 2,
+                PositionY = 2,
+                Parameters = new List<StepToolParameterUpdateDto>(),
+                Dependencies = new List<StepToolOutputDependencyDto>
+                {
+                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
+                }
+            };
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var stepToolsList = new List<StepToolUpdateDto> { nonEmbeddingStepToolDto, quizStepToolDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto
+                    {
+                        Id = stepId,
+                        Order = stepOrder,
+                        StepTools = stepToolsList
+                    }
+                }
+            };
+
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
+            var step = new Step(stepId, DateTime.UtcNow, 1, "Step 1", stepOrder, 1, 1);
+            workflow.Steps.Add(step);
+            step.Workflow = workflow;
+
+            var nonEmbeddingTool = WorkflowFixture.CreateToolModel(999, "Non-Embedding Tool", "N8N");
+            var quizTool = WorkflowFixture.CreateToolModel(2, "Quiz Tool", "Quiz");
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((int id) => id == 999 ? nonEmbeddingTool : id == 2 ? quizTool : nonEmbeddingTool);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal("Quiz tool must have at least one embedding dependency", exception.Message);
+            Assert.Equal(ToolLabel.EmbeddingDependencyRequired, exception.LabelError);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
 
         [Fact(DisplayName = "HasOcrDependency should return true when dependency tool is OCR")]
         [Trait("HasOcrDependency", "Success")]

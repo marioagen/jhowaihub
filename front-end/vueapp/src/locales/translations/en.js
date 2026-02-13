@@ -968,6 +968,7 @@ const english = {
             Embeddings: "Indexing",
             OCR: "Digitizer Agent",
             N8N: "N8N",
+            Quiz: "Questionnaire",
         },
         validationError: "Error validating fields",
     },

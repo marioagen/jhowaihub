@@ -984,6 +984,7 @@ const spanish = {
             Embeddings: "Indexación",
             OCR: "Agente Digitalizador",
             N8N: "N8N",
+            Quiz: "Cuestionario",
         },
         validationError: "Error al validar los campos",
     },
