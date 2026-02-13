@@ -392,7 +392,7 @@
                         this.conversationCards = list.map(
                             (entry) => {
                                 const isQuestionario =
-                                    entry.type === 2;
+                                    entry.type === 1;
                                 return {
                                     id: entry.id,
                                     userName:
