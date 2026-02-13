@@ -37,10 +37,10 @@
                 </span>
             </div>
         </div>
-        <div class="col-3">
+        <div class="col-3 doc-filters-select-col">
             <select
                 v-model="filters.workflowId"
-                class="form-select form-select-sm w-auto"
+                class="form-select form-select-sm w-100"
                 @change="filterData"
             >
                 <option value="">
@@ -62,7 +62,7 @@
                 </option>
             </select>
         </div>
-        <div class="col-1">
+        <div class="col-1 doc-filters-btn-col">
             <button
                 v-tooltip="
                     filters.isAllUsers
@@ -161,7 +161,7 @@
         },
     };
 </script>
-<style scooped>
+<style scoped>
     .custom-input {
         font-size: 12px;
     }
@@ -169,5 +169,14 @@
     .custom-input::placeholder {
         font-size: 12px;
         color: #999;
+    }
+
+    .doc-filters-select-col {
+        min-width: 0;
+    }
+
+    .doc-filters-btn-col {
+        flex-shrink: 0;
+        min-width: 2.25rem;
     }
 </style>

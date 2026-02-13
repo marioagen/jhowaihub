@@ -214,9 +214,11 @@ const english = {
         loadingTheText: "Loading the text",
         mostOlder: "Most older",
         mostRecent: "Most recent",
-        ocrFetchError: "Error fetching Digitizer Agent text.",
+        ocrFetchError:
+            "Error fetching Digitizer Agent text.",
         ocrLoadError: "Error loading Digitizer Agent text.",
-        ocrNotAvailable: "Digitizer Agent not available for this document.",
+        ocrNotAvailable:
+            "Digitizer Agent not available for this document.",
         noDocumentsWereFound: "No documents were found",
         normalizingTheDocument:
             "Normalizing the document, wait.",
@@ -307,6 +309,17 @@ const english = {
         youAreAboutToDeleteDocumentQuery:
             "You are about to delete <br/> the query history from the system",
     },
+    documentsHub: {
+        title: "Processing workflows",
+        subtitle:
+            "View the flow of documents through processing steps",
+        workflows: {
+            title: "Processing workflows board",
+        },
+        documents: {
+            title: "Documents list",
+        },
+    },
     filters: {
         assignment: {
             allUsers: "All users",
@@ -361,7 +374,8 @@ const english = {
         formFlow: {
             configurationSaved:
                 "Configuration saved successfully",
-            configureToolParameters: "Configure the parameters of this tool",
+            configureToolParameters:
+                "Configure the parameters of this tool",
             connectorWorkflowConfigFail:
                 "Failed to retrieve workflow configuration. Check tool URL and API key",
             connectorWorkflowFail:
@@ -377,8 +391,7 @@ const english = {
             progressFlowUpdateFail:
                 "Failed to update flow. Flow already contains output data for tools.",
             prompts: "Agents",
-            promptRequired:
-                "Select at least one agent",
+            promptRequired: "Select at least one agent",
             selectPrompt: "Select an agent",
         },
         hideTools: "Hide Tools",
@@ -681,12 +694,12 @@ const english = {
         deleteError: "Agent deletion failed",
         deleteSuccess: "Agents deleted successfully",
         editPrompt: "Edit agent",
-        emptyPromptError:
-            "The agent field cannot be empty",
+        emptyPromptError: "The agent field cannot be empty",
         importButton: "Import",
         importError: "Error importing agents",
         importPredefined: "Import predefined",
-        importSubtitle: "Select predefined agents from the system",
+        importSubtitle:
+            "Select predefined agents from the system",
         importSuccess: "Agents imported successfully",
         importTitle: "Import agents",
         information: "Basic information",
@@ -705,7 +718,8 @@ const english = {
         searchPrompts: "Search agents",
         selectAllTemplates: "Select all templates",
         subtitle: "Manage system agents",
-        subtitleEdit: "Update the selected agent information",
+        subtitleEdit:
+            "Update the selected agent information",
         subtitleNew: "Create a new AI agent",
         title: "Agents",
         updateError: "Agent update failed",
@@ -872,6 +886,9 @@ const english = {
         keyPlaceholder: "Key (value will be {{keyName}})",
         valuePlaceholder: "Enter value",
         invalidJsonFormat: "Invalid JSON format",
+        variablesOcr: "Digitizer Agent",
+        variablesEmbeddings: "Indexing",
+        variablesPrompt: "Agent",
         selectTemplate: "Select a Template",
         selectTemplatePlaceholder: "Choose an API template",
         fillVariables: "Fill Variables",

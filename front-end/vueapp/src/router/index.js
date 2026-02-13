@@ -1,11 +1,11 @@
-﻿import {
+import {
     createRouter,
     createWebHashHistory,
 } from "vue-router";
 
-import DocumentsUpload from "@/pages/documents/uploads.vue";
-import DocumentsPage from "@/pages/documents/index.vue";
-import NormalizeIndex from "@/components/documents/EmbeddingDocument";
+import DocumentsHub from "@/pages/documentsHub/index.vue";
+import DocumentsUpload from "@/pages/documentsHub/uploads.vue";
+import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
 import AnalyzerIndex from "@/components/pages/analyzer";
 
 import LoginIndex from "@/pages/login.vue";
@@ -28,7 +28,6 @@ import NewQuizz from "@/pages/managementQuizzes/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/managementQuizzes/quizzes/editQuizz.vue";
 
 import WorkflowPage from "@/pages/workflow/index.vue";
-import WorkflowManagement from "@/pages/workflow/management.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
 
@@ -129,7 +128,7 @@ const routes = [
     {
         path: "/documents",
         name: "Documents",
-        component: DocumentsPage,
+        component: DocumentsHub,
         meta: {
             layout: "default",
             module: "Documents",
@@ -281,7 +280,7 @@ const routes = [
     {
         path: "/workflow",
         name: "Workflow",
-        component: WorkflowPage,
+        component: DocumentsHub,
         meta: {
             layout: "default",
             module: "Workflow",
@@ -291,11 +290,11 @@ const routes = [
     },
     {
         path: "/workflow/management/:phase?",
-        name: "WorkflowManagement",
-        component: WorkflowManagement,
+        name: "WorkflowPage",
+        component: WorkflowPage,
         meta: {
             layout: "default",
-            module: "WorkflowManagement",
+            module: "WorkflowPage",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -306,7 +305,7 @@ const routes = [
         component: NewWorkflow,
         meta: {
             layout: "default",
-            module: "WorkflowManagement",
+            module: "WorkflowPage",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -317,7 +316,7 @@ const routes = [
         component: EditWorkflow,
         meta: {
             layout: "default",
-            module: "WorkflowManagement",
+            module: "WorkflowPage",
             action: "View",
         },
         beforeEnter: authenticate,
