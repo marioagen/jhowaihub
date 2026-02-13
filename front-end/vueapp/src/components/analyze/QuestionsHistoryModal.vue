@@ -75,9 +75,17 @@
                                 class="form-select form-select-sm border-start-0"
                                 v-model="selectedUser"
                                 style="min-width: 140px"
+                                @change="onUserFilterChange"
                             >
                                 <option value="">
                                     Todos os usuários
+                                </option>
+                                <option
+                                    v-for="u in usersList"
+                                    :key="u.id"
+                                    :value="u.id"
+                                >
+                                    {{ u.name }}
                                 </option>
                             </select>
                         </div>
@@ -280,6 +288,7 @@
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import DocumentsServices from "@/services/documents/DocumentsServices";
+    import UserService from "@/services/users/UserService";
 
     export default {
         components: {
@@ -294,6 +303,7 @@
             documentId: null,
             searchQuery: "",
             selectedUser: "",
+            usersList: [],
             conversationCards: [],
             currentTake: 10,
             hasMore: false,
@@ -320,6 +330,27 @@
                 this.currentTake = 10;
                 this.hasMore = false;
                 this.$refs.questionsHistoryModalRef?.open();
+                this.loadUsers();
+                this.getHistory();
+            },
+            loadUsers() {
+                UserService.getAllUsers()
+                    .then((data) => {
+                        if (data?.error) {
+                            this.usersList = [];
+                            return;
+                        }
+                        this.usersList = Array.isArray(data)
+                            ? data
+                            : [];
+                    })
+                    .catch(() => {
+                        this.usersList = [];
+                    });
+            },
+            onUserFilterChange() {
+                this.filters.user = this.selectedUser;
+                this.currentTake = 10;
                 this.getHistory();
             },
             close() {
@@ -337,10 +368,11 @@
             },
             getHistory() {
                 this.isLoadingCards = true;
+                this.filters.user = this.selectedUser;
                 const filters = {
                     take: this.currentTake,
                     search: this.searchQuery,
-                    user: this.selectedUser,
+                    user: this.selectedUser || undefined,
                     order: this.filters.order,
                     orderBy: this.filters.orderBy,
                 };
