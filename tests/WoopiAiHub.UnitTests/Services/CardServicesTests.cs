@@ -775,5 +775,39 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _automationServices.Verify(s => s.StartExecutionByCardAsync(It.IsAny<AutomationServicesDto>()), Times.Never);
         }
+
+        [Fact(DisplayName = "UpdateStatus should return app exception")]
+        [Trait("UpdateStatus", "Fail")]
+        public async Task UpdateStatus_CardUpdateStatusFails_CardNotFound()
+        {
+            // Arrange
+            var card = CardFixture.FindValidCard();
+            var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
+            _cardRepositoryMock.Setup(repo => repo.FindById(card.Id)).ReturnsAsync((Card)null);
+
+            // Act
+            await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStatus(updateCardStatusDto));
+
+            // Assert
+            _cardRepositoryMock.Verify(s => s.FindById(It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdateStatus should return true")]
+        [Trait("UpdateStatus", "True")]
+        public async Task UpdateStatus_CardUpdateStatusSuccess_ReturnsTrue()
+        {
+            // Arrange
+            var card = CardFixture.FindValidCard();
+            var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
+            _cardRepositoryMock.Setup(repo => repo.FindById(1)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+
+            // Act
+            var result = await _cardServices.UpdateStatus(updateCardStatusDto);
+
+            // Assert
+            Assert.True(result);
+            _cardRepositoryMock.Verify(s => s.FindById(It.IsAny<int>()), Times.Once);
+        }
     }
 }

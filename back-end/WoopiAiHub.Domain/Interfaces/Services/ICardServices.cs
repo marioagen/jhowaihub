@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
@@ -9,6 +9,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
             string tenant,
             string email);
 
+        Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto);
         Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto);
         Task<bool> UnassignUser(int cardId);
 

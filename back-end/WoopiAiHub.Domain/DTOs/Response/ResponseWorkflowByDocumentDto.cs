@@ -12,5 +12,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public int CardId { get; set; }
         public int DocumentId { get; set; }
         public string AssignedUserEmail { get; set; } = string.Empty;
+        public string StatusName { get; set; } = string.Empty;
     }
 }

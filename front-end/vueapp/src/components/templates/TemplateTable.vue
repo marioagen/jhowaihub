@@ -22,32 +22,27 @@
                 <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
-                <DropdownComponent>
-                    <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="
-                                redirectToEdit(data.row.id)
-                            "
-                        >
-                            <LucideIcon icon="SquarePen" />
-                            {{ $t("common.edit") }}
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            @click="
-                                openConfirmation(
-                                    data.row.id
-                                )
-                            "
-                        >
-                            <LucideIcon icon="Trash2" />
-                            {{ $t("common.delete") }}
-                        </a>
-                    </li>
-                </DropdownComponent>
+                <ActionTableListComponent
+                    v-slot="{ actionClass }"
+                >
+                    <a
+                        :class="actionClass"
+                        @click="redirectToEdit(data.row.id)"
+                        v-tooltip="$t('common.edit')"
+                    >
+                        <LucideIcon icon="SquarePen" />
+                    </a>
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="
+                            openConfirmation(data.row.id)
+                        "
+                        v-tooltip="$t('common.delete')"
+                    >
+                        <LucideIcon icon="Trash2" />
+                    </a>
+                </ActionTableListComponent>
             </template>
         </TableComponent>
     </div>
@@ -69,6 +64,8 @@
     import DropdownComponent from "@/components/global/DropdownComponent.vue";
     import TemplateService from "@/services/template/TemplateService";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent.vue";
+    import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
+
     export default {
         name: "TemplateTable",
         components: {
@@ -76,6 +73,7 @@
             DropdownComponent,
             TableComponent,
             ConfirmModal,
+            ActionTableListComponent,
         },
         data: () => ({
             table: {

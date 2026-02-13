@@ -49,6 +49,10 @@ const portuguese = {
     card: {
         assignBtn: "Atribuir",
         cardsOpened: "Existem cards abertos nesta esteira",
+        errorAdvancingCard: "Ocorreu um erro ao avançar o card.",
+        errorFinalizingCard: "Ocorreu um erro ao finalizar o card.",
+        finalizeConfirmMessage: "Você tem certeza que deseja finalizar esse documento?",
+        finalizeConfirmTitle: "Confirmar finalização",
         unassignInfo: "Desatribuir documento",
         userApplicant: "Solicitante",
         userAssigned: "Responsável",
@@ -61,6 +65,7 @@ const portuguese = {
         almost: "Você está quase lá!",
         analyze: "Analisar",
         analyzed: "Analisado",
+        finalize: "Finalizar",
         apply: "Aplicar",
         back: "Voltar",
         cancel: "Cancelar",
@@ -114,6 +119,17 @@ const portuguese = {
             "Esta ação não poderá ser desfeita. Tem certeza que deseja removê-lo?",
         upload: "Carregar",
         warning: "Atenção",
+    },
+    documentsHub: {
+        title: "Esteiras de processamento",
+        subtitle:
+            "Visualize o fluxo de documentos através das etapas de processamento",
+        workflows: {
+            title: "Board de Esteiras de processamento",
+        },
+        documents: {
+            title: "Lista de Documentos",
+        },
     },
     dashboard: {
         changeTenant: "Alternar Tenant",
@@ -220,9 +236,12 @@ const portuguese = {
         loadingTheText: "Carregando o texto",
         mostOlder: "Mais antigos",
         mostRecent: "Mais recentes",
-        ocrFetchError: "Erro ao buscar texto do Agente Digitalizador.",
-        ocrLoadError: "Erro ao carregar texto do Agente Digitalizador.",
-        ocrNotAvailable: "Agente Digitalizador não disponível para este documento.",
+        ocrFetchError:
+            "Erro ao buscar texto do Agente Digitalizador.",
+        ocrLoadError:
+            "Erro ao carregar texto do Agente Digitalizador.",
+        ocrNotAvailable:
+            "Agente Digitalizador não disponível para este documento.",
         noDocumentsWereFound:
             "Nenhum documento foi localizado",
         normalizingTheDocument:
@@ -355,6 +374,9 @@ const portuguese = {
             none: "Selecione uma esteira de processamento",
             withWorkflow: "Todos com esteira associadas",
         },
+        statusSelect: {
+            none: "Status do card",
+        },
     },
     flow: {
         downloadJson: "Baixar JSON",
@@ -372,7 +394,8 @@ const portuguese = {
         formFlow: {
             configurationSaved:
                 "Configuração salva com sucesso",
-            configureToolParameters: "Configure os parâmetros desta ferramenta",
+            configureToolParameters:
+                "Configure os parâmetros desta ferramenta",
             connectorWorkflowConfigFail:
                 "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
             connectorWorkflowFail:
@@ -389,8 +412,7 @@ const portuguese = {
             progressFlowUpdateFail:
                 "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
             prompts: "Agentes",
-            promptRequired:
-                "Selecione ao menos um agente",
+            promptRequired: "Selecione ao menos um agente",
             selectPrompt: "Selecione um agente",
         },
         hideTools: "Ocultar Ferramentas",
@@ -723,7 +745,8 @@ const portuguese = {
         searchPrompts: "Buscar agentes",
         selectAllTemplates: "Selecionar todos os templates",
         subtitle: "Gerencia agentes do sistema",
-        subtitleEdit: "Atualize as informações do agente selecionado",
+        subtitleEdit:
+            "Atualize as informações do agente selecionado",
         subtitleNew: "Criar um novo agente de IA",
         title: "Agentes",
         updateError: "Falha ao atualizar agente",
@@ -846,58 +869,71 @@ const portuguese = {
             "Você está prestes a deletar <br/> um questionário do sistema",
     },
     template: {
-        addParam: "Adicionar Parâmetro",
-        bodySubtitle:
-            "Digite '{' para ver as variáveis disponíveis.",
-        cancelBtn: "Cancelar",
-        createBtn: "Salvar template",
-        createError: "Erro ao criar template",
-        createSuccess: "Template criado com sucesso",
+        title: "Templates de API",
+        tableTitle: "Templates",
+        subtitle:
+            "Gerencie, teste e edite seus templates de requisição API.",
         createTemplate: "Criar novo template",
-        editError: "Erro ao atualizar template",
-        editSuccess: "Template atualizado com sucesso",
+        notFound: "Nenhum template registrado",
+        method: "Método",
+        name: "Nome",
+        url: "URL",
+        createBtn: "Salvar Template",
+        cancelBtn: "Cancelar",
+        importCurl: "Importar cURL",
+        requestDetails: "Detalhes da Requisição",
+        requestBody: "Corpo da Requisição",
+        templateName: "Nome do Template",
+        templateNamePlaceholder:
+            "ex. Processamento de OCR de Usuário",
         endpointUrl: "URL do Endpoint",
         endpointUrlPlaceholder:
             "https://api.exemplo.com/v1/recurso",
-        formCreate: {
-            subtitle:
-                "Configure o modelo da sua requisição API.",
-            title: "Criar Template",
-        },
-        formEdit: {
-            subtitle:
-                "Atualize o modelo da sua requisição API.",
-            title: "Editar Template",
-        },
+        queryParams: "Parâmetros de Query",
         headers: "Cabeçalhos",
-        importCurl: "Importar cURL",
-        invalidJsonFormat: "Formato JSON inválido",
-        keyPlaceholder: "Key (o valor será {{nomeKey}})",
-        method: "Método",
-        name: "Nome",
+        queryParameters: "Parâmetros de Query",
+        addParam: "Adicionar Parâmetro",
         noQueryParameters:
             "Sem parâmetros de query. Adicione um ou digite na URL.",
-        notFound: "Nenhum template encontrado",
-        queryParameters: "Parâmetros de Query",
-        queryParams: "Parâmetros de Query",
-        removeError: "Erro ao remover template",
-        removeSuccess: "Template removido com sucesso",
-        requestBody: "Corpo da Requisição",
-        requestDetails: "Detalhes da Requisição",
-        subtitle:
-            "Gerencie, teste e edite seus templates de requisição de API.",
-        tableTitle: "Templates",
-        templateName: "Nome do Template",
-        templateNamePlaceholder:
-            "ex. Processamento de Agente Digitalizador de Usuário",
-        title: "Templates de API",
-        unselected: "Selecione um template",
-        url: "URL",
-        variablesOcr: "Agente Digitalizador",
-        variablesEmbeddings: "Indexação",
-        variablesPrompt: "Agente",
+        bodySubtitle:
+            "Digite '{' para ver as variáveis disponíveis.",
         variablesTip:
             "Dica: Use variáveis como '{{ocr}}' ou '{{prompt}}' que serão substituídas no momento da execução.",
+        formCreate: {
+            title: "Criar Template",
+            subtitle:
+                "Configure o modelo da sua requisição API.",
+        },
+        formEdit: {
+            title: "Editar Template",
+            subtitle:
+                "Atualize o modelo da sua requisição API.",
+        },
+        createSuccess: "Template criado com sucesso",
+        createError: "Erro ao criar template",
+        editSuccess: "Template atualizado com sucesso",
+        editError: "Erro ao atualizar template",
+        removeSuccess: "Template removido com sucesso",
+        removeError: "Erro ao remover template",
+        unselected: "Selecione um template",
+        keyPlaceholder: "Key (o valor será {{nomeKey}})",
+        valuePlaceholder: "Digite o valor",
+        invalidJsonFormat: "Formato JSON inválido",
+        selectTemplate: "Selecione um Template",
+        selectTemplatePlaceholder:
+            "Escolha um template de API",
+        fillVariables: "Preencher Variáveis",
+        enterValue: "Digite o valor para",
+        loadError: "Erro ao carregar template",
+        configuration: {
+            title: "Configurar Template de API",
+            subtitle:
+                "Selecione e configure um template de API",
+            savedSuccessfully:
+                "Configuração do template salva com sucesso",
+            saveError:
+                "Erro ao salvar configuração do template",
+        },
     },
     tools: {
         createBtn: "Nova Ferramenta",
@@ -1039,9 +1075,11 @@ const portuguese = {
         boardView: "Visualizando esteira de processamento:",
         clone: "Clonar",
         cloneConfirm: "Clonar",
-        cloneError: "Erro ao clonar esteira de processamento",
+        cloneError:
+            "Erro ao clonar esteira de processamento",
         cloneNameLabel: "Nome da nova esteira",
-        cloneSuccess: "Esteira de processamento clonada com sucesso",
+        cloneSuccess:
+            "Esteira de processamento clonada com sucesso",
         cloneSuffix: "Cópia",
         cloneTitle: "Clonar esteira de processamento",
         configuredTools: "Ferramentas configuradas",
@@ -1128,7 +1166,8 @@ const portuguese = {
             analyzed: "Análisado",
             approved: "Aprovado",
             awaitinganalysis: "Esperando Análise",
-            done: "Finalizado",
+            done: "Concluído",
+            finalize: "Finalizado",
             waitingforapproval: "Esperando Aprovação",
         },
         stepFlow: "Automação de documentos",

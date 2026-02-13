@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 using Xunit;
 
@@ -56,6 +56,15 @@ namespace WoopiAiHub.UnitTests.Fixture
         public static Status FindValidStatus()
         {
             return new Status("Status", "#FFFFFF", 1, DateTime.Now);
+        }
+
+        public static UpdateCardStatusDto FindValidCardStatusDto()
+        {
+            return new UpdateCardStatusDto
+            {
+                CardId = 1,
+                StatusId =1
+            };
         }
     }
 

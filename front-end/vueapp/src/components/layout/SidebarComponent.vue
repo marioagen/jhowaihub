@@ -129,8 +129,8 @@
                         activeKey: "Dashboard",
                         to: "/dashboard",
                         icon: {
-                            name: "LayoutGrid",
-                            color: "#f43f5e",
+                            name: "ChartColumn",
+                            color: "#40b04d",
                         },
                         labelKey: "pages.dashboard",
                     },
@@ -176,16 +176,6 @@
                             "pages.workflowManagement",
                     },
                     {
-                        permission: "Documents",
-                        activeKey: "DocumentList",
-                        to: "/documents",
-                        icon: {
-                            name: "FileText",
-                            color: "#2f80ed",
-                        },
-                        labelKey: "pages.documents",
-                    },
-                    {
                         permission: "Workflow",
                         activeKey: "Workflow",
                         to: "/workflow",
@@ -204,6 +194,16 @@
                             color: "#f59e0b",
                         },
                         labelKey: "pages.tools",
+                    },
+                    {
+                        permission: "Templates",
+                        activeKey: "Templates",
+                        to: "/templates",
+                        icon: {
+                            name: "Zap",
+                            color: "#2f80ed",
+                        },
+                        labelKey: "pages.templates",
                     },
                 ],
             };
@@ -408,8 +408,8 @@
     .sidebar-menu-item-enter {
         opacity: 0;
         transform: translateX(-12px);
-        animation: sidebar-item-enter 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94)
-            forwards;
+        animation: sidebar-item-enter 280ms
+            cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         animation-delay: calc(var(--item-index) * 45ms);
     }
 
