@@ -1,12 +1,11 @@
-using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace WoopiAiHub.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTypeAndUserIdToDocumentHistory : Migration
+    public partial class AddTypeUserToHistory : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
