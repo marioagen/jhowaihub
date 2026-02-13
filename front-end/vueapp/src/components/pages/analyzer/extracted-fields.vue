@@ -144,6 +144,7 @@
                             v-model="fields[index].value"
                             rows="5"
                         ></textarea>
+                    </div>
                 </div>
                 <div v-if="field.outputType == 'Quiz'">
                     <div v-for="item in getTheValues(field)" :key="item.outputId" class="block">
