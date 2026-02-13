@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,30 +7,33 @@ namespace WoopiAiHub.Repository.Migrations
     /// <inheritdoc />
     public partial class AddTypeUserToHistory : Migration
     {
+        private const string DocumentHistories = "DocumentHistories";
+        private const string UserId = "UserId";
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
                 name: "Type",
-                table: "DocumentHistories",
+                table: DocumentHistories,
                 type: "int",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
-                name: "UserId",
-                table: "DocumentHistories",
+                name: UserId,
+                table: DocumentHistories,
                 type: "uniqueidentifier",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_DocumentHistories_UserId",
-                table: "DocumentHistories",
-                column: "UserId");
+                table: DocumentHistories,
+                column: UserId);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_DocumentHistories_Users_UserId",
-                table: "DocumentHistories",
-                column: "UserId",
+                table: DocumentHistories,
+                column: UserId,
                 principalTable: "Users",
                 principalColumn: "Id");
         }
@@ -40,19 +43,19 @@ namespace WoopiAiHub.Repository.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_DocumentHistories_Users_UserId",
-                table: "DocumentHistories");
+                table: DocumentHistories);
 
             migrationBuilder.DropIndex(
                 name: "IX_DocumentHistories_UserId",
-                table: "DocumentHistories");
+                table: DocumentHistories);
 
             migrationBuilder.DropColumn(
                 name: "Type",
-                table: "DocumentHistories");
+                table: DocumentHistories);
 
             migrationBuilder.DropColumn(
-                name: "UserId",
-                table: "DocumentHistories");
+                name: UserId,
+                table: DocumentHistories);
         }
     }
 }
