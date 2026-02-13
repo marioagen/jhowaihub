@@ -1,6 +1,6 @@
 <template>
     <div class="row">
-        <div class="col-8">
+        <div class="col-6">
             <div class="input-group">
                 <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon icon="Search"
@@ -41,7 +41,7 @@
                 </option>
             </select>
         </div>
-        <div class="col-3 doc-filters-select-col">
+        <div class="col-2 doc-filters-select-col">
             <select v-model="filters.workflowId"
                     class="form-select form-select-sm w-100"
                     @change="filterData">
@@ -62,7 +62,7 @@
                 </option>
             </select>
         </div>
-        <div class="col-1 doc-filters-btn-col">
+        <div class="col-2 doc-filters-btn-col">
             <button v-tooltip="
                     filters.isAllUsers
                         ? $t(
