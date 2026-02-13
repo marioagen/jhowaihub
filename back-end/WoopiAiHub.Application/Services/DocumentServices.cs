@@ -55,6 +55,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IUsageDailyServices _usageDailyServices;
+        private readonly IDocumentHistoryRepository _documentHistoryRepository;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
@@ -81,7 +82,8 @@ namespace WoopiAiHub.Application.Services
             IWorkflowRepository workflowRepository,
             IStepToolOutputRepository stepToolOutputRepository,
             IStepToolRepository stepToolRepository,
-            IUsageDailyServices usageDailyServices)
+            IUsageDailyServices usageDailyServices,
+            IDocumentHistoryRepository documentHistoryRepository)
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
@@ -105,6 +107,7 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolRepository = stepToolRepository;
             _usageDailyServices = usageDailyServices;
+            _documentHistoryRepository = documentHistoryRepository;
         }
 
         /// <summary>
@@ -182,28 +185,28 @@ namespace WoopiAiHub.Application.Services
 
             var referenceFilesToRemove = _documentRepository.FindHashById(ids).ToList();
             var hashList = referenceFilesToRemove;
-            
+
             _unitOfWork.BeginTransaction();
             try
             {
                 _documentRepository.ClearWorkflowRelationships(ids);
-                
+
                 var cardIds = await _cardRepository.FindCardIdsByDocumentIdsAsync(ids);
                 if (cardIds.Any())
                 {
                     _stepToolExecutionRepository.DeleteByCardIds(cardIds);
                     _stepToolOutputRepository.DeleteByCardIds(cardIds);
                 }
-                
+
                 await _cardRepository.DeleteByDocumentIds(ids);
                 var deleted = _documentRepository.Delete(ids);
                 await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
-                
+
                 if (referenceFilesToRemove.Any())
                 {
                     await DeleteBlobFilesAsync(referenceFilesToRemove, headersDto.Tenant);
                 }
-            
+
                 _unitOfWork.Commit();
                 return deleted;
             }
@@ -388,6 +391,53 @@ namespace WoopiAiHub.Application.Services
             await UpdateDocumentStatusAsync(dto.ReferenceFile, dto.Email);
 
             return dto.Data;
+        }
+
+        public async Task<WoopiAiHub.Domain.Models.Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto)
+        {
+            var documentDb = _documentRepository.FindByReferenceFile(documentQuestionnaireDto.ReferenceFile);
+            if (documentDb == null)
+            {
+                return null;
+            }
+
+            var messageContent = System.Text.Json.JsonSerializer.Serialize(documentQuestionnaireDto.QuestionsAnswers.Select(x => new QuestionAnswerDto { Id = x.Id, Question = x.Question, Answer = x.Answer }).ToList());
+
+            var documentHistory = new DocumentHistory(documentDb.Id,
+                "Quiz",
+                messageContent,
+                0,
+                DateTime.Now);
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                _documentHistoryRepository.Create(documentHistory);
+
+                var dataDto = System.Text.Json.JsonSerializer.Deserialize<MetaDataAutomationDto>(documentQuestionnaireDto.Data.ToString());
+
+                var execution = await _stepToolExecutionRepository
+                    .FindByStepToolIdAndCardIdAsync(dataDto.StepToolId, dataDto.CardId);
+                await UpdateExecutionAsync(execution!, documentQuestionnaireDto.Email);
+                await SaveStepToolOutputAsync(execution!, System.Text.Json.JsonSerializer.Serialize(documentQuestionnaireDto.QuestionsAnswers.Select(x => new QuestionAnswerDto { Id = x.Id, Question = x.Question, Answer = x.Answer }).ToList()));
+
+            foreach (var item in documentQuestionnaireDto.QuestionsAnswers)
+            {
+                foreach (var usage in item.Usage)
+                {
+                    await _usageDailyServices.AddByValuesAsync(MetricNames.Token, documentQuestionnaireDto.Email, usage.Total_usage ?? 0,
+                        usage.Model);
+                }
+            }
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+
+            return documentDb;
         }
 
 
@@ -1031,5 +1081,6 @@ namespace WoopiAiHub.Application.Services
                     .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
                     .Select(e => e.Text));
         }
+
     }
 }

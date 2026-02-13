@@ -856,6 +856,7 @@ namespace WoopiAiHub.Application.Services
             var createdDependencies = await FindStepToolDependencies(workflow, stepTool, stepToolDto);
 
             await ValidatePromptTool(tool, createdDependencies, stepToolDto);
+            await ValidateQuizTool(tool, createdDependencies, stepToolDto);
         }
 
         /// <summary>
@@ -927,6 +928,34 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Validates that a Prompt tool has at least one OCR dependency (direct or recursive).
+        /// </summary>
+        /// <param name="tool"></param>
+        /// <param name="createdDependencies"></param>
+        /// <param name="stepToolDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private async Task ValidateQuizTool(Tool tool, List<StepTool> createdDependencies, StepToolUpdateDto stepToolDto)
+        {
+            if (tool.ToolType?.Name != HandlersTypes.Quiz)
+            {
+                return;
+            }
+
+            if (stepToolDto.Dependencies == null || stepToolDto.Dependencies.Count == 0 || createdDependencies.Count == 0)
+            {
+                throw new AppException(ErrorCode.RequiredField, "Quiz tool must have at least one dependency", ToolLabel.DependecyRequired);
+            }
+
+            var toolCache = new Dictionary<int, Tool> { { tool.Id, tool } };
+            var hasEmbeddingDependency = await HasEmbeddingDependency(createdDependencies, toolCache);
+            if (!hasEmbeddingDependency)
+            {
+                throw new AppException(ErrorCode.RequiredField, "Quiz tool must have at least one Embedding dependency", ToolLabel.EmbeddingDependencyRequired);
+            }
+        }
+
+        /// <summary>
         /// Determines whether any of the specified dependencies require an OCR tool.
         /// </summary>
         /// <remarks>This method checks each dependency to determine if it is associated with a tool of
@@ -951,6 +980,39 @@ namespace WoopiAiHub.Application.Services
                 }
 
                 if (dependencyTool?.ToolType?.Name == HandlersTypes.Ocr)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether any of the specified dependencies require an Embedding tool.
+        /// </summary>
+        /// <remarks>This method checks each dependency to determine if it is associated with a tool of
+        /// type Embedding. The <paramref name="toolCache"/> is used to avoid redundant lookups and may be populated with
+        /// additional tools as needed.</remarks>
+        /// <param name="dependencies">A list of <see cref="StepTool"/> objects representing the tool dependencies to check.</param>
+        /// <param name="toolCache">A dictionary that maps tool IDs to <see cref="Tool"/> instances, used to cache tool lookups and improve
+        /// performance. May be updated with additional entries during execution.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if at least one
+        /// dependency requires an embedding tool; otherwise, <see langword="false"/>.</returns>
+        private async Task<bool> HasEmbeddingDependency(List<StepTool> dependencies, Dictionary<int, Tool> toolCache)
+        {
+            foreach (var dependency in dependencies)
+            {
+                if (!toolCache.TryGetValue(dependency.ToolId, out var dependencyTool))
+                {
+                    dependencyTool = await _toolRepository.FindModelByIdAsync(dependency.ToolId);
+                    if (dependencyTool != null)
+                    {
+                        toolCache[dependency.ToolId] = dependencyTool;
+                    }
+                }
+
+                if (dependencyTool?.ToolType?.Name == HandlersTypes.Embeddings  )
                 {
                     return true;
                 }

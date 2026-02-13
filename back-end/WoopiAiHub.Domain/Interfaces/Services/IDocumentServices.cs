@@ -4,6 +4,8 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using System.Reflection.Metadata;
+using WoopiAiHub.Domain.Models;
 
 
 namespace WoopiAiHub.Domain.Interfaces.Services
@@ -46,5 +48,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto dto);
         Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto);
         Task<OcrTextResponseDto> FindOcrTextByDocumentId(int documentId);
+
+        Task<WoopiAiHub.Domain.Models.Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto);
     };
 }

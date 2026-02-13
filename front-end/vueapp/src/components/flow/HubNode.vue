@@ -2,7 +2,9 @@
   <div class="vue-flow__node-default item-box shadow-sm">
     <Handle v-if="!node.data.isStartNode" type="target" position="left" class="hub-handle" />
     <div class="item-left me-2">
-      <LucideIcon :icon="node.data.icon" :color="node.data.color" />
+      <div class="p-2" :class="node.data.toolType === 'Quiz' ? 'icon-quiz' : ''">
+        <LucideIcon :icon="node.data.icon" :color="node.data.color" />
+      </div>
       <div>
         <h5 v-if="node.data.subtitle" :title="node.data.subtitle">{{
           node.data.subtitle
@@ -83,5 +85,17 @@ export default {
   border-radius: 100%;
   pointer-events: all;
   cursor: crosshair;
+}
+
+.icon-quiz {
+    color: #6A3EE6;
+    --vf-handle: #6A3EE6;
+    border-color: #6A3EE6;
+    background: #F3EEFF;
+    border-radius: 50%;
+}
+
+.icon-quiz svg{
+    stroke: #6A3EE6;
 }
 </style>

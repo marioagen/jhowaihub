@@ -4,6 +4,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Repository
 {
@@ -136,6 +137,7 @@ namespace WoopiAiHub.Repository
         public bool DeleteByIds(List<int> ids)
         {
             var questionnaires = _context.Questionnaires.Where(a => ids.Contains(a.Id));
+            VerifyIfQuestionnaireIsUsedInTheWorkflowTools(ids);
 
             if (questionnaires.Count() > 0)
             {
@@ -146,6 +148,22 @@ namespace WoopiAiHub.Repository
             else
             {
                 return false;
+            }
+        }
+
+        private void VerifyIfQuestionnaireIsUsedInTheWorkflowTools(List<int> ids)
+        {
+            var idsString = ids.Select(i => i.ToString());
+            var questionairesUsedInTools = _context.StepTools
+                .Include(st => st.Tool)
+                .ThenInclude(st => st.ToolType)
+                .Where(st => st.Tool.ToolType.Name == HandlersTypes.Quiz)
+                .Where(st => st.Parameters.Select(s => s.Value).Any(s => idsString.Contains(s)))
+                .Any();
+
+            if (questionairesUsedInTools)
+            {
+                throw new Exception("Some of the questionnaires are being used in tools and can't be deleted");
             }
         }
 

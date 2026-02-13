@@ -6,6 +6,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Configuration
         public string EmbeddingQueue { get; set; } = string.Empty;
         public string ChatCompletionQueue { get; set; } = string.Empty;
         public string AnswerQueue { get; set; } = string.Empty;
+        public string AnswerQueueResponse { get; set; } = string.Empty;
         public string OcrQueueAiHubResponse { get; set; } = string.Empty;
         public string EmbeddingQueueAiHubResponse { get; set; } = string.Empty;
         public string AnswerQueueAiHubResponse { get; set; } = string.Empty;
