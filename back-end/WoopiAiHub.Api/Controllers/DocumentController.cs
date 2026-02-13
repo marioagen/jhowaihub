@@ -221,7 +221,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="search"></param>
         /// <param name="order"></param>
         /// <param name="orderBy"></param>
-        /// <param name="user">Optional. Filter by user ID who created the history entry.</param>
+        /// <param name="user"></param>
         /// <returns></returns>
         [HttpGet("History/{id}/batch")]
         [SwaggerOperation("Returns document history entries for a document, limited by take (load more: 10, 20, 30...)")]

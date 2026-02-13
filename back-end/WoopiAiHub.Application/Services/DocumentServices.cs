@@ -59,9 +59,7 @@ namespace WoopiAiHub.Application.Services
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
-        /// <summary>Document history type when created via POST Document/InputQuestionnaire (questionnaire).</summary>
         private const int DocumentHistoryTypeInputQuestionnaire = 1;
-        /// <summary>Document history type when created via POST Document/Input (free input).</summary>
         private const int DocumentHistoryTypeDocumentInput = 2;
 
         public DocumentServices(IDocumentRepository documentRepository,
@@ -247,7 +245,6 @@ namespace WoopiAiHub.Application.Services
                     customQueryRequestDto,
                     apikey);
 
-                // InputQuestionnaire endpoint → history type 1
                 await this.ProcessRequestCustomQuery(resultRequest,
                     documentQuestionnaireDto.IdDocument,
                     description,
@@ -355,7 +352,6 @@ namespace WoopiAiHub.Application.Services
                 customQueryRequestDto,
                 apikey);
 
-            // Document/Input endpoint → history type 2
             var textResponse = await this.ProcessRequestCustomQuery(resultRequest,
                 documentInputDto.Id,
                 documentInputDto.Input,
@@ -518,8 +514,8 @@ namespace WoopiAiHub.Application.Services
         /// <param name="resultRequest"></param>
         /// <param name="id"></param>
         /// <param name="input"></param>
-        /// <param name="emailCreator">Logged-in user email (from request headers).</param>
-        /// <param name="isFromQuestionnaire">True when called from InputQuestionnaire endpoint, false when from Document/Input.</param>
+        /// <param name="emailCreator"></param>
+        /// <param name="isFromQuestionnaire"></param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
         /// <exception cref="Exception"></exception>
@@ -536,7 +532,6 @@ namespace WoopiAiHub.Application.Services
 
                 var userId = _userRepository.FindIdByEmail(emailCreator);
                 var userIdOrNull = (userId == Guid.Empty) ? (Guid?)null : userId;
-                // InputQuestionnaire → type 1; Document/Input → type 2
                 var historyType = isFromQuestionnaire ? DocumentHistoryTypeInputQuestionnaire : DocumentHistoryTypeDocumentInput;
                 var documentHistoryForDb = CreateDocumentHistoryForDb(id,
                     queryResponseModel!.response,
@@ -591,11 +586,11 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Creates an object of type DocumentHistory
         /// </summary>
-        /// <param name="id">Document id.</param>
-        /// <param name="output">History output (answer).</param>
-        /// <param name="input">History input (question).</param>
-        /// <param name="type">1 = InputQuestionnaire endpoint, 2 = Document/Input endpoint.</param>
-        /// <param name="userId">Logged-in user id who created the history.</param>
+        /// <param name="id"></param>
+        /// <param name="output"></param>
+        /// <param name="input"></param>
+        /// <param name="type"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         private static DocumentHistory CreateDocumentHistoryForDb(int id,
             string output,

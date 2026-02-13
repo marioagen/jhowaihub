@@ -47,7 +47,7 @@ namespace WoopiAiHub.Repository
         /// <param name="search">Optional. Filter by text in Input or Output.</param>
         /// <param name="order">Optional. "asc" or "desc". Default desc.</param>
         /// <param name="orderBy">Optional. "created". Default created.</param>
-        /// <param name="userId">Optional. Filter by user who created the history entry.</param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         public IEnumerable<DocumentHistory> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null, Guid? userId = null)
         {
