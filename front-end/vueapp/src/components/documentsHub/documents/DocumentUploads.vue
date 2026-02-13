@@ -604,9 +604,9 @@
                 this.dropzoneInstance = new Dropzone(
                     "#dropzoneUpload",
                     {
-                        paramName: "file", // Nome do parâmetro de envio
-                        maxFilesize: 10000000000, // Tamanho máximo do arquivo em MB
-                        acceptedFiles: ".pdf", // Tipos de arquivos aceitos
+                        paramName: "file",
+                        maxFilesize: 10000000000,
+                        acceptedFiles: ".pdf",
                         maxFiles: this.maxFiles,
                         autoProcessQueue: false,
                         addRemoveLinks: true,
@@ -1180,7 +1180,6 @@
         border-bottom-right-radius: 0.25rem !important;
     }
 
-    /* Refresh animated  */
     .refresh-animated {
         -webkit-animation: spin 2s linear infinite;
         -moz-animation: spin 2s linear infinite;
