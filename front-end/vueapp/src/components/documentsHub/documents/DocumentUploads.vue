@@ -95,7 +95,7 @@
                                             class="clear-button"
                                         >
                                             <img
-                                                src="../../assets/img/icon-dropzone-remove-all.svg"
+                                                src="@/assets/img/icon-dropzone-remove-all.svg"
                                                 alt="Remove All"
                                                 :title="
                                                     $t(
