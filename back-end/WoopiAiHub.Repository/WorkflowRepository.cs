@@ -402,6 +402,7 @@ namespace WoopiAiHub.Repository
 
         /// <summary>
         /// Find phase 1 data by workflow id
+        /// Optimized query that only selects necessary fields (name and teams with id and name).
         /// </summary>
         /// <param name="id">Workflow id</param>
         /// <returns>Phase1Dto containing workflow name and associated teams</returns>
@@ -409,7 +410,6 @@ namespace WoopiAiHub.Repository
         {
             var workflow = await _context.Workflows
                 .Where(w => w.Id == id && w.Enable)
-                .AsSplitQuery()
                 .Select(w => new Phase1Dto
                 {
                     Name = w.Name,

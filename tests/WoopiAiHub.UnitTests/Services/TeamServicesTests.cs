@@ -157,7 +157,7 @@ namespace WoopiAiHub.UnitTests.Services
             var team = new Team("Antigo Nome", teamId, DateTime.Now)
             {
                 Users = new List<User>(),
-                Profiles = new List<Profile>()  
+                Profiles = new List<Profile>()
             };
 
             var users = new List<User>
@@ -517,6 +517,106 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.Empty(result);
             _teamRepositoryMock.Verify(repo => repo.FindAll(), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindAllSimple should return list of TeamSimpleDto when teams exist")]
+        [Trait("FindAllSimple", "Success")]
+        public async Task FindAllSimple_ShouldReturnTeamSimpleDtoList_WhenTeamsExist()
+        {
+            // Arrange
+            var expectedTeams = new List<TeamSimpleDto>
+            {
+                new TeamSimpleDto { Id = 1, Name = "Team Alpha" },
+                new TeamSimpleDto { Id = 2, Name = "Team Beta" },
+                new TeamSimpleDto { Id = 3, Name = "Team Gamma" }
+            };
+
+            _teamRepositoryMock.Setup(repo => repo.FindAllSimple())
+                              .ReturnsAsync(expectedTeams);
+
+            // Act
+            var result = await _service.FindAllSimple();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(3, result.Count);
+            Assert.Equal(expectedTeams, result);
+            _teamRepositoryMock.Verify(repo => repo.FindAllSimple(), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindAllSimple should return empty list when no teams exist")]
+        [Trait("FindAllSimple", "Success")]
+        public async Task FindAllSimple_ShouldReturnEmptyList_WhenNoTeamsExist()
+        {
+            // Arrange
+            var expectedTeams = new List<TeamSimpleDto>();
+
+            _teamRepositoryMock.Setup(repo => repo.FindAllSimple())
+                              .ReturnsAsync(expectedTeams);
+
+            // Act
+            var result = await _service.FindAllSimple();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+            _teamRepositoryMock.Verify(repo => repo.FindAllSimple(), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindAllSimple should return single team when only one exists")]
+        [Trait("FindAllSimple", "Success")]
+        public async Task FindAllSimple_ShouldReturnSingleTeam_WhenOnlyOneExists()
+        {
+            // Arrange
+            var expectedTeams = new List<TeamSimpleDto>
+            {
+                new TeamSimpleDto { Id = 1, Name = "Single Team" }
+            };
+
+            _teamRepositoryMock.Setup(repo => repo.FindAllSimple())
+                              .ReturnsAsync(expectedTeams);
+
+            // Act
+            var result = await _service.FindAllSimple();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+            Assert.Equal(1, result.First().Id);
+            Assert.Equal("Single Team", result.First().Name);
+            _teamRepositoryMock.Verify(repo => repo.FindAllSimple(), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindAllSimple should verify correct data structure")]
+        [Trait("FindAllSimple", "Success")]
+        public async Task FindAllSimple_ShouldVerifyCorrectDataStructure()
+        {
+            // Arrange
+            var expectedTeams = new List<TeamSimpleDto>
+            {
+                new TeamSimpleDto { Id = 10, Name = "Admin" },
+                new TeamSimpleDto { Id = 20, Name = "Analyst" }
+            };
+
+            _teamRepositoryMock.Setup(repo => repo.FindAllSimple())
+                              .ReturnsAsync(expectedTeams);
+
+            // Act
+            var result = await _service.FindAllSimple();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
+
+            var firstTeam = result.First();
+            Assert.Equal(10, firstTeam.Id);
+            Assert.Equal("Admin", firstTeam.Name);
+
+            var lastTeam = result.Last();
+            Assert.Equal(20, lastTeam.Id);
+            Assert.Equal("Analyst", lastTeam.Name);
+
+            _teamRepositoryMock.Verify(repo => repo.FindAllSimple(), Times.Once);
         }
     }
 }

@@ -150,7 +150,7 @@
         methods: {
             getTeams() {
                 this.isLoadingTeams = true;
-                TeamsService.getTeamList()
+                TeamsService.getTeamListSimple()
                     .then((response) => {
                         if (response.error !== undefined)
                             return;

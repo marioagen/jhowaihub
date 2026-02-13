@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -98,7 +99,7 @@ namespace WoopiAiHub.Repository
                         })
                         .ToList(),
                     Profiles = t.Profiles!
-                        .Select( p => new ProfileDto
+                        .Select(p => new ProfileDto
                         {
                             Id = p.Id,
                             Name = p.Name,
@@ -260,6 +261,24 @@ namespace WoopiAiHub.Repository
                            .Where(t => ids.Contains(t.Id) &&
                                        t.Users.Any(s => s.Email.Equals(emailUser)))
                            .ToList();
+        }
+
+        /// <summary>
+        /// Retrieves a simple list of all teams containing only Id and Name.
+        /// Optimized for performance when full team data is not needed.
+        /// </summary>
+        /// <returns>A queryable collection of TeamSimpleDto</returns>
+        public async Task<ICollection<TeamSimpleDto>> FindAllSimple()
+        {
+            return await _context.Teams
+                           .Select(t => new TeamSimpleDto
+                           {
+                               Id = t.Id,
+                               Name = t.Name
+                           })
+                           .OrderBy(t => t.Name)
+                           .AsNoTracking()
+                           .ToListAsync();
         }
     }
 }
