@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Utils
     {
         string Encrypt(string plainText);
         string Decrypt(string encryptedText);
+        bool IsEncrypted(string text);
     }
 }

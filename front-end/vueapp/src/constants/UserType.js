@@ -1,3 +1,3 @@
 export const UserType = {
-    Analyst: 'Analyst',
+    Analyst: "Analyst",
 };

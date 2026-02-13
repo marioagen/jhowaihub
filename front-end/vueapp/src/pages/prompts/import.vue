@@ -5,18 +5,31 @@
                 <!-- Header Section -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div class="d-flex align-items-center gap-3">
-                        <button class="btn btn-link p-0" @click="goBack">
-                            <LucideIcon icon="ArrowLeft" :size="24" />
+                        <button
+                            class="btn btn-link p-0"
+                            @click="goBack"
+                        >
+                            <LucideIcon
+                                icon="ArrowLeft"
+                                :size="24"
+                            />
                         </button>
                         <div>
-                            <h5 class="mb-0 fw-bold">{{ $t("prompts.importTitle") }}</h5>
+                            <h5 class="mb-0 fw-bold">
+                                {{ $t("prompts.importTitle") }}
+                            </h5>
                             <p class="mb-0">
-                                <small class="text-muted">{{ $t("prompts.importSubtitle") }}</small>
+                                <small class="text-muted">
+                                    {{ $t("prompts.importSubtitle") }}
+                                </small>
                             </p>
                         </div>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-secondary btn-sm" @click="goBack">
+                        <button
+                            class="btn btn-outline-secondary btn-sm"
+                            @click="goBack"
+                        >
                             {{ $t("common.cancel") }}
                         </button>
                         <button
@@ -24,8 +37,13 @@
                             @click="importSelected"
                             :disabled="selectedTemplates.length === 0 || importing"
                         >
-                            <span v-if="importing" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                            {{ $t("prompts.importButton") }} ({{ selectedTemplates.length }})
+                            <span
+                                v-if="importing"
+                                class="spinner-border spinner-border-sm me-2"
+                                role="status"
+                            ></span>
+                            {{ $t("prompts.importButton") }}
+                            ({{ selectedTemplates.length }})
                         </button>
                     </div>
                 </div>
@@ -43,11 +61,23 @@
                                 />
                             </div>
                             <div class="col-md-4">
-                                <select class="form-select" v-model="orderBy" @change="loadTemplates">
-                                    <option value="created_desc">{{ $t("filters.mostRecent") }}</option>
-                                    <option value="created_asc">{{ $t("filters.mostOld") }}</option>
-                                    <option value="name_asc">{{ $t("filters.nameAZ") }}</option>
-                                    <option value="name_desc">{{ $t("filters.nameZA") }}</option>
+                                <select
+                                    class="form-select"
+                                    v-model="orderBy"
+                                    @change="loadTemplates"
+                                >
+                                    <option value="created_desc">
+                                        {{ $t("filters.mostRecent") }}
+                                    </option>
+                                    <option value="created_asc">
+                                        {{ $t("filters.mostOld") }}
+                                    </option>
+                                    <option value="name_asc">
+                                        {{ $t("filters.nameAZ") }}
+                                    </option>
+                                    <option value="name_desc">
+                                        {{ $t("filters.nameZA") }}
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -55,7 +85,10 @@
                 </div>
 
                 <!-- Select All Section -->
-                <div class="mb-3" v-if="filteredTemplates.length > 0">
+                <div
+                    class="mb-3"
+                    v-if="filteredTemplates.length > 0"
+                >
                     <div class="form-check">
                         <input
                             class="form-check-input"
@@ -64,28 +97,54 @@
                             :checked="allSelected"
                             @change="toggleSelectAll"
                         />
-                        <label class="form-check-label" for="selectAll">
-                            {{ $t("prompts.selectAllTemplates").replace("{count}", filteredTemplates.length) }}
+                        <label
+                            class="form-check-label"
+                            for="selectAll"
+                        >
+                            {{
+                                $t("prompts.selectAllTemplates").replace(
+                                    "{count}",
+                                    filteredTemplates.length
+                                )
+                            }}
                         </label>
                     </div>
                 </div>
 
-                <div class="row loading-container" v-if="loading">
+                <div
+                    class="row loading-container"
+                    v-if="loading"
+                >
                     <div class="data-load">
                         <i class="fas fa-sync-alt fa-spin text-secondary"></i>
                         &nbsp;{{ $t("common.loading") }}..
                     </div>
                 </div>
-                <div class="row loading-container" v-if="!loading && templates.length === 0">
+                <div
+                    class="row loading-container"
+                    v-if="!loading && templates.length === 0"
+                >
                     <div class="data-load">
                         <i class="fas fa-exclamation-circle text-secondary"></i>
                         &nbsp;{{ $t("prompts.noPromptsListWereFound") }}.
                     </div>
                 </div>
 
-                <div class="row g-3" v-if="!loading && filteredTemplates.length > 0">
-                    <div v-for="template in filteredTemplates" :key="template.id" class="col-md-4">
-                        <div class="card h-100 template-card" :class="{ selected: isSelected(template.id) }">
+                <div
+                    class="row g-3"
+                    v-if="!loading && filteredTemplates.length > 0"
+                >
+                    <div
+                        v-for="template in filteredTemplates"
+                        :key="template.id"
+                        class="col-md-4"
+                    >
+                        <div
+                            class="card h-100 template-card"
+                            :class="{
+                                selected: isSelected(template.id),
+                            }"
+                        >
                             <div class="card-body">
                                 <div class="d-flex align-items-start mb-2">
                                     <input
@@ -97,18 +156,33 @@
                                     />
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center gap-2">
-                                            <LucideIcon icon="Globe" :size="16" class="text-primary" />
-                                            <h6 class="mb-0 fw-bold">{{ template.name }}</h6>
+                                            <LucideIcon
+                                                icon="Globe"
+                                                :size="16"
+                                                class="text-primary"
+                                            />
+                                            <h6 class="mb-0 fw-bold">
+                                                {{ template.name }}
+                                            </h6>
                                         </div>
                                     </div>
                                 </div>
-                                <p class="text-muted small mb-2">{{ template.description }}</p>
+                                <p class="text-muted small mb-2">
+                                    {{ template.description }}
+                                </p>
                                 <div class="prompt-preview mb-2">
                                     <div class="text-muted small">
                                         {{ template.text }}
                                     </div>
-                                    <a href="#" class="small text-primary" @click.prevent="viewComplete(template)">
-                                        <LucideIcon icon="Eye" :size="14" />
+                                    <a
+                                        href="#"
+                                        class="small text-primary"
+                                        @click.prevent="viewComplete(template)"
+                                    >
+                                        <LucideIcon
+                                            icon="Eye"
+                                            :size="14"
+                                        />
                                         {{ $t("prompts.viewComplete") }}
                                     </a>
                                 </div>
@@ -130,21 +204,30 @@
         >
             <template #body>
                 <div class="modal-body-content m-3">
-                    <p class="text-muted mb-3">{{ selectedTemplate?.description }}</p>
-                    <label>{{ $t("prompts.promptContent") }}</label>
+                    <p class="text-muted mb-3">
+                        {{ selectedTemplate?.description }}
+                    </p>
+                    <label>
+                        {{ $t("prompts.promptContent") }}
+                    </label>
                     <div class="prompt-content-full">
                         {{ selectedTemplate?.text }}
                     </div>
                     <div class="text-end">
                         <small class="text-muted">
-                            {{ $t("dashboard.created") }} {{ formatDate(selectedTemplate?.created) }}
+                            {{ $t("dashboard.created") }}
+                            {{ formatDate(selectedTemplate?.created) }}
                         </small>
                     </div>
                 </div>
             </template>
             <template #footer>
                 <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" @click="closeModal">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        @click="closeModal"
+                    >
                         {{ $t("common.close") }}
                     </button>
                 </div>
@@ -152,7 +235,6 @@
         </ModalComponent>
     </main>
 </template>
-
 <script>
     import PromptService from "@/services/prompts/PromptsService";
     import ModalComponent from "@/components/global/ModalComponent.vue";
@@ -188,14 +270,20 @@
                 );
             },
             allSelected() {
-                return this.filteredTemplates.length > 0 && this.filteredTemplates.every((t) => this.isSelected(t.id));
+                return (
+                    this.filteredTemplates.length > 0 &&
+                    this.filteredTemplates.every((t) => this.isSelected(t.id))
+                );
             },
         },
         methods: {
             async loadTemplates() {
                 this.loading = true;
                 try {
-                    const result = await PromptService.findPromptTemplates(this.filterQuery, this.orderBy);
+                    const result = await PromptService.findPromptTemplates(
+                        this.filterQuery,
+                        this.orderBy
+                    );
                     if (result.error) {
                         this.$notify({
                             title: "prompts.title",
@@ -304,7 +392,6 @@
         },
     };
 </script>
-
 <style scoped>
     .template-card {
         transition: all 0.2s ease;

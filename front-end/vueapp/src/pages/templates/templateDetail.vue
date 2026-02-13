@@ -2,12 +2,8 @@
     <main>
         <div class="container-fluid mx-2">
             <form @submit.prevent="save">
-                <div
-                    class="d-flex justify-content-between align-items-center"
-                >
-                    <div
-                        class="d-flex align-items-center mb-1"
-                    >
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center mb-1">
                         <button
                             type="button"
                             class="btn btn-sm p-0 me-3"
@@ -56,55 +52,35 @@
                         <div class="card">
                             <div class="card-body">
                                 <h6 class="card-title mb-3">
-                                    {{
-                                        $t(
-                                            "template.requestDetails"
-                                        )
-                                    }}
+                                    {{ $t("template.requestDetails") }}
                                 </h6>
                                 <div class="mb-3">
                                     <label
                                         for="templateName"
                                         class="form-label"
                                     >
-                                        {{
-                                            $t(
-                                                "template.templateName"
-                                            )
-                                        }}
+                                        {{ $t("template.templateName") }}
                                     </label>
                                     <Field
                                         name="name"
                                         rules="required|max:100"
-                                        v-slot="{
-                                            field,
-                                            errorMessage,
-                                        }"
+                                        v-slot="{ field, errorMessage }"
                                     >
                                         <input
                                             v-bind="field"
                                             type="text"
                                             class="form-control"
-                                            :placeholder="
-                                                $t(
-                                                    'template.templateNamePlaceholder'
-                                                )
-                                            "
+                                            :placeholder="$t('template.templateNamePlaceholder')"
                                             id="templateName"
                                             :class="{
-                                                'is-invalid':
-                                                    errorMessage,
+                                                'is-invalid': errorMessage,
                                             }"
                                         />
                                         <span
                                             class="validation-message text-danger"
-                                            v-if="
-                                                errorMessage
-                                            "
+                                            v-if="errorMessage"
                                         >
-                                            {{
-                                                errorMessage
-                                            }}
+                                            {{ errorMessage }}
                                         </span>
                                     </Field>
                                 </div>
@@ -114,54 +90,34 @@
                                             for="method"
                                             class="form-label"
                                         >
-                                            {{
-                                                $t(
-                                                    "template.method"
-                                                )
-                                            }}
+                                            {{ $t("template.method") }}
                                         </label>
                                         <Field
                                             name="method"
                                             rules="required"
-                                            v-slot="{
-                                                field,
-                                                errorMessage,
-                                            }"
+                                            v-slot="{ field, errorMessage }"
                                         >
                                             <select
-                                                v-bind="
-                                                    field
-                                                "
+                                                v-bind="field"
                                                 class="form-select"
                                                 id="method"
                                                 :class="{
-                                                    'is-invalid':
-                                                        errorMessage,
+                                                    'is-invalid': errorMessage,
                                                 }"
                                             >
                                                 <option
                                                     v-for="method in methodsList"
-                                                    :key="
-                                                        method.id
-                                                    "
-                                                    :value="
-                                                        method.value
-                                                    "
+                                                    :key="method.id"
+                                                    :value="method.value"
                                                 >
-                                                    {{
-                                                        method.value
-                                                    }}
+                                                    {{ method.value }}
                                                 </option>
                                             </select>
                                             <span
                                                 class="validation-message text-danger"
-                                                v-if="
-                                                    errorMessage
-                                                "
+                                                v-if="errorMessage"
                                             >
-                                                {{
-                                                    errorMessage
-                                                }}
+                                                {{ errorMessage }}
                                             </span>
                                         </Field>
                                     </div>
@@ -170,46 +126,28 @@
                                             for="endpointUrl"
                                             class="form-label"
                                         >
-                                            {{
-                                                $t(
-                                                    "template.endpointUrl"
-                                                )
-                                            }}
+                                            {{ $t("template.endpointUrl") }}
                                         </label>
                                         <Field
                                             name="url"
                                             rules="required|max:500"
-                                            v-slot="{
-                                                field,
-                                                errorMessage,
-                                            }"
+                                            v-slot="{ field, errorMessage }"
                                         >
                                             <input
-                                                v-bind="
-                                                    field
-                                                "
+                                                v-bind="field"
                                                 type="text"
                                                 class="form-control"
-                                                :placeholder="
-                                                    $t(
-                                                        'template.endpointUrlPlaceholder'
-                                                    )
-                                                "
+                                                :placeholder="$t('template.endpointUrlPlaceholder')"
                                                 id="endpointUrl"
                                                 :class="{
-                                                    'is-invalid':
-                                                        errorMessage,
+                                                    'is-invalid': errorMessage,
                                                 }"
                                             />
                                             <span
                                                 class="validation-message text-danger"
-                                                v-if="
-                                                    errorMessage
-                                                "
+                                                v-if="errorMessage"
                                             >
-                                                {{
-                                                    errorMessage
-                                                }}
+                                                {{ errorMessage }}
                                             </span>
                                         </Field>
                                     </div>
@@ -230,11 +168,7 @@
                                             type="button"
                                             role="tab"
                                         >
-                                            {{
-                                                $t(
-                                                    "template.queryParams"
-                                                )
-                                            }}
+                                            {{ $t("template.queryParams") }}
                                         </button>
                                     </li>
                                     <li
@@ -249,11 +183,7 @@
                                             type="button"
                                             role="tab"
                                         >
-                                            {{
-                                                $t(
-                                                    "template.headers"
-                                                )
-                                            }}
+                                            {{ $t("template.headers") }}
                                         </button>
                                     </li>
                                 </ul>
@@ -266,84 +196,44 @@
                                         <div
                                             class="d-flex justify-content-between align-items-center mb-3"
                                         >
-                                            <h6
-                                                class="mb-0"
-                                            >
-                                                {{
-                                                    $t(
-                                                        "template.queryParameters"
-                                                    )
-                                                }}
+                                            <h6 class="mb-0">
+                                                {{ $t("template.queryParameters") }}
                                             </h6>
                                             <button
                                                 type="button"
                                                 class="btn btn-sm btn-link"
-                                                @click="
-                                                    addQueryParam
-                                                "
+                                                @click="addQueryParam"
                                             >
                                                 <LucideIcon
                                                     icon="Plus"
-                                                    :size="
-                                                        15
-                                                    "
+                                                    :size="15"
                                                 />
-                                                {{
-                                                    $t(
-                                                        "template.addParam"
-                                                    )
-                                                }}
+                                                {{ $t("template.addParam") }}
                                             </button>
                                         </div>
-                                        <div
-                                            v-if="
-                                                form
-                                                    .queryParams
-                                                    .length >
-                                                0
-                                            "
-                                        >
+                                        <div v-if="form.queryParams.length > 0">
                                             <div
-                                                v-for="(
-                                                    param,
-                                                    index
-                                                ) in form.queryParams"
+                                                v-for="(param, index) in form.queryParams"
                                                 :key="index"
                                                 class="row mb-2 align-items-center"
                                             >
-                                                <div
-                                                    class="col-10"
-                                                >
+                                                <div class="col-10">
                                                     <input
-                                                        v-model="
-                                                            param.key
-                                                        "
+                                                        v-model="param.key"
                                                         type="text"
                                                         class="form-control form-control-sm"
-                                                        :placeholder="
-                                                            $t(
-                                                                'template.keyPlaceholder'
-                                                            )
-                                                        "
+                                                        :placeholder="$t('template.keyPlaceholder')"
                                                     />
                                                 </div>
-                                                <div
-                                                    class="col-2"
-                                                >
+                                                <div class="col-2">
                                                     <button
                                                         type="button"
                                                         class="btn btn-sm btn-link text-danger"
-                                                        @click="
-                                                            removeQueryParam(
-                                                                index
-                                                            )
-                                                        "
+                                                        @click="removeQueryParam(index)"
                                                     >
                                                         <LucideIcon
                                                             icon="Trash2"
-                                                            :size="
-                                                                15
-                                                            "
+                                                            :size="15"
                                                         />
                                                     </button>
                                                 </div>
@@ -354,11 +244,7 @@
                                             class="text-center text-muted py-4"
                                         >
                                             <small>
-                                                {{
-                                                    $t(
-                                                        "template.noQueryParameters"
-                                                    )
-                                                }}
+                                                {{ $t("template.noQueryParameters") }}
                                             </small>
                                         </div>
                                     </div>
@@ -370,83 +256,44 @@
                                         <div
                                             class="d-flex justify-content-between align-items-center mb-3"
                                         >
-                                            <h6
-                                                class="mb-0"
-                                            >
-                                                {{
-                                                    $t(
-                                                        "template.headers"
-                                                    )
-                                                }}
+                                            <h6 class="mb-0">
+                                                {{ $t("template.headers") }}
                                             </h6>
                                             <button
                                                 type="button"
                                                 class="btn btn-sm btn-link"
-                                                @click="
-                                                    addHeader
-                                                "
+                                                @click="addHeader"
                                             >
                                                 <LucideIcon
                                                     icon="Plus"
-                                                    :size="
-                                                        15
-                                                    "
+                                                    :size="15"
                                                 />
-                                                {{
-                                                    $t(
-                                                        "template.addParam"
-                                                    )
-                                                }}
+                                                {{ $t("template.addParam") }}
                                             </button>
                                         </div>
-                                        <div
-                                            v-if="
-                                                form.headers
-                                                    .length >
-                                                0
-                                            "
-                                        >
+                                        <div v-if="form.headers.length > 0">
                                             <div
-                                                v-for="(
-                                                    header,
-                                                    index
-                                                ) in form.headers"
+                                                v-for="(header, index) in form.headers"
                                                 :key="index"
                                                 class="row mb-2 align-items-center"
                                             >
-                                                <div
-                                                    class="col-10"
-                                                >
+                                                <div class="col-10">
                                                     <input
-                                                        v-model="
-                                                            header.key
-                                                        "
+                                                        v-model="header.key"
                                                         type="text"
                                                         class="form-control form-control-sm"
-                                                        :placeholder="
-                                                            $t(
-                                                                'template.keyPlaceholder'
-                                                            )
-                                                        "
+                                                        :placeholder="$t('template.keyPlaceholder')"
                                                     />
                                                 </div>
-                                                <div
-                                                    class="col-2"
-                                                >
+                                                <div class="col-2">
                                                     <button
                                                         type="button"
                                                         class="btn btn-sm btn-link text-danger"
-                                                        @click="
-                                                            removeHeader(
-                                                                index
-                                                            )
-                                                        "
+                                                        @click="removeHeader(index)"
                                                     >
                                                         <LucideIcon
                                                             icon="Trash2"
-                                                            :size="
-                                                                15
-                                                            "
+                                                            :size="15"
                                                         />
                                                     </button>
                                                 </div>
@@ -457,11 +304,7 @@
                                             class="text-center text-muted py-4"
                                         >
                                             <small>
-                                                {{
-                                                    $t(
-                                                        "template.noQueryParameters"
-                                                    )
-                                                }}
+                                                {{ $t("template.noQueryParameters") }}
                                             </small>
                                         </div>
                                     </div>
@@ -474,99 +317,57 @@
                             <div class="card-body">
                                 <div class="mb-2">
                                     <h6 class="card-title">
-                                        {{
-                                            $t(
-                                                "template.requestBody"
-                                            )
-                                        }}
+                                        {{ $t("template.requestBody") }}
                                     </h6>
-                                    <small
-                                        class="text-muted"
-                                    >
-                                        {{
-                                            $t(
-                                                "template.bodySubtitle"
-                                            )
-                                        }}
+                                    <small class="text-muted">
+                                        {{ $t("template.bodySubtitle") }}
                                     </small>
                                 </div>
                                 <Field
                                     name="body"
                                     rules="jsonValidation"
-                                    v-slot="{
-                                        field,
-                                        errorMessage,
-                                    }"
+                                    v-slot="{ field, errorMessage }"
                                 >
-                                    <div
-                                        class="position-relative"
-                                    >
+                                    <div class="position-relative">
                                         <textarea
                                             v-bind="field"
                                             ref="bodyTextarea"
                                             class="form-control font-monospace"
                                             rows="15"
-                                            :placeholder="
-                                                bodyPlaceholder
-                                            "
+                                            :placeholder="bodyPlaceholder"
                                             :class="{
-                                                'is-invalid':
-                                                    errorMessage ||
-                                                    jsonError,
+                                                'is-invalid': errorMessage || jsonError,
                                             }"
-                                            @input="
-                                                handleBodyInput
-                                            "
-                                            @keydown="
-                                                handleKeyDown
-                                            "
-                                            @blur="
-                                                hideAutocomplete
-                                            "
+                                            @input="handleBodyInput"
+                                            @keydown="handleKeyDown"
+                                            @blur="hideAutocomplete"
                                         ></textarea>
                                         <div
-                                            v-if="
-                                                showAutocomplete
-                                            "
+                                            v-if="showAutocomplete"
                                             class="autocomplete-dropdown"
                                             :style="{
-                                                top:
-                                                    autocompletePosition.top +
-                                                    'px',
-                                                left:
-                                                    autocompletePosition.left +
-                                                    'px',
+                                                top: autocompletePosition.top + 'px',
+                                                left: autocompletePosition.left + 'px',
                                             }"
                                         >
                                             <div
                                                 v-for="(
-                                                    option,
-                                                    index
+                                                    option, index
                                                 ) in filteredAutocompleteOptions"
                                                 :key="index"
                                                 class="autocomplete-item"
                                                 :class="{
-                                                    active:
-                                                        index ===
-                                                        selectedAutocompleteIndex,
+                                                    active: index === selectedAutocompleteIndex,
                                                 }"
                                                 @mousedown.prevent="
-                                                    selectAutocompleteOption(
-                                                        option
-                                                    )
+                                                    selectAutocompleteOption(option)
                                                 "
                                             >
                                                 <strong>
-                                                    {{
-                                                        option.label
-                                                    }}
+                                                    {{ option.label }}
                                                 </strong>
-                                                <span
-                                                    class="text-muted ms-2"
-                                                >
-                                                    {{
-                                                        option.value
-                                                    }}
+                                                <span class="text-muted ms-2">
+                                                    {{ option.value }}
                                                 </span>
                                             </div>
                                         </div>
@@ -593,11 +394,7 @@
                                         class="me-2 flex-shrink-0"
                                     />
                                     <small>
-                                        {{
-                                            $t(
-                                                "template.variablesTip"
-                                            )
-                                        }}
+                                        {{ $t("template.variablesTip") }}
                                     </small>
                                 </div>
                             </div>
@@ -609,11 +406,7 @@
     </main>
 </template>
 <script>
-    import {
-        Field,
-        useForm,
-        defineRule,
-    } from "vee-validate";
+    import { Field, useForm, defineRule } from "vee-validate";
     import TemplateService from "@/services/template/TemplateService";
     import i18n from "@/locales/i18n";
 
@@ -622,16 +415,11 @@
             return true;
         }
         try {
-            const sanitizedValue = value.replace(
-                /\{\{[^}]+\}\}/g,
-                '"PLACEHOLDER"'
-            );
+            const sanitizedValue = value.replace(/\{\{[^}]+\}\}/g, '"PLACEHOLDER"');
             JSON.parse(sanitizedValue);
             return true;
         } catch (e) {
-            return i18n.global.t(
-                "template.invalidJsonFormat"
-            );
+            return i18n.global.t("template.invalidJsonFormat");
         }
     });
 
@@ -665,19 +453,18 @@
                 },
                 isSaving: false,
                 isLoading: false,
-                bodyPlaceholder:
-                    '{\n  "key": "{{variable}}"\n}',
+                bodyPlaceholder: '{\n  "key": "{{variable}}"\n}',
                 jsonError: "",
                 showAutocomplete: false,
                 autocompletePosition: { top: 0, left: 0 },
                 selectedAutocompleteIndex: 0,
                 autocompleteOptions: [
-                    { labelKey: "template.variablesOcr", value: "{{ocr}}" },
-                    { labelKey: "template.variablesEmbeddings", value: "{{embeddings}}" },
-                    { labelKey: "template.variablesPrompt", value: "{{prompt}}" },
-                    { label: "AI MODEL", value: "{{ai_model}}" },
-                    { label: "TRANSLATION", value: "{{translation}}" },
-                    { label: "IMAGE DATA", value: "{{image_data}}" },
+                    { labelKey: "OCR", value: "{{ocr}}", active: true },
+                    { labelKey: "EMBEDDINGS", value: "{{embeddings}}", active: false },
+                    { labelKey: "PROMPT", value: "{{prompt}}", active: true },
+                    { label: "AI MODEL", value: "{{ai_model}}", active: false },
+                    { label: "TRANSLATION", value: "{{translation}}", active: false },
+                    { label: "IMAGE DATA", value: "{{image_data}}", active: false },
                 ],
             };
         },
@@ -702,18 +489,11 @@
             getTemplateSubtitle() {
                 return this.isEditMode
                     ? this.$t("template.formEdit.subtitle")
-                    : this.$t(
-                          "template.formCreate.subtitle"
-                      );
+                    : this.$t("template.formCreate.subtitle");
             },
         },
         setup() {
-            const {
-                validate,
-                setValues,
-                values,
-                resetForm,
-            } = useForm();
+            const { validate, setValues, values, resetForm } = useForm();
             return {
                 validate,
                 setValues,
@@ -745,30 +525,20 @@
             handleBodyInput(event) {
                 const textarea = event.target;
                 const value = textarea.value;
-                const cursorPosition =
-                    textarea.selectionStart;
+                const cursorPosition = textarea.selectionStart;
 
                 this.validateJSON(value);
 
                 if (value[cursorPosition - 1] === "{") {
-                    if (
-                        !this.isMainJsonOpeningBrace(
-                            value,
-                            cursorPosition - 1
-                        )
-                    ) {
-                        this.showAutocompleteDropdown(
-                            textarea
-                        );
+                    if (!this.isMainJsonOpeningBrace(value, cursorPosition - 1)) {
+                        this.showAutocompleteDropdown(textarea);
                     }
                 } else {
                     this.hideAutocomplete();
                 }
             },
             isMainJsonOpeningBrace(value, position) {
-                const beforeCursor = value
-                    .substring(0, position)
-                    .trim();
+                const beforeCursor = value.substring(0, position).trim();
 
                 if (beforeCursor === "") {
                     return true;
@@ -788,10 +558,7 @@
                     return;
                 }
                 try {
-                    const sanitizedValue = value.replace(
-                        /\{\{[^}]+\}\}/g,
-                        '"PLACEHOLDER"'
-                    );
+                    const sanitizedValue = value.replace(/\{\{[^}]+\}\}/g, '"PLACEHOLDER"');
                     JSON.parse(sanitizedValue);
                     this.jsonError = "";
                 } catch (e) {
@@ -799,8 +566,7 @@
                 }
             },
             showAutocompleteDropdown(textarea) {
-                const coords =
-                    this.getCaretCoordinates(textarea);
+                const coords = this.getCaretCoordinates(textarea);
                 this.autocompletePosition = {
                     top: coords.top + 20,
                     left: coords.left,
@@ -819,28 +585,19 @@
                 if (event.key === "ArrowDown") {
                     event.preventDefault();
                     this.selectedAutocompleteIndex =
-                        (this.selectedAutocompleteIndex +
-                            1) %
-                        this.filteredAutocompleteOptions
-                            .length;
+                        (this.selectedAutocompleteIndex + 1) %
+                        this.filteredAutocompleteOptions.length;
                 } else if (event.key === "ArrowUp") {
                     event.preventDefault();
                     this.selectedAutocompleteIndex =
                         (this.selectedAutocompleteIndex -
                             1 +
-                            this.filteredAutocompleteOptions
-                                .length) %
-                        this.filteredAutocompleteOptions
-                            .length;
-                } else if (
-                    event.key === "Enter" ||
-                    event.key === "Tab"
-                ) {
+                            this.filteredAutocompleteOptions.length) %
+                        this.filteredAutocompleteOptions.length;
+                } else if (event.key === "Enter" || event.key === "Tab") {
                     event.preventDefault();
                     this.selectAutocompleteOption(
-                        this.filteredAutocompleteOptions[
-                            this.selectedAutocompleteIndex
-                        ]
+                        this.filteredAutocompleteOptions[this.selectedAutocompleteIndex]
                     );
                 } else if (event.key === "Escape") {
                     this.showAutocomplete = false;
@@ -848,24 +605,14 @@
             },
             selectAutocompleteOption(option) {
                 const textarea = this.$refs.bodyTextarea;
-                const cursorPosition =
-                    textarea.selectionStart;
+                const cursorPosition = textarea.selectionStart;
                 const value = textarea.value;
 
-                const beforeCursor = value.substring(
-                    0,
-                    cursorPosition - 1
-                );
-                const afterCursor =
-                    value.substring(cursorPosition);
+                const beforeCursor = value.substring(0, cursorPosition - 1);
+                const afterCursor = value.substring(cursorPosition);
 
-                const newValue =
-                    beforeCursor +
-                    option.value +
-                    afterCursor;
-                const newCursorPosition =
-                    beforeCursor.length +
-                    option.value.length;
+                const newValue = beforeCursor + option.value + afterCursor;
+                const newCursorPosition = beforeCursor.length + option.value.length;
 
                 this.setValues({
                     ...this.values,
@@ -875,23 +622,18 @@
                 this.form.body = newValue;
 
                 this.$nextTick(() => {
-                    textarea.selectionStart =
-                        newCursorPosition;
-                    textarea.selectionEnd =
-                        newCursorPosition;
+                    textarea.selectionStart = newCursorPosition;
+                    textarea.selectionEnd = newCursorPosition;
                     textarea.focus();
                 });
 
                 this.showAutocomplete = false;
             },
             getCaretCoordinates(textarea) {
-                const rect =
-                    textarea.getBoundingClientRect();
-                const style =
-                    window.getComputedStyle(textarea);
+                const rect = textarea.getBoundingClientRect();
+                const style = window.getComputedStyle(textarea);
 
-                const mirror =
-                    document.createElement("div");
+                const mirror = document.createElement("div");
                 const styles = [
                     "fontFamily",
                     "fontSize",
@@ -912,19 +654,13 @@
                 mirror.style.whiteSpace = "pre-wrap";
                 mirror.style.width = rect.width + "px";
 
-                const textBeforeCursor =
-                    textarea.value.substring(
-                        0,
-                        textarea.selectionStart
-                    );
+                const textBeforeCursor = textarea.value.substring(0, textarea.selectionStart);
                 mirror.textContent = textBeforeCursor;
 
                 document.body.appendChild(mirror);
 
                 const coordinates = {
-                    top:
-                        mirror.scrollHeight -
-                        textarea.scrollTop,
+                    top: mirror.scrollHeight - textarea.scrollTop,
                     left: 10,
                 };
 
@@ -933,7 +669,7 @@
                 return coordinates;
             },
             redirectToTemplateList() {
-                this.$router.push({ name: "Template" });
+                this.$router.push({ name: "Templates" });
             },
             addQueryParam() {
                 this.form.queryParams.push({ key: "" });
@@ -948,24 +684,17 @@
                 this.form.headers.splice(index, 1);
             },
             updateUrlWithQueryParams() {
-                const validQueryParams =
-                    this.form.queryParams.filter(
-                        (p) => p.key.trim() !== ""
-                    );
+                const validQueryParams = this.form.queryParams.filter((p) => p.key.trim() !== "");
 
                 if (!this.values.url) {
                     return;
                 }
 
-                const baseUrl =
-                    this.values.url.split("?")[0];
+                const baseUrl = this.values.url.split("?")[0];
 
                 if (validQueryParams.length > 0) {
                     const queryString = validQueryParams
-                        .map(
-                            (p) =>
-                                `${encodeURIComponent(p.key)}={{${p.key}}}`
-                        )
+                        .map((p) => `${encodeURIComponent(p.key)}={{${p.key}}}`)
                         .join("&");
                     this.setValues({
                         ...this.values,
@@ -980,49 +709,33 @@
             },
             loadTemplate() {
                 this.isLoading = true;
-                TemplateService.getTemplateById(
-                    this.routeId
-                )
+                TemplateService.getTemplateById(this.routeId)
                     .then((data) => {
                         this.form.name = data.name || "";
-                        this.form.method =
-                            data.method || "GET";
+                        this.form.method = data.method || "GET";
                         this.form.url = data.url || "";
-                        this.form.body =
-                            data.bodyTemplate || "";
+                        this.form.body = data.bodyTemplate || "";
 
                         try {
-                            const parsedQueryParams =
-                                data.queryTemplate
-                                    ? typeof data.queryTemplate ===
-                                      "string"
-                                        ? JSON.parse(
-                                              data.queryTemplate
-                                          )
-                                        : data.queryTemplate
-                                    : [];
-                            this.form.queryParams =
-                                parsedQueryParams.map(
-                                    (p) => ({ key: p.key })
-                                );
+                            const parsedQueryParams = data.queryTemplate
+                                ? typeof data.queryTemplate === "string"
+                                    ? JSON.parse(data.queryTemplate)
+                                    : data.queryTemplate
+                                : [];
+                            this.form.queryParams = parsedQueryParams.map((p) => ({ key: p.key }));
                         } catch (e) {
                             this.form.queryParams = [];
                         }
 
                         try {
-                            const parsedHeaders =
-                                data.headerTemplate
-                                    ? typeof data.headerTemplate ===
-                                      "string"
-                                        ? JSON.parse(
-                                              data.headerTemplate
-                                          )
-                                        : data.headerTemplate
-                                    : [];
-                            this.form.headers =
-                                parsedHeaders.map((h) => ({
-                                    key: h.key,
-                                }));
+                            const parsedHeaders = data.headerTemplate
+                                ? typeof data.headerTemplate === "string"
+                                    ? JSON.parse(data.headerTemplate)
+                                    : data.headerTemplate
+                                : [];
+                            this.form.headers = parsedHeaders.map((h) => ({
+                                key: h.key,
+                            }));
                         } catch (e) {
                             this.form.headers = [];
                         }
@@ -1055,15 +768,12 @@
 
                     this.isSaving = true;
 
-                    const queryParams =
-                        this.form.queryParams
-                            .filter(
-                                (p) => p.key.trim() !== ""
-                            )
-                            .map((p) => ({
-                                key: p.key,
-                                value: `{{${p.key}}}`,
-                            }));
+                    const queryParams = this.form.queryParams
+                        .filter((p) => p.key.trim() !== "")
+                        .map((p) => ({
+                            key: p.key,
+                            value: `{{${p.key}}}`,
+                        }));
 
                     const headers = this.form.headers
                         .filter((h) => h.key.trim() !== "")
@@ -1076,20 +786,10 @@
                         name: this.values.name,
                         method: this.values.method,
                         url: this.values.url,
-                        bodyTemplate:
-                            this.values.body == ""
-                                ? null
-                                : this.values.body,
+                        bodyTemplate: this.values.body == "" ? null : this.values.body,
                         queryTemplate:
-                            queryParams.length === 0
-                                ? null
-                                : JSON.stringify(
-                                      queryParams
-                                  ),
-                        headerTemplate:
-                            headers.length === 0
-                                ? null
-                                : JSON.stringify(headers),
+                            queryParams.length === 0 ? null : JSON.stringify(queryParams),
+                        headerTemplate: headers.length === 0 ? null : JSON.stringify(headers),
                     };
 
                     if (this.isEditMode) {
@@ -1097,23 +797,14 @@
                     }
 
                     const savePromise = this.isEditMode
-                        ? TemplateService.updateTemplate(
-                              templateData
-                          )
-                        : TemplateService.createTemplate(
-                              templateData
-                          );
+                        ? TemplateService.updateTemplate(templateData)
+                        : TemplateService.createTemplate(templateData);
 
                     savePromise
                         .then(() => {
-                            const successMsg = this
-                                .isEditMode
-                                ? this.$t(
-                                      "template.editSuccess"
-                                  )
-                                : this.$t(
-                                      "template.createSuccess"
-                                  );
+                            const successMsg = this.isEditMode
+                                ? this.$t("template.editSuccess")
+                                : this.$t("template.createSuccess");
                             this.$notify({
                                 title: "common.success",
                                 message: successMsg,
@@ -1124,12 +815,8 @@
                         })
                         .catch((error) => {
                             const errorMsg = this.isEditMode
-                                ? this.$t(
-                                      "template.editError"
-                                  )
-                                : this.$t(
-                                      "template.createError"
-                                  );
+                                ? this.$t("template.editError")
+                                : this.$t("template.createError");
                             this.$notify({
                                 title: "common.error",
                                 message: errorMsg,

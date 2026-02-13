@@ -23,18 +23,38 @@
                 </div>
                 <span v-else>-</span>
             </template>
-            <template #cell-actions="{ data }">                
+            <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" class="text-primary" @click="redirectToIndex(data.row)" v-tooltip="$t('workflow.access')">
+                    <a
+                        :class="actionClass"
+                        class="text-primary"
+                        @click="redirectToIndex(data.row)"
+                        v-tooltip="$t('workflow.access')"
+                    >
                         <LucideIcon icon="ExternalLink" />
                     </a>
-                    <a :class="actionClass" @click="redirectToEdit(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="redirectToEdit(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-primary" @click="openCloneModal(data.row)" v-tooltip="$t('workflow.clone')">
+                    <a
+                        :class="actionClass"
+                        class="text-primary"
+                        @click="openCloneModal(data.row)"
+                        v-tooltip="$t('workflow.clone')"
+                    >
                         <LucideIcon icon="Copy" />
                     </a>
-                    <a :class="actionClass" class="text-danger"  style="color: red;" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        style="color: red"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -64,7 +84,12 @@
         <template #body>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label for="cloneWorkflowName" class="form-label">{{ $t("workflow.cloneNameLabel") }}</label>
+                    <label
+                        for="cloneWorkflowName"
+                        class="form-label"
+                    >
+                        {{ $t("workflow.cloneNameLabel") }}
+                    </label>
                     <input
                         id="cloneWorkflowName"
                         v-model="cloneWorkflowName"
@@ -78,7 +103,6 @@
         </template>
     </ModalComponent>
 </template>
-
 <script>
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
@@ -101,8 +125,14 @@
                 columns: [
                     { key: "id", label: "id" },
                     { key: "name", label: "workflow.name" },
-                    { key: "teams", label: "workflow.teams" },
-                    { key: "actions", label: "workflow.actions" },
+                    {
+                        key: "teams",
+                        label: "workflow.teams",
+                    },
+                    {
+                        key: "actions",
+                        label: "workflow.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -239,7 +269,8 @@
                         } else {
                             this.$notify({
                                 title: "workflow.index",
-                                message: result.error.response.data.labelError ?? "workflow.removeError",
+                                message:
+                                    result.error.response.data.labelError ?? "workflow.removeError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });

@@ -19,18 +19,32 @@
                 </span>
             </template>
             <template #cell-users="{ data }">
-                <LucideIcon icon="UsersRound" :size="15" />
+                <LucideIcon
+                    icon="UsersRound"
+                    :size="15"
+                />
                 {{ data.row.users.length }}
             </template>
             <template #cell-permissions="{ data }">
-                {{ data.row.permissions.length }} {{ $t("common.showingToTotal") }} {{ this.permissionsCount }}
+                {{ data.row.permissions.length }}
+                {{ $t("common.showingToTotal") }}
+                {{ this.permissionsCount }}
             </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="redirectToForm(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="redirectToForm(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-danger" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -49,7 +63,6 @@
         @confirm="deleteProfile"
     />
 </template>
-
 <script>
     import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
@@ -71,10 +84,22 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "common.id" },
-                    { key: "name", label: "management.profiles.profile" },
-                    { key: "users", label: "management.users.title" },
-                    { key: "permissions", label: "management.profiles.permissions" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "name",
+                        label: "management.profiles.profile",
+                    },
+                    {
+                        key: "users",
+                        label: "management.users.title",
+                    },
+                    {
+                        key: "permissions",
+                        label: "management.profiles.permissions",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -94,7 +119,7 @@
             modalProfileShow: false,
             modalAlertShow: false,
             permissionsCount: 0,
-            UserType
+            UserType,
         }),
         methods: {
             getProfiles(obj) {
@@ -138,17 +163,29 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
+                this.getProfiles({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             formatDate(str) {
                 return date.formatDate(str);
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getProfiles({ search: input, page: this.queryPage, type: null });
+                this.getProfiles({
+                    search: input,
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             handleTeamCreated: function () {
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
+                this.getProfiles({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
                 this.closeModalTeam();
             },
             redirectToForm(profile) {
@@ -164,7 +201,11 @@
                 this.$refs.DeleteDialog.open();
             },
             changePage(page) {
-                this.getProfiles({ search: "", page: page, type: null });
+                this.getProfiles({
+                    search: "",
+                    page: page,
+                    type: null,
+                });
             },
             deleteProfile() {
                 this.isDeleting = true;
@@ -172,7 +213,11 @@
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
-                            this.getProfiles({ search: "", page: 1, type: null });
+                            this.getProfiles({
+                                search: "",
+                                page: 1,
+                                type: null,
+                            });
                             this.$notify({
                                 title: "Profiles",
                                 message: "management.profiles.deleteSuccess",
@@ -195,17 +240,24 @@
                     });
             },
             reload() {
-                this.getProfiles({ search: "", page: this.queryPage, type: null });
+                this.getProfiles({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getProfiles({ search: "", page: this.queryPage, type: null });
+            this.getProfiles({
+                search: "",
+                page: this.queryPage,
+                type: null,
+            });
             this.getPermissions();
         },
     };
 </script>
-
 <style>
     .dropdown-toggle::after {
         display: none;

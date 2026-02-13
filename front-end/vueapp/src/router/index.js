@@ -1,11 +1,8 @@
-﻿import {
-    createRouter,
-    createWebHashHistory,
-} from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 
-import DocumentsUpload from "@/pages/documents/uploads.vue";
-import DocumentsPage from "@/pages/documents/index.vue";
-import NormalizeIndex from "@/components/documents/EmbeddingDocument";
+import DocumentsHub from "@/pages/documentsHub/index.vue";
+import DocumentsUpload from "@/pages/documentsHub/uploads.vue";
+import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
 import AnalyzerIndex from "@/components/pages/analyzer";
 
 import LoginIndex from "@/pages/login.vue";
@@ -28,7 +25,6 @@ import NewQuizz from "@/pages/managementQuizzes/quizzes/newQuizz.vue";
 import EditQuizz from "@/pages/managementQuizzes/quizzes/editQuizz.vue";
 
 import WorkflowPage from "@/pages/workflow/index.vue";
-import WorkflowManagement from "@/pages/workflow/management.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
 
@@ -43,6 +39,7 @@ import HomePage from "@/pages/home.vue";
 
 import TemplatePage from "@/pages/templates/index.vue";
 import TemplateDetail from "@/pages/templates/templateDetail.vue";
+import TemplateConfiguration from "@/pages/templates/templateConfiguration.vue";
 
 import PromptSelector from "@/components/flow/PromptSelector.vue";
 
@@ -128,7 +125,7 @@ const routes = [
     {
         path: "/documents",
         name: "Documents",
-        component: DocumentsPage,
+        component: DocumentsHub,
         meta: {
             layout: "default",
             module: "Documents",
@@ -280,7 +277,7 @@ const routes = [
     {
         path: "/workflow",
         name: "Workflow",
-        component: WorkflowPage,
+        component: DocumentsHub,
         meta: {
             layout: "default",
             module: "Workflow",
@@ -290,11 +287,11 @@ const routes = [
     },
     {
         path: "/workflow/management/:phase?",
-        name: "WorkflowManagement",
-        component: WorkflowManagement,
+        name: "WorkflowPage",
+        component: WorkflowPage,
         meta: {
             layout: "default",
-            module: "WorkflowManagement",
+            module: "WorkflowPage",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -305,7 +302,7 @@ const routes = [
         component: NewWorkflow,
         meta: {
             layout: "default",
-            module: "WorkflowManagement",
+            module: "WorkflowPage",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -316,7 +313,7 @@ const routes = [
         component: EditWorkflow,
         meta: {
             layout: "default",
-            module: "WorkflowManagement",
+            module: "WorkflowPage",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -333,7 +330,7 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
-        path: "/flow/new/:stepOrder/:phase/:workflowId/:stepId/:hasStepTools",
+        path: "/flow/new/:stepId/:stepOrder/:phase/:workflowId/:hasStepTools",
         name: "NewFlow",
         component: NewFlow,
         meta: {
@@ -392,6 +389,61 @@ const routes = [
         path: "/flow/prompt-selector",
         name: "PromptSelector",
         component: PromptSelector,
+        meta: {
+            layout: "default",
+            module: "Workflow",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates",
+        name: "Templates",
+        component: TemplatePage,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates/new",
+        name: "TemplateNew",
+        component: TemplateDetail,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/templates/edit/:id",
+        name: "TemplateEdit",
+        component: TemplateDetail,
+        meta: {
+            layout: "default",
+            module: "Templates",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/tools/:stepToolId/template",
+        name: "TemplateConfiguration",
+        component: TemplateConfiguration,
+        meta: {
+            layout: "default",
+            module: "Workflow",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/flow/tools/template",
+        name: "TemplateConfiguration",
+        component: TemplateConfiguration,
         meta: {
             layout: "default",
             module: "Workflow",

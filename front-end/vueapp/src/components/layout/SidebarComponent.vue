@@ -1,23 +1,13 @@
 <template>
-    <aside
-        class="sidebar d-flex flex-column flex-shrink-0 background-white text-black"
-    >
+    <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
         <div
             class="sidebar-header d-flex align-items-center"
-            :class="
-                isCollapsed
-                    ? 'justify-content-center'
-                    : 'justify-content-start'
-            "
+            :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'"
             style="height: 60px; padding: 0 10px"
         >
             <router-link
                 class="d-flex align-items-center text-decoration-none"
-                :class="
-                    isCollapsed
-                        ? 'justify-content-center'
-                        : 'w-100'
-                "
+                :class="isCollapsed ? 'justify-content-center' : 'w-100'"
                 :to="{ name: 'Home' }"
             >
                 <img
@@ -58,9 +48,7 @@
             </button>
         </div>
         <div class="sidebar-horizontal-separator"></div>
-        <ul
-            class="btn-toggle-nav list-unstyled fw-normal pb-1 small"
-        >
+        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li
                 v-for="(item, index) in filteredMenuItems"
                 :key="item.labelKey"
@@ -74,9 +62,7 @@
                     :class="[
                         'd-flex align-items-center custom-menu-item link-dark rounded',
                         isRouteActive(item) ? 'active' : '',
-                        isCollapsed
-                            ? 'justify-content-center'
-                            : '',
+                        isCollapsed ? 'justify-content-center' : '',
                     ]"
                     :to="item.to"
                 >
@@ -129,8 +115,8 @@
                         activeKey: "Dashboard",
                         to: "/dashboard",
                         icon: {
-                            name: "LayoutGrid",
-                            color: "#f43f5e",
+                            name: "ChartColumn",
+                            color: "#40b04d",
                         },
                         labelKey: "pages.dashboard",
                     },
@@ -172,18 +158,7 @@
                             name: "Workflow",
                             color: "#00bba7",
                         },
-                        labelKey:
-                            "pages.workflowManagement",
-                    },
-                    {
-                        permission: "Documents",
-                        activeKey: "DocumentList",
-                        to: "/documents",
-                        icon: {
-                            name: "FileText",
-                            color: "#2f80ed",
-                        },
-                        labelKey: "pages.documents",
+                        labelKey: "pages.workflowManagement",
                     },
                     {
                         permission: "Workflow",
@@ -205,6 +180,16 @@
                         },
                         labelKey: "pages.tools",
                     },
+                    {
+                        permission: "Templates",
+                        activeKey: "Templates",
+                        to: "/templates",
+                        icon: {
+                            name: "Zap",
+                            color: "#2f80ed",
+                        },
+                        labelKey: "pages.templates",
+                    },
                 ],
             };
         },
@@ -214,10 +199,7 @@
                     if (!item.permission) {
                         return true;
                     }
-                    return hasPermission(
-                        item.permission,
-                        "View"
-                    );
+                    return hasPermission(item.permission, "View");
                 });
             },
         },
@@ -408,8 +390,7 @@
     .sidebar-menu-item-enter {
         opacity: 0;
         transform: translateX(-12px);
-        animation: sidebar-item-enter 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94)
-            forwards;
+        animation: sidebar-item-enter 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         animation-delay: calc(var(--item-index) * 45ms);
     }
 

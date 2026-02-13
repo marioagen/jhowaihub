@@ -18,5 +18,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         ICollection<Team> FindByIdsAndUser(IEnumerable<int> ids,
                                            string emailUser);
         IQueryable<TeamDto> FindAllByUser(string userEmail);
+        Task<ICollection<TeamSimpleDto>> FindAllSimple();
     }
 }

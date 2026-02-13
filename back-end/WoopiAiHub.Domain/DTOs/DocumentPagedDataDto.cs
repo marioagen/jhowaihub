@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum;
 
 namespace WoopiAiHub.Domain.DTOs
 {
@@ -12,5 +12,6 @@ namespace WoopiAiHub.Domain.DTOs
         public bool IsAscending { get; set; }
         public ColTypeDocument ColType { get; set; }
         public List<int> WorkflowIds { get; set; } = new List<int>();
+        public int? StatusId { get; set; }
     }
 }

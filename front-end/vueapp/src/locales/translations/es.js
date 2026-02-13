@@ -9,50 +9,41 @@ const spanish = {
         clear: "Limpiar",
         closeResults: "Cerrar Resultados",
         confirmed: "Confirmado",
-        conversationWithDocument:
-            "Escriba su pregunta sobre el documento...",
+        conversationWithDocument: "Escriba su pregunta sobre el documento...",
         copy: "Copiar",
         document: "Documento",
-        errorApplyingQuestionnaire:
-            "Error al aplicar cuestionario",
-        errorLoadDocumentData:
-            "Error al cargar datos del documento",
-        errorLoadingQuestionnaires:
-            "Error al cargar cuestionarios",
+        errorApplyingQuestionnaire: "Error al aplicar cuestionario",
+        errorLoadDocumentData: "Error al cargar datos del documento",
+        errorLoadingQuestionnaires: "Error al cargar cuestionarios",
         extractedData: "Datos extraídos",
         failedEditOutput: "No se pudo editar el output.",
-        failedLoadDocument:
-            "No se pudo cargar el documento.",
-        failedNoResponse:
-            "Falló, no hay respuesta del servidor.",
-        failedToLoadHistory:
-            "No se pudo cargar el historial.",
-        findingTheBestAnswer:
-            "Encontrar la mejor respuesta",
+        failedLoadDocument: "No se pudo cargar el documento.",
+        failedNoResponse: "Falló, no hay respuesta del servidor.",
+        failedToLoadHistory: "No se pudo cargar el historial.",
+        findingTheBestAnswer: "Encontrar la mejor respuesta",
         nextStep: "Siguiente paso",
         noDataInDocument: "No hay datos disponibles",
-        pleaseSelectQuestionnaire:
-            "Por favor, seleccione un cuestionario",
+        pleaseSelectQuestionnaire: "Por favor, seleccione un cuestionario",
         previousStep: "Paso anterior",
         question: "Pregunta",
         questionnaireResults: "SALIDA",
         questionnaireToApply: "CUESTIONARIO A APLICAR",
-        selectQuestionnaire:
-            "Seleccione un cuestionario...",
+        selectQuestionnaire: "Seleccione un cuestionario...",
         sendQuestion: "Enviar pregunta",
         subtitle: "Gestiona análisis de documentos",
-        successApplyingQuestionnaire:
-            "Cuestionario aplicado con éxito",
+        successApplyingQuestionnaire: "Cuestionario aplicado con éxito",
         successEditOutput: "Output editada con éxito",
         title: "Análisis de Documentos",
-        typeYourQuestion:
-            "Escriba su pregunta sobre el documento...",
+        typeYourQuestion: "Escriba su pregunta sobre el documento...",
         workflow: "Flujo de Trabajo",
     },
     card: {
         assignBtn: "Asignar",
-        cardsOpened:
-            "Hay tarjetas abiertas en este Workflow",
+        cardsOpened: "Hay tarjetas abiertas en este Workflow",
+        errorAdvancingCard: "Ocurrió un error al avanzar el card.",
+        errorFinalizingCard: "Ocurrió un error al finalizar el card.",
+        finalizeConfirmMessage: "¿Está seguro de que desea finalizar este documento?",
+        finalizeConfirmTitle: "Confirmar finalización",
         unassignInfo: "Desasignar documento",
         userApplicant: "Solicitante",
         userAssigned: "Responsable",
@@ -65,6 +56,7 @@ const spanish = {
         almost: "Ya casi has llegado!",
         analyze: "Analizar",
         analyzed: "Analizado",
+        finalize: "Finalizar",
         apply: "Aplicar",
         back: "Volver",
         cancel: "Cancelar",
@@ -103,8 +95,7 @@ const spanish = {
         save: "Guardar",
         select: "Seleccionar",
         selectAll: "Seleccionar Todos",
-        selectAnItemFromTheList:
-            "Seleccione un elemento de la lista.",
+        selectAnItemFromTheList: "Seleccione un elemento de la lista.",
         selected: "Seleccionada",
         selectedList: "Lista seleccionada",
         send: "Enviar",
@@ -112,8 +103,7 @@ const spanish = {
         signOut: "Desconectar",
         status: "Estado",
         success: "Éxito",
-        textCopiedToClipboard:
-            "Texto copiado al portapapeles.",
+        textCopiedToClipboard: "Texto copiado al portapapeles.",
         thisActionCannotBeUndone:
             "Esta acción no se puede deshacer. ¿Está seguro de que desea eliminarlo?",
         upload: "Subir",
@@ -133,8 +123,7 @@ const spanish = {
         },
         graphs: {
             pagesGraphSubtitle: "Consumo Diario",
-            pagesGraphTitle:
-                "Páginas de Documentos Procesadas (Agente Digitalizador)",
+            pagesGraphTitle: "Páginas de Documentos Procesadas (Agente Digitalizador)",
             pagesTooltip:
                 "Cantidad de páginas procesadas mediante el Agente Digitalizador, que convierte imágenes de texto en texto editable.",
             periodTotal: "Total del Período",
@@ -144,17 +133,13 @@ const spanish = {
                 "Visualización del consumo de tokens para los diferentes modelos de Inteligencia Artificial. Los tokens son las unidades de procesamiento de texto utilizadas por los modelos.",
             totalPages: "Total de Páginas Procesadas",
             totalTokens: "Total de Tokens Consumidos",
-            totalWorkflow:
-                "Total de Ejecuciones de Automatización de IA",
-            totalWorkflowAutomatic:
-                "Total de Ejecuciones Woopi AI",
+            totalWorkflow: "Total de Ejecuciones de Automatización de IA",
+            totalWorkflowAutomatic: "Total de Ejecuciones Woopi AI",
             unitValue: "Valor unitario en el plan actual:",
             workflowAutomaticTooltip:
                 "Número de veces que se ejecutaron los flujos de automatización de IA.",
-            workflowsAutomaticGraphTitle:
-                "Ejecuciones de Workflows de Automatización de IA",
-            workflowsGraphTitle:
-                "Ejecuciones de Workflows Woopi AI",
+            workflowsAutomaticGraphTitle: "Ejecuciones de Workflows de Automatización de IA",
+            workflowsGraphTitle: "Ejecuciones de Workflows Woopi AI",
             workflowTooltip:
                 "Número de veces que se ejecutaron los flujos creados en la plataforma Woopi AI.",
         },
@@ -183,33 +168,23 @@ const spanish = {
         createBtn: "Nuevo documento",
         createdDate: "Fecha de carga",
         deleteHistory: "Borrar historial",
-        descriptionDocumentNote:
-            "Descripción (única para varios documentos)",
-        descriptionExceeded:
-            "La descripción excede el máximo de 250 caracteres.",
+        descriptionDocumentNote: "Descripción (única para varios documentos)",
+        descriptionExceeded: "La descripción excede el máximo de 250 caracteres.",
         documentHasAlreadyBeenStandardizedPreviously:
             "El documento ya ha sido estandarizado anteriormente. <br/> Espere, será redirigido a la página de inicio.",
         documentName: "Nombre del documento",
-        documentNameOrDescription:
-            "Nombre o descripción del documento",
+        documentNameOrDescription: "Nombre o descripción del documento",
         documentTranscript: "Transcripción de documentos",
         documentType: "Tipo de documento",
-        documentTypeAlreadyExists:
-            "Este tipo de documento ya existe",
-        documentTypeEditSuccess:
-            "Tipo de documento actualizado exitosamente",
-        documentTypeRemoveSuccess:
-            "Tipo de documento eliminado correctamente",
-        documentTypeSuccess:
-            "Tipo de documento insertado exitosamente",
+        documentTypeAlreadyExists: "Este tipo de documento ya existe",
+        documentTypeEditSuccess: "Tipo de documento actualizado exitosamente",
+        documentTypeRemoveSuccess: "Tipo de documento eliminado correctamente",
+        documentTypeSuccess: "Tipo de documento insertado exitosamente",
         errors: {
             invalidType: "Tipo de documento no válido",
-            removeTypeError:
-                "Error al eliminar tipo de documento",
-            unselectedDocuments:
-                "Ningún documento seleccionado",
-            uploadedFilesError:
-                "¡Error al cargar archivos!",
+            removeTypeError: "Error al eliminar tipo de documento",
+            unselectedDocuments: "Ningún documento seleccionado",
+            uploadedFilesError: "¡Error al cargar archivos!",
             uploadError: "Algo salió mal",
             uploadFailure: "Error de carga",
         },
@@ -219,24 +194,19 @@ const spanish = {
         historic: "Registro de respuestas",
         inclusionDate: "Fecha de inclusión",
         listing: "Listado",
-        loadingFilePleaseWait:
-            "Cargando archivo, por favor espere",
+        loadingFilePleaseWait: "Cargando archivo, por favor espere",
         loadingTheText: "Cargando el texto",
         mostOlder: "Más viejo",
         mostRecent: "Más reciente",
         ocrFetchError: "Error al buscar texto del Agente Digitalizador.",
         ocrLoadError: "Error al cargar texto del Agente Digitalizador.",
         ocrNotAvailable: "Agente Digitalizador no disponible para este documento.",
-        noDocumentsWereFound:
-            "No se encontraron documentos",
-        normalizingTheDocument:
-            "Normalizando el documento, espera.",
+        noDocumentsWereFound: "No se encontraron documentos",
+        normalizingTheDocument: "Normalizando el documento, espera.",
         noTeams: "No hay equipos disponibles.",
-        noTeamsFound:
-            "Ningún equipo vinculado a su usuario",
+        noTeamsFound: "Ningún equipo vinculado a su usuario",
         notFound: "No se encontraron documentos",
-        notReloadThePage:
-            "Para evitar interrumpir el proceso de carga, no recargues la página",
+        notReloadThePage: "Para evitar interrumpir el proceso de carga, no recargues la página",
         numberOfPagesHasBeenExceeded:
             "Se ha excedido el número de páginas. Comuníquese con el administrador de su plan.",
         ocrText: "Texto del Agente Digitalizador",
@@ -244,29 +214,23 @@ const spanish = {
         preparingTheDocument: "Preparando el documento..",
         queryWithoutHistory: "Consulta sin historial",
         reduceHistory: "Reducir la historia",
-        removeAllFilesDropzone:
-            "¿Eliminar todos los archivos de la cola?",
+        removeAllFilesDropzone: "¿Eliminar todos los archivos de la cola?",
         removeError: "Error al eliminar el documento",
         removeSuccess: "Documento eliminado con éxito",
-        removeTitle:
-            "Está a punto de eliminar un documento del sistema",
+        removeTitle: "Está a punto de eliminar un documento del sistema",
         searchDocument: "Buscar documento",
         selectAFile: "Seleccione un archivo.",
         selectedTeams: "Equipos seleccionados",
-        selectToDelete:
-            "Seleccione al menos un documento para realizar la eliminación.",
-        sendingTheDocument:
-            "Enviando el documento, por favor espere.",
+        selectToDelete: "Seleccione al menos un documento para realizar la eliminación.",
+        sendingTheDocument: "Enviando el documento, por favor espere.",
         showingFilesUpload: "archivos subidos",
         standardizedFullText: "Texto completo normalizado",
         statusList: {
             notAnalyzed: "En espera de análisis",
         },
-        subtitle:
-            "Gestiona documentos y extrae información",
+        subtitle: "Gestiona documentos y extrae información",
         teams: "Equipo",
-        teamsSubtextDocuments:
-            "Seleccione al menos un equipo para asociarlo al documento.",
+        teamsSubtextDocuments: "Seleccione al menos un equipo para asociarlo al documento.",
         teamsTitleDocuments: "Asociarse con equipos",
         theFileMayBeCorrupt:
             "El archivo puede estar <br/> corrupto o tener un error. <br/> Por favor, inténtelo de nuevo.",
@@ -280,18 +244,15 @@ const spanish = {
             cardTitle: "Cargar Documento",
             dropZone:
                 "Arrastra y suelta tus archivos PDF abajo para comenzar o haz clic en el área para explorarlos",
-            linkSubtitle:
-                "Selecciona al menos un flujo de trabajo para asociar al documento.",
+            linkSubtitle: "Selecciona al menos un flujo de trabajo para asociar al documento.",
             linkWorkflow: "Asociar a un flujo de trabajo",
             noFileChosen: "Ningún archivo seleccionado",
             noTeamChosen: "Ningún equipo seleccionado",
             noWorkflowFound:
                 "No se encontró ningún flujo de trabajo vinculado a los equipos del usuario",
-            removeAllDropzone:
-                "Eliminar archivos del área de carga",
+            removeAllDropzone: "Eliminar archivos del área de carga",
             selectionList: "Lista de selección",
-            subtitle:
-                "Sube nuevos documentos para su análisis",
+            subtitle: "Sube nuevos documentos para su análisis",
             title: "Nuevo Documento",
             warningWorkflowNotListed:
                 "¿El flujo de trabajo no aparece en la lista? Es porque tus equipos no tienen uno asociado.",
@@ -304,8 +265,7 @@ const spanish = {
         workflowListModal: {
             cancel: "Cancelar",
             clickToView: "Haga clic para ver",
-            errorToGetWorkflows:
-                "Error al buscar flujos de trabajo",
+            errorToGetWorkflows: "Error al buscar flujos de trabajo",
             errorUnexpected: "Error inesperado.",
             nothingFound:
                 "No se encontraron flujos de trabajo. Si no hay un flujo vinculado, considere reenviar el archivo y vincular un flujo de trabajo.",
@@ -315,18 +275,26 @@ const spanish = {
                 "Este documento está asociado a varios flujos de trabajo. Elija cuál desea ver:",
         },
         workflows: "Workflows",
-        youAreAboutToDeleteDocument:
-            "Estás a punto de eliminar <br/> el documento del sistema",
+        youAreAboutToDeleteDocument: "Estás a punto de eliminar <br/> el documento del sistema",
         youAreAboutToDeleteDocumentQuery:
             "Estás a punto de eliminar <br/> el historial de consultas del sistema",
+    },
+    documentsHub: {
+        title: "Cadenas de procesamiento",
+        subtitle: "Visualice el flujo de documentos a través de las etapas de procesamiento",
+        workflows: {
+            title: "Tablero de cadenas de procesamiento",
+        },
+        documents: {
+            title: "Lista de documentos",
+        },
     },
     filters: {
         assignment: {
             allUsers: "Todos los usuarios",
             currentUser: "Mis documentos",
         },
-        documentInput:
-            "Buscar por documento, descripción o usuario, ...",
+        documentInput: "Buscar por documento, descripción o usuario, ...",
         mostOld: "Mas antiguo",
         mostRecent: "Mas reciente",
         nameAZ: "Nombre (A-Z)",
@@ -351,65 +319,57 @@ const spanish = {
             all: "Todos los usuarios",
             none: "Selecciona un usuario",
         },
-        workflowInput:
-            "Buscar por documento, descripción o solicitante",
+        workflowInput: "Buscar por documento, descripción o solicitante",
         workflowSelect: {
             none: "Selecciona un flujo de trabajo",
             withWorkflow: "Todos con workflow asociado",
+        },
+        statusSelect: {
+            none: "Estado del card",
         },
     },
     flow: {
         downloadJson: "Descargar JSON",
         flowListEnd: "Finalizar Flujo",
         formCreate: {
-            subtitle:
-                "Crea una nueva herramienta para procesar documentos",
+            subtitle: "Crea una nueva herramienta para procesar documentos",
             title: "Flujo de Automatización",
         },
         formEdit: {
-            subtitle:
-                "Actualiza la información de la herramienta seleccionada",
+            subtitle: "Actualiza la información de la herramienta seleccionada",
             title: "Flujo de Automatización:",
         },
         formFlow: {
-            configurationSaved:
-                "Configuración guardada exitosamente",
+            configurationSaved: "Configuración guardada exitosamente",
             configureToolParameters: "Configure los parámetros de esta herramienta",
             connectorWorkflowConfigFail:
                 "No se pudo recuperar la configuración del workflow. Verifica la URL y la clave API de la herramienta",
             connectorWorkflowFail:
                 "El conector del workflow no respondió. Verifica la URL y la clave API de la herramienta",
             createNewPrompt: "Crear nuevo agente",
-            dependenciesRequired:
-                "Seleccione al menos una dependencia",
+            dependenciesRequired: "Seleccione al menos una dependencia",
             editFlowNodeFail: "No se pudo editar el nodo",
-            editFlowNodeSuccess:
-                "Nodo editado exitosamente",
-            progressFlowFail:
-                "No se pudo insertar el flujo",
-            progressFlowSuccess:
-                "Flujo insertado exitosamente",
+            editFlowNodeSuccess: "Nodo editado exitosamente",
+            progressFlowFail: "No se pudo insertar el flujo",
+            progressFlowSuccess: "Flujo insertado exitosamente",
             progressFlowUpdateFail:
                 "No se pudo actualizar el flujo. El flujo ya contiene datos de salida para las herramientas.",
             prompts: "Agentes",
-            promptRequired:
-                "Seleccione al menos un agente",
+            promptRequired: "Seleccione al menos un agente",
             selectPrompt: "Seleccione un agente",
         },
         hideTools: "Ocultar Herramientas",
         showTools: "Agregar Herramientas",
         sidebar: {
             addDependency: "Agregar Dependencia",
-            allDependenciesSelected:
-                "Todas las dependencias ya seleccionadas",
+            allDependenciesSelected: "Todas las dependencias ya seleccionadas",
             deleteDependency: "Eliminar Dependencia",
             dependencies: "Dependencias",
             dependenciesHint:
                 "Seleccione las herramientas anteriores cuyas salidas desea usar como entrada",
             filter: "Selecciona un webhook",
             inputs: "Entradas",
-            noDependencies:
-                "No hay herramientas disponibles",
+            noDependencies: "No hay herramientas disponibles",
         },
         sidebarTitle: "Configurar I/O:",
         start: "Inicio",
@@ -426,12 +386,10 @@ const spanish = {
         },
         planLabel: "Usted ha adquirido el",
         planName: "Plan Enterprise",
-        planThankYou:
-            "¡Gracias por elegir nuestra plataforma!",
+        planThankYou: "¡Gracias por elegir nuestra plataforma!",
         platformCard: {
             button: "Ver video",
-            description:
-                "Vea un tour guiado de 5 minutos sobre las principales funcionalidades.",
+            description: "Vea un tour guiado de 5 minutos sobre las principales funcionalidades.",
             title: "Conozca la Plataforma",
         },
         quickStartTitle: "Guía de Inicio Rápido",
@@ -458,14 +416,12 @@ const spanish = {
         password: "Contraseña",
         selectTenant: "Selecciona el tenant para continuar",
         sso: "Login con Microsoft",
-        subtitle:
-            "Accede a tu cuenta para gestionar documentos",
+        subtitle: "Accede a tu cuenta para gestionar documentos",
         tenantDatabaseNotReady:
             "El ambiente se está preparando. Inténtelo de nuevo en unos minutos.",
         tenantNotFound: "Tenant no encontrado.",
         title: "Iniciar sesión",
-        userIncorrectPassword:
-            "La contraseña ingresada es incorrecta.",
+        userIncorrectPassword: "La contraseña ingresada es incorrecta.",
         userNotFound: "Usuario no encontrado.",
         userTokenMicrosoftInvalid:
             "No se pudo validar tu autenticación. Por favor, inicia sesión nuevamente.",
@@ -478,15 +434,12 @@ const spanish = {
             analyst: "Analista",
             createBtn: "Nuevo Perfil",
             createProfile: "Crear perfil",
-            createSubtitle:
-                "Crea un nuevo perfil para el sistema",
+            createSubtitle: "Crea un nuevo perfil para el sistema",
             createTitle: "Nuevo Perfil",
             deleteSuccess: "Perfil eliminado con éxito",
             editProfile: "Editar perfil",
-            editSubtitle:
-                "Actualiza la información del perfil seleccionado",
-            editSubTitleProfile:
-                "Actualizar la información del perfil en el sistema",
+            editSubtitle: "Actualiza la información del perfil seleccionado",
+            editSubTitleProfile: "Actualizar la información del perfil en el sistema",
             editSuccess: "Perfil actualizado con éxito",
             editTitle: "Editar Perfil",
             editTitleProfile: "Edición de perfil",
@@ -494,8 +447,7 @@ const spanish = {
                 addError: "Erro al crear perfil",
                 deleteError: "Error al eliminar el perfil",
                 editError: "Error al actualizar el perfil",
-                editProfileError:
-                    "Erro al actualizar perfil",
+                editProfileError: "Erro al actualizar perfil",
                 invalid: "Perfil inválido",
                 removeError: "Error al eliminar perfil",
                 saveError: "Error al guardar el perfil",
@@ -503,52 +455,38 @@ const spanish = {
             index: "Perfiles",
             newProfile: "Nuevo perfil",
             noPermissionChosen: "Ningún permiso vinculado",
-            noProfilesWereFound:
-                "No se encontró ningún perfil",
+            noProfilesWereFound: "No se encontró ningún perfil",
             permissions: "Permisos",
-            permissionsWorkflow:
-                "Permisos de Flujo de Trabajo",
+            permissionsWorkflow: "Permisos de Flujo de Trabajo",
             profile: "Perfil",
-            profileAddSuccess:
-                "Perfil insertado exitosamente",
-            profileEditSuccess:
-                "Perfil actualizado exitosamente",
+            profileAddSuccess: "Perfil insertado exitosamente",
+            profileEditSuccess: "Perfil actualizado exitosamente",
             profilePermissions: "Perfiles y permisos",
-            profileRemoveSuccess:
-                "Perfil eliminado correctamente",
+            profileRemoveSuccess: "Perfil eliminado correctamente",
             profiles: "Perfiles",
-            profilesMessage:
-                "Administrar perfiles y permisos del sistema",
-            saveSubTitleProfile:
-                "Crear un nuevo perfil en el sistema",
+            profilesMessage: "Administrar perfiles y permisos del sistema",
+            saveSubTitleProfile: "Crear un nuevo perfil en el sistema",
             saveSuccess: "Perfil guardado con éxito",
             saveTitleProfile: "Nuevo perfil",
             searchPermissions: "Buscar permisos...",
             searchProfiles: "Buscar perfiles",
             selectedProfiles: "Perfiles seleccionados",
-            subtitle:
-                "Administra los perfiles y permisos del sistema",
+            subtitle: "Administra los perfiles y permisos del sistema",
             title: "Perfiles y Permisos",
-            typeProfileName:
-                "Introduce el nombre del perfil",
-            youAreAboutToDeleteProfile:
-                "Estás a punto de eliminar un perfil del sistema",
+            typeProfileName: "Introduce el nombre del perfil",
+            youAreAboutToDeleteProfile: "Estás a punto de eliminar un perfil del sistema",
         },
-        subtitle:
-            "Administra los usuarios, equipos y permisos del sistema",
+        subtitle: "Administra los usuarios, equipos y permisos del sistema",
         teams: {
             analyst: "Analista",
             createBtn: "Nuevo Equipo",
-            createSubtitle:
-                "Crea un nuevo equipo para el sistema",
+            createSubtitle: "Crea un nuevo equipo para el sistema",
             createTitle: "Nuevo Equipo",
             deleteSuccess: "Equipo eliminado con éxito",
-            editSubtitle:
-                "Actualiza la información del equipo seleccionado",
+            editSubtitle: "Actualiza la información del equipo seleccionado",
             editTitle: "Editar Equipo",
             errors: {
-                deleteDocError:
-                    "No se pudo eliminar el equipo: hay documentos relacionados",
+                deleteDocError: "No se pudo eliminar el equipo: hay documentos relacionados",
                 deleteError: "Error al eliminar el equipo",
                 duplicated: "Equipo ya registrado",
                 fetchError: "Error al obtener los equipos",
@@ -558,8 +496,7 @@ const spanish = {
             },
             members: "Miembros",
             newTeam: "Nuevo equipo",
-            newTeamMessage:
-                "Crea un nuevo equipo en el sistema",
+            newTeamMessage: "Crea un nuevo equipo en el sistema",
             noTeamWasFound: "No se encontró ningún equipo",
             saveSuccess: "Equipo guardado con éxito",
             searchTeams: "Buscar equipos",
@@ -567,59 +504,48 @@ const spanish = {
             team: "Equipo",
             teamMembers: "Miembros del equipo",
             teamName: "Equipo",
-            teamsMessage:
-                "Gestionar equipos y sus miembros",
+            teamsMessage: "Gestionar equipos y sus miembros",
             title: "Equipos",
             typeTeamName: "Nombre del equipo",
-            youAreAboutToDeleteTeam:
-                "Estás a punto de eliminar un Equipo del sistema",
+            youAreAboutToDeleteTeam: "Estás a punto de eliminar un Equipo del sistema",
         },
         title: "Gestión de Usuarios y Equipos",
         users: {
             confirmedPassword: "Confirmar contraseña",
             createBtn: "Nuevo Usuario",
-            createSubtitle:
-                "Crea un nuevo usuario para el sistema",
+            createSubtitle: "Crea un nuevo usuario para el sistema",
             createTeamUser: "Crear Usuario",
             createTitle: "Nuevo Usuario",
             deleteSuccess: "Usuario eliminado con éxito",
-            editSubtitle:
-                "Actualiza la información del usuario seleccionado",
+            editSubtitle: "Actualiza la información del usuario seleccionado",
             editTitle: "Editar Usuario",
             editUser: "Editar usuario",
             email: "Correo electrónico",
             errors: {
-                emailDuplicated:
-                    "Correo electrónico ya registrado",
+                emailDuplicated: "Correo electrónico ya registrado",
                 invalid: "Usuario inválido",
                 saveError: "Error al guardar el usuario",
             },
             manageUsers: "Gestión de usuarios",
-            newTeamUserMessage:
-                "Crea un nuevo usuario que será seleccionado automáticamente",
+            newTeamUserMessage: "Crea un nuevo usuario que será seleccionado automáticamente",
             newUser: "Nuevo usuario",
-            newUserMessage:
-                "Crear o editar un usuario en el sistema",
-            noUsersWasFound:
-                "No se encontró ningún usuario",
+            newUserMessage: "Crear o editar un usuario en el sistema",
+            noUsersWasFound: "No se encontró ningún usuario",
             password: "Contraseña",
             saveSuccess: "Usuario guardado con éxito",
             searchUsers: "Buscar usuarios...",
             selectedUsers: "Usuarios seleccionados",
             subtitle: "Administra los usuarios del sistema",
             title: "Usuarios",
-            typeConfirmedPassword:
-                "Ingrese la confirmación de la contraseña",
+            typeConfirmedPassword: "Ingrese la confirmación de la contraseña",
             typeEmail: "usuario{'@'}suaempresa.com",
             typeName: "Ingrese el nombre completo",
             typePassword: "Ingrese la contraseña",
             typeUserEmail: "Introduce el email del usuario",
             typeUserName: "Introduce el nombre del usuario",
             user: "Usuario",
-            usersMessage:
-                "Administrar usuarios del sistemas",
-            youAreAboutToDeleteUser:
-                "Estás a punto de eliminar un usuario del sistema",
+            usersMessage: "Administrar usuarios del sistemas",
+            youAreAboutToDeleteUser: "Estás a punto de eliminar un usuario del sistema",
         },
     },
     managementQuizzes: {
@@ -629,8 +555,7 @@ const spanish = {
         quizzes: {
             title: "Cuestionarios",
         },
-        subtitle:
-            "Gestionar cuestionarios, equipos y permisos del sistema",
+        subtitle: "Gestionar cuestionarios, equipos y permisos del sistema",
         title: "Gestión de cuestionarios, preguntas y tipos de documentos",
         types: {
             title: "Tipos",
@@ -686,8 +611,7 @@ const spanish = {
             types: "Tipos",
             users: "Usuarios",
             workflow: "Workflow",
-            workflowmanagement:
-                "Gestión de Flujos de Trabajo",
+            workflowmanagement: "Gestión de Flujos de Trabajo",
             workflowStep: "Workflow Step",
         },
     },
@@ -707,8 +631,7 @@ const spanish = {
         importButton: "Importar",
         importError: "Error al importar agentes",
         importPredefined: "Importar predefinidos",
-        importSubtitle:
-            "Seleccione agentes predefinidos del sistema",
+        importSubtitle: "Seleccione agentes predefinidos del sistema",
         importSuccess: "Agentes importados exitosamente",
         importTitle: "Importar agentes",
         information: "Información básica",
@@ -717,14 +640,12 @@ const spanish = {
         namePrompt: "Nombre del agente",
         newPrompt: "Nuevo agente",
         noPromptsListWereFound: "No se encontraron agentes",
-        placeholderNamePrompt:
-            "Introduzca el nombre del agente",
+        placeholderNamePrompt: "Introduzca el nombre del agente",
         promptContent: "Prompt de Instrucción",
         removeAllPrompts: "Eliminar agentes",
         searchPrompt: "Buscar agente",
         searchPrompts: "Buscar agentes",
-        selectAllTemplates:
-            "Seleccionar todos los templates",
+        selectAllTemplates: "Seleccionar todos los templates",
         subtitle: "Gestiona los agentes del sistema",
         subtitleEdit: "Actualice la información del agente seleccionado",
         subtitleNew: "Crear un nuevo agente de IA",
@@ -739,8 +660,7 @@ const spanish = {
         createdData: "Fecha de creación",
         createError: "Error al crear la pregunta",
         createSuccess: "Pregunta creada con éxito",
-        descriptionOrQuestionId:
-            "Descripción, ID o ingresa una nueva pregunta para registrarte",
+        descriptionOrQuestionId: "Descripción, ID o ingresa una nueva pregunta para registrarte",
         editError: "Error al editar la pregunta",
         editQuestion: "Editar pregunta",
         editSuccess: "Pregunta editada con éxito",
@@ -756,40 +676,32 @@ const spanish = {
             save: "Guardar cambios",
             title: "Editar pregunta",
         },
-        noMoreQuestionsAvailable:
-            "No hay más preguntas disponibles",
-        noQuestionsRegistered:
-            "No hay preguntas registradas",
+        noMoreQuestionsAvailable: "No hay más preguntas disponibles",
+        noQuestionsRegistered: "No hay preguntas registradas",
         noQuestionsWereFound: "No se encontraron preguntas",
-        noQuestionsWereSelected:
-            "No se seleccionaron preguntas.",
+        noQuestionsWereSelected: "No se seleccionaron preguntas.",
         notFound: "No hay preguntas registradas",
         numberOfQuestionsHasBeenExceeded:
             "Se ha excedido el número de preguntas. Comuníquese con el administrador de su plan.",
         questionNotFound: "Pregunta no encontrada",
         removeError: "Error al eliminar la pregunta",
         removeSuccess: "Pregunta eliminada con éxito",
-        removeTitle:
-            "Estás a punto de eliminar una pregunta del sistema",
+        removeTitle: "Estás a punto de eliminar una pregunta del sistema",
         searchQuestion: "Buscar pregunta",
         selectQuestions: "Seleccionar preguntas",
-        selectToDelete:
-            "Seleccione al menos una pregunta para realizar la eliminación.",
+        selectToDelete: "Seleccione al menos una pregunta para realizar la eliminación.",
         sendQuestion: "Enviar pregunta",
         subtitle: "Gestiona las preguntas del sistema",
         title: "Preguntas",
         viewQuestions: "Ver preguntas",
-        youAreAboutToDeleteQuestion:
-            "Estás a punto de eliminar <br/> una pregunta del sistema",
+        youAreAboutToDeleteQuestion: "Estás a punto de eliminar <br/> una pregunta del sistema",
     },
     quizzes: {
         applyingQuestionnaire: "Aplicando el cuestionario",
-        applyingQuestionnaireWait:
-            "Aplicando el cuestionario, por favor espere.",
+        applyingQuestionnaireWait: "Aplicando el cuestionario, por favor espere.",
         applyQuestionnaire: "Aplicar cuestionario",
         basicInfo: "Información básica",
-        basicInfoSubtitle:
-            "Configura la información básica del cuestionario",
+        basicInfoSubtitle: "Configura la información básica del cuestionario",
         createBtn: "Crear cuestionario",
         createdDate: "Fecha de creación",
         createSuccess: "Cuestionario creado con éxito",
@@ -799,46 +711,36 @@ const spanish = {
             duplicated: "Nombre del cuestionario duplicado",
             editError: "Error al actualizar cuestionario",
             invalid: "Cuestionario no valido",
-            removeError:
-                "Error al eliminar el cuestionario",
+            removeError: "Error al eliminar el cuestionario",
         },
-        failedToApplyQuestionnaire:
-            "No se pudo aplicar el cuestionario.",
+        failedToApplyQuestionnaire: "No se pudo aplicar el cuestionario.",
         formCreate: {
-            subtitle:
-                "Guarda la información del nuevo cuestionario",
+            subtitle: "Guarda la información del nuevo cuestionario",
             title: "Nuevo cuestionario",
         },
         formEdit: {
-            subtitle:
-                "Actualiza la información del cuestionario",
+            subtitle: "Actualiza la información del cuestionario",
             title: "Edición de cuestionario",
         },
         formName: "Nombre del cuestionario",
-        formNamePlaceholder:
-            "Escribe el nombre del cuestionario",
+        formNamePlaceholder: "Escribe el nombre del cuestionario",
         formSelect: "Selecciona el tipo de documento",
-        noQuestionnairesWereFound:
-            "No se encontraron cuestionarios",
+        noQuestionnairesWereFound: "No se encontraron cuestionarios",
         notFound: "No hay cuestionarios registrados",
         questionnaireAndAi: "Cuestionarios e IA",
-        questionnaireAppliedSuccessfully:
-            "El cuestionario ha sido aplicado correctamente, espere.",
+        questionnaireAppliedSuccessfully: "El cuestionario ha sido aplicado correctamente, espere.",
         questionnaireSearch:
             "Nombre, ID, Tipo de documento o inserte un nuevo cuestionario para registrarte",
         questions: "Preguntas",
         questionsSection: {
-            subtitle:
-                "Selecciona las preguntas que formarán parte de este cuestionario",
+            subtitle: "Selecciona las preguntas que formarán parte de este cuestionario",
             title: "Selección de preguntas",
         },
         removeSuccess: "Cuestionario eliminado con éxito",
-        removeTitle:
-            "Estás a punto de eliminar un cuestionario del sistema",
+        removeTitle: "Estás a punto de eliminar un cuestionario del sistema",
         searchQuestionnaire: "Buscar cuestionario",
         selectQuestionnaire: "Seleccione uno cuestionario",
-        selectToDelete:
-            "Seleccione al menos un cuestionario para realizar la eliminación.",
+        selectToDelete: "Seleccione al menos un cuestionario para realizar la eliminación.",
         subtitle: "Gestiona los cuestionarios del sistema",
         tableTitle: "Lista de cuestionarios",
         thereIsNotEnoughCredit:
@@ -850,8 +752,7 @@ const spanish = {
     },
     template: {
         addParam: "Agregar Parámetro",
-        bodySubtitle:
-            "Escriba '{' para ver las variables disponibles.",
+        bodySubtitle: "Escriba '{' para ver las variables disponibles.",
         cancelBtn: "Cancelar",
         createBtn: "Guardar Plantilla",
         createError: "Error al crear plantilla",
@@ -860,16 +761,13 @@ const spanish = {
         editError: "Error al actualizar plantilla",
         editSuccess: "Plantilla actualizada exitosamente",
         endpointUrl: "URL del Endpoint",
-        endpointUrlPlaceholder:
-            "https://api.ejemplo.com/v1/recurso",
+        endpointUrlPlaceholder: "https://api.ejemplo.com/v1/recurso",
         formCreate: {
-            subtitle:
-                "Configure el modelo de su solicitud API.",
+            subtitle: "Configure el modelo de su solicitud API.",
             title: "Crear Plantilla",
         },
         formEdit: {
-            subtitle:
-                "Actualice el modelo de su solicitud API.",
+            subtitle: "Actualice el modelo de su solicitud API.",
             title: "Editar Plantilla",
         },
         headers: "Encabezados",
@@ -878,8 +776,7 @@ const spanish = {
         keyPlaceholder: "Key (el valor será {{nombreKey}})",
         method: "Método",
         name: "Nombre",
-        noQueryParameters:
-            "Sin parámetros de query. Agregue uno o escriba en la URL.",
+        noQueryParameters: "Sin parámetros de query. Agregue uno o escriba en la URL.",
         notFound: "No hay plantillas registradas",
         queryParameters: "Parámetros de Query",
         queryParams: "Parámetros de Query",
@@ -887,12 +784,10 @@ const spanish = {
         removeSuccess: "Plantilla eliminada exitosamente",
         requestBody: "Cuerpo de la Solicitud",
         requestDetails: "Detalles de la Solicitud",
-        subtitle:
-            "Administre, pruebe y edite sus plantillas de solicitud de API.",
+        subtitle: "Administre, pruebe y edite sus plantillas de solicitud de API.",
         tableTitle: "Plantillas",
         templateName: "Nombre de la Plantilla",
-        templateNamePlaceholder:
-            "ej. Procesamiento de Agente Digitalizador de Usuario",
+        templateNamePlaceholder: "ej. Procesamiento de Agente Digitalizador de Usuario",
         title: "Plantillas de API",
         unselected: "Seleccione una plantilla",
         url: "URL",
@@ -907,10 +802,8 @@ const spanish = {
         created: "Creado en",
         createError: "Error al crear la herramienta",
         createSuccess: "Herramienta creada con éxito",
-        dependencyRequired:
-            "La herramienta de Agente requiere al menos una dependencia",
-        dependencyToolNotFound:
-            "Herramienta de dependencia no encontrada",
+        dependencyRequired: "La herramienta de Agente requiere al menos una dependencia",
+        dependencyToolNotFound: "Herramienta de dependencia no encontrada",
         duplicated: "Nombre de herramienta duplicado",
         editBtn: "Guardar cambios",
         editError: "Error al actualizar la herramienta",
@@ -922,25 +815,20 @@ const spanish = {
             entries: "Entrada",
             entriesEditable: "Entrada editable",
             entriesSelect: "Selecciona el tipo de entrada",
-            invalidConnector:
-                "El conector no respondió. URL o clave no válidas.",
+            invalidConnector: "El conector no respondió. URL o clave no válidas.",
             name: "Nombre de la Herramienta",
             outputSelect: "Selecciona el tipo de salida",
             types: "Tipo de Herramienta",
-            typesSelect:
-                "Selecciona el tipo de herramienta",
-            validatingConnector:
-                "Validando la URL del conector",
+            typesSelect: "Selecciona el tipo de herramienta",
+            validatingConnector: "Validando la URL del conector",
             validConnector: "El conector está activo",
         },
         formCreate: {
-            subtitle:
-                "Crea una nueva herramienta para procesar documentos",
+            subtitle: "Crea una nueva herramienta para procesar documentos",
             title: "Nueva Herramienta",
         },
         formEdit: {
-            subtitle:
-                "Actualiza la información de la herramienta seleccionada",
+            subtitle: "Actualiza la información de la herramienta seleccionada",
             title: "Editar Herramienta",
         },
         index: "Herramientas",
@@ -949,10 +837,8 @@ const spanish = {
             "La herramienta de Agente requiere una dependencia de una herramienta de Agente Digitalizador",
         removeError: "Error al eliminar la herramienta",
         removeSuccess: "Herramienta eliminada con éxito",
-        removeTitle:
-            "Estás a punto de eliminar una herramienta del sistema",
-        subtitle:
-            "Administra y configura tus herramientas de procesamiento de documentos",
+        removeTitle: "Estás a punto de eliminar una herramienta del sistema",
+        subtitle: "Administra y configura tus herramientas de procesamiento de documentos",
         title: "Herramientas",
         toolNotFound: "Herramienta no encontrada",
         type: "Tipo",
@@ -976,25 +862,20 @@ const spanish = {
             removeError: "Error al eliminar tipo",
         },
         newType: "Crear tipo",
-        noDocumentTypeWasFound:
-            "No se encontró ningún tipo de documento",
+        noDocumentTypeWasFound: "No se encontró ningún tipo de documento",
         removeSuccess: "Tipo eliminado exitosamente",
         saveTitleType: "Creación de tipo",
         saveType: "Crear tipo",
         searchTypes: "Buscar tipos",
-        selectToDelete:
-            "Seleccione al menos un tipo para realizar la exclusión.",
-        subtitle:
-            "Administre los tipos de documentos del sistema",
+        selectToDelete: "Seleccione al menos un tipo para realizar la exclusión.",
+        subtitle: "Administre los tipos de documentos del sistema",
         title: "Tipos",
         typeDoc: "Tipo de Documento",
         typeDocAlreadyExists: "Tipo de documento duplicado",
-        typeNameOrId:
-            "Nombre, ID o introduce un nuevo tipo para registrarte",
+        typeNameOrId: "Nombre, ID o introduce un nuevo tipo para registrarte",
         youAreAboutToDeleteDocumentType:
             "Estás a punto de eliminar <br/> un tipo de documento del sistema",
-        youAreAboutToDeleteType:
-            "Estás a punto de eliminar un tipo del sistema",
+        youAreAboutToDeleteType: "Estás a punto de eliminar un tipo del sistema",
     },
     unauthorized: {
         returnToHome: "Volver",
@@ -1003,8 +884,7 @@ const spanish = {
     unexpectedError:
         "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",
     validation: {
-        confirmedFieldDiffers:
-            "El campo de confirmación difiere del original",
+        confirmedFieldDiffers: "El campo de confirmación difiere del original",
         email: "Correo electrónico inválido",
         fillInThisField: "Complete este campo.",
         fullname: "Ingrese el nombre y el apellido",
@@ -1012,20 +892,13 @@ const spanish = {
         max: "Máximo de {limit} caracteres",
         min: "Mínimo de {limit} caracteres",
         oneElementArray: "Selecciona al menos una opción",
-        oneStep:
-            "Se requiere al menos un paso para guardar",
-        password_confirmed:
-            "La confirmación de la contraseña no coincide.",
-        password_lowercase:
-            "La contraseña debe contener al menos una letra minúscula.",
-        password_min:
-            "La contraseña debe tener al menos 6 caracteres.",
-        password_number:
-            "La contraseña debe contener al menos un número.",
-        password_special:
-            "La contraseña debe contener al menos un carácter especial.",
-        password_uppercase:
-            "La contraseña debe contener al menos una letra mayúscula.",
+        oneStep: "Se requiere al menos un paso para guardar",
+        password_confirmed: "La confirmación de la contraseña no coincide.",
+        password_lowercase: "La contraseña debe contener al menos una letra minúscula.",
+        password_min: "La contraseña debe tener al menos 6 caracteres.",
+        password_number: "La contraseña debe contener al menos un número.",
+        password_special: "La contraseña debe contener al menos un carácter especial.",
+        password_uppercase: "La contraseña debe contener al menos una letra mayúscula.",
         required: "Campo obligatorio",
     },
     welcomeMsg: "Bienvenido",
@@ -1033,11 +906,9 @@ const spanish = {
         access: "Acceder",
         actions: "Acciones",
         addBtn: "Agregar Etapa",
-        addBtnDescription:
-            "Haz clic para crear una nueva etapa",
+        addBtnDescription: "Haz clic para crear una nueva etapa",
         addStep: "Agregar paso",
-        addStepDescription:
-            "Haga clic para crear un nuevo paso.",
+        addStepDescription: "Haga clic para crear un nuevo paso.",
         addToolFlow: "Agregar flujo de herramientas",
         associatedTeams: "Equipos asociados",
         basicInfo: "Información Básica",
@@ -1063,20 +934,16 @@ const spanish = {
         error: "Error al buscar workflows",
         finalize: "Finalizar",
         formCreate: {
-            subtitle:
-                "Configura las etapas del proceso de análisis de documentos",
+            subtitle: "Configura las etapas del proceso de análisis de documentos",
             title: "Crear Workflow",
         },
         formEdit: {
-            subtitle:
-                "Modifica las etapas y configuraciones del workflow",
+            subtitle: "Modifica las etapas y configuraciones del workflow",
             title: "Edición de Workflow",
         },
         index: "Workflow",
-        labelWatchingWorkflow:
-            "Visualización del workflow:",
-        labelWorkflowBoard:
-            "Tablero de procesamiento de documentos",
+        labelWatchingWorkflow: "Visualización del workflow:",
+        labelWorkflowBoard: "Tablero de procesamiento de documentos",
         labelWorkflowDocs: "Workflow de documentos",
         labelWorkflowSubTitle:
             "Visualice el flujo de documentos a través de los pasos de procesamiento",
@@ -1084,24 +951,20 @@ const spanish = {
             "Realizó cambios en este workflow que aún no se han guardado. Si sale ahora, se perderán todos los datos editados.",
         loadError: "Error al cargar el workflow",
         manage: "Gestionar workflow:",
-        managementSubtitle:
-            "Administra y configura workflows de procesamiento de documentos",
+        managementSubtitle: "Administra y configura workflows de procesamiento de documentos",
         managementTitle: "Gestión de Workflows",
         name: "Nombre del Workflow",
         nameAndAssociations: "Nombre y asociaciones",
         namePlaceholder: "Ex: Contract Approval",
         next: "Próximo",
-        noStepsAvailable:
-            "No hay pasos disponibles. Agregue los pasos de la fase anterior.",
+        noStepsAvailable: "No hay pasos disponibles. Agregue los pasos de la fase anterior.",
         notFound: "No se encontró ningún workflow",
         phase1Error: "Error al guardar información básica.",
-        phase1Success:
-            "Información básica guardada exitosamente.",
+        phase1Success: "Información básica guardada exitosamente.",
         phase2Error: "Error al guardar pasos",
         phase2Success: "Pasos guardados exitosamente",
         phase3Error: "Error al guardar herramientas",
-        phase3Success:
-            "Herramientas guardadas exitosamente",
+        phase3Success: "Herramientas guardadas exitosamente",
         previous: "Anterior",
         profiles: "Perfil Responsable",
         removeError: "Error al eliminar workflow",
@@ -1123,6 +986,7 @@ const spanish = {
             approved: "Aprobado",
             awaitinganalysis: "En espera de análisis",
             done: "Listo",
+            finalize: "Terminado",
             waitingforapproval: "En espera de aprobación",
         },
         stepFlow: "Automatización de documentos",
@@ -1131,10 +995,8 @@ const spanish = {
         stepsTitle: "Pasos del flujo de trabajo",
         stepSubtitle: "Configura las reglas y responsables",
         stepTitle: "Etapa del Workflow",
-        subtitle:
-            "Visualiza el flujo de documentos a través de las etapas de procesamiento",
-        subtitleEditor:
-            "Gestiona y configura workflows de procesamiento de documentos",
+        subtitle: "Visualiza el flujo de documentos a través de las etapas de procesamiento",
+        subtitleEditor: "Gestiona y configura workflows de procesamiento de documentos",
         teams: "Equipos asociados",
         title: "Tablero de Procesamiento de Documentos",
         toolFlowsTitle: "Agregar flujo de herramientas",

@@ -1,6 +1,13 @@
 <template>
-    <button v-if="showMultiDelete" class="btn btn-outline-danger btn-sm mb-2 ms-2" @click="openConfirmationMultiple">
-        <LucideIcon icon="Trash2" :size="15" />
+    <button
+        v-if="showMultiDelete"
+        class="btn btn-outline-danger btn-sm mb-2 ms-2"
+        @click="openConfirmationMultiple"
+    >
+        <LucideIcon
+            icon="Trash2"
+            :size="15"
+        />
         {{ $t("common.delete") }}
     </button>
     <div>
@@ -25,10 +32,19 @@
             </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="openEditModal(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="openEditModal(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-danger" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -36,9 +52,9 @@
         </TableComponent>
     </div>
     <ToolsModal
-        :isEdit="true" 
-        @reload="reload" 
-        ref="ToolsModal" 
+        :isEdit="true"
+        @reload="reload"
+        ref="ToolsModal"
     />
     <ConfirmModal
         id="deleteConfirm"
@@ -52,13 +68,12 @@
         @confirm="deleteTool"
     />
 </template>
-
 <script>
     import date from "@/helpers/date";
-    import ToolsService from '@/services/tools/ToolsServices';
+    import ToolsService from "@/services/tools/ToolsServices";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
-    import ToolsModal from "@/components/tools/ToolsModal.vue";    
+    import ToolsModal from "@/components/tools/ToolsModal.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
 
     export default {
@@ -67,7 +82,7 @@
             TableComponent,
             ConfirmModal,
             ToolsModal,
-            ActionTableListComponent
+            ActionTableListComponent,
         },
         data: () => ({
             table: {
@@ -75,10 +90,22 @@
                 columns: [
                     { key: "id", label: "common.id" },
                     { key: "name", label: "common.name" },
-                    { key: "toolType", label: "tools.type" },
-                    { key: "inputData", label: "tools.entry" },
-                    { key: "outputData", label: "common.output" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "toolType",
+                        label: "tools.type",
+                    },
+                    {
+                        key: "inputData",
+                        label: "tools.entry",
+                    },
+                    {
+                        key: "outputData",
+                        label: "common.output",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -117,7 +144,7 @@
                     .then((response) => {
                         const content = response?.content || [];
                         const pagination = response?.pagination || {};
-                        
+
                         this.table.data = content;
                         this.table.pagination = pagination;
                     })

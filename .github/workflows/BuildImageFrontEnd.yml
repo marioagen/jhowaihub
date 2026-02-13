@@ -1,61 +1,42 @@
-name: 'Build image front-end'
+name: "Build image front-end"
 
 on:
-  push:
-    branches:
-      - 'develop'
-      - 'release'
-    paths:
-      - 'front-end/**'
+    push:
+        branches:
+            - "develop"
+            - "release"
+        # paths:
+        # - 'front-end/**'
 
 jobs:
-  build-image:
-    name: "Build image front-end"
+    build-image:
+        name: "Build image front-end"
+        runs-on: ["azure-identity"]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
 
-    environment:
-        name: ${{ github.ref_name == 'release' && 'qa' || 'dev' }}
+            - name: Declare variables
+              id: vars
+              run: |
+                  echo "imageRepository=woopi-ai" >> $GITHUB_OUTPUT
+                  echo "imageName=woopiai-hub-frontend" >> $GITHUB_OUTPUT
 
-    runs-on: ["azure-identity"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+                  echo "imageVersion=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Declare variables
-        id: vars
-        run: |
-          echo "imageRepository=woopi-ai" >> $GITHUB_OUTPUT
-          echo "imageName=woopiai-hub-frontend" >> $GITHUB_OUTPUT
+            # - name: Build Image
+            # working-directory: ./front-end/vueapp
+            # run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
 
-          echo "imageVersion=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+            - name: Azure login
+              run: az login --identity
 
-      # - name: Build Image
-        # working-directory: ./front-end/vueapp
-        # run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
+            - name: ACR login
+              run: az acr login -n acrapplications
 
-      - name: Azure login
-        run: az login --identity
-  
-      - name: ACR login
-        run: az acr login -n acrapplications
-      
-      # - name: Push Image
-        # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}}
+            # - name: Push Image
+            # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}}
 
-      - name: Build Image
-        working-directory: ./front-end/vueapp
-        run: |
-          az acr build \
-            -r acrapplications \
-            --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} \
-            --platform linux \
-            -f Dockerfile . \
-            --build-arg VUE_APP_NAME=${{vars.VUE_APP_NAME}} \
-            --build-arg VUE_APP_BASE_URL_API=${{vars.VUE_APP_BASE_URL_API}} \
-            --build-arg VUE_APP_WAITING_TIME_MSG_UPLD=${{vars.VUE_APP_WAITING_TIME_MSG_UPLD}} \
-            --build-arg VUE_APP_TIMER_REQ=${{vars.VUE_APP_TIMER_REQ}} \
-            --build-arg VUE_APP_GTAG_ID=${{vars.VUE_APP_GTAG_ID}} \
-            --build-arg VUE_APP_ENV_TYPE=${{vars.VUE_APP_ENV_TYPE}} \
-            --build-arg VUE_APP_HOME_VIDEO_URL=${{vars.VUE_APP_HOME_VIDEO_URL}} \
-            --build-arg VUE_APP_HOME_GUIDE_URL=${{vars.VUE_APP_HOME_GUIDE_URL}} \
-            --build-arg VUE_APP_HOME_DOCS_URL=${{vars.VUE_APP_HOME_DOCS_URL}} \
-            --build-arg VUE_APP_WHATSAPP_LINK=${{vars.VUE_APP_WHATSAPP_LINK}}
+            - name: Build Image
+              working-directory: ./front-end/vueapp
+              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} --platform linux -f Dockerfile .

@@ -110,7 +110,7 @@ namespace WoopiAiHub.Application.Services
             var previousStepId = card.StepId;
             var previousStatusId = card.StatusId;
 
-            card.UpdateStepAndSatus(step.Id, step.StatusId);
+            card.UpdateStepAndStatus(step.Id, step.StatusId);
             var result = _cardRepository.Update(card);
 
             if (result)
@@ -131,13 +131,30 @@ namespace WoopiAiHub.Application.Services
                 }
                 catch
                 {
-                    card.UpdateStepAndSatus(previousStepId, previousStatusId);
+                    card.UpdateStepAndStatus(previousStepId, previousStatusId);
                     _cardRepository.Update(card);
                     throw;
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Updates only the status of a card, keeping the same step. Does not trigger automation.
+        /// </summary>
+        /// <param name="updateCardStatusDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
+        {
+            var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
+                ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+
+            card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
+
+            var result = _cardRepository.Update(card);
+            return result;
         }
 
         /// <summary>
