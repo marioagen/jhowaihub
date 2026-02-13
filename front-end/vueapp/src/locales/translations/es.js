@@ -229,9 +229,12 @@ const spanish = {
         loadingTheText: "Cargando el texto",
         mostOlder: "Más viejo",
         mostRecent: "Más reciente",
-        ocrFetchError: "Error al buscar texto del Agente Digitalizador.",
-        ocrLoadError: "Error al cargar texto del Agente Digitalizador.",
-        ocrNotAvailable: "Agente Digitalizador no disponible para este documento.",
+        ocrFetchError:
+            "Error al buscar texto del Agente Digitalizador.",
+        ocrLoadError:
+            "Error al cargar texto del Agente Digitalizador.",
+        ocrNotAvailable:
+            "Agente Digitalizador no disponible para este documento.",
         noDocumentsWereFound:
             "No se encontraron documentos",
         normalizingTheDocument:
@@ -325,6 +328,17 @@ const spanish = {
         youAreAboutToDeleteDocumentQuery:
             "Estás a punto de eliminar <br/> el historial de consultas del sistema",
     },
+    documentsHub: {
+        title: "Cadenas de procesamiento",
+        subtitle:
+            "Visualice el flujo de documentos a través de las etapas de procesamiento",
+        workflows: {
+            title: "Tablero de cadenas de procesamiento",
+        },
+        documents: {
+            title: "Lista de documentos",
+        },
+    },
     filters: {
         assignment: {
             allUsers: "Todos los usuarios",
@@ -382,7 +396,8 @@ const spanish = {
         formFlow: {
             configurationSaved:
                 "Configuración guardada exitosamente",
-            configureToolParameters: "Configure los parámetros de esta herramienta",
+            configureToolParameters:
+                "Configure los parámetros de esta herramienta",
             connectorWorkflowConfigFail:
                 "No se pudo recuperar la configuración del workflow. Verifica la URL y la clave API de la herramienta",
             connectorWorkflowFail:
@@ -400,8 +415,7 @@ const spanish = {
             progressFlowUpdateFail:
                 "No se pudo actualizar el flujo. El flujo ya contiene datos de salida para las herramientas.",
             prompts: "Agentes",
-            promptRequired:
-                "Seleccione al menos un agente",
+            promptRequired: "Seleccione al menos un agente",
             selectPrompt: "Seleccione un agente",
         },
         hideTools: "Ocultar Herramientas",
@@ -734,7 +748,8 @@ const spanish = {
         selectAllTemplates:
             "Seleccionar todos los templates",
         subtitle: "Gestiona los agentes del sistema",
-        subtitleEdit: "Actualice la información del agente seleccionado",
+        subtitleEdit:
+            "Actualice la información del agente seleccionado",
         subtitleNew: "Crear un nuevo agente de IA",
         title: "Agentes",
         updateError: "Error al actualizar agente",

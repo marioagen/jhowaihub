@@ -46,11 +46,22 @@
                     class="ms-1"
                 />
             </template>
-            <template #cell-actions="{ data }">                
-                <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" class="text-primary" @click="getWorkFlowListByDocumentId(
-                                    data.row.id
-                                )" v-tooltip="$t('documents.actions.consult')">
+            <template #cell-actions="{ data }">
+                <ActionTableListComponent
+                    v-slot="{ actionClass }"
+                >
+                    <a
+                        :class="actionClass"
+                        class="text-primary"
+                        @click="
+                            getWorkFlowListByDocumentId(
+                                data.row.id
+                            )
+                        "
+                        v-tooltip="
+                            $t('documents.actions.consult')
+                        "
+                    >
                         <LucideIcon icon="Search" />
                     </a>
                 </ActionTableListComponent>
@@ -87,9 +98,9 @@
     import DocumentsServices from "@/services/documents/DocumentsServices";
     import BadgeComponent from "@/components/global/BadgeComponent";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent";
-    import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
+    import EmbeddingDocument from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
-    import DocumentWorkflowListModal from "@/components/documents/DocumentWorkflowListModal.vue";
+    import DocumentWorkflowListModal from "@/components/documentsHub/documents/modals/DocumentWorkflowListModal.vue";
 
     export default {
         name: "DocumentsTable",

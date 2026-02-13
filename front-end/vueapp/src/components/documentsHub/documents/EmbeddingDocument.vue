@@ -1,12 +1,24 @@
 <template>
     <main class="flex-shrink-0 overlay">
         <div class="container mb-5">
-            <div class="row justify-content-md-center" style="height: 100%">
+            <div
+                class="row justify-content-md-center"
+                style="height: 100%"
+            >
                 <div class="col-md-auto">
                     <div class="div-center">
                         <div v-if="isLoading">
-                            <div class="mb-3" style="width: 100%; float: left">
-                                <h5 class="h5-custom-modal" v-html="message"></h5>
+                            <div
+                                class="mb-3"
+                                style="
+                                    width: 100%;
+                                    float: left;
+                                "
+                            >
+                                <h5
+                                    class="h5-custom-modal"
+                                    v-html="message"
+                                ></h5>
                             </div>
                             <div style="text-align: center">
                                 <img
@@ -45,30 +57,36 @@
                 backPage: this.$route.query.page,
                 isLoading: true,
                 message: "",
-                timeoutMessage: ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
+                timeoutMessage:
+                    ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
             };
         },
-        components: {
-        },
+        components: {},
         methods: {
             verifyNormalizedDoc() {
-                NormalizeServices.VerifyNormalize(this.docData.Id)
-                    .then((response) => {
-                        if (response.status === 0) {
-                            this.message = this.$t("documents.normalizingTheDocument");
+                NormalizeServices.VerifyNormalize(
+                    this.docData.Id
+                ).then((response) => {
+                    if (response.status === 0) {
+                        this.message = this.$t(
+                            "documents.normalizingTheDocument"
+                        );
+                        this.normalizeDoc();
+                    } else {
+                        if (this.isReprocessing) {
+                            this.message = this.$t(
+                                "documents.normalizingTheDocument"
+                            );
                             this.normalizeDoc();
                         } else {
-                            if (this.isReprocessing) {
-                                this.message = this.$t("documents.normalizingTheDocument");
-                                this.normalizeDoc();
-                            } else {
-                                this.message = this.$t("documents.documentHasAlreadyBeenStandardizedPreviously", [
-                                    response.name,
-                                ]);
-                                this.redirectToDocument();
-                            }
+                            this.message = this.$t(
+                                "documents.documentHasAlreadyBeenStandardizedPreviously",
+                                [response.name]
+                            );
+                            this.redirectToDocument();
                         }
-                    });
+                    }
+                });
             },
             normalizeDoc() {
                 window.onbeforeunload = function () {
@@ -77,19 +95,24 @@
 
                 let paramsReq = {
                     Id: this.docData.Id,
-                    Embeddings_model_name: this.docData.Embeddings_model_name,
+                    Embeddings_model_name:
+                        this.docData.Embeddings_model_name,
                 };
 
                 this.isLoading = true;
                 NormalizeServices.AnalyzeDocument(paramsReq)
                     .then((response) => {
                         window.onbeforeunload = null;
-                        if(response.error !== undefined) {
+                        if (response.error !== undefined) {
                             return this.$notify({
-                                title: this.$t('documents.failedToNormalize'),
-                                message: this.$t('documents.theFileMayBeUnreadableOrHaveAnError'),
-                                variant: 'danger',
-                                icon: 'CircleX',
+                                title: this.$t(
+                                    "documents.failedToNormalize"
+                                ),
+                                message: this.$t(
+                                    "documents.theFileMayBeUnreadableOrHaveAnError"
+                                ),
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                         if (this.isReprocessing) {
@@ -100,34 +123,38 @@
                     })
                     .finally(() => {
                         this.isLoading = false;
-                    })
+                    });
             },
             redirectToAnalyzer() {
                 setTimeout(() => {
                     this.$router.push({
                         name: "Analyzer",
-                        params: { 
-                            id: this.docData.Id 
+                        params: {
+                            id: this.docData.Id,
                         },
-                        query: { 
-                            page: this.backPage 
+                        query: {
+                            page: this.backPage,
                         },
                     });
                 }, 500);
             },
             redirectToDocument() {
                 setTimeout(() => {
-                    this.$router.push({ name: "Documents", query: { page: this.backPage } });
+                    this.$router.push({
+                        name: "Documents",
+                        query: { page: this.backPage },
+                    });
                 }, 6000);
             },
         },
         created() {
-            this.message = this.$t("documents.preparingTheDocument");
+            this.message = this.$t(
+                "documents.preparingTheDocument"
+            );
             this.verifyNormalizedDoc();
         },
     };
 </script>
-
 <style scoped>
     .div-center {
         position: relative;
@@ -175,7 +202,9 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: var(--color-bg-body-content) !important;
+        background-color: var(
+            --color-bg-body-content
+        ) !important;
         display: flex;
         justify-content: center;
         align-items: center;

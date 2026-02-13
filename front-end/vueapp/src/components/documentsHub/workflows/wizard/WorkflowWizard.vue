@@ -153,12 +153,16 @@
                             :size="16"
                         />
                     </button>
-                    <button v-else
-                            class="btn btn-success"
-                            @click="finalize"
-                            type="button">
-                        <LucideIcon icon="Check"
-                                    :size="16" />
+                    <button
+                        v-else
+                        class="btn btn-success"
+                        @click="finalize"
+                        type="button"
+                    >
+                        <LucideIcon
+                            icon="Check"
+                            :size="16"
+                        />
                         {{
                             isEdit
                                 ? $t("workflow.finalize")

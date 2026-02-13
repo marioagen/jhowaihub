@@ -120,6 +120,17 @@ const portuguese = {
         upload: "Carregar",
         warning: "Atenção",
     },
+    documentsHub: {
+        title: "Esteiras de processamento",
+        subtitle:
+            "Visualize o fluxo de documentos através das etapas de processamento",
+        workflows: {
+            title: "Board de Esteiras de processamento",
+        },
+        documents: {
+            title: "Lista de Documentos",
+        },
+    },
     dashboard: {
         changeTenant: "Alternar Tenant",
         created: "Criado em:",
@@ -225,9 +236,12 @@ const portuguese = {
         loadingTheText: "Carregando o texto",
         mostOlder: "Mais antigos",
         mostRecent: "Mais recentes",
-        ocrFetchError: "Erro ao buscar texto do Agente Digitalizador.",
-        ocrLoadError: "Erro ao carregar texto do Agente Digitalizador.",
-        ocrNotAvailable: "Agente Digitalizador não disponível para este documento.",
+        ocrFetchError:
+            "Erro ao buscar texto do Agente Digitalizador.",
+        ocrLoadError:
+            "Erro ao carregar texto do Agente Digitalizador.",
+        ocrNotAvailable:
+            "Agente Digitalizador não disponível para este documento.",
         noDocumentsWereFound:
             "Nenhum documento foi localizado",
         normalizingTheDocument:
@@ -380,7 +394,8 @@ const portuguese = {
         formFlow: {
             configurationSaved:
                 "Configuração salva com sucesso",
-            configureToolParameters: "Configure os parâmetros desta ferramenta",
+            configureToolParameters:
+                "Configure os parâmetros desta ferramenta",
             connectorWorkflowConfigFail:
                 "Falha ao recuperar a configuração da esteira de processamento. Verifique a URL e a chave da API da ferramenta",
             connectorWorkflowFail:
@@ -397,8 +412,7 @@ const portuguese = {
             progressFlowUpdateFail:
                 "Não foi possível atualizar fluxo. Fluxo já contém dados de saída para as ferramentas.",
             prompts: "Agentes",
-            promptRequired:
-                "Selecione ao menos um agente",
+            promptRequired: "Selecione ao menos um agente",
             selectPrompt: "Selecione um agente",
         },
         hideTools: "Ocultar Ferramentas",
@@ -731,7 +745,8 @@ const portuguese = {
         searchPrompts: "Buscar agentes",
         selectAllTemplates: "Selecionar todos os templates",
         subtitle: "Gerencia agentes do sistema",
-        subtitleEdit: "Atualize as informações do agente selecionado",
+        subtitleEdit:
+            "Atualize as informações do agente selecionado",
         subtitleNew: "Criar um novo agente de IA",
         title: "Agentes",
         updateError: "Falha ao atualizar agente",
@@ -1047,9 +1062,11 @@ const portuguese = {
         boardView: "Visualizando esteira de processamento:",
         clone: "Clonar",
         cloneConfirm: "Clonar",
-        cloneError: "Erro ao clonar esteira de processamento",
+        cloneError:
+            "Erro ao clonar esteira de processamento",
         cloneNameLabel: "Nome da nova esteira",
-        cloneSuccess: "Esteira de processamento clonada com sucesso",
+        cloneSuccess:
+            "Esteira de processamento clonada com sucesso",
         cloneSuffix: "Cópia",
         cloneTitle: "Clonar esteira de processamento",
         configuredTools: "Ferramentas configuradas",

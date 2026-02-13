@@ -23,18 +23,40 @@
                 </div>
                 <span v-else>-</span>
             </template>
-            <template #cell-actions="{ data }">                
-                <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" class="text-primary" @click="redirectToIndex(data.row)" v-tooltip="$t('workflow.access')">
+            <template #cell-actions="{ data }">
+                <ActionTableListComponent
+                    v-slot="{ actionClass }"
+                >
+                    <a
+                        :class="actionClass"
+                        class="text-primary"
+                        @click="redirectToIndex(data.row)"
+                        v-tooltip="$t('workflow.access')"
+                    >
                         <LucideIcon icon="ExternalLink" />
                     </a>
-                    <a :class="actionClass" @click="redirectToEdit(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="redirectToEdit(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-primary" @click="openCloneModal(data.row)" v-tooltip="$t('workflow.clone')">
+                    <a
+                        :class="actionClass"
+                        class="text-primary"
+                        @click="openCloneModal(data.row)"
+                        v-tooltip="$t('workflow.clone')"
+                    >
                         <LucideIcon icon="Copy" />
                     </a>
-                    <a :class="actionClass" class="text-danger"  style="color: red;" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        style="color: red"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -64,13 +86,20 @@
         <template #body>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label for="cloneWorkflowName" class="form-label">{{ $t("workflow.cloneNameLabel") }}</label>
+                    <label
+                        for="cloneWorkflowName"
+                        class="form-label"
+                    >
+                        {{ $t("workflow.cloneNameLabel") }}
+                    </label>
                     <input
                         id="cloneWorkflowName"
                         v-model="cloneWorkflowName"
                         type="text"
                         class="form-control"
-                        :placeholder="$t('workflow.namePlaceholder')"
+                        :placeholder="
+                            $t('workflow.namePlaceholder')
+                        "
                         @keyup.enter="confirmClone"
                     />
                 </div>
@@ -78,7 +107,6 @@
         </template>
     </ModalComponent>
 </template>
-
 <script>
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
@@ -101,8 +129,14 @@
                 columns: [
                     { key: "id", label: "id" },
                     { key: "name", label: "workflow.name" },
-                    { key: "teams", label: "workflow.teams" },
-                    { key: "actions", label: "workflow.actions" },
+                    {
+                        key: "teams",
+                        label: "workflow.teams",
+                    },
+                    {
+                        key: "actions",
+                        label: "workflow.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -130,7 +164,8 @@
             getWorkflowList() {
                 this.table.isLoading = true;
                 const params = {
-                    login: this.$store.state.userProfile.login,
+                    login: this.$store.state.userProfile
+                        .login,
                     search: this.filters.input,
                     pageSize: 10,
                     page: this.table.pagination.currentPage,
@@ -152,7 +187,8 @@
                             });
                         }
                         this.table.data = response.content;
-                        this.table.pagination = response.pagination;
+                        this.table.pagination =
+                            response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -189,7 +225,10 @@
                 this.$refs.CloneModal.close();
             },
             confirmClone() {
-                if (!this.selectedWorkflowForClone || !this.cloneWorkflowName?.trim()) {
+                if (
+                    !this.selectedWorkflowForClone ||
+                    !this.cloneWorkflowName?.trim()
+                ) {
                     return;
                 }
                 this.isCloning = true;
@@ -203,17 +242,27 @@
                             this.closeCloneModal();
                             this.getWorkflowList();
                             this.$notify({
-                                title: this.$t("workflow.index"),
-                                message: this.$t("workflow.cloneSuccess"),
+                                title: this.$t(
+                                    "workflow.index"
+                                ),
+                                message: this.$t(
+                                    "workflow.cloneSuccess"
+                                ),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: this.$t("workflow.index"),
+                                title: this.$t(
+                                    "workflow.index"
+                                ),
                                 message:
-                                    result.error?.response?.data?.labelError ??
-                                    this.$t("workflow.cloneError"),
+                                    result.error?.response
+                                        ?.data
+                                        ?.labelError ??
+                                    this.$t(
+                                        "workflow.cloneError"
+                                    ),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -225,21 +274,27 @@
             },
             deleteWorkflow() {
                 this.isDeleting = true;
-                WorkflowService.deleteWorkflowById(this.selectedWorkflow)
+                WorkflowService.deleteWorkflowById(
+                    this.selectedWorkflow
+                )
                     .then((result) => {
                         if (result.error === undefined) {
                             this.$refs.DeleteDialog.close();
                             this.getWorkflowList();
                             this.$notify({
                                 title: "workflow.index",
-                                message: "workflow.removeSuccess",
+                                message:
+                                    "workflow.removeSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "workflow.index",
-                                message: result.error.response.data.labelError ?? "workflow.removeError",
+                                message:
+                                    result.error.response
+                                        .data.labelError ??
+                                    "workflow.removeError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -255,7 +310,9 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
+            this.queryPage = this.$route.query.page
+                ? this.$route.query.page
+                : 1;
             this.getWorkflowList();
         },
         computed: {
