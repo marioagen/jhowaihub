@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -16,17 +16,29 @@ namespace WoopiAiHub.Domain.Models
         [Column("IsEdited", TypeName = "bit")]
         public bool IsEdited { get; private set; }
 
+        [Column("Type", TypeName = "int")]
+        public int? Type { get; private set; }
+
+        [Column("UserId", TypeName = "uniqueidentifier")]
+        public Guid? UserId { get; private set; }
+
         public virtual Document Document { get; set; }
+
+        public virtual User? User { get; set; }
 
         public DocumentHistory(int idDocument,
                               string input,
                               string output,
                               int id,
-                              DateTime created) : base(id, created)
+                              DateTime created,
+                              int? type = 1,
+                              Guid? userId = null) : base(id, created)
         {
             IdDocument = idDocument;
             Input = input;
             Output = output;
+            Type = type;
+            UserId = userId;
         }
 
         /// <summary>

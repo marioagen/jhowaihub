@@ -63,6 +63,8 @@ namespace WoopiAiHub.Application.Services
                 Input = h.Input,
                 Output = h.Output,
                 IsEdited = h.IsEdited,
+                Type = h.Type,
+                UserId = h.UserId,
                 Created = h.Created
             });
         }

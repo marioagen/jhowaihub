@@ -38,6 +38,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<UsageLog> UsageLogs { get; set; } = [];
         public virtual ICollection<UsageMonth> UsageMonths { get; set; } = [];
         public virtual ICollection<AuditLog> AuditLogs { get; set; } = [];
+        public virtual ICollection<DocumentHistory> DocumentHistories { get; set; } = [];
 
         public User(Guid id,
                     string name,
