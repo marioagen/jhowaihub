@@ -24,7 +24,7 @@ namespace WoopiAiHub.Repository.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.Sql(@"DELETE FROM ToolType WHERE [Name] = 'Quiz'");
         }
     }
 }

@@ -393,7 +393,7 @@ namespace WoopiAiHub.Application.Services
             return dto.Data;
         }
 
-        public async Task<WoopiAiHub.Domain.Models.Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto)
+        public async Task<Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto)
         {
             var documentDb = _documentRepository.FindByReferenceFile(documentQuestionnaireDto.ReferenceFile);
             if (documentDb == null)
