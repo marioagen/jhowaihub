@@ -1,14 +1,23 @@
 <template>
-    <div
-        class="card"
-    >
+    <div class="card">
         <div class="card-content">
             <div class="card-body pb-0">
                 <div class="mb-1 title-text">
                     {{ truncateText(dataCard.name) }}
-                    <div class="badge fr flex-shrink-1 mt-1"
-                        :style="badgeStyle(dataStep.status.color)">
-                        {{ $t("workflow.statusList." + dataStep.status.name.toLowerCase()) }}
+                    <div
+                        class="badge fr flex-shrink-1 mt-1"
+                        :style="
+                            badgeStyle(
+                                dataStep.status.color
+                            )
+                        "
+                    >
+                        {{
+                            $t(
+                                "workflow.statusList." +
+                                    dataStep.status.name.toLowerCase()
+                            )
+                        }}
                     </div>
                 </div>
                 <div class="mb-2">
@@ -93,14 +102,28 @@
                     class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
                     v-if="!showLoading"
                 >
-                    <div>
-                        <button type="button" class="btn btn-sm btn-primary" @click="redirectToAnalyzer">
-                            {{$t("common.analyze")}}
-                            <LucideIcon icon="FileClock"
+                    <div class="d-flex align-items-center gap-2">
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            @click="redirectToAnalyzer"
+                        >
+                            {{ $t("common.analyze") }}
+                            <LucideIcon
+                                icon="FileClock"
+                                :size="15"
+                                class="ms-2"
+                            />
+                        </button>
+                        <button v-if="isLastStep"
+                                type="button"
+                                class="btn btn-sm btn-outline-success"
+                                @click.stop="openFinalizeConfirm">
+                            <LucideIcon icon="Check"
                                         :size="15"
-                                        class="ms-2"
-                                        />
-                        </button> 
+                                        class="" />
+                            {{ $t("common.finalize") }}
+                        </button>
                     </div>
                     <div v-if="!isLastStep">
                         <button
@@ -138,7 +161,7 @@
                             >
                                 <button
                                     type="button"
-                                    class="btn btn-sm btn-primary btn-outline-primary  dropdown-toggle"
+                                    class="btn btn-sm btn-primary btn-outline-primary dropdown-toggle"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                     @click.stop=""
@@ -295,23 +318,41 @@
                 </div>
             </div>
         </div>
+        <ConfirmModal
+            :id="`finalize-modal-${dataCard.id}`"
+            ref="finalizeConfirmModalRef"
+            :isLoading="isFinalizing"
+            :title="'card.finalizeConfirmTitle'"
+            :message="'card.finalizeConfirmMessage'"
+            :confirmText="'common.finalize'"
+            cancelText="common.cancel"
+            confirmVariant="success"
+            iconVariant="success"
+            iconeName="Check"
+            @confirm="onConfirmFinalize"
+        />
     </div>
 </template>
 <script>
     import CardsServices from "@/services/cards/CardsServices";
+    import StatusService from "@/services/status/StatusService";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import dates from "@/helpers/date";
 
     export default {
         name: "CardComponent",
-        emits: ["reload", "cardMoved", "cardUpdated"],
+        components: { ConfirmModal },
+        emits: ["reload", "cardMoved", "cardUpdated", "cardFinalized"],
         data: () => ({
             isLoadingAnalysis: false,
             isUpdatingAssignedUser: false,
             isUnassigningUser: false,
+            isFinalizing: false,
             statusProgress: null,
             signalrEventStatusChanged: "StatusChanged",
             userSearchText: "",
             filteredUsers: [],
+            finalizeStatusId: null,
         }),
         props: {
             dataCard: {
@@ -349,24 +390,26 @@
                         "color-mix(in srgb, var(--cor-base) 30%, white)",
                 };
             },
-            async updateStatus() {
-                if (!this.isLastStep) {
-                    var params = {
-                        CardId: this.dataCard.id,
-                        NextStepOrder:
-                            this.dataStep.order + 1,
-                        WorkflowId:
-                            this.dataStep.workflowId,
-                    };
-                    const response =
-                        await CardsServices.updateStepAndStatus(
-                            params
-                        );
-                    if (response?.error !== undefined) {
-                        throw new Error(
-                            response.error.response?.data?.labelError
-                        );
-                    }
+            async updateStatus(nextStepOrder = null) {
+                const targetOrder =
+                    nextStepOrder ??
+                    this.dataStep.order + 1;
+                if (this.isLastStep && nextStepOrder === null) {
+                    return;
+                }
+                var params = {
+                    CardId: this.dataCard.id,
+                    NextStepOrder: targetOrder,
+                    WorkflowId: this.dataStep.workflowId,
+                };
+                const response =
+                    await CardsServices.updateStepAndStatus(
+                        params
+                    );
+                if (response?.error !== undefined) {
+                    throw new Error(
+                        response.error.response?.data?.labelError
+                    );
                 }
             },
             async assignUser(userId) {
@@ -440,14 +483,52 @@
                 } catch (e) {
                     this.$notify({
                         title: "Error",
-                        message:
-                            e.message ||
-                            "An error occurred while advancing the step.",
+                        message:this.$t("card.errorAdvancingCard"),
                         variant: "danger",
                         icon: "CircleX",
                     });
                 } finally {
                     this.isLoadingAnalysis = false;
+                }
+            },
+            openFinalizeConfirm() {
+                this.$refs.finalizeConfirmModalRef?.open();
+            },
+            async onConfirmFinalize() {
+                this.isFinalizing = true;
+                try {
+                    await this.updateStatusOnly();
+                    this.$refs.finalizeConfirmModalRef?.close();
+                    this.$emit("cardFinalized", {
+                        cardId: this.dataCard.id,
+                        currentStepOrder:
+                            this.dataStep.order,
+                    });
+                    this.reloadList();
+                } catch (e) {
+                    this.$notify({
+                        title: "Error",
+                        message:
+                            e.message ||
+                            this.$t("card.errorFinalizingCard"),
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isFinalizing = false;
+                }
+            },
+            async updateStatusOnly() {
+                const params = {
+                    CardId: this.dataCard.id,
+                    StatusId: this.finalizeStatusId,
+                };
+                const response =
+                    await CardsServices.updateStatusOnly(params);
+                if (response?.error !== undefined) {
+                    throw new Error(
+                        response.error.response?.data?.labelError
+                    );
                 }
             },
             redirectToAnalyzer() {
@@ -484,12 +565,21 @@
                 return dates.formatDate(date);
             },
             truncateText(text) {
-                if (!text) return ''
-                return text.length > 25 ? text.substring(0, 25) + '...' : text
-            }
+                if (!text) return "";
+                return text.length > 25
+                    ? text.substring(0, 25) + "..."
+                    : text;
+            },
         },
-        mounted() {
+        async mounted() {
             this.setUsers();
+            const statusResponse = await StatusService.getStatus();
+            if (statusResponse?.error === undefined && Array.isArray(statusResponse)) {
+                const finalize = statusResponse.find(
+                    (s) => s.name && s.name.toLowerCase() === "finalize"
+                );
+                if (finalize) this.finalizeStatusId = finalize.id;
+            }
         },
         computed: {
             showLoading() {
@@ -718,7 +808,7 @@
     }
 
     .fr {
-        float:right
+        float: right;
     }
 
     .spinner-grow {
@@ -774,7 +864,7 @@
         padding-bottom: 50px;
     }
 
-    .title-text{
+    .title-text {
         font-size: 13px;
     }
 </style>

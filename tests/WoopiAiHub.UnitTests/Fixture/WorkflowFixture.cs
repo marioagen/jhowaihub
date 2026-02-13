@@ -474,6 +474,23 @@ namespace WoopiAiHub.UnitTests.Fixture
 
             return tool;
         }
+
+        public static ToolDto CreateToolDto(Tool tool)
+        {
+            return new ToolDto
+            {
+                Id = tool.Id,
+                Name = tool.Name,
+                ToolTypeId = tool.ToolType?.Id ?? 1,
+                ToolType = tool.ToolType?.Name ?? "OCR",
+                InputDataId = tool.InputDataId,
+                InputData = "Input",
+                OutputDataId = tool.OutputDataId,
+                OutputData = "Output",
+                IsEditableInput = tool.IsEditableInput,
+                ConnectorUrl = tool.ConnectorUrl
+            };
+        }
     }
 
     [CollectionDefinition(nameof(WorkflowCollection))]

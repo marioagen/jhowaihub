@@ -108,9 +108,15 @@
                             </div>
                             <div class="workflow-info">
                                 <h6
-                                    class="mb-0 fw-normal text-dark"
+                                    class="mb-0 fw-normal text-dark d-flex align-items-center gap-2 flex-wrap"
                                 >
                                     {{ workflow.name }}
+                                    <span
+                                        v-if="workflowStatusLabel(workflow)"
+                                        class="badge status-badge border border-primary text-primary"
+                                    >
+                                        {{ workflowStatusLabel(workflow) }}
+                                    </span>
                                 </h6>
                                 <small class="text-muted">
                                     {{
@@ -193,6 +199,13 @@
             };
         },
         methods: {
+            workflowStatusLabel(workflow) {
+                const name = workflow.statusName || workflow.StatusName || "";
+                if (!name) return "";
+                const key = "workflow.statusList." + name.toLowerCase();
+                const translated = this.$t(key);
+                return translated !== key ? translated : name;
+            },
             async filterData() {
                 this.isLoading = true;
                 try {
@@ -324,5 +337,10 @@
 
     .text-primary {
         color: #3b82f6 !important;
+    }
+
+    .status-badge {
+        font-size: 0.7rem;
+        font-weight: 500;
     }
 </style>

@@ -1,16 +1,14 @@
 <template>
     <div class="row mb-2">
         <div class="col">
-            <button
-                class="btn btn-primary btn-sm me-2"
-                data-bs-toggle="collapse"
-                data-bs-target="#toolsCollapse"
-                aria-expanded="false"
-                aria-controls="toolsCollapse"
-                @click="showCollapse"
-            >
+            <button class="btn btn-primary btn-sm me-2" data-bs-toggle="collapse" data-bs-target="#toolsCollapse"
+                    aria-expanded="false" aria-controls="toolsCollapse" @click="showCollapse">
                 <LucideIcon icon="Plus" :size="15" />
-                {{ isActiveCollapse ? $t("flow.hideTools") : $t("flow.showTools") }}
+                {{
+                    isActiveCollapse
+                        ? $t("flow.hideTools")
+                        : $t("flow.showTools")
+                }}
             </button>
         </div>
     </div>
@@ -19,20 +17,16 @@
             <div class="card mb-3">
                 <div class="card-body palette">
                     <div>
-                        <button
-                            v-for="tool in toolsList"
-                            :key="tool.id"
-                            class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item"
-                            draggable="true"
-                            @dragstart="
+                        <button v-for="tool in toolsList" :key="tool.id"
+                                class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item" draggable="true" @dragstart="
                                 onDragStart($event, {
                                     id: tool.id,
                                     name: tool.name,
-                                    isEditableInput: tool.isEditableInput,
+                                    isEditableInput:
+                                        tool.isEditableInput,
                                     toolType: tool.toolType,
                                 })
-                            "
-                        >
+                                ">
                             {{ tool.name }}
                         </button>
                     </div>
@@ -41,15 +35,8 @@
         </div>
     </div>
     <div class="card vue-flow-container p-0">
-        <VueFlow
-            v-model:nodes="nodes"
-            v-model:edges="edges"
-            :style="{ width: '100%', height: '100%' }"
-            @connect="onConnect"
-            @pane-ready="onPaneReady"
-            @drop="onDrop"
-            @dragover="onDragOver"
-        >
+        <VueFlow v-model:nodes="nodes" v-model:edges="edges" :style="{ width: '100%', height: '100%' }"
+                 @connect="onConnect" @pane-ready="onPaneReady" @drop="onDrop" @dragover="onDragOver">
             <Background patternColor="#BCD5F2" gap="10" variant="dots" :size="1" />
             <template #node-hub="props">
                 <HubNode :node="props" @deleteNode="deleteNode" @openNodeConfig="openNodeConfig" />
@@ -60,7 +47,6 @@
         </VueFlow>
     </div>
 </template>
-
 <script>
     import { VueFlow } from "@vue-flow/core";
     import { Background } from "@vue-flow/background";
@@ -69,6 +55,8 @@
     import LogService from "@/services/log/logService";
     import ToolsServices from "@/services/tools/ToolsServices";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import PromptService from "@/services/prompts/PromptsService";
+    import ToolType from "@/constants/ToolType";
 
     export default {
         name: "VueFlowComponent",
@@ -76,6 +64,11 @@
         props: {
             stepId: {
                 type: Number,
+                required: false,
+                default: null,
+            },
+            step: {
+                type: Object,
                 required: false,
                 default: null,
             },
@@ -97,7 +90,6 @@
         },
         data() {
             return {
-                step: null,
                 toolsList: [],
                 nodes: [],
                 edges: [],
@@ -113,9 +105,11 @@
         },
         methods: {
             getToolsList() {
-                ToolsServices.getToolsList().then((response) => {
-                    this.toolsList = response;
-                });
+                ToolsServices.getToolsList().then(
+                    (response) => {
+                        this.toolsList = response;
+                    }
+                );
             },
             onPaneReady(instance) {
                 this.vueFlowInstance = instance;
@@ -134,48 +128,64 @@
                     type: "hub",
                 };
             },
+            reloadFlow() {
+                this.getFlow();
+            },
             newFlow() {
                 this.nodes = [this.createStartNode()];
                 this.edges = [];
             },
             async getFlow() {
                 try {
-                    if (this.hasStepTools && this.stepId != 0) {
-                        this.step = await WorkflowService.getStepById(this.stepId);
-                    }
-
-                    let stepTools = this.step ? this.step.stepTools : [];
-                    const mappedNodes = stepTools.map((stepTool) => ({
-                        id: stepTool.id.toString(),
-                        position: { x: stepTool.positionX, y: stepTool.positionY },
-                        label: stepTool.tool.name,
-                        toolId: stepTool.toolId,
-                        data: {
-                            order: stepTool.order,
-                            icon: "Activity",
-                            color: "blue",
-                            parameters: stepTool.parameters,
-                            isEditableInput: stepTool.tool.isEditableInput,
-                            toolType: stepTool.tool.toolType,
+                    let stepTools = this.step
+                        ? this.step.stepTools
+                        : [];
+                    const mappedNodes = stepTools.map(
+                        (stepTool) => ({
+                            id: stepTool.id.toString(),
+                            position: {
+                                x: stepTool.positionX,
+                                y: stepTool.positionY,
+                            },
+                            label: stepTool.tool.name,
                             toolId: stepTool.toolId,
-                            stepToolId: stepTool.id,
-                            dependencies: stepTool.dependencies,
-                        },
-                        sourcePosition: "right",
-                        targetPosition: "left",
-                        type: "hub",
-                    }));
-                    const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
-                        id: `${tool.id}-${stepTools[index + 1].id}`,
-                        source: tool.id.toString(),
-                        target: stepTools[index + 1].id.toString(),
-                        animated: false,
-                        type: "special",
-                    }));
+                            data: {
+                                order: stepTool.order,
+                                icon: "Activity",
+                                color: "blue",
+                                parameters: stepTool.parameters,
+                                isEditableInput: stepTool.tool.isEditableInput,
+                                toolType: stepTool.tool.toolType,
+                                toolId: stepTool.toolId,
+                                stepToolId: stepTool.id,
+                                dependencies: stepTool.dependencies,
+                                subtitle:
+                                    stepTool.parameters &&
+                                        stepTool.parameters.length > 0
+                                        ? stepTool.parameters[0].promptName
+                                        : "",
+                            },
+                            sourcePosition: "right",
+                            targetPosition: "left",
+                            type: "hub",
+                        })
+                    );
+                    const mappedEdges = stepTools
+                        .slice(0, -1)
+                        .map((tool, index) => ({
+                            id: `${tool.id}-${stepTools[index + 1].id}`,
+                            source: tool.id.toString(),
+                            target: stepTools[index + 1].id.toString(),
+                            animated: false,
+                            type: "special",
+                        }));
 
                     const startNode = {
                         ...this.createStartNode(),
-                        data: { ...this.createStartNode().data, isActive: true },
+                        data: {
+                            ...this.createStartNode().data,
+                            isActive: true,
+                        },
                     };
                     if (stepTools.length > 0) {
                         const firstTool = stepTools[0];
@@ -189,39 +199,63 @@
 
                     this.nodes = [startNode, ...mappedNodes];
                     this.edges = mappedEdges;
+
+                    await this.enrichNodesWithSubtitles(this.nodes);
                 } catch (e) {
-                    LogService.showMessage("Erro ao carregar fluxo");
+                    LogService.showMessage(
+                        "Erro ao carregar fluxo"
+                    );
                 }
             },
             deleteNode(nodeId) {
                 this.removeNodeDependency(nodeId);
-                this.nodes = this.nodes.filter((node) => node.id !== nodeId);
-                this.edges = this.edges.filter((edge) => edge.source !== nodeId && edge.target !== nodeId);
+                this.nodes = this.nodes.filter(
+                    (node) => node.id !== nodeId
+                );
+                this.edges = this.edges.filter(
+                    (edge) =>
+                        edge.source !== nodeId &&
+                        edge.target !== nodeId
+                );
             },
             removeNodeDependency(nodeId) {
-                const idx = this.nodes.findIndex((node) => node.id === nodeId);
+                const idx = this.nodes.findIndex(
+                    (node) => node.id === nodeId
+                );
                 if (idx !== -1) {
                     const node = this.nodes[idx];
                     this.nodes.forEach((n) => {
                         if (n.order > node.data.order) {
-                            n.data.dependencies = (n.data.dependencies || []).filter(
-                                (d) => !(d.stepOrder === this.step.order && d.stepToolOrder === node.data.order)
-                            );
+                            n.data.dependencies = (n.data.dependencies || [])
+                                .filter((d) =>
+                                    !(d.stepOrder === this.step.order &&
+                                        d.stepToolOrder === node.data.order)
+                                );
                         }
                     });
 
-                    this.$store.state.tempWorkflow.list.forEach((step) => {
-                        if (step.order > this.step.order) {
-                            step.stepTools.forEach((stepTool) => {
-                                stepTool.dependencies = (stepTool.dependencies || []).filter(
-                                    (d) => !(d.stepOrder === this.step.order && d.stepToolOrder === node.data.order)
+                    this.$store.state.tempWorkflow.list.forEach(
+                        (step) => {
+                            if (step.order > this.step.order) {
+                                step.stepTools.forEach(
+                                    (stepTool) => {
+                                        stepTool.dependencies = (stepTool.dependencies || [])
+                                            .filter((d) =>
+                                                !(d.stepOrder === this.step.order &&
+                                                    d.stepToolOrder === node.data.order)
+                                            );
+                                    }
                                 );
-                            });
+                            }
                         }
-                    });
+                    );
                 }
             },
-            updateNodeInput(nodeId, parameters, dependencies) {
+            updateNodeInput(
+                nodeId,
+                parameters,
+                dependencies
+            ) {
                 const idx = this.nodes.findIndex((node) => node.id === nodeId);
                 if (idx !== -1) {
                     this.nodes[idx] = {
@@ -233,8 +267,6 @@
                         },
                     };
                 }
-
-                console.log(this.nodes);
             },
             deleteEdge(edgeId) {
                 this.edges = this.edges.filter((edge) => edge.id !== edgeId);
@@ -273,12 +305,14 @@
                         icon: "Activity",
                         color: "#000",
                         isStartNode: false,
-                        isEditableInput: nodeData.isEditableInput,
+                        isEditableInput:
+                            nodeData.isEditableInput,
                         toolType: nodeData.toolType,
                         parameters: [],
                         toolId: nodeData.id,
                         stepToolId: null,
                         dependencies: [],
+                        subtitle: "",
                     },
                 };
                 this.vueFlowInstance?.addNodes([newNode]);
@@ -299,7 +333,7 @@
                         order: index + 1,
                         status: "Active",
                         parameters: node.data.parameters,
-                        dependsOnStepToolId: index,
+                        dependsOnStepToolId: node.data.stepToolId && node.data.stepToolId > 0 ? node.data.stepToolId : null,
                         dependencies: (node.data.dependencies || []).map((d) => ({
                             stepOrder: d.stepOrder ?? null,
                             stepToolOrder: d.stepToolOrder ?? null,
@@ -309,14 +343,53 @@
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;
             },
+            async enrichNodesWithSubtitles(nodes) {
+                const promptNodes = nodes.filter((n) => n.data?.toolType === ToolType.Prompt && n.data?.parameters?.length > 0);
+
+                if (promptNodes.length > 0) {
+                    const prompts = await PromptService.getPrompts();
+                    promptNodes.forEach((node) => {
+                        const promptId = node.data.parameters[0].value;
+                        if (promptId) {
+                            const prompt = prompts.find((p) => p.id.toString() === promptId.toString());
+                            if (prompt) {
+                                node.data.subtitle = prompt.name;
+                            }
+                        }
+                    });
+                }
+            },
+            async restoreFromStorage() {
+                const tempNodes = localStorage.getItem('flow_temp_nodes');
+                const tempEdges = localStorage.getItem('flow_temp_edges');
+
+                if (tempNodes && tempEdges) {
+                    this.nodes = JSON.parse(tempNodes);
+                    this.edges = JSON.parse(tempEdges);
+                    localStorage.removeItem('flow_temp_nodes');
+                    localStorage.removeItem('flow_temp_edges');
+                    localStorage.removeItem('flow_state_params');
+
+                    await this.enrichNodesWithSubtitles(this.nodes);
+                    return true;
+                }
+                return false;
+            },
         },
-        mounted() {
+        async mounted() {
             this.getToolsList();
-            this.getFlow();
+            const restored = await this.restoreFromStorage();
+            if (!restored) {
+                this.getFlow();
+            }
         },
+        expose: [
+            "updateNodeInput",
+            "buildFlowPayload",
+            "reloadFlow",
+        ],
     };
 </script>
-
 <style>
     @import "@vue-flow/core/dist/style.css";
     @import "@vue-flow/core/dist/theme-default.css";

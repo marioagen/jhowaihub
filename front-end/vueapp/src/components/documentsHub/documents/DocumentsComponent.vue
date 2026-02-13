@@ -1,41 +1,31 @@
 <template>
-    <main>
-        <div class="container-fluid scroll-area mx-2">
-            <div class="mt-3 mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("documents.title") }}</h5>
-                        <p>
-                            <small class="text-muted">{{ $t("documents.subtitle") }}</small>
-                        </p>
-                    </div>
-                    <button class="btn btn-primary btn-sm" @click="redirectToNewUpload">
-                        <LucideIcon icon="Plus" :size="17" />
-                        {{ $t("documents.createBtn") }}
-                    </button>
-                </div>
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <DocumentFilters 
-                            :workflowsList="workflowsList"
-                            @filter="filterData"
-                            ref="DocumentFilters"
-                        />
-                    </div>
-                </div>
-            </div>
-            <DocumentsTable 
-                ref="DocumentsTable"
-            />
+    <div class="mt-3 mb-3">
+        <div class="d-flex justify-content-end align-items-center mb-3">
+            <button class="btn btn-primary btn-sm"
+                    @click="redirectToNewUpload">
+                <LucideIcon icon="Plus"
+                            :size="17" />
+                {{ $t("documents.createBtn") }}
+            </button>
         </div>
-    </main>
+        <div class="card mb-3">
+            <div class="card-body">
+                <DocumentFilters :workflowsList="workflowsList"
+                                 @filter="filterData"
+                                 ref="DocumentFilters"
+                                 :statusList="statusList"
+ />
+            </div>
+        </div>
+    </div>
+    <DocumentsTable ref="DocumentsTable" />
 </template>
-
 <script>
     import GlobalEventService from "@/services/globalEventService.js";
-    import DocumentFilters from "@/components/documents/DocumentFilters.vue";
-    import DocumentsTable from "@/components/documents/DocumentsTable.vue";
-    import WorkflowService from '@/services/workflow/WorkflowService';
+    import DocumentFilters from "@/components/documentsHub/documents/filters/DocumentFilters.vue";
+    import DocumentsTable from "@/components/documentsHub/documents/tables/DocumentsTable.vue";
+    import WorkflowService from "@/services/workflow/WorkflowService";
+    import StatusService from '@/services/status/StatusService';
 
     export default {
         name: "DocumentsPage",
@@ -60,7 +50,9 @@
         },
         methods: {
             redirectToNewUpload() {
-                this.$router.push({ name: "DocumentsUpload" });
+                this.$router.push({
+                    name: "DocumentsUpload",
+                });
             },
             reloadData() {
                 this.$refs.DocumentsTable.getDocuments();
@@ -70,38 +62,59 @@
                 this.reloadData();
             },
             getWorkflows() {
-                var email = this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email)
-                    .then((response) => {
-                        if(response.error !== undefined) {
+                var email =
+                    this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email).then(
+                    (response) => {
+                        if (response.error !== undefined) {
                             return this.$notify({
-                                title: 'workflows.title',
-                                message: 'workflows.error',
-                                variant: 'danger',
-                                icon: 'CircleX',
+                                title: "workflows.title",
+                                message: "workflows.error",
+                                variant: "danger",
+                                icon: "CircleX",
                             });
                         }
                         this.workflowsList = response;
-                    });
+                    }
+                );
+            },
+            async getStatuses() {
+                const response = await StatusService.getStatus();
+                if (response?.error === undefined && Array.isArray(response)) {
+                    this.statusList = response;
+                }
             },
         },
         computed: {
             keyMongoAccess() {
-                return this.$store.state.userProfile.keyMongoAccess;
+                return this.$store.state.userProfile
+                    .keyMongoAccess;
             },
         },
         async created() {
-            GlobalEventService.on("all-uploads-complete", this.reloadData);
-            GlobalEventService.on("refresh-once", this.reloadData);
+            GlobalEventService.on(
+                "all-uploads-complete",
+                this.reloadData
+            );
+            GlobalEventService.on(
+                "refresh-once",
+                this.reloadData
+            );
             this.getWorkflows();
+            await this.getStatuses();
         },
         beforeUnmount() {
-            GlobalEventService.off("all-uploads-complete", this.reloadData);
-            GlobalEventService.off("refresh-once", this.reloadData);
+            GlobalEventService.off(
+                "all-uploads-complete",
+                this.reloadData
+            );
+            GlobalEventService.off(
+                "refresh-once",
+                this.reloadData
+            );
         },
     };
 </script>
-
 <style scoped>
     .team-list {
         display: flex;

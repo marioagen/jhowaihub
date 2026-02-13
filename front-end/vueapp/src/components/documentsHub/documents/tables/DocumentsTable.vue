@@ -36,17 +36,6 @@
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
-            <template #cell-status="{ data }">
-                <BadgeComponent
-                    v-if="data.row.status === 0"
-                    text="documents.statusList.notAnalyzed"
-                />
-                <BadgeComponent
-                    v-else
-                    text="common.analyzed"
-                    variant="success"
-                />
-            </template>
             <template #cell-workflows="{ data }">
                 <BadgeOutlinedComponent
                     v-for="(workflowData, index) in data.row
@@ -57,11 +46,22 @@
                     class="ms-1"
                 />
             </template>
-            <template #cell-actions="{ data }">                
-                <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" class="text-primary" @click="getWorkFlowListByDocumentId(
-                                    data.row.id
-                                )" v-tooltip="$t('documents.actions.consult')">
+            <template #cell-actions="{ data }">
+                <ActionTableListComponent
+                    v-slot="{ actionClass }"
+                >
+                    <a
+                        :class="actionClass"
+                        class="text-primary"
+                        @click="
+                            getWorkFlowListByDocumentId(
+                                data.row.id
+                            )
+                        "
+                        v-tooltip="
+                            $t('documents.actions.consult')
+                        "
+                    >
                         <LucideIcon icon="Search" />
                     </a>
                 </ActionTableListComponent>
@@ -98,9 +98,9 @@
     import DocumentsServices from "@/services/documents/DocumentsServices";
     import BadgeComponent from "@/components/global/BadgeComponent";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent";
-    import EmbeddingDocument from "@/components/documents/EmbeddingDocument.vue";
+    import EmbeddingDocument from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
-    import DocumentWorkflowListModal from "@/components/documents/DocumentWorkflowListModal.vue";
+    import DocumentWorkflowListModal from "@/components/documentsHub/documents/modals/DocumentWorkflowListModal.vue";
 
     export default {
         name: "DocumentsTable",
@@ -127,10 +127,6 @@
                         label: "documents.createdDate",
                     },
                     {
-                        key: "status",
-                        label: "common.status",
-                    },
-                    {
                         key: "workflows",
                         label: "documents.workflows",
                     },
@@ -152,6 +148,7 @@
                 input: "",
                 workflowId: "",
                 workflows: [],
+                statusId: "",
                 isAsc: true,
                 isAllUsers: false,
                 login: null,
@@ -175,6 +172,9 @@
                     login: this.filters.login,
                     workflowIds: this.filters.workflows,
                 };
+                if (this.filters.statusId !== "" && this.filters.statusId != null) {
+                    params.statusId = Number(this.filters.statusId);
+                }
 
                 DocumentsServices.getDocuments(params)
                     .then((response) => {

@@ -251,7 +251,6 @@
         </div>
     </div>
 </template>
-
 <script>
     import { Field } from "vee-validate";
     import ProfilesService from "@/services/profiles/ProfilesService";
@@ -386,7 +385,6 @@
         },
     };
 </script>
-
 <style scoped>
     .phase-container {
         padding: 20px 24px;

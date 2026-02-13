@@ -49,6 +49,10 @@ const english = {
         assignBtn: "Assign",
         cardsOpened:
             "There are open cards in this Workflow",
+        errorAdvancingCard: "An error occurred while advancing the card.",
+        errorFinalizingCard: "An error occurred while finalizing the card.",
+        finalizeConfirmMessage: "Are you sure you want to finalize this document?",
+        finalizeConfirmTitle: "Confirm finalization",
         unassignInfo: "Unassign document",
         userApplicant: "Applicant",
         userAssigned: "Assigned",
@@ -61,6 +65,7 @@ const english = {
         almost: "You're almost there!",
         analyze: "Analyze",
         analyzed: "Analyzed",
+        finalize: "Finalize",
         apply: "Apply",
         back: "Back",
         cancel: "Cancel",
@@ -214,9 +219,11 @@ const english = {
         loadingTheText: "Loading the text",
         mostOlder: "Most older",
         mostRecent: "Most recent",
-        ocrFetchError: "Error fetching Digitizer Agent text.",
+        ocrFetchError:
+            "Error fetching Digitizer Agent text.",
         ocrLoadError: "Error loading Digitizer Agent text.",
-        ocrNotAvailable: "Digitizer Agent not available for this document.",
+        ocrNotAvailable:
+            "Digitizer Agent not available for this document.",
         noDocumentsWereFound: "No documents were found",
         normalizingTheDocument:
             "Normalizing the document, wait.",
@@ -307,6 +314,17 @@ const english = {
         youAreAboutToDeleteDocumentQuery:
             "You are about to delete <br/> the query history from the system",
     },
+    documentsHub: {
+        title: "Processing workflows",
+        subtitle:
+            "View the flow of documents through processing steps",
+        workflows: {
+            title: "Processing workflows board",
+        },
+        documents: {
+            title: "Documents list",
+        },
+    },
     filters: {
         assignment: {
             allUsers: "All users",
@@ -344,6 +362,9 @@ const english = {
             none: "Select a workflow",
             withWorkflow: "All with associated workflow",
         },
+        statusSelect: {
+            none: "Card status",
+        },
     },
     flow: {
         downloadJson: "Download JSON",
@@ -361,7 +382,8 @@ const english = {
         formFlow: {
             configurationSaved:
                 "Configuration saved successfully",
-            configureToolParameters: "Configure the parameters of this tool",
+            configureToolParameters:
+                "Configure the parameters of this tool",
             connectorWorkflowConfigFail:
                 "Failed to retrieve workflow configuration. Check tool URL and API key",
             connectorWorkflowFail:
@@ -377,8 +399,7 @@ const english = {
             progressFlowUpdateFail:
                 "Failed to update flow. Flow already contains output data for tools.",
             prompts: "Agents",
-            promptRequired:
-                "Select at least one agent",
+            promptRequired: "Select at least one agent",
             selectPrompt: "Select an agent",
         },
         hideTools: "Hide Tools",
@@ -681,12 +702,12 @@ const english = {
         deleteError: "Agent deletion failed",
         deleteSuccess: "Agents deleted successfully",
         editPrompt: "Edit agent",
-        emptyPromptError:
-            "The agent field cannot be empty",
+        emptyPromptError: "The agent field cannot be empty",
         importButton: "Import",
         importError: "Error importing agents",
         importPredefined: "Import predefined",
-        importSubtitle: "Select predefined agents from the system",
+        importSubtitle:
+            "Select predefined agents from the system",
         importSuccess: "Agents imported successfully",
         importTitle: "Import agents",
         information: "Basic information",
@@ -705,7 +726,8 @@ const english = {
         searchPrompts: "Search agents",
         selectAllTemplates: "Select all templates",
         subtitle: "Manage system agents",
-        subtitleEdit: "Update the selected agent information",
+        subtitleEdit:
+            "Update the selected agent information",
         subtitleNew: "Create a new AI agent",
         title: "Agents",
         updateError: "Agent update failed",
@@ -824,56 +846,71 @@ const english = {
             "You are about to delete <br/> a questionnaire from the system",
     },
     template: {
-        addParam: "Add Param",
-        bodySubtitle:
-            "Type '{' to see available variables.",
-        cancelBtn: "Cancel",
-        createBtn: "Save Template",
-        createError: "Error creating template",
-        createSuccess: "Template created successfully",
+        title: "API Templates",
+        tableTitle: "Templates",
+        subtitle:
+            "Manage, test and edit your API request templates.",
         createTemplate: "Create new template",
-        editError: "Error updating template",
-        editSuccess: "Template updated successfully",
+        notFound: "No templates registered",
+        method: "Method",
+        name: "Name",
+        url: "URL",
+        createBtn: "Save Template",
+        cancelBtn: "Cancel",
+        importCurl: "Import cURL",
+        requestDetails: "Request Details",
+        requestBody: "Request Body",
+        templateName: "Template Name",
+        templateNamePlaceholder: "e.g. User OCR Processing",
         endpointUrl: "Endpoint URL",
         endpointUrlPlaceholder:
             "https://api.example.com/v1/resource",
-        formCreate: {
-            subtitle:
-                "Configure your API request blueprint.",
-            title: "Create Template",
-        },
-        formEdit: {
-            subtitle: "Update your API request blueprint.",
-            title: "Edit Template",
-        },
+        queryParams: "Query Params",
         headers: "Headers",
-        importCurl: "Import cURL",
-        invalidJsonFormat: "Invalid JSON format",
-        keyPlaceholder: "Key (value will be {{keyName}})",
-        method: "Method",
-        name: "Name",
+        queryParameters: "Query Parameters",
+        addParam: "Add Param",
         noQueryParameters:
             "No query parameters. Add one or type in the URL.",
-        notFound: "No templates registered",
-        queryParameters: "Query Parameters",
-        queryParams: "Query Params",
-        removeError: "Error removing template",
+        bodySubtitle:
+            "Type '{' to see available variables.",
+        variablesTip:
+            "Tip: Use variables like {{ocr}} or {{prompt}} that will be replaced at execution time.",
+        formCreate: {
+            title: "Create Template",
+            subtitle:
+                "Configure your API request blueprint.",
+        },
+        formEdit: {
+            title: "Edit Template",
+            subtitle: "Update your API request blueprint.",
+        },
+        createSuccess: "Template created successfully",
+        createError: "Error creating template",
+        editSuccess: "Template updated successfully",
+        editError: "Error updating template",
         removeSuccess: "Template removed successfully",
-        requestBody: "Request Body",
-        requestDetails: "Request Details",
-        subtitle:
-            "Manage, test and edit your API request templates.",
-        tableTitle: "Templates",
-        templateName: "Template Name",
-        templateNamePlaceholder: "e.g. User Digitizer Agent Processing",
-        title: "API Templates",
+        removeError: "Error removing template",
         unselected: "Select a template",
-        url: "URL",
+        keyPlaceholder: "Key (value will be {{keyName}})",
+        valuePlaceholder: "Enter value",
+        invalidJsonFormat: "Invalid JSON format",
         variablesOcr: "Digitizer Agent",
         variablesEmbeddings: "Indexing",
         variablesPrompt: "Agent",
-        variablesTip:
-            "Tip: Use variables like {{ocr}} or {{prompt}} that will be replaced at execution time.",
+        selectTemplate: "Select a Template",
+        selectTemplatePlaceholder: "Choose an API template",
+        fillVariables: "Fill Variables",
+        enterValue: "Enter value for",
+        loadError: "Error loading template",
+        configuration: {
+            title: "Configure API Template",
+            subtitle:
+                "Select and configure an API template",
+            savedSuccessfully:
+                "Template configuration saved successfully",
+            saveError:
+                "Error saving template configuration",
+        },
     },
     tools: {
         createBtn: "New Tool",
@@ -1084,6 +1121,7 @@ const english = {
             approved: "Approved",
             awaitinganalysis: "Awaiting Analysis",
             done: "Done",
+            finalize: "Finalize",
             waitingforapproval: "Waiting for Approval",
         },
         stepFlow: "Document Automation",
