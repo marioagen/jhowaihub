@@ -516,7 +516,6 @@
                         response.error.response?.data?.labelError
                     );
                 }
-                console.log(this.dataCard);
             },
             redirectToAnalyzer() {
                 if (!this.showLoading) {

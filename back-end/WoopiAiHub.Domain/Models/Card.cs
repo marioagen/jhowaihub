@@ -1,4 +1,3 @@
-using Google.Api;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
