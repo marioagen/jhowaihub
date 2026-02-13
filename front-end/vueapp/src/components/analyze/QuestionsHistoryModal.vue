@@ -6,9 +6,7 @@
     >
         <template #header>
             <div class="modal-header">
-                <div
-                    class="d-flex align-items-center flex-grow-1"
-                >
+                <div class="d-flex align-items-center flex-grow-1">
                     <LucideIcon
                         icon="History"
                         :size="20"
@@ -16,13 +14,10 @@
                     />
                     <div>
                         <h5 class="modal-title mb-0">
-                            Histórico de Conversas
+                            {{ $t("analyze.questionsHistoryModal.title") }}
                         </h5>
-                        <p
-                            class="text-muted small mb-0 mt-1"
-                        >
-                            Perguntas e respostas anteriores
-                            realizadas sobre este documento
+                        <p class="text-muted small mb-0 mt-1">
+                            {{ $t("analyze.questionsHistoryModal.subtitle") }}
                         </p>
                     </div>
                 </div>
@@ -30,7 +25,7 @@
                     class="btn-close"
                     data-bs-dismiss="modal"
                     @click="close"
-                    aria-label="Close"
+                    :aria-label="$t('common.close')"
                 />
             </div>
         </template>
@@ -39,12 +34,8 @@
                 <!-- Search and filters (fixed, no scroll) -->
                 <div class="row g-2 mb-3">
                     <div class="col">
-                        <div
-                            class="input-group input-group-sm"
-                        >
-                            <span
-                                class="input-group-text border-end-0 bg-white"
-                            >
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text border-end-0 bg-white">
                                 <LucideIcon
                                     icon="Search"
                                     :size="16"
@@ -53,19 +44,15 @@
                             <input
                                 type="text"
                                 class="form-control form-control-sm border-start-0"
-                                placeholder="Buscar em perguntas ou"
+                                :placeholder="$t('analyze.questionsHistoryModal.searchPlaceholder')"
                                 v-model="searchQuery"
                                 @keyup.enter="applyFilters"
                             />
                         </div>
                     </div>
                     <div class="col-auto">
-                        <div
-                            class="input-group input-group-sm"
-                        >
-                            <span
-                                class="input-group-text border-end-0 bg-white"
-                            >
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text border-end-0 bg-white">
                                 <LucideIcon
                                     icon="User"
                                     :size="16"
@@ -78,7 +65,7 @@
                                 @change="onUserFilterChange"
                             >
                                 <option value="">
-                                    Todos os usuários
+                                    {{ $t("analyze.questionsHistoryModal.allUsers") }}
                                 </option>
                                 <option
                                     v-for="u in usersList"
@@ -91,11 +78,9 @@
                         </div>
                     </div>
                 </div>
-                <div
-                    class="d-flex align-items-center justify-content-between mb-3"
-                >
+                <div class="d-flex align-items-center justify-content-between mb-3">
                     <span class="text-muted small">
-                        Ordenado por: {{ orderLabel }}
+                        {{ $t("analyze.questionsHistoryModal.sortedBy") }}: {{ orderLabel }}
                     </span>
                     <button
                         type="button"
@@ -129,114 +114,74 @@
                                     <div
                                         class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
                                     >
-                                        <div
-                                            class="d-flex align-items-center text-muted small"
-                                        >
+                                        <div class="d-flex align-items-center text-muted small">
                                             <LucideIcon
                                                 icon="User"
                                                 :size="14"
                                                 class="me-1"
                                             />
                                             <span>
-                                                {{
-                                                    item.userName
-                                                }}
+                                                {{ item.userName }}
                                             </span>
-                                            <span
-                                                class="mx-1"
-                                            >
-                                                ·
-                                            </span>
+                                            <span class="mx-1">·</span>
                                             <LucideIcon
                                                 icon="Clock"
                                                 :size="14"
                                                 class="me-1"
                                             />
                                             <span>
-                                                {{
-                                                    item.date
-                                                }}
+                                                {{ item.date }}
                                             </span>
                                         </div>
-                                        <div
-                                            class="d-flex align-items-center gap-2"
-                                        >
+                                        <div class="d-flex align-items-center gap-2">
                                             <BadgeComponent
-                                                :text="
-                                                    item.tagText
-                                                "
-                                                :variant="
-                                                    item.tagVariant
-                                                "
-                                                :clickable="
-                                                    false
-                                                "
-                                                :class="
-                                                    item.tagClass
-                                                "
+                                                :text="item.tagText"
+                                                :variant="item.tagVariant"
+                                                :clickable="false"
+                                                :class="item.tagClass"
                                             />
                                             <button
                                                 type="button"
                                                 class="btn btn-link btn-sm p-0 text-secondary"
-                                                title="Copiar"
-                                                @click="
-                                                    copyQuestion(
-                                                        item.question
-                                                    )
-                                                "
+                                                :title="$t('analyze.copy')"
+                                                @click="copyQuestion(item.question)"
                                             >
                                                 <LucideIcon
                                                     icon="Copy"
-                                                    :size="
-                                                        16
-                                                    "
+                                                    :size="16"
                                                 />
                                             </button>
                                         </div>
                                     </div>
                                     <div class="mb-2">
-                                        <div
-                                            class="d-flex align-items-center gap-1 mb-1"
-                                        >
+                                        <div class="d-flex align-items-center gap-1 mb-1">
                                             <LucideIcon
                                                 icon="MessageCircle"
                                                 :size="14"
                                                 class="text-secondary"
                                             />
-                                            <span
-                                                class="fw-bold small text-uppercase"
-                                            >
-                                                Pergunta
+                                            <span class="fw-bold small text-uppercase">
+                                                {{ $t("analyze.question") }}
                                             </span>
                                         </div>
-                                        <p
-                                            class="mb-0 ps-3 small"
-                                        >
-                                            {{
-                                                item.question
-                                            }}
+                                        <p class="mb-0 ps-3 small">
+                                            {{ item.question }}
                                         </p>
                                     </div>
                                     <div>
-                                        <div
-                                            class="d-flex align-items-center gap-1 mb-1"
-                                        >
+                                        <div class="d-flex align-items-center gap-1 mb-1">
                                             <LucideIcon
                                                 icon="CheckCircle"
                                                 :size="14"
                                                 class="text-success"
                                             />
-                                            <span
-                                                class="fw-bold small text-uppercase"
-                                            >
-                                                Resposta
+                                            <span class="fw-bold small text-uppercase">
+                                                {{ $t("analyze.answer") }}
                                             </span>
                                         </div>
                                         <div
                                             class="ps-3 small"
-                                            v-html="
-                                                item.answerHtml
-                                            "
+                                            v-html="item.answerHtml"
                                         ></div>
                                     </div>
                                 </div>
@@ -254,8 +199,8 @@
                             >
                                 {{
                                     isLoadingCards
-                                        ? "A carregar…"
-                                        : "Ver mais"
+                                        ? $t("analyze.questionsHistoryModal.loading")
+                                        : $t("analyze.questionsHistoryModal.loadMore")
                                 }}
                             </button>
                         </div>
@@ -264,20 +209,16 @@
             </div>
         </template>
         <template #footer>
-            <div
-                class="modal-footer w-100 justify-content-between"
-            >
-                <span
-                    class="text-muted small align-self-center"
-                >
+            <div class="modal-footer w-100 justify-content-between">
+                <span class="text-muted small align-self-center">
                     {{ conversationCards.length }}
-                    interações registradas
+                    {{ $t("analyze.questionsHistoryModal.interactionsCount") }}
                 </span>
                 <button
                     class="btn btn-primary btn-sm"
                     @click="close"
                 >
-                    Fechar
+                    {{ $t("common.close") }}
                 </button>
             </div>
         </template>
@@ -317,8 +258,8 @@
         computed: {
             orderLabel() {
                 return this.filters.order === "asc"
-                    ? "Mais antigos"
-                    : "Mais recentes";
+                    ? this.$t("analyze.questionsHistoryModal.orderOldest")
+                    : this.$t("analyze.questionsHistoryModal.orderNewest");
             },
         },
         methods: {
@@ -340,9 +281,7 @@
                             this.usersList = [];
                             return;
                         }
-                        this.usersList = Array.isArray(data)
-                            ? data
-                            : [];
+                        this.usersList = Array.isArray(data) ? data : [];
                     })
                     .catch(() => {
                         this.usersList = [];
@@ -362,8 +301,7 @@
             formatHistoryDate(created) {
                 if (!created) return "—";
                 const d = new Date(created);
-                const pad = (n) =>
-                    String(n).padStart(2, "0");
+                const pad = (n) => String(n).padStart(2, "0");
                 return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
             },
             getHistory() {
@@ -376,47 +314,32 @@
                     order: this.filters.order,
                     orderBy: this.filters.orderBy,
                 };
-                DocumentsServices.getDocumentQuestionsHistory(
-                    this.documentId,
-                    filters
-                )
+                DocumentsServices.getDocumentQuestionsHistory(this.documentId, filters)
                     .then((response) => {
                         if (response?.error) {
                             this.conversationCards = [];
                             this.hasMore = false;
                             return;
                         }
-                        const list = Array.isArray(response)
-                            ? response
-                            : [];
-                        this.conversationCards = list.map(
-                            (entry) => {
-                                const isQuestionario =
-                                    entry.type === 1;
-                                return {
-                                    id: entry.id,
-                                    userName:
-                                        entry.userName ||
-                                        "—",
-                                    date: this.formatHistoryDate(
-                                        entry.created
-                                    ),
-                                    tagText: isQuestionario
-                                        ? "Questionário"
-                                        : "Pergunta Livre",
-                                    tagVariant: "primary",
-                                    tagClass: isQuestionario
-                                        ? "badge-tag-questionario"
-                                        : "badge-tag-pergunta-livre",
-                                    question:
-                                        entry.input || "",
-                                    answerHtml:
-                                        entry.output || "",
-                                };
-                            }
-                        );
-                        this.hasMore =
-                            list.length >= filters.take;
+                        const list = Array.isArray(response) ? response : [];
+                        this.conversationCards = list.map((entry) => {
+                            const isQuestionario = entry.type === 1;
+                            return {
+                                id: entry.id,
+                                userName: entry.userName || "—",
+                                date: this.formatHistoryDate(entry.created),
+                                tagText: isQuestionario
+                                    ? this.$t("analyze.questionsHistoryModal.tagQuestionnaire")
+                                    : this.$t("analyze.questionsHistoryModal.tagFreeQuestion"),
+                                tagVariant: "primary",
+                                tagClass: isQuestionario
+                                    ? "badge-tag-questionario"
+                                    : "badge-tag-pergunta-livre",
+                                question: entry.input || "",
+                                answerHtml: entry.output || "",
+                            };
+                        });
+                        this.hasMore = list.length >= filters.take;
                     })
                     .catch(() => {
                         this.conversationCards = [];
@@ -435,10 +358,7 @@
                 this.getHistory();
             },
             toggleOrder() {
-                this.filters.order =
-                    this.filters.order === "desc"
-                        ? "asc"
-                        : "desc";
+                this.filters.order = this.filters.order === "desc" ? "asc" : "desc";
                 this.currentTake = 10;
                 this.getHistory();
             },
@@ -468,10 +388,7 @@
     }
 
     .conversation-card {
-        background-color: var(
-            --bs-light,
-            #f8f9fa
-        ) !important;
+        background-color: var(--bs-light, #f8f9fa) !important;
     }
 
     .badge-tag-questionario {
