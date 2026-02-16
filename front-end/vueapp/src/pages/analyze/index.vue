@@ -85,14 +85,12 @@
                     </div>
                 </div>
                 <div class="row">
-                    <prompt-view
+                    <PromptViewer
                         :hashDocument="hashDocument"
                         :historyListOrder="historyListOrder"
                         @showHistory="showHistory"
                         @unshiftHistoryList="unshiftHistoryList"
                         @pushHistoryList="pushHistoryList"
-                        @showAlertToast="showAlertToast"
-                        @clearMyInterval="clearMyInterval"
                         v-if="!isExpandedHistory"
                     />
 
@@ -109,7 +107,6 @@
                         <step-analysis-view
                             :document-id="parseInt(documentId)"
                             :card-id="parseInt(cardId)"
-                            @show-alert-toast="showAlertToast"
                             v-if="viewMode === 'history' || viewMode === 'both'"
                         />
                     </div>
@@ -128,22 +125,15 @@
                 </a>
             </div>
         </div>
-        <!-- Component ToastAlert -->
-        <toast-alert
-            :showToast="toastShow"
-            :colorToast="toastColor"
-            :messageToast="toastMessage"
-            @close="closeToast"
-        />
         <NormalizeIndex
             :docData="dataView"
             :isReprocessing="isReprocessing"
             v-if="showLoading"
-        ></NormalizeIndex>
+        />
     </main>
 </template>
 <script>
-    import PromptView from "@/components/pages/analyzer/prompt-view";
+    import PromptViewer from "@/components/analyze/PromptViewer.vue";
     import DocView from "@/components/pages/analyzer/doc-view";
     import StepAnalysisView from "@/components/pages/analyzer/step-analysis-view";
     import ToastAlert from "@/components/pages/analyzer/toast-alert";
@@ -181,7 +171,7 @@
             };
         },
         components: {
-            PromptView,
+            PromptViewer,
             DocView,
             StepAnalysisView,
             ToastAlert,
@@ -207,9 +197,6 @@
             },
             pushHistoryList: function (data) {
                 this.dataPushHistoryList = data;
-            },
-            showAlertToast: function (data) {
-                this.alertToast(data.msg, data.color);
             },
             getDataDocument: function () {
                 let self = this;
@@ -240,26 +227,6 @@
                 } else {
                     this.$router.back();
                 }
-            },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 3000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
             },
         },
         created() {
