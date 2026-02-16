@@ -94,12 +94,13 @@
                         v-if="!isExpandedHistory"
                     />
 
-                    <doc-view
+                    <DocumentViewer
                         @showNormalize="normalize"
                         id="docView"
                         v-if="viewMode === 'doc' || viewMode === 'both'"
                         :documentView="viewMode"
                     />
+
                     <div
                         :id="'docHistory'"
                         :class="viewMode === 'both' ? 'col-md-6' : 'col-12'"
@@ -134,7 +135,7 @@
 </template>
 <script>
     import PromptViewer from "@/components/analyze/PromptViewer.vue";
-    import DocView from "@/components/pages/analyzer/doc-view";
+    import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
     import StepAnalysisView from "@/components/pages/analyzer/step-analysis-view";
     import ToastAlert from "@/components/pages/analyzer/toast-alert";
     import api from "@/services/api";
@@ -172,7 +173,7 @@
         },
         components: {
             PromptViewer,
-            DocView,
+            DocumentViewer,
             StepAnalysisView,
             ToastAlert,
             NormalizeIndex,

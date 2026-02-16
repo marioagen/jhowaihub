@@ -30,16 +30,6 @@
                     :title="$t('documents.ocrText')"
                     v-if="srcPdf && hasOcrText"
                 />
-                <!--
-                <button
-                    type="button"
-                    class="btn btn-primary btn-sm mb-1 reindex-button"
-                    @click="openModal()"
-                >
-                    <i class="fas fa-sync-alt"></i>
-                    {{ $t("common.reprocess") }}
-                </button>
-                -->
                 <div
                     class="view-pdf"
                     v-if="srcPdf"
@@ -170,7 +160,7 @@
         },
         data() {
             return {
-                idAnalyzer: this.$route.params.documentId,
+                documentId: this.$route.params.documentId,
                 viewMode: VIEW_MODE_PDF,
                 srcPdf: null,
                 errorPdf: false,
@@ -184,7 +174,7 @@
                 loadingNormalize: false,
                 modalAlertShow: false,
                 dataView: {
-                    Id: parseInt(this.idAnalyzer),
+                    Id: parseInt(this.documentId),
                     Embeddings_model_name: "",
                 },
                 isReprocessing: true,
@@ -199,10 +189,10 @@
                 this.srcPdf = null;
                 this.errorPdf = false;
                 DocumentsServices.findDocument(
-                    this.idAnalyzer
+                    this.documentId
                 ).then((response) => {
                     if (response.error !== undefined) {
-                        this.$notify({
+                        return this.$notify({
                             title: "analyze.title",
                             message:
                                 "analyze.failedLoadDocument",
@@ -233,7 +223,7 @@
                 if (this.textContent == "") {
                     this.loadingText = true;
                     DocumentsServices.getOcrText(
-                        this.idAnalyzer
+                        this.documentId
                     )
                         .then((response) => {
                             if (
@@ -263,7 +253,7 @@
             },
             checkOcrAvailability() {
                 DocumentsServices.getOcrText(
-                    this.idAnalyzer
+                    this.documentId
                 )
                     .then((response) => {
                         if (response && response.hasOcr) {
@@ -290,7 +280,7 @@
             openModal() {
                 this.showModalForm = true;
                 this.dataView.Id = parseInt(
-                    this.idAnalyzer
+                    this.documentId
                 );
                 document.getElementsByTagName(
                     "BODY"
@@ -308,7 +298,7 @@
                     return true;
                 };
                 let paramsReq = {
-                    Id: parseInt(this.idAnalyzer),
+                    Id: parseInt(this.documentId),
                     Embeddings_model_name: "",
                 };
                 this.loadingNormalize = true;
