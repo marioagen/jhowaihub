@@ -1,12 +1,9 @@
-import {
-    createRouter,
-    createWebHashHistory,
-} from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 
 import DocumentsHub from "@/pages/documentsHub/index.vue";
 import DocumentsUpload from "@/pages/documentsHub/uploads.vue";
 import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
-import AnalyzerIndex from "@/components/pages/analyzer";
+import AnalyzerIndex from "@/pages/analyze/index.vue";
 
 import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
