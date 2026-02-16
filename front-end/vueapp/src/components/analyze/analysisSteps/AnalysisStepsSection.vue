@@ -5,7 +5,7 @@
             v-if="documentData && documentData.canAnswer"
         />
 
-        <StepViewer
+        <StepsViewer
             v-if="documentData && documentData.steps && documentData.steps.length > 0"
             :steps="documentData.steps"
             :initial-step-id="documentData.lastProcessedStepId"
@@ -22,7 +22,7 @@
 </template>
 <script>
     import DocumentChat from "@/components/analyze/analysisSteps/DocumentChat.vue";
-    import StepViewer from "@/components/analyze/analysisSteps/StepViewer.vue";
+    import StepsViewer from "@/components/analyze/analysisSteps/StepsViewer.vue";
     import ExtractedDataViewer from "@/components/analyze/analysisSteps/ExtractedDataViewer.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import CardsServices from "@/services/cards/CardsServices";
@@ -31,7 +31,7 @@
         name: "AnalysisStepsSection",
         components: {
             DocumentChat,
-            StepViewer,
+            StepsViewer,
             ExtractedDataViewer,
         },
         props: {

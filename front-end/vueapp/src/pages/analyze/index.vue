@@ -105,7 +105,7 @@
                         :id="'docHistory'"
                         :class="viewMode === 'both' ? 'col-md-6' : 'col-12'"
                     >
-                        <step-analysis-view
+                        <AnalysisStepsSection
                             :document-id="parseInt(documentId)"
                             :card-id="parseInt(cardId)"
                             v-if="viewMode === 'history' || viewMode === 'both'"
@@ -136,7 +136,7 @@
 <script>
     import PromptViewer from "@/components/analyze/PromptViewer.vue";
     import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
-    import StepAnalysisView from "@/components/pages/analyzer/step-analysis-view";
+    import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import ToastAlert from "@/components/pages/analyzer/toast-alert";
     import api from "@/services/api";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
@@ -174,7 +174,7 @@
         components: {
             PromptViewer,
             DocumentViewer,
-            StepAnalysisView,
+            AnalysisStepsSection,
             ToastAlert,
             NormalizeIndex,
         },
