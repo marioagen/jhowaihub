@@ -139,7 +139,7 @@ namespace WoopiAiHub.Repository
             var questionnaires = _context.Questionnaires.Where(a => ids.Contains(a.Id));
             var validationQuestionnaireUsedInTools = VerifyIfQuestionnaireIsUsedInTheWorkflowTools(ids);
 
-            if (questionnaires.Count() > 0 && !validationQuestionnaireUsedInTools)
+            if (questionnaires.Any() && !validationQuestionnaireUsedInTools)
             {
                 _context.Questionnaires.RemoveRange(questionnaires);
                 _context.SaveChanges();

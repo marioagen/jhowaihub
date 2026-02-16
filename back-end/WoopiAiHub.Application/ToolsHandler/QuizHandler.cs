@@ -44,7 +44,7 @@ namespace WoopiAiHub.Application.ToolsHandler
                                                             StepToolExecution? execution = null)
         {
             var tenantInfo = await _tenantCacheServices.FindTenantAsync(automationServicesDto.Tenant);
-            if (tenantInfo!.AiGatewayApplicationId.HasValue is false)
+            if (!tenantInfo!.AiGatewayApplicationId.HasValue)
             {
                 throw new ArgumentException("AiGateway ApplicationId not found");
             }

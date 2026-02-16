@@ -38,7 +38,7 @@ namespace WoopiAiHub.Application.Messaging
         }
 
         /// <summary>
-        /// Execute the background service to consume messages from the ChatCompletion queue.
+        /// Execute the background service to consume messages from the QuizConsumer queue.
         /// </summary>
         /// <param name="stoppingToken"></param>
         /// <returns></returns>
@@ -49,6 +49,7 @@ namespace WoopiAiHub.Application.Messaging
                 using var scope = _scopeFactory.CreateScope();
                 try
                 {
+                    
                     var connectionString = await GetConnectionStringAsync(scope, message.Tenant!);
                     var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
                     httpAccessor.HttpContext ??= new DefaultHttpContext();
