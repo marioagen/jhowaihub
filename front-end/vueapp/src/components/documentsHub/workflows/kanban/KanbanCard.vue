@@ -6,18 +6,9 @@
                     {{ truncateText(dataCard.name) }}
                     <div
                         class="badge fr flex-shrink-1 mt-1"
-                        :style="
-                            badgeStyle(
-                                dataStep.status.color
-                            )
-                        "
+                        :style="badgeStyle(dataStep.status.color)"
                     >
-                        {{
-                            $t(
-                                "workflow.statusList." +
-                                    dataStep.status.name.toLowerCase()
-                            )
-                        }}
+                        {{ $t("workflow.statusList." + dataStep.status.name.toLowerCase()) }}
                     </div>
                 </div>
                 <div class="mb-2">
@@ -53,11 +44,7 @@
                     </small>
                 </div>
                 <div
-                    v-if="
-                        !isLastStep &&
-                        dataCard.assignedUser &&
-                        !showLoading
-                    "
+                    v-if="!isLastStep && dataCard.assignedUser && !showLoading"
                     class="mb-2"
                 >
                     <LucideIcon
@@ -73,9 +60,7 @@
                         type="button"
                         @click.stop="unassignUser"
                         class="btn btn-sm btn-unlink ms-1 px-1"
-                        v-tooltip.right="
-                            $t('card.unassignInfo')
-                        "
+                        v-tooltip.right="$t('card.unassignInfo')"
                     >
                         <LucideIcon
                             v-if="isUnassigningUser"
@@ -94,9 +79,7 @@
             </div>
             <div
                 class="card-footer pt-0"
-                :class="
-                    showLoading ? 'padding-loading ' : ''
-                "
+                :class="showLoading ? 'padding-loading ' : ''"
             >
                 <div
                     class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
@@ -115,22 +98,22 @@
                                 class="ms-2"
                             />
                         </button>
-                        <button v-if="isLastStep"
-                                type="button"
-                                class="btn btn-sm btn-outline-success"
-                                @click.stop="openFinalizeConfirm">
-                            <LucideIcon icon="Check"
-                                        :size="15"
-                                        class="" />
+                        <button
+                            v-if="isLastStep"
+                            type="button"
+                            class="btn btn-sm btn-outline-success"
+                            @click.stop="openFinalizeConfirm"
+                        >
+                            <LucideIcon
+                                icon="Check"
+                                :size="15"
+                            />
                             {{ $t("common.finalize") }}
                         </button>
                     </div>
                     <div v-if="!isLastStep">
                         <button
-                            v-if="
-                                !isFirstStep ||
-                                dataCard.assignedUser
-                            "
+                            v-if="!isFirstStep || dataCard.assignedUser"
                             class="btn btn-sm btn-outline-primary float-end"
                             @click.stop="advanceStep"
                         >
@@ -149,12 +132,7 @@
                                 v-if="isLoadingAnalysis"
                             ></div>
                         </button>
-                        <div
-                            v-else-if="
-                                !dataCard.assignedUser &&
-                                !showLoading
-                            "
-                        >
+                        <div v-else-if="!dataCard.assignedUser && !showLoading">
                             <div
                                 v-if="isAdmin"
                                 class="btn-group"
@@ -167,19 +145,13 @@
                                     @click.stop=""
                                 >
                                     <LucideIcon
-                                        v-if="
-                                            isUpdatingAssignedUser
-                                        "
+                                        v-if="isUpdatingAssignedUser"
                                         icon="Loader"
                                         :size="16"
                                         class="mr-2 animate-spin text-white"
                                     />
                                     <span>
-                                        {{
-                                            $t(
-                                                "card.assignBtn"
-                                            )
-                                        }}
+                                        {{ $t("card.assignBtn") }}
                                     </span>
                                     <LucideIcon
                                         icon="ChevronRight"
@@ -192,40 +164,26 @@
                                         class="ml-2 icon-open"
                                     />
                                 </button>
-                                <ul
-                                    class="dropdown-menu p-2 users-list"
-                                >
+                                <ul class="dropdown-menu p-2 users-list">
                                     <li
-                                        v-if="
-                                            users.length > 5
-                                        "
+                                        v-if="users.length > 5"
                                         class="mb-1"
                                     >
-                                        <div
-                                            class="input-group input-group-sm"
-                                        >
-                                            <span
-                                                class="input-group-text p-1"
-                                            >
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text p-1">
                                                 <LucideIcon
                                                     icon="Search"
-                                                    :size="
-                                                        16
-                                                    "
+                                                    :size="16"
                                                     class="me-1"
                                                 />
                                             </span>
                                             <input
                                                 :id="`filter-user-${dataCard.id}`"
-                                                v-model="
-                                                    userSearchText
-                                                "
+                                                v-model="userSearchText"
                                                 type="text"
                                                 name="filter"
                                                 class="form-control"
-                                                @input="
-                                                    searchUser
-                                                "
+                                                @input="searchUser"
                                                 @click.stop=""
                                             />
                                         </div>
@@ -233,15 +191,9 @@
                                     <li
                                         v-for="user in filteredUsers"
                                         :key="user.id"
-                                        @click.stop="
-                                            assignUser(
-                                                user.id
-                                            )
-                                        "
+                                        @click.stop="assignUser(user.id)"
                                     >
-                                        <span
-                                            class="dropdown-item"
-                                        >
+                                        <span class="dropdown-item">
                                             {{ user.name }}
                                         </span>
                                     </li>
@@ -251,14 +203,10 @@
                                 v-else
                                 type="button"
                                 class="btn btn-sm btn-primary assing-btn"
-                                @click.stop="
-                                    assignUser(loggedUserId)
-                                "
+                                @click.stop="assignUser(loggedUserId)"
                             >
                                 <LucideIcon
-                                    v-if="
-                                        isUpdatingAssignedUser
-                                    "
+                                    v-if="isUpdatingAssignedUser"
                                     icon="Loader"
                                     :size="12"
                                     class="mr-2 animate-spin text-white"
@@ -291,26 +239,17 @@
                         <div class="mb-2">
                             {{ $t("common.processing") }}
                             {{ truncatedToolName }}
-                            <span class="float-end">
-                                {{
-                                    dataCard.percentage ||
-                                    0
-                                }}%
-                            </span>
+                            <span class="float-end">{{ dataCard.percentage || 0 }}%</span>
                         </div>
                         <div class="progress">
                             <div
                                 class="progress-bar progress-bar-striped progress-bar-animated"
                                 role="progressbar"
-                                :aria-valuenow="
-                                    dataCard.percentage || 0
-                                "
+                                :aria-valuenow="dataCard.percentage || 0"
                                 aria-valuemin="0"
                                 aria-valuemax="100"
                                 :style="{
-                                    width:
-                                        (dataCard.percentage ||
-                                            0) + '%',
+                                    width: (dataCard.percentage || 0) + '%',
                                 }"
                             ></div>
                         </div>
@@ -386,14 +325,11 @@
                 return {
                     "--cor-base": color,
                     color: "var(--cor-base)",
-                    backgroundColor:
-                        "color-mix(in srgb, var(--cor-base) 30%, white)",
+                    backgroundColor: "color-mix(in srgb, var(--cor-base) 30%, white)",
                 };
             },
             async updateStatus(nextStepOrder = null) {
-                const targetOrder =
-                    nextStepOrder ??
-                    this.dataStep.order + 1;
+                const targetOrder = nextStepOrder ?? this.dataStep.order + 1;
                 if (this.isLastStep && nextStepOrder === null) {
                     return;
                 }
@@ -402,14 +338,9 @@
                     NextStepOrder: targetOrder,
                     WorkflowId: this.dataStep.workflowId,
                 };
-                const response =
-                    await CardsServices.updateStepAndStatus(
-                        params
-                    );
+                const response = await CardsServices.updateStepAndStatus(params);
                 if (response?.error !== undefined) {
-                    throw new Error(
-                        response.error.response?.data?.labelError
-                    );
+                    throw new Error(response.error.response?.data?.labelError);
                 }
             },
             async assignUser(userId) {
@@ -418,8 +349,7 @@
                     UserId: userId,
                 };
                 this.isUpdatingAssignedUser = true;
-                const response =
-                    await CardsServices.assignUser(params);
+                const response = await CardsServices.assignUser(params);
                 if (response?.error !== undefined) {
                     this.$notify({
                         title: "Error",
@@ -428,22 +358,16 @@
                         icon: "CircleX",
                     });
                 } else {
-                    const assignedUser = Array.isArray(
-                        this.users
-                    )
-                        ? this.users.find(
-                              (u) => u.id === userId
-                          )
+                    const assignedUser = Array.isArray(this.users)
+                        ? this.users.find((u) => u.id === userId)
                         : null;
 
                     this.$emit("cardUpdated", {
                         card: {
                             ...this.dataCard,
-                            assignedUser:
-                                assignedUser || null,
+                            assignedUser: assignedUser || null,
                         },
-                        currentStepOrder:
-                            this.dataStep.order,
+                        currentStepOrder: this.dataStep.order,
                         newStepOrder: this.dataStep.order,
                     });
                 }
@@ -451,10 +375,7 @@
             },
             async unassignUser() {
                 this.isUnassigningUser = true;
-                const response =
-                    await CardsServices.unassignUser(
-                        this.dataCard.id
-                    );
+                const response = await CardsServices.unassignUser(this.dataCard.id);
                 if (response?.error !== undefined) {
                     this.$notify({
                         title: "Error",
@@ -468,8 +389,7 @@
                             ...this.dataCard,
                             assignedUser: null,
                         },
-                        currentStepOrder:
-                            this.dataStep.order,
+                        currentStepOrder: this.dataStep.order,
                         newStepOrder: this.dataStep.order,
                     });
                 }
@@ -483,7 +403,7 @@
                 } catch (e) {
                     this.$notify({
                         title: "Error",
-                        message:this.$t("card.errorAdvancingCard"),
+                        message: this.$t("card.errorAdvancingCard"),
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -501,16 +421,19 @@
                     this.$refs.finalizeConfirmModalRef?.close();
                     this.$emit("cardFinalized", {
                         cardId: this.dataCard.id,
-                        currentStepOrder:
-                            this.dataStep.order,
+                        currentStepOrder: this.dataStep.order,
                     });
                     this.reloadList();
+                    this.$notify({
+                        title: this.$t("common.success"),
+                        message: this.$t("card.successFinalizeMessage"),
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
                 } catch (e) {
                     this.$notify({
-                        title: "Error",
-                        message:
-                            e.message ||
-                            this.$t("card.errorFinalizingCard"),
+                        title: this.$t("common.error"),
+                        message: e.message || this.$t("card.errorFinalizingCard"),
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -523,12 +446,9 @@
                     CardId: this.dataCard.id,
                     StatusId: this.finalizeStatusId,
                 };
-                const response =
-                    await CardsServices.updateStatusOnly(params);
+                const response = await CardsServices.updateStatusOnly(params);
                 if (response?.error !== undefined) {
-                    throw new Error(
-                        response.error.response?.data?.labelError
-                    );
+                    throw new Error(response.error.response?.data?.labelError);
                 }
             },
             redirectToAnalyzer() {
@@ -536,8 +456,7 @@
                     this.$router.push({
                         name: "Analyzer",
                         params: {
-                            documentId:
-                                this.dataCard.documentId,
+                            documentId: this.dataCard.documentId,
                             cardId: this.dataCard.id,
                         },
                         query: { page: this.backPage },
@@ -548,14 +467,9 @@
                 this.$emit("reload");
             },
             searchUser() {
-                const searchText =
-                    this.userSearchText.toLowerCase();
+                const searchText = this.userSearchText.toLowerCase();
                 this.filteredUsers = this.users.filter(
-                    (o) =>
-                        o.name &&
-                        o.name
-                            .toLowerCase()
-                            .includes(searchText)
+                    (o) => o.name && o.name.toLowerCase().includes(searchText)
                 );
             },
             setUsers() {
@@ -566,9 +480,7 @@
             },
             truncateText(text) {
                 if (!text) return "";
-                return text.length > 25
-                    ? text.substring(0, 25) + "..."
-                    : text;
+                return text.length > 25 ? text.substring(0, 25) + "..." : text;
             },
         },
         async mounted() {
@@ -586,24 +498,18 @@
                 return this.dataCard.percentage < 100;
             },
             isAdmin() {
-                return this.$store.state.userProfile
-                    .isAdmin;
+                return this.$store.state.userProfile.isAdmin;
             },
             loggedUserId() {
                 const user = this.users.find(
-                    (u) =>
-                        u.email ===
-                        this.$store.state.userProfile.login
+                    (u) => u.email === this.$store.state.userProfile.login
                 );
                 return user ? user.id : null;
             },
             truncatedToolName() {
                 if (!this.dataCard?.toolName) return "";
-                const toolName =
-                    this.dataCard.toolName.trim();
-                return toolName.length > 10
-                    ? toolName.substring(0, 10) + "..."
-                    : toolName;
+                const toolName = this.dataCard.toolName.trim();
+                return toolName.length > 10 ? toolName.substring(0, 10) + "..." : toolName;
             },
         },
     };
