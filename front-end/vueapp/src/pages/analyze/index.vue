@@ -137,10 +137,9 @@
     import PromptViewer from "@/components/analyze/PromptViewer.vue";
     import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
-    import ToastAlert from "@/components/pages/analyzer/toast-alert";
-    import api from "@/services/api";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
+    import AnalyzerService from "@/services/documents/AnalyzerService";
     import LogService from "@/services/log/logService";
 
     export default {
@@ -175,41 +174,36 @@
             PromptViewer,
             DocumentViewer,
             AnalysisStepsSection,
-            ToastAlert,
             NormalizeIndex,
         },
         methods: {
-            normalize: function (dataView, isReprocessing) {
+            normalize(dataView, isReprocessing) {
                 this.dataView = dataView;
                 this.isReprocessing = isReprocessing;
                 this.showLoading = true;
             },
-            expandHistory: function () {
+            expandHistory() {
                 this.isExpandedHistory = !this.isExpandedHistory;
             },
-            updateHistoryListOrder: function (data) {
+            updateHistoryListOrder(data) {
                 this.historyListOrder = data.value;
             },
-            showHistory: function () {
+            showHistory() {
                 this.dataShowHistory = !this.dataShowHistory;
             },
-            unshiftHistoryList: function (data) {
+            unshiftHistoryList(data) {
                 this.dataUnshiftHistoryList = data;
             },
-            pushHistoryList: function (data) {
+            pushHistoryList(data) {
                 this.dataPushHistoryList = data;
             },
-            getDataDocument: function () {
-                let self = this;
-                api.get("/Document/Analyze/" + this.documentId)
-                    .then(function (result) {
-                        self.hashDocument = result.data.referenceFile;
+            getDataDocument() {
+                AnalyzerService.getAnalyzeDocument(this.documentId)
+                    .then((result) => {
+                        this.hashDocument = result.referenceFile;
                     })
-                    .catch(function (e) {
-                        LogService.showMessage("Error loading document: " + e);
-                    })
-                    .finally(function () {
-                        LogService.showMessage("Finished request.");
+                    .catch((error) => {
+                        LogService.showMessage("Error loading document: " + error);
                     });
             },
             async getCardHeaderInfo() {
