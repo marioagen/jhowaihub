@@ -334,7 +334,19 @@
                 };
                 PromptService.createPrompt(paramsData)
                     .then((response) => {
-                        if (!response) throw new Error("Create failed");
+                        if (response.error) {
+                            let errorMessage = response.error.response.data.detail;
+                            return this.$notify({
+                                title: "prompts.title",
+                                message: this.$t(errorMessage),
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        }
+
+                        if (!response) {
+                            throw new Error("Create failed");
+                        }
 
                         this.$notify({
                             title: "prompts.title",
