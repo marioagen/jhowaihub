@@ -9,29 +9,18 @@
             <div class="modal-header-custom">
                 <div class="modal-info text-center w-100">
                     <h6 class="modal-title mb-1">
-                        {{
-                            $t(
-                                "documents.workflowListModal.title"
-                            )
-                        }}
+                        {{ $t("documents.workflowListModal.title") }}
                     </h6>
                     <p
                         class="modal-subtitle text-muted mb-0"
-                        v-html="
-                            $t(
-                                'documents.workflowListModal.titleMessage'
-                            )
-                        "
-                        v-if="
-                            workflowListByDocument.length !=
-                            0
-                        "
+                        v-html="$t('documents.workflowListModal.titleMessage')"
+                        v-if="workflowListByDocument.length != 0"
                     ></p>
                 </div>
                 <button
                     type="button"
                     class="btn-close position-absolute top-0 end-0 m-3"
-                    aria-label="Close"
+                    :aria-label="$t('common.close')"
                     @click="close"
                 ></button>
             </div>
@@ -39,12 +28,8 @@
         <template #body>
             <div class="px-2">
                 <!-- Search Input -->
-                <div
-                    class="input-group mt-3 mb-3 search-container"
-                >
-                    <span
-                        class="input-group-text bg-white border-end-0"
-                    >
+                <div class="input-group mt-3 mb-3 search-container">
+                    <span class="input-group-text bg-white border-end-0">
                         <LucideIcon
                             icon="Search"
                             size="18"
@@ -55,14 +40,9 @@
                         type="text"
                         class="form-control border-start-0 border-end-0 ps-0 search-input"
                         :class="{
-                            'params-filled':
-                                searchData.search,
+                            'params-filled': searchData.search,
                         }"
-                        :placeholder="
-                            $t(
-                                'documents.workflowListModal.searchPlaceholder'
-                            )
-                        "
+                        :placeholder="$t('documents.workflowListModal.searchPlaceholder')"
                         v-model="searchData.search"
                         @input="filterData"
                     />
@@ -85,18 +65,14 @@
                 </div>
 
                 <!-- Workflow List -->
-                <div
-                    class="workflow-list d-flex flex-column gap-3"
-                >
+                <div class="workflow-list d-flex flex-column gap-3">
                     <div
                         v-for="workflow in workflowListByDocument"
                         :key="workflow.id"
                         class="workflow-card p-3 d-flex align-items-center justify-content-between"
                         @click="redirectToConsult(workflow)"
                     >
-                        <div
-                            class="d-flex align-items-center gap-3"
-                        >
+                        <div class="d-flex align-items-center gap-3">
                             <div
                                 class="icon-circle d-flex align-items-center justify-content-center"
                             >
@@ -119,11 +95,7 @@
                                     </span>
                                 </h6>
                                 <small class="text-muted">
-                                    {{
-                                        $t(
-                                            "documents.workflowListModal.clickToView"
-                                        )
-                                    }}
+                                    {{ $t("documents.workflowListModal.clickToView") }}
                                 </small>
                             </div>
                         </div>
@@ -137,34 +109,21 @@
                     </div>
 
                     <div
-                        v-if="
-                            workflowListByDocument.length ===
-                                0 && !isLoading
-                        "
+                        v-if="workflowListByDocument.length === 0 && !isLoading"
                         class="text-center py-4 text-muted"
                     >
-                        {{
-                            $t(
-                                "documents.workflowListModal.nothingFound"
-                            )
-                        }}
+                        {{ $t("documents.workflowListModal.nothingFound") }}
                     </div>
                 </div>
             </div>
         </template>
         <template #footer>
-            <div
-                class="w-100 d-flex justify-content-end py-2 px-2 border-top mt-3"
-            >
+            <div class="w-100 d-flex justify-content-end py-2 px-2 border-top mt-3">
                 <button
                     class="btn btn-outline-secondary btn-sm px-4"
                     @click="close"
                 >
-                    {{
-                        $t(
-                            "documents.workflowListModal.cancel"
-                        )
-                    }}
+                    {{ $t("documents.workflowListModal.cancel") }}
                 </button>
             </div>
         </template>
@@ -192,8 +151,7 @@
                 workflowListByDocument: [],
                 searchData: {
                     documentId: this.documentId,
-                    login: this.$store.state.userProfile
-                        .login,
+                    login: this.$store.state.userProfile.login,
                     search: "",
                 },
             };
@@ -209,38 +167,24 @@
             async filterData() {
                 this.isLoading = true;
                 try {
-                    this.searchData.documentId =
-                        this.documentId;
-                    const response =
-                        await WorkflowService.getWorkflowsByDocument(
-                            this.searchData
-                        );
+                    this.searchData.documentId = this.documentId;
+                    const response = await WorkflowService.getWorkflowsByDocument(this.searchData);
                     if (response?.error) {
                         this.$notify({
-                            title: "Error",
-                            message: this.$t(
-                                "documents.workflowListModal.errorToGetWorkflows"
-                            ),
+                            title: this.$t("common.error"),
+                            message: this.$t("documents.workflowListModal.errorToGetWorkflows"),
                             variant: "danger",
                             icon: "CircleX",
                         });
                         this.workflowListByDocument = [];
                     } else {
-                        this.workflowListByDocument =
-                            response.content ||
-                            response ||
-                            [];
+                        this.workflowListByDocument = response.content || response || [];
                     }
                 } catch (error) {
-                    LogService.showMessage(
-                        "Error fetching workflows:",
-                        error
-                    );
+                    LogService.showMessage("Error fetching workflows:", error);
                     this.$notify({
-                        title: "Error",
-                        message: this.$t(
-                            "documents.workflowListModal.errorUnexpected"
-                        ),
+                        title: this.$t("common.error"),
+                        message: this.$t("documents.workflowListModal.errorUnexpected"),
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -267,12 +211,8 @@
             },
             async open() {
                 await this.filterData();
-                if (
-                    this.workflowListByDocument.length == 1
-                ) {
-                    this.redirectToConsult(
-                        this.workflowListByDocument[0]
-                    );
+                if (this.workflowListByDocument.length == 1) {
+                    this.redirectToConsult(this.workflowListByDocument[0]);
                     return;
                 }
                 this.$refs.modal.open();

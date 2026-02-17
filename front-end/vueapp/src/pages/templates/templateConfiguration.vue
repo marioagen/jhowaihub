@@ -97,7 +97,6 @@
         </div>
     </main>
 </template>
-
 <script>
     import TemplateService from "@/services/template/TemplateService";
     import TemplateFormDisplay from "@/components/templates/TemplateFormDisplay.vue";

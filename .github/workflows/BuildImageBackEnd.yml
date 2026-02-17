@@ -1,42 +1,42 @@
-name: 'Build image back-end'
+name: "Build image back-end"
 
 on:
-  push:
-    branches:
-      - 'develop'
-      - 'release'
-    # paths:
-      # - 'back-end/**'
+    push:
+        branches:
+            - "develop"
+            - "release"
+        # paths:
+        # - 'back-end/**'
 
 jobs:
-  build-image:
-    name: "Build image back-end"
-    runs-on: ["azure-identity"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    build-image:
+        name: "Build image back-end"
+        runs-on: ["azure-identity"]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
 
-      - name: Declare variables
-        id: vars
-        run: |
-          echo "imageRepository=woopi-ai" >> $GITHUB_OUTPUT
-          echo "imageName=woopiai-hub-backend" >> $GITHUB_OUTPUT
+            - name: Declare variables
+              id: vars
+              run: |
+                  echo "imageRepository=woopi-ai" >> $GITHUB_OUTPUT
+                  echo "imageName=woopiai-hub-backend" >> $GITHUB_OUTPUT
 
-          echo "imageVersion=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-          
-      # - name: Build Image
-        # working-directory: ./back-end
-        # run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
+                  echo "imageVersion=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Azure login
-        run: az login --identity
-  
-      - name: ACR login
-        run: az acr login -n acrapplications
-      
-      # - name: Push Image
-        # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}}
+            # - name: Build Image
+            # working-directory: ./back-end
+            # run: docker image build -t acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} .
 
-      - name: Build Image
-        working-directory: ./back-end
-        run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} --platform linux -f Dockerfile .
+            - name: Azure login
+              run: az login --identity
+
+            - name: ACR login
+              run: az acr login -n acrapplications
+
+            # - name: Push Image
+            # run: docker image push acrapplications.azurecr.io/${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}}
+
+            - name: Build Image
+              working-directory: ./back-end
+              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageName}}:${{steps.vars.outputs.imageVersion}} --platform linux -f Dockerfile .

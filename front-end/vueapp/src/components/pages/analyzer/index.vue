@@ -3,9 +3,7 @@
         <div class="container-fluid mt-4">
             <div>
                 <div class="row align-items-center mb-4">
-                    <div
-                        class="col-8 d-flex align-items-center"
-                    >
+                    <div class="col-8 d-flex align-items-center">
                         <button
                             class="btn btn-outline-primary btn-table btn-sm me-2"
                             @click="goBack"
@@ -25,16 +23,12 @@
                 </div>
                 <div class="d-flex align-items-center mt-1">
                     <span class="badge bg-light text-dark">
-                        <i
-                            class="fas fa-project-diagram me-1 text-primary"
-                        ></i>
+                        <i class="fas fa-project-diagram me-1 text-primary"></i>
                         {{ workflowName }}
                     </span>
                     /
                     <span class="badge bg-light text-dark">
-                        <i
-                            class="fas fa-file-alt me-1 text-primary"
-                        ></i>
+                        <i class="fas fa-file-alt me-1 text-primary"></i>
                         {{ documentName }}
                     </span>
                     <div
@@ -59,7 +53,7 @@
 
                         <input
                             type="radio"
-                            class="btn-check"
+                            class="btn-check ms-2"
                             name="view"
                             id="view-both"
                             autocomplete="off"
@@ -95,9 +89,7 @@
                         :hashDocument="hashDocument"
                         :historyListOrder="historyListOrder"
                         @showHistory="showHistory"
-                        @unshiftHistoryList="
-                            unshiftHistoryList
-                        "
+                        @unshiftHistoryList="unshiftHistoryList"
                         @pushHistoryList="pushHistoryList"
                         @showAlertToast="showAlertToast"
                         @clearMyInterval="clearMyInterval"
@@ -107,32 +99,18 @@
                     <doc-view
                         @showNormalize="normalize"
                         id="docView"
-                        v-if="
-                            viewMode === 'doc' ||
-                            viewMode === 'both'
-                        "
+                        v-if="viewMode === 'doc' || viewMode === 'both'"
                         :documentView="viewMode"
                     />
                     <div
                         :id="'docHistory'"
-                        :class="
-                            viewMode === 'both'
-                                ? 'col-md-6'
-                                : 'col-12'
-                        "
+                        :class="viewMode === 'both' ? 'col-md-6' : 'col-12'"
                     >
                         <step-analysis-view
-                            :document-id="
-                                parseInt(idAnalyzer)
-                            "
+                            :document-id="parseInt(idAnalyzer)"
                             :card-id="parseInt(idCard)"
-                            @show-alert-toast="
-                                showAlertToast
-                            "
-                            v-if="
-                                viewMode === 'history' ||
-                                viewMode === 'both'
-                            "
+                            @show-alert-toast="showAlertToast"
+                            v-if="viewMode === 'history' || viewMode === 'both'"
                         />
                     </div>
                 </div>
@@ -143,14 +121,10 @@
             >
                 <a
                     class="btn btn-light btn-sm shadow"
-                    :title="
-                        $t('quizzes.questionnaireAndAi')
-                    "
+                    :title="$t('quizzes.questionnaireAndAi')"
                     @click="expandHistory"
                 >
-                    <img
-                        src="./../../../assets/img/prompt.png"
-                    />
+                    <img src="./../../../assets/img/prompt.png" />
                 </a>
             </div>
         </div>
@@ -231,30 +205,26 @@
                         crumb: this.$t("documents.listing"),
                         link: {
                             to: "Documents",
-                            queryPage:
-                                this.$route.query.page,
+                            queryPage: this.$route.query.page,
                         },
                     },
                     {
                         crumb: this.$t("common.consult"),
                         link: {
                             to: "Analyzer",
-                            queryPage:
-                                this.$route.query.page,
+                            queryPage: this.$route.query.page,
                         },
                     },
                 ];
             },
             expandHistory: function () {
-                this.isExpandedHistory =
-                    !this.isExpandedHistory;
+                this.isExpandedHistory = !this.isExpandedHistory;
             },
             updateHistoryListOrder: function (data) {
                 this.historyListOrder = data.value;
             },
             showHistory: function () {
-                this.dataShowHistory =
-                    !this.dataShowHistory;
+                this.dataShowHistory = !this.dataShowHistory;
             },
             unshiftHistoryList: function (data) {
                 this.dataUnshiftHistoryList = data;
@@ -267,29 +237,19 @@
             },
             getDataDocument: function () {
                 let self = this;
-                api.get(
-                    "/Document/Analyze/" + this.idAnalyzer
-                )
+                api.get("/Document/Analyze/" + this.idAnalyzer)
                     .then(function (result) {
-                        self.hashDocument =
-                            result.data.referenceFile;
+                        self.hashDocument = result.data.referenceFile;
                     })
                     .catch(function (e) {
-                        LogService.showMessage(
-                            "Error loading document: " + e
-                        );
+                        LogService.showMessage("Error loading document: " + e);
                     })
                     .finally(function () {
-                        LogService.showMessage(
-                            "Finished request."
-                        );
+                        LogService.showMessage("Finished request.");
                     });
             },
             async getCardHeaderInfo() {
-                const result =
-                    await CardsServices.findCardHeaderInfo(
-                        this.idCard
-                    );
+                const result = await CardsServices.findCardHeaderInfo(this.idCard);
                 if (result && !result.error) {
                     this.workflowName = result.workflowName;
                     this.documentName = result.cardName;
