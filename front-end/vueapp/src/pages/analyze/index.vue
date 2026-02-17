@@ -85,15 +85,6 @@
                     </div>
                 </div>
                 <div class="row">
-                    <PromptViewer
-                        :hashDocument="hashDocument"
-                        :historyListOrder="historyListOrder"
-                        @showHistory="showHistory"
-                        @unshiftHistoryList="unshiftHistoryList"
-                        @pushHistoryList="pushHistoryList"
-                        v-if="!isExpandedHistory"
-                    />
-
                     <DocumentViewer
                         @showNormalize="normalize"
                         id="docView"
@@ -134,7 +125,6 @@
     </main>
 </template>
 <script>
-    import PromptViewer from "@/components/analyze/PromptViewer.vue";
     import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
@@ -171,7 +161,6 @@
             };
         },
         components: {
-            PromptViewer,
             DocumentViewer,
             AnalysisStepsSection,
             NormalizeIndex,
