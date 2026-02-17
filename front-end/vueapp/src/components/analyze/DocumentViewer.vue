@@ -102,24 +102,17 @@
                 ></textarea>
             </div>
         </div>
-        <ModalReprocess
-            v-if="showModalForm"
-            @close="closeModal"
-            @formatData="updateModel"
-        />
     </div>
 </template>
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
-    import ModalReprocess from "@/components/pages/analyzer/modal-reprocess";
-    import ModalAlert from "@/components/pages/analyzer/modal-alert";
     import LogService from "@/services/log/logService";
 
     const VIEW_MODE_PDF = "pdf";
     const VIEW_MODE_TEXT = "text";
 
     export default {
-        name: "DocView",
+        name: "DocumentViewer",
         VIEW_MODE_PDF,
         VIEW_MODE_TEXT,
         props: {
@@ -138,7 +131,6 @@
                 loadingText: false,
                 textContent: "",
                 hasOcrText: false,
-                showModalForm: false,
                 showLoading: false,
                 message: "",
                 loadingNormalize: false,
@@ -149,10 +141,6 @@
                 },
                 isReprocessing: true,
             };
-        },
-        components: {
-            ModalReprocess,
-            ModalAlert,
         },
         methods: {
             getDocument() {
@@ -187,7 +175,6 @@
                     DocumentsServices.getOcrText(this.documentId)
                         .then((response) => {
                             if (response.error !== undefined) {
-                                this.modalAlertShow = true;
                                 this.loadingText = false;
                                 return;
                             }
@@ -223,16 +210,6 @@
             },
             reloadPage() {
                 location.reload();
-            },
-            openModal() {
-                this.showModalForm = true;
-                this.dataView.Id = parseInt(this.documentId);
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.showModalForm = false;
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             normalizeDoc() {
                 window.onbeforeunload = function () {
