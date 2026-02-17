@@ -1,5 +1,5 @@
 <template>
-    <modal-question
+    <ModalQuestion
         v-if="showModalQuestion"
         :dataQuiz="quizSelected"
     />
