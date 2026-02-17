@@ -1,4 +1,3 @@
-using Google.Api;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
@@ -42,7 +41,7 @@ namespace WoopiAiHub.Domain.Models
         /// </summary>
         private Card(int id, DateTime created) : base(id, created) { }
 
-        public void UpdateStepAndSatus(int stepId, int statusId)
+        public void UpdateStepAndStatus(int stepId, int statusId)
         {
             StepId = stepId;
             StatusId = statusId;

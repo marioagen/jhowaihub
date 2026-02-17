@@ -223,7 +223,10 @@ namespace WoopiAiHub.Repository
                     .Include(w => w.Documents)
                     .Include(w => w.Steps.Where(s => s.Cards.Any(c => c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
                         .ThenInclude(s => s.Cards.Where(c => c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
-                        .ThenInclude(s => s.AssignedUser)
+                        .ThenInclude(c => c.AssignedUser)
+                    .Include(w => w.Steps.Where(s => s.Cards.Any(c => c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
+                        .ThenInclude(s => s.Cards.Where(c => c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
+                        .ThenInclude(c => c.Status)
                 .AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
@@ -247,16 +250,18 @@ namespace WoopiAiHub.Repository
             var resultDto = result
                 .SelectMany(workflow =>
                     workflow.Steps.SelectMany(step =>
-                        step.Cards.Select(card => new ResponseWorkflowByDocumentDto
-                        {
-                            Id = workflow.Id,
-                            Name = workflow.Name,
-                            CardId = card.Id,
-                            DocumentId = card.DocumentId,
-                            AssignedUserEmail = card.AssignedUser?.Email ?? string.Empty
-                        })
+                        step.Cards.Select(card => new { Workflow = workflow, Card = card })
                     )
                 )
+                .Select(x => new ResponseWorkflowByDocumentDto
+                {
+                    Id = x.Workflow.Id,
+                    Name = x.Workflow.Name,
+                    CardId = x.Card.Id,
+                    DocumentId = x.Card.DocumentId,
+                    AssignedUserEmail = x.Card.AssignedUser?.Email ?? string.Empty,
+                    StatusName = x.Card.Status?.Name ?? string.Empty
+                })
                 .ToList();
 
             return resultDto;
@@ -325,7 +330,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Retrieves a workflow by its ID and includes only the necessaryrelated entities.
+        /// Retrieves a workflow by its ID and includes only the necessary related entities.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -340,6 +345,23 @@ namespace WoopiAiHub.Repository
                       .ThenInclude(s => s.StepTools)
                           .ThenInclude(st => st.Dependencies)
                  .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
+        }
+
+        /// <summary>
+        /// Retrieves a workflow with the specified identifier for analysis, including its associated steps.
+        /// </summary>
+        /// <remarks>The returned workflow includes its related steps for comprehensive analysis. Only
+        /// workflows that are enabled are considered.</remarks>
+        /// <param name="id">The unique identifier of the workflow to retrieve. Must be a positive integer.</param>
+        /// <returns>A <see cref="Workflow"/> object representing the workflow and its steps if a matching, enabled workflow is
+        /// found; otherwise, <see langword="null"/>.</returns>
+        public async Task<Workflow?> FindByIdForAnalyze(int id)
+        {
+            return await _context.Workflows
+                                 .AsSplitQuery()
+                                 .Include(w => w.Steps)
+                                 .FirstOrDefaultAsync(w => w.Id == id &&
+                                                           w.Enable.Equals(true));
         }
 
         /// <summary>
@@ -380,13 +402,13 @@ namespace WoopiAiHub.Repository
 
         /// <summary>
         /// Find phase 1 data by workflow id
+        /// Optimized query that only selects necessary fields (name and teams with id and name).
         /// </summary>
         /// <param name="id">Workflow id</param>
         /// <returns>Phase1Dto containing workflow name and associated teams</returns>
         public async Task<Phase1Dto> FindPhase1ById(int id)
         {
             var workflow = await _context.Workflows
-                .AsNoTracking()
                 .Where(w => w.Id == id && w.Enable)
                 .Select(w => new Phase1Dto
                 {
@@ -397,6 +419,7 @@ namespace WoopiAiHub.Repository
                         Name = t.Name,
                     }).ToList(),
                 })
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
             return workflow!;
         }

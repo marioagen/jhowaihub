@@ -1,5 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.DTOs.Request
 {

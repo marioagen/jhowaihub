@@ -5,8 +5,8 @@ on:
     branches:
       - 'develop'
       - 'release'
-    paths:
-      - 'front-end/**'
+    # paths:
+      # - 'front-end/**'
 
 jobs:
   build-image:

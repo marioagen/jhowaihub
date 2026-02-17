@@ -1,5 +1,10 @@
 <template>
-    <div class="doc-view-scroll" :class="documentView === 'both' ? 'col-md-6' : 'col-12'">
+    <div
+        class="doc-view-scroll"
+        :class="
+            documentView === 'both' ? 'col-md-6' : 'col-12'
+        "
+    >
         <div
             class="mb-2"
             style="margin-top: 12px !important"
@@ -102,7 +107,8 @@
                 v-else-if="
                     viewMode === $options.VIEW_MODE_TEXT
                 "
-            class="scroll-text">
+                class="scroll-text"
+            >
                 <div>
                     <strong class="form-label mb-3">
                         {{
@@ -160,10 +166,9 @@
             documentView: {
                 type: String,
                 required: true,
-            }
+            },
         },
         data() {
-
             return {
                 idAnalyzer: this.$route.params.documentId,
                 viewMode: VIEW_MODE_PDF,
@@ -242,14 +247,16 @@
                                 this.textContent =
                                     response.content;
                             } else {
-                                this.textContent =
-                                    this.$t("documents.ocrNotAvailable");
+                                this.textContent = this.$t(
+                                    "documents.ocrNotAvailable"
+                                );
                             }
                             this.loadingText = false;
                         })
                         .catch((error) => {
-                            this.textContent =
-                                this.$t("documents.ocrLoadError");
+                            this.textContent = this.$t(
+                                "documents.ocrLoadError"
+                            );
                             this.loadingText = false;
                         });
                 }
@@ -265,7 +272,9 @@
                     })
                     .catch((error) => {
                         LogService.showMessage(
-                            this.$t("documents.ocrFetchError")
+                            this.$t(
+                                "documents.ocrFetchError"
+                            )
                         );
                     });
             },
@@ -332,7 +341,7 @@
         font-weight: 900 !important;
     }
 
-    .scroll-text{
+    .scroll-text {
         overflow-y: auto;
         max-height: 65vh;
     }
@@ -361,47 +370,46 @@
         }
     }
 
-        .view-pdf object,
-        .view-pdf embed {
-            width: 100% !important;
-            height: 100% !important;
-            max-width: 100%;
-            max-height: 70vh;
-            display: block;
-        }
+    .view-pdf object,
+    .view-pdf embed {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
+        max-height: 70vh;
+        display: block;
+    }
 
+    .textarea-norm-full {
+        height: calc(100vh - 138px) !important;
+    }
 
-        .textarea-norm-full {
-            height: calc(100vh - 138px) !important;
-        }
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
 
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
+    .overlay-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        text-align: center;
+    }
 
-        .overlay-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
+    .loading-div {
+        border: 1px solid #0d6efd;
+        text-align: center;
+        cursor: pointer;
+    }
 
-        .loading-div {
-            border: 1px solid #0d6efd;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .reindex-button {
-            margin-left: 5%;
-        }
+    .reindex-button {
+        margin-left: 5%;
+    }
 </style>

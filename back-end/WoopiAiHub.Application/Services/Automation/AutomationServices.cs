@@ -243,12 +243,19 @@ namespace WoopiAiHub.Application.Services.Automation
             execution.UpdateStatusExecution(StatusExecution.Running);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
-            var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
+            try
+            {
+                var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
+                var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
 
-            var payload = await BuildPayloadWithDependenciesAsync(stepTool, enrichedDto, input, resolvedCardId, execution);
-
-            await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
+                var payload = await BuildPayloadWithDependenciesAsync(stepTool, enrichedDto, input, resolvedCardId, execution);
+                await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
+            }
+            catch
+            {
+                execution.UpdateStatusExecution(StatusExecution.Pending);
+                await _stepToolExecutionRepository.UpdateAsync(execution);
+            }
         }
 
         /// <summary>
@@ -450,7 +457,7 @@ namespace WoopiAiHub.Application.Services.Automation
                 return;
             }
 
-            card.UpdateStepAndSatus(nextStep.Id, nextStep.StatusId);
+            card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
             var updated = _cardRepository.Update(card);
 
             if (updated)

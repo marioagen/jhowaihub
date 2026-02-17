@@ -131,13 +131,30 @@ namespace WoopiAiHub.Application.Services
                 }
                 catch
                 {
-                    card.UpdateStepAndSatus(previousStepId, previousStatusId);
+                    card.UpdateStepAndStatus(previousStepId, previousStatusId);
                     _cardRepository.Update(card);
                     throw;
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Updates only the status of a card, keeping the same step. Does not trigger automation.
+        /// </summary>
+        /// <param name="updateCardStatusDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
+        {
+            var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
+                ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+
+            card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
+
+            var result = _cardRepository.Update(card);
+            return result;
         }
 
         /// <summary>
@@ -153,7 +170,13 @@ namespace WoopiAiHub.Application.Services
             var card = await FindCardWithRelationships(cardId);
             var verifyAnswer = await VerifyCanAnswer(card);
             var document = card.Document ?? throw new ArgumentException("Document not found for the card");
-            var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
+            if (card.Step == null)
+            {
+                throw new ArgumentException($"Step not found for card {cardId}");
+            }
+
+            var workflow = await _workflowRepository.FindByIdForAnalyze(card.Step.WorkflowId) ??
+                           throw new ArgumentException($"Workflow not found for card {cardId}. StepId: {card.StepId}, Step is null: false");
 
             var steps = BuildStepsFromWorkflow(workflow, card);
             var lastProcessedStepId = card.StepId.ToString();

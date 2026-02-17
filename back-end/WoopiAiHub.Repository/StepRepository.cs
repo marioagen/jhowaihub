@@ -58,6 +58,21 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Asynchronously retrieves a step by its unique identifier, including its associated tools.
+        /// </summary>
+        /// <remarks>The returned step includes its related tools loaded from the database. This method
+        /// performs a database query and may return null if no step with the specified identifier exists.</remarks>
+        /// <param name="id">The unique identifier of the step to retrieve.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the step with its associated
+        /// tools if found; otherwise, null.</returns>
+        public async Task<Step?> FindByIdWithTools(int id)
+        {
+            return await _context.Steps
+                .Include(s => s.StepTools)
+                .FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        /// <summary>
         /// Retrieves all steps associated with a specific workflow ID.
         /// </summary>
         /// <param name="ids"></param>
@@ -156,6 +171,7 @@ namespace WoopiAiHub.Repository
                                  allUsers == true
                                  || (c.AssignedUser != null && c.AssignedUser.Email == login)
                              )
+                             && c.StatusId != 6
                          )
                         .Select(c => new CardDto
                         {
