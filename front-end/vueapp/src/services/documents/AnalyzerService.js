@@ -25,4 +25,16 @@ export default {
                 };
             });
     },
+    getAnalyzeDocument(id) {
+        return api
+            .get("/Document/Analyze/" + id)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
 };
