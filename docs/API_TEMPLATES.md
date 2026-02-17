@@ -1,6 +1,7 @@
 # Documentação - Templates de API
 
 ## Índice
+
 1. [Visão Geral](#visão-geral)
 2. [Modelo de Dados](#modelo-de-dados)
 3. [CRUD de Templates](#crud-de-templates)
@@ -46,11 +47,11 @@ public class ApiTemplate
 
 - **Name**: Obrigatório, não pode ser vazio
 - **Method**: Obrigatório, deve ser um dos seguintes valores:
-  - `GET`
-  - `POST`
-  - `PUT`
-  - `DELETE`
-  - `PATCH`
+    - `GET`
+    - `POST`
+    - `PUT`
+    - `DELETE`
+    - `PATCH`
 - **Url**: Obrigatória, não pode ser vazia
 - **QueryTemplate, HeaderTemplate, BodyTemplate**: Opcionais
 
@@ -63,18 +64,20 @@ public class ApiTemplate
 **Endpoint**: `POST /api/ApiTemplate`
 
 **Request Body**:
+
 ```json
 {
-  "name": "Webhook Notificação",
-  "method": "POST",
-  "url": "https://api.exemplo.com/webhooks/notificar",
-  "queryTemplate": "{\"token\": \"{{token}}\"}",
-  "headerTemplate": "{\"Content-Type\": \"application/json\", \"Authorization\": \"Bearer {{auth_token}}\"}",
-  "bodyTemplate": "{\"message\": \"{{prompt}}\", \"data\": {{ocr}}}"
+    "name": "Webhook Notificação",
+    "method": "POST",
+    "url": "https://api.exemplo.com/webhooks/notificar",
+    "queryTemplate": "{\"token\": \"{{token}}\"}",
+    "headerTemplate": "{\"Content-Type\": \"application/json\", \"Authorization\": \"Bearer {{auth_token}}\"}",
+    "bodyTemplate": "{\"message\": \"{{prompt}}\", \"data\": {{ocr}}}"
 }
 ```
 
 **Response**: `200 OK`
+
 ```json
 true
 ```
@@ -82,33 +85,38 @@ true
 ### 2. Listar Templates
 
 #### Listagem Simples
+
 **Endpoint**: `GET /api/ApiTemplate`
 
 **Query Parameters**:
+
 - `input` (opcional): Filtro por nome do template
 - `method` (opcional): Filtro por método HTTP
 - `orderBy` (opcional): Ordenação (`created asc`, `created desc`, `name asc`, `name desc`)
 
 **Response**: `200 OK`
+
 ```json
 [
-  {
-    "id": 1,
-    "created": "2024-01-15T10:30:00",
-    "name": "Webhook Notificação",
-    "method": "POST",
-    "url": "https://api.exemplo.com/webhooks/notificar",
-    "queryTemplate": "{\"token\": \"{{token}}\"}",
-    "headerTemplate": "{\"Content-Type\": \"application/json\"}",
-    "bodyTemplate": "{\"message\": \"{{prompt}}\"}"
-  }
+    {
+        "id": 1,
+        "created": "2024-01-15T10:30:00",
+        "name": "Webhook Notificação",
+        "method": "POST",
+        "url": "https://api.exemplo.com/webhooks/notificar",
+        "queryTemplate": "{\"token\": \"{{token}}\"}",
+        "headerTemplate": "{\"Content-Type\": \"application/json\"}",
+        "bodyTemplate": "{\"message\": \"{{prompt}}\"}"
+    }
 ]
 ```
 
 #### Listagem Paginada
+
 **Endpoint**: `GET /api/ApiTemplate/paged`
 
 **Query Parameters**:
+
 - `page`: Número da página (obrigatório, > 0)
 - `pageSize`: Tamanho da página (padrão: 10)
 - `input` (opcional): Filtro por nome
@@ -116,6 +124,7 @@ true
 - `orderBy` (opcional): Ordenação
 
 **Response**: `200 OK`
+
 ```json
 {
   "items": [...],
@@ -131,16 +140,17 @@ true
 **Endpoint**: `GET /api/ApiTemplate/{id}`
 
 **Response**: `200 OK`
+
 ```json
 {
-  "id": 1,
-  "created": "2024-01-15T10:30:00",
-  "name": "Webhook Notificação",
-  "method": "POST",
-  "url": "https://api.exemplo.com/webhooks/notificar",
-  "queryTemplate": null,
-  "headerTemplate": "{\"Content-Type\": \"application/json\"}",
-  "bodyTemplate": "{\"message\": \"{{prompt}}\"}"
+    "id": 1,
+    "created": "2024-01-15T10:30:00",
+    "name": "Webhook Notificação",
+    "method": "POST",
+    "url": "https://api.exemplo.com/webhooks/notificar",
+    "queryTemplate": null,
+    "headerTemplate": "{\"Content-Type\": \"application/json\"}",
+    "bodyTemplate": "{\"message\": \"{{prompt}}\"}"
 }
 ```
 
@@ -149,19 +159,21 @@ true
 **Endpoint**: `PUT /api/ApiTemplate`
 
 **Request Body**:
+
 ```json
 {
-  "id": 1,
-  "name": "Webhook Notificação Atualizado",
-  "method": "POST",
-  "url": "https://api.exemplo.com/webhooks/v2/notificar",
-  "queryTemplate": null,
-  "headerTemplate": "{\"Content-Type\": \"application/json\"}",
-  "bodyTemplate": "{\"message\": \"{{prompt}}\", \"timestamp\": \"{{timestamp}}\"}"
+    "id": 1,
+    "name": "Webhook Notificação Atualizado",
+    "method": "POST",
+    "url": "https://api.exemplo.com/webhooks/v2/notificar",
+    "queryTemplate": null,
+    "headerTemplate": "{\"Content-Type\": \"application/json\"}",
+    "bodyTemplate": "{\"message\": \"{{prompt}}\", \"timestamp\": \"{{timestamp}}\"}"
 }
 ```
 
 **Response**: `200 OK`
+
 ```json
 true
 ```
@@ -171,6 +183,7 @@ true
 **Endpoint**: `DELETE /api/ApiTemplate/{id}`
 
 **Response**: `200 OK`
+
 ```json
 true
 ```
@@ -184,8 +197,8 @@ true
 1. **Selecionar o Tool Type**: `API`
 2. **Configurar o StepTool**: Associar um template de API existente
 3. **Definir Parâmetros**: Os parâmetros são armazenados criptografados e incluem:
-   - `TemplateId`: ID do template a ser usado
-   - Configurações específicas da requisição
+    - `TemplateId`: ID do template a ser usado
+    - Configurações específicas da requisição
 
 ### Estrutura de Parâmetros no StepTool
 
@@ -193,16 +206,16 @@ Os parâmetros do StepTool são salvos criptografados no formato:
 
 ```json
 {
-  "templateId": 1,
-  "url": "https://api.exemplo.com/endpoint",
-  "method": "POST",
-  "query": {
-    "param1": "value1"
-  },
-  "headers": {
-    "Authorization": "Bearer token"
-  },
-  "body": "{\"data\": \"{{ocr}}\", \"prompt\": \"{{prompt}}\"}"
+    "templateId": 1,
+    "url": "https://api.exemplo.com/endpoint",
+    "method": "POST",
+    "query": {
+        "param1": "value1"
+    },
+    "headers": {
+        "Authorization": "Bearer token"
+    },
+    "body": "{\"data\": \"{{ocr}}\", \"prompt\": \"{{prompt}}\"}"
 }
 ```
 
@@ -273,19 +286,20 @@ public async Task<ExecutionMessageDto> BuildPayload(
 
 1. **Busca o StepTool**: Recupera as configurações do banco de dados
 2. **Validações**:
-   - Verifica se o tool type é `API`
-   - Garante que há parâmetros configurados
+    - Verifica se o tool type é `API`
+    - Garante que há parâmetros configurados
 3. **Descriptografa Parâmetros**: Usa `IEncryptionService` para descriptografar
 4. **Busca Template**: Recupera o template de API pelo ID
 5. **Processa Body**: Substitui placeholders pelos valores reais dos outputs
 6. **Monta ApiRequestDto** com:
-   - Dados do template
-   - Metadados da automação (CardId, StepToolId)
-   - Informações de contexto (Email, Tenant)
-   - ID da execução
-   - Fila de resposta
+    - Dados do template
+    - Metadados da automação (CardId, StepToolId)
+    - Informações de contexto (Email, Tenant)
+    - ID da execução
+    - Fila de resposta
 
 **Output**: `ExecutionMessageDto` contendo:
+
 - `Queue`: Nome da fila de destino (`ApiRequestQueue`)
 - `Message`: Objeto `ApiRequestDto` serializado
 
@@ -297,7 +311,7 @@ Processa o body do template substituindo placeholders:
 
 ```csharp
 private string ConvertOutputsToJson(
-    ICollection<StepToolOutput> outputs, 
+    ICollection<StepToolOutput> outputs,
     string inputValue)
 ```
 
@@ -305,30 +319,32 @@ private string ConvertOutputsToJson(
 
 1. **Itera sobre outputs anteriores** do workflow
 2. **Identifica o tipo de ferramenta**:
-   - `OCR` → Placeholder `{{ocr}}`
-   - `Embeddings` → Placeholder `{{embeddings}}`
-   - `Prompt` → Placeholder `{{prompt}}`
+    - `OCR` → Placeholder `{{ocr}}`
+    - `Embeddings` → Placeholder `{{embeddings}}`
+    - `Prompt` → Placeholder `{{prompt}}`
 3. **Extrai o valor**:
-   - Para OCR e Embeddings: Extrai textos do JSON `DocumentEmbeddings`
-   - Para Prompt: Usa o valor direto
+    - Para OCR e Embeddings: Extrai textos do JSON `DocumentEmbeddings`
+    - Para Prompt: Usa o valor direto
 4. **Substitui no template**: Replace case-insensitive
 5. **Serializa JSON**: Garante formato válido se necessário
 
 **Exemplo**:
 
 Template:
+
 ```json
 {
-  "extractedText": "{{ocr}}",
-  "analysis": "{{prompt}}"
+    "extractedText": "{{ocr}}",
+    "analysis": "{{prompt}}"
 }
 ```
 
 Após substituição:
+
 ```json
 {
-  "extractedText": "Texto extraído do documento via OCR",
-  "analysis": "Análise gerada pelo modelo de linguagem"
+    "extractedText": "Texto extraído do documento via OCR",
+    "analysis": "Análise gerada pelo modelo de linguagem"
 }
 ```
 
@@ -356,6 +372,7 @@ public record class ApiRequestDto
 ```
 
 **Campos**:
+
 - **TemplateId/TemplateName**: Identificação do template usado
 - **Url/Method**: Endpoint e método HTTP
 - **Query/Headers/Body**: Dados da requisição
@@ -370,6 +387,7 @@ public record class ApiRequestDto
 A mensagem é enviada para a fila configurada em `MessageQueues.ApiRequestQueue`.
 
 **Configuração**:
+
 ```csharp
 public class MessageQueues
 {
@@ -381,6 +399,7 @@ public class MessageQueues
 ### 5. Processamento Externo
 
 Um worker externo (não implementado neste projeto) é responsável por:
+
 1. Consumir mensagens da `ApiRequestQueue`
 2. Executar a requisição HTTP real
 3. Enviar a resposta para `ApiRequestQueueResponse`
@@ -397,11 +416,11 @@ public class ApiOutputConsumer : BaseConsumer
 
 1. **Escuta a fila**: `ApiRequestQueueResponse`
 2. **Para cada mensagem**:
-   - Cria um scope de serviços
-   - Chama `IApiOutputServices.ProcessMessage`
-   - Registra uso diário (métrica)
-   - Continua a execução do workflow
-   - Trata exceções e loga erros
+    - Cria um scope de serviços
+    - Chama `IApiOutputServices.ProcessMessage`
+    - Registra uso diário (métrica)
+    - Continua a execução do workflow
+    - Trata exceções e loga erros
 
 ### 7. Processamento de Resposta (ApiOutputServices)
 
@@ -412,6 +431,7 @@ public async Task<AutomationServicesDto> ProcessMessage(ApiOutputDto outputDto)
 ```
 
 **Estrutura da Resposta (ApiOutputDto)**:
+
 ```csharp
 public record class ApiOutputDto
 {
@@ -427,86 +447,91 @@ public record class ApiOutputDto
 **Processo**:
 
 1. **Busca a Execução**:
-   ```csharp
-   var execution = await _stepToolExecutionRepository
-       .FindByIdAsync(outputDto.ExecutionId);
-   ```
+
+    ```csharp
+    var execution = await _stepToolExecutionRepository
+        .FindByIdAsync(outputDto.ExecutionId);
+    ```
 
 2. **Monta Conteúdo do Output**:
-   ```csharp
-   var content = JsonSerializer.Serialize(new {
-       outputDto.TemplateName,
-       outputDto.StatusCode,
-       outputDto.Content
-   });
-   ```
+
+    ```csharp
+    var content = JsonSerializer.Serialize(new {
+        outputDto.TemplateName,
+        outputDto.StatusCode,
+        outputDto.Content
+    });
+    ```
 
 3. **Cria StepToolOutput**:
-   ```csharp
-   var stepToolOutput = new StepToolOutput(
-       0,
-       DateTime.Now,
-       execution.StepToolId,
-       execution.CardId,
-       content
-   );
-   await _stepToolOutputRepository.CreateAsync(stepToolOutput);
-   ```
+
+    ```csharp
+    var stepToolOutput = new StepToolOutput(
+        0,
+        DateTime.Now,
+        execution.StepToolId,
+        execution.CardId,
+        content
+    );
+    await _stepToolOutputRepository.CreateAsync(stepToolOutput);
+    ```
 
 4. **Registra Histórico do Documento**:
-   ```csharp
-   var documentHistory = new DocumentHistory(
-       execution.Card.DocumentId,
-       "API",
-       content,
-       0,
-       DateTime.Now
-   );
-   _documentHistoryRepository.Create(documentHistory);
-   ```
+
+    ```csharp
+    var documentHistory = new DocumentHistory(
+        execution.Card.DocumentId,
+        "API",
+        content,
+        0,
+        DateTime.Now
+    );
+    _documentHistoryRepository.Create(documentHistory);
+    ```
 
 5. **Atualiza Status da Execução**:
-   ```csharp
-   private async Task UpdateExecutionAsync(
-       StepToolExecution execution, 
-       string email)
-   {
-       // Calcula progresso
-       var count = await _stepToolExecutionRepository
-           .ExecutionsByStepIdCountAsync(
-               execution.StepTool.StepId, 
-               execution.CardId
-           );
-       var percent = (count / execution.StepTool.Order) * 100;
 
-       // Atualiza status
-       execution.UpdateStatusExecution(StatusExecution.Ready);
-       await _stepToolExecutionRepository.UpdateAsync(execution);
+    ```csharp
+    private async Task UpdateExecutionAsync(
+        StepToolExecution execution,
+        string email)
+    {
+        // Calcula progresso
+        var count = await _stepToolExecutionRepository
+            .ExecutionsByStepIdCountAsync(
+                execution.StepTool.StepId,
+                execution.CardId
+            );
+        var percent = (count / execution.StepTool.Order) * 100;
 
-       // Notifica progresso via Hub
-       var tool = await _workflowRepository
-           .FindToolByStepToolId(execution.StepToolId);
-       await _hubNotifier.CardProgessAsync(
-           email, 
-           execution.CardId, 
-           percent, 
-           execution.StepTool.StepId, 
-           tool?.Name ?? string.Empty
-       );
-   }
-   ```
+        // Atualiza status
+        execution.UpdateStatusExecution(StatusExecution.Ready);
+        await _stepToolExecutionRepository.UpdateAsync(execution);
+
+        // Notifica progresso via Hub
+        var tool = await _workflowRepository
+            .FindToolByStepToolId(execution.StepToolId);
+        await _hubNotifier.CardProgessAsync(
+            email,
+            execution.CardId,
+            percent,
+            execution.StepTool.StepId,
+            tool?.Name ?? string.Empty
+        );
+    }
+    ```
 
 6. **Retorna DTO para Continuar Workflow**:
-   ```csharp
-   return new AutomationServicesDto(
-       execution.StepToolId,
-       execution.CardId,
-       outputDto.Tenant,
-       outputDto.Email,
-       execution.Card.Document.ReferenceFile,
-       0
-   );
-   ```
+    ```csharp
+    return new AutomationServicesDto(
+        execution.StepToolId,
+        execution.CardId,
+        outputDto.Tenant,
+        outputDto.Email,
+        execution.Card.Document.ReferenceFile,
+        0
+    );
+    ```
 
 ---
 
@@ -584,6 +609,7 @@ Content-Type: application/json
 **2. Configurar Workflow**
 
 Criar um workflow com os seguintes steps:
+
 - **Step 1**: OCR Tool (extrai texto do documento)
 - **Step 2**: API Tool (envia texto extraído)
 
@@ -592,80 +618,81 @@ Criar um workflow com os seguintes steps:
 Quando um documento é processado:
 
 1. **OCR Tool executa** → Gera output:
-   ```json
-   {
-     "DocumentEmbeddings": [
-       {"Text": "Linha 1 do documento"},
-       {"Text": "Linha 2 do documento"}
-     ]
-   }
-   ```
+
+    ```json
+    {
+        "DocumentEmbeddings": [{ "Text": "Linha 1 do documento" }, { "Text": "Linha 2 do documento" }]
+    }
+    ```
 
 2. **API Tool inicia** → `ApiHandler.BuildPayload`:
-   - Busca template "Enviar Texto Extraído"
-   - Substitui `{{ocr}}` por: `"Linha 1 do documento\n\nLinha 2 do documento"`
-   - Gera `ApiRequestDto`:
-     ```json
-     {
-       "templateId": 1,
-       "templateName": "Enviar Texto Extraído",
-       "url": "https://api.external.com/process",
-       "method": "POST",
-       "headers": {
-         "Content-Type": "application/json",
-         "X-Api-Key": "secret123"
-       },
-       "body": "{\"extractedText\": \"Linha 1 do documento\\n\\nLinha 2 do documento\", \"metadata\": {\"source\": \"pdf\"}}",
-       "executionId": 123,
-       "responseQueue": "api-response-queue",
-       "tenant": "client-tenant",
-       "email": "user@example.com"
-     }
-     ```
+    - Busca template "Enviar Texto Extraído"
+    - Substitui `{{ocr}}` por: `"Linha 1 do documento\n\nLinha 2 do documento"`
+    - Gera `ApiRequestDto`:
+        ```json
+        {
+            "templateId": 1,
+            "templateName": "Enviar Texto Extraído",
+            "url": "https://api.external.com/process",
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+                "X-Api-Key": "secret123"
+            },
+            "body": "{\"extractedText\": \"Linha 1 do documento\\n\\nLinha 2 do documento\", \"metadata\": {\"source\": \"pdf\"}}",
+            "executionId": 123,
+            "responseQueue": "api-response-queue",
+            "tenant": "client-tenant",
+            "email": "user@example.com"
+        }
+        ```
 
 3. **Mensagem enviada para RabbitMQ** → `ApiRequestQueue`
 
 4. **Worker externo consome e executa**:
-   ```http
-   POST https://api.external.com/process
-   Content-Type: application/json
-   X-Api-Key: secret123
 
-   {
-     "extractedText": "Linha 1 do documento\n\nLinha 2 do documento",
-     "metadata": {
-       "source": "pdf"
-     }
-   }
-   ```
+    ```http
+    POST https://api.external.com/process
+    Content-Type: application/json
+    X-Api-Key: secret123
+
+    {
+      "extractedText": "Linha 1 do documento\n\nLinha 2 do documento",
+      "metadata": {
+        "source": "pdf"
+      }
+    }
+    ```
 
 5. **Worker recebe resposta**:
-   ```json
-   {
-     "status": "success",
-     "processed": true,
-     "id": "abc123"
-   }
-   ```
+
+    ```json
+    {
+        "status": "success",
+        "processed": true,
+        "id": "abc123"
+    }
+    ```
 
 6. **Worker envia para fila de resposta**:
-   ```json
-   {
-     "templateName": "Enviar Texto Extraído",
-     "tenant": "client-tenant",
-     "email": "user@example.com",
-     "executionId": 123,
-     "statusCode": 200,
-     "content": "{\"status\": \"success\", \"processed\": true, \"id\": \"abc123\"}"
-   }
-   ```
+
+    ```json
+    {
+        "templateName": "Enviar Texto Extraído",
+        "tenant": "client-tenant",
+        "email": "user@example.com",
+        "executionId": 123,
+        "statusCode": 200,
+        "content": "{\"status\": \"success\", \"processed\": true, \"id\": \"abc123\"}"
+    }
+    ```
 
 7. **ApiOutputConsumer processa**:
-   - Salva output no banco
-   - Registra histórico
-   - Atualiza execução para "Ready"
-   - Notifica usuário via Hub
-   - Continua workflow (se houver próximo step)
+    - Salva output no banco
+    - Registra histórico
+    - Atualiza execução para "Ready"
+    - Notifica usuário via Hub
+    - Continua workflow (se houver próximo step)
 
 ---
 
@@ -674,17 +701,19 @@ Quando um documento é processado:
 ### Exemplo 1: Webhook Simples (GET)
 
 **Template**:
+
 ```json
 {
-  "name": "Verificar Status",
-  "method": "GET",
-  "url": "https://api.status.com/check",
-  "queryTemplate": "{\"service\": \"processing\"}",
-  "headerTemplate": "{\"Authorization\": \"Bearer token123\"}"
+    "name": "Verificar Status",
+    "method": "GET",
+    "url": "https://api.status.com/check",
+    "queryTemplate": "{\"service\": \"processing\"}",
+    "headerTemplate": "{\"Authorization\": \"Bearer token123\"}"
 }
 ```
 
 **Requisição Gerada**:
+
 ```http
 GET https://api.status.com/check?service=processing
 Authorization: Bearer token123
@@ -693,22 +722,25 @@ Authorization: Bearer token123
 ### Exemplo 2: POST com Dados de OCR e Prompt
 
 **Template**:
+
 ```json
 {
-  "name": "Análise Completa",
-  "method": "POST",
-  "url": "https://api.analytics.com/analyze",
-  "headerTemplate": "{\"Content-Type\": \"application/json\"}",
-  "bodyTemplate": "{\"document\": \"{{ocr}}\", \"analysis\": \"{{prompt}}\", \"timestamp\": \"2024-01-15T10:00:00Z\"}"
+    "name": "Análise Completa",
+    "method": "POST",
+    "url": "https://api.analytics.com/analyze",
+    "headerTemplate": "{\"Content-Type\": \"application/json\"}",
+    "bodyTemplate": "{\"document\": \"{{ocr}}\", \"analysis\": \"{{prompt}}\", \"timestamp\": \"2024-01-15T10:00:00Z\"}"
 }
 ```
 
 **Workflow**:
+
 1. OCR → Extrai texto
 2. Prompt → Analisa texto
 3. API → Envia ambos para sistema externo
 
 **Requisição Gerada**:
+
 ```http
 POST https://api.analytics.com/analyze
 Content-Type: application/json
@@ -723,17 +755,19 @@ Content-Type: application/json
 ### Exemplo 3: PUT para Atualizar Recurso
 
 **Template**:
+
 ```json
 {
-  "name": "Atualizar Registro",
-  "method": "PUT",
-  "url": "https://api.crm.com/contacts/123",
-  "headerTemplate": "{\"Content-Type\": \"application/json\", \"X-Api-Key\": \"key456\"}",
-  "bodyTemplate": "{\"notes\": \"{{prompt}}\", \"lastUpdate\": \"2024-01-15\"}"
+    "name": "Atualizar Registro",
+    "method": "PUT",
+    "url": "https://api.crm.com/contacts/123",
+    "headerTemplate": "{\"Content-Type\": \"application/json\", \"X-Api-Key\": \"key456\"}",
+    "bodyTemplate": "{\"notes\": \"{{prompt}}\", \"lastUpdate\": \"2024-01-15\"}"
 }
 ```
 
 **Requisição Gerada**:
+
 ```http
 PUT https://api.crm.com/contacts/123
 Content-Type: application/json
@@ -748,16 +782,18 @@ X-Api-Key: key456
 ### Exemplo 4: DELETE Simples
 
 **Template**:
+
 ```json
 {
-  "name": "Remover Cache",
-  "method": "DELETE",
-  "url": "https://api.cache.com/entries/temp",
-  "headerTemplate": "{\"Authorization\": \"Bearer token789\"}"
+    "name": "Remover Cache",
+    "method": "DELETE",
+    "url": "https://api.cache.com/entries/temp",
+    "headerTemplate": "{\"Authorization\": \"Bearer token789\"}"
 }
 ```
 
 **Requisição Gerada**:
+
 ```http
 DELETE https://api.cache.com/entries/temp
 Authorization: Bearer token789
@@ -770,62 +806,66 @@ Authorization: Bearer token789
 ### Possíveis Erros
 
 1. **Template não encontrado**:
-   ```json
-   {
-     "errorCode": "NotFound",
-     "message": "Template not found"
-   }
-   ```
+
+    ```json
+    {
+        "errorCode": "NotFound",
+        "message": "Template not found"
+    }
+    ```
 
 2. **Tool type inválido**:
-   ```json
-   {
-     "errorCode": "InvalidValue",
-     "message": "Invalid tool type for API handler"
-   }
-   ```
+
+    ```json
+    {
+        "errorCode": "InvalidValue",
+        "message": "Invalid tool type for API handler"
+    }
+    ```
 
 3. **Parâmetros não configurados**:
-   ```json
-   {
-     "errorCode": "NotFound",
-     "message": "No API was found configured for the specified step tool."
-   }
-   ```
+
+    ```json
+    {
+        "errorCode": "NotFound",
+        "message": "No API was found configured for the specified step tool."
+    }
+    ```
 
 4. **ExecutionId não definido**:
-   ```json
-   {
-     "errorCode": "InvalidValue",
-     "message": "ExecutionId not defined"
-   }
-   ```
+
+    ```json
+    {
+        "errorCode": "InvalidValue",
+        "message": "ExecutionId not defined"
+    }
+    ```
 
 5. **Erro no processamento**:
-   - Logs são registrados via `ILogger`
-   - Exceção não interrompe outros consumidores
-   - Mensagem pode ser reprocessada (dependendo da configuração do RabbitMQ)
+    - Logs são registrados via `ILogger`
+    - Exceção não interrompe outros consumidores
+    - Mensagem pode ser reprocessada (dependendo da configuração do RabbitMQ)
 
 ---
 
 ## Considerações de Segurança
 
-1. **Criptografia de Parâmetros**: 
-   - Parâmetros sensíveis são criptografados usando `IEncryptionService`
-   - Descriptografia ocorre apenas durante execução
+1. **Criptografia de Parâmetros**:
+    - Parâmetros sensíveis são criptografados usando `IEncryptionService`
+    - Descriptografia ocorre apenas durante execução
 
 2. **Autenticação**:
-   - Todos os endpoints requerem autenticação JWT
-   - Header: `Authorization: Bearer {token}`
+    - Todos os endpoints requerem autenticação JWT
+    - Header: `Authorization: Bearer {token}`
 
 3. **Isolamento por Tenant**:
-   - Cada requisição carrega informação de tenant
-   - Garantia de isolamento de dados
+    - Cada requisição carrega informação de tenant
+    - Garantia de isolamento de dados
 
 4. **Validação de Inputs**:
-   - Validação de método HTTP
-   - Validação de campos obrigatórios
-   - Proteção contra injeção JSON
+    - Validação de método HTTP
+    - Validação de campos obrigatórios
+    - Proteção contra injeção JSON
 
 ---
 
@@ -834,17 +874,18 @@ Authorization: Bearer token789
 ### Métricas Registradas
 
 1. **Uso Diário**:
-   ```csharp
-   await usageDailyServices.AddByValuesAsync(
-       MetricNames.Automation, 
-       message.Email, 
-       1
-   );
-   ```
+
+    ```csharp
+    await usageDailyServices.AddByValuesAsync(
+        MetricNames.Automation,
+        message.Email,
+        1
+    );
+    ```
 
 2. **Progresso de Cards**:
-   - Notificação em tempo real via SignalR Hub
-   - Percentual calculado baseado em ferramentas completadas
+    - Notificação em tempo real via SignalR Hub
+    - Percentual calculado baseado em ferramentas completadas
 
 ### Logs
 
@@ -862,10 +903,10 @@ Configurar no `appsettings.json`:
 
 ```json
 {
-  "MessageQueues": {
-    "ApiRequestQueue": "api-request-queue",
-    "ApiRequestQueueResponse": "api-response-queue"
-  }
+    "MessageQueues": {
+        "ApiRequestQueue": "api-request-queue",
+        "ApiRequestQueueResponse": "api-response-queue"
+    }
 }
 ```
 
@@ -906,10 +947,10 @@ public async Task BuildPayload_Should_Replace_Ocr_Placeholder()
             Value = "{\"DocumentEmbeddings\":[{\"Text\":\"Test\"}]}"
         }
     };
-    
+
     // Act
     var result = await _apiHandler.BuildPayload(automationDto, null, outputs, execution);
-    
+
     // Assert
     Assert.Contains("Test", result.Message.Body);
 }

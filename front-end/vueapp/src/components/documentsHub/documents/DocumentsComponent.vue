@@ -1,20 +1,26 @@
 <template>
     <div class="mt-3 mb-3">
         <div class="d-flex justify-content-end align-items-center mb-3">
-            <button class="btn btn-primary btn-sm"
-                    @click="redirectToNewUpload">
-                <LucideIcon icon="Plus"
-                            :size="17" />
+            <button
+                class="btn btn-primary btn-sm"
+                @click="redirectToNewUpload"
+            >
+                <LucideIcon
+                    icon="Plus"
+                    :size="17"
+                    class="me-2"
+                />
                 {{ $t("documents.createBtn") }}
             </button>
         </div>
         <div class="card mb-3">
             <div class="card-body">
-                <DocumentFilters :workflowsList="workflowsList"
-                                 @filter="filterData"
-                                 ref="DocumentFilters"
-                                 :statusList="statusList"
- />
+                <DocumentFilters
+                    :workflowsList="workflowsList"
+                    @filter="filterData"
+                    ref="DocumentFilters"
+                    :statusList="statusList"
+                />
             </div>
         </div>
     </div>
@@ -25,7 +31,7 @@
     import DocumentFilters from "@/components/documentsHub/documents/filters/DocumentFilters.vue";
     import DocumentsTable from "@/components/documentsHub/documents/tables/DocumentsTable.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
-    import StatusService from '@/services/status/StatusService';
+    import StatusService from "@/services/status/StatusService";
 
     export default {
         name: "DocumentsPage",
@@ -33,6 +39,7 @@
             return {
                 teamsList: [],
                 workflowsList: [],
+                statusList: [],
             };
         },
         components: {
@@ -62,56 +69,42 @@
                 this.reloadData();
             },
             getWorkflows() {
-                var email =
-                    this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email).then(
-                    (response) => {
-                        if (response.error !== undefined) {
-                            return this.$notify({
-                                title: "workflows.title",
-                                message: "workflows.error",
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                        }
-                        this.workflowsList = response;
+                var email = this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email).then((response) => {
+                    if (response.error !== undefined) {
+                        return this.$notify({
+                            title: "workflows.title",
+                            message: "workflows.error",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
                     }
-                );
+                    this.workflowsList = response;
+                });
             },
             async getStatuses() {
+                console.log("getStatuses");
                 const response = await StatusService.getStatus();
                 if (response?.error === undefined && Array.isArray(response)) {
                     this.statusList = response;
+                    console.log("statusList", this.statusList);
                 }
             },
         },
         computed: {
             keyMongoAccess() {
-                return this.$store.state.userProfile
-                    .keyMongoAccess;
+                return this.$store.state.userProfile.keyMongoAccess;
             },
         },
         async created() {
-            GlobalEventService.on(
-                "all-uploads-complete",
-                this.reloadData
-            );
-            GlobalEventService.on(
-                "refresh-once",
-                this.reloadData
-            );
+            GlobalEventService.on("all-uploads-complete", this.reloadData);
+            GlobalEventService.on("refresh-once", this.reloadData);
             this.getWorkflows();
             await this.getStatuses();
         },
         beforeUnmount() {
-            GlobalEventService.off(
-                "all-uploads-complete",
-                this.reloadData
-            );
-            GlobalEventService.off(
-                "refresh-once",
-                this.reloadData
-            );
+            GlobalEventService.off("all-uploads-complete", this.reloadData);
+            GlobalEventService.off("refresh-once", this.reloadData);
         },
     };
 </script>

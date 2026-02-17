@@ -4,9 +4,7 @@
         v-if="isLoading"
     >
         <div class="container mb-5">
-            <div
-                class="row justify-content-md-center full-height"
-            >
+            <div class="row justify-content-md-center full-height">
                 <div class="col-md-auto">
                     <div class="div-center">
                         <div>
@@ -48,19 +46,11 @@
                     <div class="col-10">
                         <div>
                             <h5 class="mb-1">
-                                {{
-                                    $t(
-                                        "documents.upload.title"
-                                    )
-                                }}
+                                {{ $t("documents.upload.title") }}
                             </h5>
                             <p>
                                 <small class="text-muted">
-                                    {{
-                                        $t(
-                                            "documents.upload.subtitle"
-                                        )
-                                    }}
+                                    {{ $t("documents.upload.subtitle") }}
                                 </small>
                             </p>
                         </div>
@@ -74,37 +64,17 @@
                                 @submit.prevent="save"
                             >
                                 <h5 class="mb-4">
-                                    {{
-                                        $t(
-                                            "documents.upload.cardTitle"
-                                        )
-                                    }}
+                                    {{ $t("documents.upload.cardTitle") }}
                                 </h5>
-                                <div
-                                    class="col-lg-12 col-md-12 col-sm-12 mb-3"
-                                >
-                                    <label
-                                        class="label-container mb-2"
-                                    >
-                                        {{
-                                            $t(
-                                                "documents.upload.dropZone"
-                                            )
-                                        }}
-                                        <span
-                                            class="clear-button"
-                                        >
+                                <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
+                                    <label class="label-container mb-2">
+                                        {{ $t("documents.upload.dropZone") }}
+                                        <span class="clear-button">
                                             <img
                                                 src="@/assets/img/icon-dropzone-remove-all.svg"
                                                 alt="Remove All"
-                                                :title="
-                                                    $t(
-                                                        'documents.upload.removeAllDropzone'
-                                                    )
-                                                "
-                                                @click="
-                                                    confirmationDialog()
-                                                "
+                                                :title="$t('documents.upload.removeAllDropzone')"
+                                                @click="confirmationDialog()"
                                             />
                                         </span>
                                     </label>
@@ -120,28 +90,18 @@
                                         class="form-label"
                                         for="descId"
                                     >
-                                        {{
-                                            $t(
-                                                "documents.descriptionDocumentNote"
-                                            )
-                                        }}
+                                        {{ $t("documents.descriptionDocumentNote") }}
                                     </label>
                                     <textarea
                                         rows="5"
                                         id="descId"
                                         v-validate
                                         name="text"
-                                        v-model="
-                                            form.description
-                                        "
+                                        v-model="form.description"
                                         required
                                         :class="{
                                             'form-control': true,
-                                            'red-warning':
-                                                form
-                                                    .description
-                                                    .length >
-                                                250,
+                                            'red-warning': form.description.length > 250,
                                         }"
                                     >
                                 ></textarea
@@ -152,128 +112,65 @@
                                         <a
                                             :class="[
                                                 'char-counter',
-                                                form
-                                                    .description
-                                                    .length <=
-                                                250
+                                                form.description.length <= 250
                                                     ? 'char-normal'
                                                     : 'char-error',
                                             ]"
                                         >
+                                            {{ 250 - form.description.length }}
                                             {{
-                                                250 -
-                                                form
-                                                    .description
-                                                    .length
-                                            }}
-                                            {{
-                                                250 -
-                                                    form
-                                                        .description
-                                                        .length ===
-                                                1
-                                                    ? $t(
-                                                          "common.character"
-                                                      )
-                                                    : $t(
-                                                          "common.characters"
-                                                      )
+                                                250 - form.description.length === 1
+                                                    ? $t("common.character")
+                                                    : $t("common.characters")
                                             }}
                                         </a>
                                         <a
-                                            v-if="
-                                                form
-                                                    .description
-                                                    .length >
-                                                250
-                                            "
+                                            v-if="form.description.length > 250"
                                             class="char-counter char-error exceedDesc"
                                         >
-                                            {{
-                                                $t(
-                                                    "documents.descriptionExceeded"
-                                                )
-                                            }}
+                                            {{ $t("documents.descriptionExceeded") }}
                                         </a>
                                     </div>
                                 </div>
                                 <div
                                     class="mb-3 team-selector-container rounded p-3"
                                     :class="{
-                                        'is-invalid':
-                                            hasError,
-                                        'is-valid':
-                                            !hasError,
+                                        'is-invalid': hasError,
+                                        'is-valid': !hasError,
                                     }"
                                 >
                                     <div
                                         class="d-flex justify-content-between align-items-center mb-1"
                                     >
-                                        <div
-                                            class="d-flex align-items-center mb-1"
-                                        >
+                                        <div class="d-flex align-items-center mb-1">
                                             <LucideIcon
                                                 icon="Building"
                                                 class="icon-blue"
                                             />
-                                            <label
-                                                class="form-label mb-0 ms-2"
-                                            >
-                                                {{
-                                                    $t(
-                                                        "documents.upload.linkWorkflow"
-                                                    )
-                                                }}
+                                            <label class="form-label mb-0 ms-2">
+                                                {{ $t("documents.upload.linkWorkflow") }}
                                             </label>
                                         </div>
-                                        <span
-                                            class="selected-count"
-                                        >
-                                            {{
-                                                selectedWorkflows.length
-                                            }}
-                                            {{
-                                                $t(
-                                                    "common.selected"
-                                                )
-                                            }}
+                                        <span class="selected-count">
+                                            {{ selectedWorkflows.length }}
+                                            {{ $t("common.selected") }}
                                         </span>
                                     </div>
-                                    <div
-                                        class="text-muted small mb-3"
-                                    >
-                                        {{
-                                            $t(
-                                                "documents.upload.linkSubtitle"
-                                            )
-                                        }}
+                                    <div class="text-muted small mb-3">
+                                        {{ $t("documents.upload.linkSubtitle") }}
                                     </div>
                                     <div
                                         v-if="hasError"
                                         class="text-danger small mb-3 d-flex align-items-center gap-1"
                                     >
-                                        <span
-                                            class="text-danger"
-                                        >
-                                            *
-                                        </span>
+                                        <span class="text-danger">*</span>
                                         <span>
-                                            {{
-                                                $t(
-                                                    "validation.required"
-                                                )
-                                            }}
+                                            {{ $t("validation.required") }}
                                         </span>
                                     </div>
-                                    <div
-                                        class="mb-3 rounded"
-                                    >
-                                        <div
-                                            class="input-group"
-                                        >
-                                            <span
-                                                class="input-group-text border-end-0"
-                                            >
+                                    <div class="mb-3 rounded">
+                                        <div class="input-group">
+                                            <span class="input-group-text border-end-0">
                                                 <LucideIcon
                                                     icon="Search"
                                                     size="16"
@@ -287,62 +184,36 @@
                                                         'documents.workflowListModal.searchPlaceholder'
                                                     )
                                                 "
-                                                v-model="
-                                                    searchTerm
-                                                "
+                                                v-model="searchTerm"
                                             />
                                         </div>
                                     </div>
-                                    <div
-                                        class="mb-1 d-flex gap-2 p-2 rounded"
-                                    >
+                                    <div class="mb-1 d-flex gap-2 p-2 rounded">
                                         <button
                                             type="button"
                                             class="btn btn-custom-light btn-sm"
-                                            @click="
-                                                selectAll(
-                                                    $event
-                                                )
-                                            "
+                                            @click="selectAll($event)"
                                         >
                                             <LucideIcon
                                                 icon="Check"
                                                 class="me-1"
                                             />
-                                            {{
-                                                $t(
-                                                    "common.selectAll"
-                                                )
-                                            }}
+                                            {{ $t("common.selectAll") }}
                                         </button>
                                         <button
                                             type="button"
                                             class="btn btn-custom-light btn-sm"
-                                            @click="
-                                                clearSelection(
-                                                    $event
-                                                )
-                                            "
+                                            @click="clearSelection($event)"
                                         >
                                             <LucideIcon
                                                 icon="X"
                                                 class="me-1"
                                             />
-                                            {{
-                                                $t(
-                                                    "common.clearSelection"
-                                                )
-                                            }}
+                                            {{ $t("common.clearSelection") }}
                                         </button>
                                     </div>
-                                    <div
-                                        class="text-muted small mb-1"
-                                    >
-                                        {{
-                                            $t(
-                                                "documents.upload.warningWorkflowNotListed"
-                                            )
-                                        }}
+                                    <div class="text-muted small mb-1">
+                                        {{ $t("documents.upload.warningWorkflowNotListed") }}
                                     </div>
                                     <div
                                         class="border rounded p-1 user-list scrollable-list bg-white"
@@ -355,86 +226,50 @@
                                                 class="spinner-border text-primary"
                                                 role="status"
                                             >
-                                                <span
-                                                    class="visually-hidden"
-                                                >
-                                                    {{
-                                                        $t(
-                                                            "common.loading"
-                                                        )
-                                                    }}
+                                                <span class="visually-hidden">
+                                                    {{ $t("common.loading") }}
                                                 </span>
                                             </div>
                                         </div>
                                         <div
-                                            v-else-if="
-                                                filtersWorkflowList.length ===
-                                                0
-                                            "
+                                            v-else-if="filtersWorkflowList.length === 0"
                                             class="text-center text-muted py-3"
                                         >
-                                            {{
-                                                $t(
-                                                    "documents.upload.noWorkflowFound"
-                                                )
-                                            }}
+                                            {{ $t("documents.upload.noWorkflowFound") }}
                                         </div>
                                         <div
-                                            v-if="
-                                                !isLoading
-                                            "
+                                            v-if="!isLoading"
                                             v-for="team in filtersWorkflowList"
                                             :key="team.id"
                                             class="p-1"
                                         >
-                                            <div
-                                                class="form-check d-flex align-items-center"
-                                            >
+                                            <div class="form-check d-flex align-items-center">
                                                 <input
                                                     class="form-check-input me-3"
                                                     type="checkbox"
                                                     :id="`user-${team.id}`"
-                                                    :value="
-                                                        team.id
-                                                    "
-                                                    v-model="
-                                                        selectedWorkflows
-                                                    "
+                                                    :value="team.id"
+                                                    v-model="selectedWorkflows"
                                                 />
                                                 <label
                                                     class="form-check-label d-flex align-items-center w-100"
                                                     :for="`user-${team.id}`"
                                                 >
-                                                    <div
-                                                        class="fw-semibold"
-                                                    >
-                                                        {{
-                                                            team.name
-                                                        }}
+                                                    <div class="fw-semibold">
+                                                        {{ team.name }}
                                                     </div>
                                                 </label>
                                             </div>
                                         </div>
                                     </div>
                                     <div
-                                        v-if="
-                                            selectedWorkflows.length >
-                                            0
-                                        "
+                                        v-if="selectedWorkflows.length > 0"
                                         class="mt-3"
                                     >
-                                        <label
-                                            class="form-label"
-                                        >
-                                            {{
-                                                $t(
-                                                    "documents.upload.selectionList"
-                                                )
-                                            }}
+                                        <label class="form-label">
+                                            {{ $t("documents.upload.selectionList") }}
                                         </label>
-                                        <div
-                                            class="d-flex flex-wrap gap-2"
-                                        >
+                                        <div class="d-flex flex-wrap gap-2">
                                             <div
                                                 v-for="id in selectedWorkflows"
                                                 :key="id"
@@ -444,14 +279,8 @@
                                                     icon="Building"
                                                     class="me-1"
                                                 />
-                                                <span
-                                                    class="me-1"
-                                                >
-                                                    {{
-                                                        getName(
-                                                            id
-                                                        )
-                                                    }}
+                                                <span class="me-1">
+                                                    {{ getName(id) }}
                                                 </span>
                                             </div>
                                         </div>
@@ -460,13 +289,8 @@
                                 <button
                                     type="submit"
                                     class="btn btn-primary m-2 float-right"
-                                    :title="
-                                        $t('common.send')
-                                    "
-                                    :disabled="
-                                        form.description
-                                            .length > 250
-                                    "
+                                    :title="$t('common.send')"
+                                    :disabled="form.description.length > 250"
                                 >
                                     {{ $t("common.send") }}
                                 </button>
@@ -478,13 +302,9 @@
                                             page: '1',
                                         },
                                     }"
-                                    :title="
-                                        $t('common.cancel')
-                                    "
+                                    :title="$t('common.cancel')"
                                 >
-                                    {{
-                                        $t("common.cancel")
-                                    }}
+                                    {{ $t("common.cancel") }}
                                 </router-link>
                             </form>
                         </div>
@@ -503,12 +323,8 @@
         <modal-alert
             v-if="modalAlertShow"
             :type="'Confirm'"
-            :alertTitle="
-                $t('documents.upload.removeAllDropzone')
-            "
-            :alertMessage="
-                $t('documents.thisActionRemoveAllFiles')
-            "
+            :alertTitle="$t('documents.upload.removeAllDropzone')"
+            :alertMessage="$t('documents.thisActionRemoveAllFiles')"
             :okLabel="$t('common.confirm')"
             :cancelLabel="$t('common.cancel')"
             @open="removeAllFiles"
@@ -530,30 +346,20 @@
         directives: {
             validate: {
                 inserted: function (el, binding) {
-                    el.addEventListener(
-                        "input",
-                        function () {
-                            el.setCustomValidity("");
-                            if (!el.checkValidity()) {
-                                el.reportValidity();
-                            }
-                        }
-                    );
-
-                    el.addEventListener(
-                        "invalid",
-                        function (event) {
-                            event.preventDefault();
-                            if (el.validity.valueMissing) {
-                                el.setCustomValidity(
-                                    this.$t(
-                                        "validation.fillInThisField"
-                                    )
-                                );
-                            }
+                    el.addEventListener("input", function () {
+                        el.setCustomValidity("");
+                        if (!el.checkValidity()) {
                             el.reportValidity();
                         }
-                    );
+                    });
+
+                    el.addEventListener("invalid", function (event) {
+                        event.preventDefault();
+                        if (el.validity.valueMissing) {
+                            el.setCustomValidity(this.$t("validation.fillInThisField"));
+                        }
+                        el.reportValidity();
+                    });
                 },
             },
         },
@@ -582,8 +388,7 @@
                 toastShow: false,
                 toastColor: "",
                 toastMessage: "",
-                timeoutMessage:
-                    ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
+                timeoutMessage: ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
                 timerReq: ENV_CONFIG.VUE_APP_TIMER_REQ,
                 dropzoneInstance: null,
                 selectedWorkflows: [],
@@ -601,53 +406,34 @@
         },
         methods: {
             initializeDropzone() {
-                this.dropzoneInstance = new Dropzone(
-                    "#dropzoneUpload",
-                    {
-                        paramName: "file",
-                        maxFilesize: 10000000000,
-                        acceptedFiles: ".pdf",
-                        maxFiles: this.maxFiles,
-                        autoProcessQueue: false,
-                        addRemoveLinks: true,
-                    }
-                );
-                this.dropzoneInstance.on(
-                    "addedfile",
-                    this.onFileAdded
-                );
-                this.dropzoneInstance.on(
-                    "removedfile",
-                    this.onFileRemove
-                );
+                this.dropzoneInstance = new Dropzone("#dropzoneUpload", {
+                    paramName: "file",
+                    maxFilesize: 10000000000,
+                    acceptedFiles: ".pdf",
+                    maxFiles: this.maxFiles,
+                    autoProcessQueue: false,
+                    addRemoveLinks: true,
+                });
+                this.dropzoneInstance.on("addedfile", this.onFileAdded);
+                this.dropzoneInstance.on("removedfile", this.onFileRemove);
             },
             getName(id) {
-                const workflow = this.workflowsList.find(
-                    (t) => t.id === id
-                );
-                return workflow
-                    ? workflow.name
-                    : "Desconhecido";
+                const workflow = this.workflowsList.find((t) => t.id === id);
+                return workflow ? workflow.name : "Desconhecido";
             },
             selectAll(event) {
                 event.target.blur();
-                this.selectedWorkflows =
-                    this.filtersWorkflowList.map(
-                        (user) => user.id
-                    );
+                this.selectedWorkflows = this.filtersWorkflowList.map((user) => user.id);
             },
             clearSelection(event) {
                 event.target.blur();
                 this.selectedWorkflows = [];
             },
             validateSelection() {
-                this.hasError =
-                    this.selectedWorkflows.length === 0;
+                this.hasError = this.selectedWorkflows.length === 0;
             },
             clickUplodFile: function () {
-                document
-                    .getElementById("inputFileId")
-                    .click();
+                document.getElementById("inputFileId").click();
             },
             setCrumbsData: function () {
                 this.crumbsData = [
@@ -662,23 +448,15 @@
                 ];
             },
             onFileAdded(message) {
-                if (
-                    this.filesList.some(
-                        (f) => f.name == message.name
-                    )
-                ) {
-                    this.dropzoneInstance.removeFile(
-                        message
-                    );
+                if (this.filesList.some((f) => f.name == message.name)) {
+                    this.dropzoneInstance.removeFile(message);
                 } else {
                     this.filesList.push(message);
                 }
                 this.updateDropzoneState();
             },
             removeFile(uuid) {
-                this.filesList = this.filesList.filter(
-                    (fileObj) => fileObj.upload.uuid != uuid
-                );
+                this.filesList = this.filesList.filter((fileObj) => fileObj.upload.uuid != uuid);
                 this.updateDropzoneState();
             },
             removeAllFiles() {
@@ -692,9 +470,7 @@
                 if (this.filesList.length > 0) {
                     dropzone.classList.add("files-added");
                 } else {
-                    dropzone.classList.remove(
-                        "files-added"
-                    );
+                    dropzone.classList.remove("files-added");
                 }
             },
             onFileRemove(message) {
@@ -708,9 +484,7 @@
                         if (response.data === true) {
                             self.clearMyInterval();
                             self.alertToast(
-                                self.$t(
-                                    "documents.numberOfPagesHasBeenExceeded"
-                                ),
+                                self.$t("documents.numberOfPagesHasBeenExceeded"),
                                 "toast-warning"
                             );
                         }
@@ -724,20 +498,14 @@
                 if (this.filesList.length == 0) {
                     this.clearMyInterval();
                     this.alertToast(
-                        this.$t(
-                            "documents.upload.noFileChosen"
-                        ) + ".",
+                        this.$t("documents.upload.noFileChosen") + ".",
                         "toast-warning"
                     );
                     valid = false;
-                } else if (
-                    this.selectedWorkflows.length == 0
-                ) {
+                } else if (this.selectedWorkflows.length == 0) {
                     this.clearMyInterval();
                     this.alertToast(
-                        this.$t(
-                            "documents.upload.noTeamChosen"
-                        ) + ".",
+                        this.$t("documents.upload.noTeamChosen") + ".",
                         "toast-warning"
                     );
                     valid = false;
@@ -750,118 +518,64 @@
                 window.onbeforeunload = function () {
                     return true;
                 };
-                this.message = this.$t(
-                    "documents.sendingTheDocument"
-                );
+                this.message = this.$t("documents.sendingTheDocument");
                 this.isLoading = true;
 
                 const apiHeaders = {
-                    "X-Email":
-                        this.$store.state.userProfile.login,
-                    "X-Tenant":
-                        this.$store.state.userProfile
-                            .tenant,
-                    "X-Key-Mongo-Access":
-                        this.$store.state.userProfile
-                            .keyMongoAccess,
-                    "X-Language":
-                        this.$store.state.userProfile
-                            .language,
+                    "X-Email": this.$store.state.userProfile.login,
+                    "X-Tenant": this.$store.state.userProfile.tenant,
+                    "X-Key-Mongo-Access": this.$store.state.userProfile.keyMongoAccess,
+                    "X-Language": this.$store.state.userProfile.language,
                     Authorization: `Bearer ${this.$store.state.userProfile.tokenApi}`,
                 };
                 const chunkSize = 19 * 1024 * 1024;
-                const filesNames = this.filesList.map(
-                    (u) => u.name
-                );
-                const promises = this.filesList.map(
-                    (fileObj) => {
-                        const file = fileObj;
-                        let additionalData = {
-                            name: file.name.replace(
-                                ".pdf",
-                                ""
-                            ),
-                            description:
-                                this.form.description,
-                            emailCreator:
-                                this.$store.state
-                                    .userProfile.login,
-                            filesNames: filesNames,
-                            workflows:
-                                this.selectedWorkflows.slice(),
-                        };
+                const filesNames = this.filesList.map((u) => u.name);
+                const promises = this.filesList.map((fileObj) => {
+                    const file = fileObj;
+                    let additionalData = {
+                        name: file.name.replace(".pdf", ""),
+                        description: this.form.description,
+                        emailCreator: this.$store.state.userProfile.login,
+                        filesNames: filesNames,
+                        workflows: this.selectedWorkflows.slice(),
+                    };
 
-                        return this.readFileAsArrayBuffer(
-                            file
-                        ).then((arrayBuffer) => {
-                            const totalChunks = Math.ceil(
-                                arrayBuffer.byteLength /
-                                    chunkSize
-                            );
-                            const chunks = [];
-                            for (
-                                let i = 0;
-                                i < totalChunks;
-                                i++
-                            ) {
-                                const start = i * chunkSize;
-                                const end = Math.min(
-                                    start + chunkSize,
-                                    arrayBuffer.byteLength
-                                );
-                                const chunk =
-                                    arrayBuffer.slice(
-                                        start,
-                                        end
-                                    );
-                                chunks.push({
-                                    fileChunk: chunk,
-                                    fileType: file.type,
-                                    additionalData:
-                                        additionalData,
-                                    headers: {
-                                        ...apiHeaders,
-                                    },
-                                    fileName: file.name,
-                                    userEmail:
-                                        this.$store.state
-                                            .userProfile
-                                            .login,
-                                    tokenAzure:
-                                        this.$store.state
-                                            .userProfile
-                                            .tokenAzure,
-                                    url: ENV_CONFIG.VUE_APP_BASE_URL_API,
-                                    chunkIndex: i,
-                                    totalChunks:
-                                        totalChunks,
-                                });
-                            }
-                            return chunks;
-                        });
-                    }
-                );
+                    return this.readFileAsArrayBuffer(file).then((arrayBuffer) => {
+                        const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
+                        const chunks = [];
+                        for (let i = 0; i < totalChunks; i++) {
+                            const start = i * chunkSize;
+                            const end = Math.min(start + chunkSize, arrayBuffer.byteLength);
+                            const chunk = arrayBuffer.slice(start, end);
+                            chunks.push({
+                                fileChunk: chunk,
+                                fileType: file.type,
+                                additionalData: additionalData,
+                                headers: {
+                                    ...apiHeaders,
+                                },
+                                fileName: file.name,
+                                userEmail: this.$store.state.userProfile.login,
+                                tokenAzure: this.$store.state.userProfile.tokenAzure,
+                                url: ENV_CONFIG.VUE_APP_BASE_URL_API,
+                                chunkIndex: i,
+                                totalChunks: totalChunks,
+                            });
+                        }
+                        return chunks;
+                    });
+                });
 
                 Promise.all(promises)
                     .then((fileDataChunksArray) => {
-                        fileDataChunksArray.forEach(
-                            (chunks) => {
-                                chunks.forEach(
-                                    (chunkData) => {
-                                        uploadFileWorker.send(
-                                            {
-                                                message:
-                                                    chunkData,
-                                            }
-                                        );
-                                    }
-                                );
-                            }
-                        );
-                        localStorage.setItem(
-                            "showToast",
-                            "true"
-                        );
+                        fileDataChunksArray.forEach((chunks) => {
+                            chunks.forEach((chunkData) => {
+                                uploadFileWorker.send({
+                                    message: chunkData,
+                                });
+                            });
+                        });
+                        localStorage.setItem("showToast", "true");
                     })
                     .finally(() => {
                         this.$router.push({
@@ -878,10 +592,8 @@
             readFileAsArrayBuffer(file) {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = () =>
-                        resolve(reader.result);
-                    reader.onerror = (error) =>
-                        reject(error);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = (error) => reject(error);
                     reader.readAsArrayBuffer(file);
                 });
             },
@@ -890,22 +602,13 @@
                     chunks = Math.ceil(file.size / size);
                 for (let i = 0; i < chunks; i++) {
                     this.chunks.push(
-                        file.slice(
-                            i * size,
-                            Math.min(
-                                i * size + size,
-                                file.size
-                            ),
-                            file.type
-                        )
+                        file.slice(i * size, Math.min(i * size + size, file.size), file.type)
                     );
                 }
             },
             closeModal: function () {
                 this.modalAlertShow = false;
-                document.getElementsByTagName(
-                    "BODY"
-                )[0].children[1].className = "overlay";
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             alertToast: function (msg, color) {
                 this.toastMessage = msg;
@@ -930,21 +633,16 @@
             confirmationDialog: function () {
                 if (this.filesList.length > 0) {
                     this.modalAlertShow = true;
-                    document.getElementsByTagName(
-                        "BODY"
-                    )[0].children[1].className += " active";
+                    document.getElementsByTagName("BODY")[0].children[1].className += " active";
                 } else {
                     this.alertToast(
-                        this.$t(
-                            "documents.upload.noFileChosen"
-                        ) + ".",
+                        this.$t("documents.upload.noFileChosen") + ".",
                         "toast-warning"
                     );
                 }
             },
             getWorkflows() {
-                var email =
-                    this.$store.state.userProfile.login;
+                var email = this.$store.state.userProfile.login;
                 WorkflowService.getWorkflowList(email)
                     .then((response) => {
                         if (response.error !== undefined) {
@@ -955,8 +653,7 @@
                                 icon: "CircleX",
                             });
                         }
-                        this.workflowsList =
-                            response.filter((t) => t.name);
+                        this.workflowsList = response.filter((t) => t.name);
                     })
                     .finally(() => {
                         this.isLoading = false;
@@ -969,11 +666,7 @@
                     return this.workflowsList;
                 }
                 return this.workflowsList.filter((team) =>
-                    team.name
-                        .toLowerCase()
-                        .includes(
-                            this.searchTerm.toLowerCase()
-                        )
+                    team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
                 );
             },
         },
@@ -1136,13 +829,11 @@
         margin-left: -2px !important;
     }
 
-    .custom-file-button
-        input[type="file"]::-webkit-file-upload-button {
+    .custom-file-button input[type="file"]::-webkit-file-upload-button {
         display: none;
     }
 
-    .custom-file-button
-        input[type="file"]::file-selector-button {
+    .custom-file-button input[type="file"]::file-selector-button {
         display: none;
     }
 

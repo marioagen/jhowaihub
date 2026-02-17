@@ -22,9 +22,7 @@
                 <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
-                <ActionTableListComponent
-                    v-slot="{ actionClass }"
-                >
+                <ActionTableListComponent v-slot="{ actionClass }">
                     <a
                         :class="actionClass"
                         @click="redirectToEdit(data.row.id)"
@@ -35,9 +33,7 @@
                     <a
                         :class="actionClass"
                         class="text-danger"
-                        @click="
-                            openConfirmation(data.row.id)
-                        "
+                        @click="openConfirmation(data.row.id)"
                         v-tooltip="$t('common.delete')"
                     >
                         <LucideIcon icon="Trash2" />
@@ -123,16 +119,14 @@
                         if (response.error !== undefined) {
                             this.$notify({
                                 title: "template.title",
-                                message:
-                                    "template.notFound",
+                                message: "template.notFound",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
                         }
 
                         this.table.data = response.content;
-                        this.table.pagination =
-                            response.pagination;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -162,16 +156,13 @@
                 }
 
                 this.isDeleting = true;
-                TemplateService.deleteTemplate(
-                    this.selectedTemplate
-                )
+                TemplateService.deleteTemplate(this.selectedTemplate)
                     .then(() => {
                         this.$refs.DeleteDialog.close();
                         this.getTemplates();
                         this.$notify({
                             title: "common.success",
-                            message:
-                                "template.removeSuccess",
+                            message: "template.removeSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
@@ -179,10 +170,7 @@
                     .catch((error) => {
                         this.$notify({
                             title: "common.error",
-                            message:
-                                error.response?.data
-                                    ?.labelError ??
-                                "template.removeError",
+                            message: error.response?.data?.labelError ?? "template.removeError",
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -198,9 +186,7 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page
-                ? this.$route.query.page
-                : 1;
+            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
             this.getTemplates();
         },
     };

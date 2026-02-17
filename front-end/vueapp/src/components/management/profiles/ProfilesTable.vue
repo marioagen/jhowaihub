@@ -11,9 +11,7 @@
             @change-page="changePage"
         >
             <template #cell-name="{ data }">
-                <span
-                    v-if="data.row.name == UserType.Analyst"
-                >
+                <span v-if="data.row.name == UserType.Analyst">
                     {{ $t("management.profiles.analyst") }}
                 </span>
                 <span v-else>
@@ -33,9 +31,7 @@
                 {{ this.permissionsCount }}
             </template>
             <template #cell-actions="{ data }">
-                <ActionTableListComponent
-                    v-slot="{ actionClass }"
-                >
+                <ActionTableListComponent v-slot="{ actionClass }">
                     <a
                         :class="actionClass"
                         @click="redirectToForm(data.row)"
@@ -132,9 +128,7 @@
                 this.dataDocument = [];
                 this.listIds = [];
                 var paramsReq = {
-                    search: obj.search.trim()
-                        ? obj.search.trim()
-                        : "",
+                    search: obj.search.trim() ? obj.search.trim() : "",
                     pageSize: this.selectedOption,
                     page: obj.page,
                     isAscending: this.isAscending,
@@ -143,27 +137,22 @@
 
                 ProfilesService.getProfiles(paramsReq)
                     .then((response) => {
-                        const content =
-                            response?.content || [];
-                        const pagination =
-                            response?.pagination || {};
+                        const content = response?.content || [];
+                        const pagination = response?.pagination || {};
 
                         this.table.data = content;
                         this.table.pagination = pagination;
                     })
                     .finally(() => {
-                        if (obj.type === "search")
-                            this.searching = true;
+                        if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
                     });
             },
             getPermissions(obj) {
                 PermissionsService.getPermissions()
                     .then((response) => {
-                        const permissions =
-                            response.permissions;
-                        this.permissionsCount =
-                            permissions.length;
+                        const permissions = response.permissions;
+                        this.permissionsCount = permissions.length;
                     })
                     .finally(() => {});
             },
@@ -220,9 +209,7 @@
             },
             deleteProfile() {
                 this.isDeleting = true;
-                ProfilesService.deleteProfileById(
-                    this.selectedProfile
-                )
+                ProfilesService.deleteProfileById(this.selectedProfile)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
@@ -233,16 +220,14 @@
                             });
                             this.$notify({
                                 title: "Profiles",
-                                message:
-                                    "management.profiles.deleteSuccess",
+                                message: "management.profiles.deleteSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "Profiles",
-                                message:
-                                    "management.profiles.errors.deleteError",
+                                message: "management.profiles.errors.deleteError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -263,9 +248,7 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page
-                ? this.$route.query.page
-                : 1;
+            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
             this.getProfiles({
                 search: "",
                 page: this.queryPage,
