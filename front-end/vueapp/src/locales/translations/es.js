@@ -42,6 +42,7 @@ const spanish = {
         cardsOpened: "Hay tarjetas abiertas en este Workflow",
         errorAdvancingCard: "Ocurrió un error al avanzar el card.",
         errorFinalizingCard: "Ocurrió un error al finalizar el card.",
+        successFinalizeMessage: "Card finalizado con éxito.",
         finalizeConfirmMessage: "¿Está seguro de que desea finalizar este documento?",
         finalizeConfirmTitle: "Confirmar finalización",
         unassignInfo: "Desasignar documento",
