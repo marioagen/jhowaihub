@@ -83,11 +83,9 @@
                 });
             },
             async getStatuses() {
-                console.log("getStatuses");
                 const response = await StatusService.getStatus();
                 if (response?.error === undefined && Array.isArray(response)) {
                     this.statusList = response;
-                    console.log("statusList", this.statusList);
                 }
             },
         },
