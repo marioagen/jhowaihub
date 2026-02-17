@@ -62,7 +62,7 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                card.UpdateStepAndSatus(dto.StepId, status.Id);
+                card.UpdateStepAndStatus(dto.StepId, status.Id);
                 _cardRepository.Update(card);
                 await _repository.CreateAsync(rejection);
                 _unitOfWork.Commit();

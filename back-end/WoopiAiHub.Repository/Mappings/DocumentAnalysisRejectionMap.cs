@@ -23,17 +23,17 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasOne(d => d.Card)
                 .WithMany()
                 .HasForeignKey(d => d.CardId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(d => d.Step)
                 .WithMany()
                 .HasForeignKey(d => d.StepId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(d => d.User)
                 .WithMany()
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(d => d.CardId);
             builder.HasIndex(d => d.Created);

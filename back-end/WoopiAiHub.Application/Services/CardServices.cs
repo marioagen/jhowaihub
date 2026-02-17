@@ -110,7 +110,7 @@ namespace WoopiAiHub.Application.Services
             ) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
             var statusId = card.IsRejected() ? previousStatusId : step.StatusId;
-            card.UpdateStepAndSatus(step.Id, statusId);
+            card.UpdateStepAndStatus(step.Id, statusId);
             var result = _cardRepository.Update(card);
 
             if (result)
