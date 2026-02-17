@@ -1,0 +1,44 @@
+using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Repository.Context;
+
+namespace WoopiAiHub.Repository
+{
+    public class DocumentAnalysisRejectionRepository : IDocumentAnalysisRejectionRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public DocumentAnalysisRejectionRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<bool> CreateAsync(DocumentAnalysisRejection rejection)
+        {
+            await _context.DocumentAnalysisRejections.AddAsync(rejection);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<List<DocumentAnalysisRejectionDto>> FindByCardIdAsync(int cardId)
+        {
+            return await _context.DocumentAnalysisRejections
+                .AsNoTracking()
+                .Where(r => r.CardId == cardId)
+                .Include(r => r.User)
+                .OrderByDescending(r => r.Created)
+                .Select(r => new DocumentAnalysisRejectionDto
+                {
+                    Id = r.Id,
+                    Justification = r.Justification,
+                    CardId = r.CardId,
+                    StepId = r.StepId,
+                    UserId = r.UserId,
+                    UserName = r.User != null ? r.User.Name : string.Empty,
+                    Date = r.Created
+                })
+                .ToListAsync();
+        }
+    }
+}

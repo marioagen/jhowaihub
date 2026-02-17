@@ -52,6 +52,7 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IUsageUnitRepository, UsageUnitRepository>();
             services.AddScoped<IApiTemplateRepository, ApiTemplateRepository>();
             services.AddScoped<ISubscriptionPeriodRepository, SubscriptionPeriodRepository>();
+            services.AddScoped<IDocumentAnalysisRejectionRepository, DocumentAnalysisRejectionRepository>();
 
             services.AddStackExchangeRedisCache(options =>
             {

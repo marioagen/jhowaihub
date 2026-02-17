@@ -37,6 +37,27 @@ const spanish = {
         question: "Pregunta",
         questionnaireResults: "SALIDA",
         questionnaireToApply: "CUESTIONARIO A APLICAR",
+        reject: {
+            cancel: "Cancelar",
+            confirm: "Confirmar Reprobación",
+            error: "Error al reprobar el documento.",
+            justification: "Justificación",
+            justificationInstructions: "Proporcione una justificativa e indique para qué etapa se debe devolver el documento.",
+            justificationPlaceholder: "Proporcione una justificativa",
+            returnToStep: "Volver a la etapa",
+            selectStep: "Seleccione una etapa...",
+            success: "Documento reprobado con éxito.",
+            title: "Reprobar Documento",
+            validationError: "Por favor, complete todos los campos obligatorios.",
+        },
+        justification: {
+            date: "Fecha",
+            rejectedBy: "Reprobado por",
+            reason: "Motivo de la Reprobación",
+            subtitle: "Este documento fue devuelto para corrección. Vea los detalles a continuación.",
+            title: "Justificación de la Reprobación",
+        },
+        reprovar: "Reprobar",
         selectQuestionnaire:
             "Seleccione un cuestionario...",
         sendQuestion: "Enviar pregunta",
@@ -261,6 +282,7 @@ const spanish = {
         standardizedFullText: "Texto completo normalizado",
         statusList: {
             notAnalyzed: "En espera de análisis",
+            rejected: "Reprobado",
         },
         subtitle:
             "Gestiona documentos y extrae información",
@@ -660,7 +682,7 @@ const spanish = {
         descriptions: {
             dashboard: "Ver Dashboard",
             documents: "Ver Documentos",
-            documentReject: "Rechazar documentos",
+            documentRejection: "Rechazar documentos",
             management: "Ver Gestión de tablas",
             profiles: "Ver Perfiles",
             prompts: "Ver Agentes",
@@ -1125,6 +1147,7 @@ const spanish = {
             awaitinganalysis: "En espera de análisis",
             done: "Listo",
             waitingforapproval: "En espera de aprobación",
+            rejected: "Rechazado"
         },
         stepFlow: "Automatización de documentos",
         stepNamePlaceholder: "Nombre del paso",

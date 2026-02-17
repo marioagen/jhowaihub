@@ -1,4 +1,4 @@
-﻿using Google.Api;
+using Google.Api;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
@@ -51,6 +51,11 @@ namespace WoopiAiHub.Domain.Models
         public void UpdateAssignedUser(Guid? userId)
         {
             AssignedUserId = userId;
+        }
+
+        public bool IsRejected()
+        {
+            return StatusId == 6;
         }
     }
 }

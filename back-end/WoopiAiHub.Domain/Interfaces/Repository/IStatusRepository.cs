@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<Status?> FindById(int id);
         Task<ICollection<StatusDto>> FindAll();
+        Task<Status?> FindByName(string name);
     }
 }

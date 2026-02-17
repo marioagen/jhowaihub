@@ -44,6 +44,27 @@ const portuguese = {
         title: "Análise de Documentos",
         typeYourQuestion:
             "Digite sua pergunta sobre o documento...",
+        reprovar: "Reprovar",
+        reject: {
+            cancel: "Cancelar",
+            confirm: "Confirmar Reprovação",
+            error: "Erro ao reprovar documento.",
+            justification: "Justificativa",
+            justificationInstructions: "Forneça uma justificativa e selecione para qual etapa o documento deve ser retornado.",
+            justificationPlaceholder: "Forneça uma justificativa",
+            returnToStep: "Retornar para a etapa",
+            selectStep: "Selecione uma etapa...",
+            success: "Documento reprovado com sucesso.",
+            title: "Reprovar Documento",
+            validationError: "Por favor, preencha todos os campos obrigatórios.",
+        },
+        justification: {
+            date: "Data",
+            rejectedBy: "Reprovado por",
+            reason: "Motivo da Reprovação",
+            title: "Justificativa da Reprovação",
+            subtitle: "Este documento foi retornado para correção. Veja os detalhes abaixo.",
+        },
         workflow: "Esteira de Processamento",
     },
     card: {
@@ -257,6 +278,7 @@ const portuguese = {
         standardizedFullText: "Texto integral normalizado",
         statusList: {
             notAnalyzed: "Esperando análise",
+            rejected: "Reprovado",
         },
         step: "Etapa",
         subtitle:
@@ -654,7 +676,7 @@ const portuguese = {
         descriptions: {
             dashboard: "Visualizar Dashboard",
             documents: "Visualizar Documentos",
-            documentReject: "Rejeitar documentos",
+            documentRejection: "Rejeitar documentos",
             management: "Visualizar Gestão de tabelas",
             profiles: "Visualizar Perfis",
             prompts: "Visualizar Agentes",
@@ -1131,6 +1153,7 @@ const portuguese = {
             awaitinganalysis: "Esperando Análise",
             done: "Finalizado",
             waitingforapproval: "Esperando Aprovação",
+            rejected: "Reprovado",
         },
         stepFlow: "Automação de documentos",
         stepNamePlaceholder: "Nome da etapa",

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -318,6 +318,10 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task ContinueExecution(AutomationServicesDto automationServicesDto)
         {
+            var card = await _cardRepository.FindById(automationServicesDto.CardId);
+            if (card != null && card.IsRejected())
+                return;
+
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
             

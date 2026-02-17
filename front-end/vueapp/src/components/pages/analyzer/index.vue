@@ -24,39 +24,48 @@
                         <i class="fas fa-file-alt me-1 text-primary"></i>
                         {{ documentName }}
                     </span>
-                        <div class="btn-group-sm margin-left" role="group">
-                            <input type="radio" class="btn-check" name="view" id="view-doc" autocomplete="off"
-                                   v-model="viewMode" value="doc">
-                            <label class="btn btn-outline-primary" for="view-doc">
-                                <LucideIcon icon="PanelLeft" />
-                            </label>
+                    <div class="btn-group-sm margin-left" role="group">
+                        <input type="radio" class="btn-check" name="view" id="view-doc" autocomplete="off"
+                            v-model="viewMode" value="doc">
+                        <label class="btn btn-outline-primary" for="view-doc">
+                            <LucideIcon icon="PanelLeft" />
+                        </label>
 
-                            <input type="radio" class="btn-check" name="view" id="view-both" autocomplete="off"
-                                   v-model="viewMode" value="both">
-                            <label class="btn btn-outline-primary" for="view-both">
-                                <LucideIcon icon="Columns2" />
-                            </label>
+                        <input type="radio" class="btn-check" name="view" id="view-both" autocomplete="off"
+                            v-model="viewMode" value="both">
+                        <label class="btn btn-outline-primary" for="view-both">
+                            <LucideIcon icon="Columns2" />
+                        </label>
 
-                            <input type="radio" class="btn-check" name="view" id="view-history" autocomplete="off"
-                                   v-model="viewMode" value="history">
-                            <label class="btn btn-outline-primary" for="view-history">
-                                <LucideIcon icon="PanelRight" />
-                            </label>
-                        </div>
+                        <input type="radio" class="btn-check" name="view" id="view-history" autocomplete="off"
+                            v-model="viewMode" value="history">
+                        <label class="btn btn-outline-primary" for="view-history">
+                            <LucideIcon icon="PanelRight" />
+                        </label>
+                    </div>
+                    <button v-if="canReject" class="btn btn-outline-danger btn-sm ms-2" @click="openRejectModal"
+                        :disabled="!workflowId">
+                        <i class="fas fa-times-circle me-1"></i>
+                        {{ $t('analyze.reprovar') }}
+                    </button>
+                    <button v-if="isRejected" class="btn btn-outline-warning btn-sm ms-2"
+                        @click="openViewRejectionModal">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Ver Justificativa
+                    </button>
                 </div>
                 <div class="row">
 
                     <prompt-view :hashDocument="hashDocument" :historyListOrder="historyListOrder"
-                                 @showHistory="showHistory" @unshiftHistoryList="unshiftHistoryList"
-                                 @pushHistoryList="pushHistoryList" @showAlertToast="showAlertToast"
-                                 @clearMyInterval="clearMyInterval" v-if="!isExpandedHistory" />
+                        @showHistory="showHistory" @unshiftHistoryList="unshiftHistoryList"
+                        @pushHistoryList="pushHistoryList" @showAlertToast="showAlertToast"
+                        @clearMyInterval="clearMyInterval" v-if="!isExpandedHistory" />
 
-                    <doc-view @showNormalize="normalize" id="docView" v-if="viewMode === 'doc' || viewMode === 'both'" :documentView="viewMode"/>
-                    <div :id="'docHistory'"
-                         :class="viewMode === 'both' ? 'col-md-6' : 'col-12'">
+                    <doc-view @showNormalize="normalize" id="docView" v-if="viewMode === 'doc' || viewMode === 'both'"
+                        :documentView="viewMode" />
+                    <div :id="'docHistory'" :class="viewMode === 'both' ? 'col-md-6' : 'col-12'">
                         <step-analysis-view :document-id="parseInt(idAnalyzer)" :card-id="parseInt(idCard)"
-                                            @show-alert-toast="showAlertToast"
-                                            v-if="viewMode === 'history' || viewMode === 'both'"/>
+                            @show-alert-toast="showAlertToast" v-if="viewMode === 'history' || viewMode === 'both'" />
                     </div>
                 </div>
             </div>
@@ -66,9 +75,12 @@
                 </a>
             </div>
         </div>
-        <!-- Component ToastAlert -->
+
         <toast-alert :showToast="toastShow" :colorToast="toastColor" :messageToast="toastMessage" @close="closeToast" />
         <NormalizeIndex :docData="dataView" :isReprocessing="isReprocessing" v-if="showLoading"></NormalizeIndex>
+        <ModalReject ref="modalReject" :cardId="idCard" :documentId="idAnalyzer" @close="closeRejectModal"
+            @success="handleRejectSuccess" />
+        <ModalViewRejection ref="modalViewRejection" @close="closeViewRejectionModal" />
     </main>
 </template>
 
@@ -81,6 +93,9 @@ import api from "@/services/api";
 import NormalizeIndex from "@/components/documents/EmbeddingDocument";
 import CardsServices from "@/services/cards/CardsServices";
 import LogService from '@/services/log/logService';
+import ModalReject from "@/components/pages/analyzer/modal-reject";
+import ModalViewRejection from "@/components/pages/analyzer/modal-view-rejection";
+import { hasPermission } from "@/utils/permissions";
 
 export default {
     name: "AnalyzerIndex",
@@ -110,6 +125,11 @@ export default {
             workflowName: "",
             documentName: "",
             viewMode: 'both',
+
+
+            cardStatus: null,
+            workflowId: null,
+            currentStepOrder: 0,
         };
     },
     components: {
@@ -118,6 +138,21 @@ export default {
         StepAnalysisView,
         ToastAlert,
         NormalizeIndex,
+        ModalReject,
+        ModalViewRejection,
+    },
+    computed: {
+        canReject() {
+            return hasPermission('DocumentRejection', 'Actions') && this.currentStepOrder > 1;
+        },
+        isRejected() {
+            return this.cardStatus?.toLowerCase() === 'rejected';
+        }
+    },
+    watch: {
+        workflowId() {
+            this.getCardHeaderInfo();
+        }
     },
     methods: {
         normalize: function (dataView, isReprocessing) {
@@ -168,6 +203,9 @@ export default {
             if (result && !result.error) {
                 this.workflowName = result.workflowName;
                 this.documentName = result.cardName;
+                this.cardStatus = result.statusName;
+                this.workflowId = result.workflowId;
+                this.currentStepOrder = result.currentStepOrder;
             }
         },
         goBack() {
@@ -197,6 +235,24 @@ export default {
             clearInterval(this.myInterval);
             this.myInterval = null;
         },
+        openRejectModal() {
+            if (this.workflowId) {
+                this.$refs.modalReject.open(this.workflowId);
+            }
+        },
+        closeRejectModal() {
+        },
+        handleRejectSuccess() {
+            this.alertToast(this.$t('analyze.reject.success'), 'success');
+            setTimeout(() => {
+                this.goBack();
+            }, 2000);
+        },
+        openViewRejectionModal() {
+            this.$refs.modalViewRejection.open(this.idCard);
+        },
+        closeViewRejectionModal() {
+        },
     },
     created() {
         this.setCrumbsData();
@@ -221,18 +277,22 @@ export default {
     }
 }
 
-    #docHistory {
-        overflow-y: auto;
-        max-height: 70vh;
-        min-height: 300px; /* Opcional: altura mínima para não ficar pequeno demais */
-        height: auto !important;
-    }
-    .btn-check:checked + .btn {
-        background-color: #0d6efd !important; /* azul bootstrap */
-        color: white !important;
-        border-color: #0d6efd !important;
-    }
-    .margin-left{
-        margin-left:auto;
-    }
+#docHistory {
+    overflow-y: auto;
+    max-height: 70vh;
+    min-height: 300px;
+    /* Opcional: altura mínima para não ficar pequeno demais */
+    height: auto !important;
+}
+
+.btn-check:checked+.btn {
+    background-color: #0d6efd !important;
+    /* azul bootstrap */
+    color: white !important;
+    border-color: #0d6efd !important;
+}
+
+.margin-left {
+    margin-left: auto;
+}
 </style>

@@ -1,3 +1,4 @@
+using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -40,6 +41,16 @@ namespace WoopiAiHub.Repository
                    Color = status.Color,
                 })
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Find a status by its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public async Task<Status?> FindByName(string name)
+        {
+            return await _context.Status.Where(s => s.Name == name).FirstOrDefaultAsync();
         }
     }
 }
