@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -49,18 +50,58 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Returns a card by its ID.
+        /// Returns a card dto by its ID.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<Card?> FindByIdWithDocumentAndWorkflow(int id)
+        public async Task<CardAnalysisDto?> FindByIdWithDocumentAndWorkflow(int id)
         {
             return await _context.Cards.Where(c => c.Id == id)
-                                .Include(d => d.Document)
-                                .Include(s => s.Step)
-                                    .ThenInclude(w => w!.Workflow)
-                                .Include(s => s.Outputs)
-                                .FirstOrDefaultAsync();
+                .Select(c => new CardAnalysisDto
+                {
+                    Id = c.Id,
+                    Created = c.Created,
+                    StepId = c.StepId,
+                    DocumentId = c.DocumentId,
+                    AssignedUserId = c.AssignedUserId,
+                    Name = c.Name,
+                    StatusId = c.StatusId,
+                    Document = c.Document != null ? new DocumentDto
+                    {
+                        Id = c.Document.Id,
+                        Name = c.Document.Name,
+                        Description = c.Document.Description,
+                        ReferenceFile = c.Document.ReferenceFile
+                    } : null,
+                    Step = c.Step != null ? new StepDto
+                    {
+                        Id = c.Step.Id,
+                        Name = c.Step.Name,
+                        Order = c.Step.Order,
+                        WorkflowId = c.Step.WorkflowId,
+                    } : null,
+                    Outputs = c.Outputs != null ? c.Outputs.Select(o => new StepToolOutputAnalysesDto
+                    {
+                        Id = o.Id,
+                        StepToolId = o.StepToolId,
+                        Value = o.Value,
+                        StepTool = o.StepTool != null ? new StepToolDto
+                        {
+                            Id = o.StepTool.Id,
+                            StepId = o.StepTool.StepId,
+                            ToolId = o.StepTool.ToolId,
+                            Tool = o.StepTool.Tool != null ? new ToolDto
+                            {
+                                Id = o.StepTool.Tool.Id,
+                                Name = o.StepTool.Tool.Name,
+                                ToolTypeId = o.StepTool.Tool.ToolTypeId,
+                                ToolType = o.StepTool.Tool.ToolType != null ?
+                                    o.StepTool.Tool.ToolType.Name
+                                    : string.Empty,
+                            } : null
+                        } : null
+                    }).ToList() : null
+                }).FirstOrDefaultAsync();
         }
 
         /// <summary>

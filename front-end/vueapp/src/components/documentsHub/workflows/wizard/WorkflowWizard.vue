@@ -26,28 +26,19 @@
             <!-- Phase Navigation -->
             <div class="row mb-4">
                 <div class="col-12">
-                    <div
-                        class="phase-nav d-flex justify-content-center"
-                    >
+                    <div class="phase-nav d-flex justify-content-center">
                         <div
                             v-for="(phase, index) in phases"
                             :key="index"
                             class="phase-item"
                             :class="{
-                                active:
-                                    currentPhase ===
-                                    index + 1,
-                                completed:
-                                    index + 1 <
-                                    currentPhase,
+                                active: currentPhase === index + 1,
+                                completed: index + 1 < currentPhase,
                             }"
                         >
                             <div class="phase-circle">
                                 <LucideIcon
-                                    v-if="
-                                        index + 1 <
-                                        currentPhase
-                                    "
+                                    v-if="index + 1 < currentPhase"
                                     icon="Check"
                                     :size="20"
                                 />
@@ -59,10 +50,7 @@
                                 {{ phase }}
                             </span>
                             <div
-                                v-if="
-                                    index <
-                                    phases.length - 1
-                                "
+                                v-if="index < phases.length - 1"
                                 class="phase-connector"
                             ></div>
                         </div>
@@ -78,45 +66,28 @@
                         <Phase1NameAndTeams
                             v-if="currentPhase === 1"
                             ref="phase1"
-                            :initialData="
-                                phase1Data ?? null
-                            "
+                            :initialData="phase1Data ?? null"
                             :key="phase1Data?.name"
                         />
 
                         <Phase2Steps
                             v-if="currentPhase === 2"
                             ref="phase2"
-                            :initialSteps="
-                                phase2Data?.steps ?? []
-                            "
+                            :initialSteps="phase2Data?.steps ?? []"
                             :key="phase2Data?.steps.length"
                         />
 
                         <Phase3Tools
                             v-if="currentPhase === 3"
                             ref="phase3"
-                            :workflowSteps="
-                                phase3Data?.steps ?? []
-                            "
+                            :workflowSteps="phase3Data?.steps ?? []"
                             :key="phase3Data?.steps.length"
-                            :profilesList="
-                                profilesList ?? []
-                            "
+                            :profilesList="profilesList ?? []"
                             :phase="currentPhase"
-                            @add-tool-flow="
-                                handleAddToolFlow
-                            "
-                            @edit-tool-flow="
-                                handleEditToolFlow
-                            "
-                            @remove-tool-flow="
-                                handleRemoveToolFlow
-                            "
-                            :hasStepsTools="
-                                phase3Data?.steps
-                                    .hasStepTools
-                            "
+                            @add-tool-flow="handleAddToolFlow"
+                            @edit-tool-flow="handleEditToolFlow"
+                            @remove-tool-flow="handleRemoveToolFlow"
+                            :hasStepsTools="phase3Data?.steps.hasStepTools"
                         />
                     </div>
                 </div>
@@ -124,9 +95,7 @@
 
             <!-- Navigation Buttons -->
             <div class="row mt-4 mb-2">
-                <div
-                    class="col-12 d-flex justify-content-between"
-                >
+                <div class="col-12 d-flex justify-content-between">
                     <button
                         v-if="currentPhase > 1"
                         class="btn btn-outline-secondary"
@@ -163,13 +132,7 @@
                             icon="Check"
                             :size="16"
                         />
-                        {{
-                            isEdit
-                                ? $t("workflow.finalize")
-                                : $t(
-                                      "workflow.createWorkflow"
-                                  )
-                        }}
+                        {{ isEdit ? $t("workflow.finalize") : $t("workflow.createWorkflow") }}
                     </button>
                 </div>
             </div>
@@ -225,9 +188,7 @@
         },
         data() {
             return {
-                currentPhase: Number(
-                    this.$route.params.phase ?? 1
-                ),
+                currentPhase: Number(this.$route.params.phase ?? 1),
                 phases: [
                     this.$t("workflow.nameAndAssociations"),
                     this.$t("workflow.steps"),
@@ -246,16 +207,12 @@
         computed: {
             formTitle() {
                 return this.$t(
-                    this.isEdit
-                        ? "workflow.formEdit.title"
-                        : "workflow.formCreate.title"
+                    this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title"
                 );
             },
             formSubtitle() {
                 return this.$t(
-                    this.isEdit
-                        ? "workflow.formEdit.subtitle"
-                        : "workflow.formCreate.subtitle"
+                    this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle"
                 );
             },
         },
@@ -293,13 +250,9 @@
                 this.isLoading = true;
                 const phase1Component = this.$refs.phase1;
                 const data = phase1Component.getData();
-                let workflowIdInternal =
-                    this.workflowIdInternal;
+                let workflowIdInternal = this.workflowIdInternal;
                 try {
-                    if (
-                        workflowIdInternal != null ||
-                        this.isEdit
-                    ) {
+                    if (workflowIdInternal != null || this.isEdit) {
                         this.phase1Data = data;
                         this.currentPhase = 2;
                         const params = {
@@ -308,30 +261,20 @@
                             teams: data.teams,
                         };
 
-                        const result =
-                            await WorkflowService.updatePhase1(
-                                params
-                            );
+                        const result = await WorkflowService.updatePhase1(params);
                         await this.loadPhase2Data();
                     } else {
-                        const workflowId =
-                            await WorkflowService.createPhase1(
-                                data
-                            );
+                        const workflowId = await WorkflowService.createPhase1(data);
                         if (workflowId.error) {
-                            throw new Error(
-                                workflowId.error
-                            );
+                            throw new Error(workflowId.error);
                         }
-                        this.workflowIdInternal =
-                            workflowId;
+                        this.workflowIdInternal = workflowId;
                         this.phase1Data = data;
                         this.currentPhase = 2;
                         await this.loadPhase2Data();
                         this.$notify({
                             title: "workflow.index",
-                            message:
-                                "workflow.phase1Success",
+                            message: "workflow.phase1Success",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
@@ -369,10 +312,7 @@
                         steps: data.steps,
                     };
 
-                    const result =
-                        await WorkflowService.updatePhase2(
-                            params
-                        );
+                    const result = await WorkflowService.updatePhase2(params);
                     if (result.error) {
                         throw new Error(result.error);
                     }
@@ -408,12 +348,12 @@
                     this.checkNavigation(() => {
                         this.canLeave = true;
                         this.$router.push({
-                            name: "WorkflowManagement",
+                            name: "WorkflowPage",
                         });
                     });
                 } else {
                     this.$router.push({
-                        name: "WorkflowManagement",
+                        name: "WorkflowPage",
                     });
                 }
             },
@@ -434,18 +374,9 @@
             },
             handleAddToolFlow(step, phase) {
                 this.canLeave = true;
-                localStorage.setItem(
-                    "wizardPhase1Data",
-                    JSON.stringify(this.phase1Data)
-                );
-                localStorage.setItem(
-                    "wizardPhase2Data",
-                    JSON.stringify(this.phase2Data)
-                );
-                localStorage.setItem(
-                    "wizardPhase3Data",
-                    JSON.stringify(this.phase3Data)
-                );
+                localStorage.setItem("wizardPhase1Data", JSON.stringify(this.phase1Data));
+                localStorage.setItem("wizardPhase2Data", JSON.stringify(this.phase2Data));
+                localStorage.setItem("wizardPhase3Data", JSON.stringify(this.phase3Data));
                 this.$router.push({
                     name: "NewFlow",
                     params: {
@@ -459,18 +390,9 @@
             },
             handleEditToolFlow(step, phase) {
                 this.canLeave = true;
-                localStorage.setItem(
-                    "wizardPhase1Data",
-                    JSON.stringify(this.phase1Data)
-                );
-                localStorage.setItem(
-                    "wizardPhase2Data",
-                    JSON.stringify(this.phase2Data)
-                );
-                localStorage.setItem(
-                    "wizardPhase3Data",
-                    JSON.stringify(this.phase3Data)
-                );
+                localStorage.setItem("wizardPhase1Data", JSON.stringify(this.phase1Data));
+                localStorage.setItem("wizardPhase2Data", JSON.stringify(this.phase2Data));
+                localStorage.setItem("wizardPhase3Data", JSON.stringify(this.phase3Data));
                 this.$router.push({
                     name: "EditFlow",
                     params: {
@@ -484,22 +406,15 @@
             },
             async handleRemoveToolFlow(step) {
                 const phase3Component = this.$refs.phase3;
-                let phase3DataResult =
-                    await this.getPhase3Data();
+                let phase3DataResult = await this.getPhase3Data();
 
-                const stepIndex =
-                    phase3DataResult.findIndex(
-                        (s) => s.id === step.id
-                    );
+                const stepIndex = phase3DataResult.findIndex((s) => s.id === step.id);
                 if (stepIndex !== -1) {
-                    phase3DataResult[stepIndex].stepTools =
-                        [];
+                    phase3DataResult[stepIndex].stepTools = [];
                 }
 
                 const params = {
-                    workflowId:
-                        this.workflowId ??
-                        this.$route.params.workflowId,
+                    workflowId: this.workflowId ?? this.$route.params.workflowId,
                     steps: phase3DataResult,
                 };
 
@@ -508,8 +423,7 @@
                         if (result.error !== undefined) {
                             return this.$notify({
                                 title: "flow.title",
-                                message:
-                                    "flow.formFlow.progressFlowUpdateFail",
+                                message: "flow.formFlow.progressFlowUpdateFail",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -517,8 +431,7 @@
                             this.loadPhase3Data();
                             this.$notify({
                                 title: "flow.title",
-                                message:
-                                    "flow.formFlow.progressFlowSuccess",
+                                message: "flow.formFlow.progressFlowSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
@@ -527,76 +440,55 @@
                     .catch((error) => {
                         this.$notify({
                             title: "flow.title",
-                            message:
-                                error.message ||
-                                "flow.formFlow.progressFlowFail",
+                            message: error.message || "flow.formFlow.progressFlowFail",
                             variant: "danger",
                             icon: "CircleX",
                         });
                     });
             },
             async loadWorkflowData() {
-                this.workflowIdInternal =
-                    this.workflowIdInternal ??
-                    this.$route.params.workflowId;
-                this.currentPhase =
-                    this.currentPhase ??
-                    this.$route.params.phase;
-                
+                this.workflowIdInternal = this.workflowIdInternal ?? this.$route.params.workflowId;
+                this.currentPhase = this.currentPhase ?? this.$route.params.phase;
+
                 if (!this.workflowIdInternal && !this.isEdit) {
                     return;
                 }
-                
+
                 this.isLoading = true;
                 try {
                     if (this.currentPhase == 1) {
                         if (this.workflowIdInternal || this.isEdit) {
-                            let result =
-                                await this.getPhase1Data();
+                            let result = await this.getPhase1Data();
                             this.phase1Data = {
                                 name: result.name,
-                                teams: result.teams.map(
-                                    (t) => t.id
-                                ),
+                                teams: result.teams.map((t) => t.id),
                             };
                         }
                     } else if (this.currentPhase == 2) {
-                        let result =
-                            await this.getPhase2Data();
+                        let result = await this.getPhase2Data();
                         this.phase2Data = {
                             steps: result.map((step) => ({
                                 id: step.id,
                                 name: step.name,
                                 order: step.order,
-                                profileId: String(
-                                    step.profile?.id || ""
-                                ),
-                                statusId: String(
-                                    step.status?.id || ""
-                                ),
-                                hasStepTools:
-                                    step.hasStepTools,
+                                profileId: String(step.profile?.id || ""),
+                                statusId: String(step.status?.id || ""),
+                                hasStepTools: step.hasStepTools,
                                 isActive: true,
                             })),
                         };
                     } else if (this.currentPhase == 3) {
                         await this.loadProfiles();
-                        
-                        let result =
-                            await this.getPhase2Data();
+
+                        let result = await this.getPhase2Data();
                         this.phase2Data = {
                             steps: result.map((step) => ({
                                 id: step.id,
                                 name: step.name,
                                 order: step.order,
-                                profileId: String(
-                                    step.profile?.id || ""
-                                ),
-                                statusId: String(
-                                    step.status?.id || ""
-                                ),
-                                hasStepTools:
-                                    step.hasStepTools,
+                                profileId: String(step.profile?.id || ""),
+                                statusId: String(step.status?.id || ""),
+                                hasStepTools: step.hasStepTools,
                             })),
                         };
                         this.phase3Data = this.phase2Data;
@@ -604,9 +496,7 @@
                 } catch (error) {
                     this.$notify({
                         title: "workflow.index",
-                        message:
-                            error.message ||
-                            "workflow.loadError",
+                        message: error.message || "workflow.loadError",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -616,49 +506,36 @@
                 }
             },
             async loadProfiles() {
-                try {
-                    const response =
-                        await ProfilesService.getProfilesList();
-                    if (response.error === undefined) {
-                        this.profilesList = response.map(
-                            (r) => ({
-                                id: r.id,
-                                text: r.name,
-                            })
-                        );
-                    }
-                } catch (error) {
-                    console.error(
-                        "Error loading profiles:",
-                        error
-                    );
+                const response = await ProfilesService.getProfilesList();
+                if (response.error === undefined) {
+                    this.profilesList = response.map((r) => ({
+                        id: r.id,
+                        text: r.name,
+                    }));
                 }
             },
             async getPhase1Data() {
-                const phase1DataReturn =
-                    await WorkflowService.getPhase1ById(
-                        this.workflowIdInternal
-                    );
+                const phase1DataReturn = await WorkflowService.getPhase1ById(
+                    this.workflowIdInternal
+                );
                 if (phase1DataReturn.error) {
                     throw new Error(phase1DataReturn.error);
                 }
                 return phase1DataReturn;
             },
             async getPhase2Data() {
-                const phase2DataReturn =
-                    await WorkflowService.getPhase2ById(
-                        this.workflowIdInternal
-                    );
+                const phase2DataReturn = await WorkflowService.getPhase2ById(
+                    this.workflowIdInternal
+                );
                 if (phase2DataReturn.error) {
                     throw new Error(phase2DataReturn.error);
                 }
                 return phase2DataReturn;
             },
             async getPhase3Data() {
-                const phase3DataReturn =
-                    await WorkflowService.getPhase3ById(
-                        this.workflowIdInternal
-                    );
+                const phase3DataReturn = await WorkflowService.getPhase3ById(
+                    this.workflowIdInternal
+                );
                 if (phase3DataReturn.error) {
                     throw new Error(phase3DataReturn.error);
                 }
@@ -676,9 +553,7 @@
                 } catch (error) {
                     this.$notify({
                         title: "workflow.index",
-                        message:
-                            error.message ||
-                            "workflow.loadError",
+                        message: error.message || "workflow.loadError",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -696,12 +571,8 @@
                             id: step.id,
                             name: step.name,
                             order: step.order,
-                            profileId: String(
-                                step.profile?.id || ""
-                            ),
-                            statusId: String(
-                                step.status?.id || ""
-                            ),
+                            profileId: String(step.profile?.id || ""),
+                            statusId: String(step.status?.id || ""),
                             hasStepTools: step.hasStepTools,
                             isActive: true,
                         })),
@@ -709,9 +580,7 @@
                 } catch (error) {
                     this.$notify({
                         title: "workflow.index",
-                        message:
-                            error.message ||
-                            "workflow.loadError",
+                        message: error.message || "workflow.loadError",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -724,19 +593,15 @@
                 this.isLoading = true;
                 try {
                     await this.loadProfiles();
-                    
+
                     let result = await this.getPhase2Data();
                     this.phase2Data = {
                         steps: result.map((step) => ({
                             id: step.id,
                             name: step.name,
                             order: step.order,
-                            profileId: String(
-                                step.profile?.id || ""
-                            ),
-                            statusId: String(
-                                step.status?.id || ""
-                            ),
+                            profileId: String(step.profile?.id || ""),
+                            statusId: String(step.status?.id || ""),
                             hasStepTools: step.hasStepTools,
                         })),
                     };
@@ -744,9 +609,7 @@
                 } catch (error) {
                     this.$notify({
                         title: "workflow.index",
-                        message:
-                            error.message ||
-                            "workflow.loadError",
+                        message: error.message || "workflow.loadError",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -760,15 +623,9 @@
             this.loadWorkflowData();
         },
         async mounted() {
-            const phase1 = localStorage.getItem(
-                "wizardPhase1Data"
-            );
-            const phase2 = localStorage.getItem(
-                "wizardPhase2Data"
-            );
-            const phase3 = localStorage.getItem(
-                "wizardPhase3Data"
-            );
+            const phase1 = localStorage.getItem("wizardPhase1Data");
+            const phase2 = localStorage.getItem("wizardPhase2Data");
+            const phase3 = localStorage.getItem("wizardPhase3Data");
             if (phase1 && phase2 && phase3) {
                 this.phase1Data = JSON.parse(phase1);
                 this.phase2Data = JSON.parse(phase2);
@@ -782,8 +639,7 @@
             "$route.params.phase": {
                 handler(newPhase) {
                     if (newPhase) {
-                        this.currentPhase =
-                            Number(newPhase);
+                        this.currentPhase = Number(newPhase);
                         if (this.workflowIdInternal) {
                             if (this.currentPhase === 1) {
                                 this.loadPhase1Data();
