@@ -13,10 +13,16 @@
                             class="btn btn-outline-primary table-btn btn-sm position-relative"
                             type="button"
                             data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
                             aria-expanded="false"
                             style="display: flex; align-items: center; justify-content: center"
                         >
                             <LucideIcon icon="Bell" />
+                            <span
+                                v-if="showNotificationDot"
+                                class="notification-dot"
+                                aria-hidden="true"
+                            ></span>
                             <span
                                 v-if="unreadNotificationCount > 0"
                                 class="notification-badge"
@@ -47,39 +53,34 @@
                                 <div
                                     :class="[
                                         'notification-row d-flex align-items-center justify-content-between px-3 py-2',
-                                        notification.status === 'completed'
-                                            ? 'notification-completed'
-                                            : 'notification-in-progress',
+                                        notification.status === 'in_progress'
+                                            ? 'notification-in-progress'
+                                            : notification.success !== false
+                                              ? 'notification-completed'
+                                              : 'notification-failed',
                                     ]"
                                 >
-                                    <div class="d-flex align-items-center flex-grow-1 min-width-0">
-                                        <span class="notification-file-name text-truncate">
-                                            {{ notification.fileName }}
-                                        </span>
+                                    <span
+                                        class="notification-file-name text-truncate flex-grow-1 min-width-0"
+                                    >
+                                        {{ notification.fileName }}
+                                    </span>
+                                    <span
+                                        v-if="notification.status === 'in_progress'"
+                                        class="d-flex align-items-center ms-2 flex-shrink-0"
+                                    >
                                         <span
-                                            v-if="notification.status === 'in_progress'"
-                                            class="notification-status ms-2"
-                                        >
-                                            <span
-                                                class="spinner-border spinner-border-sm"
-                                                role="status"
-                                                aria-hidden="true"
-                                            ></span>
-                                            {{ $t("common.inProgress", "In progress") }}
-                                        </span>
-                                        <span
-                                            v-else
-                                            class="notification-status ms-2"
-                                        >
-                                            {{ $t("common.completed", "Completed") }}
-                                        </span>
-                                    </div>
+                                            class="spinner-border spinner-border-sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                        ></span>
+                                    </span>
                                     <button
                                         v-if="notification.status === 'completed'"
                                         type="button"
-                                        class="btn btn-link btn-sm p-0 ms-2 text-muted notification-remove"
+                                        class="btn btn-link btn-sm p-0 ms-2 flex-shrink-0 text-muted notification-remove"
                                         :aria-label="$t('common.remove', 'Remove')"
-                                        @click="removeNotification(notification.id)"
+                                        @click.stop="removeNotification(notification.id)"
                                     >
                                         <LucideIcon
                                             icon="X"
@@ -317,6 +318,10 @@
             unreadNotificationCount() {
                 return this.uploadNotifications.length;
             },
+            showNotificationDot() {
+                const list = this.$store.state.uploadNotifications || [];
+                return list.some((n) => n.id && !String(n.id).startsWith("dummy-"));
+            },
             tenantInitialized() {
                 return this.$store.state.tenantInitialized;
             },
@@ -509,6 +514,22 @@
     .notification-in-progress {
         background-color: var(--color-bg-toast-content-primary);
         color: var(--color-toast-content-primary);
+    }
+
+    .notification-failed {
+        background-color: var(--color-bg-toast-content-danger);
+        color: var(--color-toast-content-danger);
+    }
+
+    .notification-dot {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 8px;
+        height: 8px;
+        background-color: var(--color-bg-btn-danger);
+        border-radius: 50%;
+        border: 1px solid #fff;
     }
 
     .notification-file-name {
