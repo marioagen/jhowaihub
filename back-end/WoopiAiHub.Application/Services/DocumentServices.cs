@@ -56,9 +56,12 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
+        private readonly IUserRepository _userRepository;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
+        private const int DocumentHistoryTypeInputQuestionnaire = 1;
+        private const int DocumentHistoryTypeDocumentInput = 2;
 
         public DocumentServices(IDocumentRepository documentRepository,
             IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -83,7 +86,8 @@ namespace WoopiAiHub.Application.Services
             IStepToolOutputRepository stepToolOutputRepository,
             IStepToolRepository stepToolRepository,
             IUsageDailyServices usageDailyServices,
-            IDocumentHistoryRepository documentHistoryRepository)
+            IDocumentHistoryRepository documentHistoryRepository,
+            IUserRepository userRepository)
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
@@ -108,6 +112,7 @@ namespace WoopiAiHub.Application.Services
             _stepToolRepository = stepToolRepository;
             _usageDailyServices = usageDailyServices;
             _documentHistoryRepository = documentHistoryRepository;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -246,7 +251,8 @@ namespace WoopiAiHub.Application.Services
                 await this.ProcessRequestCustomQuery(resultRequest,
                     documentQuestionnaireDto.IdDocument,
                     description,
-                    headersDto.EmailCreator);
+                    headersDto.EmailCreator,
+                    isFromQuestionnaire: true);
             }
 
             return true;
@@ -352,7 +358,8 @@ namespace WoopiAiHub.Application.Services
             var textResponse = await this.ProcessRequestCustomQuery(resultRequest,
                 documentInputDto.Id,
                 documentInputDto.Input,
-                headersDto.EmailCreator);
+                headersDto.EmailCreator,
+                isFromQuestionnaire: false);
 
             return textResponse;
         }
@@ -557,22 +564,30 @@ namespace WoopiAiHub.Application.Services
         /// <param name="resultRequest"></param>
         /// <param name="id"></param>
         /// <param name="input"></param>
+        /// <param name="emailCreator"></param>
+        /// <param name="isFromQuestionnaire"></param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
         /// <exception cref="Exception"></exception>
         private async Task<string> ProcessRequestCustomQuery(HttpResponseMessage resultRequest,
             int id,
             string input,
-            string emailCreator)
+            string emailCreator,
+            bool isFromQuestionnaire)
         {
             if (resultRequest.IsSuccessStatusCode)
             {
                 var queryResponse = await resultRequest.Content.ReadAsStringAsync();
                 var queryResponseModel = JsonConvert.DeserializeObject<QueryResponseModelRefitDto>(queryResponse);
 
+                var userId = _userRepository.FindIdByEmail(emailCreator);
+                var userIdOrNull = (userId == Guid.Empty) ? (Guid?)null : userId;
+                var historyType = isFromQuestionnaire ? DocumentHistoryTypeInputQuestionnaire : DocumentHistoryTypeDocumentInput;
                 var documentHistoryForDb = CreateDocumentHistoryForDb(id,
                     queryResponseModel!.response,
-                    input);
+                    input,
+                    historyType,
+                    userIdOrNull);
                 foreach (var usage in queryResponseModel.Usage)
                 {
                     await _usageDailyServices.AddByValuesAsync(MetricNames.Token, emailCreator, usage.Total_usage ?? 0,
@@ -624,10 +639,14 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <param name="output"></param>
         /// <param name="input"></param>
+        /// <param name="type"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         private static DocumentHistory CreateDocumentHistoryForDb(int id,
             string output,
-            string input)
+            string input,
+            int type,
+            Guid? userId)
         {
             return new DocumentHistory
             (
@@ -635,7 +654,9 @@ namespace WoopiAiHub.Application.Services
                 input,
                 output,
                 0,
-                DateTime.Now
+                DateTime.Now,
+                type,
+                userId
             );
         }
 

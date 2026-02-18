@@ -8,9 +8,7 @@
             </div>
         </div>
         <div
-            v-if="
-                !workflowSteps || workflowSteps.length === 0
-            "
+            v-if="!workflowSteps || workflowSteps.length === 0"
             class="text-center text-muted py-5"
         >
             <p>{{ $t("workflow.noStepsAvailable") }}</p>
@@ -25,12 +23,8 @@
                     :key="step.id || index"
                     class="step-tool-card card shadow-sm rounded-3 mb-3"
                 >
-                    <div
-                        class="card-header d-flex justify-content-between align-items-center"
-                    >
-                        <div
-                            class="d-flex align-items-center"
-                        >
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
                             <div class="step-badge">
                                 <LucideIcon
                                     icon="Info"
@@ -47,38 +41,22 @@
                                 :size="14"
                                 class="me-1"
                             />
-                            {{
-                                getProfileName(
-                                    step.profileId
-                                )
-                            }}
+                            {{ getProfileName(step.profileId) }}
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <label
-                                class="form-label small text-muted"
-                            >
-                                {{
-                                    $t(
-                                        "workflow.responsible"
-                                    )
-                                }}
+                            <label class="form-label small text-muted">
+                                {{ $t("workflow.responsible") }}
                             </label>
-                            <div
-                                class="d-flex align-items-center"
-                            >
+                            <div class="d-flex align-items-center">
                                 <LucideIcon
                                     icon="Users"
                                     :size="16"
                                     class="me-2 text-primary"
                                 />
                                 <span>
-                                    {{
-                                        getProfileName(
-                                            step.profileId
-                                        )
-                                    }}
+                                    {{ getProfileName(step.profileId) }}
                                 </span>
                             </div>
                         </div>
@@ -86,14 +64,8 @@
                             v-if="step.hasStepTools"
                             class="tools-list"
                         >
-                            <p
-                                class="small text-muted mb-2"
-                            >
-                                {{
-                                    $t(
-                                        "workflow.configuredTools"
-                                    )
-                                }}: {{ step.length }}
+                            <p class="small text-muted mb-2">
+                                {{ $t("workflow.configuredTools") }}: {{ step.length }}
                             </p>
                             <button
                                 class="btn btn-outline-primary btn-sm w-100 mb-2"
@@ -104,28 +76,18 @@
                                     :size="15"
                                     class="me-1"
                                 />
-                                {{
-                                    $t(
-                                        "workflow.editToolFlow"
-                                    )
-                                }}
+                                {{ $t("workflow.editToolFlow") }}
                             </button>
                             <button
                                 class="btn btn-outline-danger btn-sm w-100"
-                                @click="
-                                    removeToolFlow(step)
-                                "
+                                @click="removeToolFlow(step)"
                             >
                                 <LucideIcon
                                     icon="Trash"
                                     :size="15"
                                     class="me-1"
                                 />
-                                {{
-                                    $t(
-                                        "workflow.removeToolFlow"
-                                    )
-                                }}
+                                {{ $t("workflow.removeToolFlow") }}
                             </button>
                         </div>
                         <div v-else>
@@ -138,11 +100,7 @@
                                     :size="15"
                                     class="me-1"
                                 />
-                                {{
-                                    $t(
-                                        "workflow.addToolFlow"
-                                    )
-                                }}
+                                {{ $t("workflow.addToolFlow") }}
                             </button>
                         </div>
                     </div>
@@ -176,39 +134,26 @@
         },
         methods: {
             getProfileName(profileId) {
-                const profile = this.profilesList.find(
-                    (p) => p.id === parseInt(profileId)
-                );
+                const profile = this.profilesList.find((p) => p.id === parseInt(profileId));
                 return profile ? profile.text : "N/A";
             },
             addToolFlow(step) {
-                this.$emit(
-                    "add-tool-flow",
-                    step,
-                    this.phase
-                );
+                this.$emit("add-tool-flow", step, this.phase);
             },
             editToolFlow(step) {
-                this.$emit(
-                    "edit-tool-flow",
-                    step,
-                    this.phase
-                );
+                this.$emit("edit-tool-flow", step, this.phase);
             },
             removeToolFlow(step) {
                 this.$emit("remove-tool-flow", step);
             },
             getData() {
                 return {
-                    steps: this.workflowSteps.map(
-                        (step) => ({
-                            id: step.id,
-                            order: step.order,
-                            stepTools: step.stepTools || [],
-                            hasStepTools:
-                                step.hasStepTools || false,
-                        })
-                    ),
+                    steps: this.workflowSteps.map((step) => ({
+                        id: step.id,
+                        order: step.order,
+                        stepTools: step.stepTools || [],
+                        hasStepTools: step.hasStepTools || false,
+                    })),
                 };
             },
         },

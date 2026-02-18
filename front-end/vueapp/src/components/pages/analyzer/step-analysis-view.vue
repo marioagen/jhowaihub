@@ -19,7 +19,6 @@
         />
     </div>
 </template>
-
 <script>
     import StepStepper from "@/components/pages/analyzer/step-stepper";
     import ExtractedFields from "@/components/pages/analyzer/extracted-fields";
@@ -133,7 +132,6 @@
         },
     };
 </script>
-
 <style scoped>
     .step-analysis-container {
         display: flex;

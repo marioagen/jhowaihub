@@ -5,9 +5,7 @@
                 class="row align-items-center mt-3"
                 v-if="!embedded"
             >
-                <div
-                    class="col-md-8 d-flex justify-content-between align-items-center"
-                >
+                <div class="col-md-8 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                         <button
                             class="btn btn-sm p-0 me-3"
@@ -26,24 +24,14 @@
                         <div>
                             <div class="fw-semibold">
                                 {{
-                                    isEditMode
-                                        ? $t(
-                                              "prompts.editPrompt"
-                                          )
-                                        : $t(
-                                              "prompts.newPrompt"
-                                          )
+                                    isEditMode ? $t("prompts.editPrompt") : $t("prompts.newPrompt")
                                 }}
                             </div>
                             <div class="text-muted small">
                                 {{
                                     isEditMode
-                                        ? $t(
-                                              "prompts.subtitleEdit"
-                                          )
-                                        : $t(
-                                              "prompts.subtitleNew"
-                                          )
+                                        ? $t("prompts.subtitleEdit")
+                                        : $t("prompts.subtitleNew")
                                 }}
                             </div>
                         </div>
@@ -59,19 +47,13 @@
                                 class="card-title mb-3"
                                 v-if="!embedded"
                             >
-                                {{
-                                    $t(
-                                        "prompts.information"
-                                    )
-                                }}
+                                {{ $t("prompts.information") }}
                             </h6>
                             <h6
                                 v-else
                                 class="mb-3"
                             >
-                                {{
-                                    $t("prompts.newPrompt")
-                                }}
+                                {{ $t("prompts.newPrompt") }}
                             </h6>
 
                             <div class="mb-3">
@@ -79,35 +61,23 @@
                                     for="inputNamePrompt"
                                     class="form-label"
                                 >
-                                    {{
-                                        $t(
-                                            "prompts.namePrompt"
-                                        )
-                                    }}
+                                    {{ $t("prompts.namePrompt") }}
                                 </label>
                                 <Field
                                     name="name"
                                     :rules="'required|max:50'"
-                                    v-slot="{
-                                        field,
-                                        errorMessage,
-                                    }"
+                                    v-slot="{ field, errorMessage }"
                                 >
                                     <input
                                         v-bind="field"
                                         type="text"
                                         class="form-control"
-                                        :placeholder="
-                                            $t(
-                                                'prompts.placeholderNamePrompt'
-                                            )
-                                        "
+                                        :placeholder="$t('prompts.placeholderNamePrompt')"
                                         id="inputNamePrompt"
                                         aria-describedby=""
                                         name="name"
                                         :class="{
-                                            'is-invalid':
-                                                errorMessage,
+                                            'is-invalid': errorMessage,
                                         }"
                                     />
                                     <span
@@ -123,19 +93,12 @@
                                     for="FormControlTextarea1"
                                     class="form-label"
                                 >
-                                    {{
-                                        $t(
-                                            "common.description"
-                                        )
-                                    }}
+                                    {{ $t("common.description") }}
                                 </label>
                                 <Field
                                     name="description"
                                     :rules="'required|max:500'"
-                                    v-slot="{
-                                        field,
-                                        errorMessage,
-                                    }"
+                                    v-slot="{ field, errorMessage }"
                                 >
                                     <textarea
                                         v-bind="field"
@@ -147,25 +110,15 @@
                                         name="description"
                                         maxlength="500"
                                         :class="{
-                                            'is-invalid':
-                                                errorMessage,
+                                            'is-invalid': errorMessage,
                                         }"
-                                        @input="
-                                            field.onInput(
-                                                $event
-                                            )
-                                        "
+                                        @input="field.onInput($event)"
                                     />
                                     <div
                                         id="descriptionCounter"
                                         class="form-text text-end"
                                     >
-                                        {{
-                                            (
-                                                values.description ||
-                                                ""
-                                            ).length
-                                        }}/500
+                                        {{ (values.description || "").length }}/500
                                     </div>
                                     <span
                                         class="validation-message text-danger"
@@ -181,19 +134,12 @@
                                     for="FormControlTextarea2"
                                     class="form-label"
                                 >
-                                    {{
-                                        $t(
-                                            "prompts.promptContent"
-                                        )
-                                    }}
+                                    {{ $t("prompts.promptContent") }}
                                 </label>
                                 <Field
                                     name="text"
                                     rules="required"
-                                    v-slot="{
-                                        field,
-                                        errorMessage,
-                                    }"
+                                    v-slot="{ field, errorMessage }"
                                 >
                                     <textarea
                                         v-bind="field"
@@ -203,8 +149,7 @@
                                         rows="3"
                                         name="text"
                                         :class="{
-                                            'is-invalid':
-                                                errorMessage,
+                                            'is-invalid': errorMessage,
                                         }"
                                     />
                                     <span
@@ -233,26 +178,18 @@
                                         v-else
                                     />
                                     <span class="fw-bold">
-                                        {{
-                                            $t(
-                                                "prompts.refinePrompt"
-                                            )
-                                        }}
+                                        {{ $t("prompts.refinePrompt") }}
                                     </span>
                                 </button>
                             </div>
 
-                            <div
-                                class="d-flex justify-content-end gap-2 mt-3"
-                            >
+                            <div class="d-flex justify-content-end gap-2 mt-3">
                                 <button
                                     class="btn btn-secondary"
                                     type="button"
                                     @click="cancel"
                                 >
-                                    {{
-                                        $t("common.cancel")
-                                    }}
+                                    {{ $t("common.cancel") }}
                                 </button>
                                 <button
                                     class="btn btn-primary"
@@ -312,20 +249,11 @@
         },
         computed: {
             isEditMode() {
-                return (
-                    this.idEdit !== undefined &&
-                    this.idEdit !== null &&
-                    this.idEdit !== 0
-                );
+                return this.idEdit !== undefined && this.idEdit !== null && this.idEdit !== 0;
             },
         },
         setup() {
-            const {
-                validate,
-                setValues,
-                values,
-                resetForm,
-            } = useForm();
+            const { validate, setValues, values, resetForm } = useForm();
             return {
                 validate,
                 setValues,
@@ -349,37 +277,26 @@
             },
             findById(id) {
                 this.resetData();
-                PromptService.getPromptById(id).then(
-                    (response) => {
-                        this.form = {
-                            name: response.name,
-                            description:
-                                response.description,
-                            text: response.text,
-                        };
-                        this.setValues(this.form);
-                        this.idEdit = id;
-                    }
-                );
+                PromptService.getPromptById(id).then((response) => {
+                    this.form = {
+                        name: response.name,
+                        description: response.description,
+                        text: response.text,
+                    };
+                    this.setValues(this.form);
+                    this.idEdit = id;
+                });
             },
             loadCloneData(id) {
                 this.resetData();
-                PromptService.getPromptById(id).then(
-                    (response) => {
-                        this.form = {
-                            name:
-                                response.name +
-                                " " +
-                                this.$t(
-                                    "prompts.cloneSuffix"
-                                ),
-                            description:
-                                response.description,
-                            text: response.text,
-                        };
-                        this.setValues(this.form);
-                    }
-                );
+                PromptService.getPromptById(id).then((response) => {
+                    this.form = {
+                        name: response.name + " " + this.$t("prompts.cloneSuffix"),
+                        description: response.description,
+                        text: response.text,
+                    };
+                    this.setValues(this.form);
+                });
             },
             updatePrompt: function () {
                 var paramsData = {
@@ -390,15 +307,11 @@
                 };
                 PromptService.updatePrompt(paramsData)
                     .then((response) => {
-                        if (!response)
-                            throw new Error(
-                                "Update failed"
-                            );
+                        if (!response) throw new Error("Update failed");
 
                         this.$notify({
                             title: "prompts.title",
-                            message:
-                                "prompts.updateSuccess",
+                            message: "prompts.updateSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
@@ -421,15 +334,23 @@
                 };
                 PromptService.createPrompt(paramsData)
                     .then((response) => {
-                        if (!response)
-                            throw new Error(
-                                "Create failed"
-                            );
+                        if (response.error) {
+                            let errorMessage = response.error.response.data.detail;
+                            return this.$notify({
+                                title: "prompts.title",
+                                message: this.$t(errorMessage),
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        }
+
+                        if (!response) {
+                            throw new Error("Create failed");
+                        }
 
                         this.$notify({
                             title: "prompts.title",
-                            message:
-                                "prompts.updateSuccess",
+                            message: "prompts.updateSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
@@ -455,11 +376,7 @@
                 });
             },
             refinePrompt: function () {
-                if (
-                    !this.values ||
-                    !this.values.text ||
-                    this.values.text.trim() === ""
-                ) {
+                if (!this.values || !this.values.text || this.values.text.trim() === "") {
                     return this.$notify({
                         title: "prompts.title",
                         message: "prompts.emptyPromptError",
@@ -470,20 +387,13 @@
                 this.isRefining = true;
                 PromptService.refinePrompt(this.values.text)
                     .then((response) => {
-                        if (!response || response.error)
-                            throw new Error(
-                                "Refine failed"
-                            );
+                        if (!response || response.error) throw new Error("Refine failed");
 
                         let refinedText = response;
                         if (typeof response === "object") {
-                            refinedText = Object.entries(
-                                response
-                            )
+                            refinedText = Object.entries(response)
                                 .map(([key, value]) => {
-                                    if (
-                                        Array.isArray(value)
-                                    ) {
+                                    if (Array.isArray(value)) {
                                         return `${key}\n${value.map((item) => `${item}`).join("\n")}`;
                                     }
                                     return `${key}\n${value}`;
@@ -496,8 +406,7 @@
                         });
                         this.$notify({
                             title: "prompts.title",
-                            message:
-                                "prompts.refineSuccess",
+                            message: "prompts.refineSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
