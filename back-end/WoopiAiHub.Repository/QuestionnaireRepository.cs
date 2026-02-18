@@ -151,13 +151,19 @@ namespace WoopiAiHub.Repository
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         private bool VerifyIfQuestionnaireIsUsedInTheWorkflowTools(List<int> ids)
         {
+            var toolTypeId = _context.ToolTypes.Where(tt => tt.Name == HandlersTypes.Quiz).Select(tt => tt.Id).FirstOrDefault();
             var idsString = ids.Select(i => i.ToString());
             return  _context.StepTools
                 .Include(st => st.Tool!)
                 .ThenInclude(t => t!.ToolType)
-                .Where(st => st.Tool!.ToolType!.Name == HandlersTypes.Quiz)
+                .Where(st => st.Tool!.ToolType!.Id == toolTypeId)
                 .Where(st => st.Parameters.Select(s => s.Value).Any(s => idsString.Contains(s)))
                 .Any();
         }
