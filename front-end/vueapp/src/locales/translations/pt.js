@@ -60,6 +60,20 @@ const portuguese = {
         typeYourQuestion:
             "Digite sua pergunta sobre o documento...",
         workflow: "Esteira de Processamento",
+        questionsHistoryModal: {
+            title: "Histórico de Conversas",
+            subtitle: "Perguntas e respostas anteriores realizadas sobre este documento",
+            searchPlaceholder: "Buscar em perguntas ou",
+            allUsers: "Todos os usuários",
+            sortedBy: "Ordenado por",
+            orderOldest: "Mais antigos",
+            orderNewest: "Mais recentes",
+            loadMore: "Ver mais",
+            loading: "A carregar…",
+            interactionsCount: "interações registradas",
+            tagQuestionnaire: "Questionário",
+            tagFreeQuestion: "Pergunta Livre",
+        },
     },
     card: {
         assignBtn: "Atribuir",

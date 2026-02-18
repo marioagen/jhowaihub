@@ -1,8 +1,6 @@
 <template>
     <main>
-        <div
-            class="container-fluid scroll-area manage-user mx-2"
-        >
+        <div class="container-fluid scroll-area manage-user mx-2">
             <div class="row">
                 <div class="col-12">
                     <h5 class="mb-0 fw-bold">
@@ -55,9 +53,7 @@
         mounted() {
             let activeTab = this.$route.query.tab;
             if (activeTab !== undefined) {
-                this.$refs.TabsComponent.setActiveTab(
-                    activeTab
-                );
+                this.$refs.TabsComponent.setActiveTab(activeTab);
             }
         },
     };

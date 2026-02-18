@@ -2,9 +2,7 @@
     <div class="row">
         <div class="col-10">
             <div class="input-group">
-                <span
-                    class="input-group-text border-end-0 bg-white"
-                >
+                <span class="input-group-text border-end-0 bg-white">
                     <LucideIcon
                         icon="Search"
                         :size="16"
@@ -80,16 +78,12 @@
                 if (!apiName) return "";
                 const key = "tools.typeDisplay." + apiName;
                 const translated = this.$t(key);
-                return translated !== key
-                    ? translated
-                    : apiName;
+                return translated !== key ? translated : apiName;
             },
             getToolTypes() {
-                ToolsTypesService.getToolTypes().then(
-                    (response) => {
-                        this.toolsTypesList = response;
-                    }
-                );
+                ToolsTypesService.getToolTypes().then((response) => {
+                    this.toolsTypesList = response;
+                });
             },
             filterData() {
                 this.$emit("filter", this.filters);

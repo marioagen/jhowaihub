@@ -4,7 +4,11 @@
             <div>
                 <div class="row align-items-center mb-4">
                     <div class="col-8 d-flex align-items-center">
-                        <button class="btn btn-outline-primary btn-table btn-sm me-2" @click="goBack" type="button">
+                        <button
+                            class="btn btn-outline-primary btn-table btn-sm me-2"
+                            @click="goBack"
+                            type="button"
+                        >
                             <LucideIcon icon="ArrowLeft" />
                         </button>
                         <div>
@@ -34,9 +38,19 @@
                             <LucideIcon icon="PanelLeft" />
                         </label>
 
-                        <input type="radio" class="btn-check" name="view" id="view-both" autocomplete="off"
-                            v-model="viewMode" value="both" />
-                        <label class="btn btn-outline-primary" for="view-both">
+                        <input
+                            type="radio"
+                            class="btn-check ms-2"
+                            name="view"
+                            id="view-both"
+                            autocomplete="off"
+                            v-model="viewMode"
+                            value="both"
+                        />
+                        <label
+                            class="btn btn-outline-primary"
+                            for="view-both"
+                        >
                             <LucideIcon icon="Columns2" />
                         </label>
 
@@ -58,33 +72,45 @@
                     </button>
                 </div>
                 <div class="row">
-                    <prompt-view :hashDocument="hashDocument" :historyListOrder="historyListOrder"
-                        @showHistory="showHistory" @unshiftHistoryList="
-                            unshiftHistoryList
-                        " @pushHistoryList="pushHistoryList" @showAlertToast="showAlertToast"
-                        @clearMyInterval="clearMyInterval" v-if="!isExpandedHistory" />
+                    <prompt-view
+                        :hashDocument="hashDocument"
+                        :historyListOrder="historyListOrder"
+                        @showHistory="showHistory"
+                        @unshiftHistoryList="unshiftHistoryList"
+                        @pushHistoryList="pushHistoryList"
+                        @showAlertToast="showAlertToast"
+                        @clearMyInterval="clearMyInterval"
+                        v-if="!isExpandedHistory"
+                    />
 
-                    <doc-view @showNormalize="normalize" id="docView" v-if="
-                        viewMode === 'doc' ||
-                        viewMode === 'both'
-                    " :documentView="viewMode" />
-                    <div :id="'docHistory'" :class="viewMode === 'both'
-                        ? 'col-md-6'
-                        : 'col-12'
-                        ">
-                        <step-analysis-view :document-id="parseInt(idAnalyzer)
-                            " :card-id="parseInt(idCard)" @show-alert-toast="
-                                showAlertToast
-                            " v-if="
-                                viewMode === 'history' ||
-                                viewMode === 'both'
-                            " />
+                    <doc-view
+                        @showNormalize="normalize"
+                        id="docView"
+                        v-if="viewMode === 'doc' || viewMode === 'both'"
+                        :documentView="viewMode"
+                    />
+                    <div
+                        :id="'docHistory'"
+                        :class="viewMode === 'both' ? 'col-md-6' : 'col-12'"
+                    >
+                        <step-analysis-view
+                            :document-id="parseInt(idAnalyzer)"
+                            :card-id="parseInt(idCard)"
+                            @show-alert-toast="showAlertToast"
+                            v-if="viewMode === 'history' || viewMode === 'both'"
+                        />
                     </div>
                 </div>
             </div>
-            <div v-if="isExpandedHistory" style="position: absolute; top: 50%">
-                <a class="btn btn-light btn-sm shadow" :title="$t('quizzes.questionnaireAndAi')
-                    " @click="expandHistory">
+            <div
+                v-if="isExpandedHistory"
+                style="position: absolute; top: 50%"
+            >
+                <a
+                    class="btn btn-light btn-sm shadow"
+                    :title="$t('quizzes.questionnaireAndAi')"
+                    @click="expandHistory"
+                >
                     <img src="./../../../assets/img/prompt.png" />
                 </a>
             </div>
@@ -110,46 +136,45 @@ import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal"
 import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal";
 import { hasPermission } from "@/utils/permissions";
 
-export default {
-    name: "AnalyzerIndex",
-    data() {
-        return {
-            crumbsData: [],
-            sidebarData: "Documents",
-            idAnalyzer: this.$route.params.documentId,
-            idCard: this.$route.params.cardId,
-            backPage: this.$route.query.page,
-            hashDocument: "",
-            isExpandedHistory: false,
-            historyListOrder: "desc",
-            toastShow: false,
-            toastColor: "",
-            toastMessage: "",
-            myInterval: null,
-            dataShowHistory: true,
-            dataUnshiftHistoryList: {},
-            dataPushHistoryList: {},
-            dataView: {
-                Id: parseInt(this.idAnalyzer),
-                Embeddings_model_name: "",
-            },
-            isReprocessing: true,
-            showLoading: false,
-            workflowName: "",
-            documentName: "",
-            viewMode: "both",
-            cardStatus: null,
-            workflowId: null,
-            currentStepOrder: 0,
-        };
-    },
-    components: {
-        PromptView,
-        DocView,
-        StepAnalysisView,
-        ToastAlert,
-        NormalizeIndex,
-        DocumentRejectionModal,
+    export default {
+        name: "AnalyzerIndex",
+        data() {
+            return {
+                crumbsData: [],
+                sidebarData: "Documents",
+                idAnalyzer: this.$route.params.documentId,
+                idCard: this.$route.params.cardId,
+                backPage: this.$route.query.page,
+                hashDocument: "",
+                isExpandedHistory: false,
+                historyListOrder: "desc",
+                toastShow: false,
+                toastColor: "",
+                toastMessage: "",
+                myInterval: null,
+                dataShowHistory: true,
+                dataUnshiftHistoryList: {},
+                dataPushHistoryList: {},
+                dataView: {
+                    Id: parseInt(this.idAnalyzer),
+                    Embeddings_model_name: "",
+                },
+                isReprocessing: true,
+                showLoading: false,
+                workflowName: "",
+                documentName: "",
+                viewMode: "both",
+                cardStatus: null,
+                workflowId: null,
+                currentStepOrder: 0,
+            };
+        },
+        components: {
+            PromptView,
+            DocView,
+            StepAnalysisView,
+            ToastAlert,
+            NormalizeIndex,        DocumentRejectionModal,
         DocumentViewRejectionModal,
     },
     computed: {
@@ -160,126 +185,126 @@ export default {
             return this.cardStatus?.toLowerCase() === 'rejected';
         }
     },
-    methods: {
-        normalize: function (dataView, isReprocessing) {
-            this.dataView = dataView;
-            this.isReprocessing = isReprocessing;
-            this.showLoading = true;
-        },
-        setCrumbsData: function () {
-            this.crumbsData = [
-                {
-                    crumb: this.$t("documents.title"),
-                    link: { to: "Documents" },
-                },
-                {
-                    crumb: this.$t("documents.listing"),
-                    link: {
-                        to: "Documents",
-                        queryPage:
-                            this.$route.query.page,
+        methods: {
+            normalize: function (dataView, isReprocessing) {
+                this.dataView = dataView;
+                this.isReprocessing = isReprocessing;
+                this.showLoading = true;
+            },
+            setCrumbsData: function () {
+                this.crumbsData = [
+                    {
+                        crumb: this.$t("documents.title"),
+                        link: { to: "Documents" },
                     },
-                },
-                {
-                    crumb: this.$t("common.consult"),
-                    link: {
-                        to: "Analyzer",
-                        queryPage:
-                            this.$route.query.page,
+                    {
+                        crumb: this.$t("documents.listing"),
+                        link: {
+                            to: "Documents",
+                            queryPage:
+                                this.$route.query.page,
+                        },
                     },
-                },
-            ];
-        },
-        expandHistory: function () {
-            this.isExpandedHistory =
-                !this.isExpandedHistory;
-        },
-        updateHistoryListOrder: function (data) {
-            this.historyListOrder = data.value;
-        },
-        showHistory: function () {
-            this.dataShowHistory =
-                !this.dataShowHistory;
-        },
-        unshiftHistoryList: function (data) {
-            this.dataUnshiftHistoryList = data;
-        },
-        pushHistoryList: function (data) {
-            this.dataPushHistoryList = data;
-        },
-        showAlertToast: function (data) {
-            this.alertToast(data.msg, data.color);
-        },
-        getDataDocument: function () {
-            let self = this;
-            api.get(
-                "/Document/Analyze/" + this.idAnalyzer
-            )
-                .then(function (result) {
-                    self.hashDocument =
-                        result.data.referenceFile;
-                })
-                .catch(function (e) {
-                    LogService.showMessage(
-                        "Error loading document: " + e
+                    {
+                        crumb: this.$t("common.consult"),
+                        link: {
+                            to: "Analyzer",
+                            queryPage:
+                                this.$route.query.page,
+                        },
+                    },
+                ];
+            },
+            expandHistory: function () {
+                this.isExpandedHistory =
+                    !this.isExpandedHistory;
+            },
+            updateHistoryListOrder: function (data) {
+                this.historyListOrder = data.value;
+            },
+            showHistory: function () {
+                this.dataShowHistory =
+                    !this.dataShowHistory;
+            },
+            unshiftHistoryList: function (data) {
+                this.dataUnshiftHistoryList = data;
+            },
+            pushHistoryList: function (data) {
+                this.dataPushHistoryList = data;
+            },
+            showAlertToast: function (data) {
+                this.alertToast(data.msg, data.color);
+            },
+            getDataDocument: function () {
+                let self = this;
+                api.get(
+                    "/Document/Analyze/" + this.idAnalyzer
+                )
+                    .then(function (result) {
+                        self.hashDocument =
+                            result.data.referenceFile;
+                    })
+                    .catch(function (e) {
+                        LogService.showMessage(
+                            "Error loading document: " + e
+                        );
+                    })
+                    .finally(function () {
+                        LogService.showMessage(
+                            "Finished request."
+                        );
+                    });
+            },
+            async getCardHeaderInfo() {
+                const result =
+                    await CardsServices.findCardHeaderInfo(
+                        this.idCard
                     );
-                })
-                .finally(function () {
-                    LogService.showMessage(
-                        "Finished request."
-                    );
-                });
+                if (result && !result.error) {
+                    this.workflowName = result.workflowName;
+                    this.documentName = result.cardName;
+                    this.cardStatus = result.statusName;
+                    this.currentStepOrder = result.currentStepOrder;
+                    this.workflowId = result.workflowId;
+                }
+            },
+            goBack() {
+                if (this.backPage) {
+                    this.$router.push({
+                        name: "Documents",
+                        query: { page: this.backPage },
+                    });
+                } else {
+                    this.$router.back();
+                }
+            },
+            alertToast: function (msg, color) {
+                this.toastMessage = msg;
+                this.toastColor = color;
+                this.toastShow = true;
+                let self = this;
+                this.myInterval = setInterval(function () {
+                    self.toastMessage = "";
+                    self.toastColor = "";
+                    self.toastShow = false;
+                    clearInterval(self.myInterval);
+                }, 3000);
+            },
+            closeToast: function () {
+                this.toastShow = false;
+                this.clearMyInterval();
+            },
+            clearMyInterval: function () {
+                clearInterval(this.myInterval);
+                this.myInterval = null;
+            },
         },
-        async getCardHeaderInfo() {
-            const result =
-                await CardsServices.findCardHeaderInfo(
-                    this.idCard
-                );
-            if (result && !result.error) {
-                this.workflowName = result.workflowName;
-                this.documentName = result.cardName;
-                this.cardStatus = result.statusName;
-                this.currentStepOrder = result.currentStepOrder;
-                this.workflowId = result.workflowId;
-            }
+        created() {
+            this.setCrumbsData();
+            this.getDataDocument();
+            this.getCardHeaderInfo();
         },
-        goBack() {
-            if (this.backPage) {
-                this.$router.push({
-                    name: "Documents",
-                    query: { page: this.backPage },
-                });
-            } else {
-                this.$router.back();
-            }
-        },
-        alertToast: function (msg, color) {
-            this.toastMessage = msg;
-            this.toastColor = color;
-            this.toastShow = true;
-            let self = this;
-            this.myInterval = setInterval(function () {
-                self.toastMessage = "";
-                self.toastColor = "";
-                self.toastShow = false;
-                clearInterval(self.myInterval);
-            }, 3000);
-        },
-        closeToast: function () {
-            this.toastShow = false;
-            this.clearMyInterval();
-        },
-        clearMyInterval: function () {
-            clearInterval(this.myInterval);
-            this.myInterval = null;
-        },
-    },
-    created() {
-        this.setCrumbsData();
-        this.getDataDocument();
-        this.getCardHeaderInfo();
-    },
-};
+    };
 </script>
 <style scoped>
 .container-fluid {

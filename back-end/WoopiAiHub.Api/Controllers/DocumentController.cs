@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Application.Dto;
+using WoopiAiHub.Application.Dto;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -209,6 +209,39 @@ namespace WoopiAiHub.Api.Controllers
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(FindDocumentHistory)} method");
                 return BadRequest("Error while finding history" + ex);
+            }
+        }
+
+        /// <summary>
+        /// Returns the first N document history entries by document id (cumulative load: pass take=10, then 20, then 30...).
+        /// Optional query: search (filter Input/Output), order (asc/desc), orderBy (created).
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="take"></param>
+        /// <param name="search"></param>
+        /// <param name="order"></param>
+        /// <param name="orderBy"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpGet("History/{id}/batch")]
+        [SwaggerOperation("Returns document history entries for a document, limited by take (load more: 10, 20, 30...)")]
+        [ProducesResponseType(typeof(IEnumerable<DocumentHistoryDto>), StatusCodes.Status200OK)]
+        public IActionResult GetDocumentHistoryBatch(int id,
+                                                     [FromQuery] int take = 10,
+                                                     [FromQuery] string? search = null,
+                                                     [FromQuery] string? order = null,
+                                                     [FromQuery] string? orderBy = null,
+                                                     [FromQuery] Guid? user = null)
+        {
+            try
+            {
+                var result = _documentHistoryServices.FindByIdWithTake(id, take, search, order, orderBy, user);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(GetDocumentHistoryBatch)} method");
+                return BadRequest("Error while finding history batch" + ex);
             }
         }
 

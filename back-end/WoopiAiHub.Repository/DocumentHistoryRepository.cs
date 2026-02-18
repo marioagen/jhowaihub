@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using System.Linq.Dynamic.Core;
@@ -36,6 +36,38 @@ namespace WoopiAiHub.Repository
         public IEnumerable<DocumentHistory> FindById(int idDocument)
         {
             return _context.DocumentHistories.Where(a => a.IdDocument.Equals(idDocument)).AsNoTracking();
+        }
+
+        /// <summary>
+        /// Find the first N DocumentHistory entries by the id of the document (cumulative load: first 10, then 20, then 30...).
+        /// Optional filter by search (Input or Output), order and orderBy (e.g. orderBy=created, order=desc).
+        /// </summary>
+        /// <param name="idDocument"></param>
+        /// <param name="take"></param>
+        /// <param name="search">Optional. Filter by text in Input or Output.</param>
+        /// <param name="order">Optional. "asc" or "desc". Default desc.</param>
+        /// <param name="orderBy">Optional. "created". Default created.</param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public IEnumerable<DocumentHistory> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null, Guid? userId = null)
+        {
+            var query = _context.DocumentHistories
+                .Include(h => h.User)
+                .Where(a => a.IdDocument == idDocument);
+
+            if (userId.HasValue)
+                query = query.Where(a => a.UserId == userId.Value);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(a => (a.Input != null && a.Input.Contains(term)) || (a.Output != null && a.Output.Contains(term)));
+            }
+
+            var isDesc = string.IsNullOrWhiteSpace(order) || order.Trim().Equals("desc", StringComparison.OrdinalIgnoreCase);
+            query = isDesc ? query.OrderByDescending(a => a.Created) : query.OrderBy(a => a.Created);
+
+            return query.Take(take).AsNoTracking();
         }
 
         /// <summary>
