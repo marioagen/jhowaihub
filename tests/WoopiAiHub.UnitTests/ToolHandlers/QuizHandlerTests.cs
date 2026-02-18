@@ -35,7 +35,6 @@ namespace WoopiAiHub.UnitTests.Handlers
             _handler = _mocker.CreateInstance<QuizHandler>();
         }
 
-///
         [Fact(DisplayName = "BuildPayload should return valid ExecutionMessageDto")]        
         [Trait("BuildPayload", "Success")]
         public async Task BuildPayload_ValidInput_ReturnsExecutionMessageDto()

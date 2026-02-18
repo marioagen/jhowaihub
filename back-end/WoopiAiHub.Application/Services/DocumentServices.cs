@@ -442,11 +442,10 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var item in usages)
                 {
-                    await _usageDailyServices.AddByValuesAsync(
+                    await _usageDailyServices.AddByRangeValuesAsync(
                         MetricNames.Token,
                         documentQuestionnaireDto.Email,
-                        item.TotalUsage,
-                        item.Model
+                        new List<(string Model, int TotalUsage)> { (item.Model, item.TotalUsage) }
                     );
                 }
 
