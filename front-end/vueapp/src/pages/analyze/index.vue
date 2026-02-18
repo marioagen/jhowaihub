@@ -92,6 +92,7 @@
                 </div>
                 <ResizeColumnsComponent
                     v-if="viewMode === 'both'"
+                    preference-key="analyzeLeftColumnPercent"
                     :min-height="'300px'"
                 >
                     <template #left>
