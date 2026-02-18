@@ -1,7 +1,7 @@
 <template>
     <div
         class="doc-view-scroll"
-        :class="documentView === 'both' ? 'col-md-6' : 'col-12'"
+        :class="fillContainer ? 'w-100' : documentView === 'both' ? 'col-md-6' : 'col-12'"
     >
         <div
             class="mb-2"
@@ -119,6 +119,11 @@
             documentView: {
                 type: String,
                 required: true,
+            },
+            /** When true, component fills its container (e.g. inside resizable split). */
+            fillContainer: {
+                type: Boolean,
+                default: false,
             },
         },
         data() {

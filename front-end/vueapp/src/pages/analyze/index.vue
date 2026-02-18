@@ -22,13 +22,19 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center mt-1">
-                    <span class="badge bg-light text-dark">
-                        <i class="fas fa-project-diagram me-1 text-primary"></i>
+                    <span class="badge bg-light text-primary">
+                        <LucideIcon
+                            icon="Waypoints"
+                            :size="15"
+                        />
                         {{ workflowName }}
                     </span>
                     /
-                    <span class="badge bg-light text-dark">
-                        <i class="fas fa-file-alt me-1 text-primary"></i>
+                    <span class="badge bg-light text-primary">
+                        <LucideIcon
+                            icon="FileText"
+                            :size="15"
+                        />
                         {{ documentName }}
                     </span>
                     <div
@@ -84,22 +90,48 @@
                         </label>
                     </div>
                 </div>
-                <div class="row">
+                <ResizeColumnsComponent
+                    v-if="viewMode === 'both'"
+                    :min-height="'300px'"
+                >
+                    <template #left>
+                        <DocumentViewer
+                            @showNormalize="normalize"
+                            id="docView"
+                            :documentView="'both'"
+                            :fillContainer="true"
+                        />
+                    </template>
+                    <template #right>
+                        <div
+                            id="docHistory"
+                            class="analyze-doc-history"
+                        >
+                            <AnalysisStepsSection
+                                :document-id="parseInt(documentId)"
+                                :card-id="parseInt(cardId)"
+                            />
+                        </div>
+                    </template>
+                </ResizeColumnsComponent>
+                <div
+                    v-else
+                    class="row"
+                >
                     <DocumentViewer
                         @showNormalize="normalize"
                         id="docView"
-                        v-if="viewMode === 'doc' || viewMode === 'both'"
+                        v-if="viewMode === 'doc'"
                         :documentView="viewMode"
                     />
-
                     <div
                         :id="'docHistory'"
-                        :class="viewMode === 'both' ? 'col-md-6' : 'col-12'"
+                        class="col-12"
+                        v-if="viewMode === 'history'"
                     >
                         <AnalysisStepsSection
                             :document-id="parseInt(documentId)"
                             :card-id="parseInt(cardId)"
-                            v-if="viewMode === 'history' || viewMode === 'both'"
                         />
                     </div>
                 </div>
@@ -128,6 +160,7 @@
     import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
+    import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
     import CardsServices from "@/services/cards/CardsServices";
     import AnalyzerService from "@/services/documents/AnalyzerService";
     import LogService from "@/services/log/logService";
@@ -164,6 +197,7 @@
             DocumentViewer,
             AnalysisStepsSection,
             NormalizeIndex,
+            ResizeColumnsComponent,
         },
         methods: {
             normalize(dataView, isReprocessing) {
@@ -234,12 +268,14 @@
         }
     }
 
+    .analyze-doc-history,
     #docHistory {
         overflow-y: auto;
         max-height: 70vh;
-        min-height: 300px; /* Opcional: altura mínima para não ficar pequeno demais */
+        min-height: 300px;
         height: auto !important;
     }
+
     .btn-check:checked + .btn {
         background-color: #0d6efd !important; /* azul bootstrap */
         color: white !important;
