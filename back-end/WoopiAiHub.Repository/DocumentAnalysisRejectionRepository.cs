@@ -15,12 +15,22 @@ namespace WoopiAiHub.Repository
             _context = context;
         }
 
+        /// <summary>
+        /// Create a new document analysis rejection record in the database.
+        /// </summary>
+        /// <param name="rejection"></param>
+        /// <returns></returns>
         public async Task<bool> CreateAsync(DocumentAnalysisRejection rejection)
         {
             await _context.DocumentAnalysisRejections.AddAsync(rejection);
             return await _context.SaveChangesAsync() > 0;
         }
 
+        /// <summary>
+        /// Find all document analysis rejections for a specific card, including the user information of who made the rejection, ordered by creation date in descending order.
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
         public async Task<List<DocumentAnalysisRejectionDto>> FindByCardIdAsync(int cardId)
         {
             return await _context.DocumentAnalysisRejections
