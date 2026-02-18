@@ -5,9 +5,9 @@
                 <div>
                     <h5 class="modal-title fw-bold">
                         <i class="fas fa-times-circle text-danger me-2"></i>
-                        {{ $t('analyze.reject.title') }}
+                        {{ $t('analyze.rejection.title') }}
                     </h5>
-                    <small class="text-muted d-block">{{ $t('analyze.reject.justificationInstructions') }}</small>
+                    <small class="text-muted d-block">{{ $t('analyze.rejection.justificationInstructions') }}</small>
                 </div>
                 <button class="btn-close" data-bs-dismiss="modal" @click="close" />
             </div>
@@ -16,12 +16,12 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label for="justification" class="form-label">
-                        {{ $t('analyze.reject.justification') }} <span class="text-danger">*</span>
+                        {{ $t('analyze.rejection.justification') }} <span class="text-danger">*</span>
                     </label>
                     <Field name="justification" rules="required" v-slot="{ field, errorMessage }">
                         <textarea v-bind="field" class="form-control" id="justification" rows="3"
                             :class="{ 'is-invalid': errorMessage }"
-                            :placeholder="$t('analyze.reject.justificationPlaceholder')"></textarea>
+                            :placeholder="$t('analyze.rejection.justificationPlaceholder')"></textarea>
                         <span v-if="errorMessage" class="validation-message text-danger">
                             {{ errorMessage }}
                         </span>
@@ -29,12 +29,12 @@
                 </div>
                 <div class="mb-3">
                     <label for="returnStep" class="form-label">
-                        {{ $t('analyze.reject.returnToStep') }} <span class="text-danger">*</span>
+                        {{ $t('analyze.rejection.returnToStep') }} <span class="text-danger">*</span>
                     </label>
                     <Field name="selectedStepId" rules="required" v-slot="{ field, errorMessage }">
                         <select v-bind="field" class="form-select" id="returnStep"
                             :class="{ 'is-invalid': errorMessage }">
-                            <option value="">{{ $t('analyze.reject.selectStep') }}</option>
+                            <option value="">{{ $t('analyze.rejection.selectStep') }}</option>
                             <option v-for="step in steps" :key="step.id" :value="step.id">
                                 {{ step.name }}
                             </option>
@@ -49,10 +49,10 @@
         <template #footer>
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-light" @click="close">
-                    {{ $t('analyze.reject.cancel') }}
+                    {{ $t('analyze.rejection.cancel') }}
                 </button>
                 <button type="button" class="btn btn-danger" @click="confirm" :disabled="loading">
-                    {{ $t('analyze.reject.confirm') }}
+                    {{ $t('analyze.rejection.confirm') }}
                 </button>
             </div>
         </template>
