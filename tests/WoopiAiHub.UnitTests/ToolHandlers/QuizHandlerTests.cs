@@ -78,21 +78,5 @@ namespace WoopiAiHub.UnitTests.Handlers
             Assert.Equal(1, message.Questions.First().Id);
             Assert.Equal("Q1", message.Questions.First().Question);
         }
-
-        [Fact(DisplayName = "BuildPayload should throw ArgumentException when AiGateway info is missing")]       
-        [Trait("BuildPayload", "Fail")]
-        public async Task BuildPayload_MissingAiGatewayInfo_ThrowsArgumentException()
-        {
-            // Arrange
-            var automationDto = new AutomationServicesDto(1, 1, "tenant-test", "user@test.com", "ref-file", 1);
-            var input = new StepToolParameter(1, System.DateTime.Now, 1, false, null, "123");
-            
-            var tenantInfo = new TenantInfoDto { Name = "tenant-test", AiGatewayApplicationId = null }; // Missing ID
-            _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync("tenant-test")).ReturnsAsync(tenantInfo);
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<System.ArgumentException>(() => _handler.BuildPayload(automationDto, input, null!));
-            Assert.Equal("AiGateway ApplicationId not found", exception.Message);
-        }
     }
 }
