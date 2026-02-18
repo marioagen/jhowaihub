@@ -2,7 +2,7 @@
   <div class="vue-flow__node-default item-box shadow-sm">
     <Handle v-if="!node.data.isStartNode" type="target" position="left" class="hub-handle" />
     <div class="item-left me-2">
-      <div class="p-2" :class="node.data.toolType === 'Quiz' ? 'icon-quiz' : ''">
+      <div class="p-2">
         <LucideIcon :icon="node.data.icon" :color="node.data.color" />
       </div>
       <div>
