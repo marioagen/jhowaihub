@@ -24,9 +24,7 @@
                 <span v-else>-</span>
             </template>
             <template #cell-actions="{ data }">
-                <ActionTableListComponent
-                    v-slot="{ actionClass }"
-                >
+                <ActionTableListComponent v-slot="{ actionClass }">
                     <a
                         :class="actionClass"
                         class="text-primary"
@@ -97,9 +95,7 @@
                         v-model="cloneWorkflowName"
                         type="text"
                         class="form-control"
-                        :placeholder="
-                            $t('workflow.namePlaceholder')
-                        "
+                        :placeholder="$t('workflow.namePlaceholder')"
                         @keyup.enter="confirmClone"
                     />
                 </div>
@@ -164,8 +160,7 @@
             getWorkflowList() {
                 this.table.isLoading = true;
                 const params = {
-                    login: this.$store.state.userProfile
-                        .login,
+                    login: this.$store.state.userProfile.login,
                     search: this.filters.input,
                     pageSize: 10,
                     page: this.table.pagination.currentPage,
@@ -187,8 +182,7 @@
                             });
                         }
                         this.table.data = response.content;
-                        this.table.pagination =
-                            response.pagination;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -225,10 +219,7 @@
                 this.$refs.CloneModal.close();
             },
             confirmClone() {
-                if (
-                    !this.selectedWorkflowForClone ||
-                    !this.cloneWorkflowName?.trim()
-                ) {
+                if (!this.selectedWorkflowForClone || !this.cloneWorkflowName?.trim()) {
                     return;
                 }
                 this.isCloning = true;
@@ -242,27 +233,17 @@
                             this.closeCloneModal();
                             this.getWorkflowList();
                             this.$notify({
-                                title: this.$t(
-                                    "workflow.index"
-                                ),
-                                message: this.$t(
-                                    "workflow.cloneSuccess"
-                                ),
+                                title: this.$t("workflow.index"),
+                                message: this.$t("workflow.cloneSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: this.$t(
-                                    "workflow.index"
-                                ),
+                                title: this.$t("workflow.index"),
                                 message:
-                                    result.error?.response
-                                        ?.data
-                                        ?.labelError ??
-                                    this.$t(
-                                        "workflow.cloneError"
-                                    ),
+                                    result.error?.response?.data?.labelError ??
+                                    this.$t("workflow.cloneError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -274,17 +255,14 @@
             },
             deleteWorkflow() {
                 this.isDeleting = true;
-                WorkflowService.deleteWorkflowById(
-                    this.selectedWorkflow
-                )
+                WorkflowService.deleteWorkflowById(this.selectedWorkflow)
                     .then((result) => {
                         if (result.error === undefined) {
                             this.$refs.DeleteDialog.close();
                             this.getWorkflowList();
                             this.$notify({
                                 title: "workflow.index",
-                                message:
-                                    "workflow.removeSuccess",
+                                message: "workflow.removeSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
@@ -292,9 +270,7 @@
                             this.$notify({
                                 title: "workflow.index",
                                 message:
-                                    result.error.response
-                                        .data.labelError ??
-                                    "workflow.removeError",
+                                    result.error.response.data.labelError ?? "workflow.removeError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -310,9 +286,7 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page
-                ? this.$route.query.page
-                : 1;
+            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
             this.getWorkflowList();
         },
         computed: {

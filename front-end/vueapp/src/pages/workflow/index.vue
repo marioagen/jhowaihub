@@ -2,24 +2,14 @@
     <main>
         <div class="container-fluid scroll-area mx-2">
             <div class="mt-3 mb-3">
-                <div
-                    class="d-flex justify-content-between align-items-center mb-3"
-                >
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
                         <h5 class="mb-0 fw-bold">
-                            {{
-                                $t(
-                                    "workflow.managementTitle"
-                                )
-                            }}
+                            {{ $t("workflow.managementTitle") }}
                         </h5>
                         <p>
                             <small class="text-muted">
-                                {{
-                                    $t(
-                                        "workflow.managementSubtitle"
-                                    )
-                                }}
+                                {{ $t("workflow.managementSubtitle") }}
                             </small>
                         </p>
                     </div>
@@ -75,18 +65,14 @@
                 this.$router.push({ name: "NewWorkflow" });
             },
             getTeams() {
-                TeamsService.getTeamList().then(
-                    (response) => {
-                        this.teamsList = response;
-                    }
-                );
+                TeamsService.getTeamList().then((response) => {
+                    this.teamsList = response;
+                });
             },
             getUsers() {
-                UsersService.getAllUsers().then(
-                    (response) => {
-                        this.usersList = response;
-                    }
-                );
+                UsersService.getAllUsers().then((response) => {
+                    this.usersList = response;
+                });
             },
         },
         created() {

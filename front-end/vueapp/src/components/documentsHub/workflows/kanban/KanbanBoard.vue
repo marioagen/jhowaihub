@@ -6,9 +6,7 @@
                 v-for="step in stepsList"
                 :key="step.id"
             >
-                <div
-                    class="card flex-grow-1 kanban-column-card"
-                >
+                <div class="card flex-grow-1 kanban-column-card">
                     <div
                         class="card-header d-flex justify-content-between align-items-center"
                         :class="findOrder(step.order)"
@@ -22,47 +20,29 @@
                         <div
                             v-if="step.order === maxOrder"
                             class="cursor-pointer"
-                            @click="
-                                toggleLastColumnVisibility
-                            "
+                            @click="toggleLastColumnVisibility"
                         >
                             <LucideIcon
-                                :icon="
-                                    isLastColumnVisible
-                                        ? 'Eye'
-                                        : 'EyeOff'
-                                "
+                                :icon="isLastColumnVisible ? 'Eye' : 'EyeOff'"
                                 size="16"
                             />
                         </div>
                     </div>
                     <div v-if="isEditor">
                         <div class="card-body">
-                            <div
-                                class="d-flex justify-content-center mb-3"
-                            >
+                            <div class="d-flex justify-content-center mb-3">
                                 <div
                                     class="rounded-circle bg-light d-flex align-items-center justify-content-center"
                                 >
-                                    <LucideIcon
-                                        icon="Workflow"
-                                    />
+                                    <LucideIcon icon="Workflow" />
                                 </div>
                             </div>
 
                             <h6 class="card-title">
-                                {{
-                                    $t("workflow.stepTitle")
-                                }}
+                                {{ $t("workflow.stepTitle") }}
                             </h6>
-                            <p
-                                class="card-text text-muted small xsm-text"
-                            >
-                                {{
-                                    $t(
-                                        "workflow.stepSubtitle"
-                                    )
-                                }}
+                            <p class="card-text text-muted small xsm-text">
+                                {{ $t("workflow.stepSubtitle") }}
                             </p>
                         </div>
                     </div>
@@ -70,12 +50,7 @@
                         v-else
                         class="kanban-column-body"
                     >
-                        <div
-                            v-show="
-                                step.order !== maxOrder ||
-                                isLastColumnVisible
-                            "
-                        >
+                        <div v-show="step.order !== maxOrder || isLastColumnVisible">
                             <div
                                 v-for="card in step.cards"
                                 :key="card.id"
@@ -85,22 +60,12 @@
                                 <KanbanCard
                                     :dataCard="card"
                                     :dataStep="step"
-                                    :isFirstStep="
-                                        step.order ===
-                                        minOrder
-                                    "
+                                    :isFirstStep="step.order === minOrder"
                                     :isLoading="isLoading"
-                                    :isLastStep="
-                                        step.order ===
-                                        maxOrder
-                                    "
+                                    :isLastStep="step.order === maxOrder"
                                     @reload="reloadList"
-                                    @cardMoved="
-                                        handleCardMoved
-                                    "
-                                    @cardUpdated="
-                                        handleCardUpdated
-                                    "
+                                    @cardMoved="handleCardMoved"
+                                    @cardUpdated="handleCardUpdated"
                                     label="common.analyze"
                                     :users="users"
                                 />
@@ -159,29 +124,19 @@
         }),
         computed: {
             minOrder() {
-                return Math.min(
-                    ...this.kanbanData.map((s) => s.order)
-                );
+                return Math.min(...this.kanbanData.map((s) => s.order));
             },
             maxOrder() {
-                return Math.max(
-                    ...this.kanbanData.map((s) => s.order)
-                );
+                return Math.max(...this.kanbanData.map((s) => s.order));
             },
         },
         methods: {
             findOrder(stepOrder) {
-                const minOrder = Math.min(
-                    ...this.kanbanData.map((s) => s.order)
-                );
-                const maxOrder = Math.max(
-                    ...this.kanbanData.map((s) => s.order)
-                );
+                const minOrder = Math.min(...this.kanbanData.map((s) => s.order));
+                const maxOrder = Math.max(...this.kanbanData.map((s) => s.order));
 
-                if (stepOrder === minOrder)
-                    return "first-steps";
-                if (stepOrder === maxOrder)
-                    return "last-step";
+                if (stepOrder === minOrder) return "first-steps";
+                if (stepOrder === maxOrder) return "last-step";
                 return "middle-step";
             },
             reloadList() {
@@ -197,33 +152,24 @@
                 this.stepsList = this.kanbanData;
             },
             updateCards(cardIds) {
-                if (!cardIds || cardIds.length === 0)
-                    return;
+                if (!cardIds || cardIds.length === 0) return;
                 cardIds.forEach((cardId) => {
-                    const cardElement =
-                        document.getElementById(cardId);
+                    const cardElement = document.getElementById(cardId);
                     if (cardElement) {
                         cardElement.remove();
                     }
                 });
             },
             toggleLastColumnVisibility() {
-                this.isLastColumnVisible =
-                    !this.isLastColumnVisible;
-                localStorage.setItem(
-                    "kanban_last_column_visibility",
-                    this.isLastColumnVisible
-                );
+                this.isLastColumnVisible = !this.isLastColumnVisible;
+                localStorage.setItem("kanban_last_column_visibility", this.isLastColumnVisible);
             },
         },
         mounted() {
             this.setCard();
-            const savedVisibility = localStorage.getItem(
-                "kanban_last_column_visibility"
-            );
+            const savedVisibility = localStorage.getItem("kanban_last_column_visibility");
             if (savedVisibility !== null) {
-                this.isLastColumnVisible =
-                    savedVisibility === "true";
+                this.isLastColumnVisible = savedVisibility === "true";
             }
         },
     };

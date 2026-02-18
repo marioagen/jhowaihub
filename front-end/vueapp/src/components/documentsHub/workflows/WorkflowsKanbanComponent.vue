@@ -4,9 +4,7 @@
             <div class="card-body p-3">
                 <div class="row align-items-center">
                     <div class="col-6">
-                        <div
-                            class="flex flex-col items-start gap-3 flex-1 align-items-center"
-                        >
+                        <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
                             <div>
                                 <LucideIcon
                                     icon="Clock"
@@ -14,11 +12,7 @@
                                     class="me-2"
                                 />
                                 <span>
-                                    {{
-                                        $t(
-                                            "workflow.boardView"
-                                        )
-                                    }}
+                                    {{ $t("workflow.boardView") }}
                                 </span>
                             </div>
                             <div class="dropdown">
@@ -29,19 +23,11 @@
                                     aria-expanded="false"
                                 >
                                     <div>
-                                        <div
-                                            class="fw-bold font-size-sm"
-                                        >
-                                            {{
-                                                selectedOption.teamName
-                                            }}
+                                        <div class="fw-bold font-size-sm">
+                                            {{ selectedOption.teamName }}
                                         </div>
-                                        <div
-                                            class="text-muted font-size-xs"
-                                        >
-                                            {{
-                                                selectedOption.name
-                                            }}
+                                        <div class="text-muted font-size-xs">
+                                            {{ selectedOption.name }}
                                         </div>
                                     </div>
                                     <LucideIcon
@@ -50,41 +36,26 @@
                                         class="ms-2"
                                     />
                                 </button>
-                                <ul
-                                    class="dropdown-menu p-2 workflow-list"
-                                >
+                                <ul class="dropdown-menu p-2 workflow-list">
                                     <li
-                                        v-if="
-                                            workflowList.length >
-                                            5
-                                        "
+                                        v-if="workflowList.length > 5"
                                         class="mb-1"
                                     >
-                                        <div
-                                            class="input-group input-group-sm"
-                                        >
-                                            <span
-                                                class="input-group-text p-1"
-                                            >
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text p-1">
                                                 <LucideIcon
                                                     icon="Search"
-                                                    :size="
-                                                        16
-                                                    "
+                                                    :size="16"
                                                     class="me-1"
                                                 />
                                             </span>
                                             <input
                                                 id="filter-workflow"
-                                                v-model="
-                                                    workflowSearchText
-                                                "
+                                                v-model="workflowSearchText"
                                                 type="text"
                                                 name="filter"
                                                 class="form-control"
-                                                @input="
-                                                    searchWorkflow
-                                                "
+                                                @input="searchWorkflow"
                                                 @click.stop=""
                                             />
                                         </div>
@@ -95,35 +66,19 @@
                                     >
                                         <a
                                             class="dropdown-item"
-                                            @click="
-                                                selectOption(
-                                                    item
-                                                )
-                                            "
+                                            @click="selectOption(item)"
                                         >
-                                            <div
-                                                class="fw-bold"
-                                            >
-                                                {{
-                                                    item
-                                                        .teams
-                                                        .name
-                                                }}
+                                            <div class="fw-bold">
+                                                {{ item.teams.name }}
                                             </div>
-                                            <div
-                                                class="text-muted small"
-                                            >
-                                                {{
-                                                    item.name
-                                                }}
+                                            <div class="text-muted small">
+                                                {{ item.name }}
                                             </div>
                                         </a>
                                     </li>
                                 </ul>
                             </div>
-                            <div
-                                class="badge bg-secondary badge-custom"
-                            >
+                            <div class="badge bg-secondary badge-custom">
                                 <LucideIcon
                                     icon="Workflow"
                                     :size="14"
@@ -131,22 +86,13 @@
                                     stroke="#0d6efd"
                                 />
                                 <span>
-                                    {{
-                                        selectedOption.name ||
-                                        $t(
-                                            "workflow.selectWorkflow"
-                                        )
-                                    }}
+                                    {{ selectedOption.name || $t("workflow.selectWorkflow") }}
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <div
-                        class="col-6 d-flex align-items-center justify-content-end gap-2"
-                    >
-                        <WorkflowFilters
-                            @filter="filterData"
-                        />
+                    <div class="col-6 d-flex align-items-center justify-content-end gap-2">
+                        <WorkflowFilters @filter="filterData" />
                         <button
                             class="btn btn-primary btn-sm new-doc-btn py-1 px-2"
                             @click="redirectToNewUpload"
@@ -166,9 +112,7 @@
         </div>
         <div v-else-if="hasList">
             <div class="card custom-height">
-                <div
-                    class="card-body d-flex flex-column p-2 card-container"
-                >
+                <div class="card-body d-flex flex-column p-2 card-container">
                     <div class="kanban-wrapper">
                         <KanbanBoard
                             ref="kanbanBoardRef"
@@ -178,9 +122,7 @@
                             @cardMoved="handleCardMoved"
                             @cardUpdated="updateCard"
                             :isLoading="isLoadingKanban"
-                            :cardIdsToUpdate="
-                                cardIdsToUpdate
-                            "
+                            :cardIdsToUpdate="cardIdsToUpdate"
                         />
                     </div>
                 </div>
@@ -229,8 +171,7 @@
                 isLoaded: false,
                 isLoadedUsers: false,
                 isLoadingKanban: true,
-                signalrEventExecutionChanged:
-                    "CardExecutionChanged",
+                signalrEventExecutionChanged: "CardExecutionChanged",
                 filters: {
                     orderBy: "",
                     input: null,
@@ -255,42 +196,33 @@
         methods: {
             getWorkflowByUser() {
                 this.isLoadingKanban = true;
-                var email =
-                    this.$store.state.userProfile.login;
-                WorkflowService.getWorkflowList(email).then(
-                    (response) => {
-                        if (response.error !== undefined) {
-                            this.$notify({
-                                title: "workflow.index",
-                                message: "workflow.error",
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                        }
-
-                        this.workflowList = response;
-                        this.filteredWorkflows = response;
-                        if (this.workflowList.length > 0) {
-                            return this.setSelectedWorkflow();
-                        }
-                        this.isLoadingKanban = false;
+                var email = this.$store.state.userProfile.login;
+                WorkflowService.getWorkflowList(email).then((response) => {
+                    if (response.error !== undefined) {
+                        this.$notify({
+                            title: "workflow.index",
+                            message: "workflow.error",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
                     }
-                );
+
+                    this.workflowList = response;
+                    this.filteredWorkflows = response;
+                    if (this.workflowList.length > 0) {
+                        return this.setSelectedWorkflow();
+                    }
+                    this.isLoadingKanban = false;
+                });
             },
             setSelectedWorkflow() {
-                const redicteWorkflowId =
-                    this.$route.query.id;
+                const redicteWorkflowId = this.$route.query.id;
                 let workflowToSelect = this.workflowList[0];
 
                 if (redicteWorkflowId !== undefined) {
-                    const foundWorkflow =
-                        this.workflowList.find(
-                            (w) => w.id == redicteWorkflowId
-                        );
+                    const foundWorkflow = this.workflowList.find((w) => w.id == redicteWorkflowId);
                     if (foundWorkflow) {
-                        return this.selectOption(
-                            foundWorkflow
-                        );
+                        return this.selectOption(foundWorkflow);
                     } else {
                         return this.$notify({
                             title: "workflow.index",
@@ -301,17 +233,11 @@
                     }
                 }
 
-                const lastSelected =
-                    this.$store.state.lastSelectedWorkflow;
+                const lastSelected = this.$store.state.lastSelectedWorkflow;
                 if (lastSelected) {
-                    const foundWorkflow =
-                        this.workflowList.find(
-                            (w) => w.id === lastSelected.id
-                        );
+                    const foundWorkflow = this.workflowList.find((w) => w.id === lastSelected.id);
                     if (foundWorkflow) {
-                        return this.selectOption(
-                            foundWorkflow
-                        );
+                        return this.selectOption(foundWorkflow);
                     }
                 }
 
@@ -319,10 +245,7 @@
             },
             getWorkflowStepsById(workflowId) {
                 this.isLoadingKanban = true;
-                WorkflowService.getWorkflowStepsById(
-                    workflowId,
-                    this.filters
-                )
+                WorkflowService.getWorkflowStepsById(workflowId, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
                     })
@@ -345,10 +268,7 @@
                         this.users = users;
                     })
                     .catch((error) => {
-                        LogService.showMessage(
-                            "Error loading users:",
-                            error
-                        );
+                        LogService.showMessage("Error loading users:", error);
                         this.users = [];
                     })
                     .finally(() => {
@@ -361,13 +281,10 @@
                 this.isLoaded = false;
                 this.isLoadedUsers = false;
 
-                this.$store.commit(
-                    "setLastSelectedWorkflow",
-                    {
-                        id: workflow.id,
-                        name: workflow.name,
-                    }
-                );
+                this.$store.commit("setLastSelectedWorkflow", {
+                    id: workflow.id,
+                    name: workflow.name,
+                });
 
                 this.selectedOption = {
                     id: workflow.id,
@@ -378,37 +295,25 @@
                 this.getUsersByTeams(workflow.teams);
             },
             reloadKanban() {
-                this.getWorkflowStepsById(
-                    this.selectedOption.id
-                );
+                this.getWorkflowStepsById(this.selectedOption.id);
             },
             handleCardMoved(cardMoveData) {
                 this.updateCard({
                     card: cardMoveData.card,
-                    currentStepOrder:
-                        cardMoveData.currentStepOrder,
-                    newStepOrder:
-                        cardMoveData.nextStepOrder,
+                    currentStepOrder: cardMoveData.currentStepOrder,
+                    newStepOrder: cardMoveData.nextStepOrder,
                 });
             },
             updateCard(cardUpdateData) {
-                const steps = Array.isArray(
-                    this.kanbanCards
-                )
+                const steps = Array.isArray(this.kanbanCards)
                     ? this.kanbanCards
                     : this.kanbanCards?.steps || [];
 
                 if (steps.length === 0) return;
 
-                const currentStep = steps.find(
-                    (s) =>
-                        s.order ===
-                        cardUpdateData.currentStepOrder
-                );
+                const currentStep = steps.find((s) => s.order === cardUpdateData.currentStepOrder);
                 if (!currentStep) {
-                    LogService.showMessage(
-                        "Could not find current step for card update"
-                    );
+                    LogService.showMessage("Could not find current step for card update");
                     return;
                 }
 
@@ -416,35 +321,22 @@
                     currentStep.cards = [];
                 }
 
-                const cardIndex =
-                    currentStep.cards.findIndex(
-                        (c) =>
-                            c.id === cardUpdateData.card.id
-                    );
+                const cardIndex = currentStep.cards.findIndex(
+                    (c) => c.id === cardUpdateData.card.id
+                );
                 if (cardIndex === -1) {
-                    LogService.showMessage(
-                        "Card not found in current step"
-                    );
+                    LogService.showMessage("Card not found in current step");
                     return;
                 }
 
-                const existingCard =
-                    currentStep.cards[cardIndex];
+                const existingCard = currentStep.cards[cardIndex];
                 const shouldMove =
-                    cardUpdateData.newStepOrder !==
-                        undefined &&
-                    cardUpdateData.newStepOrder !==
-                        cardUpdateData.currentStepOrder;
+                    cardUpdateData.newStepOrder !== undefined &&
+                    cardUpdateData.newStepOrder !== cardUpdateData.currentStepOrder;
                 if (shouldMove) {
-                    const targetStep = steps.find(
-                        (s) =>
-                            s.order ===
-                            cardUpdateData.newStepOrder
-                    );
+                    const targetStep = steps.find((s) => s.order === cardUpdateData.newStepOrder);
                     if (!targetStep) {
-                        LogService.showMessage(
-                            "Could not find target step for card movement"
-                        );
+                        LogService.showMessage("Could not find target step for card movement");
                         return;
                     }
 
@@ -454,8 +346,7 @@
                         stepId: targetStep.id,
                         status: targetStep.status
                             ? { ...targetStep.status }
-                            : cardUpdateData.card.status ||
-                              existingCard.status,
+                            : cardUpdateData.card.status || existingCard.status,
                     };
 
                     currentStep.cards.splice(cardIndex, 1);
@@ -469,8 +360,7 @@
                         ...cardUpdateData.card,
                     };
 
-                    currentStep.cards[cardIndex] =
-                        updatedCard;
+                    currentStep.cards[cardIndex] = updatedCard;
                 }
 
                 if (Array.isArray(this.kanbanCards)) {
@@ -482,110 +372,72 @@
                     };
                 }
             },
-            updateSpecificCards(
-                cardIds,
-                signalRMessage = null
-            ) {
-                if (!cardIds || cardIds.length === 0)
-                    return;
+            updateSpecificCards(cardIds, signalRMessage = null) {
+                if (!cardIds || cardIds.length === 0) return;
 
                 if (this.updateCardsDebounceTimer) {
-                    clearTimeout(
-                        this.updateCardsDebounceTimer
-                    );
+                    clearTimeout(this.updateCardsDebounceTimer);
                 }
 
-                this.updateCardsDebounceTimer = setTimeout(
-                    () => {
-                        const steps = Array.isArray(
-                            this.kanbanCards
-                        )
-                            ? this.kanbanCards
-                            : this.kanbanCards?.steps || [];
+                this.updateCardsDebounceTimer = setTimeout(() => {
+                    const steps = Array.isArray(this.kanbanCards)
+                        ? this.kanbanCards
+                        : this.kanbanCards?.steps || [];
 
-                        if (steps.length === 0) return;
+                    if (steps.length === 0) return;
 
-                        cardIds.forEach((cardId) => {
-                            let currentCard = null;
-                            let currentStepOrder = null;
+                    cardIds.forEach((cardId) => {
+                        let currentCard = null;
+                        let currentStepOrder = null;
 
-                            for (const step of steps) {
-                                if (step.cards) {
-                                    const card =
-                                        step.cards.find(
-                                            (c) =>
-                                                c.id ===
-                                                cardId
-                                        );
-                                    if (card) {
-                                        currentCard = card;
-                                        currentStepOrder =
-                                            step.order;
-                                        break;
-                                    }
+                        for (const step of steps) {
+                            if (step.cards) {
+                                const card = step.cards.find((c) => c.id === cardId);
+                                if (card) {
+                                    currentCard = card;
+                                    currentStepOrder = step.order;
+                                    break;
                                 }
                             }
+                        }
 
-                            if (!currentCard) {
-                                LogService.showMessage(
-                                    `Card ${cardId} not found in current state`
-                                );
-                                return;
+                        if (!currentCard) {
+                            LogService.showMessage(`Card ${cardId} not found in current state`);
+                            return;
+                        }
+
+                        let newStepOrder = currentStepOrder;
+                        if (signalRMessage && signalRMessage.stepId) {
+                            const targetStep = steps.find((s) => s.id === signalRMessage.stepId);
+                            if (targetStep) {
+                                newStepOrder = targetStep.order;
                             }
+                        }
 
-                            let newStepOrder =
-                                currentStepOrder;
-                            if (
-                                signalRMessage &&
-                                signalRMessage.stepId
-                            ) {
-                                const targetStep =
-                                    steps.find(
-                                        (s) =>
-                                            s.id ===
-                                            signalRMessage.stepId
-                                    );
-                                if (targetStep) {
-                                    newStepOrder =
-                                        targetStep.order;
-                                }
+                        const updatedCardData = {
+                            ...currentCard,
+                        };
+
+                        if (signalRMessage) {
+                            if (signalRMessage.percentage !== undefined) {
+                                updatedCardData.percentage = signalRMessage.percentage;
                             }
-
-                            const updatedCardData = {
-                                ...currentCard,
-                            };
-
-                            if (signalRMessage) {
-                                if (
-                                    signalRMessage.percentage !==
-                                    undefined
-                                ) {
-                                    updatedCardData.percentage =
-                                        signalRMessage.percentage;
-                                }
-                                if (
-                                    signalRMessage.toolName !==
-                                    undefined
-                                ) {
-                                    updatedCardData.toolName =
-                                        signalRMessage.toolName;
-                                }
+                            if (signalRMessage.toolName !== undefined) {
+                                updatedCardData.toolName = signalRMessage.toolName;
                             }
+                        }
 
-                            this.updateCard({
-                                card: updatedCardData,
-                                currentStepOrder:
-                                    currentStepOrder,
-                                newStepOrder: newStepOrder,
-                            });
+                        this.updateCard({
+                            card: updatedCardData,
+                            currentStepOrder: currentStepOrder,
+                            newStepOrder: newStepOrder,
                         });
+                    });
 
-                        setTimeout(() => {
-                            this.cardIdsToUpdate = [];
-                        }, 100);
-                    },
-                    300
-                );
+                    setTimeout(() => {
+                        this.cardIdsToUpdate = [];
+                    }, 100);
+                }, 300);
             },
             filterData(filters) {
                 this.filters = filters;
@@ -597,115 +449,66 @@
                 });
             },
             searchWorkflow() {
-                const searchText =
-                    this.workflowSearchText.toLowerCase();
-                this.filteredWorkflows =
-                    this.workflowList.filter(
-                        (o) =>
-                            (o.name &&
-                                o.name
-                                    .toLowerCase()
-                                    .includes(
-                                        searchText
-                                    )) ||
-                            (o.teams &&
-                                o.teams.name &&
-                                o.teams.name
-                                    .toLowerCase()
-                                    .includes(searchText))
-                    );
+                const searchText = this.workflowSearchText.toLowerCase();
+                this.filteredWorkflows = this.workflowList.filter(
+                    (o) =>
+                        (o.name && o.name.toLowerCase().includes(searchText)) ||
+                        (o.teams && o.teams.name && o.teams.name.toLowerCase().includes(searchText))
+                );
             },
         },
         created() {
             this.getWorkflowByUser();
-            GlobalEventService.on(
-                "all-uploads-complete",
-                this.getWorkflowByUser
-            );
-            GlobalEventService.on(
-                "refresh-once",
-                this.getWorkflowByUser
-            );
+            GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
+            GlobalEventService.on("refresh-once", this.getWorkflowByUser);
         },
         async mounted() {
             await signalRService.startConnection();
-            signalRService.on(
-                this.signalrEventExecutionChanged,
-                (message) => {
-                    const steps = Array.isArray(
-                        this.kanbanCards
-                    )
-                        ? this.kanbanCards
-                        : this.kanbanCards?.steps || [];
+            signalRService.on(this.signalrEventExecutionChanged, (message) => {
+                const steps = Array.isArray(this.kanbanCards)
+                    ? this.kanbanCards
+                    : this.kanbanCards?.steps || [];
 
-                    if (steps.length === 0) return;
+                if (steps.length === 0) return;
 
-                    let foundCard = null;
-                    let currentStepOrder = null;
+                let foundCard = null;
+                let currentStepOrder = null;
 
-                    for (const step of steps) {
-                        if (step.cards) {
-                            const card = step.cards.find(
-                                (c) =>
-                                    c.id === message.cardId
-                            );
-                            if (card) {
-                                foundCard = card;
-                                currentStepOrder =
-                                    step.order;
-                                break;
-                            }
+                for (const step of steps) {
+                    if (step.cards) {
+                        const card = step.cards.find((c) => c.id === message.cardId);
+                        if (card) {
+                            foundCard = card;
+                            currentStepOrder = step.order;
+                            break;
                         }
-                    }
-
-                    if (!foundCard) {
-                        LogService.showMessage(
-                            `Card ${message.cardId} not found in SignalR update`
-                        );
-                        return;
-                    }
-
-                    foundCard.percentage =
-                        message.percentage;
-                    foundCard.toolName = message.toolName;
-
-                    if (
-                        message.percentage === 100.0 &&
-                        foundCard.stepId !== message.stepId
-                    ) {
-                        if (
-                            !this.cardIdsToUpdate.includes(
-                                message.cardId
-                            )
-                        ) {
-                            this.cardIdsToUpdate.push(
-                                message.cardId
-                            );
-                        }
-                        this.updateSpecificCards(
-                            [message.cardId],
-                            message
-                        );
                     }
                 }
-            );
+
+                if (!foundCard) {
+                    LogService.showMessage(`Card ${message.cardId} not found in SignalR update`);
+                    return;
+                }
+
+                foundCard.percentage = message.percentage;
+                foundCard.toolName = message.toolName;
+
+                if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
+                    if (!this.cardIdsToUpdate.includes(message.cardId)) {
+                        this.cardIdsToUpdate.push(message.cardId);
+                    }
+                    this.updateSpecificCards([message.cardId], message);
+                }
+            });
         },
         beforeUnmount() {
             if (this.updateCardsDebounceTimer) {
                 clearTimeout(this.updateCardsDebounceTimer);
             }
-            signalRService.off(
-                this.signalrEventExecutionChanged
-            );
+            signalRService.off(this.signalrEventExecutionChanged);
             signalRService.stopConnection();
-            GlobalEventService.off(
-                "all-uploads-complete",
-                this.reloadKanban
-            );
-            GlobalEventService.off(
-                "refresh-once",
-                this.reloadKanban
-            );
+            GlobalEventService.off("all-uploads-complete", this.reloadKanban);
+            GlobalEventService.off("refresh-once", this.reloadKanban);
         },
     };
 </script>

@@ -476,14 +476,10 @@
                 return this.routeId !== undefined;
             },
             filteredAutocompleteOptions() {
-                return this.autocompleteOptions.map(
-                    (opt) => ({
-                        ...opt,
-                        label: opt.labelKey
-                            ? this.$t(opt.labelKey)
-                            : opt.label,
-                    })
-                );
+                return this.autocompleteOptions.map((opt) => ({
+                    ...opt,
+                    label: opt.labelKey ? this.$t(opt.labelKey) : opt.label,
+                }));
             },
             getTemplateTitle() {
                 return this.isEditMode
