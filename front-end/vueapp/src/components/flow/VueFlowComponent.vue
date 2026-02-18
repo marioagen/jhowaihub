@@ -376,29 +376,10 @@
                     });
                 }
             },
-            async restoreFromStorage() {
-                const tempNodes = localStorage.getItem("flow_temp_nodes");
-                const tempEdges = localStorage.getItem("flow_temp_edges");
-
-                if (tempNodes && tempEdges) {
-                    this.nodes = JSON.parse(tempNodes);
-                    this.edges = JSON.parse(tempEdges);
-                    localStorage.removeItem("flow_temp_nodes");
-                    localStorage.removeItem("flow_temp_edges");
-                    localStorage.removeItem("flow_state_params");
-
-                    await this.enrichNodesWithSubtitles(this.nodes);
-                    return true;
-                }
-                return false;
-            },
         },
         async mounted() {
             this.getToolsList();
-            const restored = await this.restoreFromStorage();
-            if (!restored) {
-                this.getFlow();
-            }
+            this.getFlow();
         },
         expose: ["updateNodeInput", "buildFlowPayload", "reloadFlow"],
     };

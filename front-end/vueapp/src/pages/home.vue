@@ -142,7 +142,7 @@
             </div>
         </div>
     </main>
-    <WhatsAppComponent />
+    <WhatsAppComponent v-if="showWhatsAppLink" />
 </template>
 <script>
     import store from "@/store";
@@ -161,6 +161,7 @@
                     },
                 },
                 plan: "",
+                showWhatsAppLink: false,
             };
         },
         components: {
@@ -177,6 +178,7 @@
             this.config.links.videoUrl = ENV_CONFIG.VUE_APP_HOME_VIDEO_URL || "";
             this.config.links.guideUrl = ENV_CONFIG.VUE_APP_HOME_GUIDE_URL || "";
             this.config.links.docsUrl = ENV_CONFIG.VUE_APP_HOME_DOCS_URL || "";
+            this.showWhatsAppLink = ENV_CONFIG.SHOW_WHATSAPP_LINK || false;
             this.getPlan();
         },
     };
