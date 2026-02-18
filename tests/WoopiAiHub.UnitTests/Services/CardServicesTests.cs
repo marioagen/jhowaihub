@@ -179,8 +179,10 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var card = CardFixture.FindValidCard();
-            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1);
-            card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
+            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
 
             _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
@@ -189,7 +191,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             var exception =
                 await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignUser(updateAssignedUserDto));
-            Assert.Equal(Domain.Enum.ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("User not found", exception.Message);
         }
 
@@ -201,9 +203,11 @@ namespace WoopiAiHub.UnitTests.Services
             var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var card = CardFixture.FindValidCard();
             card.UpdateAssignedUser(userId);
-            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1);
-            card.Step.Workflow = WorkflowFixture.FindValidWorkflow();
-            card.Step.Workflow.Teams = new List<Team>() { DocumentFixture.FindValidTeam() };
+            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            card.Step.Workflow.Teams = [DocumentFixture.FindValidTeam()];
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
             updateAssignedUserDto.UserId = userId;
 
@@ -229,9 +233,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
 
-            var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
+            var workflow = new Workflow(1, DateTime.Now, [], "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
             var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
@@ -239,36 +242,29 @@ namespace WoopiAiHub.UnitTests.Services
 
             tool.ToolType = toolType;
             stepTool.Tool = tool;
-            step.StepTools = new List<StepTool> { stepTool };
+            step.StepTools = [stepTool];
             step.Workflow = workflow;
-            workflow.Steps = new List<Step> { step };
+            workflow.Steps = [step];
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            card.Step = step;
-            card.Document = document;
+            var cardAnalysisDto = CardFixture.FindCardAnalysisDtoWithOutput();
 
-            var outputValue = "{\"Campo1\": \"Valor1\", \"Campo2\": \"Valor2\"}";
-            var output = new StepToolOutput(1, DateTime.Now, 1, cardId, outputValue);
-            output.StepTool = stepTool;
-            typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput> { output });
-
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync(workflow);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal($"doc-{document.Id}", result.DocumentId);
-            Assert.Equal(document.Name, result.Name);
-            Assert.Equal(document.Description, result.Description);
-            Assert.Equal(document.ReferenceFile, result.ReferenceFile);
+            Assert.Equal($"doc-{cardAnalysisDto.DocumentId}", result.DocumentId);
+            Assert.Equal(cardAnalysisDto.Document?.Name, result.Name);
+            Assert.Equal(cardAnalysisDto.Document?.Description, result.Description);
+            Assert.Equal(cardAnalysisDto.Document?.ReferenceFile, result.ReferenceFile);
             Assert.NotEmpty(result.Steps);
             _cardRepositoryMock.Verify(a => a.FindByIdWithDocumentAndWorkflow(cardId), Times.Once);
         }
@@ -280,7 +276,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync((Card)null!);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync((CardAnalysisDto)null!);
 
             // Act / Assert
             await Assert.ThrowsAsync<AppException>(() => _cardServices.FindByIdAnalyzeWithSteps(cardId, headers));
@@ -294,17 +290,16 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange: card found but with no Document (relationship not loaded / null)
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
-            var card = new Card(cardId, DateTime.Now, 1, 1, "Card Test", 1, null);
-            card.Step = step;
-            card.Document = null;
+            
+            var cardAnalysisDto = CardFixture.FindValidCardAnalysisDto(cardId);
+            cardAnalysisDto.Document = null;
 
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act / Assert
             var ex = await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.FindByIdAnalyzeWithSteps(cardId, headers));
@@ -319,18 +314,15 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange: card has Document but no Step/Workflow
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
-            var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            card.Document = document;
-            card.Step = step;
+            
+            var cardAnalysisDto = CardFixture.FindValidCardAnalysisDto(cardId);
 
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Actually call to workflowRepository will happen and return null for non-configured calls
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync((Workflow?)null);
@@ -348,9 +340,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
 
-            var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
+            var workflow = new Workflow(1, DateTime.Now, [], "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var ocrTool = new Tool(1, DateTime.Now, "OCR Tool", true, 1, 1, 1, false, null, null);
             var ocrToolType = new ToolType(1, DateTime.Now, "OCR", string.Empty, true);
@@ -358,26 +349,19 @@ namespace WoopiAiHub.UnitTests.Services
 
             ocrTool.ToolType = ocrToolType;
             stepTool.Tool = ocrTool;
-            step.StepTools = new List<StepTool> { stepTool };
+            step.StepTools = [stepTool];
             step.Workflow = workflow;
-            workflow.Steps = new List<Step> { step };
+            workflow.Steps = [step];
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            card.Step = step;
-            card.Document = document;
+            var cardAnalysisDto = CardFixture.FindCardAnalysisDtoWithOCROutput(cardId);
 
-            var outputValue = "{\"text\": \"OCR Result\"}";
-            var output = new StepToolOutput(1, DateTime.Now, 1, cardId, outputValue);
-            output.StepTool = stepTool;
-            typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput> { output });
-
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync(workflow);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -385,7 +369,6 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.NotNull(result);
             Assert.NotEmpty(result.Steps);
-            // OCR outputs should be filtered out, so no outputs in the step
             Assert.Empty(result.Steps[0].Outputs);
         }
 
@@ -396,7 +379,6 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
 
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
@@ -406,26 +388,19 @@ namespace WoopiAiHub.UnitTests.Services
 
             embeddingsTool.ToolType = embeddingsToolType;
             stepTool.Tool = embeddingsTool;
-            step.StepTools = new List<StepTool> { stepTool };
+            step.StepTools = [stepTool];
             step.Workflow = workflow;
-            workflow.Steps = new List<Step> { step };
+            workflow.Steps = [step];
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            card.Step = step;
-            card.Document = document;
+            var cardAnalysisDto = CardFixture.FindCardAnalysisDtoWithEmbeddingsOutput(cardId);
 
-            var outputValue = "{\"embedding\": \"[0.1, 0.2, 0.3]\"}";
-            var output = new StepToolOutput(1, DateTime.Now, 1, cardId, outputValue);
-            output.StepTool = stepTool;
-            typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput> { output });
-
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync(workflow);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -433,7 +408,6 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.NotNull(result);
             Assert.NotEmpty(result.Steps);
-            // Embeddings outputs should be filtered out
             Assert.Empty(result.Steps[0].Outputs);
         }
 
@@ -444,9 +418,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
 
-            var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
+            var workflow = new Workflow(1, DateTime.Now, [], "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
             var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
@@ -454,26 +427,19 @@ namespace WoopiAiHub.UnitTests.Services
 
             tool.ToolType = toolType;
             stepTool.Tool = tool;
-            step.StepTools = new List<StepTool> { stepTool };
+            step.StepTools = [stepTool];
             step.Workflow = workflow;
-            workflow.Steps = new List<Step> { step };
+            workflow.Steps = [step];
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            card.Step = step;
-            card.Document = document;
+            var cardAnalysisDto = CardFixture.FindCardAnalysisDtoWithJsonOutput(cardId);
 
-            var outputValue = "{\"Nome\": \"João Silva\", \"Email\": \"joao@example.com\"}";
-            var output = new StepToolOutput(1, DateTime.Now, 1, cardId, outputValue);
-            output.StepTool = stepTool;
-            typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput> { output });
-
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync(workflow);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -493,9 +459,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
 
-            var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
+            var workflow = new Workflow(1, DateTime.Now, [], "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
             var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
@@ -503,26 +468,19 @@ namespace WoopiAiHub.UnitTests.Services
 
             tool.ToolType = toolType;
             stepTool.Tool = tool;
-            step.StepTools = new List<StepTool> { stepTool };
+            step.StepTools = [stepTool];
             step.Workflow = workflow;
-            workflow.Steps = new List<Step> { step };
+            workflow.Steps = [step];
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            card.Step = step;
-            card.Document = document;
+            var cardAnalysisDto = CardFixture.FindCardAnalysisDtoWithPlainTextOutput(cardId);
 
-            var outputValue = "This is a plain text response without JSON structure";
-            var output = new StepToolOutput(1, DateTime.Now, 1, cardId, outputValue);
-            output.StepTool = stepTool;
-            typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput> { output });
-
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync(workflow);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -532,7 +490,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotEmpty(result.Steps);
             Assert.Single(result.Steps[0].Outputs);
             Assert.Equal("Test Tool", result.Steps[0].Outputs[0].Label);
-            Assert.Equal(outputValue, result.Steps[0].Outputs[0].Value);
+            Assert.Equal("This is a plain text response without JSON structure", result.Steps[0].Outputs[0].Value);
         }
 
         [Fact(DisplayName = "FindByIdAnalyzeWithStepsHandlesMultipleSteps")]
@@ -542,7 +500,6 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
 
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step1 = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
@@ -555,29 +512,21 @@ namespace WoopiAiHub.UnitTests.Services
             tool.ToolType = toolType;
             stepTool1.Tool = tool;
             stepTool2.Tool = tool;
-            step1.StepTools = new List<StepTool> { stepTool1 };
-            step2.StepTools = new List<StepTool> { stepTool2 };
+            step1.StepTools = [stepTool1];
+            step2.StepTools = [stepTool2];
             step1.Workflow = workflow;
             step2.Workflow = workflow;
-            workflow.Steps = new List<Step> { step1, step2 };
+            workflow.Steps = [step1, step2];
 
-            var card = new Card(cardId, DateTime.Now, step2.Id, document.Id, "Card Test", 1, null);
-            card.Step = step1;
-            card.Document = document;
+            var cardAnalysisDto = CardFixture.FindCardAnalysisDtoWithMultipleOutputs(cardId);
 
-            var output1 = new StepToolOutput(1, DateTime.Now, 1, cardId, "{\"Field1\": \"Value1\"}");
-            var output2 = new StepToolOutput(2, DateTime.Now, 2, cardId, "{\"Field2\": \"Value2\"}");
-            output1.StepTool = stepTool1;
-            output2.StepTool = stepTool2;
-            typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput> { output1, output2 });
-
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync(workflow);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -597,7 +546,6 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
 
             var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
@@ -607,22 +555,19 @@ namespace WoopiAiHub.UnitTests.Services
 
             tool.ToolType = toolType;
             stepTool.Tool = tool;
-            step.StepTools = new List<StepTool> { stepTool };
+            step.StepTools = [stepTool];
             step.Workflow = workflow;
-            workflow.Steps = new List<Step> { step };
+            workflow.Steps = [step];
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            card.Step = step;
-            card.Document = document;
-            typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput>());
+            var cardAnalysisDto = CardFixture.FindValidCardAnalysisDto(cardId);
 
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync(workflow);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -631,7 +576,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             Assert.NotEmpty(result.Steps);
             Assert.Empty(result.Steps[0].Outputs);
-            // Last processed step should still be the last step even if no outputs
             Assert.Equal("1", result.LastProcessedStepId);
         }
 
@@ -642,9 +586,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var document = DocumentFixture.FindValidDocument();
 
-            var workflow = new Workflow(1, DateTime.Now, new List<Team>(), "Test Workflow");
+            var workflow = new Workflow(1, DateTime.Now, [], "Test Workflow");
             var step = new Step(1, DateTime.Now, 1, "Step Test", 1, 1, 1);
             var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
             var toolType = new ToolType(2, DateTime.Now, "Prompt", string.Empty, true);
@@ -652,26 +595,19 @@ namespace WoopiAiHub.UnitTests.Services
 
             tool.ToolType = toolType;
             stepTool.Tool = tool;
-            step.StepTools = new List<StepTool> { stepTool };
+            step.StepTools = [stepTool];
             step.Workflow = workflow;
-            workflow.Steps = new List<Step> { step };
+            workflow.Steps = [step];
 
-            var card = new Card(cardId, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            card.Step = step;
-            card.Document = document;
+            var cardAnalysisDto = CardFixture.FindCardAnalysisDtoWithInvalidJsonOutput(cardId);
 
-            var outputValue = "{\"field\": \"value\", invalid json";
-            var output = new StepToolOutput(1, DateTime.Now, 1, cardId, outputValue);
-            output.StepTool = stepTool;
-            typeof(Card).GetProperty("Outputs")!.SetValue(card, new List<StepToolOutput> { output });
-
-            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardAnalysisDto);
             _mocker.GetMock<IWorkflowRepository>().Setup(r => r.FindByIdForAnalyze(It.IsAny<int>())).ReturnsAsync(workflow);
 
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             stepToolExecutionRepository
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
-                .ReturnsAsync(new List<StepToolExecution>());
+                .ReturnsAsync([]);
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
@@ -680,9 +616,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             Assert.NotEmpty(result.Steps);
             Assert.Single(result.Steps[0].Outputs);
-            // Should fall back to plain text display
             Assert.Equal("Test Tool", result.Steps[0].Outputs[0].Label);
-            Assert.Equal(outputValue, result.Steps[0].Outputs[0].Value);
+            Assert.Equal("{\"field\": \"value\", invalid json", result.Steps[0].Outputs[0].Value);
         }
 
         [Fact(DisplayName = "FindCardHeaderInfoAsync_Success")]

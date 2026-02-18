@@ -167,7 +167,7 @@ namespace WoopiAiHub.Application.Services
         public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto)
         {
-            var card = await FindCardWithRelationships(cardId);
+            var card = await _cardRepository.FindByIdWithDocumentAndWorkflow(cardId) ?? throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);
             var verifyAnswer = await VerifyCanAnswer(card);
             var document = card.Document ?? throw new ArgumentException("Document not found for the card");
             if (card.Step == null)
@@ -198,7 +198,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="card"></param>
         /// <returns></returns>
-        private async Task<bool> VerifyCanAnswer(Card card)
+        private async Task<bool> VerifyCanAnswer(CardAnalysisDto card)
         {
             var executions = await _stepToolExecutionRepository.FindByStepToolByCardIdAsync(card.Id);
 
@@ -219,28 +219,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Find card by id and returns the card with relationships
-        /// </summary>
-        /// <param name="cardId"></param>
-        /// <returns></returns>
-        private async Task<Card> FindCardWithRelationships(int cardId)
-        {
-            var card = await _cardRepository.FindByIdWithDocumentAndWorkflow(cardId);
-            if (card == null)
-            {
-                throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);
-            }
-
-            return card;
-        }
-
-        /// <summary>
         /// Prepare steps from workflow
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="card"></param>
         /// <returns></returns>
-        private List<DocumentStepDto> BuildStepsFromWorkflow(Workflow workflow, Card card)
+        private List<DocumentStepDto> BuildStepsFromWorkflow(Workflow workflow, CardAnalysisDto card)
         {
             var steps = new List<DocumentStepDto>();
             var workflowSteps = workflow.Steps.OrderBy(s => s.Order).ToList();
@@ -276,13 +260,18 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepDto"></param>
         /// <param name="step"></param>
         /// <param name="card"></param>
-        private void PopulateStepOutputs(DocumentStepDto stepDto, Step step, Card card)
+        private static void PopulateStepOutputs(DocumentStepDto stepDto, Step step, CardAnalysisDto card)
         {
             foreach (var stepTool in step.StepTools.OrderBy(st => st.Order))
             {
-                var outputs = card.Outputs
+                var outputs = card.Outputs?
                     .Where(o => o.StepToolId == stepTool.Id)
                     .ToList();
+
+                if(outputs is null || outputs.Count <= 0)
+                {
+                    continue;
+                }
 
                 foreach (var output in outputs)
                 {
@@ -300,12 +289,12 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        private bool ShouldSkipOutput(StepToolOutput output)
+        private static bool ShouldSkipOutput(StepToolOutputAnalysesDto output)
         {
             if (output.StepTool?.Tool == null)
                 return true;
 
-            var toolTypeName = output.StepTool.Tool.ToolType?.Name;
+            var toolTypeName = output.StepTool.Tool.ToolType;
             return toolTypeName == HandlersTypes.Ocr || toolTypeName == HandlersTypes.Embeddings;
         }
 
@@ -314,14 +303,14 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        private List<ExtractedFieldDto> ParseOutput(StepToolOutput output)
+        private static List<ExtractedFieldDto> ParseOutput(StepToolOutputAnalysesDto output)
         {
             var fields = new List<ExtractedFieldDto>();
 
             if (string.IsNullOrWhiteSpace(output.Value))
                 return fields;
 
-            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType?.Name))
+            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType))
             {
                 fields.AddRange(jsonFields);
             }
@@ -333,7 +322,7 @@ namespace WoopiAiHub.Application.Services
                     Value = output.Value,
                     IsEdited = false,
                     OutputId = output.Id,
-                    OutputType = output.StepTool?.Tool?.ToolType?.Name ?? "None",
+                    OutputType = output.StepTool?.Tool?.ToolType ?? "None",
                 });
             }
 
@@ -348,9 +337,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <param name="outputType"></param>
         /// <returns></returns>
-        private bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
+        private static bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
             int id,
-            string outputType)
+            string? outputType)
         {
             fields = new List<ExtractedFieldDto>();
 
@@ -376,7 +365,7 @@ namespace WoopiAiHub.Application.Services
                             Value = kvp.Value?.ToString() ?? string.Empty,
                             IsEdited = false,
                             OutputId = id,
-                            OutputType = outputType,
+                            OutputType = outputType ?? string.Empty,
                         });
                     }
 

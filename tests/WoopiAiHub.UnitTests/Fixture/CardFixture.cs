@@ -69,6 +69,161 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
+        public static CardAnalysisDto FindValidCardAnalysisDto(int cardId = 1, int stepId = 1, int documentId = 1)
+        {
+            var document = DocumentFixture.FindValidDocument();
+            
+            return new CardAnalysisDto
+            {
+                Id = cardId,
+                Created = DateTime.Now,
+                StepId = stepId,
+                DocumentId = documentId,
+                Name = "Card Test",
+                StatusId = 1,
+                Document = new DocumentDto
+                {
+                    Id = documentId,
+                    Name = document.Name,
+                    Description = document.Description,
+                    ReferenceFile = document.ReferenceFile
+                },
+                Step = new StepDto
+                {
+                    Id = stepId,
+                    Name = "Step Test",
+                    Order = 1,
+                    WorkflowId = 1
+                },
+                Outputs = []
+            };
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithOutput(int cardId = 1, int stepId = 1, int stepToolId = 1, string outputValue = "{\"Campo1\": \"Valor1\", \"Campo2\": \"Valor2\"}", string toolTypeName = "Prompt", int toolTypeId = 2, int toolId = 1)
+        {
+            var cardAnalysisDto = FindValidCardAnalysisDto(cardId, stepId);
+
+            cardAnalysisDto.Outputs =
+            [
+                new StepToolOutputAnalysesDto
+                {
+                    Id = 1,
+                    StepToolId = stepToolId,
+                    Value = outputValue,
+                    StepTool = new StepToolDto
+                    {
+                        Id = stepToolId,
+                        StepId = stepId,
+                        ToolId = toolId,
+                        Tool = new ToolDto
+                        {
+                            Id = toolId,
+                            Name = "Test Tool",
+                            ToolTypeId = toolTypeId,
+                            ToolType = toolTypeName
+                        }
+                    }
+                }
+            ];
+
+            return cardAnalysisDto;
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithMultipleOutputs(int cardId = 1)
+        {
+            var document = DocumentFixture.FindValidDocument();
+            
+            return new CardAnalysisDto
+            {
+                Id = cardId,
+                Created = DateTime.Now,
+                StepId = 2,
+                DocumentId = document.Id,
+                Name = "Card Test",
+                StatusId = 1,
+                Document = new DocumentDto
+                {
+                    Id = document.Id,
+                    Name = document.Name,
+                    Description = document.Description,
+                    ReferenceFile = document.ReferenceFile
+                },
+                Step = new StepDto
+                {
+                    Id = 1,
+                    Name = "Step Test",
+                    Order = 1,
+                    WorkflowId = 1
+                },
+                Outputs =
+                [
+                    new StepToolOutputAnalysesDto
+                    {
+                        Id = 1,
+                        StepToolId = 1,
+                        Value = "{\"Field1\": \"Value1\"}",
+                        StepTool = new StepToolDto
+                        {
+                            Id = 1,
+                            StepId = 1,
+                            ToolId = 1,
+                            Tool = new ToolDto
+                            {
+                                Id = 1,
+                                Name = "Test Tool",
+                                ToolTypeId = 2,
+                                ToolType = "Prompt"
+                            }
+                        }
+                    },
+                    new StepToolOutputAnalysesDto
+                    {
+                        Id = 2,
+                        StepToolId = 2,
+                        Value = "{\"Field2\": \"Value2\"}",
+                        StepTool = new StepToolDto
+                        {
+                            Id = 2,
+                            StepId = 2,
+                            ToolId = 1,
+                            Tool = new ToolDto
+                            {
+                                Id = 1,
+                                Name = "Test Tool",
+                                ToolTypeId = 2,
+                                ToolType = "Prompt"
+                            }
+                        }
+                    }
+                ]
+            };
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithOCROutput(int cardId = 1)
+        {
+            return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "{\"text\": \"OCR Result\"}", "OCR", 1, 1);
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithEmbeddingsOutput(int cardId = 1)
+        {
+            return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "{\"embedding\": \"[0.1, 0.2, 0.3]\"}", "Embeddings", 3, 1);
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithPlainTextOutput(int cardId = 1)
+        {
+            return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "This is a plain text response without JSON structure", "Prompt", 2, 1);
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithInvalidJsonOutput(int cardId = 1)
+        {
+            return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "{\"field\": \"value\", invalid json", "Prompt", 2, 1);
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithJsonOutput(int cardId = 1)
+        {
+            return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "{\"Nome\": \"João Silva\", \"Email\": \"joao@example.com\"}", "Prompt", 2, 1);
+        }
+
         public static CreateDocumentAnalysisRejectionDto FindValidCreateDocumentAnalysisRejectionDto()
         {
             var faker = new Faker("pt_BR");
