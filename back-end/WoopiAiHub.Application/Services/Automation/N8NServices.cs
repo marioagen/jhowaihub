@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Enum;

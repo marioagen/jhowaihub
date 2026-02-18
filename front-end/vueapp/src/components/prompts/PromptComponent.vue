@@ -1,15 +1,11 @@
 <template>
-    <div
-        class="mb-2 d-flex align-items-center gap-2 scroll-area"
-    >
+    <div class="mb-2 d-flex align-items-center gap-2 scroll-area">
         <div class="form-pill">
             <a
                 class="pill-link"
                 href="#"
                 :class="{ selected: !loadAllPrompts }"
-                @click.prevent="
-                    !loadAllPrompts ? getAllPrompts() : null
-                "
+                @click.prevent="!loadAllPrompts ? getAllPrompts() : null"
             >
                 <span
                     class="badge rounded-pill"
@@ -24,11 +20,7 @@
                 class="pill-link"
                 href="#"
                 :class="{ selected: loadAllPrompts }"
-                @click.prevent="
-                    loadAllPrompts
-                        ? getOnlyUserPrompts()
-                        : null
-                "
+                @click.prevent="loadAllPrompts ? getOnlyUserPrompts() : null"
             >
                 <span
                     class="badge rounded-pill"
@@ -40,10 +32,7 @@
         </div>
         <div
             class="form-check"
-            v-if="
-                this.dataPrompt.length > 1 &&
-                !loadAllPrompts
-            "
+            v-if="this.dataPrompt.length > 1 && !loadAllPrompts"
         >
             <input
                 class="form-check-input"
@@ -51,9 +40,7 @@
                 value=""
                 @click="checkAll($event)"
             />
-            <label>
-                {{ $t("common.selectAll") }} &nbsp;
-            </label>
+            <label>{{ $t("common.selectAll") }} &nbsp;</label>
         </div>
         <button
             type="button"
@@ -61,9 +48,7 @@
             @click="confirmationDialog(item)"
             v-if="this.listIds.length > 0"
         >
-            <i
-                class="fas fa-trash text-danger icon-delete"
-            ></i>
+            <i class="fas fa-trash text-danger icon-delete"></i>
             {{ $t("common.delete") }}
         </button>
     </div>
@@ -72,12 +57,8 @@
         v-if="dataPrompt.length === 0 && !loading"
     >
         <div class="data-load">
-            <i
-                class="fas fa-exclamation-circle text-secondary"
-            ></i>
-            &nbsp;{{
-                $t("prompts.noPromptsListWereFound")
-            }}.
+            <i class="fas fa-exclamation-circle text-secondary"></i>
+            &nbsp;{{ $t("prompts.noPromptsListWereFound") }}.
         </div>
     </div>
     <div
@@ -85,9 +66,7 @@
         v-if="loading"
     >
         <div class="data-load">
-            <i
-                class="fas fa-sync-alt fa-spin text-secondary"
-            ></i>
+            <i class="fas fa-sync-alt fa-spin text-secondary"></i>
             &nbsp;{{ $t("common.loading") }}..
         </div>
     </div>
@@ -105,10 +84,7 @@
                 <div class="row">
                     <div class="col-12 icons-card">
                         <LucideIcon
-                            v-if="
-                                item.isImported &&
-                                !item.isEdited
-                            "
+                            v-if="item.isImported && !item.isEdited"
                             icon="Globe"
                             :size="16"
                             class="text-primary mt-2"
@@ -126,9 +102,7 @@
                                 type="checkbox"
                                 value=""
                                 :id="item.id"
-                                @click="
-                                    countChecks(item.id)
-                                "
+                                @click="countChecks(item.id)"
                                 v-if="item.isOwner"
                             />
                             <a
@@ -138,72 +112,39 @@
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                             >
-                                <i
-                                    class="fas fa-ellipsis-v icon-ellipsis"
-                                ></i>
+                                <i class="fas fa-ellipsis-v icon-ellipsis"></i>
                             </a>
                             <ul
                                 class="dropdown-menu"
                                 aria-labelledby="dropdownIcon"
                             >
                                 <li
-                                    @click="
-                                        redirectToEditPrompt(
-                                            item.id
-                                        )
-                                    "
+                                    @click="redirectToEditPrompt(item.id)"
                                     v-if="item.isOwner"
                                 >
-                                    <a
-                                        class="dropdown-item"
-                                    >
-                                        {{
-                                            $t(
-                                                "common.edit"
-                                            )
-                                        }}
+                                    <a class="dropdown-item">
+                                        {{ $t("common.edit") }}
                                     </a>
                                 </li>
-                                <li
-                                    @click="
-                                        redirectToClonePrompt(
-                                            item.id
-                                        )
-                                    "
-                                >
-                                    <a
-                                        class="dropdown-item"
-                                    >
-                                        {{
-                                            $t(
-                                                "prompts.cloneAction"
-                                            )
-                                        }}
+                                <li @click="redirectToClonePrompt(item.id)">
+                                    <a class="dropdown-item">
+                                        {{ $t("prompts.cloneAction") }}
                                     </a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
-                <p
-                    class="card-text d-flex align-items-start gap-1"
-                >
+                <p class="card-text d-flex align-items-start gap-1">
                     <span>
                         {{
-                            item.description &&
-                            item.description.length > 100
-                                ? item.description.slice(
-                                      0,
-                                      100
-                                  ) + "..."
+                            item.description && item.description.length > 100
+                                ? item.description.slice(0, 100) + "..."
                                 : item.description
                         }}
                     </span>
                     <span
-                        v-if="
-                            item.description &&
-                            item.description.length > 100
-                        "
+                        v-if="item.description && item.description.length > 100"
                         class="description-view-icon"
                         v-tooltip="item.description"
                         tabindex="0"
@@ -228,10 +169,7 @@
     </div>
     <div
         class="row mt-1"
-        v-if="
-            !loading &&
-            this.dataPrompt.length < this.pagination.count
-        "
+        v-if="!loading && this.dataPrompt.length < this.pagination.count"
     >
         <div class="col">
             <div class="pagination justify-content-center">
@@ -249,9 +187,7 @@
         v-if="modalAlertShow"
         :type="'Confirm'"
         :alertTitle="$t('prompts.removeAllPrompts')"
-        :alertMessage="
-            $t('common.thisActionCannotBeUndone')
-        "
+        :alertMessage="$t('common.thisActionCannotBeUndone')"
         :okLabel="$t('common.confirm')"
         :cancelLabel="$t('common.cancel')"
         @open="deletePrompts"
@@ -269,9 +205,7 @@
                 entitySearch: {},
                 resetInputSearch: false,
                 sidebarData: "Type",
-                queryPage: this.$route.query.page
-                    ? this.$route.query.page
-                    : 1,
+                queryPage: this.$route.query.page ? this.$route.query.page : 1,
                 searchInput: "",
                 searching: false,
                 dataPrompt: [],
@@ -302,8 +236,7 @@
         },
         methods: {
             checkAll: function (event) {
-                const checkboxes =
-                    document.querySelectorAll(".checkbox");
+                const checkboxes = document.querySelectorAll(".checkbox");
                 let checkboxIds = [];
                 this.listIds = [];
                 checkboxes.forEach((checkbox) => {
@@ -313,29 +246,21 @@
                 this.countMultipleChecks(checkboxIds);
             },
             countChecks: function (id) {
-                let checkBox = document.querySelector(
-                    `input[type="checkbox"][id="${id}"]`
-                );
+                let checkBox = document.querySelector(`input[type="checkbox"][id="${id}"]`);
                 if (checkBox && checkBox.checked) {
                     this.listIds.push(id);
                 } else {
-                    this.listIds = this.listIds.filter(
-                        (i) => i !== id
-                    );
+                    this.listIds = this.listIds.filter((i) => i !== id);
                 }
             },
             countMultipleChecks: function (checkboxIds) {
                 parseInt(checkboxIds);
                 checkboxIds.forEach((id) => {
-                    let checkBox = document.querySelector(
-                        `input[type="checkbox"][id="${id}"]`
-                    );
+                    let checkBox = document.querySelector(`input[type="checkbox"][id="${id}"]`);
                     if (checkBox && checkBox.checked) {
                         this.listIds.push(id);
                     } else {
-                        this.listIds = this.listIds.filter(
-                            (i) => i !== id
-                        );
+                        this.listIds = this.listIds.filter((i) => i !== id);
                     }
                 });
             },
@@ -370,60 +295,47 @@
                     isAscending: this.isAscending,
                     colType: this.colType,
                 };
-                PromptService.getPromptList(paramsReq).then(
-                    (response) => {
-                        if (response.error !== undefined) {
-                            return this.$notify({
-                                title: "prompt.title",
-                                message: response.error,
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                        }
-                        this.dataPrompt =
-                            response.data.items;
-                        this.pagination = {
-                            currentPage:
-                                response.data.currentPage,
-                            count: response.data.count,
-                            totalPages:
-                                response.data.totalPages,
-                        };
-                        this.loading = false;
+                PromptService.getPromptList(paramsReq).then((response) => {
+                    if (response.error !== undefined) {
+                        return this.$notify({
+                            title: "prompt.title",
+                            message: response.error,
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
                     }
-                );
+                    this.dataPrompt = response.data.items;
+                    this.pagination = {
+                        currentPage: response.data.currentPage,
+                        count: response.data.count,
+                        totalPages: response.data.totalPages,
+                    };
+                    this.loading = false;
+                });
             },
             confirmationDialog: function (item) {
                 this.modalEntity = item;
                 this.modalAlertShow = true;
-                document.getElementsByTagName(
-                    "BODY"
-                )[0].children[1].className += " active";
+                document.getElementsByTagName("BODY")[0].children[1].className += " active";
             },
             closeModal: function () {
                 this.modalAlertShow = false;
-                document.getElementsByTagName(
-                    "BODY"
-                )[0].children[1].className = "overlay";
+                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
             },
             deletePrompts: function () {
-                PromptService.deletePrompts(
-                    this.listIds
-                ).then((response) => {
+                PromptService.deletePrompts(this.listIds).then((response) => {
                     try {
                         if (!response) {
                             return this.$notify({
                                 title: "prompts.title",
-                                message:
-                                    "prompts.deleteError",
+                                message: "prompts.deleteError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
                         }
                         return this.$notify({
                             title: "prompts.title",
-                            message:
-                                "prompts.deleteSuccess",
+                            message: "prompts.deleteSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
@@ -453,8 +365,7 @@
                 return formattedDate;
             },
             loadMore: function () {
-                this.selectedOption =
-                    this.selectedOption * 2;
+                this.selectedOption = this.selectedOption * 2;
                 this.getList({
                     search: "",
                     page: this.queryPage,
@@ -485,18 +396,13 @@
                 this.loading = true;
                 this.searching = false;
                 var paramsReq = {
-                    search: this.searchInput.trim()
-                        ? this.searchInput.trim()
-                        : "",
+                    search: this.searchInput.trim() ? this.searchInput.trim() : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
                     isAscending: this.isAscending,
                     colType: this.colType,
                 };
-                PromptService.getPromptByUserId(
-                    paramsReq,
-                    userId
-                ).then((response) => {
+                PromptService.getPromptByUserId(paramsReq, userId).then((response) => {
                     if (response.error !== undefined) {
                         return this.$notify({
                             title: "prompt.title",
@@ -507,11 +413,9 @@
                     }
                     this.dataPrompt = response.data.items;
                     this.pagination = {
-                        currentPage:
-                            response.data.currentPage,
+                        currentPage: response.data.currentPage,
                         count: response.data.count,
-                        totalPages:
-                            response.data.totalPages,
+                        totalPages: response.data.totalPages,
                     };
                     this.loading = false;
                 });
@@ -526,37 +430,19 @@
         },
         computed: {
             filteredPrompts() {
-                const search = (
-                    this.filters.input || ""
-                ).toLowerCase();
+                const search = (this.filters.input || "").toLowerCase();
                 return this.dataPrompt.filter((item) => {
-                    const nameMatch =
-                        item.name &&
-                        item.name
-                            .toLowerCase()
-                            .includes(search);
+                    const nameMatch = item.name && item.name.toLowerCase().includes(search);
                     const descMatch =
-                        item.description &&
-                        item.description
-                            .toLowerCase()
-                            .includes(search);
+                        item.description && item.description.toLowerCase().includes(search);
                     const createdStr = item.created
-                        ? new Date(
-                              item.created
-                          ).toLocaleDateString("pt-BR")
+                        ? new Date(item.created).toLocaleDateString("pt-BR")
                         : "";
                     const createdMatch =
                         createdStr.includes(search) ||
-                        (item.created &&
-                            item.created
-                                .toLowerCase()
-                                .includes(search));
+                        (item.created && item.created.toLowerCase().includes(search));
                     if (!search) return true;
-                    return (
-                        nameMatch ||
-                        descMatch ||
-                        createdMatch
-                    );
+                    return nameMatch || descMatch || createdMatch;
                 });
             },
         },
@@ -626,9 +512,7 @@
     .card {
         flex: 0 1 calc(33.333% - 1rem);
         height: auto;
-        background-color: var(
-            --color-card-content
-        ) !important;
+        background-color: var(--color-card-content) !important;
         color: var(--color-body-content) !important;
         border-color: #d0d4d9 !important;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 38%);
@@ -669,12 +553,8 @@
     }
 
     .data-load {
-        background-color: var(
-            --color-bg-loading-content
-        ) !important;
-        border-color: var(
-            --color-bg-loading-content
-        ) !important;
+        background-color: var(--color-bg-loading-content) !important;
+        border-color: var(--color-bg-loading-content) !important;
         color: var(--color-body-content) !important;
         text-align: center;
         padding: 9px;

@@ -217,7 +217,6 @@
         </div>
     </div>
 </template>
-
 <script>
     export default {
         name: "TemplateFormDisplay",
@@ -274,7 +273,6 @@
         },
     };
 </script>
-
 <style scoped>
     .font-monospace {
         font-family: "Courier New", Courier, monospace;

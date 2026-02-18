@@ -3,25 +3,15 @@
         <div
             class="d-flex justify-content-between align-items-center px-3 py-2"
             :style="{
-                backgroundColor: isLast
-                    ? '#E8FFE8'
-                    : '#e8f1ff',
+                backgroundColor: isLast ? '#E8FFE8' : '#e8f1ff',
             }"
         >
             <div class="d-flex align-items-center">
-                <div
-                    class="d-flex flex-column align-items-start"
-                >
-                    <div
-                        class="d-flex align-items-center mb-1"
-                    >
+                <div class="d-flex flex-column align-items-start">
+                    <div class="d-flex align-items-center mb-1">
                         <div
                             class="d-flex justify-content-center align-items-center rounded-circle text-white me-2"
-                            style="
-                                width: 28px;
-                                height: 28px;
-                                background-color: #2f80ed;
-                            "
+                            style="width: 28px; height: 28px; background-color: #2f80ed"
                         >
                             {{ index }}
                         </div>
@@ -43,9 +33,7 @@
                                             flushTitle(e);
                                         }
                                     "
-                                    @keyup.enter="
-                                        flushTitle($event)
-                                    "
+                                    @keyup.enter="flushTitle($event)"
                                     placeholder="Title"
                                     autofocus
                                 />
@@ -72,9 +60,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="mb-3">
-                    <label
-                        class="form-label text-muted small"
-                    >
+                    <label class="form-label text-muted small">
                         {{ $t("common.status") }}
                     </label>
                     <Field
@@ -89,9 +75,7 @@
                                 class="form-select form-select-sm"
                                 v-bind="field"
                             >
-                                <option value="">
-                                    Select status
-                                </option>
+                                <option value="">Select status</option>
                                 <option
                                     v-for="s in statusList"
                                     :key="s.id"
@@ -112,9 +96,7 @@
             </div>
             <div class="row">
                 <div class="mb-2">
-                    <label
-                        class="form-label text-muted small"
-                    >
+                    <label class="form-label text-muted small">
                         {{ $t("workflow.profiles") }}
                     </label>
                     <Field
@@ -126,9 +108,7 @@
                     >
                         <div class="d-flex flex-column">
                             <div class="input-group">
-                                <span
-                                    class="input-group-text border-end-0 bg-white"
-                                >
+                                <span class="input-group-text border-end-0 bg-white">
                                     <LucideIcon
                                         icon="Users"
                                         :size="16"
@@ -139,18 +119,12 @@
                                     v-bind="field"
                                 >
                                     <option value="">
-                                        {{
-                                            $t(
-                                                "workflow.profiles"
-                                            )
-                                        }}
+                                        {{ $t("workflow.profiles") }}
                                     </option>
                                     <option
                                         v-for="p in profilesList"
                                         :key="p.id"
-                                        :value="
-                                            String(p.id)
-                                        "
+                                        :value="String(p.id)"
                                     >
                                         {{ p.text }}
                                     </option>
@@ -170,9 +144,7 @@
                 v-if="showEditFlow"
                 class="row mt-3"
             >
-                <div
-                    class="col-12 d-flex align-items-center justify-content-between"
-                >
+                <div class="col-12 d-flex align-items-center justify-content-between">
                     <p class="mb-0">
                         {{ $t("workflow.stepFlow") }}
                     </p>
@@ -274,22 +246,17 @@
                 },
                 set(val) {
                     clearTimeout(this.titleDebounceTimer);
-                    this.titleDebounceTimer = setTimeout(
-                        () => {
-                            this.$emit("update-step", {
-                                ...this.step,
-                                name: val,
-                            });
-                        },
-                        300
-                    );
+                    this.titleDebounceTimer = setTimeout(() => {
+                        this.$emit("update-step", {
+                            ...this.step,
+                            name: val,
+                        });
+                    }, 300);
                 },
             },
             statusIdComputed: {
                 get() {
-                    return String(
-                        this.step?.statusId ?? ""
-                    );
+                    return String(this.step?.statusId ?? "");
                 },
                 set(val) {
                     this.$emit("update-step", {
@@ -300,9 +267,7 @@
             },
             profileIdComputed: {
                 get() {
-                    return String(
-                        this.step?.profileId ?? ""
-                    );
+                    return String(this.step?.profileId ?? "");
                 },
                 set(val) {
                     this.$emit("update-step", {
@@ -312,10 +277,7 @@
                 },
             },
             showEditFlow() {
-                return (
-                    this.isEdit &&
-                    this.step?.stepTools?.length > 0
-                );
+                return this.isEdit && this.step?.stepTools?.length > 0;
             },
             showCloseButton() {
                 return this.step.id == 0;
@@ -348,20 +310,12 @@
                 this.$refs.statusField?.setTouched?.(true);
                 this.$refs.profileField?.setTouched?.(true);
 
-                const [
-                    titleValid,
-                    statusValid,
-                    profileValid,
-                ] = await Promise.all([
+                const [titleValid, statusValid, profileValid] = await Promise.all([
                     this.$refs.titleField?.validate?.(),
                     this.$refs.statusField?.validate?.(),
                     this.$refs.profileField?.validate?.(),
                 ]);
-                return (
-                    titleValid?.valid &&
-                    statusValid?.valid &&
-                    profileValid?.valid
-                );
+                return titleValid?.valid && statusValid?.valid && profileValid?.valid;
             },
             redirectToFlow() {
                 this.$emit("saveWorkflow");
