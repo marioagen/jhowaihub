@@ -10,7 +10,6 @@ namespace WoopiAiHub.Repository.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
             migrationBuilder.Sql(@"
                 IF NOT EXISTS (SELECT 1 FROM ToolTypes WHERE [Name] = 'Quiz')
                 BEGIN
@@ -18,7 +17,6 @@ namespace WoopiAiHub.Repository.Migrations
                     VALUES ('Quiz', 'tools.typeDisplay.Quiz', 1, GETDATE());
                 END
             ");
-
         }
 
         /// <inheritdoc />

@@ -12,8 +12,8 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260213210233_AlterTablePromptInceaseDescriptionSize")]
-    partial class AlterTablePromptInceaseDescriptionSize
+    [Migration("20260218160819_AddQuizToolType")]
+    partial class AddQuizToolType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -312,9 +312,19 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("varchar(max)")
                         .HasColumnName("Output");
 
+                    b.Property<int?>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("Type");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IdDocument");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("DocumentHistories", (string)null);
                 });
@@ -1467,7 +1477,13 @@ namespace WoopiAiHub.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
+                        .WithMany("DocumentHistories")
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Document");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentNormalized", b =>
@@ -1929,6 +1945,8 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>
                 {
                     b.Navigation("AuditLogs");
+
+                    b.Navigation("DocumentHistories");
 
                     b.Navigation("Prompts");
 

@@ -152,7 +152,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// 
+        /// Verify if the questionnaire is being used in the workflow tools, if it is being used, it cannot be deleted
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
@@ -161,11 +161,11 @@ namespace WoopiAiHub.Repository
             var toolTypeId = _context.ToolTypes.Where(tt => tt.Name == HandlersTypes.Quiz).Select(tt => tt.Id).FirstOrDefault();
             var idsString = ids.Select(i => i.ToString());
             return  _context.StepTools
-                .Include(st => st.Tool!)
-                .ThenInclude(t => t!.ToolType)
-                .Where(st => st.Tool!.ToolType!.Id == toolTypeId)
-                .Where(st => st.Parameters.Select(s => s.Value).Any(s => idsString.Contains(s)))
-                .Any();
+                        .Any(st =>
+                            st.Tool != null &&
+                            st.Tool.ToolType != null &&
+                            st.Tool.ToolType.Id == toolTypeId &&
+                            st.Parameters.Any(p => idsString.Contains(p.Value)));
         }
 
         /// <summary>

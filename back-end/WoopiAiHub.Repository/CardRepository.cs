@@ -59,6 +59,7 @@ namespace WoopiAiHub.Repository
                                 .Include(d => d.Document)
                                 .Include(s => s.Step)
                                     .ThenInclude(w => w!.Workflow)
+                                .Include(s => s.Outputs)
                                 .FirstOrDefaultAsync();
         }
 
