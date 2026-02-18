@@ -26,6 +26,10 @@ export default new Vuex.Store({
                 teamId: "",
             },
         },
+        uploadNotifications: [
+            { id: "dummy-completed", fileName: "Annual-Report-2024.pdf", status: "completed" },
+            { id: "dummy-in-progress", fileName: "Contract-draft.docx", status: "in_progress" },
+        ],
     },
     mutations: {
         updateUserProfile(state, payload) {
@@ -59,7 +63,7 @@ export default new Vuex.Store({
         },
         setFlowByStep(state, payload) {
             const { stepId, flowData, stepOrder } = payload;
-            state.tempWorkflow.list = state.tempWorkflow.list.map(item => {
+            state.tempWorkflow.list = state.tempWorkflow.list.map((item) => {
                 if (stepOrder !== undefined && (stepId === undefined || stepId == 0)) {
                     return item.order == stepOrder ? { ...item, stepTools: flowData } : item;
                 }
@@ -75,6 +79,24 @@ export default new Vuex.Store({
                 list: [],
                 data: {},
             };
+        },
+        addUploadNotification(state, payload) {
+            const { id, fileName, status = "in_progress" } = payload;
+            const exists = state.uploadNotifications.some((n) => n.id === id);
+            if (!exists) {
+                state.uploadNotifications.unshift({ id, fileName, status });
+            }
+        },
+        setUploadNotificationComplete(state, payload) {
+            const notification = state.uploadNotifications.find((n) => n.id === payload.id);
+            if (notification) {
+                notification.status = "completed";
+            }
+        },
+        removeUploadNotification(state, payload) {
+            state.uploadNotifications = state.uploadNotifications.filter(
+                (n) => n.id !== payload.id
+            );
         },
     },
     plugins: [
