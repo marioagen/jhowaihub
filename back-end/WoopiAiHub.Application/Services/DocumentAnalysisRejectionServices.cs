@@ -101,7 +101,7 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
             }
-            var status = await _statusRepository.FindByName("Rejected");
+            var status = await _statusRepository.FindById((int)CardStatus.Rejected);
             if (status == null)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);

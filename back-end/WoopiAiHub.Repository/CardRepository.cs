@@ -58,7 +58,7 @@ namespace WoopiAiHub.Repository
             return await _context.Cards.Where(c => c.Id == id)
                 .Include(d => d.Document)
                 .Include(s => s.Step)
-                .ThenInclude(w => w!.Workflow)
+                    .ThenInclude(w => w!.Workflow)
                 .FirstOrDefaultAsync();
         }
 
@@ -71,36 +71,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Cards.Where(c => c.Id == id)
                 .Include(s => s.Step)
-                .ThenInclude(p => p!.Profile)
-                .FirstOrDefaultAsync();
-        }
-
-        /// <summary>
-        /// Returns a card by its ID.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public async Task<Card?> FindByIdWithFullRelationships(int id)
-        {
-            //To show ze Card, we only need to include the Document
-            return await _context.Cards.Where(c => c.Id == id)
-                .Include(d => d.Document)
-                .Include(s => s.Step)
-                .ThenInclude(p => p!.Profile)
-                .Include(s => s.Step)
-                .ThenInclude(w => w!.Workflow)
-                .ThenInclude(w => w!.Teams)
-                .ThenInclude(w => w!.Users)
-                .Include(s => s.Step)
-                .ThenInclude(w => w!.Workflow)
-                .ThenInclude(ws => ws!.Steps)
-                .ThenInclude(st => st.StepTools)
-                .ThenInclude(t => t.Tool)
-                .ThenInclude(tt => tt!.ToolType)
-                .Include(c => c.Outputs)
-                .ThenInclude(o => o.StepTool)
-                .ThenInclude(st => st!.Tool)
-                .ThenInclude(t => t!.ToolType)
+                    .ThenInclude(p => p!.Profile)
                 .FirstOrDefaultAsync();
         }
 
@@ -159,9 +130,9 @@ namespace WoopiAiHub.Repository
             return await _context.Cards
                 .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Executions)
-                .ThenInclude(e => e.StepTool)
-                .ThenInclude(st => st!.Tool)
-                .ThenInclude(t => t!.ToolType)
+                    .ThenInclude(e => e.StepTool)
+                        .ThenInclude(st => st!.Tool)
+                .           ThenInclude(t => t!.ToolType)
                 .OrderByDescending(c => c.Created)
                 .FirstOrDefaultAsync();
         }
@@ -177,8 +148,8 @@ namespace WoopiAiHub.Repository
                 .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Step)
                 .Include(c => c.Outputs)
-                .ThenInclude(o => o.StepTool)
-                .ThenInclude(st => st!.Tool)
+                    .ThenInclude(o => o.StepTool)
+                        .ThenInclude(st => st!.Tool)
                 .OrderBy(c => c.Step!.Order)
                 .ToListAsync();
         }

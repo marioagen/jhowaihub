@@ -6,9 +6,6 @@ export const hasPermission = (module, action) => {
 
     const permissions = store.state.permissions;
     if (permissions.length === 0) return false;
-    console.log(permissions);
-    console.log(module);
-    console.log(action);
     var isAllowed = permissions.some(p => {
         const [key] = Object.keys(p);
         const value = p[key];

@@ -42,15 +42,5 @@ namespace WoopiAiHub.Repository
                 })
                 .ToListAsync();
         }
-
-        /// <summary>
-        /// Find a status by its name
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public async Task<Status?> FindByName(string name)
-        {
-            return await _context.Status.Where(s => s.Name == name).FirstOrDefaultAsync();
-        }
     }
 }

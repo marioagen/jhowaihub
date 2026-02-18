@@ -137,7 +137,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindByName("Rejected"))
+            _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
                 .ReturnsAsync((Status?)null);
 
             // Act & Assert
@@ -168,7 +168,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindByName("Rejected"))
+            _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
                 .ReturnsAsync(status);
             _userRepositoryMock.Setup(repo => repo.FindByEmailAsync(email))
                 .ReturnsAsync((User?)null);
@@ -202,7 +202,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindByName("Rejected"))
+            _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
                 .ReturnsAsync(status);
             _userRepositoryMock.Setup(repo => repo.FindByEmailAsync(email))
                 .ReturnsAsync(user);
@@ -246,7 +246,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindByName("Rejected"))
+            _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
                 .ReturnsAsync(status);
             _userRepositoryMock.Setup(repo => repo.FindByEmailAsync(email))
                 .ReturnsAsync(user);

@@ -66,7 +66,7 @@ import AnalysisRejectionServices from "@/services/documents/AnalysisRejectionSer
 import LogService from '@/services/log/logService';
 
 export default {
-    name: "ModalReject",
+    name: "DocumentRejectionModal",
     components: {
         ModalComponent,
         Field,

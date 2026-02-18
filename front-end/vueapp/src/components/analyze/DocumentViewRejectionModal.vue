@@ -69,7 +69,7 @@ import dateHelper from "@/helpers/date";
 import LogService from '@/services/log/logService';
 
 export default {
-    name: "ModalViewRejection",
+    name: "DocumentViewRejectionModal",
     components: {
         ModalComponent
     },
@@ -90,10 +90,9 @@ export default {
                     } else {
                         this.rejections = [];
                     }
-                    console.log("rejections", this.rejections)
                 })
                 .catch((err) => {
-                    console.log(err)
+                    LogService.showMessage("Error fetching rejections: " + err);
                 })
                 .finally(() => {
                     this.loading = false;
