@@ -124,7 +124,7 @@ namespace WoopiAiHub.Application.Services
                 modelUsages.Add((
                     g.Model,
                     modelEmbeddingEntity.Id,
-                    (int)g.TotalUsage
+                    g.TotalUsage
                 ));
             }
 

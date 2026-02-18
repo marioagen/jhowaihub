@@ -58,8 +58,7 @@ namespace WoopiAiHub.Application.Messaging
                     await documentServices.InputToolQuestionnaire(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
-                    var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
-                    
+
                     var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto
                     (
