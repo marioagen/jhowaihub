@@ -35,7 +35,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet]
         [SwaggerOperation("Retrieves document analysis rejections by card ID")]
         [ProducesResponseType(typeof(List<DocumentAnalysisRejectionDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetRejections([FromQuery] int cardId)
+        public async Task<IActionResult> FindRejections([FromQuery] int cardId)
         {
             var result = await _services.FindRejectionsByCardIdAsync(cardId);
             return Ok(result);
@@ -44,7 +44,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("WorkflowPreviousSteps/{workflowId}")]
         [SwaggerOperation("Retrieves workflow previous steps by workflow ID")]
         [ProducesResponseType(typeof(List<StepDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetWorkflowPreviousSteps(int workflowId, [FromQuery] int cardId)
+        public async Task<IActionResult> FindWorkflowPreviousSteps(int workflowId, [FromQuery] int cardId)
         {
             var result = await _services.FindWorkflowPreviousStepsAsync(workflowId, cardId);
             return Ok(result);
