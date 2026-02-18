@@ -791,7 +791,7 @@
 
                         this.$notify({
                             title: "flow.title",
-                            message: "Template configurado com sucesso",
+                            message: "flow.formFlow.configurationSaved",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });

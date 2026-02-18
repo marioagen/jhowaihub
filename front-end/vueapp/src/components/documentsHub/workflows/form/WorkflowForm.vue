@@ -498,7 +498,7 @@
             redirectToIndex() {
                 this.$store.commit("cleanTempWorkflow");
                 return this.$router.push({
-                    name: "WorkflowManagement",
+                    name: "WorkflowPage",
                 });
             },
             saveWorkflowInStore() {
