@@ -120,7 +120,6 @@
                 type: String,
                 required: true,
             },
-            /** When true, component fills its container (e.g. inside resizable split). */
             fillContainer: {
                 type: Boolean,
                 default: false,
