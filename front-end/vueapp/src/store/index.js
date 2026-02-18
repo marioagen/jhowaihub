@@ -26,10 +26,7 @@ export default new Vuex.Store({
                 teamId: "",
             },
         },
-        uploadNotifications: [
-            { id: "dummy-completed", fileName: "Annual-Report-2024.pdf", status: "completed" },
-            { id: "dummy-in-progress", fileName: "Contract-draft.docx", status: "in_progress" },
-        ],
+        uploadNotifications: [],
     },
     mutations: {
         updateUserProfile(state, payload) {
@@ -80,23 +77,34 @@ export default new Vuex.Store({
                 data: {},
             };
         },
+        clearInProgressUploadNotifications(state, payload) {
+            const namesFiles = payload.namesFiles || [];
+            if (namesFiles.length === 0) return;
+            state.uploadNotifications = state.uploadNotifications.filter(
+                (n) => !(n.status === "in_progress" && namesFiles.includes(n.fileName))
+            );
+        },
         addUploadNotification(state, payload) {
-            const { id, fileName, status = "in_progress" } = payload;
+            const { id, fileName, status = "in_progress", success = true } = payload;
             const exists = state.uploadNotifications.some((n) => n.id === id);
             if (!exists) {
-                state.uploadNotifications.unshift({ id, fileName, status });
+                state.uploadNotifications.unshift({ id, fileName, status, success });
             }
         },
         setUploadNotificationComplete(state, payload) {
             const notification = state.uploadNotifications.find((n) => n.id === payload.id);
             if (notification) {
                 notification.status = "completed";
+                notification.success = payload.success !== false;
             }
         },
         removeUploadNotification(state, payload) {
             state.uploadNotifications = state.uploadNotifications.filter(
                 (n) => n.id !== payload.id
             );
+        },
+        clearUploadNotifications(state) {
+            state.uploadNotifications = [];
         },
     },
     plugins: [
@@ -105,6 +113,9 @@ export default new Vuex.Store({
                 getItem: (key) => Cookies.get(key),
                 setItem: (key, value) => Cookies.set(key, value, { expires: 3, secure: true }),
                 removeItem: (key) => Cookies.remove(key),
+            },
+            reducer(state) {
+                return { ...state, uploadNotifications: [] };
             },
         }),
     ],

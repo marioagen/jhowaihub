@@ -279,6 +279,7 @@ const spanish = {
         },
         uploadComplete: "Carga completa",
         uploadedFiles: "Todos los archivos subidos",
+        sentNowProcessing: "Documentos enviados, en proceso.",
         uploadPdf:
             "Arrastre y suelte sus archivos PDF a continuación para empezar o haga clic en el área para navegar",
         viewHistory: "Ver historial",

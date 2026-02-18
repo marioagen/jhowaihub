@@ -276,6 +276,7 @@ const english = {
         },
         uploadComplete: "Upload complete",
         uploadedFiles: "All files are uploaded!",
+        sentNowProcessing: "Documents sent, now processing.",
         uploadPdf:
             "Drag and drop your PDF files below to get started or click on the area to browse",
         viewHistory: "View history",

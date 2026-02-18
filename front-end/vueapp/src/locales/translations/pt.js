@@ -289,6 +289,7 @@ const portuguese = {
         },
         uploadComplete: "Carregamento completo",
         uploadedFiles: "Todos os arquivos carregados",
+        sentNowProcessing: "Documentos enviados, em processamento.",
         uploadPdf:
             "Arraste e solte seus arquivos PDF abaixo para começar ou clique na área para navegar",
         viewHistory: "Exibir histórico",
