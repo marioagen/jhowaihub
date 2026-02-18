@@ -49,7 +49,6 @@ namespace WoopiAiHub.Application.ToolsHandler
             var quizDto = _quizServices.FindById(quizId);
             var apikey = _config["IndexerApiKey"]!;
 
-
             return new ExecutionMessageDto
             {
                 Queue = _messageQueues.AnswerQueue,
