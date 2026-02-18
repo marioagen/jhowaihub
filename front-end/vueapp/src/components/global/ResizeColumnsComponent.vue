@@ -41,34 +41,61 @@
     export default {
         name: "ResizeColumnsComponent",
         props: {
-            /** Initial left column width (0–100). */
             defaultLeftPercent: {
                 type: Number,
                 default: 50,
             },
-            /** Minimum left column width (0–100). */
             minLeftPercent: {
                 type: Number,
                 default: 20,
             },
-            /** Maximum left column width (0–100). */
             maxLeftPercent: {
                 type: Number,
                 default: 80,
             },
-            /** Minimum height of the row (CSS value, e.g. '300px'). */
             minHeight: {
                 type: String,
                 default: "300px",
             },
+            preferenceKey: {
+                type: String,
+                default: null,
+            },
         },
         data() {
+            const saved = this.getSavedLeftPercent();
+            const initial =
+                saved !== null
+                    ? Math.min(this.maxLeftPercent, Math.max(this.minLeftPercent, saved))
+                    : this.defaultLeftPercent;
             return {
-                leftPanelPercent: this.defaultLeftPercent,
+                leftPanelPercent: initial,
                 isDragging: false,
             };
         },
+        watch: {
+            defaultLeftPercent(value) {
+                const clamped = Math.min(this.maxLeftPercent, Math.max(this.minLeftPercent, value));
+                this.leftPanelPercent = clamped;
+            },
+            preferenceKey() {
+                const saved = this.getSavedLeftPercent();
+                if (saved !== null) {
+                    this.leftPanelPercent = Math.min(
+                        this.maxLeftPercent,
+                        Math.max(this.minLeftPercent, saved)
+                    );
+                }
+            },
+        },
         methods: {
+            getSavedLeftPercent() {
+                if (!this.preferenceKey || !this.$store?.state?.userPreferences) {
+                    return null;
+                }
+                const value = this.$store.state.userPreferences[this.preferenceKey];
+                return typeof value === "number" ? value : null;
+            },
             startResize() {
                 this.isDragging = true;
                 const overlay = this.$refs.resizeOverlayRef;
@@ -102,6 +129,13 @@
                 document.removeEventListener("mouseup", this.stopResize, true);
                 document.body.style.userSelect = "";
                 document.body.style.cursor = "";
+                if (this.preferenceKey) {
+                    this.$store.commit("setUserPreference", {
+                        key: this.preferenceKey,
+                        value: this.leftPanelPercent,
+                    });
+                }
+                this.$emit("update:left-percent", this.leftPanelPercent);
             },
         },
     };
