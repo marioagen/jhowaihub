@@ -99,10 +99,30 @@
             toggleSidebar() {
                 this.isSidebarCollapsed = !this.isSidebarCollapsed;
             },
-            handleUploadComplete(payload) {},
+            handleUploadComplete(payload) {
+                const { nameFile } = payload || {};
+                if (!nameFile) return;
+                const list = this.$store.state.uploadNotifications || [];
+                const inProgress = list.find(
+                    (n) => n.fileName === nameFile && n.status === "in_progress"
+                );
+                if (inProgress) {
+                    this.$store.commit("setUploadNotificationComplete", { id: inProgress.id });
+                }
+            },
             handleUploadInProgress(payload) {},
             handleUploadStarted(payload) {
                 this.alertToast();
+                const { namesFiles } = payload || {};
+                if (!namesFiles || !Array.isArray(namesFiles)) return;
+                const base = Date.now();
+                namesFiles.forEach((name, i) => {
+                    this.$store.commit("addUploadNotification", {
+                        id: `upload-${base}-${i}-${name}`,
+                        fileName: name,
+                        status: "in_progress",
+                    });
+                });
             },
             alertToast(msg, color) {
                 this.toastShow = true;
