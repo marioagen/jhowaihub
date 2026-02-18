@@ -174,15 +174,17 @@ namespace WoopiAiHub.Application.Services
                 return;
             }
 
-            var chargeRequest = new ExcessManagementTenantDto
+            var tenantConsumption = new TenantConsumptionDto
             {
                 Tenant = tenant.Name,
                 UsageCount = usageByTenant,
+                PeriodStart = lastPeriod.PeriodStart,
+                PeriodEnd = lastPeriod.PeriodEnd
             };
 
             await _resiliencePipeline.ExecuteAsync(async token =>
             {
-                var result = await _marketPlaceApi.ProcessConsumption(keyAccess, chargeRequest);
+                var result = await _marketPlaceApi.ProcessConsumption(keyAccess, tenantConsumption);
                 if (result)
                 {
                     _logger.LogInformation("Successfully sent usage charge for tenant {TenantName}", tenant.Name);
