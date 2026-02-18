@@ -55,7 +55,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IUsageDailyServices _usageDailyServices;
-        private readonly IDocumentHistoryRepository _documentHistoryRepository;
         private readonly IUserRepository _userRepository;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
@@ -86,7 +85,6 @@ namespace WoopiAiHub.Application.Services
             IStepToolOutputRepository stepToolOutputRepository,
             IStepToolRepository stepToolRepository,
             IUsageDailyServices usageDailyServices,
-            IDocumentHistoryRepository documentHistoryRepository,
             IUserRepository userRepository)
         {
             _unitOfWork = unitOfWork;
@@ -111,7 +109,6 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolRepository = stepToolRepository;
             _usageDailyServices = usageDailyServices;
-            _documentHistoryRepository = documentHistoryRepository;
             _userRepository = userRepository;
         }
 
@@ -414,17 +411,6 @@ namespace WoopiAiHub.Application.Services
                 return null;
             }
 
-            var messageContent = System.Text.Json.JsonSerializer.Serialize(documentQuestionnaireDto.QuestionsAnswers
-                .Select(x =>
-                    new QuestionAnswerDto
-                    {
-                        Id = x.Id,
-                        Question = x.Question,
-                        Answer = x.Answer
-                    }
-                )
-                .ToList());
-
             _unitOfWork.BeginTransaction();
             try
             {
@@ -434,7 +420,17 @@ namespace WoopiAiHub.Application.Services
                     .FindByStepToolIdAndCardIdAsync(dataDto.StepToolId, dataDto.CardId);
 
                 await UpdateExecutionAsync(execution!, documentQuestionnaireDto.Email);
-                await SaveStepToolOutputAsync(execution!, System.Text.Json.JsonSerializer.Serialize(documentQuestionnaireDto.QuestionsAnswers.Select(x => new QuestionAnswerDto { Id = x.Id, Question = x.Question, Answer = x.Answer }).ToList()));
+                await SaveStepToolOutputAsync(
+                    execution!, 
+                    System.Text.Json.JsonSerializer.Serialize(
+                        documentQuestionnaireDto
+                            .QuestionsAnswers
+                                .Select(x => new QuestionAnswerDto {
+                                    Id = x.Id,
+                                    Question = x.Question,
+                                    Answer = x.Answer
+                                })
+                                .ToList()));
 
                 var usages = documentQuestionnaireDto.QuestionsAnswers.SelectMany(x => x.Usage).GroupBy(u => u.Model)
                     .Select(u => new
@@ -446,8 +442,12 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var item in usages)
                 {
-                    await _usageDailyServices.AddByValuesAsync(MetricNames.Token, documentQuestionnaireDto.Email, item.TotalUsage,
-                        item.Model);
+                    await _usageDailyServices.AddByValuesAsync(
+                        MetricNames.Token,
+                        documentQuestionnaireDto.Email,
+                        item.TotalUsage,
+                        item.Model
+                    );
                 }
 
                 _unitOfWork.Commit();
