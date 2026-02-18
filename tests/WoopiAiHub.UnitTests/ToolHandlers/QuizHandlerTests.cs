@@ -35,7 +35,9 @@ namespace WoopiAiHub.UnitTests.Handlers
             _handler = _mocker.CreateInstance<QuizHandler>();
         }
 
-        [Fact(DisplayName = "BuildPayload should return valid ExecutionMessageDto")]
+///
+        [Fact(DisplayName = "BuildPayload should return valid ExecutionMessageDto")]        
+        [Trait("BuildPayload", "Success")]
         public async Task BuildPayload_ValidInput_ReturnsExecutionMessageDto()
         {
             // Arrange
@@ -77,7 +79,8 @@ namespace WoopiAiHub.UnitTests.Handlers
             Assert.Equal("Q1", message.Questions.First().Question);
         }
 
-        [Fact(DisplayName = "BuildPayload should throw ArgumentException when AiGateway info is missing")]
+        [Fact(DisplayName = "BuildPayload should throw ArgumentException when AiGateway info is missing")]       
+        [Trait("BuildPayload", "Fail")]
         public async Task BuildPayload_MissingAiGatewayInfo_ThrowsArgumentException()
         {
             // Arrange

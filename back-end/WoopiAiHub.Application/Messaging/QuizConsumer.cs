@@ -44,12 +44,11 @@ namespace WoopiAiHub.Application.Messaging
         /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _consumer.ConsumerAsync(_queues.AnswerQueueResponse, async message =>
+            await _consumer.ConsumerAsync(_queues.AnswerQueueAiHubResponse, async message =>
             {
                 using var scope = _scopeFactory.CreateScope();
                 try
                 {
-                    
                     var connectionString = await GetConnectionStringAsync(scope, message.Tenant!);
                     var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
                     httpAccessor.HttpContext ??= new DefaultHttpContext();

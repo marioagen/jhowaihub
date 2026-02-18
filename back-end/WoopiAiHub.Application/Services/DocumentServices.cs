@@ -400,6 +400,12 @@ namespace WoopiAiHub.Application.Services
             return dto.Data;
         }
 
+        /// <summary>
+        /// Processes the questionnaire result from the tool and saves the result, token usage and history in the database.
+        /// </summary>
+        /// <param name="documentQuestionnaireDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
         public async Task<Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto)
         {
             var documentDb = _documentRepository.FindByReferenceFile(documentQuestionnaireDto.ReferenceFile);
@@ -408,34 +414,42 @@ namespace WoopiAiHub.Application.Services
                 return null;
             }
 
-            var messageContent = System.Text.Json.JsonSerializer.Serialize(documentQuestionnaireDto.QuestionsAnswers.Select(x => new QuestionAnswerDto { Id = x.Id, Question = x.Question, Answer = x.Answer }).ToList());
-
-            var documentHistory = new DocumentHistory(documentDb.Id,
-                "Quiz",
-                messageContent,
-                0,
-                DateTime.Now);
+            var messageContent = System.Text.Json.JsonSerializer.Serialize(documentQuestionnaireDto.QuestionsAnswers
+                .Select(x =>
+                    new QuestionAnswerDto
+                    {
+                        Id = x.Id,
+                        Question = x.Question,
+                        Answer = x.Answer
+                    }
+                )
+                .ToList());
 
             _unitOfWork.BeginTransaction();
             try
             {
-                _documentHistoryRepository.Create(documentHistory);
-
                 var dataDto = System.Text.Json.JsonSerializer.Deserialize<MetaDataAutomationDto>(documentQuestionnaireDto.Data.ToString());
 
                 var execution = await _stepToolExecutionRepository
                     .FindByStepToolIdAndCardIdAsync(dataDto.StepToolId, dataDto.CardId);
+
                 await UpdateExecutionAsync(execution!, documentQuestionnaireDto.Email);
                 await SaveStepToolOutputAsync(execution!, System.Text.Json.JsonSerializer.Serialize(documentQuestionnaireDto.QuestionsAnswers.Select(x => new QuestionAnswerDto { Id = x.Id, Question = x.Question, Answer = x.Answer }).ToList()));
 
-            foreach (var item in documentQuestionnaireDto.QuestionsAnswers)
-            {
-                foreach (var usage in item.Usage)
+                var usages = documentQuestionnaireDto.QuestionsAnswers.SelectMany(x => x.Usage).GroupBy(u => u.Model)
+                    .Select(u => new
+                    {
+                        Model = u.Key,
+                        TotalUsage = u.Sum(usage => usage.Total_usage ?? 0)
+                    })
+                    .ToList();
+
+                foreach (var item in usages)
                 {
-                    await _usageDailyServices.AddByValuesAsync(MetricNames.Token, documentQuestionnaireDto.Email, usage.Total_usage ?? 0,
-                        usage.Model);
+                    await _usageDailyServices.AddByValuesAsync(MetricNames.Token, documentQuestionnaireDto.Email, item.TotalUsage,
+                        item.Model);
                 }
-            }
+
                 _unitOfWork.Commit();
             }
             catch (Exception ex)

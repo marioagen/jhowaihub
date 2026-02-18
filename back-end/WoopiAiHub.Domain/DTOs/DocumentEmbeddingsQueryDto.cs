@@ -7,7 +7,7 @@ using WoopiAiIntegrationServices.Domain.Dtos.Request;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class DocumentEmbeddingsQueryDto
+    public record class DocumentEmbeddingsQueryDto
     {
         public string ReferenceFile { get; set; } = string.Empty;
         public string KeyMongoAccess { get; set; } = string.Empty;
