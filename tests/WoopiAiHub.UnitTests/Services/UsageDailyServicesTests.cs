@@ -272,17 +272,17 @@ namespace WoopiAiHub.UnitTests.Services
             var modelEmbedding = _fixture.CreateValidModelEmbedding();
             var userId = Guid.NewGuid();
             var email = "test@example.com";
-            var usages = new List<(string Model, int TotalUsage)>
+            var usages = new List<QueryUsageDto>
             {
-                (modelEmbedding.Name, 10)
+                new QueryUsageDto { Model = modelEmbedding.Name, Total_usage = 10 }
             };
 
             _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
                                  .ReturnsAsync(usageType);
             _userServicesMock.Setup(s => s.FindIdByEmail(email))
                             .Returns(userId);
-            _modelEmbeddingRepositoryMock.Setup(r => r.FindByNameAsync(modelEmbedding.Name))
-                                        .ReturnsAsync(modelEmbedding);
+            _modelEmbeddingRepositoryMock.Setup(r => r.FindAllByNamesListAsync(new List<string> { modelEmbedding.Name }))
+                                        .ReturnsAsync(new List<ModelEmbedding> { modelEmbedding });
             _usageDailyRepositoryMock.Setup(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()))
                                     .ReturnsAsync(true);
 
@@ -293,7 +293,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _usageTypeServicesMock.Verify(s => s.FindByNameAsync(usageType.Name), Times.Once);
             _userServicesMock.Verify(s => s.FindIdByEmail(email), Times.Once);
-            _modelEmbeddingRepositoryMock.Verify(r => r.FindByNameAsync(modelEmbedding.Name), Times.Once);
+            _modelEmbeddingRepositoryMock.Verify(r => r.FindAllByNamesListAsync(new List<string> { modelEmbedding.Name }), Times.Once);
             _usageDailyRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()), Times.Once);
         }
 
@@ -303,7 +303,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var email = "test@example.com";
-            var usages = new List<(string Model, int TotalUsage)> { ("Model1", 10) };
+            var usages = new List<QueryUsageDto> { new QueryUsageDto { Model = "Model1", Total_usage = 10 } };
 
             _usageTypeServicesMock.Setup(s => s.FindByNameAsync(It.IsAny<string>()))
                                  .ReturnsAsync((UsageType?)null);
@@ -325,7 +325,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var usageType = _fixture.CreateValidUsageType();
             var email = "test@example.com";
-            var usages = new List<(string Model, int TotalUsage)> { ("Model1", 10) };
+            var usages = new List<QueryUsageDto> { new QueryUsageDto { Model = "Model1", Total_usage = 10 } };
 
             _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
                                  .ReturnsAsync(usageType);
@@ -351,20 +351,18 @@ namespace WoopiAiHub.UnitTests.Services
             var modelEmbedding = _fixture.CreateValidModelEmbedding();
             var userId = Guid.NewGuid();
             var email = "test@example.com";
-            var usages = new List<(string Model, int TotalUsage)>
+            var usages = new List<QueryUsageDto>
             {
-                (modelEmbedding.Name, 10),
-                ("NonExistentModel", 5)
+                new QueryUsageDto { Model = modelEmbedding.Name, Total_usage = 10 },
+                new QueryUsageDto { Model = "NonExistentModel", Total_usage = 5 }
             };
 
             _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
                                  .ReturnsAsync(usageType);
             _userServicesMock.Setup(s => s.FindIdByEmail(email))
                             .Returns(userId);
-            _modelEmbeddingRepositoryMock.Setup(r => r.FindByNameAsync(modelEmbedding.Name))
-                                        .ReturnsAsync(modelEmbedding);
-            _modelEmbeddingRepositoryMock.Setup(r => r.FindByNameAsync("NonExistentModel"))
-                                        .ReturnsAsync((ModelEmbedding?)null);
+            _modelEmbeddingRepositoryMock.Setup(r => r.FindAllByNamesListAsync(new List<string> { modelEmbedding.Name, "NonExistentModel" }))
+                                        .ReturnsAsync(new List<ModelEmbedding> { modelEmbedding });
             _usageDailyRepositoryMock.Setup(r => r.AddRangeAsync(It.Is<List<UsageDaily>>(list => list.Count == 1)))
                                     .ReturnsAsync(true);
 
@@ -373,8 +371,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            _modelEmbeddingRepositoryMock.Verify(r => r.FindByNameAsync(modelEmbedding.Name), Times.Once);
-            _modelEmbeddingRepositoryMock.Verify(r => r.FindByNameAsync("NonExistentModel"), Times.Once);
+            _modelEmbeddingRepositoryMock.Verify(r => r.FindAllByNamesListAsync(new List<string> {  modelEmbedding.Name, "NonExistentModel" }), Times.Once);
             _usageDailyRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()), Times.Once);
         }
     }

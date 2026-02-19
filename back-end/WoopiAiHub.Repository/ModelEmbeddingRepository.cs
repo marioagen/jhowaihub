@@ -23,5 +23,15 @@ namespace WoopiAiHub.Repository
         {
             return await _context.ModelEmbeddings.FirstOrDefaultAsync(x => x.Name == name);
         }
+
+        /// <summary>
+        /// Find all model embeddings by a list of names
+        /// </summary>
+        /// <param name="names"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<ModelEmbedding>> FindAllByNamesListAsync(List<string> names)
+        {
+            return await _context.ModelEmbeddings.Where(x => names.Contains(x.Name)).ToListAsync();
+        }
     }
 }

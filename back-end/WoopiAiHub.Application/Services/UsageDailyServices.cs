@@ -74,10 +74,12 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> AddByValuesAsync(string usageTypeName, string email, int count, string modelEmbedding = "")
         {
             var usageType = await _usageTypeServices.FindByNameAsync(usageTypeName);
-            if (usageType == null) return false;
+            if (usageType == null)
+                return false;
 
             var userId = _userServices.FindIdByEmail(email);
-            if (userId == Guid.Empty) return false;
+            if (userId == Guid.Empty)
+                return false;
 
             int? modelEmbeddingId = null;
             if (!string.IsNullOrEmpty(modelEmbedding))
@@ -106,20 +108,33 @@ namespace WoopiAiHub.Application.Services
         /// <param name="email"></param>
         /// <param name="usages"></param>
         /// <returns></returns>
-        public async Task<bool> AddByRangeValuesAsync(string usageTypeName, string email,  List<(string Model, int TotalUsage)> usages)
+        public async Task<bool> AddByRangeValuesAsync(string usageTypeName, string email, List<QueryUsageDto> usages)
         {
             var usageType = await _usageTypeServices.FindByNameAsync(usageTypeName);
-            if (usageType is null) return false;
+            if (usageType is null)
+                return false;
 
             var userId = _userServices.FindIdByEmail(email);
-            if (userId == Guid.Empty) return false;
+            if (userId == Guid.Empty)
+                return false;
+
+            var usagesGroup = usages.GroupBy(u => u.Model)
+                .Select(u => new
+                {
+                    Model = u.Key,
+                    TotalUsage = u.Sum(usage => usage.Total_usage ?? 0)
+                })
+                .ToList();
 
             var modelUsages = new List<(string Model, int ModelId, int TotalUsage)>();
+            var allModels = usagesGroup.Select(g => g.Model).ToList();
+            var modelEmbeddings = await _modelEmbeddingRepository.FindAllByNamesListAsync(allModels);
 
-            foreach (var g in usages)
+            foreach (var g in usagesGroup)
             {
-                var modelEmbeddingEntity = await _modelEmbeddingRepository.FindByNameAsync(g.Model);
-                if (modelEmbeddingEntity is null) continue;
+                var modelEmbeddingEntity = modelEmbeddings.FirstOrDefault(m => m.Name == g.Model);
+                if (modelEmbeddingEntity is null)
+                    continue;
 
                 modelUsages.Add((
                     g.Model,

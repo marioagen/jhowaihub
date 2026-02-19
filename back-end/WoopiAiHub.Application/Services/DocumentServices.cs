@@ -432,22 +432,14 @@ namespace WoopiAiHub.Application.Services
                                 })
                                 .ToList()));
 
-                var usages = documentQuestionnaireDto.QuestionsAnswers.SelectMany(x => x.Usage).GroupBy(u => u.Model)
-                    .Select(u => new
-                    {
-                        Model = u.Key,
-                        TotalUsage = u.Sum(usage => usage.Total_usage ?? 0)
-                    })
+                var usages = documentQuestionnaireDto.QuestionsAnswers.SelectMany(x => x.Usage)
                     .ToList();
 
-                foreach (var item in usages)
-                {
-                    await _usageDailyServices.AddByRangeValuesAsync(
-                        MetricNames.Token,
-                        documentQuestionnaireDto.Email,
-                        new List<(string Model, int TotalUsage)> { (item.Model, item.TotalUsage) }
-                    );
-                }
+                await _usageDailyServices.AddByRangeValuesAsync(
+                    MetricNames.Token,
+                    documentQuestionnaireDto.Email,
+                    usages
+                );
 
                 _unitOfWork.Commit();
             }
