@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WoopiAiHub.Repository.Context;
 
@@ -11,9 +12,11 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260217185836_DocumentRejection")]
+    partial class DocumentRejection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,7 +132,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("varchar(500)")
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("Url");
 
                     b.HasKey("Id");
@@ -352,19 +355,9 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("varchar(max)")
                         .HasColumnName("Output");
 
-                    b.Property<int?>("Type")
-                        .HasColumnType("int")
-                        .HasColumnName("Type");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("UserId");
-
                     b.HasKey("Id");
 
                     b.HasIndex("IdDocument");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("DocumentHistories", (string)null);
                 });
@@ -1514,19 +1507,19 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasOne("WoopiAiHub.Domain.Models.Card", "Card")
                         .WithMany()
                         .HasForeignKey("CardId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WoopiAiHub.Domain.Models.Step", "Step")
                         .WithMany()
                         .HasForeignKey("StepId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("WoopiAiHub.Domain.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Card");
@@ -1544,13 +1537,7 @@ namespace WoopiAiHub.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
-                        .WithMany("DocumentHistories")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("Document");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentNormalized", b =>
@@ -2012,8 +1999,6 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>
                 {
                     b.Navigation("AuditLogs");
-
-                    b.Navigation("DocumentHistories");
 
                     b.Navigation("Prompts");
 

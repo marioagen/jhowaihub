@@ -42,6 +42,7 @@
                                 type="text"
                                 class="form-control"
                                 id="endpointUrl"
+                                maxlength="500"
                                 :disabled="readOnly"
                             />
                         </div>

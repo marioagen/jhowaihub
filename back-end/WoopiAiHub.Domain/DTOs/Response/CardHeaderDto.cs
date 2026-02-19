@@ -4,5 +4,8 @@ namespace WoopiAiHub.Domain.DTOs.Response
     {
         public string CardName { get; set; } = string.Empty;
         public string WorkflowName { get; set; } = string.Empty;
+        public int WorkflowId { get; set; }
+        public string StatusName { get; set; } = string.Empty;
+        public int CurrentStepOrder { get; set; }
     }
 }

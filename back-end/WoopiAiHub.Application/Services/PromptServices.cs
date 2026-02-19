@@ -229,7 +229,7 @@ namespace WoopiAiHub.Application.Services
             var createPromptResult = _promptRepository.CreateUniquePrompt(prompt);
             if (!createPromptResult)
             {
-                throw new AppException(ErrorCode.Duplicated, "prompt.duplicated", null);
+                throw new AppException(ErrorCode.Duplicated, "prompts.duplicated", null);
             }
 
             return createPromptResult;

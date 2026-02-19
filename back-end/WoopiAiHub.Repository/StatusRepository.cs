@@ -1,3 +1,4 @@
+using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;

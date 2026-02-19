@@ -25,22 +25,14 @@
                 </div>
 
                 <div class="quick-start-section">
-                    <h2
-                        class="quick-start-title text-center mb-4"
-                    >
+                    <h2 class="quick-start-title text-center mb-4">
                         {{ $t("home.quickStartTitle") }}
                     </h2>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <div
-                                class="card quick-start-card h-100"
-                            >
-                                <div
-                                    class="card-body text-center d-flex flex-column"
-                                >
-                                    <div
-                                        class="icon-container mb-3"
-                                    >
+                            <div class="card quick-start-card h-100">
+                                <div class="card-body text-center d-flex flex-column">
+                                    <div class="icon-container mb-3">
                                         <LucideIcon
                                             icon="Video"
                                             :size="48"
@@ -48,38 +40,18 @@
                                         />
                                     </div>
                                     <h5 class="card-title">
-                                        {{
-                                            $t(
-                                                "home.platformCard.title"
-                                            )
-                                        }}
+                                        {{ $t("home.platformCard.title") }}
                                     </h5>
-                                    <p
-                                        class="card-text text-muted flex-grow-1"
-                                    >
-                                        {{
-                                            $t(
-                                                "home.platformCard.description"
-                                            )
-                                        }}
+                                    <p class="card-text text-muted flex-grow-1">
+                                        {{ $t("home.platformCard.description") }}
                                     </p>
                                     <a
-                                        v-if="
-                                            config.links
-                                                .videoUrl
-                                        "
-                                        :href="
-                                            config.links
-                                                .videoUrl
-                                        "
+                                        v-if="config.links.videoUrl"
+                                        :href="config.links.videoUrl"
                                         target="_blank"
                                         class="btn btn-link text-decoration-none"
                                     >
-                                        {{
-                                            $t(
-                                                "home.platformCard.button"
-                                            )
-                                        }}
+                                        {{ $t("home.platformCard.button") }}
                                         →
                                     </a>
                                     <button
@@ -87,26 +59,16 @@
                                         class="btn btn-link text-decoration-none"
                                         disabled
                                     >
-                                        {{
-                                            $t(
-                                                "home.platformCard.button"
-                                            )
-                                        }}
+                                        {{ $t("home.platformCard.button") }}
                                         →
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <div
-                                class="card quick-start-card h-100"
-                            >
-                                <div
-                                    class="card-body text-center d-flex flex-column"
-                                >
-                                    <div
-                                        class="icon-container mb-3"
-                                    >
+                            <div class="card quick-start-card h-100">
+                                <div class="card-body text-center d-flex flex-column">
+                                    <div class="icon-container mb-3">
                                         <LucideIcon
                                             icon="BookOpen"
                                             :size="48"
@@ -114,38 +76,18 @@
                                         />
                                     </div>
                                     <h5 class="card-title">
-                                        {{
-                                            $t(
-                                                "home.workflowCard.title"
-                                            )
-                                        }}
+                                        {{ $t("home.workflowCard.title") }}
                                     </h5>
-                                    <p
-                                        class="card-text text-muted flex-grow-1"
-                                    >
-                                        {{
-                                            $t(
-                                                "home.workflowCard.description"
-                                            )
-                                        }}
+                                    <p class="card-text text-muted flex-grow-1">
+                                        {{ $t("home.workflowCard.description") }}
                                     </p>
                                     <a
-                                        v-if="
-                                            config.links
-                                                .guideUrl
-                                        "
-                                        :href="
-                                            config.links
-                                                .guideUrl
-                                        "
+                                        v-if="config.links.guideUrl"
+                                        :href="config.links.guideUrl"
                                         target="_blank"
                                         class="btn btn-link text-decoration-none"
                                     >
-                                        {{
-                                            $t(
-                                                "home.workflowCard.button"
-                                            )
-                                        }}
+                                        {{ $t("home.workflowCard.button") }}
                                         →
                                     </a>
                                     <button
@@ -153,26 +95,16 @@
                                         class="btn btn-link text-decoration-none"
                                         disabled
                                     >
-                                        {{
-                                            $t(
-                                                "home.workflowCard.button"
-                                            )
-                                        }}
+                                        {{ $t("home.workflowCard.button") }}
                                         →
                                     </button>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <div
-                                class="card quick-start-card h-100"
-                            >
-                                <div
-                                    class="card-body text-center d-flex flex-column"
-                                >
-                                    <div
-                                        class="icon-container mb-3"
-                                    >
+                            <div class="card quick-start-card h-100">
+                                <div class="card-body text-center d-flex flex-column">
+                                    <div class="icon-container mb-3">
                                         <LucideIcon
                                             icon="FileText"
                                             :size="48"
@@ -180,38 +112,18 @@
                                         />
                                     </div>
                                     <h5 class="card-title">
-                                        {{
-                                            $t(
-                                                "home.docsCard.title"
-                                            )
-                                        }}
+                                        {{ $t("home.docsCard.title") }}
                                     </h5>
-                                    <p
-                                        class="card-text text-muted flex-grow-1"
-                                    >
-                                        {{
-                                            $t(
-                                                "home.docsCard.description"
-                                            )
-                                        }}
+                                    <p class="card-text text-muted flex-grow-1">
+                                        {{ $t("home.docsCard.description") }}
                                     </p>
                                     <a
-                                        v-if="
-                                            config.links
-                                                .docsUrl
-                                        "
-                                        :href="
-                                            config.links
-                                                .docsUrl
-                                        "
+                                        v-if="config.links.docsUrl"
+                                        :href="config.links.docsUrl"
                                         target="_blank"
                                         class="btn btn-link text-decoration-none"
                                     >
-                                        {{
-                                            $t(
-                                                "home.docsCard.button"
-                                            )
-                                        }}
+                                        {{ $t("home.docsCard.button") }}
                                         →
                                     </a>
                                     <button
@@ -219,11 +131,7 @@
                                         class="btn btn-link text-decoration-none"
                                         disabled
                                     >
-                                        {{
-                                            $t(
-                                                "home.docsCard.button"
-                                            )
-                                        }}
+                                        {{ $t("home.docsCard.button") }}
                                         →
                                     </button>
                                 </div>
@@ -234,7 +142,7 @@
             </div>
         </div>
     </main>
-    <WhatsAppComponent />
+    <WhatsAppComponent v-if="showWhatsAppLink" />
 </template>
 <script>
     import store from "@/store";
@@ -253,6 +161,7 @@
                     },
                 },
                 plan: "",
+                showWhatsAppLink: false,
             };
         },
         components: {
@@ -260,20 +169,16 @@
         },
         methods: {
             getPlan() {
-                DashboardServices.GetPlan(
-                    store.state.userProfile.tenant
-                ).then((response) => {
+                DashboardServices.GetPlan(store.state.userProfile.tenant).then((response) => {
                     this.plan = response.toUpperCase();
                 });
             },
         },
         mounted() {
-            this.config.links.videoUrl =
-                ENV_CONFIG.VUE_APP_HOME_VIDEO_URL || "";
-            this.config.links.guideUrl =
-                ENV_CONFIG.VUE_APP_HOME_GUIDE_URL || "";
-            this.config.links.docsUrl =
-                ENV_CONFIG.VUE_APP_HOME_DOCS_URL || "";
+            this.config.links.videoUrl = ENV_CONFIG.VUE_APP_HOME_VIDEO_URL || "";
+            this.config.links.guideUrl = ENV_CONFIG.VUE_APP_HOME_GUIDE_URL || "";
+            this.config.links.docsUrl = ENV_CONFIG.VUE_APP_HOME_DOCS_URL || "";
+            this.showWhatsAppLink = ENV_CONFIG.VUE_APP_SHOW_WHATSAPP_LINK || false;
             this.getPlan();
         },
     };
