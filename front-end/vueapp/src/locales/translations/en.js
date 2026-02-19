@@ -41,7 +41,8 @@ const english = {
             confirm: "Confirm Rejection",
             error: "Error rejecting document.",
             justification: "Justification",
-            justificationInstructions: "Provide a justification and select the step to which the document should be returned.",
+            justificationInstructions:
+                "Provide a justification and select the step to which the document should be returned.",
             justificationPlaceholder: "Provide a justification",
             reject: "Reject",
             returnToStep: "Return to step",
@@ -809,9 +810,9 @@ const english = {
         queryParameters: "Query Parameters",
         addParam: "Add Param",
         noQueryParameters: "No query parameters. Add one or type in the URL.",
-        bodySubtitle: "Type '{' to see available variables.",
+        bodySubtitle: "Type '[' to see available variables.",
         variablesTip:
-            "Tip: Use variables like {{ocr}} or {{prompt}} that will be replaced at execution time.",
+            "Tip: Use variables like [ocr] or [prompt] that will be replaced at execution time.",
         formCreate: {
             title: "Create Template",
             subtitle: "Configure your API request blueprint.",
@@ -827,7 +828,7 @@ const english = {
         removeSuccess: "Template removed successfully",
         removeError: "Error removing template",
         unselected: "Select a template",
-        keyPlaceholder: "Key (value will be {{keyName}})",
+        keyPlaceholder: "Key",
         valuePlaceholder: "Enter value",
         invalidJsonFormat: "Invalid JSON format",
         variablesOcr: "Digitizer Agent",
