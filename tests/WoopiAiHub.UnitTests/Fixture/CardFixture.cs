@@ -2,6 +2,7 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
 using Xunit;
+using Bogus;
 
 namespace WoopiAiHub.UnitTests.Fixture
 {
@@ -221,6 +222,59 @@ namespace WoopiAiHub.UnitTests.Fixture
         public static CardAnalysisDto FindCardAnalysisDtoWithJsonOutput(int cardId = 1)
         {
             return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "{\"Nome\": \"João Silva\", \"Email\": \"joao@example.com\"}", "Prompt", 2, 1);
+        }
+
+        public static CreateDocumentAnalysisRejectionDto FindValidCreateDocumentAnalysisRejectionDto()
+        {
+            var faker = new Faker("pt_BR");
+            return new CreateDocumentAnalysisRejectionDto(
+                Justification: faker.Lorem.Paragraph(),
+                CardId: 1,
+                StepId: 1
+            );
+        }
+
+        public static DocumentAnalysisRejectionDto FindValidDocumentAnalysisRejectionDto()
+        {
+            var faker = new Faker("pt_BR");
+            return new DocumentAnalysisRejectionDto
+            {
+                Id = faker.IndexFaker,
+                Justification = faker.Lorem.Paragraph(),
+                CardId = 1,
+                StepId = 1,
+                UserId = Guid.NewGuid(),
+                UserName = faker.Person.FirstName,
+                Date = faker.Date.Past()
+            };
+        }
+
+        public static List<DocumentAnalysisRejectionDto> FindValidDocumentAnalysisRejectionDtoList()
+        {
+            var faker = new Faker<DocumentAnalysisRejectionDto>("pt_BR")
+                .RuleFor(x => x.Id, f => f.IndexFaker)
+                .RuleFor(x => x.Justification, f => f.Lorem.Paragraph())
+                .RuleFor(x => x.CardId, 1)
+                .RuleFor(x => x.StepId, 1)
+                .RuleFor(x => x.UserId, f => Guid.NewGuid())
+                .RuleFor(x => x.UserName, f => f.Person.FirstName)
+                .RuleFor(x => x.Date, f => f.Date.Past());
+
+            return faker.Generate(3);
+        }
+
+        public static DocumentAnalysisRejection FindValidDocumentAnalysisRejection()
+        {
+            var faker = new Faker("pt_BR");
+            var userId = Guid.NewGuid();
+            return new DocumentAnalysisRejection(
+                id: faker.IndexFaker,
+                created: faker.Date.Past(),
+                justification: faker.Lorem.Paragraph(),
+                cardId: 1,
+                stepId: 1,
+                userId: userId
+            );
         }
     }
 

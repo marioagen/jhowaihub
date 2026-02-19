@@ -171,7 +171,6 @@ namespace WoopiAiHub.Repository
                                  allUsers == true
                                  || (c.AssignedUser != null && c.AssignedUser.Email == login)
                              )
-                             && c.StatusId != 6
                          )
                         .Select(c => new CardDto
                         {
@@ -201,7 +200,13 @@ namespace WoopiAiHub.Repository
                                 Created = c.AssignedUser.Created,
                                 Id = c.AssignedUser.Id
                             }
-                            : null
+                            : null,
+                            Status = new StatusDto
+                            {
+                                Id = c.Status!.Id,
+                                Name = c.Status.Name,
+                                Color = c.Status.Color
+                            },
                         }).ToList()
                 })
                 .AsNoTracking()
@@ -210,6 +215,44 @@ namespace WoopiAiHub.Repository
             steps.ForEach(step => step.Cards = ApplyCardOrdering(step.Cards, order));
 
             return steps;
+        }
+
+        /// <summary>
+        /// Retrieves a list of steps in the specified workflow that precede the current step of the given card.
+        /// </summary>
+        /// <remarks>Use this method to determine the steps that a card has already passed through or
+        /// could have passed through in a workflow. The returned steps are ordered according to their position in the
+        /// workflow.</remarks>
+        /// <param name="workflowId">The unique identifier of the workflow to search within.</param>
+        /// <param name="order">order.</param>
+        /// <returns>A list of <see cref="StepDto"/> objects representing the steps that occur before the current step of the
+        /// specified card in the workflow. Returns an empty list if no previous steps are found.</returns>
+        public async Task<List<StepDto>> FindPreviousStepsByWorkflowIdAndOrder(int workflowId, int order)
+        {
+            return await _context.Steps
+                .Where(s => s.WorkflowId == workflowId && s.Order < order)
+                .Select(s => new StepDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Order = s.Order,
+                    WorkflowId = s.WorkflowId
+                })
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// finds the step associated with a specific card ID.
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public Task<Step?> FindStepByCardId(int cardId)
+        {
+            return _context.Steps
+                           .Include(s => s.Cards)
+                           .FirstOrDefaultAsync(s => s.Cards.Any(c => c.Id == cardId));
         }
 
         /// <summary>
