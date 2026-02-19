@@ -41,7 +41,8 @@ const portuguese = {
             confirm: "Confirmar Reprovação",
             error: "Erro ao reprovar documento.",
             justification: "Justificativa",
-            justificationInstructions: "Forneça uma justificativa e selecione para qual etapa o documento deve ser retornado.",
+            justificationInstructions:
+                "Forneça uma justificativa e selecione para qual etapa o documento deve ser retornado.",
             justificationPlaceholder: "Forneça uma justificativa",
             reject: "Reprovar",
             returnToStep: "Retornar para a etapa",
@@ -57,8 +58,7 @@ const portuguese = {
         successEditOutput: "Output editado com sucesso",
         title: "Análise de Documentos",
         typeYourQuestion: "Digite sua pergunta sobre o documento...",
-        typeYourQuestion:
-            "Digite sua pergunta sobre o documento...",
+        typeYourQuestion: "Digite sua pergunta sobre o documento...",
         workflow: "Esteira de Processamento",
         questionsHistoryModal: {
             title: "Histórico de Conversas",
@@ -820,9 +820,9 @@ const portuguese = {
         queryParameters: "Parâmetros de Query",
         addParam: "Adicionar Parâmetro",
         noQueryParameters: "Sem parâmetros de query. Adicione um ou digite na URL.",
-        bodySubtitle: "Digite '{' para ver as variáveis disponíveis.",
+        bodySubtitle: "Digite '[' para ver as variáveis disponíveis.",
         variablesTip:
-            "Dica: Use variáveis como '{{ocr}}' ou '{{prompt}}' que serão substituídas no momento da execução.",
+            "Dica: Use variáveis como [ocr] ou [prompt] que serão substituídas no momento da execução.",
         formCreate: {
             title: "Criar Template",
             subtitle: "Configure o modelo da sua requisição API.",
@@ -838,7 +838,7 @@ const portuguese = {
         removeSuccess: "Template removido com sucesso",
         removeError: "Erro ao remover template",
         unselected: "Selecione um template",
-        keyPlaceholder: "Key (o valor será {{nomeKey}})",
+        keyPlaceholder: "Key",
         valuePlaceholder: "Digite o valor",
         invalidJsonFormat: "Formato JSON inválido",
         selectTemplate: "Selecione um Template",
