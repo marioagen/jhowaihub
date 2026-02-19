@@ -216,6 +216,34 @@
                                 {{ $t("common.save") }}
                             </button>
                         </div>
+                    </div>                    
+                    <div v-else-if="isQuizTool">
+                        <h6>Quiz</h6>
+                        <div class="background-div">
+                            <select
+                                class="form-select"
+                                v-model="idSelected"
+                                @change="onQuizSelect"
+                            >
+                                <option
+                                    v-for="item in quizlist"
+                                    :key="item.id"
+                                    :value="item.id"
+                                >
+                                    {{ item.title }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mt-4">
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                @click="updateNode"
+                            >
+                                {{ $t("common.save") }}
+                            </button>
+                        </div>
                     </div>
                     <div
                         v-else
@@ -256,6 +284,8 @@
     import VueFlowComponent from "@/components/flow/VueFlowComponent.vue";
     import DependencySelector from "@/components/flow/DependencySelector.vue";
     import AutomationServices from "@/services/automation/AutomationServices";
+    import PromptService from "@/services/prompts/PromptsService";
+    import QuizzesService from "@/services/quizzes/QuizzesService";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import LogService from "@/services/log/logService";
     import ToolType from "@/constants/ToolType";
@@ -318,6 +348,7 @@
                 valueInput: "",
                 idSelected: 0,
                 promptlist: [],
+                quizlist: [],
                 toolType: "",
                 previousStepTools: [],
                 selectedDependencies: [],
@@ -499,6 +530,23 @@
                         name: "PromptSelector",
                     });
                     return;
+                } else if (
+                    this.isTargetTool(ToolType.Quiz)
+                ) {
+                    this.findAllQuizzes();
+                    if (this.parameters.length === 0) {
+                        this.idSelected = 0;
+                        this.parameters.push({
+                            stepToolId: 0,
+                            value: null,
+                            requiredFile: false,
+                            webhookId: null,
+                        });
+                    } else {
+                        this.idSelected = parseInt(
+                            this.parameters[0]?.value
+                        );
+                    }
                 } else if (this.parameters.length === 0) {
                     this.parameters.push({
                         stepToolId: 0,
@@ -673,6 +721,20 @@
                     }
                 });
             },
+            findAllPrompts() {
+                PromptService.getPrompts().then(
+                    (response) => {
+                        this.promptlist = response;
+                    }
+                );
+            },
+            findAllQuizzes() {
+                QuizzesService.getQuizzesList().then(
+                    (response) => {
+                        this.quizlist = response;
+                    }
+                );
+            },
             async loadPreviousStepTools(node) {
                 let workflowSteps = [];
                 if (this.workflowId) {
@@ -800,6 +862,15 @@
 
                 localStorage.removeItem("flow_state_params");
             },
+            onQuizSelect() {
+                const selectedQuiz = this.quizlist.find(
+                    (q) => q.id === this.idSelected
+                );
+                if (selectedQuiz) {
+                    this.nodeFlow.data.subtitle =
+                        selectedQuiz.name;
+                }
+            },
         },
         async mounted() {
             await this.fetchStepName();
@@ -818,6 +889,9 @@
             },
             isPromptTool() {
                 return this.isTargetTool(ToolType.Prompt);
+            },
+            isQuizTool() {
+                return this.isTargetTool(ToolType.Quiz);
             },
         },
     };

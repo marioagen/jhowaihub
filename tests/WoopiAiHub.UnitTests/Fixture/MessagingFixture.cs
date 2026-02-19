@@ -163,6 +163,38 @@ namespace WoopiAiHub.UnitTests.Fixture
                 });
             return faker;
         }
+
+        internal static DocumentEmbeddingsQueryResponseDto FindValidDocumentEmbeddingsQueryResponseDto()
+        {
+            JObject mockJObject = new JObject();
+            mockJObject.Add("CardId", 1);
+            mockJObject.Add("StepToolId", 30);
+
+            var faker = new Faker<DocumentEmbeddingsQueryResponseDto>("pt_BR")
+                .CustomInstantiator(f => new DocumentEmbeddingsQueryResponseDto
+                {
+                    ReferenceFile = f.Random.Guid().ToString(),
+                    Tenant = f.Random.String(),
+                    Email = f.Random.String(),
+                    QuestionsAnswers = new List<QuestionAnswerDto>
+                    { new QuestionAnswerDto
+                                {
+                                    Question = f.Lorem.Sentence(),
+                                    Answer = f.Lorem.Paragraph(),
+                                    Usage = new List<QueryUsageDto>{                                        
+                                        new QueryUsageDto
+                                        {
+                                            Prompt_usage = f.Random.Int(1, 1000),
+                                            Completion_usage = f.Random.Int(1, 1000),
+                                            Total_usage = f.Random.Int(1, 2000)
+                                        }
+                                    }
+                                }
+                    },
+                    Data = mockJObject
+                });
+            return faker;
+        }
     }
 
     [CollectionDefinition(nameof(MessagingCollection))]

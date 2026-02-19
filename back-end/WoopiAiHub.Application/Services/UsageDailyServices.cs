@@ -44,6 +44,26 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Add a range of new usage daily records
+        /// </summary>
+        /// <param name="usageDailyDtos"></param>
+        /// <returns></returns>
+        public async Task<bool> AddRangeAsync(List<UsageDailyDto> usageDailyDtos)
+        {
+            var usageDailies = usageDailyDtos.Select(usageDailyDto => new UsageDaily(
+                0,
+                DateTime.UtcNow,
+                usageDailyDto.UserId,
+                usageDailyDto.UsageTypeId,
+                usageDailyDto.UsageCount,
+                usageDailyDto.Processed,
+                usageDailyDto.ModelEmbeddingId
+            )).ToList();
+
+            return await _usageDailyRepository.AddRangeAsync(usageDailies);
+        }
+
+        /// <summary>
         /// Add a new usage daily record by values
         /// </summary>
         /// <param name="usageTypeName"></param>
@@ -54,10 +74,12 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> AddByValuesAsync(string usageTypeName, string email, int count, string modelEmbedding = "")
         {
             var usageType = await _usageTypeServices.FindByNameAsync(usageTypeName);
-            if (usageType == null) return false;
+            if (usageType == null)
+                return false;
 
             var userId = _userServices.FindIdByEmail(email);
-            if (userId == Guid.Empty) return false;
+            if (userId == Guid.Empty)
+                return false;
 
             int? modelEmbeddingId = null;
             if (!string.IsNullOrEmpty(modelEmbedding))
@@ -77,6 +99,61 @@ namespace WoopiAiHub.Application.Services
             );
 
             return await AddAsync(usageDailyDto);
+        }
+
+        /// <summary>
+        /// Add a new usage daily record by values with multiple usages
+        /// </summary>
+        /// <param name="usageTypeName"></param>
+        /// <param name="email"></param>
+        /// <param name="usages"></param>
+        /// <returns></returns>
+        public async Task<bool> AddByRangeValuesAsync(string usageTypeName, string email, List<QueryUsageDto> usages)
+        {
+            var usageType = await _usageTypeServices.FindByNameAsync(usageTypeName);
+            if (usageType is null)
+                return false;
+
+            var userId = _userServices.FindIdByEmail(email);
+            if (userId == Guid.Empty)
+                return false;
+
+            var usagesGroup = usages.GroupBy(u => u.Model)
+                .Select(u => new
+                {
+                    Model = u.Key,
+                    TotalUsage = u.Sum(usage => usage.Total_usage ?? 0)
+                })
+                .ToList();
+
+            var modelUsages = new List<(string Model, int ModelId, int TotalUsage)>();
+            var allModels = usagesGroup.Select(g => g.Model).ToList();
+            var modelEmbeddings = await _modelEmbeddingRepository.FindAllByNamesListAsync(allModels);
+
+            foreach (var g in usagesGroup)
+            {
+                var modelEmbeddingEntity = modelEmbeddings.FirstOrDefault(m => m.Name == g.Model);
+                if (modelEmbeddingEntity is null)
+                    continue;
+
+                modelUsages.Add((
+                    g.Model,
+                    modelEmbeddingEntity.Id,
+                    g.TotalUsage
+                ));
+            }
+
+            var usageDailyDtos = modelUsages
+                .Select(m => new UsageDailyDto(
+                    usageType.Id,
+                    m.TotalUsage,
+                    userId,
+                    m.ModelId
+                ))
+                .ToList();
+
+            return await AddRangeAsync(usageDailyDtos);
+
         }
     }
 }

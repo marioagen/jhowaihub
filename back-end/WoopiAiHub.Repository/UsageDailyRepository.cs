@@ -105,6 +105,17 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Add a range of new usage daily records
+        /// </summary>
+        /// <param name="usageDailies"></param>
+        /// <returns></returns>
+        public async Task<bool> AddRangeAsync(List<UsageDaily> usageDailies)
+        {
+            await _context.UsageDailies.AddRangeAsync(usageDailies);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
         /// Update an existing usage daily record
         /// </summary>
         /// <param name="usageDaily"></param>
