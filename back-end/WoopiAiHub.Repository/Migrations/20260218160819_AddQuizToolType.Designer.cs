@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WoopiAiHub.Repository.Context;
 
@@ -11,9 +12,11 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260218160819_AddQuizToolType")]
+    partial class AddQuizToolType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -129,7 +132,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("varchar(500)")
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("Url");
 
                     b.HasKey("Id");
@@ -276,49 +279,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Documents", (string)null);
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentAnalysisRejection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CardId")
-                        .HasColumnType("int")
-                        .HasColumnName("CardId");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime")
-                        .HasColumnName("Created");
-
-                    b.Property<string>("Justification")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(MAX)")
-                        .HasColumnName("Justification");
-
-                    b.Property<int>("StepId")
-                        .HasColumnType("int")
-                        .HasColumnName("StepId");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CardId");
-
-                    b.HasIndex("Created");
-
-                    b.HasIndex("StepId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("DocumentAnalysisRejections", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentHistory", b =>
@@ -1507,33 +1467,6 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Status");
 
                     b.Navigation("Step");
-                });
-
-            modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentAnalysisRejection", b =>
-                {
-                    b.HasOne("WoopiAiHub.Domain.Models.Card", "Card")
-                        .WithMany()
-                        .HasForeignKey("CardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WoopiAiHub.Domain.Models.Step", "Step")
-                        .WithMany()
-                        .HasForeignKey("StepId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Card");
-
-                    b.Navigation("Step");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentHistory", b =>

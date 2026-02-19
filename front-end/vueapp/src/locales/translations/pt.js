@@ -903,6 +903,8 @@ const portuguese = {
             Embeddings: "Indexação",
             OCR: "Agente Digitalizador",
             N8N: "N8N",
+            Quiz: "Questionário",
+            Api: "API",
         },
         validationError: "Erro ao validar campos",
     },

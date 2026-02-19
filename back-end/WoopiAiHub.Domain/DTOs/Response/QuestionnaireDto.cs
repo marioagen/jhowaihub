@@ -2,7 +2,7 @@
 
 namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class QuestionnaireDto
+    public record class QuestionnaireDto
     {
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;

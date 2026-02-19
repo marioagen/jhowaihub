@@ -65,5 +65,16 @@ export default {
                     error: e,
                 }
             });
-    }
+    },
+    getQuizzesList() {
+        return api.get("/Questionnaire/FindAll")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                }
+            });
+    },
 }

@@ -313,7 +313,7 @@
                     toolId: nodeData.id,
                     data: {
                         order: this.nodes.length + 1,
-                        icon: "Activity",
+                        icon: nodeData.toolType === "Quiz" ? "ClipboardList" : "Activity",
                         color: "#000",
                         isStartNode: false,
                         isEditableInput: nodeData.isEditableInput,
@@ -390,5 +390,31 @@
 
     .vue-flow-container {
         height: calc(100vh - 200px);
+    }
+</style>
+
+<style scoped>
+    .btn-outline-quiz {
+        color: #7C4DFF;
+        border: 1px solid #7C4DFF;
+        background: transparent;
+    }
+
+    .btn-outline-quiz:hover {
+        color: #6A3EE6;
+        border-color: #6A3EE6;
+        background: #F3EEFF;
+    }
+
+    .btn-outline-quiz:active {
+        color: #5A32CC;
+        border-color: #5A32CC;
+        background: #E8E0FF;
+    }
+
+    .btn-outline-quiz:disabled {
+        color: #B8A7FF;
+        border-color: #D6CCFF;
+        background: #FAF8FF;
     }
 </style>

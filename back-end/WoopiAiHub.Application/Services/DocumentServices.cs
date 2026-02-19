@@ -187,28 +187,28 @@ namespace WoopiAiHub.Application.Services
 
             var referenceFilesToRemove = _documentRepository.FindHashById(ids).ToList();
             var hashList = referenceFilesToRemove;
-            
+
             _unitOfWork.BeginTransaction();
             try
             {
                 _documentRepository.ClearWorkflowRelationships(ids);
-                
+
                 var cardIds = await _cardRepository.FindCardIdsByDocumentIdsAsync(ids);
                 if (cardIds.Any())
                 {
                     _stepToolExecutionRepository.DeleteByCardIds(cardIds);
                     _stepToolOutputRepository.DeleteByCardIds(cardIds);
                 }
-                
+
                 await _cardRepository.DeleteByDocumentIds(ids);
                 var deleted = _documentRepository.Delete(ids);
                 await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
-                
+
                 if (referenceFilesToRemove.Any())
                 {
                     await DeleteBlobFilesAsync(referenceFilesToRemove, headersDto.Tenant);
                 }
-            
+
                 _unitOfWork.Commit();
                 return deleted;
             }
@@ -395,6 +395,61 @@ namespace WoopiAiHub.Application.Services
             await UpdateDocumentStatusAsync(dto.ReferenceFile, dto.Email);
 
             return dto.Data;
+        }
+
+        /// <summary>
+        /// Processes the questionnaire result from the tool and saves the result, token usage and history in the database.
+        /// </summary>
+        /// <param name="documentQuestionnaireDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto)
+        {
+            var documentDb = _documentRepository.FindByReferenceFile(documentQuestionnaireDto.ReferenceFile);
+            if (documentDb == null)
+            {
+                return null;
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var dataDto = System.Text.Json.JsonSerializer.Deserialize<MetaDataAutomationDto>(documentQuestionnaireDto.Data.ToString());
+
+                var execution = await _stepToolExecutionRepository
+                    .FindByStepToolIdAndCardIdAsync(dataDto.StepToolId, dataDto.CardId);
+
+                await UpdateExecutionAsync(execution!, documentQuestionnaireDto.Email);
+                await SaveStepToolOutputAsync(
+                    execution!, 
+                    System.Text.Json.JsonSerializer.Serialize(
+                        documentQuestionnaireDto
+                            .QuestionsAnswers
+                                .Select(x => new QuestionAnswerDto {
+                                    Id = x.Id,
+                                    Question = x.Question,
+                                    Answer = x.Answer
+                                })
+                                .ToList()));
+
+                var usages = documentQuestionnaireDto.QuestionsAnswers.SelectMany(x => x.Usage)
+                    .ToList();
+
+                await _usageDailyServices.AddByRangeValuesAsync(
+                    MetricNames.Token,
+                    documentQuestionnaireDto.Email,
+                    usages
+                );
+
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+
+            return documentDb;
         }
 
 
@@ -1052,5 +1107,6 @@ namespace WoopiAiHub.Application.Services
                     .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
                     .Select(e => e.Text));
         }
+
     }
 }

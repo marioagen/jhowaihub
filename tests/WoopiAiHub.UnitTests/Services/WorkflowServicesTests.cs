@@ -13,6 +13,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Repository;
 using WoopiAiHub.UnitTests.Fixture;
@@ -1990,6 +1991,83 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
+        [Fact(DisplayName = "ValidateQuizTool should throw when hasEmbedding Dependency is false")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task ValidateQuizTool_HasEmbeddingDependencyFalse_ThrowsAppException()
+        {
+            // Arrange
+            var stepId = 1;
+            var stepOrder = 1;
+            
+            var nonEmbeddingStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 999,
+                Order = 1,
+                PositionX = 1,
+                PositionY = 1,
+                Parameters = new List<StepToolParameterUpdateDto>()
+            };
+
+            var quizStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 2,
+                Order = 2,
+                PositionX = 2,
+                PositionY = 2,
+                Parameters = new List<StepToolParameterUpdateDto>(),
+                Dependencies = new List<StepToolOutputDependencyDto>
+                {
+                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
+                }
+            };
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var stepToolsList = new List<StepToolUpdateDto> { nonEmbeddingStepToolDto, quizStepToolDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto
+                    {
+                        Id = stepId,
+                        Order = stepOrder,
+                        StepTools = stepToolsList
+                    }
+                }
+            };
+
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
+            var step = new Step(stepId, DateTime.UtcNow, 1, "Step 1", stepOrder, 1, 1);
+            workflow.Steps.Add(step);
+            step.Workflow = workflow;
+
+            var nonEmbeddingTool = WorkflowFixture.CreateToolModel(999, "Non-Embedding Tool", "N8N");
+            var quizTool = WorkflowFixture.CreateToolModel(2, "Quiz Tool", "Quiz");
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((int id) => id == 999 ? nonEmbeddingTool : id == 2 ? quizTool : nonEmbeddingTool);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal("Quiz tool must have at least one Embedding dependency", exception.Message);
+            Assert.Equal(ToolLabel.EmbeddingDependencyRequired, exception.LabelError);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
 
         [Fact(DisplayName = "HasOcrDependency should return true when dependency tool is OCR")]
         [Trait("HasOcrDependency", "Success")]
@@ -2419,6 +2497,183 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
         }
+
+        #endregion
+
+        #region CreateStepToolUpdate Tests
+
+        [Fact(DisplayName = "UpdatePhase3 should encrypt API tool parameters correctly")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_ApiToolParameterEncryption_EncryptsSuccessfully()
+        {
+            // Arrange
+            var encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            
+            var apiTool = WorkflowFixture.CreateToolModel(1, "API Tool", HandlersTypes.API);
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var step = workflow.Steps.First();
+            var webhookId1 = Guid.NewGuid();
+            var webhookId2 = Guid.NewGuid();
+            
+            var stepToolDto = new StepToolUpdateDto
+            {
+                ToolId = 1,
+                Order = 1,
+                PositionX = 10,
+                PositionY = 10,
+                Parameters = new List<StepToolParameterUpdateDto>
+                {
+                    new StepToolParameterUpdateDto { Value = "" }, // Should be skipped
+                    new StepToolParameterUpdateDto { Value = "raw_value", WebhookId = webhookId1, RequiredFile = false },
+                    new StepToolParameterUpdateDto { Value = "encrypted_value", WebhookId = webhookId2, RequiredFile = true }
+                }
+            };
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = workflow.Id,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto
+                    {
+                        Id = step.Id,
+                        Order = step.Order,
+                        StepTools = new List<StepToolUpdateDto> { stepToolDto }
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForFlow(workflow.Id)).ReturnsAsync(workflow);
+            _toolRepositoryMock.Setup(r => r.FindModelByIdAsync(1)).ReturnsAsync(apiTool);
+            
+            encryptionServiceMock.Setup(s => s.IsEncrypted("raw_value")).Returns(false);
+            encryptionServiceMock.Setup(s => s.Encrypt("raw_value")).Returns("encrypted_raw_value");
+            encryptionServiceMock.Setup(s => s.IsEncrypted("encrypted_value")).Returns(true);
+
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            // Assert
+            Assert.True(result);
+            var createdStepTool = step.StepTools.First();
+            Assert.Equal(2, createdStepTool.Parameters.Count);
+            
+            var param1 = createdStepTool.Parameters.First(p => p.WebhookId == webhookId1);
+            Assert.Equal("encrypted_raw_value", param1.Value);
+            
+            var param2 = createdStepTool.Parameters.First(p => p.WebhookId == webhookId2);
+            Assert.Equal("encrypted_value", param2.Value);
+
+            encryptionServiceMock.Verify(s => s.Encrypt("raw_value"), Times.Once);
+            encryptionServiceMock.Verify(s => s.Encrypt("encrypted_value"), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should not encrypt non-API tool parameters")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_NonApiToolParameter_AddsWithoutEncryption()
+        {
+            // Arrange
+            var encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
+            var webhookId = Guid.NewGuid();
+            
+            var nonApiTool = WorkflowFixture.CreateToolModel(1, "OCR Tool", HandlersTypes.Ocr);
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var step = workflow.Steps.First();
+            
+            var stepToolDto = new StepToolUpdateDto
+            {
+                ToolId = 1,
+                Order = 1,
+                Parameters = new List<StepToolParameterUpdateDto>
+                {
+                    new StepToolParameterUpdateDto { Value = "plain_value", WebhookId = webhookId }
+                }
+            };
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = workflow.Id,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto
+                    {
+                        Id = step.Id,
+                        Order = step.Order,
+                        StepTools = new List<StepToolUpdateDto> { stepToolDto }
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForFlow(workflow.Id)).ReturnsAsync(workflow);
+            _toolRepositoryMock.Setup(r => r.FindModelByIdAsync(1)).ReturnsAsync(nonApiTool);
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            // Assert
+            Assert.True(result);
+            var createdStepTool = step.StepTools.First();
+            Assert.Single(createdStepTool.Parameters);
+            Assert.Equal("plain_value", createdStepTool.Parameters.First().Value);
+
+            encryptionServiceMock.Verify(s => s.IsEncrypted(It.IsAny<string>()), Times.Never);
+            encryptionServiceMock.Verify(s => s.Encrypt(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should map StepTool properties correctly")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_StepToolProperties_MappedCorrectly()
+        {
+            // Arrange
+            var tool = WorkflowFixture.CreateToolModel(5, "Test Tool", HandlersTypes.Ocr);
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var step = workflow.Steps.First();
+            
+            var stepToolDto = new StepToolUpdateDto
+            {
+                ToolId = 5,
+                Order = 3,
+                PositionX = 123.45m,
+                PositionY = 678.90m,
+                Parameters = new List<StepToolParameterUpdateDto>()
+            };
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = workflow.Id,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto
+                    {
+                        Id = step.Id,
+                        Order = step.Order,
+                        StepTools = new List<StepToolUpdateDto> { stepToolDto }
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForFlow(workflow.Id)).ReturnsAsync(workflow);
+            _toolRepositoryMock.Setup(r => r.FindModelByIdAsync(5)).ReturnsAsync(tool);
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            // Assert
+            var createdStepTool = step.StepTools.First();
+            Assert.Equal(5, createdStepTool.ToolId);
+            Assert.Equal(3, createdStepTool.Order);
+            Assert.Equal(123.45m, createdStepTool.PositionX);
+            Assert.Equal(678.90m, createdStepTool.PositionY);
+        }
+
+        #endregion
+
+        #region CloneAsync Tests
 
         [Fact(DisplayName = "CloneAsync should preserve team associations")]
         [Trait("CloneAsync", "Success")]
