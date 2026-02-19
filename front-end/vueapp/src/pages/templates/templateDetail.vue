@@ -139,6 +139,7 @@
                                                 class="form-control"
                                                 :placeholder="$t('template.endpointUrlPlaceholder')"
                                                 id="endpointUrl"
+                                                maxlength="500"
                                                 :class="{
                                                     'is-invalid': errorMessage,
                                                 }"
