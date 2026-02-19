@@ -277,7 +277,6 @@
         },
     };
 </script>
-
 <style scoped>
     .extracted-fields-container {
         background: white;

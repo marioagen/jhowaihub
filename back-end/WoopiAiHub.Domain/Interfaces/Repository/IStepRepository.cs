@@ -20,5 +20,8 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
                                                   bool allUsers = false, 
                                                   string login = "", 
                                                   string order = "");
+        Task<List<StepDto>> FindPreviousStepsByWorkflowIdAndOrder(int workflowId,
+                                                                 int order);
+        Task<Step?> FindStepByCardId(int cardId);
     }
 }

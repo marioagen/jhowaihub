@@ -1,7 +1,4 @@
-import {
-    createRouter,
-    createWebHashHistory,
-} from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 
 import DocumentsHub from "@/pages/documentsHub/index.vue";
 import DocumentsUpload from "@/pages/documentsHub/uploads.vue";

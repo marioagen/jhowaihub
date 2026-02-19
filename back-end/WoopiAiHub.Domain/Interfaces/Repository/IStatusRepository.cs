@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository

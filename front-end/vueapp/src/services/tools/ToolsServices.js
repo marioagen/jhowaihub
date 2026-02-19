@@ -41,7 +41,7 @@ export default {
                 return true;
             })
             .catch((e) => {
-                const message = e?.response?.data?.errorCode
+                const message = e?.response?.data?.errorCode;
                 return {
                     error: message,
                 };
@@ -54,7 +54,7 @@ export default {
                 return true;
             })
             .catch((e) => {
-                const message = e?.response?.data?.errorCode
+                const message = e?.response?.data?.errorCode;
                 return {
                     error: message,
                 };

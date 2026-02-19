@@ -11,9 +11,7 @@
             @change-page="changePage"
         >
             <template #cell-name="{ data }">
-                <span
-                    v-if="data.row.name == UserType.Analyst"
-                >
+                <span v-if="data.row.name == UserType.Analyst">
                     {{ $t("management.teams.analyst") }}
                 </span>
                 <span v-else>
@@ -28,9 +26,7 @@
                 {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">
-                <ActionTableListComponent
-                    v-slot="{ actionClass }"
-                >
+                <ActionTableListComponent v-slot="{ actionClass }">
                     <a
                         :class="actionClass"
                         @click="editTeam(data.row)"
@@ -121,9 +117,7 @@
                 this.dataDocument = [];
                 this.listIds = [];
                 var paramsReq = {
-                    search: obj.search.trim()
-                        ? obj.search.trim()
-                        : "",
+                    search: obj.search.trim() ? obj.search.trim() : "",
                     pageSize: this.selectedOption,
                     page: obj.page,
                     isAscending: this.isAscending,
@@ -132,17 +126,14 @@
 
                 TeamsService.getTeams(paramsReq)
                     .then((response) => {
-                        const content =
-                            response?.content || [];
-                        const pagination =
-                            response?.pagination || {};
+                        const content = response?.content || [];
+                        const pagination = response?.pagination || {};
 
                         this.table.data = content;
                         this.table.pagination = pagination;
                     })
                     .finally(() => {
-                        if (obj.type === "search")
-                            this.searching = true;
+                        if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
                     });
             },
@@ -188,19 +179,14 @@
                             });
                             return this.$notify({
                                 title: "management.teams.title",
-                                message:
-                                    "management.teams.deleteSuccess",
+                                message: "management.teams.deleteSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
-                        } else if (
-                            response.error.response.data
-                                .errorCode == 5
-                        ) {
+                        } else if (response.error.response.data.errorCode == 5) {
                             return this.$notify({
                                 title: "management.teams.title",
-                                message:
-                                    "management.teams.deleteDocError",
+                                message: "management.teams.deleteDocError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -208,8 +194,7 @@
 
                         this.$notify({
                             title: "management.teams.title",
-                            message:
-                                "management.teams.errors.deleteError",
+                            message: "management.teams.errors.deleteError",
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -236,9 +221,7 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page
-                ? this.$route.query.page
-                : 1;
+            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
             this.getTeams({
                 search: "",
                 page: this.queryPage,

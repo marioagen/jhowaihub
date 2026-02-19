@@ -33,8 +33,7 @@
                                 v-bind="field"
                                 class="form-control form-control-sm"
                                 :class="{
-                                    'is-invalid':
-                                        errorMessage,
+                                    'is-invalid': errorMessage,
                                 }"
                             />
                             <span
@@ -60,28 +59,19 @@
                                 v-bind="field"
                                 class="form-select form-select-sm"
                                 :class="{
-                                    'is-invalid':
-                                        errorMessage,
+                                    'is-invalid': errorMessage,
                                 }"
                                 @change="changeToolType"
                             >
                                 <option value="">
-                                    {{
-                                        $t(
-                                            "tools.form.typesSelect"
-                                        )
-                                    }}
+                                    {{ $t("tools.form.typesSelect") }}
                                 </option>
                                 <option
-                                    v-for="(
-                                        item, index
-                                    ) in typesList"
+                                    v-for="(item, index) in typesList"
                                     :key="index"
                                     :value="item.id"
                                 >
-                                    {{
-                                        $t(item.description)
-                                    }}
+                                    {{ $t(item.description) }}
                                 </option>
                             </select>
                             <span
@@ -99,19 +89,11 @@
                 >
                     <div class="col-6">
                         <label>
-                            {{
-                                $t(
-                                    "tools.form.connectorUrl"
-                                )
-                            }}
+                            {{ $t("tools.form.connectorUrl") }}
                         </label>
                         <Field
                             name="connectorUrl"
-                            :rules="
-                                isN8NConnectorToolType
-                                    ? 'required'
-                                    : ''
-                            "
+                            :rules="isN8NConnectorToolType ? 'required' : ''"
                             v-slot="{ field, errorMessage }"
                         >
                             <input
@@ -119,8 +101,7 @@
                                 class="form-control form-control-sm"
                                 autocomplete="off"
                                 :class="{
-                                    'is-invalid':
-                                        errorMessage,
+                                    'is-invalid': errorMessage,
                                 }"
                                 placeholder="https://your-n8n-instance.com"
                                 @blur="validateConnector"
@@ -135,20 +116,11 @@
                     </div>
                     <div class="col-6">
                         <label>
-                            {{
-                                $t(
-                                    "tools.form.connectorApiKey"
-                                )
-                            }}
+                            {{ $t("tools.form.connectorApiKey") }}
                         </label>
                         <Field
                             name="connectorApiKey"
-                            :rules="
-                                isN8NConnectorToolType &&
-                                apiKeyRequired
-                                    ? 'required'
-                                    : ''
-                            "
+                            :rules="isN8NConnectorToolType && apiKeyRequired ? 'required' : ''"
                             v-slot="{ field, errorMessage }"
                         >
                             <input
@@ -158,8 +130,7 @@
                                 autocomplete="new-password"
                                 @blur="validateConnector"
                                 :class="{
-                                    'is-invalid':
-                                        errorMessage,
+                                    'is-invalid': errorMessage,
                                 }"
                             />
                             <span
@@ -185,21 +156,14 @@
                                 v-bind="field"
                                 class="form-select form-select-sm"
                                 :class="{
-                                    'is-invalid':
-                                        errorMessage,
+                                    'is-invalid': errorMessage,
                                 }"
                             >
                                 <option value="">
-                                    {{
-                                        $t(
-                                            "tools.form.entriesSelect"
-                                        )
-                                    }}
+                                    {{ $t("tools.form.entriesSelect") }}
                                 </option>
                                 <option
-                                    v-for="(
-                                        item, index
-                                    ) in inputsList"
+                                    v-for="(item, index) in inputsList"
                                     :key="index"
                                     :value="item.id"
                                 >
@@ -221,9 +185,7 @@
                             :value="true"
                             :unchecked-value="false"
                         >
-                            <div
-                                class="form-check mt-1 p-0"
-                            >
+                            <div class="form-check mt-1 p-0">
                                 <input
                                     type="checkbox"
                                     name="isEditableInput"
@@ -235,11 +197,7 @@
                                     class="form-check-label ps-1"
                                     for="isEditableInput"
                                 >
-                                    {{
-                                        $t(
-                                            "tools.form.entriesEditable"
-                                        )
-                                    }}
+                                    {{ $t("tools.form.entriesEditable") }}
                                 </label>
                             </div>
                         </Field>
@@ -257,21 +215,14 @@
                                 v-bind="field"
                                 class="form-select form-select-sm"
                                 :class="{
-                                    'is-invalid':
-                                        errorMessage,
+                                    'is-invalid': errorMessage,
                                 }"
                             >
                                 <option value="">
-                                    {{
-                                        $t(
-                                            "tools.form.outputSelect"
-                                        )
-                                    }}
+                                    {{ $t("tools.form.outputSelect") }}
                                 </option>
                                 <option
-                                    v-for="(
-                                        item, index
-                                    ) in outputsList"
+                                    v-for="(item, index) in outputsList"
                                     :key="index"
                                     :value="item.id"
                                 >
@@ -322,12 +273,7 @@
             Field,
         },
         setup() {
-            const {
-                validate,
-                setValues,
-                values,
-                resetForm,
-            } = useForm();
+            const { validate, setValues, values, resetForm } = useForm();
             return {
                 validate,
                 setValues,
@@ -362,57 +308,40 @@
         }),
         computed: {
             titleText() {
-                return this.isEdit
-                    ? "tools.formEdit.title"
-                    : "tools.formCreate.title";
+                return this.isEdit ? "tools.formEdit.title" : "tools.formCreate.title";
             },
             saveText() {
-                return this.isEdit
-                    ? "tools.editBtn"
-                    : "tools.createBtn";
+                return this.isEdit ? "tools.editBtn" : "tools.createBtn";
             },
             apiKeyRequired() {
-                return this.isEdit &&
-                    this.isN8NConnectorToolType
-                    ? false
-                    : true;
+                return this.isEdit && this.isN8NConnectorToolType ? false : true;
             },
         },
         methods: {
             async validateConnector() {
-                if (
-                    this.values.connectorUrl &&
-                    this.values.connectorApiKey
-                ) {
+                if (this.values.connectorUrl && this.values.connectorApiKey) {
                     this.$notify({
                         title: "tools.index",
-                        message:
-                            "tools.form.validatingConnector",
+                        message: "tools.form.validatingConnector",
                         variant: "warning",
                         icon: "CircleAlert",
                     });
                     let params = {
-                        connectorUrl:
-                            this.values.connectorUrl,
-                        connectorApiKey:
-                            this.values.connectorApiKey,
+                        connectorUrl: this.values.connectorUrl,
+                        connectorApiKey: this.values.connectorApiKey,
                     };
-                    ToolsService.validateConnector(
-                        params
-                    ).then((result) => {
+                    ToolsService.validateConnector(params).then((result) => {
                         if (result) {
                             return this.$notify({
                                 title: "tools.index",
-                                message:
-                                    "tools.form.validConnector",
+                                message: "tools.form.validConnector",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "tools.index",
-                                message:
-                                    "tools.form.invalidConnector",
+                                message: "tools.form.invalidConnector",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -424,31 +353,21 @@
                 this.isN8NConnectorToolType =
                     (this.values.toolTypeId &&
                         this.typesList
-                            .find(
-                                (t) =>
-                                    t.id ===
-                                    this.values.toolTypeId
-                            )
+                            .find((t) => t.id === this.values.toolTypeId)
                             ?.name?.toLowerCase()
-                            ?.includes(
-                                ToolType.N8N.toLowerCase()
-                            )) ||
+                            ?.includes(ToolType.N8N.toLowerCase())) ||
                     false;
             },
             getToolTypes() {
-                ToolsTypesService.getToolTypes().then(
-                    (response) => {
-                        this.typesList = response;
-                    }
-                );
+                ToolsTypesService.getToolTypes().then((response) => {
+                    this.typesList = response;
+                });
             },
             getToolDatas() {
-                ToolsDataService.getToollData().then(
-                    (response) => {
-                        this.inputsList = response;
-                        this.outputsList = response;
-                    }
-                );
+                ToolsDataService.getToollData().then((response) => {
+                    this.inputsList = response;
+                    this.outputsList = response;
+                });
             },
             open(tool = null) {
                 this.resetData();
@@ -459,8 +378,7 @@
                         toolTypeId: tool.toolTypeId,
                         inputDataId: tool.inputDataId,
                         outputDataId: tool.outputDataId,
-                        isEditableInput:
-                            tool.isEditableInput,
+                        isEditableInput: tool.isEditableInput,
                         connectorUrl: tool.connectorUrl,
                     });
                 }
@@ -508,8 +426,7 @@
                             this.close();
                             return this.$notify({
                                 title: "tools.index",
-                                message:
-                                    "tools.createSuccess",
+                                message: "tools.createSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
@@ -517,16 +434,14 @@
                             if (result.error == 1) {
                                 this.$notify({
                                     title: "tools.index",
-                                    message:
-                                        "tools.duplicated",
+                                    message: "tools.duplicated",
                                     variant: "danger",
                                     icon: "CircleX",
                                 });
                             } else {
                                 this.$notify({
                                     title: "tools.index",
-                                    message:
-                                        "tools.createError",
+                                    message: "tools.createError",
                                     variant: "danger",
                                     icon: "CircleX",
                                 });
@@ -546,8 +461,7 @@
                             this.close();
                             return this.$notify({
                                 title: "tools.index",
-                                message:
-                                    "tools.editSuccess",
+                                message: "tools.editSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });

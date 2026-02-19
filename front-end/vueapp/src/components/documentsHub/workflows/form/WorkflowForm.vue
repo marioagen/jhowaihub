@@ -11,9 +11,7 @@
                                 @click="redirectToIndex"
                                 type="button"
                             >
-                                <LucideIcon
-                                    icon="ArrowLeft"
-                                />
+                                <LucideIcon icon="ArrowLeft" />
                             </button>
                         </div>
                         <div class="col-10">
@@ -22,12 +20,8 @@
                                     {{ $t(formTitle) }}
                                 </h5>
                                 <p>
-                                    <small
-                                        class="text-muted"
-                                    >
-                                        {{
-                                            $t(formSubtitle)
-                                        }}
+                                    <small class="text-muted">
+                                        {{ $t(formSubtitle) }}
                                     </small>
                                 </p>
                             </div>
@@ -55,11 +49,7 @@
                         <div class="col">
                             <p>
                                 <small class="text-muted">
-                                    {{
-                                        $t(
-                                            "workflow.manage"
-                                        )
-                                    }}
+                                    {{ $t("workflow.manage") }}
                                 </small>
                             </p>
                         </div>
@@ -72,18 +62,13 @@
                             <Field
                                 name="name"
                                 rules="required"
-                                v-slot="{
-                                    field,
-                                    errorMessage,
-                                }"
+                                v-slot="{ field, errorMessage }"
                                 v-model="workflowData.name"
                                 ref="nameField"
                             >
                                 <input
                                     class="form-control form-control-sm"
-                                    :placeholder="
-                                        $t('workflow.name')
-                                    "
+                                    :placeholder="$t('workflow.name')"
                                     v-bind="field"
                                 />
                                 <span
@@ -96,9 +81,7 @@
                         </div>
                         <div class="col-12">
                             <div v-if="isLoadingTeams">
-                                <div
-                                    class="d-flex justify-content-center"
-                                >
+                                <div class="d-flex justify-content-center">
                                     <div
                                         class="spinner-border text-primary"
                                         role="status"
@@ -122,27 +105,19 @@
                                             :key="team.id"
                                             class="col-3 p-1"
                                         >
-                                            <div
-                                                class="form-check d-flex align-items-center"
-                                            >
+                                            <div class="form-check d-flex align-items-center">
                                                 <input
                                                     class="form-check-input me-3"
                                                     type="checkbox"
                                                     :id="`team-${team.id}`"
-                                                    :value="
-                                                        team.id
-                                                    "
-                                                    v-model="
-                                                        selectedTeams
-                                                    "
+                                                    :value="team.id"
+                                                    v-model="selectedTeams"
                                                 />
                                                 <label
                                                     class="form-check-label fw-semibold"
                                                     :for="`team-${team.id}`"
                                                 >
-                                                    {{
-                                                        team.text
-                                                    }}
+                                                    {{ team.text }}
                                                 </label>
                                             </div>
                                         </div>
@@ -160,9 +135,7 @@
                 </div>
             </div>
             <div class="row mt-4">
-                <div
-                    class="row d-flex justify-content-between align-items-center"
-                >
+                <div class="row d-flex justify-content-between align-items-center">
                     <div class="col-auto">
                         <h6 class="mb-4">
                             {{ $t("workflow.steps") }}
@@ -178,16 +151,12 @@
                                 icon="Plus"
                                 :size="15"
                             />
-                            {{
-                                $t("workflow.createNewStep")
-                            }}
+                            {{ $t("workflow.createNewStep") }}
                         </button>
                     </div>
                 </div>
                 <div v-if="isLoadingSteps">
-                    <div
-                        class="d-flex justify-content-center"
-                    >
+                    <div class="d-flex justify-content-center">
                         <div
                             class="spinner-border text-primary"
                             role="status"
@@ -198,36 +167,21 @@
                     v-else
                     class="row"
                 >
-                    <div
-                        class="d-flex gap-3 overflow-auto flex-nowrap pb-2"
-                    >
+                    <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
                         <WorkflowStep
-                            v-for="(
-                                step, index
-                            ) in activeStepsList"
+                            v-for="(step, index) in activeStepsList"
                             :key="step.id || index"
                             :step="step"
                             :index="index + 1"
-                            :is-last="
-                                index ===
-                                activeStepsList.length - 1
-                            "
+                            :is-last="index === activeStepsList.length - 1"
                             :profilesList="profilesList"
                             :statusList="statusList"
                             :isEdit="isEdit"
                             :workflowId="id"
-                            @update-step="
-                                updateStep(index, $event)
-                            "
-                            @remove-step="
-                                removeStep(index, $event)
-                            "
-                            @remove-flow="
-                                removeFlow(index, $event)
-                            "
-                            @saveWorkflow="
-                                saveWorkflowInStore
-                            "
+                            @update-step="updateStep(index, $event)"
+                            @remove-step="removeStep(index, $event)"
+                            @remove-flow="removeFlow(index, $event)"
+                            @saveWorkflow="saveWorkflowInStore"
                             class="workflow-step-card"
                             ref="stepRefs"
                         />
@@ -244,14 +198,8 @@
                             <h6 class="fw-semibold mb-1">
                                 {{ $t("workflow.addBtn") }}
                             </h6>
-                            <p
-                                class="text-muted small mb-0"
-                            >
-                                {{
-                                    $t(
-                                        "workflow.addBtnDescription"
-                                    )
-                                }}
+                            <p class="text-muted small mb-0">
+                                {{ $t("workflow.addBtnDescription") }}
                             </p>
                         </div>
                     </div>
@@ -289,8 +237,7 @@
             },
         },
         setup() {
-            const { validate, values, setValues } =
-                useForm();
+            const { validate, values, setValues } = useForm();
             return {
                 validate,
                 values,
@@ -326,14 +273,10 @@
             formSubtitle() {
                 return this.isEdit
                     ? this.$t("workflow.formEdit.subtitle")
-                    : this.$t(
-                          "workflow.formCreate.subtitle"
-                      );
+                    : this.$t("workflow.formCreate.subtitle");
             },
             activeStepsList() {
-                return this.stepsList.filter(
-                    (s) => s.isActive !== false
-                );
+                return this.stepsList.filter((s) => s.isActive !== false);
             },
         },
         methods: {
@@ -341,45 +284,33 @@
                 this.isLoadingTeams = true;
                 TeamsService.getTeamList()
                     .then((response) => {
-                        if (response.error !== undefined)
-                            return;
-                        this.teamsList = response.map(
-                            (r) => ({
-                                id: r.id,
-                                text: r.name,
-                            })
-                        );
+                        if (response.error !== undefined) return;
+                        this.teamsList = response.map((r) => ({
+                            id: r.id,
+                            text: r.name,
+                        }));
                     })
                     .finally(() => {
                         this.isLoadingTeams = false;
                     });
             },
             getStatus() {
-                StatusService.getStatus().then(
-                    (response) => {
-                        if (response.error !== undefined)
-                            return;
-                        this.statusList = response;
-                    }
-                );
+                StatusService.getStatus().then((response) => {
+                    if (response.error !== undefined) return;
+                    this.statusList = response;
+                });
             },
             getProfiles() {
-                ProfilesService.getProfilesList().then(
-                    (response) => {
-                        if (response.error !== undefined)
-                            return;
-                        this.profilesList = response.map(
-                            (r) => ({
-                                id: r.id,
-                                text: r.name,
-                            })
-                        );
-                    }
-                );
+                ProfilesService.getProfilesList().then((response) => {
+                    if (response.error !== undefined) return;
+                    this.profilesList = response.map((r) => ({
+                        id: r.id,
+                        text: r.name,
+                    }));
+                });
             },
             setEdit() {
-                let hasInStore =
-                    this.$store.state.tempWorkflow.status;
+                let hasInStore = this.$store.state.tempWorkflow.status;
                 if (hasInStore && !this.isEdit) {
                     this.setWorkflowFromStore();
                 }
@@ -388,9 +319,7 @@
                     this.isLoading = true;
                     WorkflowService.getWorkflowById(this.id)
                         .then((response) => {
-                            if (
-                                response.error !== undefined
-                            ) {
+                            if (response.error !== undefined) {
                                 this.$router.push({
                                     name: "Workflow",
                                 });
@@ -401,27 +330,15 @@
                                     icon: "CircleX",
                                 });
                             }
-                            this.workflowData.id =
-                                response.id;
-                            this.workflowData.name =
-                                response.name;
-                            this.selectedTeams =
-                                response.teams.map(
-                                    (team) => team.id
-                                );
-                            this.stepsList =
-                                response.steps.map(
-                                    (step) => ({
-                                        ...step,
-                                        profileId:
-                                            step.profile
-                                                ?.id || "",
-                                        statusId:
-                                            step.status
-                                                ?.id || "",
-                                        isActive: true,
-                                    })
-                                );
+                            this.workflowData.id = response.id;
+                            this.workflowData.name = response.name;
+                            this.selectedTeams = response.teams.map((team) => team.id);
+                            this.stepsList = response.steps.map((step) => ({
+                                ...step,
+                                profileId: step.profile?.id || "",
+                                statusId: step.status?.id || "",
+                                isActive: true,
+                            }));
                         })
                         .finally(() => {
                             this.saveWorkflowInStore();
@@ -432,13 +349,10 @@
                 }
             },
             setWorkflowFromStore() {
-                let workflowData =
-                    this.$store.state.tempWorkflow.data;
+                let workflowData = this.$store.state.tempWorkflow.data;
                 this.workflowData.name = workflowData.name;
-                this.workflowData.teams =
-                    workflowData.teams;
-                this.stepsList =
-                    this.$store.state.tempWorkflow.list;
+                this.workflowData.teams = workflowData.teams;
+                this.stepsList = this.$store.state.tempWorkflow.list;
             },
             updateStep(index, updatedStep) {
                 this.stepsList[index] = {
@@ -461,13 +375,10 @@
             removeStep(order2, step) {
                 const i = this.stepsList.findIndex(
                     (s) =>
-                        (s.id !== 0 && s.id === step.id) ||
-                        (s.id === 0 &&
-                            s.tempId === step.tempId)
+                        (s.id !== 0 && s.id === step.id) || (s.id === 0 && s.tempId === step.tempId)
                 );
                 if (i !== -1) {
-                    if (step.id === 0)
-                        this.stepsList.splice(i, 1);
+                    if (step.id === 0) this.stepsList.splice(i, 1);
                     else this.stepsList[i].isActive = false;
 
                     let order = 1;
@@ -478,18 +389,13 @@
                 this.saveTempWorkflow();
             },
             removeFlow(index, stepId) {
-                let step = this.stepsList.find(
-                    (s) => s.id === stepId
-                );
+                let step = this.stepsList.find((s) => s.id === stepId);
                 step.stepTools = [];
                 this.updateStep(index, step);
                 this.saveTempWorkflow();
             },
             async save() {
-                if (
-                    !this.stepsList ||
-                    this.stepsList.length === 0
-                ) {
+                if (!this.stepsList || this.stepsList.length === 0) {
                     return this.$notify({
                         title: "workflow.index",
                         message: "validation.oneStep",
@@ -498,25 +404,18 @@
                     });
                 }
 
-                const nameValid =
-                    await this.$refs.nameField?.validate?.();
-                const teamValid =
-                    await this.$refs.teamField?.validate?.();
+                const nameValid = await this.$refs.nameField?.validate?.();
+                const teamValid = await this.$refs.teamField?.validate?.();
 
                 let stepsValid = true;
                 const stepRefs = this.$refs.stepRefs || [];
                 for (const stepRef of stepRefs) {
                     if (stepRef?.validateStep) {
-                        const valid =
-                            await stepRef.validateStep();
+                        const valid = await stepRef.validateStep();
                         if (!valid) stepsValid = false;
                     }
                 }
-                if (
-                    !nameValid?.valid ||
-                    !teamValid?.valid ||
-                    !stepsValid
-                ) {
+                if (!nameValid?.valid || !teamValid?.valid || !stepsValid) {
                     return this.$notify({
                         title: "workflow.index",
                         message: "validation.hasInvalid",
@@ -534,17 +433,14 @@
                 return this.createWorkflow();
             },
             reorderList() {
-                this.activeStepsList.forEach(
-                    (step, index) => {
-                        step.order = index + 1;
-                    }
-                );
+                this.activeStepsList.forEach((step, index) => {
+                    step.order = index + 1;
+                });
             },
             createWorkflow() {
                 let params = {
                     name: this.workflowData.name,
-                    steps: this.$store.state.tempWorkflow
-                        .list,
+                    steps: this.$store.state.tempWorkflow.list,
                     teams: this.selectedTeams,
                 };
 
@@ -554,8 +450,7 @@
                             this.redirectToIndex();
                             return this.$notify({
                                 title: "workflow.index",
-                                message:
-                                    "workflow.createSuccess",
+                                message: "workflow.createSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
@@ -575,8 +470,7 @@
                 let params = {
                     id: this.workflowData.id,
                     name: this.workflowData.name,
-                    steps: this.$store.state.tempWorkflow
-                        .list,
+                    steps: this.$store.state.tempWorkflow.list,
                     teams: this.selectedTeams,
                 };
                 WorkflowService.editWorkflow(params)
@@ -585,8 +479,7 @@
                             this.redirectToIndex();
                             return this.$notify({
                                 title: "workflow.index",
-                                message:
-                                    "workflow.editSuccess",
+                                message: "workflow.editSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
@@ -605,13 +498,12 @@
             redirectToIndex() {
                 this.$store.commit("cleanTempWorkflow");
                 return this.$router.push({
-                    name: "WorkflowManagement",
+                    name: "WorkflowPage",
                 });
             },
             saveWorkflowInStore() {
                 this.reorderList();
-                const storeList =
-                    this.$store.state.tempWorkflow.list;
+                const storeList = this.$store.state.tempWorkflow.list;
                 if (!storeList || storeList.length === 0) {
                     this.saveTempWorkflow();
                 }

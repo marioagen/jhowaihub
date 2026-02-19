@@ -15,7 +15,8 @@ export default {
             });
         }*/
 
-        return api.get("/Document", { params: filters })
+        return api
+            .get("/Document", { params: filters })
             .then(({ data }) => {
                 return {
                     content: data.content,
@@ -25,23 +26,24 @@ export default {
                         itemsPerPage: 10,
                         totalItems: data.rowCount,
                     },
-                }
+                };
             })
             .catch((e) => {
                 return {
                     error: e,
-                }
+                };
             });
     },
     deleteDocument(ids) {
-        return api.delete("/Document/Delete", { data: ids })
+        return api
+            .delete("/Document/Delete", { data: ids })
             .then(() => {
                 return true;
             })
             .catch(function (e) {
                 return {
                     error: e,
-                }
+                };
             });
     },
     getDocumentAnalyze(docId) {
@@ -154,8 +156,23 @@ export default {
                 };
             });
     },
+    async getDocumentQuestionsHistory(id, filters) {
+        return await api
+            .get(`/Document/History/${id}/batch`, {
+                params: filters,
+            })
+            .then((response) => {
+                return response.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
     checkPagesLength() {
-        return api.get("/Document/CheckExceededPages")
+        return api
+            .get("/Document/CheckExceededPages")
             .then(({ data }) => {
                 return data;
             })
