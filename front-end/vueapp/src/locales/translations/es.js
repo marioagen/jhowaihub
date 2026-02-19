@@ -25,7 +25,8 @@ const spanish = {
             date: "Fecha",
             rejectedBy: "Reprobado por",
             reason: "Motivo de la Reprobación",
-            subtitle: "Este documento fue devuelto para corrección. Vea los detalles a continuación.",
+            subtitle:
+                "Este documento fue devuelto para corrección. Vea los detalles a continuación.",
             title: "Justificación de la Reprobación",
             viewJustification: "Ver Justificación",
         },
@@ -42,7 +43,8 @@ const spanish = {
             confirm: "Confirmar Reprobación",
             error: "Error al reprobar el documento.",
             justification: "Justificación",
-            justificationInstructions: "Proporcione una justificativa e indique para qué etapa se debe devolver el documento.",
+            justificationInstructions:
+                "Proporcione una justificativa e indique para qué etapa se debe devolver el documento.",
             justificationPlaceholder: "Proporcione una justificativa",
             reject: "Reprobar",
             returnToStep: "Volver a la etapa",
@@ -51,8 +53,7 @@ const spanish = {
             title: "Reprobar Documento",
             validationError: "Por favor, complete todos los campos obligatorios.",
         },
-        selectQuestionnaire:
-            "Seleccione un cuestionario...",
+        selectQuestionnaire: "Seleccione un cuestionario...",
         sendQuestion: "Enviar pregunta",
         subtitle: "Gestiona análisis de documentos",
         successApplyingQuestionnaire: "Cuestionario aplicado con éxito",
@@ -794,7 +795,7 @@ const spanish = {
     },
     template: {
         addParam: "Agregar Parámetro",
-        bodySubtitle: "Escriba '{' para ver las variables disponibles.",
+        bodySubtitle: "Escriba '[' para ver las variables disponibles.",
         cancelBtn: "Cancelar",
         createBtn: "Guardar Plantilla",
         createError: "Error al crear plantilla",
@@ -815,7 +816,7 @@ const spanish = {
         headers: "Encabezados",
         importCurl: "Importar cURL",
         invalidJsonFormat: "Formato JSON inválido",
-        keyPlaceholder: "Key (el valor será {{nombreKey}})",
+        keyPlaceholder: "Key",
         method: "Método",
         name: "Nombre",
         noQueryParameters: "Sin parámetros de query. Agregue uno o escriba en la URL.",
@@ -837,7 +838,7 @@ const spanish = {
         variablesEmbeddings: "Indexación",
         variablesPrompt: "Agente",
         variablesTip:
-            "Consejo: Use variables como {{ocr}} o {{prompt}} que serán reemplazadas en el momento de la ejecución.",
+            "Consejo: Use variables como [ocr] o [prompt] que serán reemplazadas en el momento de la ejecución.",
     },
     tools: {
         createBtn: "Nueva Herramienta",
@@ -1030,7 +1031,7 @@ const spanish = {
             done: "Listo",
             finalize: "Terminado",
             waitingforapproval: "En espera de aprobación",
-            rejected: "Rechazado"
+            rejected: "Rechazado",
         },
         stepFlow: "Automatización de documentos",
         stepNamePlaceholder: "Nombre del paso",
