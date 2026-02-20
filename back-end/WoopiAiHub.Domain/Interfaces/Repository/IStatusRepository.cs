@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<Status?> FindById(int id);
         Task<ICollection<StatusDto>> FindAll();
+        Task<ICollection<StatusDto>> FindStatusForWorkflowSteps();
     }
 }
