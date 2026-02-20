@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -225,9 +226,11 @@ namespace WoopiAiHub.Application.Services
                     var requiredFile = parameter.RequiredFile ?? false;
                     string paramValue = parameter.Value;
 
-                    if (!_encryptationService.IsEncrypted(parameter.Value))
+                    paramValue = NormalizeBodyToString(paramValue);
+
+                    if (!_encryptationService.IsEncrypted(paramValue))
                     {
-                        paramValue = _encryptationService.Encrypt(parameter.Value);
+                        paramValue = _encryptationService.Encrypt(paramValue);
                     }
 
                     stepTool.Parameters.Add(
@@ -246,6 +249,68 @@ namespace WoopiAiHub.Application.Services
             }
 
             return stepTool;
+        }
+
+        /// <summary>
+        /// Normalizes the body property in an API request JSON to ensure it is stored as a string.
+        /// If the body is a JSON object, it will be serialized to a JSON string.
+        /// </summary>
+        /// <param name="jsonValue">The JSON string containing the API request configuration.</param>
+        /// <returns>The normalized JSON string with the body as a string value.</returns>
+        private static string NormalizeBodyToString(string jsonValue)
+        {
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+
+                using var document = JsonDocument.Parse(jsonValue);
+                var root = document.RootElement;
+
+                if (!root.TryGetProperty("body", out var bodyProperty))
+                {
+                    return jsonValue;
+                }
+
+                if (bodyProperty.ValueKind == JsonValueKind.String)
+                {
+                    return jsonValue;
+                }
+
+                using var stream = new MemoryStream();
+                using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions 
+                { 
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping 
+                });
+
+                writer.WriteStartObject();
+
+                foreach (var property in root.EnumerateObject())
+                {
+                    writer.WritePropertyName(property.Name);
+
+                    if (property.Name.Equals("body", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var bodyJson = JsonSerializer.Serialize(property.Value, options);
+                        writer.WriteStringValue(bodyJson);
+                    }
+                    else
+                    {
+                        property.Value.WriteTo(writer);
+                    }
+                }
+
+                writer.WriteEndObject();
+                writer.Flush();
+
+                return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+            }
+            catch
+            {
+                return jsonValue;
+            }
         }
 
         /// <summary>

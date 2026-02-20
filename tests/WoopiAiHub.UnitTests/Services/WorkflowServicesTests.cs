@@ -2502,20 +2502,22 @@ namespace WoopiAiHub.UnitTests.Services
 
         #region CreateStepToolUpdate Tests
 
-        [Fact(DisplayName = "UpdatePhase3 should encrypt API tool parameters correctly")]
+        [Fact(DisplayName = "UpdatePhase3 should encrypt API tool parameters and normalize body correctly")]
         [Trait("UpdatePhase3", "Success")]
         public async Task UpdatePhase3_ApiToolParameterEncryption_EncryptsSuccessfully()
         {
             // Arrange
             var encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            
+
             var apiTool = WorkflowFixture.CreateToolModel(1, "API Tool", HandlersTypes.API);
             var workflow = WorkflowFixture.FindValidWorkflow();
             var step = workflow.Steps.First();
             var webhookId1 = Guid.NewGuid();
             var webhookId2 = Guid.NewGuid();
-            
+            var webhookId3 = Guid.NewGuid();
+            var webhookId4 = Guid.NewGuid();
+
             var stepToolDto = new StepToolUpdateDto
             {
                 ToolId = 1,
@@ -2525,8 +2527,28 @@ namespace WoopiAiHub.UnitTests.Services
                 Parameters = new List<StepToolParameterUpdateDto>
                 {
                     new StepToolParameterUpdateDto { Value = "" }, // Should be skipped
-                    new StepToolParameterUpdateDto { Value = "raw_value", WebhookId = webhookId1, RequiredFile = false },
-                    new StepToolParameterUpdateDto { Value = "encrypted_value", WebhookId = webhookId2, RequiredFile = true }
+                    new StepToolParameterUpdateDto 
+                    { 
+                        Value = "{\"templateId\":3003,\"body\":{\"messages\":[{\"role\":\"system\"}]}}", // Body as object - should be normalized
+                        WebhookId = webhookId1, 
+                        RequiredFile = false 
+                    },
+                    new StepToolParameterUpdateDto 
+                    { 
+                        Value = "{\"templateId\":3004,\"body\":\"{\\\"messages\\\":[]}\"}", // Body already as string - should remain
+                        WebhookId = webhookId2, 
+                        RequiredFile = true 
+                    },
+                    new StepToolParameterUpdateDto 
+                    { 
+                        Value = "{\"templateId\":3005,\"method\":\"GET\"}", // No body - should process normally
+                        WebhookId = webhookId3 
+                    },
+                    new StepToolParameterUpdateDto 
+                    { 
+                        Value = "already_encrypted_value", 
+                        WebhookId = webhookId4 
+                    }
                 }
             };
 
@@ -2546,10 +2568,10 @@ namespace WoopiAiHub.UnitTests.Services
 
             _workflowRepositoryMock.Setup(r => r.FindByIdForFlow(workflow.Id)).ReturnsAsync(workflow);
             _toolRepositoryMock.Setup(r => r.FindModelByIdAsync(1)).ReturnsAsync(apiTool);
-            
-            encryptionServiceMock.Setup(s => s.IsEncrypted("raw_value")).Returns(false);
-            encryptionServiceMock.Setup(s => s.Encrypt("raw_value")).Returns("encrypted_raw_value");
-            encryptionServiceMock.Setup(s => s.IsEncrypted("encrypted_value")).Returns(true);
+
+            encryptionServiceMock.Setup(s => s.IsEncrypted(It.Is<string>(v => !v.Contains("already_encrypted")))).Returns(false);
+            encryptionServiceMock.Setup(s => s.IsEncrypted("already_encrypted_value")).Returns(true);
+            encryptionServiceMock.Setup(s => s.Encrypt(It.IsAny<string>())).Returns<string>(s => $"encrypted_{s}");
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
@@ -2559,16 +2581,29 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             var createdStepTool = step.StepTools.First();
-            Assert.Equal(2, createdStepTool.Parameters.Count);
-            
-            var param1 = createdStepTool.Parameters.First(p => p.WebhookId == webhookId1);
-            Assert.Equal("encrypted_raw_value", param1.Value);
-            
-            var param2 = createdStepTool.Parameters.First(p => p.WebhookId == webhookId2);
-            Assert.Equal("encrypted_value", param2.Value);
+            Assert.Equal(4, createdStepTool.Parameters.Count);
 
-            encryptionServiceMock.Verify(s => s.Encrypt("raw_value"), Times.Once);
-            encryptionServiceMock.Verify(s => s.Encrypt("encrypted_value"), Times.Never);
+            // Verify body as object was normalized to string
+            encryptionServiceMock.Verify(s => s.Encrypt(It.Is<string>(v => 
+                v.Contains("\"templateId\":3003") &&
+                v.Contains("\"body\":\"") && 
+                !v.Contains("\"body\":{")
+            )), Times.Once);
+
+            // Verify body already as string remained unchanged
+            encryptionServiceMock.Verify(s => s.Encrypt(It.Is<string>(v => 
+                v.Contains("\"templateId\":3004") &&
+                v.Contains("\"body\":\"")
+            )), Times.Once);
+
+            // Verify JSON without body processed normally
+            encryptionServiceMock.Verify(s => s.Encrypt(It.Is<string>(v => 
+                v.Contains("\"templateId\":3005") &&
+                v.Contains("\"method\":\"GET\"")
+            )), Times.Once);
+
+            // Verify already encrypted value was not re-encrypted
+            encryptionServiceMock.Verify(s => s.Encrypt("already_encrypted_value"), Times.Never);
         }
 
         [Fact(DisplayName = "UpdatePhase3 should not encrypt non-API tool parameters")]
@@ -2578,11 +2613,11 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
             var webhookId = Guid.NewGuid();
-            
+
             var nonApiTool = WorkflowFixture.CreateToolModel(1, "OCR Tool", HandlersTypes.Ocr);
             var workflow = WorkflowFixture.FindValidWorkflow();
             var step = workflow.Steps.First();
-            
+
             var stepToolDto = new StepToolUpdateDto
             {
                 ToolId = 1,
@@ -2622,6 +2657,64 @@ namespace WoopiAiHub.UnitTests.Services
 
             encryptionServiceMock.Verify(s => s.IsEncrypted(It.IsAny<string>()), Times.Never);
             encryptionServiceMock.Verify(s => s.Encrypt(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should handle malformed JSON gracefully in API tool")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_ApiToolWithMalformedJson_ProcessesWithoutError()
+        {
+            // Arrange
+            var encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
+            var webhookId = Guid.NewGuid();
+
+            var apiTool = WorkflowFixture.CreateToolModel(1, "API Tool", HandlersTypes.API);
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var step = workflow.Steps.First();
+
+            var malformedJson = "{invalid json}";
+
+            var stepToolDto = new StepToolUpdateDto
+            {
+                ToolId = 1,
+                Order = 1,
+                Parameters = new List<StepToolParameterUpdateDto>
+                {
+                    new StepToolParameterUpdateDto { Value = malformedJson, WebhookId = webhookId }
+                }
+            };
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = workflow.Id,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto
+                    {
+                        Id = step.Id,
+                        Order = step.Order,
+                        StepTools = new List<StepToolUpdateDto> { stepToolDto }
+                    }
+                }
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForFlow(workflow.Id)).ReturnsAsync(workflow);
+            _toolRepositoryMock.Setup(r => r.FindModelByIdAsync(1)).ReturnsAsync(apiTool);
+
+            encryptionServiceMock.Setup(s => s.IsEncrypted(It.IsAny<string>())).Returns(false);
+            encryptionServiceMock.Setup(s => s.Encrypt(It.IsAny<string>())).Returns<string>(s => $"encrypted_{s}");
+
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            // Assert
+            Assert.True(result);
+            var createdStepTool = step.StepTools.First();
+            Assert.Single(createdStepTool.Parameters);
+
+            // Malformed JSON should be kept as-is and encrypted (NormalizeBodyToString returns original on error)
+            encryptionServiceMock.Verify(s => s.Encrypt(malformedJson), Times.Once);
         }
 
         [Fact(DisplayName = "UpdatePhase3 should map StepTool properties correctly")]
