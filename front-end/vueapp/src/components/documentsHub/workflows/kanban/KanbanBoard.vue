@@ -14,7 +14,7 @@
                         <span>
                             {{ step.name }}
                             <span class="badge">
-                                {{ step.cards.length }}
+                                {{ toFinalizeCardLength(step.cards) }}
                             </span>
                         </span>
                         <div
@@ -57,7 +57,6 @@
                                 class="card-body"
                                 :id="card.id"
                             >
-                                {{ card.status.id }}
                                 <KanbanCard
                                     v-if="showFinalized(card.status.id, step)"
                                     :dataCard="card"
@@ -173,6 +172,9 @@
                 if (id == 6) return false;
                 if (this.isLastStep(step)) return this.isLastColumnVisible;
                 return true;
+            },
+            toFinalizeCardLength(cards) {
+                return cards.filter((card) => card.status.id !== 6).length;
             },
         },
         mounted() {
