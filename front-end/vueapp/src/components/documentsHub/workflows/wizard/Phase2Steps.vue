@@ -32,24 +32,14 @@
             v-else
             class="row"
         >
-            <div
-                class="d-flex gap-3 overflow-auto flex-nowrap pb-2"
-            >
+            <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
                 <div
                     v-for="step in activeStepsList"
-                    :key="
-                        step.id
-                            ? `id-${step.id}`
-                            : `tmp-${step.tempId}`
-                    "
+                    :key="step.id ? `id-${step.id}` : `tmp-${step.tempId}`"
                     class="step-card card shadow-sm rounded-3"
                 >
-                    <div
-                        class="card-header d-flex justify-content-between align-items-center"
-                    >
-                        <div
-                            class="d-flex align-items-center"
-                        >
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
                             <div class="step-number">
                                 {{ step.order }}
                             </div>
@@ -60,19 +50,13 @@
                                 rules="required"
                                 v-slot="{ field, errors }"
                             >
-                                <div
-                                    class="d-flex flex-column"
-                                >
+                                <div class="d-flex flex-column">
                                     <input
                                         type="text"
                                         class="input-title"
                                         v-bind="field"
                                         v-model="step.name"
-                                        :placeholder="
-                                            $t(
-                                                'workflow.stepNamePlaceholder'
-                                            )
-                                        "
+                                        :placeholder="$t('workflow.stepNamePlaceholder')"
                                     />
                                     <span
                                         v-if="errors[0]"
@@ -96,9 +80,7 @@
                     <div class="card-body">
                         <!-- STATUS -->
                         <div class="mb-3">
-                            <label
-                                class="form-label text-muted small"
-                            >
+                            <label class="form-label text-muted small">
                                 {{ $t("common.status") }}
                             </label>
 
@@ -108,38 +90,22 @@
                                 rules="required"
                                 v-slot="{ field, errors }"
                             >
-                                <div
-                                    class="d-flex flex-column"
-                                >
+                                <div class="d-flex flex-column">
                                     <select
                                         class="form-select form-select-sm"
                                         v-bind="field"
-                                        v-model="
-                                            step.statusId
-                                        "
+                                        v-model="step.statusId"
                                     >
                                         <option value="">
-                                            {{
-                                                $t(
-                                                    "workflow.selectStatus"
-                                                )
-                                            }}
+                                            {{ $t("workflow.selectStatus") }}
                                         </option>
 
                                         <option
                                             v-for="s in statusList"
                                             :key="s.id"
-                                            :value="
-                                                String(s.id)
-                                            "
+                                            :value="String(s.id)"
                                         >
-                                            {{
-                                                s.label
-                                                    ? $t(
-                                                          s.label
-                                                      )
-                                                    : s.name
-                                            }}
+                                            {{ s.label ? $t(s.label) : s.name }}
                                         </option>
                                     </select>
 
@@ -155,12 +121,8 @@
 
                         <!-- PROFILE -->
                         <div class="mb-2">
-                            <label
-                                class="form-label text-muted small"
-                            >
-                                {{
-                                    $t("workflow.profiles")
-                                }}
+                            <label class="form-label text-muted small">
+                                {{ $t("workflow.profiles") }}
                             </label>
 
                             <Field
@@ -169,15 +131,9 @@
                                 rules="required"
                                 v-slot="{ field, errors }"
                             >
-                                <div
-                                    class="d-flex flex-column"
-                                >
-                                    <div
-                                        class="input-group"
-                                    >
-                                        <span
-                                            class="input-group-text border-end-0 bg-white"
-                                        >
+                                <div class="d-flex flex-column">
+                                    <div class="input-group">
+                                        <span class="input-group-text border-end-0 bg-white">
                                             <LucideIcon
                                                 icon="Users"
                                                 :size="16"
@@ -187,28 +143,16 @@
                                         <select
                                             class="form-select form-select-sm border-start-0"
                                             v-bind="field"
-                                            v-model="
-                                                step.profileId
-                                            "
+                                            v-model="step.profileId"
                                         >
-                                            <option
-                                                value=""
-                                            >
-                                                {{
-                                                    $t(
-                                                        "workflow.selectProfile"
-                                                    )
-                                                }}
+                                            <option value="">
+                                                {{ $t("workflow.selectProfile") }}
                                             </option>
 
                                             <option
                                                 v-for="p in profilesList"
                                                 :key="p.id"
-                                                :value="
-                                                    String(
-                                                        p.id
-                                                    )
-                                                "
+                                                :value="String(p.id)"
                                             >
                                                 {{ p.text }}
                                             </option>
@@ -240,11 +184,7 @@
                         {{ $t("workflow.addStep") }}
                     </h6>
                     <p class="text-muted small mb-0">
-                        {{
-                            $t(
-                                "workflow.addStepDescription"
-                            )
-                        }}
+                        {{ $t("workflow.addStepDescription") }}
                     </p>
                 </div>
             </div>
@@ -273,11 +213,8 @@
                     this.initialSteps.length > 0
                         ? this.initialSteps.map((s) => ({
                               ...s,
-                              tempId:
-                                  s.tempId ??
-                                  crypto.randomUUID(),
-                              isActive:
-                                  s.isActive !== false,
+                              tempId: s.tempId ?? crypto.randomUUID(),
+                              isActive: s.isActive !== false,
                           }))
                         : [],
                 profilesList: [],
@@ -290,9 +227,7 @@
 
         computed: {
             activeStepsList() {
-                return this.steps.filter(
-                    (s) => s.isActive !== false
-                );
+                return this.steps.filter((s) => s.isActive !== false);
             },
         },
 
@@ -309,19 +244,14 @@
                 });
             },
             reorderList() {
-                this.activeStepsList.forEach(
-                    (step, index) => {
-                        step.order = index + 1;
-                    }
-                );
+                this.activeStepsList.forEach((step, index) => {
+                    step.order = index + 1;
+                });
             },
 
             removeStep(step) {
                 const idx = this.steps.findIndex(
-                    (s) =>
-                        (s.id && s.id === step.id) ||
-                        (s.tempId &&
-                            s.tempId === step.tempId)
+                    (s) => (s.id && s.id === step.id) || (s.tempId && s.tempId === step.tempId)
                 );
                 if (idx !== -1) {
                     this.steps[idx].isActive = false;
@@ -337,14 +267,9 @@
                             id: step.id || 0,
                             name: step.name,
                             order: index + 1,
-                            profileId: step.profileId
-                                ? parseInt(step.profileId)
-                                : null,
-                            statusId: step.statusId
-                                ? parseInt(step.statusId)
-                                : null,
-                            hasStepTools:
-                                step.hasStepTools || false,
+                            profileId: step.profileId ? parseInt(step.profileId) : null,
+                            statusId: step.statusId ? parseInt(step.statusId) : null,
+                            hasStepTools: step.hasStepTools || false,
                             isActive: true,
                         })),
                 };
@@ -353,14 +278,11 @@
                 this.isLoadingProfiles = true;
                 ProfilesService.getProfilesList()
                     .then((response) => {
-                        if (response.error !== undefined)
-                            return;
-                        this.profilesList = response.map(
-                            (r) => ({
-                                id: r.id,
-                                text: r.name,
-                            })
-                        );
+                        if (response.error !== undefined) return;
+                        this.profilesList = response.map((r) => ({
+                            id: r.id,
+                            text: r.name,
+                        }));
                     })
                     .finally(() => {
                         this.isLoadingProfiles = false;
@@ -368,10 +290,9 @@
             },
             getStatus() {
                 this.isLoadingStatus = true;
-                StatusService.getStatus()
+                StatusService.getStatusForWorkflowSteps()
                     .then((response) => {
-                        if (response.error !== undefined)
-                            return;
+                        if (response.error !== undefined) return;
                         this.statusList = response;
                     })
                     .finally(() => {
