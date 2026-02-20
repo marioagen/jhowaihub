@@ -134,7 +134,6 @@ export default {
             try {
                 this.loading = true;
                 const response = await AnalysisRejectionServices.rejectAnalysis(params);
-                console.log(response);
                 if (response && !response.error) {
                     this.$emit("success");
                     this.close();

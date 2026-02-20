@@ -13,7 +13,6 @@ namespace WoopiAiHub.Application.Services
     public class DocumentAnalysisRejectionServices : IDocumentAnalysisRejectionServices
     {
         private readonly IDocumentAnalysisRejectionRepository _repository;
-
         private readonly IStepRepository _stepRepository;
         private readonly IPermissionServices _permissionServices;
         private readonly ICardRepository _cardRepository;
