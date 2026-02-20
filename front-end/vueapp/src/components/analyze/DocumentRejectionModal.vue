@@ -134,14 +134,31 @@ export default {
             try {
                 this.loading = true;
                 const response = await AnalysisRejectionServices.rejectAnalysis(params);
+                console.log(response);
                 if (response && !response.error) {
                     this.$emit("success");
                     this.close();
+                    return this.$notify({
+                        title: "analyze.rejection.title",
+                        message: "analyze.rejection.success",
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
                 } else {
-                    LogService.showMessage("Error rejecting document: " + (response.error || "Unknown error"));
+                    this.$notify({
+                        title: "analyze.rejection.title",
+                        message: response.error.response.data.labelError || "analyze.rejection.error",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
                 }
             } catch (error) {
-                LogService.showMessage("Error rejecting document: " + error);
+                this.$notify({
+                    title: "analyze.rejection.title",
+                    message: "analyze.rejection.error",
+                    variant: "danger",
+                    icon: "CircleX",
+                });
             } finally {
                 this.loading = false;
             }

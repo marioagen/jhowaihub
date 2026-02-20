@@ -26,6 +26,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<ICardRepository> _cardRepositoryMock;
         private readonly Mock<IStatusRepository> _statusRepositoryMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly Mock<IPermissionServices> _permissionServicesMock;
         private readonly DocumentAnalysisRejectionServices _rejectionServices;
 
         public DocumentAnalysisRejectionServicesTests()
@@ -38,11 +39,10 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             _statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
             _unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+            _permissionServicesMock = _mocker.GetMock<IPermissionServices>();
 
             _rejectionServices = _mocker.CreateInstance<DocumentAnalysisRejectionServices>();
         }
-
-        #region CreateRejectionAsync Tests
 
         [Fact(DisplayName = "CreateRejectionAsync should throw exception when user does not have permission")]
         [Trait("CreateRejectionAsync", "Fail")]
@@ -51,18 +51,14 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionDto();
             var email = "test@example.com";
-            var permissions = new Dictionary<string, List<string>>
-            {
-                { "Actions", new List<string> { "OtherPermission" } }
-            };
 
-            _permissionRepositoryMock.Setup(repo => repo.FindUserPermissionsAsync(email))
-                .ReturnsAsync(permissions);
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(false);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() =>
                 _rejectionServices.CreateRejectionAsync(dto, email));
-            Assert.Equal(ErrorCode.Conflict, exception.ErrorCode);
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("User does not have permission to reject documents", exception.Message);
         }
 
@@ -73,13 +69,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionDto();
             var email = "test@example.com";
-            var permissions = new Dictionary<string, List<string>>
-            {
-                { "Actions", new List<string> { "DocumentRejection" } }
-            };
 
-            _permissionRepositoryMock.Setup(repo => repo.FindUserPermissionsAsync(email))
-                .ReturnsAsync(permissions);
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
             _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
                 .ReturnsAsync((Card?)null);
 
@@ -98,13 +90,9 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionDto();
             var email = "test@example.com";
             var card = CardFixture.FindValidCard();
-            var permissions = new Dictionary<string, List<string>>
-            {
-                { "Actions", new List<string> { "DocumentRejection" } }
-            };
 
-            _permissionRepositoryMock.Setup(repo => repo.FindUserPermissionsAsync(email))
-                .ReturnsAsync(permissions);
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
             _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
@@ -126,13 +114,9 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "test@example.com";
             var card = CardFixture.FindValidCard();
             var step = CardFixture.FindValidStep();
-            var permissions = new Dictionary<string, List<string>>
-            {
-                { "Actions", new List<string> { "DocumentRejection" } }
-            };
 
-            _permissionRepositoryMock.Setup(repo => repo.FindUserPermissionsAsync(email))
-                .ReturnsAsync(permissions);
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
             _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
@@ -154,30 +138,16 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionDto();
             var email = "test@example.com";
-            var card = CardFixture.FindValidCard();
-            var step = CardFixture.FindValidStep();
-            var status = CardFixture.FindValidStatus();
-            var permissions = new Dictionary<string, List<string>>
-            {
-                { "Actions", new List<string> { "DocumentRejection" } }
-            };
+            var profiles = new List<string>();
 
-            _permissionRepositoryMock.Setup(repo => repo.FindUserPermissionsAsync(email))
-                .ReturnsAsync(permissions);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
-                .ReturnsAsync(card);
-            _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
-                .ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
-                .ReturnsAsync(status);
-            _userRepositoryMock.Setup(repo => repo.FindByEmailAsync(email))
-                .ReturnsAsync((User?)null);
+            _userRepositoryMock.Setup(repo => repo.FindUserProfilesByEmailAsync(email))
+                .ReturnsAsync(profiles);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() =>
                 _rejectionServices.CreateRejectionAsync(dto, email));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
-            Assert.Equal(UserLabel.NotFound, exception.LabelError);
+            Assert.Equal(UserLabel.UnauthorizedOperation, exception.LabelError);
         }
 
         [Fact(DisplayName = "CreateRejectionAsync should successfully create rejection")]
@@ -191,21 +161,17 @@ namespace WoopiAiHub.UnitTests.Services
             var step = CardFixture.FindValidStep();
             var status = CardFixture.FindValidStatus();
             var user = new User(Guid.NewGuid(), "Test User", email, true, DateTime.Now);
-            var permissions = new Dictionary<string, List<string>>
-            {
-                { "Actions", new List<string> { "DocumentRejection" } }
-            };
 
-            _permissionRepositoryMock.Setup(repo => repo.FindUserPermissionsAsync(email))
-                .ReturnsAsync(permissions);
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
             _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
             _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
                 .ReturnsAsync(status);
-            _userRepositoryMock.Setup(repo => repo.FindByEmailAsync(email))
-                .ReturnsAsync(user);
+            _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
+                .Returns(user.Id);
             _cardRepositoryMock.Setup(repo => repo.Update(card))
                 .Returns(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()))
@@ -240,8 +206,8 @@ namespace WoopiAiHub.UnitTests.Services
                 { "Actions", new List<string> { "DocumentRejection" } }
             };
 
-            _permissionRepositoryMock.Setup(repo => repo.FindUserPermissionsAsync(email))
-                .ReturnsAsync(permissions);
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
             _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
@@ -264,10 +230,6 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
         }
-
-        #endregion
-
-        #region FindRejectionsByCardIdAsync Tests
 
         [Fact(DisplayName = "FindRejectionsByCardIdAsync should return rejections for valid card ID")]
         [Trait("FindRejectionsByCardIdAsync", "Success")]
@@ -309,10 +271,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Empty(result);
             _rejectionRepositoryMock.Verify(repo => repo.FindByCardIdAsync(cardId), Times.Once);
         }
-
-        #endregion
-
-        #region FindWorkflowPreviousStepsAsync Tests
 
         [Fact(DisplayName = "FindWorkflowPreviousStepsAsync should throw exception when step not found")]
         [Trait("FindWorkflowPreviousStepsAsync", "Fail")]
@@ -416,7 +374,5 @@ namespace WoopiAiHub.UnitTests.Services
             _stepRepositoryMock.Verify(repo => repo.FindStepByCardId(cardId), Times.Once);
             _stepRepositoryMock.Verify(repo => repo.FindPreviousStepsByWorkflowIdAndOrder(workflowId, currentStep.Order), Times.Once);
         }
-
-        #endregion
     }
 }

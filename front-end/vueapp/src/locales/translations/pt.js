@@ -641,6 +641,7 @@ const portuguese = {
             workflowStepView: "Visualizar Etapas",
         },
         groups: {
+            actions: "Ações",
             dashboard: "Dashboard",
             documents: "Documentos",
             management: "Gestão",
@@ -655,6 +656,7 @@ const portuguese = {
             workflow: "Esteira de processamento",
             workflowmanagement: "Gestão de Esteira",
             workflowstep: "Etapa da esteira",
+
         },
     },
     plan: {
@@ -938,6 +940,7 @@ const portuguese = {
     unauthorized: {
         returnToHome: "Retornar",
         title: "Você não tem permissão para acessar esta tela.",
+        operation: "Você não tem permissão para realizar esta ação."
     },
     unexpectedError:
         "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",

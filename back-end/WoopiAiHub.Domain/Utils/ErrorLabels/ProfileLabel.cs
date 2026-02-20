@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.Utils.ErrorLabels
+namespace WoopiAiHub.Domain.Utils.ErrorLabels
 {
     public static class ProfileLabel
     {

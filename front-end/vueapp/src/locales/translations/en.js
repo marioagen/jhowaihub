@@ -632,6 +632,7 @@ const english = {
             workflowStepView: "View Steps",
         },
         groups: {
+            actions: "Actions",
             dashboard: "Dashboard",
             documents: "Documents",
             management: "Management",
@@ -930,6 +931,7 @@ const english = {
     unauthorized: {
         returnToHome: "Return",
         title: "You do not have permission to access this screen.",
+        operation: "You do not have permission to perform this action.",
     },
     unexpectedError: "An unexpected error occurred. Please contact the system administrator.",
     validation: {
