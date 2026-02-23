@@ -387,6 +387,8 @@ const portuguese = {
                 "Conector da esteira de processamento não respondeu. Verifique a URL e a chave da API da ferramenta",
             createNewPrompt: "Criar novo agente",
             dependenciesRequired: "Selecione ao menos uma dependência",
+            dependenciesInvalidOrRemoved:
+                "Uma ou mais dependências selecionadas são inválidas ou foram removidas do fluxo.",
             editFlowNodeFail: "Falha ao editar o nodo",
             editFlowNodeSuccess: "Nodo editado com sucesso",
             progressFlowFail: "Não foi possível inserir fluxo",
@@ -656,7 +658,6 @@ const portuguese = {
             workflow: "Esteira de processamento",
             workflowmanagement: "Gestão de Esteira",
             workflowstep: "Etapa da esteira",
-
         },
     },
     plan: {
@@ -940,7 +941,7 @@ const portuguese = {
     unauthorized: {
         returnToHome: "Retornar",
         title: "Você não tem permissão para acessar esta tela.",
-        operation: "Você não tem permissão para realizar esta ação."
+        operation: "Você não tem permissão para realizar esta ação.",
     },
     unexpectedError:
         "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
