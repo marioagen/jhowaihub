@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -55,7 +56,7 @@ namespace WoopiAiHub.Domain.Models
 
         public bool IsRejected()
         {
-            return StatusId == (int)CardStatus.Rejected;
+            return StatusId == this.Status?.Id && this.Status.Name == StatusNames.Rejected;
         }
     }
 }
