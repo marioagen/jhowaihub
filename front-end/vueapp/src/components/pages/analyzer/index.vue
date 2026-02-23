@@ -268,7 +268,6 @@ export default {
         closeRejectModal() {
         },
         handleRejectSuccess() {
-            this.alertToast(this.$t('analyze.rejection.success'), 'success');
             setTimeout(() => {
                 this.goBack();
             }, 2000);

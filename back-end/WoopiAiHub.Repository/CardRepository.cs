@@ -38,6 +38,19 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Returns a card by its ID with status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Card?> FindByIdWithStatus(int id)
+        {
+            return await _context.Cards
+                .Include(s => s.Status)
+                .Where(c => c.Id == id)
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
         /// Returns a card by its ID.
         /// </summary>
         /// <param name="id"></param>

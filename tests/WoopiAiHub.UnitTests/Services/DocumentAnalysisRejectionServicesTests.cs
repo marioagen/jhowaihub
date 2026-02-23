@@ -2,7 +2,6 @@ using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -22,7 +21,6 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IDocumentAnalysisRejectionRepository> _rejectionRepositoryMock;
         private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly Mock<IStepRepository> _stepRepositoryMock;
-        private readonly Mock<IPermissionRepository> _permissionRepositoryMock;
         private readonly Mock<ICardRepository> _cardRepositoryMock;
         private readonly Mock<IStatusRepository> _statusRepositoryMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
@@ -35,7 +33,6 @@ namespace WoopiAiHub.UnitTests.Services
             _rejectionRepositoryMock = _mocker.GetMock<IDocumentAnalysisRejectionRepository>();
             _userRepositoryMock = _mocker.GetMock<IUserRepository>();
             _stepRepositoryMock = _mocker.GetMock<IStepRepository>();
-            _permissionRepositoryMock = _mocker.GetMock<IPermissionRepository>();
             _cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             _statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
             _unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
@@ -121,7 +118,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
+            _statusRepositoryMock.Setup(repo => repo.FindByName(It.IsAny<string>()))
                 .ReturnsAsync((Status?)null);
 
             // Act & Assert
@@ -168,7 +165,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
+            _statusRepositoryMock.Setup(repo => repo.FindByName(It.IsAny<string>()))
                 .ReturnsAsync(status);
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(user.Id);
@@ -212,7 +209,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
-            _statusRepositoryMock.Setup(repo => repo.FindById((int)CardStatus.Rejected))
+            _statusRepositoryMock.Setup(repo => repo.FindByName(It.IsAny<string>()))
                 .ReturnsAsync(status);
             _userRepositoryMock.Setup(repo => repo.FindByEmailAsync(email))
                 .ReturnsAsync(user);
