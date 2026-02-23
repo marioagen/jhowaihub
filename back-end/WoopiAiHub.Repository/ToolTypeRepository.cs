@@ -24,11 +24,7 @@ namespace WoopiAiHub.Repository
             return await _context.ToolTypes
                 .AsNoTracking()
                 .Where(tt => tt.IsActive)
-                .Select(tt => new ToolTypeDto
-                {
-                    Id = tt.Id,
-                    Name = tt.Name,
-                })
+                .Select(tt => new ToolTypeDto { Id = tt.Id, Name = tt.Name, Description = tt.Description, })
                 .ToListAsync();
         }
 
@@ -42,12 +38,8 @@ namespace WoopiAiHub.Repository
         {
             return await _context.ToolTypes
                 .AsNoTracking()
-                .Where(tt =>  tt.IsActive && tt.Id == id)
-                .Select(tt => new ToolTypeDto
-                {
-                    Id = tt.Id,
-                    Name = tt.Name,
-                })
+                .Where(tt => tt.IsActive && tt.Id == id)
+                .Select(tt => new ToolTypeDto { Id = tt.Id, Name = tt.Name, Description = tt.Description, })
                 .FirstOrDefaultAsync();
         }
 

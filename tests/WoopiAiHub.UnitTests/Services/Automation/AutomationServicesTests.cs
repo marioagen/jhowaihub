@@ -380,7 +380,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
         {
             // Arrange
             var tool = ToolFixture.FindValidToolModel();
-            tool.ToolType = new ToolType(1, DateTime.Now, "tool", true);
+            tool.ToolType = new ToolType(1, DateTime.Now, "tool", "description", true);
 
             var _toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
@@ -398,7 +398,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var keyVaultValue = Guid.NewGuid().ToString();
             var tool = ToolFixture.FindValidToolModelWithEmptyConnector();
-            tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, true);
+            tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, "description", true);
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.BadRequest), string.Empty, new RefitSettings());
 
             var toolRepositoryMock = _mocker.GetMock<IToolRepository>();
@@ -432,7 +432,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var keyVaultValue = Guid.NewGuid().ToString();
             var tool = ToolFixture.FindValidToolModelWithEmptyConnector();
-            tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, true);
+            tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, "description", true);
 
             var webhookDataDtoList = AutomationFixture.FindValidWebhookDataDto();
             var responseContent = JsonConvert.SerializeObject(webhookDataDtoList);
@@ -485,7 +485,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var webhookInputDto = new WebhookInputDto { ToolId = 1, WorkflowId = Guid.NewGuid() };
             var tool = ToolFixture.FindValidToolModel();
-            tool.ToolType = new ToolType(1, DateTime.Now, string.Empty, true);
+            tool.ToolType = new ToolType(1, DateTime.Now, string.Empty, string.Empty, true);
 
             var toolRepositoryMock = _mocker.GetMock<IToolRepository>();
             toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(It.IsAny<int>()))
@@ -503,7 +503,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var webhookInputDto = new WebhookInputDto { ToolId = 1, WorkflowId = Guid.NewGuid() };
             var tool = ToolFixture.FindValidToolModel();
-            tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, true);
+            tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, string.Empty, true);
 
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.BadRequest), string.Empty, new RefitSettings());
 
@@ -531,7 +531,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Arrange
             var webhookInputDto = new WebhookInputDto { ToolId = 1, WorkflowId = Guid.NewGuid() };
             var tool = ToolFixture.FindValidToolModel();
-            tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, true);
+            tool.ToolType = new ToolType(1, DateTime.Now, ConnectorNames.N8N, string.Empty, true);
 
             var content = AutomationFixture.FindValidJson();
             var response = new ApiResponse<string>(new HttpResponseMessage(HttpStatusCode.OK), content, new RefitSettings());
@@ -585,7 +585,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
             stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync(stepTool);
 
-            cardRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(card);
+            cardRepositoryMock.Setup(r => r.FindByIdWithStepAndProfile(It.IsAny<int>())).ReturnsAsync(card);
             stepRepositoryMock.Setup(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId)).ReturnsAsync(nextStep);
             cardRepositoryMock.Setup(r => r.Update(It.IsAny<Domain.Models.Card>())).Returns(true);
             hubNotifierMock.Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>())).Returns(Task.CompletedTask);
@@ -595,7 +595,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);           
-            cardRepositoryMock.Verify(r => r.FindById(It.IsAny<int>()), Times.Once);
+            cardRepositoryMock.Verify(r => r.FindByIdWithStepAndProfile(It.IsAny<int>()), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId), Times.Once);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Once);
             hubNotifierMock.Verify(h => h.CardProgessAsync(automationDto.Email, automationDto.CardId, 100.0, nextStep.Id, It.IsAny<string>()), Times.Once);
@@ -623,7 +623,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
             stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync((StepTool?)null);
            
-            cardRepositoryMock.Setup(r => r.FindById(automationDto.CardId)).ReturnsAsync(card);
+            cardRepositoryMock.Setup(r => r.FindByIdWithStepAndProfile(automationDto.CardId)).ReturnsAsync(card);
 
             // Act
             await _service.ContinueExecution(automationDto);
@@ -631,7 +631,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Assert
             stepToolRepositoryMock.Verify(r => r.FindDependentAsync(It.IsAny<int>()), Times.Once);
             
-            cardRepositoryMock.Verify(r => r.FindById(automationDto.CardId), Times.Once);
+            cardRepositoryMock.Verify(r => r.FindByIdWithStepAndProfile(automationDto.CardId), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Never);
         }

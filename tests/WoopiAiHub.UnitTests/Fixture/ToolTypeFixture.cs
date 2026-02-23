@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
 using Xunit;
@@ -25,6 +25,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 DateTime.UtcNow,
                 string.Empty,
+                string.Empty,
                 true
             );
         }
@@ -44,6 +45,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 DateTime.UtcNow,
                 _faker.Name.FullName(),
+                _faker.Name.FullName(),
                 true
             );
         }
@@ -55,6 +57,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 1000),
                 DateTime.UtcNow,
                name,
+               _faker.Name.FullName(),
                 true
             );
         }

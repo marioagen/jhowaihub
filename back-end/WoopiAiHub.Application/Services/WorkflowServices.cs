@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -10,7 +11,6 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -26,20 +26,24 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IValidateStep _validateStep;
         private readonly IToolRepository _toolRepository;
+        private readonly IStepToolRepository _stepToolRepository;
+        private readonly IEncryptionService _encryptationService;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
 
         public WorkflowServices(
-            IWorkflowRepository workflowRepository, 
+            IWorkflowRepository workflowRepository,
             IProfileRepository profileRepository,
-            ITeamRepository teamRepository, 
+            ITeamRepository teamRepository,
             IStatusRepository statusRepository,
             IStepRepository stepRepository,
+            IStepToolRepository stepToolRepository,
             IStepToolDependencyRepository stepToolDependencyRepository,
-            IStepToolOutputRepository stepToolOutputRepository, 
+            IStepToolOutputRepository stepToolOutputRepository,
             IUnitOfWork unitOfWork,
             IToolRepository toolRepository,
             IValidateStep validateStep,
+            IEncryptionService encryptationService,
             ILogger<WorkflowServices> logger 
         )
         {
@@ -47,12 +51,14 @@ namespace WoopiAiHub.Application.Services
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
+            _stepToolRepository = stepToolRepository;
             _stepToolDependencyRepository = stepToolDependencyRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
             _unitOfWork = unitOfWork;
             _validateStep = validateStep;
             _teamRepository = teamRepository;
             _toolRepository = toolRepository;
+            _encryptationService = encryptationService;
             _logger = logger;
         }
 
@@ -195,7 +201,7 @@ namespace WoopiAiHub.Application.Services
         /// cref="StepTool.Parameters"/> collection.</remarks>
         /// <param name="stepToolDto">The data transfer object containing the update information for the <see cref="StepTool"/>.</param>
         /// <returns>A new <see cref="StepTool"/> instance initialized with the specified update data.</returns>
-        private static StepTool CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
+        private async Task<StepTool> CreateStepToolUpdate(StepToolUpdateDto stepToolDto)
         {
             var stepTool = new StepTool(
                 0,
@@ -207,15 +213,104 @@ namespace WoopiAiHub.Application.Services
                 stepToolDto.PositionY
             );
 
-            foreach (var parameter in stepToolDto.Parameters)
+            var tool = await _toolRepository.FindModelByIdAsync(stepToolDto.ToolId)  ?? throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
+            if (tool.ToolType?.Name == HandlersTypes.API)
             {
-                var requiredFile = parameter.RequiredFile ?? false;
-                stepTool.Parameters.Add(
-                    new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId,
-                        parameter.Value));
+                foreach (var parameter in stepToolDto.Parameters)
+                {
+                    if (string.IsNullOrEmpty(parameter.Value))
+                    {
+                        continue;
+                    }
+
+                    var requiredFile = parameter.RequiredFile ?? false;
+                    string paramValue = parameter.Value;
+
+                    paramValue = NormalizeBodyToString(paramValue);
+
+                    if (!_encryptationService.IsEncrypted(paramValue))
+                    {
+                        paramValue = _encryptationService.Encrypt(paramValue);
+                    }
+
+                    stepTool.Parameters.Add(
+                        new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId, paramValue));
+                }
+            }
+            else
+            {
+                foreach (var parameter in stepToolDto.Parameters)
+                {
+                    var requiredFile = parameter.RequiredFile ?? false;
+                    stepTool.Parameters.Add(
+                        new StepToolParameter(0, DateTime.Now, 0, requiredFile, parameter.WebhookId,
+                            parameter.Value));
+                }
             }
 
             return stepTool;
+        }
+
+        /// <summary>
+        /// Normalizes the body property in an API request JSON to ensure it is stored as a string.
+        /// If the body is a JSON object, it will be serialized to a JSON string.
+        /// </summary>
+        /// <param name="jsonValue">The JSON string containing the API request configuration.</param>
+        /// <returns>The normalized JSON string with the body as a string value.</returns>
+        private static string NormalizeBodyToString(string jsonValue)
+        {
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+
+                using var document = JsonDocument.Parse(jsonValue);
+                var root = document.RootElement;
+
+                if (!root.TryGetProperty("body", out var bodyProperty))
+                {
+                    return jsonValue;
+                }
+
+                if (bodyProperty.ValueKind == JsonValueKind.String)
+                {
+                    return jsonValue;
+                }
+
+                using var stream = new MemoryStream();
+                using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions 
+                { 
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping 
+                });
+
+                writer.WriteStartObject();
+
+                foreach (var property in root.EnumerateObject())
+                {
+                    writer.WritePropertyName(property.Name);
+
+                    if (property.Name.Equals("body", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var bodyJson = JsonSerializer.Serialize(property.Value, options);
+                        writer.WriteStringValue(bodyJson);
+                    }
+                    else
+                    {
+                        property.Value.WriteTo(writer);
+                    }
+                }
+
+                writer.WriteEndObject();
+                writer.Flush();
+
+                return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+            }
+            catch
+            {
+                return jsonValue;
+            }
         }
 
         /// <summary>
@@ -496,6 +591,19 @@ namespace WoopiAiHub.Application.Services
         public StepDto FindStepById(int id)
         {
             var step = _workflowRepository.FindStepById(id);
+
+            var apiTools = step.StepTools.Where(w => w.Tool?.ToolType == HandlersTypes.API).ToList();
+            if (apiTools is not null && apiTools.Count > 0)
+            {
+                foreach(var apiTool in apiTools)
+                {
+                    foreach(var apiToolParam in apiTool.Parameters)
+                    {
+                        apiToolParam.Value = _encryptationService.Decrypt(apiToolParam.Value);
+                    }
+                }
+            }
+
             return step;
         }
 
@@ -702,7 +810,7 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var stepToolDto in stepDto.StepTools.OrderBy(st => st.Order))
                 {
-                    var stepTool = CreateAndConfigureStepTool(
+                    var stepTool = await CreateAndConfigureStepTool(
                         stepToolDto,
                         existingStep,
                         previousStepToolInStep,
@@ -788,13 +896,13 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Creates and configures a step tool with its dependencies.
         /// </summary>
-        private StepTool CreateAndConfigureStepTool(
+        private async Task<StepTool> CreateAndConfigureStepTool(
             StepToolUpdateDto stepToolDto,
             Step step,
             StepTool? previousStepToolInStep,
             StepTool? lastGlobalStepTool)
         {
-            var stepTool = CreateStepToolUpdate(stepToolDto);
+            var stepTool = await CreateStepToolUpdate(stepToolDto);
             stepTool.Step = step;
             stepTool.DependsOnStepTool = previousStepToolInStep ?? lastGlobalStepTool;
             return stepTool;
@@ -808,15 +916,12 @@ namespace WoopiAiHub.Application.Services
         {
             await _stepToolDependencyRepository.DeleteByStepToolIdAsync([stepTool.Id]);
 
-            var tool = await _toolRepository.FindModelByIdAsync(stepTool.ToolId);
-            if (tool == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
-            }
+            var tool = await _toolRepository.FindModelByIdAsync(stepTool.ToolId) ?? throw new AppException(ErrorCode.NotFound, "Tool not found", ToolLabel.NotFound);
 
             var createdDependencies = await FindStepToolDependencies(workflow, stepTool, stepToolDto);
 
             await ValidatePromptTool(tool, createdDependencies, stepToolDto);
+            await ValidateQuizTool(tool, createdDependencies, stepToolDto);
         }
 
         /// <summary>
@@ -888,6 +993,34 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Validates that a Prompt tool has at least one OCR dependency (direct or recursive).
+        /// </summary>
+        /// <param name="tool"></param>
+        /// <param name="createdDependencies"></param>
+        /// <param name="stepToolDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private async Task ValidateQuizTool(Tool tool, List<StepTool> createdDependencies, StepToolUpdateDto stepToolDto)
+        {
+            if (tool.ToolType?.Name != HandlersTypes.Quiz)
+            {
+                return;
+            }
+
+            if (stepToolDto.Dependencies == null || stepToolDto.Dependencies.Count == 0 || createdDependencies.Count == 0)
+            {
+                throw new AppException(ErrorCode.RequiredField, "Quiz tool must have at least one dependency", ToolLabel.DependecyRequired);
+            }
+
+            var toolCache = new Dictionary<int, Tool> { { tool.Id, tool } };
+            var hasEmbeddingDependency = await HasEmbeddingDependency(createdDependencies, toolCache);
+            if (!hasEmbeddingDependency)
+            {
+                throw new AppException(ErrorCode.RequiredField, "Quiz tool must have at least one Embedding dependency", ToolLabel.EmbeddingDependencyRequired);
+            }
+        }
+
+        /// <summary>
         /// Determines whether any of the specified dependencies require an OCR tool.
         /// </summary>
         /// <remarks>This method checks each dependency to determine if it is associated with a tool of
@@ -921,6 +1054,39 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Determines whether any of the specified dependencies require an Embedding tool.
+        /// </summary>
+        /// <remarks>This method checks each dependency to determine if it is associated with a tool of
+        /// type Embedding. The <paramref name="toolCache"/> is used to avoid redundant lookups and may be populated with
+        /// additional tools as needed.</remarks>
+        /// <param name="dependencies">A list of <see cref="StepTool"/> objects representing the tool dependencies to check.</param>
+        /// <param name="toolCache">A dictionary that maps tool IDs to <see cref="Tool"/> instances, used to cache tool lookups and improve
+        /// performance. May be updated with additional entries during execution.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if at least one
+        /// dependency requires an embedding tool; otherwise, <see langword="false"/>.</returns>
+        private async Task<bool> HasEmbeddingDependency(List<StepTool> dependencies, Dictionary<int, Tool> toolCache)
+        {
+            foreach (var dependency in dependencies)
+            {
+                if (!toolCache.TryGetValue(dependency.ToolId, out var dependencyTool))
+                {
+                    dependencyTool = await _toolRepository.FindModelByIdAsync(dependency.ToolId);
+                    if (dependencyTool != null)
+                    {
+                        toolCache[dependency.ToolId] = dependencyTool;
+                    }
+                }
+
+                if (dependencyTool?.ToolType?.Name == HandlersTypes.Embeddings  )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Find steps by workflow id.
         /// </summary>
         /// <param name="id"></param>
@@ -940,6 +1106,204 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
             return workflow;
+        }
+
+        /// <summary>
+        /// Creates a deep copy of an existing workflow with a new name.
+        /// Copies steps, step tools, parameters, dependencies and team associations.
+        /// Does not copy documents. The source workflow is not modified.
+        /// </summary>
+        public async Task<int> CloneAsync(WorkflowCloneRequestDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.NewName))
+            {
+                throw new AppException(ErrorCode.RequiredField, "Workflow name is required", WorkflowLabel.InvalidName);
+            }
+
+            var source = await _workflowRepository.FindByIdForClone(dto.SourceWorkflowId);
+            if (source == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+
+            var teamIds = source.Teams.Select(t => t.Id).ToList();
+            var teamsList = _teamRepository.FindByIds(teamIds);
+            if (teamsList.Count != teamIds.Count)
+            {
+                throw new AppException(ErrorCode.NotFound, "One or more teams not found", TeamLabel.NotFound);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var newWorkflow = new Workflow(0, DateTime.UtcNow, teamsList, dto.NewName);
+                await _workflowRepository.Create(newWorkflow);
+
+                var sourceStepsOrdered = source.Steps.OrderBy(s => s.Order).ToList();
+                AddClonedSteps(newWorkflow, sourceStepsOrdered);
+                await _workflowRepository.Update(newWorkflow);
+
+                var (newStepToolsList, sourceStepToolsList) = AddClonedStepTools(newWorkflow, sourceStepsOrdered);
+                await _stepToolRepository.CreateRangeAsync(newStepToolsList);
+
+                ApplyClonedDependencies(newStepToolsList, sourceStepToolsList);
+                await _unitOfWork.SaveChangesAsync();
+
+                await CreateClonedStepToolDependencies(newStepToolsList, sourceStepToolsList);
+
+                _unitOfWork.Commit();
+                return newWorkflow.Id;
+            }
+            catch
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Adds cloned steps to the new workflow.
+        /// </summary>
+        /// <param name="newWorkflow">The new workflow instance.</param>
+        /// <param name="sourceStepsOrdered">The ordered list of steps from the source workflow.</param>
+        private static void AddClonedSteps(Workflow newWorkflow, List<Step> sourceStepsOrdered)
+        {
+            foreach (var sourceStep in sourceStepsOrdered)
+            {
+                var newStep = new Step(
+                    0,
+                    DateTime.UtcNow,
+                    newWorkflow.Id,
+                    sourceStep.Name,
+                    sourceStep.Order,
+                    sourceStep.ProfileId,
+                    sourceStep.StatusId);
+                newWorkflow.AddStep(newStep);
+            }
+        }
+
+        /// <summary>
+        /// Adds cloned step tools to the new workflow steps.
+        /// </summary>
+        /// <param name="newWorkflow">The new workflow instance.</param>
+        /// <param name="sourceStepsOrdered">The ordered list of steps from the source workflow.</param>
+        /// <returns>A tuple containing lists of new and source step tools for dependency mapping.</returns>
+        private static (List<StepTool> NewStepTools, List<StepTool> SourceStepTools) AddClonedStepTools(
+            Workflow newWorkflow,
+            List<Step> sourceStepsOrdered)
+        {
+            var newStepsOrdered = newWorkflow.Steps.OrderBy(s => s.Order).ToList();
+            var newStepToolsList = new List<StepTool>();
+            var sourceStepToolsList = new List<StepTool>();
+
+            for (var i = 0; i < sourceStepsOrdered.Count; i++)
+            {
+                var sourceStep = sourceStepsOrdered[i];
+                var newStep = newStepsOrdered[i];
+
+                foreach (var sourceStepTool in sourceStep.StepTools.OrderBy(st => st.Order))
+                {
+                    var newStepTool = CreateClonedStepTool(newStep.Id, sourceStepTool);
+                    newStep.AddStepTool(newStepTool);
+                    newStepToolsList.Add(newStepTool);
+                    sourceStepToolsList.Add(sourceStepTool);
+                }
+            }
+
+            return (newStepToolsList, sourceStepToolsList);
+        }
+
+        /// <summary>
+        /// Creates a deep copy of a step tool including its parameters.
+        /// </summary>
+        /// <param name="newStepId">The ID of the new step.</param>
+        /// <param name="sourceStepTool">The source step tool to clone.</param>
+        /// <returns>The new cloned StepTool instance.</returns>
+        private static StepTool CreateClonedStepTool(int newStepId, StepTool sourceStepTool)
+        {
+            var newStepTool = new StepTool(
+                0,
+                DateTime.UtcNow,
+                newStepId,
+                sourceStepTool.ToolId,
+                sourceStepTool.Order,
+                sourceStepTool.PositionX,
+                sourceStepTool.PositionY);
+
+            foreach (var param in sourceStepTool.Parameters)
+            {
+                var newParam = new StepToolParameter(
+                    0,
+                    DateTime.UtcNow,
+                    0,
+                    param.RequiredFile,
+                    param.WebhookId,
+                    param.Value);
+                newStepTool.Parameters.Add(newParam);
+            }
+
+            return newStepTool;
+        }
+
+        /// <summary>
+        /// Updates the in-memory dependencies (linked list) for the cloned step tools.
+        /// </summary>
+        /// <param name="newStepToolsList">List of new step tools.</param>
+        /// <param name="sourceStepToolsList">List of source step tools corresponding directly to the new list.</param>
+        private void ApplyClonedDependencies(List<StepTool> newStepToolsList, List<StepTool> sourceStepToolsList)
+        {
+            var sourceIdToIndex = new Dictionary<int, int>();
+            for (var i = 0; i < sourceStepToolsList.Count; i++)
+            {
+                sourceIdToIndex[sourceStepToolsList[i].Id] = i;
+            }
+
+            for (var i = 0; i < sourceStepToolsList.Count; i++)
+            {
+                var sourceStepTool = sourceStepToolsList[i];
+                var newStepTool = newStepToolsList[i];
+
+                if (sourceStepTool.DependsOnStepToolId is { } dependsOnId &&
+                    sourceIdToIndex.TryGetValue(dependsOnId, out var depIndex))
+                {
+                    newStepTool.UpdateDependencyStepTool(newStepToolsList[depIndex]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates the database dependency records (StepToolDependency) for the cloned step tools.
+        /// </summary>
+        /// <param name="newStepToolsList">List of new step tools.</param>
+        /// <param name="sourceStepToolsList">List of source step tools corresponding directly to the new list.</param>
+        private async Task CreateClonedStepToolDependencies(
+            List<StepTool> newStepToolsList,
+            List<StepTool> sourceStepToolsList)
+        {
+            var sourceIdToIndex = new Dictionary<int, int>();
+            for (var i = 0; i < sourceStepToolsList.Count; i++)
+            {
+                sourceIdToIndex[sourceStepToolsList[i].Id] = i;
+            }
+
+            for (var i = 0; i < sourceStepToolsList.Count; i++)
+            {
+                var sourceStepTool = sourceStepToolsList[i];
+                var newStepTool = newStepToolsList[i];
+
+                foreach (var dep in sourceStepTool.Dependencies)
+                {
+                    if (sourceIdToIndex.TryGetValue(dep.DependsOnStepToolId, out var depIndex))
+                    {
+                        var newDependency = new StepToolDependency(
+                            0,
+                            DateTime.UtcNow,
+                            newStepTool.Id,
+                            newStepToolsList[depIndex].Id);
+                        await _stepToolDependencyRepository.CreateAsync(newDependency);
+                    }
+                }
+            }
         }
     }
 }

@@ -6,7 +6,6 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -113,6 +112,16 @@ namespace WoopiAiHub.Application.Services
         public async Task<ICollection<TeamDto>> FindAll()
         {
             return await _teamRepository.FindAll().ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves a simple list of all teams containing only Id and Name.
+        /// Optimized for performance when full team data is not needed (e.g., workflow wizard).
+        /// </summary>
+        /// <returns>A collection of TeamSimpleDto</returns>
+        public async Task<ICollection<TeamSimpleDto>> FindAllSimple()
+        {
+            return await _teamRepository.FindAllSimple();
         }
 
         /// <summary>

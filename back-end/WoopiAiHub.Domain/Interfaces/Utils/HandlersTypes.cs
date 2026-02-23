@@ -5,4 +5,6 @@ public static class HandlersTypes
     public const string Embeddings = "Embeddings";
     public const string Prompt = "Prompt";
     public const string N8N = "N8N";
+    public const string API = "API";
+    public const string Quiz = "Quiz";
 }

@@ -13,6 +13,18 @@ export default {
                 };
             });
     },
+    updateStatusOnly(params) {
+        return api
+            .put(`/Card/UpdateStatus`, params)
+            .then((result) => {
+                return result.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
     assignUser(params) {
         return api
             .put(`/Card/AssignUser`, params)
@@ -60,5 +72,5 @@ export default {
                     error: error,
                 };
             });
-    }
+    },
 };

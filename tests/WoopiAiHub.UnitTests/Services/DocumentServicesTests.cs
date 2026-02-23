@@ -657,7 +657,7 @@ namespace WoopiAiHub.UnitTests.Services
             var document = new Document("Test Document", "Description", referenceFile, 
                 DocumentStatus.OCR, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
 
-            var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, true);
+            var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, string.Empty, true);
             var tool = new Tool(1, DateTime.UtcNow, "OCR Tool", true, 1, 1, 1, false, null, null);
             typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
 
@@ -758,6 +758,75 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(referenceFile, result.ReferenceFile);
             documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
             cardRepositoryMock.Verify(r => r.FindByDocumentIdCardAsync(documentId), Times.Once);
+        }
+
+        
+        [Fact(DisplayName = "InputToolQuestionnaire should successfully process the document questionnaire and return the data")]
+        [Trait("InputToolQuestionnaire", "Success")]
+        public async Task InputToolQuestionnaire_Success()
+        {
+            // Arrange
+            var documentEmbeddingsQueryResponseDto = DocumentFixture.FindValidDocumentEmbeddingsQueryResponseDto();
+            var ProcessOcrDataAutomationDto = DocumentFixture.FindValidProcessOcrDataAutomationDto();
+            var document = DocumentFixture.FindValidDocument();
+            var tenant = _fixture.FindValidTenantInfoDto();
+            var execution = DocumentFixture.FindValidStepToolExecution();
+            var stepTool =  WorkflowFixture.FindValidStepTool();
+
+            var configurationMock = new Mock<IConfiguration>();
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            // var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
+            documentRepositoryMock.Setup(r => r.FindByReferenceFile(documentEmbeddingsQueryResponseDto.ReferenceFile)).Returns(document);
+
+            
+            var dataDto = System.Text.Json.JsonSerializer.Deserialize<MetaDataAutomationDto>(documentEmbeddingsQueryResponseDto.Data.ToString());
+            
+            stepToolExecutionRepositoryMock.Setup(e => e.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(execution);
+            // tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
+            //                    .ReturnsAsync(tenant);
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+            stepToolRepositoryMock.Setup(s=> s.FindDependentAsync(execution.StepTool!.StepId)).ReturnsAsync(stepTool);
+
+            // Act
+            var result = await documentServices.InputToolQuestionnaire(documentEmbeddingsQueryResponseDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(document.Id, result.Id);
+
+            documentRepositoryMock.Verify(r => r.FindByReferenceFile(documentEmbeddingsQueryResponseDto.ReferenceFile), Times.Once);
+            // tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
+        }
+
+        [Fact(DisplayName = "InputToolQuestionnaire should not be successfully process the document questionnaire and return null")]
+        [Trait("InputToolQuestionnaire", "Fail")]
+        public async Task InputToolQuestionnaire_Fail()
+        {
+            // Arrange
+            var documentEmbeddingsQueryResponseDto = DocumentFixture.FindValidDocumentEmbeddingsQueryResponseDto();
+            var ProcessOcrDataAutomationDto = DocumentFixture.FindValidProcessOcrDataAutomationDto();
+            var document = null as Document;
+            var tenant = _fixture.FindValidTenantInfoDto();
+            var execution = DocumentFixture.FindValidStepToolExecution();
+            var stepTool =  WorkflowFixture.FindValidStepTool();
+
+            var configurationMock = new Mock<IConfiguration>();
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            // var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
+            documentRepositoryMock.Setup(r => r.FindByReferenceFile(documentEmbeddingsQueryResponseDto.ReferenceFile)).Returns(document);
+
+            
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            var result = await documentServices.InputToolQuestionnaire(documentEmbeddingsQueryResponseDto);
+
+            // Assert
+            Assert.Null(result);
         }
     }
 }

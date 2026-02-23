@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -164,6 +164,115 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.False(result);
             documentHistoryRepository.Verify(a => a.Delete(It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "Test FindByIdWithTake returns mapped DTOs")]
+        [Trait("FindByIdWithTake", "Success")]
+        public void FindByIdWithTake_ReturnsMappedDtos_Success()
+        {
+            // Arrange
+            var idDocument = 42;
+            var take = 10;
+            var created = new DateTime(2025, 1, 15, 10, 0, 0, DateTimeKind.Utc);
+            var historyList = new List<DocumentHistory>
+            {
+                new DocumentHistory(idDocument, "input1", "output1", 1, created, 1, null)
+            };
+            var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
+            documentHistoryRepository
+                .Setup(a => a.FindByIdWithTake(idDocument, take, null, null, null, null))
+                .Returns(historyList);
+
+            // Act
+            var result = _documentHistoryServices.FindByIdWithTake(idDocument, take).ToList();
+
+            // Assert
+            Assert.Single(result);
+            var dto = result[0];
+            Assert.Equal(1, dto.Id);
+            Assert.Equal(idDocument, dto.IdDocument);
+            Assert.Equal("input1", dto.Input);
+            Assert.Equal("output1", dto.Output);
+            Assert.False(dto.IsEdited);
+            Assert.Equal(1, dto.Type);
+            Assert.Null(dto.UserId);
+            Assert.Null(dto.UserName);
+            Assert.Equal(created, dto.Created);
+            documentHistoryRepository.Verify(
+                a => a.FindByIdWithTake(idDocument, take, null, null, null, null),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "Test FindByIdWithTake returns empty when no entries")]
+        [Trait("FindByIdWithTake", "Empty")]
+        public void FindByIdWithTake_ReturnsEmpty_WhenNoEntries()
+        {
+            // Arrange
+            var idDocument = 99;
+            var take = 20;
+            var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
+            documentHistoryRepository
+                .Setup(a => a.FindByIdWithTake(idDocument, take, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Guid?>()))
+                .Returns(Array.Empty<DocumentHistory>());
+
+            // Act
+            var result = _documentHistoryServices.FindByIdWithTake(idDocument, take, "search", "desc", "created", Guid.NewGuid()).ToList();
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        [Fact(DisplayName = "Test FindByIdWithTake passes all parameters to repository")]
+        [Trait("FindByIdWithTake", "Parameters")]
+        public void FindByIdWithTake_PassesParametersToRepository()
+        {
+            // Arrange
+            var idDocument = 5;
+            var take = 15;
+            var search = "filter text";
+            var order = "asc";
+            var orderBy = "created";
+            var userId = Guid.NewGuid();
+            var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
+            documentHistoryRepository
+                .Setup(a => a.FindByIdWithTake(idDocument, take, search, order, orderBy, userId))
+                .Returns(new List<DocumentHistory>());
+
+            // Act
+            _ = _documentHistoryServices.FindByIdWithTake(idDocument, take, search, order, orderBy, userId).ToList();
+
+            // Assert
+            documentHistoryRepository.Verify(
+                a => a.FindByIdWithTake(idDocument, take, search, order, orderBy, userId),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "Test FindByIdWithTake maps UserName when User is included")]
+        [Trait("FindByIdWithTake", "UserName")]
+        public void FindByIdWithTake_MapsUserName_WhenUserIsIncluded()
+        {
+            // Arrange
+            var idDocument = 7;
+            var take = 10;
+            var user = new User(Guid.NewGuid(), "Alice Smith", "alice@example.com", true, DateTime.UtcNow);
+            var created = DateTime.UtcNow.AddDays(-1);
+            var history = new DocumentHistory(idDocument, "q", "a", 100, created, 1, user.Id)
+            {
+                User = user
+            };
+            var historyList = new List<DocumentHistory> { history };
+            var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
+            documentHistoryRepository
+                .Setup(a => a.FindByIdWithTake(idDocument, take, null, null, null, null))
+                .Returns(historyList);
+
+            // Act
+            var result = _documentHistoryServices.FindByIdWithTake(idDocument, take).ToList();
+
+            // Assert
+            Assert.Single(result);
+            Assert.Equal("Alice Smith", result[0].UserName);
+            Assert.Equal(user.Id, result[0].UserId);
         }
     }
 }

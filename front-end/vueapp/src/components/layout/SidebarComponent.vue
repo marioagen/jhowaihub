@@ -1,23 +1,13 @@
 <template>
-    <aside
-        class="sidebar d-flex flex-column flex-shrink-0 background-white text-black"
-    >
+    <aside class="sidebar d-flex flex-column flex-shrink-0 background-white text-black">
         <div
             class="sidebar-header d-flex align-items-center"
-            :class="
-                isCollapsed
-                    ? 'justify-content-center'
-                    : 'justify-content-start'
-            "
+            :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'"
             style="height: 60px; padding: 0 10px"
         >
             <router-link
                 class="d-flex align-items-center text-decoration-none"
-                :class="
-                    isCollapsed
-                        ? 'justify-content-center'
-                        : 'w-100'
-                "
+                :class="isCollapsed ? 'justify-content-center' : 'w-100'"
                 :to="{ name: 'Home' }"
             >
                 <img
@@ -58,24 +48,21 @@
             </button>
         </div>
         <div class="sidebar-horizontal-separator"></div>
-        <ul
-            class="btn-toggle-nav list-unstyled fw-normal pb-1 small"
-        >
+        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li
-                v-for="item in filteredMenuItems"
+                v-for="(item, index) in filteredMenuItems"
                 :key="item.labelKey"
-                class="mb-1"
+                class="mb-1 sidebar-menu-item-enter"
                 :class="{
                     'is-active': isRouteActive(item),
                 }"
+                :style="{ '--item-index': index }"
             >
                 <router-link
                     :class="[
                         'd-flex align-items-center custom-menu-item link-dark rounded',
                         isRouteActive(item) ? 'active' : '',
-                        isCollapsed
-                            ? 'justify-content-center'
-                            : '',
+                        isCollapsed ? 'justify-content-center' : '',
                     ]"
                     :to="item.to"
                 >
@@ -128,8 +115,8 @@
                         activeKey: "Dashboard",
                         to: "/dashboard",
                         icon: {
-                            name: "LayoutGrid",
-                            color: "#f43f5e",
+                            name: "ChartColumn",
+                            color: "#40b04d",
                         },
                         labelKey: "pages.dashboard",
                     },
@@ -144,35 +131,14 @@
                         labelKey: "pages.management",
                     },
                     {
-                        permission: "Documents",
-                        activeKey: "DocumentList",
-                        to: "/documents",
+                        permission: "Prompts",
+                        activeKey: "Prompts",
+                        to: "/prompts",
                         icon: {
-                            name: "FileText",
-                            color: "#2f80ed",
+                            name: "Braces",
+                            color: "#8e51ff",
                         },
-                        labelKey: "pages.documents",
-                    },
-                    {
-                        permission: "Workflow",
-                        activeKey: "Workflow",
-                        to: "/workflow",
-                        icon: {
-                            name: "Workflow",
-                            color: "#615FFF",
-                        },
-                        labelKey: "pages.workflows",
-                    },
-                    {
-                        permission: "WorkflowManagement",
-                        activeKey: "WorkflowManagement",
-                        to: "/workflow/management",
-                        icon: {
-                            name: "Workflow",
-                            color: "#00bba7",
-                        },
-                        labelKey:
-                            "pages.workflowManagement",
+                        labelKey: "pages.prompts",
                     },
                     {
                         permission: "Quizzes",
@@ -185,6 +151,26 @@
                         labelKey: "pages.quizzes",
                     },
                     {
+                        permission: "WorkflowManagement",
+                        activeKey: "WorkflowManagement",
+                        to: "/workflow/management",
+                        icon: {
+                            name: "Workflow",
+                            color: "#00bba7",
+                        },
+                        labelKey: "pages.workflowManagement",
+                    },
+                    {
+                        permission: "Workflow",
+                        activeKey: "Workflow",
+                        to: "/workflow",
+                        icon: {
+                            name: "Workflow",
+                            color: "#615FFF",
+                        },
+                        labelKey: "pages.workflows",
+                    },
+                    {
                         permission: "Tools",
                         activeKey: "Tools",
                         to: "/tools",
@@ -195,14 +181,14 @@
                         labelKey: "pages.tools",
                     },
                     {
-                        permission: "Prompts",
-                        activeKey: "Prompts",
-                        to: "/prompts",
+                        permission: "Templates",
+                        activeKey: "Templates",
+                        to: "/templates",
                         icon: {
-                            name: "Braces",
-                            color: "#8e51ff",
+                            name: "Zap",
+                            color: "#2f80ed",
                         },
-                        labelKey: "pages.prompts",
+                        labelKey: "pages.templates",
                     },
                 ],
             };
@@ -213,10 +199,7 @@
                     if (!item.permission) {
                         return true;
                     }
-                    return hasPermission(
-                        item.permission,
-                        "View"
-                    );
+                    return hasPermission(item.permission, "View");
                 });
             },
         },
@@ -402,5 +385,23 @@
 
     .custom-menu-item:not(.active) {
         opacity: 0.8;
+    }
+
+    .sidebar-menu-item-enter {
+        opacity: 0;
+        transform: translateX(-12px);
+        animation: sidebar-item-enter 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        animation-delay: calc(var(--item-index) * 45ms);
+    }
+
+    @keyframes sidebar-item-enter {
+        from {
+            opacity: 0;
+            transform: translateX(-12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
 </style>

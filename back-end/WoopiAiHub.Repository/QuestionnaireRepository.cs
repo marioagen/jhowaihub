@@ -4,6 +4,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Repository
 {
@@ -136,8 +137,9 @@ namespace WoopiAiHub.Repository
         public bool DeleteByIds(List<int> ids)
         {
             var questionnaires = _context.Questionnaires.Where(a => ids.Contains(a.Id));
+            var validationQuestionnaireUsedInTools = VerifyIfQuestionnaireIsUsedInTheWorkflowTools(ids);
 
-            if (questionnaires.Count() > 0)
+            if (questionnaires.Any() && !validationQuestionnaireUsedInTools)
             {
                 _context.Questionnaires.RemoveRange(questionnaires);
                 _context.SaveChanges();
@@ -147,6 +149,23 @@ namespace WoopiAiHub.Repository
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Verify if the questionnaire is being used in the workflow tools, if it is being used, it cannot be deleted
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        private bool VerifyIfQuestionnaireIsUsedInTheWorkflowTools(List<int> ids)
+        {
+            var toolTypeId = _context.ToolTypes.Where(tt => tt.Name == HandlersTypes.Quiz).Select(tt => tt.Id).FirstOrDefault();
+            var idsString = ids.Select(i => i.ToString());
+            return  _context.StepTools
+                        .Any(st =>
+                            st.Tool != null &&
+                            st.Tool.ToolType != null &&
+                            st.Tool.ToolType.Id == toolTypeId &&
+                            st.Parameters.Any(p => idsString.Contains(p.Value)));
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -33,24 +34,100 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindById(int id)
         {
             return await _context.Cards.Where(c => c.Id == id)
-                                .Include(d => d.Document)
-                                .Include(s => s.Step)
-                                    .ThenInclude(p => p!.Profile)
-                                .Include(s => s.Step)
-                                    .ThenInclude(w => w!.Workflow)
-                                    .ThenInclude(w => w!.Teams)
-                                    .ThenInclude(w => w!.Users)
-                                    .Include(s => s.Step)
-                                    .ThenInclude(w => w!.Workflow)
-                                        .ThenInclude(ws => ws!.Steps)
-                                            .ThenInclude(st => st.StepTools)
-                                                .ThenInclude(t => t.Tool)
-                                                    .ThenInclude(tt => tt!.ToolType)
-                                 .Include(c => c.Outputs)
-                                    .ThenInclude(o => o.StepTool)
-                                        .ThenInclude(st => st!.Tool)
-                                            .ThenInclude(t => t!.ToolType)
-                                 .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns a card by its ID with status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Card?> FindByIdWithStatus(int id)
+        {
+            return await _context.Cards
+                .Include(s => s.Status)
+                .Where(c => c.Id == id)
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns a card by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Card?> FindByIdWithDocument(int id)
+        {
+            return await _context.Cards.Where(c => c.Id == id)
+                .Include(d => d.Document)
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns a card dto by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<CardAnalysisDto?> FindByIdWithDocumentAndWorkflow(int id)
+        {
+            return await _context.Cards.Where(c => c.Id == id)
+                .Select(c => new CardAnalysisDto
+                {
+                    Id = c.Id,
+                    Created = c.Created,
+                    StepId = c.StepId,
+                    DocumentId = c.DocumentId,
+                    AssignedUserId = c.AssignedUserId,
+                    Name = c.Name,
+                    StatusId = c.StatusId,
+                    Document = c.Document != null ? new DocumentDto
+                    {
+                        Id = c.Document.Id,
+                        Name = c.Document.Name,
+                        Description = c.Document.Description,
+                        ReferenceFile = c.Document.ReferenceFile
+                    } : null,
+                    Step = c.Step != null ? new StepDto
+                    {
+                        Id = c.Step.Id,
+                        Name = c.Step.Name,
+                        Order = c.Step.Order,
+                        WorkflowId = c.Step.WorkflowId,
+                    } : null,
+                    Outputs = c.Outputs != null ? c.Outputs.Select(o => new StepToolOutputAnalysesDto
+                    {
+                        Id = o.Id,
+                        StepToolId = o.StepToolId,
+                        Value = o.Value,
+                        StepTool = o.StepTool != null ? new StepToolDto
+                        {
+                            Id = o.StepTool.Id,
+                            StepId = o.StepTool.StepId,
+                            ToolId = o.StepTool.ToolId,
+                            Tool = o.StepTool.Tool != null ? new ToolDto
+                            {
+                                Id = o.StepTool.Tool.Id,
+                                Name = o.StepTool.Tool.Name,
+                                ToolTypeId = o.StepTool.Tool.ToolTypeId,
+                                ToolType = o.StepTool.Tool.ToolType != null ?
+                                    o.StepTool.Tool.ToolType.Name
+                                    : string.Empty,
+                            } : null
+                        } : null
+                    }).ToList() : null
+                }).FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns a card by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Card?> FindByIdWithStepAndProfile(int id)
+        {
+            return await _context.Cards.Where(c => c.Id == id)
+                .Include(s => s.Step)
+                    .ThenInclude(p => p!.Profile)
+                .FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -108,9 +185,9 @@ namespace WoopiAiHub.Repository
             return await _context.Cards
                 .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Executions)
-                .ThenInclude(e => e.StepTool)
-                .ThenInclude(st => st!.Tool)
-                .ThenInclude(t => t!.ToolType)
+                    .ThenInclude(e => e.StepTool)
+                        .ThenInclude(st => st!.Tool)
+                .           ThenInclude(t => t!.ToolType)
                 .OrderByDescending(c => c.Created)
                 .FirstOrDefaultAsync();
         }
@@ -126,8 +203,8 @@ namespace WoopiAiHub.Repository
                 .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Step)
                 .Include(c => c.Outputs)
-                .ThenInclude(o => o.StepTool)
-                .ThenInclude(st => st!.Tool)
+                    .ThenInclude(o => o.StepTool)
+                        .ThenInclude(st => st!.Tool)
                 .OrderBy(c => c.Step!.Order)
                 .ToListAsync();
         }
@@ -145,7 +222,10 @@ namespace WoopiAiHub.Repository
                 .Select(c => new CardHeaderDto
                 {
                     CardName = c.Name,
-                    WorkflowName = c.Step != null && c.Step.Workflow != null ? c.Step.Workflow.Name : string.Empty
+                    WorkflowName = c.Step != null && c.Step.Workflow != null ? c.Step.Workflow.Name : string.Empty,
+                    WorkflowId = c.Step != null && c.Step.Workflow != null ? c.Step.Workflow.Id : 0,
+                    StatusName = c.Status != null ? c.Status.Name : string.Empty,
+                    CurrentStepOrder = c.Step != null ? c.Step.Order : 0
                 })
                 .FirstOrDefaultAsync();
         }

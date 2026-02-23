@@ -10,16 +10,36 @@
             :hasSelection="false"
             @change-page="changePage"
         >
+            <template #cell-name="{ data }">
+                <span v-if="data.row.name == UserType.Analyst">
+                    {{ $t("management.teams.analyst") }}
+                </span>
+                <span v-else>
+                    {{ data.row.name }}
+                </span>
+            </template>
             <template #cell-members="{ data }">
-                <LucideIcon icon="UsersRound" :size="15" />
+                <LucideIcon
+                    icon="UsersRound"
+                    :size="15"
+                />
                 {{ data.row.users.length }}
             </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="editTeam(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="editTeam(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-danger"  @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -38,13 +58,13 @@
         @confirm="deleteTeam"
     />
 </template>
-
 <script>
     import date from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
     import TeamsService from "@/services/teams/TeamsService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
+    import { UserType } from "@/constants/UserType";
 
     export default {
         name: "TeamsTable",
@@ -58,9 +78,18 @@
                 isLoading: true,
                 columns: [
                     { key: "id", label: "common.id" },
-                    { key: "name", label: "management.teams.teamName" },
-                    { key: "members", label: "management.teams.members" },
-                    { key: "actions", label: "common.actions" },
+                    {
+                        key: "name",
+                        label: "management.teams.teamName",
+                    },
+                    {
+                        key: "members",
+                        label: "management.teams.members",
+                    },
+                    {
+                        key: "actions",
+                        label: "common.actions",
+                    },
                 ],
                 data: [],
                 pagination: {
@@ -79,6 +108,7 @@
             colType: 2,
             modalTeamShow: false,
             modalAlertShow: false,
+            UserType,
         }),
         methods: {
             getTeams(obj) {
@@ -114,7 +144,11 @@
                     this.isAscending = true;
                 }
                 this.colType = col;
-                this.getTeams({ search: "", page: this.queryPage, type: null });
+                this.getTeams({
+                    search: "",
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             formatDate(str) {
                 return date.formatDate(str);
@@ -138,7 +172,11 @@
                     .then((response) => {
                         if (response.error === undefined) {
                             this.$refs.DeleteDialog.close();
-                            this.getTeams({ search: "", page: 1, type: null });
+                            this.getTeams({
+                                search: "",
+                                page: 1,
+                                type: null,
+                            });
                             return this.$notify({
                                 title: "management.teams.title",
                                 message: "management.teams.deleteSuccess",
@@ -168,19 +206,30 @@
             },
             filterList(input) {
                 this.searchInput = input;
-                this.getTeams({ search: input, page: this.queryPage, type: null });
+                this.getTeams({
+                    search: input,
+                    page: this.queryPage,
+                    type: null,
+                });
             },
             changePage(page) {
-                this.getTeams({ search: "", page: page, type: null });
+                this.getTeams({
+                    search: "",
+                    page: page,
+                    type: null,
+                });
             },
         },
         created() {
             this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
-            this.getTeams({ search: "", page: this.queryPage, type: null });
+            this.getTeams({
+                search: "",
+                page: this.queryPage,
+                type: null,
+            });
         },
     };
 </script>
-
 <style>
     .dropdown-toggle::after {
         display: none;

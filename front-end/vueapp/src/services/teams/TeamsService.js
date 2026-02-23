@@ -31,6 +31,18 @@ export default {
                 };
             });
     },
+    getTeamListSimple() {
+        return api
+            .get("/Team/Simple")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
     deleteTeamById(teamId) {
         return api
             .delete("/Team/DeleteByIds", { data: [teamId] })

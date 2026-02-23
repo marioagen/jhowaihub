@@ -20,16 +20,19 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
+        private readonly IWorkflowRepository _workflowRepository;
 
         public CardServices(ICardRepository cardRepository,
-            IStepRepository stepRepository,
-            IAutomationServices automationServices,
-            IStepToolExecutionRepository stepToolExecutionRepository)
+                            IStepRepository stepRepository,
+                            IAutomationServices automationServices,
+                            IStepToolExecutionRepository stepToolExecutionRepository,
+                            IWorkflowRepository workflowRepository)
         {
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
+            _workflowRepository = workflowRepository;
         }
 
         /// <summary>
@@ -40,20 +43,22 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto)
         {
-            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
-            if (card == null)
-            {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
-            }
-
             if (updateAssingnedUserDto.UserId == Guid.Empty)
             {
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var isValidTeamUser =
-                card.Step?.Workflow?.Teams?.Any(t => t.Users.Any(u => u.Id.Equals(updateAssingnedUserDto.UserId)));
-            if (!isValidTeamUser.HasValue || !isValidTeamUser.Value)
+            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
+
+            if (card == null)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            }
+
+            var isValidTeamUser = await _workflowRepository.IsValidTeamUser(updateAssingnedUserDto.CardId,
+                                                                            updateAssingnedUserDto.UserId);
+
+            if (!isValidTeamUser)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found",
                     CardLabel.UserCannotBeAssigned);
@@ -95,17 +100,17 @@ namespace WoopiAiHub.Application.Services
             string email
         )
         {
-            var card = await _cardRepository.FindById(updateCardStepStatusDto.CardId) ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var card = await _cardRepository.FindByIdWithDocument(updateCardStepStatusDto.CardId) ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var previousStepId = card.StepId;
+            var previousStatusId = card.StatusId;
 
             var step = await _stepRepository.FindByOrderAndWorkflowId(
                 updateCardStepStatusDto.NextStepOrder,
                 updateCardStepStatusDto.WorkflowId
             ) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
-            var previousStepId = card.StepId;
-            var previousStatusId = card.StatusId;
-
-            card.UpdateStepAndSatus(step.Id, step.StatusId);
+            var statusId = card.IsRejected() ? previousStatusId : step.StatusId;
+            card.UpdateStepAndStatus(step.Id, statusId);
             var result = _cardRepository.Update(card);
 
             if (result)
@@ -126,13 +131,30 @@ namespace WoopiAiHub.Application.Services
                 }
                 catch
                 {
-                    card.UpdateStepAndSatus(previousStepId, previousStatusId);
+                    card.UpdateStepAndStatus(previousStepId, previousStatusId);
                     _cardRepository.Update(card);
                     throw;
                 }
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Updates only the status of a card, keeping the same step. Does not trigger automation.
+        /// </summary>
+        /// <param name="updateCardStatusDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
+        {
+            var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
+                ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+
+            card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
+
+            var result = _cardRepository.Update(card);
+            return result;
         }
 
         /// <summary>
@@ -145,10 +167,16 @@ namespace WoopiAiHub.Application.Services
         public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto)
         {
-            var card = await FindCardWithRelationships(cardId);
+            var card = await _cardRepository.FindByIdWithDocumentAndWorkflow(cardId) ?? throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);
             var verifyAnswer = await VerifyCanAnswer(card);
             var document = card.Document ?? throw new ArgumentException("Document not found for the card");
-            var workflow = card.Step?.Workflow ?? throw new ArgumentException("Workflow not found for the card");
+            if (card.Step == null)
+            {
+                throw new ArgumentException($"Step not found for card {cardId}");
+            }
+
+            var workflow = await _workflowRepository.FindByIdForAnalyze(card.Step.WorkflowId) ??
+                           throw new ArgumentException($"Workflow not found for card {cardId}. StepId: {card.StepId}, Step is null: false");
 
             var steps = BuildStepsFromWorkflow(workflow, card);
             var lastProcessedStepId = card.StepId.ToString();
@@ -170,7 +198,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="card"></param>
         /// <returns></returns>
-        private async Task<bool> VerifyCanAnswer(Card card)
+        private async Task<bool> VerifyCanAnswer(CardAnalysisDto card)
         {
             var executions = await _stepToolExecutionRepository.FindByStepToolByCardIdAsync(card.Id);
 
@@ -191,28 +219,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Find card by id and returns the card with relationships
-        /// </summary>
-        /// <param name="cardId"></param>
-        /// <returns></returns>
-        private async Task<Card> FindCardWithRelationships(int cardId)
-        {
-            var card = await _cardRepository.FindById(cardId);
-            if (card == null)
-            {
-                throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);
-            }
-
-            return card;
-        }
-
-        /// <summary>
         /// Prepare steps from workflow
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="card"></param>
         /// <returns></returns>
-        private List<DocumentStepDto> BuildStepsFromWorkflow(Workflow workflow, Card card)
+        private List<DocumentStepDto> BuildStepsFromWorkflow(Workflow workflow, CardAnalysisDto card)
         {
             var steps = new List<DocumentStepDto>();
             var workflowSteps = workflow.Steps.OrderBy(s => s.Order).ToList();
@@ -248,17 +260,23 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepDto"></param>
         /// <param name="step"></param>
         /// <param name="card"></param>
-        private void PopulateStepOutputs(DocumentStepDto stepDto, Step step, Card card)
+        private static void PopulateStepOutputs(DocumentStepDto stepDto, Step step, CardAnalysisDto card)
         {
             foreach (var stepTool in step.StepTools.OrderBy(st => st.Order))
             {
-                var outputs = card.Outputs
+                var outputs = card.Outputs?
                     .Where(o => o.StepToolId == stepTool.Id)
                     .ToList();
 
+                if(outputs is null || outputs.Count <= 0)
+                {
+                    continue;
+                }
+
                 foreach (var output in outputs)
                 {
-                    if (ShouldSkipOutput(output)) continue;
+                    if (ShouldSkipOutput(output))
+                        continue;
 
                     var extractedFields = ParseOutput(output);
                     stepDto.Outputs.AddRange(extractedFields);
@@ -271,11 +289,12 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        private bool ShouldSkipOutput(StepToolOutput output)
+        private static bool ShouldSkipOutput(StepToolOutputAnalysesDto output)
         {
-            if (output.StepTool?.Tool == null) return true;
+            if (output.StepTool?.Tool == null)
+                return true;
 
-            var toolTypeName = output.StepTool.Tool.ToolType?.Name;
+            var toolTypeName = output.StepTool.Tool.ToolType;
             return toolTypeName == HandlersTypes.Ocr || toolTypeName == HandlersTypes.Embeddings;
         }
 
@@ -284,14 +303,14 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        private List<ExtractedFieldDto> ParseOutput(StepToolOutput output)
+        private static List<ExtractedFieldDto> ParseOutput(StepToolOutputAnalysesDto output)
         {
             var fields = new List<ExtractedFieldDto>();
 
             if (string.IsNullOrWhiteSpace(output.Value))
                 return fields;
 
-            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType?.Name))
+            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType))
             {
                 fields.AddRange(jsonFields);
             }
@@ -303,7 +322,7 @@ namespace WoopiAiHub.Application.Services
                     Value = output.Value,
                     IsEdited = false,
                     OutputId = output.Id,
-                    OutputType = output.StepTool?.Tool?.ToolType?.Name ?? "None",
+                    OutputType = output.StepTool?.Tool?.ToolType ?? "None",
                 });
             }
 
@@ -318,9 +337,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <param name="outputType"></param>
         /// <returns></returns>
-        private bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
+        private static bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
             int id,
-            string outputType)
+            string? outputType)
         {
             fields = new List<ExtractedFieldDto>();
 
@@ -346,7 +365,7 @@ namespace WoopiAiHub.Application.Services
                             Value = kvp.Value?.ToString() ?? string.Empty,
                             IsEdited = false,
                             OutputId = id,
-                            OutputType = outputType,
+                            OutputType = outputType ?? string.Empty,
                         });
                     }
 

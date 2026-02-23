@@ -6,26 +6,26 @@ import store from "./store";
 import i18n from "./locales/i18n";
 import VueGtag from "vue-gtag";
 import tooltip from "@/directives/bootstrapTooltip";
-import outsideClick from '@/directives/outsideClick.js';
-import FloatingVue from 'floating-vue';
+import outsideClick from "@/directives/outsideClick.js";
+import FloatingVue from "floating-vue";
 import "@/validators/validationRules";
-import 'floating-vue/dist/style.css'
+import "floating-vue/dist/style.css";
 
 import LucideIcon from "@/components/global/LucideIcon.vue";
 import NotificationComponent from "@/components/global/NotificationComponent.vue";
 import { notify } from "@/utils/notification";
 
-import '@/validators/validationRules';
+import "@/validators/validationRules";
 
 import "@/assets/css/bootstrap-5.0.2/css/bootstrap.min.css";
 import "@/assets/webfont/fontawesome-5.15.4/css/all.min.css";
-import '@vueform/multiselect/themes/default.css'
+import "@vueform/multiselect/themes/default.css";
 
 localStorage.removeItem("theme");
 document.documentElement.className = "css-theme-light";
 
 const app = createApp(App);
-app.use(FloatingVue)
+app.use(FloatingVue);
 app.use(router);
 app.use(store);
 app.use(i18n);
@@ -45,7 +45,7 @@ app.use(
     router
 );
 
-app.directive('outsideClick', outsideClick);
+app.directive("outsideClick", outsideClick);
 app.directive("tooltip", tooltip);
 app.component("NotificationComponent", NotificationComponent);
 app.component("LucideIcon", LucideIcon);
@@ -53,5 +53,9 @@ app.component("LucideIcon", LucideIcon);
 app.config.globalProperties.$notify = notify;
 app.config.globalProperties.$appName = ENV_CONFIG.VUE_APP_NAME;
 app.config.globalProperties.$clientIdAzure = ENV_CONFIG.VUE_APP_CLIENT_ID_AZURE;
+
+app.config.globalProperties.$tBracketsToBraces = function (key) {
+    return this.$t(key).replaceAll("[", "{{").replaceAll("]", "}}");
+};
 
 app.mount("#app");

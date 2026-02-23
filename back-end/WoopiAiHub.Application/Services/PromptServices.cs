@@ -197,7 +197,7 @@ namespace WoopiAiHub.Application.Services
                 0,
                 dto.Created,
                 dto.Name.Substring(0, Math.Min(dto.Name.Length, 50)),
-                dto.Description.Substring(0, Math.Min(dto.Description.Length, 95)),
+                dto.Description.Substring(0, Math.Min(dto.Description.Length, 500)),
                 dto.Text,
                 idUser,
                 isEdited: false,
@@ -229,7 +229,7 @@ namespace WoopiAiHub.Application.Services
             var createPromptResult = _promptRepository.CreateUniquePrompt(prompt);
             if (!createPromptResult)
             {
-                throw new AppException(ErrorCode.Duplicated, "Duplicated Prompt", null);
+                throw new AppException(ErrorCode.Duplicated, "prompts.duplicated", null);
             }
 
             return createPromptResult;

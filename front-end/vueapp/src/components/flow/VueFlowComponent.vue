@@ -13,11 +13,7 @@
                     icon="Plus"
                     :size="15"
                 />
-                {{
-                    isActiveCollapse
-                        ? $t("flow.hideTools")
-                        : $t("flow.showTools")
-                }}
+                {{ isActiveCollapse ? $t("flow.hideTools") : $t("flow.showTools") }}
             </button>
         </div>
     </div>
@@ -38,8 +34,7 @@
                                 onDragStart($event, {
                                     id: tool.id,
                                     name: tool.name,
-                                    isEditableInput:
-                                        tool.isEditableInput,
+                                    isEditableInput: tool.isEditableInput,
                                     toolType: tool.toolType,
                                 })
                             "
@@ -97,7 +92,7 @@
 
     export default {
         name: "VueFlowComponent",
-        emits: ["openNodeConfig"],
+        emits: ["openNodeConfig", "nodeDeleted"],
         props: {
             stepId: {
                 type: Number,
@@ -142,11 +137,9 @@
         },
         methods: {
             getToolsList() {
-                ToolsServices.getToolsList().then(
-                    (response) => {
-                        this.toolsList = response;
-                    }
-                );
+                ToolsServices.getToolsList().then((response) => {
+                    this.toolsList = response;
+                });
             },
             onPaneReady(instance) {
                 this.vueFlowInstance = instance;
@@ -165,64 +158,50 @@
                     type: "hub",
                 };
             },
+            reloadFlow() {
+                this.getFlow();
+            },
             newFlow() {
                 this.nodes = [this.createStartNode()];
                 this.edges = [];
             },
             async getFlow() {
                 try {
-                    let stepTools = this.step
-                        ? this.step.stepTools
-                        : [];
-                    const mappedNodes = stepTools.map(
-                        (stepTool) => ({
-                            id: stepTool.id.toString(),
-                            position: {
-                                x: stepTool.positionX,
-                                y: stepTool.positionY,
-                            },
-                            label: stepTool.tool.name,
+                    let stepTools = this.step ? this.step.stepTools : [];
+                    const mappedNodes = stepTools.map((stepTool) => ({
+                        id: stepTool.id.toString(),
+                        position: {
+                            x: stepTool.positionX,
+                            y: stepTool.positionY,
+                        },
+                        label: stepTool.tool.name,
+                        toolId: stepTool.toolId,
+                        data: {
+                            order: stepTool.order,
+                            icon: "Activity",
+                            color: "blue",
+                            parameters: stepTool.parameters,
+                            isEditableInput: stepTool.tool.isEditableInput,
+                            toolType: stepTool.tool.toolType,
                             toolId: stepTool.toolId,
-                            data: {
-                                order: stepTool.order,
-                                icon: "Activity",
-                                color: "blue",
-                                parameters:
-                                    stepTool.parameters,
-                                isEditableInput:
-                                    stepTool.tool
-                                        .isEditableInput,
-                                toolType:
-                                    stepTool.tool.toolType,
-                                toolId: stepTool.toolId,
-                                stepToolId: stepTool.id,
-                                dependencies:
-                                    stepTool.dependencies,
-                                subtitle:
-                                    stepTool.parameters &&
-                                    stepTool.parameters.length >
-                                        0
-                                        ? stepTool
-                                              .parameters[0]
-                                              .promptName
-                                        : "",
-                            },
-                            sourcePosition: "right",
-                            targetPosition: "left",
-                            type: "hub",
-                        })
-                    );
-                    const mappedEdges = stepTools
-                        .slice(0, -1)
-                        .map((tool, index) => ({
-                            id: `${tool.id}-${stepTools[index + 1].id}`,
-                            source: tool.id.toString(),
-                            target: stepTools[
-                                index + 1
-                            ].id.toString(),
-                            animated: false,
-                            type: "special",
-                        }));
+                            stepToolId: stepTool.id,
+                            dependencies: stepTool.dependencies,
+                            subtitle:
+                                stepTool.parameters && stepTool.parameters.length > 0
+                                    ? stepTool.parameters[0].promptName
+                                    : "",
+                        },
+                        sourcePosition: "right",
+                        targetPosition: "left",
+                        type: "hub",
+                    }));
+                    const mappedEdges = stepTools.slice(0, -1).map((tool, index) => ({
+                        id: `${tool.id}-${stepTools[index + 1].id}`,
+                        source: tool.id.toString(),
+                        target: stepTools[index + 1].id.toString(),
+                        animated: false,
+                        type: "special",
+                    }));
 
                     const startNode = {
                         ...this.createStartNode(),
@@ -241,92 +220,55 @@
                         });
                     }
 
-                    this.nodes = [
-                        startNode,
-                        ...mappedNodes,
-                    ];
+                    this.nodes = [startNode, ...mappedNodes];
                     this.edges = mappedEdges;
 
                     await this.enrichNodesWithSubtitles(this.nodes);
                 } catch (e) {
-                    LogService.showMessage(
-                        "Erro ao carregar fluxo"
-                    );
+                    LogService.showMessage("Erro ao carregar fluxo");
                 }
             },
             deleteNode(nodeId) {
                 this.removeNodeDependency(nodeId);
-                this.nodes = this.nodes.filter(
-                    (node) => node.id !== nodeId
-                );
+                this.nodes = this.nodes.filter((node) => node.id !== nodeId);
                 this.edges = this.edges.filter(
-                    (edge) =>
-                        edge.source !== nodeId &&
-                        edge.target !== nodeId
+                    (edge) => edge.source !== nodeId && edge.target !== nodeId
                 );
+                this.$emit("nodeDeleted", nodeId);
             },
             removeNodeDependency(nodeId) {
-                const idx = this.nodes.findIndex(
-                    (node) => node.id === nodeId
-                );
+                const idx = this.nodes.findIndex((node) => node.id === nodeId);
                 if (idx !== -1) {
                     const node = this.nodes[idx];
                     this.nodes.forEach((n) => {
                         if (n.order > node.data.order) {
-                            n.data.dependencies = (
-                                n.data.dependencies || []
-                            ).filter(
+                            n.data.dependencies = (n.data.dependencies || []).filter(
                                 (d) =>
                                     !(
-                                        d.stepOrder ===
-                                            this.step
-                                                .order &&
-                                        d.stepToolOrder ===
-                                            node.data.order
+                                        d.stepOrder === this.step.order &&
+                                        d.stepToolOrder === node.data.order
                                     )
                             );
                         }
                     });
 
-                    this.$store.state.tempWorkflow.list.forEach(
-                        (step) => {
-                            if (
-                                step.order > this.step.order
-                            ) {
-                                step.stepTools.forEach(
-                                    (stepTool) => {
-                                        stepTool.dependencies =
-                                            (
-                                                stepTool.dependencies ||
-                                                []
-                                            ).filter(
-                                                (d) =>
-                                                    !(
-                                                        d.stepOrder ===
-                                                            this
-                                                                .step
-                                                                .order &&
-                                                        d.stepToolOrder ===
-                                                            node
-                                                                .data
-                                                                .order
-                                                    )
-                                            );
-                                    }
+                    this.$store.state.tempWorkflow.list.forEach((step) => {
+                        if (step.order > this.step.order) {
+                            step.stepTools.forEach((stepTool) => {
+                                stepTool.dependencies = (stepTool.dependencies || []).filter(
+                                    (d) =>
+                                        !(
+                                            d.stepOrder === this.step.order &&
+                                            d.stepToolOrder === node.data.order
+                                        )
                                 );
-                            }
+                            });
                         }
-                    );
+                    });
                 }
             },
-            updateNodeInput(
-                nodeId,
-                parameters,
-                dependencies
-            ) {
-                const idx = this.nodes.findIndex(
-                    (node) => node.id === nodeId
-                );
+            updateNodeInput(nodeId, parameters, dependencies) {
+                const idx = this.nodes.findIndex((node) => node.id === nodeId);
                 if (idx !== -1) {
                     this.nodes[idx] = {
                         ...this.nodes[idx],
@@ -339,54 +281,31 @@
                 }
             },
             deleteEdge(edgeId) {
-                this.edges = this.edges.filter(
-                    (edge) => edge.id !== edgeId
-                );
+                this.edges = this.edges.filter((edge) => edge.id !== edgeId);
             },
             openNodeConfig(node) {
-                const idx = this.nodes.findIndex(
-                    (n) => n.id === node.id
-                );
-                this.$emit(
-                    "openNodeConfig",
-                    this.nodes,
-                    this.nodes[idx]
-                );
+                const idx = this.nodes.findIndex((n) => n.id === node.id);
+                this.$emit("openNodeConfig", this.nodes, this.nodes[idx]);
             },
             onConnect(params) {
-                this.vueFlowInstance?.addEdges([
-                    { ...params, type: "special" },
-                ]);
+                this.vueFlowInstance?.addEdges([{ ...params, type: "special" }]);
             },
             onDragOver(event) {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = "move";
             },
             onDragStart(event, nodeData) {
-                event.dataTransfer.setData(
-                    "application/node-data",
-                    JSON.stringify(nodeData)
-                );
+                event.dataTransfer.setData("application/node-data", JSON.stringify(nodeData));
                 event.dataTransfer.effectAllowed = "move";
             },
             onDrop(event) {
                 event.preventDefault();
-                const reactFlowBounds =
-                    event.currentTarget.getBoundingClientRect();
-                const nodeData = JSON.parse(
-                    event.dataTransfer.getData(
-                        "application/node-data"
-                    )
-                );
-                const position =
-                    this.vueFlowInstance.project({
-                        x:
-                            event.clientX -
-                            reactFlowBounds.left,
-                        y:
-                            event.clientY -
-                            reactFlowBounds.top,
-                    });
+                const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+                const nodeData = JSON.parse(event.dataTransfer.getData("application/node-data"));
+                const position = this.vueFlowInstance.project({
+                    x: event.clientX - reactFlowBounds.left,
+                    y: event.clientY - reactFlowBounds.top,
+                });
                 const newNode = {
                     id: (this.nodes.length + 1).toString(),
                     type: "hub",
@@ -395,11 +314,10 @@
                     toolId: nodeData.id,
                     data: {
                         order: this.nodes.length + 1,
-                        icon: "Activity",
+                        icon: nodeData.toolType === "Quiz" ? "ClipboardList" : "Activity",
                         color: "#000",
                         isStartNode: false,
-                        isEditableInput:
-                            nodeData.isEditableInput,
+                        isEditableInput: nodeData.isEditableInput,
                         toolType: nodeData.toolType,
                         parameters: [],
                         toolId: nodeData.id,
@@ -410,79 +328,84 @@
                 };
                 this.vueFlowInstance?.addNodes([newNode]);
             },
+            getNodesOrderedByEdges() {
+                const edges = this.edges || [];
+                const outgoings = {};
+                edges.forEach((e) => {
+                    const s = String(e.source);
+                    if (!outgoings[s]) outgoings[s] = [];
+                    outgoings[s].push(String(e.target));
+                });
+                const visited = new Set();
+                const order = [];
+                const queue = ["start"];
+                while (queue.length) {
+                    const id = queue.shift();
+                    if (visited.has(id)) continue;
+                    visited.add(id);
+                    if (id !== "start") order.push(id);
+                    (outgoings[id] || []).forEach((target) => queue.push(target));
+                }
+                const nodeMap = {};
+                this.nodes.forEach((n) => {
+                    nodeMap[String(n.id)] = n;
+                });
+                return order.map((id) => nodeMap[id]).filter(Boolean);
+            },
             buildFlowPayload() {
-                return this.nodes
-                    .filter((node) => node.id !== "start")
-                    .map((node, index) => ({
-                        id: parseInt(node.id, 10),
-                        toolId: node.toolId,
-                        tool: {
-                            name: node.label,
-                            isEditableInput:
-                                node.data.isEditableInput,
-                            toolType: node.data.toolType,
-                        },
-                        positionX: parseFloat(
-                            node.position.x.toFixed(2)
-                        ),
-                        positionY: parseFloat(
-                            node.position.y.toFixed(2)
-                        ),
-                        order: index + 1,
-                        status: "Active",
-                        parameters: node.data.parameters,
-                        dependsOnStepToolId:
-                            node.data.stepToolId &&
-                            node.data.stepToolId > 0
-                                ? node.data.stepToolId
-                                : null,
-                        dependencies: (
-                            node.data.dependencies || []
-                        ).map((d) => ({
-                            stepOrder: d.stepOrder ?? null,
-                            stepToolOrder:
-                                d.stepToolOrder ?? null,
-                        })),
-                    }));
+                const orderedNodes = this.getNodesOrderedByEdges();
+                return orderedNodes.map((node, index) => ({
+                    id: parseInt(node.id, 10),
+                    toolId: node.toolId,
+                    tool: {
+                        name: node.label,
+                        isEditableInput: node.data.isEditableInput,
+                        toolType: node.data.toolType,
+                    },
+                    positionX: parseFloat(node.position.x.toFixed(2)),
+                    positionY: parseFloat(node.position.y.toFixed(2)),
+                    order: index + 1,
+                    status: "Active",
+                    parameters: node.data.parameters,
+                    dependsOnStepToolId:
+                        node.data.stepToolId && node.data.stepToolId > 0
+                            ? node.data.stepToolId
+                            : null,
+                    dependencies: (node.data.dependencies || []).map((d) => ({
+                        stepOrder: d.stepOrder ?? null,
+                        stepToolOrder: d.stepToolOrder ?? null,
+                    })),
+                }));
             },
             showCollapse() {
-                this.isActiveCollapse =
-                    !this.isActiveCollapse;
+                this.isActiveCollapse = !this.isActiveCollapse;
             },
             async enrichNodesWithSubtitles(nodes) {
                 const promptNodes = nodes.filter(
-                    (n) =>
-                        n.data?.toolType ===
-                            ToolType.Prompt &&
-                        n.data?.parameters?.length > 0
+                    (n) => n.data?.toolType === ToolType.Prompt && n.data?.parameters?.length > 0
                 );
 
                 if (promptNodes.length > 0) {
-                     const prompts =
-                        await PromptService.getPrompts();
-                     promptNodes.forEach((node) => {
-                         const promptId =
-                            node.data.parameters[0]
-                                    .value;
-                         if (promptId) {
+                    const prompts = await PromptService.getPrompts();
+                    promptNodes.forEach((node) => {
+                        const promptId = node.data.parameters[0].value;
+                        if (promptId) {
                             const prompt = prompts.find(
-                                (p) =>
-                                    p.id.toString() ===
-                                    promptId.toString()
-                                );
+                                (p) => p.id.toString() === promptId.toString()
+                            );
                             if (prompt) {
-                                 node.data.subtitle =
-                                 prompt.name;
+                                node.data.subtitle = prompt.name;
                             }
-                         }
-                     });
+                        }
+                    });
                 }
             },
         },
-        mounted() {
+        async mounted() {
             this.getToolsList();
             this.getFlow();
         },
+        expose: ["updateNodeInput", "buildFlowPayload", "reloadFlow", "getNodesOrderedByEdges"],
     };
 </script>
 <style>
@@ -491,5 +414,30 @@
 
     .vue-flow-container {
         height: calc(100vh - 200px);
+    }
+</style>
+<style scoped>
+    .btn-outline-quiz {
+        color: #7c4dff;
+        border: 1px solid #7c4dff;
+        background: transparent;
+    }
+
+    .btn-outline-quiz:hover {
+        color: #6a3ee6;
+        border-color: #6a3ee6;
+        background: #f3eeff;
+    }
+
+    .btn-outline-quiz:active {
+        color: #5a32cc;
+        border-color: #5a32cc;
+        background: #e8e0ff;
+    }
+
+    .btn-outline-quiz:disabled {
+        color: #b8a7ff;
+        border-color: #d6ccff;
+        background: #faf8ff;
     }
 </style>

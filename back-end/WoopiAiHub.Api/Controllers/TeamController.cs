@@ -128,5 +128,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _teamServices.FindAll();
             return Ok(result);
         }
+
+        /// <summary>
+        /// Returns a simple list of all teams containing only Id and Name.
+        /// Optimized for performance when full team data is not needed (e.g., workflow wizard).
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("Simple")]
+        [SwaggerOperation("Endpoint that returns a simple list of teams (Id and Name only)")]
+        [ProducesResponseType(typeof(ICollection<TeamSimpleDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindAllSimple()
+        {
+            var result = await _teamServices.FindAllSimple();
+            return Ok(result);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -145,6 +145,7 @@ namespace WoopiAiHub.Repository
                     Color = s.Status.Color,
                 },
                 StepTools = s.StepTools
+            .OrderBy(st => st.Order)
             .Select(st => new StepToolDto
             {
                 Id = st.Id,
@@ -221,9 +222,12 @@ namespace WoopiAiHub.Repository
             var login = dto.Login?.ToLower();
             var query = _context.Workflows
                     .Include(w => w.Documents)
-                    .Include(w => w.Steps.Where(s => s.Cards.Any(c =>  c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
+                    .Include(w => w.Steps.Where(s => s.Cards.Any(c => c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
                         .ThenInclude(s => s.Cards.Where(c => c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
-                        .ThenInclude(s => s.AssignedUser)
+                        .ThenInclude(c => c.AssignedUser)
+                    .Include(w => w.Steps.Where(s => s.Cards.Any(c => c.DocumentId == dto.DocumentId)).OrderBy(s => s.Order))
+                        .ThenInclude(s => s.Cards.Where(c => c.DocumentId == dto.DocumentId).OrderBy(c => c.Id))
+                        .ThenInclude(c => c.Status)
                 .AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
@@ -247,16 +251,18 @@ namespace WoopiAiHub.Repository
             var resultDto = result
                 .SelectMany(workflow =>
                     workflow.Steps.SelectMany(step =>
-                        step.Cards.Select(card => new ResponseWorkflowByDocumentDto
-                        {
-                            Id = workflow.Id,
-                            Name = workflow.Name,
-                            CardId = card.Id,
-                            DocumentId = card.DocumentId,
-                            AssignedUserEmail = card.AssignedUser?.Email ?? string.Empty
-                        })
+                        step.Cards.Select(card => new { Workflow = workflow, Card = card })
                     )
                 )
+                .Select(x => new ResponseWorkflowByDocumentDto
+                {
+                    Id = x.Workflow.Id,
+                    Name = x.Workflow.Name,
+                    CardId = x.Card.Id,
+                    DocumentId = x.Card.DocumentId,
+                    AssignedUserEmail = x.Card.AssignedUser?.Email ?? string.Empty,
+                    StatusName = x.Card.Status?.Name ?? string.Empty
+                })
                 .ToList();
 
             return resultDto;
@@ -325,7 +331,7 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Retrieves a workflow by its ID and includes only the necessaryrelated entities.
+        /// Retrieves a workflow by its ID and includes only the necessary related entities.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -342,6 +348,47 @@ namespace WoopiAiHub.Repository
                  .FirstOrDefaultAsync(w => w.Id == id && w.Enable.Equals(true));
         }
 
+        /// <summary>
+        /// Retrieves a workflow with the specified identifier for analysis, including its associated steps.
+        /// </summary>
+        /// <remarks>The returned workflow includes its related steps for comprehensive analysis. Only
+        /// workflows that are enabled are considered.</remarks>
+        /// <param name="id">The unique identifier of the workflow to retrieve. Must be a positive integer.</param>
+        /// <returns>A <see cref="Workflow"/> object representing the workflow and its steps if a matching, enabled workflow is
+        /// found; otherwise, <see langword="null"/>.</returns>
+        public async Task<Workflow?> FindByIdForAnalyze(int id)
+        {
+            return await _context.Workflows
+                                 .AsSplitQuery()
+                                 .Include(w => w.Steps)
+                                 .FirstOrDefaultAsync(w => w.Id == id &&
+                                                           w.Enable.Equals(true));
+        }
+
+        /// <summary>
+        /// Retrieves a workflow by ID with all data needed for cloning.
+        /// Includes teams, steps (with profile/status), step tools, parameters and dependencies.
+        /// Excludes documents, cards, executions and outputs.
+        /// </summary>
+        public async Task<Workflow?> FindByIdForClone(int id)
+        {
+            return await _context.Workflows
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(w => w.Teams)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.Profile)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.Status)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                        .ThenInclude(st => st.Parameters)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                        .ThenInclude(st => st.Dependencies)
+                .FirstOrDefaultAsync(w => w.Id == id && w.Enable);
+        }
+
 
         /// <summary>
         /// Update output of step in a workflow.
@@ -356,13 +403,13 @@ namespace WoopiAiHub.Repository
 
         /// <summary>
         /// Find phase 1 data by workflow id
+        /// Optimized query that only selects necessary fields (name and teams with id and name).
         /// </summary>
         /// <param name="id">Workflow id</param>
         /// <returns>Phase1Dto containing workflow name and associated teams</returns>
         public async Task<Phase1Dto> FindPhase1ById(int id)
         {
             var workflow = await _context.Workflows
-                .AsNoTracking()
                 .Where(w => w.Id == id && w.Enable)
                 .Select(w => new Phase1Dto
                 {
@@ -373,6 +420,7 @@ namespace WoopiAiHub.Repository
                         Name = t.Name,
                     }).ToList(),
                 })
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
             return workflow!;
         }
@@ -443,6 +491,7 @@ namespace WoopiAiHub.Repository
                     },
                     HasStepTools = s.StepTools.Any(),
                     StepTools = s.StepTools
+                        .OrderBy(st => st.Order)
                         .Select(st => new StepToolDto
                         {
                             Id = st.Id,
@@ -517,6 +566,7 @@ namespace WoopiAiHub.Repository
                     },
                     HasStepTools = s.StepTools.Any(),
                     StepTools = s.StepTools
+                        .OrderBy(st => st.Order)
                         .Select(st => new StepToolDto
                         {
                             Id = st.Id,
@@ -737,5 +787,27 @@ namespace WoopiAiHub.Repository
                                             }).FirstOrDefaultAsync();
         }
 
+        /// <summary>
+        /// Determines whether the specified user is a member of any team associated with the workflows of the document
+        /// linked to the given card.
+        /// </summary>
+        /// <remarks>The method returns <see langword="false"/> if the card does not exist, is not linked
+        /// to a document, or if the user is not found in any associated team.</remarks>
+        /// <param name="cardId">The unique identifier of the card whose associated document's teams are to be checked.</param>
+        /// <param name="userId">The unique identifier of the user to validate as a team member.</param>
+        /// <returns><see langword="true"/> if the user is a member of at least one team associated with the workflows of the
+        /// document linked to the specified card; otherwise, <see langword="false"/>.</returns>
+        public async Task<bool> IsValidTeamUser(int cardId,
+                                                Guid userId)
+        {
+            var isValidTeamUser = await _context.Cards
+                                                .Where(c => c.Id == cardId)
+                                                .SelectMany(c => c.Document!.Workflows)
+                                                .SelectMany(w => w.Teams)
+                                                .SelectMany(t => t.Users)
+                                                .AnyAsync(u => u.Id == userId);
+
+            return isValidTeamUser;
+        }
     }
 }

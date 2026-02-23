@@ -12,5 +12,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> AddAsync(UsageDaily usageDaily);
         Task<bool> UpdateAsync(UsageDaily usageDaily);
         Task<bool> DeleteAsync(int id);
+        Task<bool> AddRangeAsync(List<UsageDaily> usageDailies);
     }
 }

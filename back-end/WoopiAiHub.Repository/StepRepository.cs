@@ -1,13 +1,8 @@
-﻿using Google.Api;
 using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
-using System.Linq;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository
@@ -60,6 +55,21 @@ namespace WoopiAiHub.Repository
                            .Include(s => s.Cards)
                            .Include(s => s.Workflow)
                            .FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a step by its unique identifier, including its associated tools.
+        /// </summary>
+        /// <remarks>The returned step includes its related tools loaded from the database. This method
+        /// performs a database query and may return null if no step with the specified identifier exists.</remarks>
+        /// <param name="id">The unique identifier of the step to retrieve.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the step with its associated
+        /// tools if found; otherwise, null.</returns>
+        public async Task<Step?> FindByIdWithTools(int id)
+        {
+            return await _context.Steps
+                .Include(s => s.StepTools)
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
 
         /// <summary>
@@ -190,7 +200,13 @@ namespace WoopiAiHub.Repository
                                 Created = c.AssignedUser.Created,
                                 Id = c.AssignedUser.Id
                             }
-                            : null
+                            : null,
+                            Status = new StatusDto
+                            {
+                                Id = c.Status!.Id,
+                                Name = c.Status.Name,
+                                Color = c.Status.Color
+                            },
                         }).ToList()
                 })
                 .AsNoTracking()
@@ -199,6 +215,44 @@ namespace WoopiAiHub.Repository
             steps.ForEach(step => step.Cards = ApplyCardOrdering(step.Cards, order));
 
             return steps;
+        }
+
+        /// <summary>
+        /// Retrieves a list of steps in the specified workflow that precede the current step of the given card.
+        /// </summary>
+        /// <remarks>Use this method to determine the steps that a card has already passed through or
+        /// could have passed through in a workflow. The returned steps are ordered according to their position in the
+        /// workflow.</remarks>
+        /// <param name="workflowId">The unique identifier of the workflow to search within.</param>
+        /// <param name="order">order.</param>
+        /// <returns>A list of <see cref="StepDto"/> objects representing the steps that occur before the current step of the
+        /// specified card in the workflow. Returns an empty list if no previous steps are found.</returns>
+        public async Task<List<StepDto>> FindPreviousStepsByWorkflowIdAndOrder(int workflowId, int order)
+        {
+            return await _context.Steps
+                .Where(s => s.WorkflowId == workflowId && s.Order < order)
+                .Select(s => new StepDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Order = s.Order,
+                    WorkflowId = s.WorkflowId
+                })
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// finds the step associated with a specific card ID.
+        /// </summary>
+        /// <param name="cardId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public Task<Step?> FindStepByCardId(int cardId)
+        {
+            return _context.Steps
+                           .Include(s => s.Cards)
+                           .FirstOrDefaultAsync(s => s.Cards.Any(c => c.Id == cardId));
         }
 
         /// <summary>

@@ -129,7 +129,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Url")
                         .IsRequired()
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("varchar(500)")
                         .HasColumnName("Url");
 
                     b.HasKey("Id");
@@ -278,6 +278,49 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("Documents", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentAnalysisRejection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("int")
+                        .HasColumnName("CardId");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<string>("Justification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnName("Justification");
+
+                    b.Property<int>("StepId")
+                        .HasColumnType("int")
+                        .HasColumnName("StepId");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CardId");
+
+                    b.HasIndex("Created");
+
+                    b.HasIndex("StepId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DocumentAnalysisRejections", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -309,9 +352,19 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("varchar(max)")
                         .HasColumnName("Output");
 
+                    b.Property<int?>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("Type");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IdDocument");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("DocumentHistories", (string)null);
                 });
@@ -440,8 +493,8 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(95)
-                        .HasColumnType("varchar(95)")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("Description");
 
                     b.Property<Guid>("IdUser")
@@ -1012,6 +1065,11 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("Description");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
                         .HasColumnName("IsActive");
@@ -1451,6 +1509,33 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("Step");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentAnalysisRejection", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Card", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Step", "Step")
+                        .WithMany()
+                        .HasForeignKey("StepId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
+                    b.Navigation("Step");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentHistory", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Document", "Document")
@@ -1459,7 +1544,13 @@ namespace WoopiAiHub.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WoopiAiHub.Domain.Models.User", "User")
+                        .WithMany("DocumentHistories")
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Document");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentNormalized", b =>
@@ -1921,6 +2012,8 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>
                 {
                     b.Navigation("AuditLogs");
+
+                    b.Navigation("DocumentHistories");
 
                     b.Navigation("Prompts");
 

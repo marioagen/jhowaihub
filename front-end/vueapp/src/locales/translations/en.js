@@ -9,46 +9,79 @@ const english = {
         clear: "Clear",
         closeResults: "Close Results",
         confirmed: "Confirmed",
-        conversationWithDocument:
-            "Conversation with the Document",
+        conversationWithDocument: "Conversation with the Document",
         copy: "Copy",
         document: "Document",
-        errorApplyingQuestionnaire:
-            "Error applying questionnaire",
-        errorLoadDocumentData:
-            "Error loading document data",
-        errorLoadingQuestionnaires:
-            "Error loading questionnaires",
+        errorApplyingQuestionnaire: "Error applying questionnaire",
+        errorLoadDocumentData: "Error loading document data",
+        errorLoadingQuestionnaires: "Error loading questionnaires",
         extractedData: "Extracted Data",
         failedEditOutput: "The output could not be edited.",
         failedLoadDocument: "Failed to load document",
-        failedNoResponse:
-            "Failed, no response from the server.",
+        failedNoResponse: "Failed, no response from the server.",
         failedToLoadHistory: "Failed to load history.",
         findingTheBestAnswer: "Finding the best answer",
+        justification: {
+            date: "Date",
+            rejectedBy: "Rejected by",
+            reason: "Reason for Rejection",
+            subtitle: "This document was returned for correction. See details below.",
+            title: "Rejection Justification",
+            viewJustification: "View Justification",
+        },
         nextStep: "Next Step",
         noDataInDocument: "No data available",
-        pleaseSelectQuestionnaire:
-            "Please select a questionnaire",
+        pleaseSelectQuestionnaire: "Please select a questionnaire",
         previousStep: "Previous Step",
         question: "Question",
         questionnaireResults: "OUTPUT",
         questionnaireToApply: "QUESTIONNAIRE TO APPLY",
+        reject: {
+            cancel: "Cancel",
+            confirm: "Confirm Rejection",
+            error: "Error rejecting document.",
+            justification: "Justification",
+            justificationInstructions:
+                "Provide a justification and select the step to which the document should be returned.",
+            justificationPlaceholder: "Provide a justification",
+            reject: "Reject",
+            returnToStep: "Return to step",
+            selectStep: "Select a step...",
+            success: "Document rejected successfully.",
+            title: "Reject Document",
+            validationError: "Please fill in all required fields.",
+        },
         selectQuestionnaire: "Select a questionnaire...",
         sendQuestion: "Send Question",
         subtitle: "Manage document analysis",
-        successApplyingQuestionnaire:
-            "Questionnaire applied successfully",
+        successApplyingQuestionnaire: "Questionnaire applied successfully",
         successEditOutput: "Output edited successfully",
         title: "Analyze Document",
-        typeYourQuestion:
-            "Type your question about the document...",
+        typeYourQuestion: "Type your question about the document...",
         workflow: "Workflow",
+        questionsHistoryModal: {
+            title: "Conversation History",
+            subtitle: "Previous questions and answers about this document",
+            searchPlaceholder: "Search in questions or",
+            allUsers: "All users",
+            sortedBy: "Sorted by",
+            orderOldest: "Oldest first",
+            orderNewest: "Newest first",
+            loadMore: "Load more",
+            loading: "Loading…",
+            interactionsCount: "recorded interactions",
+            tagQuestionnaire: "Questionnaire",
+            tagFreeQuestion: "Free Question",
+        },
     },
     card: {
         assignBtn: "Assign",
-        cardsOpened:
-            "There are open cards in this Workflow",
+        cardsOpened: "There are open cards in this Workflow",
+        errorAdvancingCard: "An error occurred while advancing the card.",
+        errorFinalizingCard: "An error occurred while finalizing the card.",
+        successFinalizeMessage: "Card finalized successfully.",
+        finalizeConfirmMessage: "Are you sure you want to finalize this document?",
+        finalizeConfirmTitle: "Confirm finalization",
         unassignInfo: "Unassign document",
         userApplicant: "Applicant",
         userAssigned: "Assigned",
@@ -61,6 +94,7 @@ const english = {
         almost: "You're almost there!",
         analyze: "Analyze",
         analyzed: "Analyzed",
+        finalize: "Finalize",
         apply: "Apply",
         back: "Back",
         cancel: "Cancel",
@@ -99,8 +133,7 @@ const english = {
         save: "Save",
         select: "Select",
         selectAll: "Select All",
-        selectAnItemFromTheList:
-            "Select an item from the list.",
+        selectAnItemFromTheList: "Select an item from the list.",
         selected: "Selected",
         selectedList: "Selected list",
         send: "Send",
@@ -128,10 +161,9 @@ const english = {
         },
         graphs: {
             pagesGraphSubtitle: "Daily Consumption",
-            pagesGraphTitle:
-                "Processed Document Pages (OCR)",
+            pagesGraphTitle: "Processed Document Pages (Digitizer Agent)",
             pagesTooltip:
-                "Number of document pages processed through Optical Character Recognition (OCR), which converts text images into editable text.",
+                "Number of document pages processed through the Digitizer Agent, which converts text images into editable text.",
             periodTotal: "Period Total",
             tokenGraphSubtitle: "Daily Token Consumption",
             tokenGraphTitle: "AI Token Consumption",
@@ -140,15 +172,11 @@ const english = {
             totalPages: "Total Pages Processed",
             totalTokens: "Total Tokens Consumed",
             totalWorkflow: "Total AI Automation Executions",
-            totalWorkflowAutomatic:
-                "Total Woopi AI Executions",
+            totalWorkflowAutomatic: "Total Woopi AI Executions",
             unitValue: "Unit value in the current plan:",
-            workflowAutomaticTooltip:
-                "Number of times AI automation workflows were executed.",
-            workflowsAutomaticGraphTitle:
-                "AI Automation Workflow Executions",
-            workflowsGraphTitle:
-                "Woopi AI Workflow Executions",
+            workflowAutomaticTooltip: "Number of times AI automation workflows were executed.",
+            workflowsAutomaticGraphTitle: "AI Automation Workflow Executions",
+            workflowsGraphTitle: "Woopi AI Workflow Executions",
             workflowTooltip:
                 "Number of times workflows created in the Woopi AI platform were executed.",
         },
@@ -177,25 +205,18 @@ const english = {
         createBtn: "New document",
         createdDate: "Upload date",
         deleteHistory: "Delete history",
-        descriptionDocumentNote:
-            "Description (Unique for multiple documents)",
-        descriptionExceeded:
-            "Description exceeds the maximum of 250 characters.",
+        descriptionDocumentNote: "Description (Unique for multiple documents)",
+        descriptionExceeded: "Description exceeds the maximum of 250 characters.",
         documentHasAlreadyBeenStandardizedPreviously:
             "Document has already been standardized previously. <br/> Please wait, you will be redirected to the home page.",
         documentName: "Document name",
-        documentNameOrDescription:
-            "Document name or description",
+        documentNameOrDescription: "Document name or description",
         documentTranscript: "Document transcription",
         documentType: "Document type",
-        documentTypeAlreadyExists:
-            "This document type already exists",
-        documentTypeEditSuccess:
-            "Document type updated successfully",
-        documentTypeRemoveSuccess:
-            "Document type successfully removed",
-        documentTypeSuccess:
-            "Document type inserted successfully",
+        documentTypeAlreadyExists: "This document type already exists",
+        documentTypeEditSuccess: "Document type updated successfully",
+        documentTypeRemoveSuccess: "Document type successfully removed",
+        documentTypeSuccess: "Document type inserted successfully",
         errors: {
             invalidType: "Invalid document type",
             removeTypeError: "Error removing document type",
@@ -214,65 +235,57 @@ const english = {
         loadingTheText: "Loading the text",
         mostOlder: "Most older",
         mostRecent: "Most recent",
+        ocrFetchError: "Error fetching Digitizer Agent text.",
+        ocrLoadError: "Error loading Digitizer Agent text.",
+        ocrNotAvailable: "Digitizer Agent not available for this document.",
         noDocumentsWereFound: "No documents were found",
-        normalizingTheDocument:
-            "Normalizing the document, wait.",
+        normalizingTheDocument: "Normalizing the document, wait.",
         noTeams: "No teams available",
         noTeamsFound: "No team linked to your user",
         notFound: "No documents found",
-        notReloadThePage:
-            "To avoid interrupting the upload process, do not reload the page",
+        notReloadThePage: "To avoid interrupting the upload process, do not reload the page",
         numberOfPagesHasBeenExceeded:
             "Number of pages has been exceeded. Contact your plan administrator.",
-        ocrText: "OCR Text",
+        ocrText: "Digitizer Agent Text",
         pdfBack: "Back to PDF",
         preparingTheDocument: "Preparing the document..",
         queryWithoutHistory: "Query without history",
         reduceHistory: "Reduce history",
-        removeAllFilesDropzone:
-            "Remove all files from the queue?",
+        removeAllFilesDropzone: "Remove all files from the queue?",
         removeError: "Error removing document",
         removeSuccess: "Document successfully removed",
-        removeTitle:
-            "You are about to delete a document from the system",
+        removeTitle: "You are about to delete a document from the system",
         searchDocument: "Search document",
         selectAFile: "Select a file.",
         selectedTeams: "Selected teams",
-        selectToDelete:
-            "Select at least one document to perform deletion.",
-        sendingTheDocument:
-            "Sending the document, please wait.",
+        selectToDelete: "Select at least one document to perform deletion.",
+        sendingTheDocument: "Sending the document, please wait.",
         showingFilesUpload: "uploaded files",
         standardizedFullText: "Standardized full text",
         statusList: {
             notAnalyzed: "Waiting for analysis",
+            rejected: "Rejected",
         },
         step: "Step",
-        subtitle:
-            "Manage documents and extract information",
+        subtitle: "Manage documents and extract information",
         teams: "Team",
-        teamsSubtextDocuments:
-            "Select at least one team to associate with the document.",
+        teamsSubtextDocuments: "Select at least one team to associate with the document.",
         teamsTitleDocuments: "Associate with teams",
         theFileMayBeCorrupt:
             "The file may be <br/> corrupt or have an error. <br/> Please try again.",
         theFileMayBeUnreadableOrHaveAnError:
             "The file may be <br/> unreadable or have an error. <br/> Please try again.",
-        thisActionRemoveAllFiles:
-            "This action will remove all files selected for upload",
+        thisActionRemoveAllFiles: "This action will remove all files selected for upload",
         title: "Documents",
         totalDocuments: "Total documents",
         upload: {
             cardTitle: "Upload Document",
-            dropZone:
-                "Drag and drop your PDF files below to start, or click the area to browse",
-            linkSubtitle:
-                "Select at least one workflow to associate with the document.",
+            dropZone: "Drag and drop your PDF files below to start, or click the area to browse",
+            linkSubtitle: "Select at least one workflow to associate with the document.",
             linkWorkflow: "Link to workflow",
             noFileChosen: "No file chosen",
             noTeamChosen: "No team chosen",
-            noWorkflowFound:
-                "No workflow linked to your user teams",
+            noWorkflowFound: "No workflow linked to your user teams",
             removeAllDropzone: "Remove files from dropzone",
             selectionList: "Selection list",
             subtitle: "Upload new documents for analysis",
@@ -288,8 +301,7 @@ const english = {
         workflowListModal: {
             cancel: "Cancel",
             clickToView: "Click to view",
-            errorToGetWorkflows:
-                "Error searching for workflows.",
+            errorToGetWorkflows: "Error searching for workflows.",
             errorUnexpected: "Unexpected error.",
             nothingFound:
                 "No workflows found. If there is no linked workflow, consider resubmitting the file linking with a workflow",
@@ -299,18 +311,26 @@ const english = {
                 "This document is associated with multiple workflows. Choose which one you want to view:",
         },
         workflows: "Workflows",
-        youAreAboutToDeleteDocument:
-            "You are about to delete <br/> the document from the system",
+        youAreAboutToDeleteDocument: "You are about to delete <br/> the document from the system",
         youAreAboutToDeleteDocumentQuery:
             "You are about to delete <br/> the query history from the system",
+    },
+    documentsHub: {
+        title: "Processing workflows",
+        subtitle: "View the flow of documents through processing steps",
+        workflows: {
+            title: "Processing workflows board",
+        },
+        documents: {
+            title: "Documents list",
+        },
     },
     filters: {
         assignment: {
             allUsers: "All users",
             currentUser: "My documents",
         },
-        documentInput:
-            "Search by document, description or user, ...",
+        documentInput: "Search by document, description or user, ...",
         mostOld: "Most old",
         mostRecent: "Most recent",
         nameAZ: "Name (A-Z)",
@@ -335,51 +355,54 @@ const english = {
             all: "All users",
             none: "Select a user",
         },
-        workflowInput:
-            "Search by document, description or requester",
+        workflowInput: "Search by document, description or requester",
         workflowSelect: {
             none: "Select a workflow",
             withWorkflow: "All with associated workflow",
+        },
+        statusSelect: {
+            none: "Card status",
         },
     },
     flow: {
         downloadJson: "Download JSON",
         flowListEnd: "Finish Flow",
         formCreate: {
-            subtitle:
-                "Create a new tool to process documents",
+            subtitle: "Create a new tool to process documents",
             title: "Automation Flow",
         },
         formEdit: {
-            subtitle:
-                "Update the information of the selected tool",
+            subtitle: "Update the information of the selected tool",
             title: "Automation Flow:",
         },
         formFlow: {
+            configurationSaved: "Configuration saved successfully",
+            configureToolParameters: "Configure the parameters of this tool",
             connectorWorkflowConfigFail:
                 "Failed to retrieve workflow configuration. Check tool URL and API key",
-            connectorWorkflowFail:
-                "Workflow connector did not respond. Check tool URL and API key",
-            dependenciesRequired:
-                "Select at least one dependency",
+            connectorWorkflowFail: "Workflow connector did not respond. Check tool URL and API key",
+            createNewPrompt: "Create new agent",
+            dependenciesRequired: "Select at least one dependency",
+            dependenciesInvalidOrRemoved:
+                "One or more selected dependencies are invalid or were removed from the flow.",
             editFlowNodeFail: "Failed to edit node",
             editFlowNodeSuccess: "Node edited successfully",
             progressFlowFail: "Failed to insert flow",
-            progressFlowSuccess:
-                "Flow inserted successfully",
+            progressFlowSuccess: "Flow inserted successfully",
             progressFlowUpdateFail:
                 "Failed to update flow. Flow already contains output data for tools.",
+            prompts: "Agents",
+            promptRequired: "Select at least one agent",
+            selectPrompt: "Select an agent",
         },
         hideTools: "Hide Tools",
         showTools: "Add Tools",
         sidebar: {
             addDependency: "Add Dependency",
-            allDependenciesSelected:
-                "All dependencies already selected",
+            allDependenciesSelected: "All dependencies already selected",
             deleteDependency: "Remove Dependency",
             dependencies: "Dependencies",
-            dependenciesHint:
-                "Select previous tools whose outputs you want to use as input",
+            dependenciesHint: "Select previous tools whose outputs you want to use as input",
             filter: "Select webhook",
             inputs: "Inputs",
             noDependencies: "No tools available",
@@ -393,18 +416,15 @@ const english = {
     home: {
         docsCard: {
             button: "Access docs",
-            description:
-                "Check our complete documentation to explore all the potential of AI HUB.",
+            description: "Check our complete documentation to explore all the potential of AI HUB.",
             title: "Explore the Documentation",
         },
         planLabel: "You have acquired the",
         planName: "Enterprise Plan",
-        planThankYou:
-            "Thank you for choosing our platform!",
+        planThankYou: "Thank you for choosing our platform!",
         platformCard: {
             button: "Watch video",
-            description:
-                "Watch a 5-minute guided tour about the main features.",
+            description: "Watch a 5-minute guided tour about the main features.",
             title: "Discover the Platform",
         },
         quickStartTitle: "Quick Start Guide",
@@ -436,29 +456,24 @@ const english = {
             "The environment is being prepared. Please try again in a few minutes.",
         tenantNotFound: "Tenant not found.",
         title: "Sign In",
-        userIncorrectPassword:
-            "The entered password is incorrect.",
+        userIncorrectPassword: "The entered password is incorrect.",
         userNotFound: "User not found.",
-        userTokenMicrosoftInvalid:
-            "Could not validate your authentication. Please log in again.",
-        userWithoutAccess:
-            "User does not have access permission.",
+        userTokenMicrosoftInvalid: "Could not validate your authentication. Please log in again.",
+        userWithoutAccess: "User does not have access permission.",
         validateClient: "Client validated",
         warning: "Attention",
     },
     management: {
         profiles: {
+            analyst: "Analyst",
             createBtn: "New Profile",
             createProfile: "Create profile",
-            createSubtitle:
-                "Create a new profile for the system",
+            createSubtitle: "Create a new profile for the system",
             createTitle: "New Profile",
             deleteSuccess: "Profile deleted successfully",
             editProfile: "Edit profile",
-            editSubtitle:
-                "Update the selected profile's information",
-            editSubTitleProfile:
-                "Update the profile's information in the system",
+            editSubtitle: "Update the selected profile's information",
+            editSubTitleProfile: "Update the profile's information in the system",
             editSuccess: "Profile updated successfully",
             editTitle: "Edit Profile",
             editTitleProfile: "Editing profile",
@@ -466,11 +481,9 @@ const english = {
                 addError: "Erro while creating profile",
                 deleteError: "Error deleting profile",
                 editError: "Error updating profile",
-                editProfileError:
-                    "Erro while editing profile",
+                editProfileError: "Erro while editing profile",
                 invalid: "Invalid profile",
-                removeError:
-                    "Error while removinmg profile",
+                removeError: "Error while removinmg profile",
                 saveError: "Error saving profile",
             },
             index: "Profiles",
@@ -480,56 +493,44 @@ const english = {
             permissions: "Permissions",
             permissionsWorkflow: "Workflow Permissions",
             profile: "Profile",
-            profileAddSuccess:
-                "Profile inserted successfully",
-            profileEditSuccess:
-                "Profile updated successfully",
+            profileAddSuccess: "Profile inserted successfully",
+            profileEditSuccess: "Profile updated successfully",
             profilePermissions: "Profiles and Permissions",
-            profileRemoveSuccess:
-                "Profile removed successfully",
+            profileRemoveSuccess: "Profile removed successfully",
             profiles: "Profiles",
-            profilesMessage:
-                "Manage profiles and permissions from system",
-            saveSubTitleProfile:
-                "Create a new profile in the system",
+            profilesMessage: "Manage profiles and permissions from system",
+            saveSubTitleProfile: "Create a new profile in the system",
             saveSuccess: "Profile saved successfully",
             saveTitleProfile: "New profile",
             searchPermissions: "Search permissions...",
             searchProfiles: "Search profiles",
             selectedProfiles: "Selected profiles",
-            subtitle:
-                "Manage system profiles and permissions",
+            subtitle: "Manage system profiles and permissions",
             title: "Profiles and Permissions",
             typeProfileName: "Enter the profile name",
-            youAreAboutToDeleteProfile:
-                "You are about to delete a profile from the system",
+            youAreAboutToDeleteProfile: "You are about to delete a profile from the system",
         },
-        subtitle:
-            "Manage system users, teams, and permissions",
+        subtitle: "Manage system users, teams, and permissions",
         teams: {
+            analyst: "Analyst",
             createBtn: "New Team",
-            createSubtitle:
-                "Create a new team for the system",
+            createSubtitle: "Create a new team for the system",
             createTitle: "New Team",
             deleteSuccess: "Team deleted successfully",
-            editSubtitle:
-                "Update the selected team's information",
+            editSubtitle: "Update the selected team's information",
             editTitle: "Edit Team",
             errors: {
-                deleteDocError:
-                    "Could not delete the team: there are related documents",
+                deleteDocError: "Could not delete the team: there are related documents",
                 deleteError: "Error deleting team",
                 duplicated: "Team already registered",
                 fetchError: "Error fetching teams",
                 invalid: "Invalid team",
                 saveError: "Error saving team",
-                teamAlreadyExists:
-                    "Team already registered",
+                teamAlreadyExists: "Team already registered",
             },
             members: "Members",
             newTeam: "New team",
-            newTeamMessage:
-                "Create a new team in the system",
+            newTeamMessage: "Create a new team in the system",
             noTeamWasFound: "No team was found",
             saveSuccess: "Team saved successfully",
             searchTeams: "Search teams",
@@ -540,20 +541,17 @@ const english = {
             teamsMessage: "Manage teams and their members",
             title: "Teams",
             typeTeamName: "Enter the team name",
-            youAreAboutToDeleteTeam:
-                "You are about to delete a Team from the system",
+            youAreAboutToDeleteTeam: "You are about to delete a Team from the system",
         },
         title: "User and Team Management",
         users: {
             confirmedPassword: "Confirm password",
             createBtn: "New User",
-            createSubtitle:
-                "Create a new user for the system",
+            createSubtitle: "Create a new user for the system",
             createTeamUser: "Create User",
             createTitle: "New User",
             deleteSuccess: "User deleted successfully",
-            editSubtitle:
-                "Update the selected user's information",
+            editSubtitle: "Update the selected user's information",
             editTitle: "Edit User",
             editUser: "Edit user",
             email: "Email",
@@ -563,11 +561,9 @@ const english = {
                 saveError: "Error saving user",
             },
             manageUsers: "User management",
-            newTeamUserMessage:
-                "Create a new user that will be automatically selected",
+            newTeamUserMessage: "Create a new user that will be automatically selected",
             newUser: "New user",
-            newUserMessage:
-                "Create or edit an user in the system",
+            newUserMessage: "Create or edit an user in the system",
             noUsersWasFound: "No user was found",
             password: "Password",
             saveSuccess: "User saved successfully",
@@ -575,8 +571,7 @@ const english = {
             selectedUsers: "Selected users",
             subtitle: "Manage system users",
             title: "Users",
-            typeConfirmedPassword:
-                "Enter password confirmation",
+            typeConfirmedPassword: "Enter password confirmation",
             typeEmail: "user{'@'}yourcompany.com",
             typeName: "Enter full name",
             typePassword: "Enter password",
@@ -594,8 +589,7 @@ const english = {
         quizzes: {
             title: "Quizzes",
         },
-        subtitle:
-            "Manage quizzes, teams and system permissions",
+        subtitle: "Manage quizzes, teams and system permissions",
         title: "Quiz Management, Questions and Document Types",
         types: {
             title: "Types",
@@ -608,7 +602,7 @@ const english = {
         dashboard: "Dashboard",
         documents: "Documents",
         management: "User Management",
-        prompts: "Prompts",
+        prompts: "Agents",
         questions: "Questions",
         quizzes: "Quizzes",
         templates: "API Templates",
@@ -625,9 +619,10 @@ const english = {
         descriptions: {
             dashboard: "View Dashboard",
             documents: "View Documents",
+            documentRejection: "Reject documents",
             management: "View Management Tables",
             profiles: "View Profiles",
-            prompts: "View Prompts",
+            prompts: "View Agents",
             questions: "View Questions",
             quizzes: "View Quizzes",
             teams: "View Teams",
@@ -639,11 +634,12 @@ const english = {
             workflowStepView: "View Steps",
         },
         groups: {
+            actions: "Actions",
             dashboard: "Dashboard",
             documents: "Documents",
             management: "Management",
             profiles: "Profiles",
-            prompts: "Prompts",
+            prompts: "Agents",
             questions: "Questions",
             quizzes: "Quizzes",
             teams: "Teams",
@@ -660,39 +656,43 @@ const english = {
         enterprise: "Enterprise Plan",
     },
     prompts: {
-        createError: "Prompts create failed",
-        createPrompt: "Create prompt",
-        createSuccess: "Prompts created successfully",
-        deleteError: "Prompts delete failed",
-        deleteSuccess: "Prompts deleted successfully",
-        emptyPromptError:
-            "The prompt field cannot be empty",
+        cloneAction: "Clone",
+        cloneSuffix: "- Clone",
+        createError: "Agent creation failed",
+        createPrompt: "Create agent",
+        createSuccess: "Agent created successfully",
+        deleteError: "Agent deletion failed",
+        deleteSuccess: "Agents deleted successfully",
+        duplicated: "Duplicate prompt",
+        editPrompt: "Edit agent",
+        emptyPromptError: "The agent field cannot be empty",
         importButton: "Import",
-        importError: "Error importing prompts",
+        importError: "Error importing agents",
         importPredefined: "Import predefined",
-        importSubtitle: "Import a prompt from a file",
-        importSuccess: "Prompts imported successfully",
-        importTitle: "Import prompt",
+        importSubtitle: "Select predefined agents from the system",
+        importSuccess: "Agents imported successfully",
+        importTitle: "Import agents",
         information: "Basic information",
         labelLoadMore: "Load more",
-        myPromptsBadge: "My prompts",
-        namePrompt: "Prompt name",
-        newPrompt: "New prompt",
-        noPromptsListWereFound: "No prompts were found",
-        placeholderNamePrompt: "Enter the prompt name",
-        promptContent: "Prompt content",
-        refineError: "Failed to refine prompt",
-        refinePrompt: "Refine Prompt",
-        refineSuccess: "Prompt refined successfully",
-        removeAllPrompts: "Delete prompts",
-        searchPrompt: "Search prompt",
-        searchPrompts: "Search prompts",
+        myPromptsBadge: "My agents",
+        namePrompt: "Agent name",
+        newPrompt: "New agent",
+        noPromptsListWereFound: "No agents were found",
+        placeholderNamePrompt: "Enter the agent name",
+        promptContent: "Instruction Prompt",
+        refineError: "Failed to refine agent",
+        refinePrompt: "Refine Agent",
+        refineSuccess: "Agent refined successfully",
+        removeAllPrompts: "Delete agents",
+        searchPrompt: "Search agent",
+        searchPrompts: "Search agents",
         selectAllTemplates: "Select all templates",
-        subtitle: "Manage system prompts",
-        subtitleNew: "Create a new AI prompt",
-        title: "Prompts",
-        updateError: "Prompts update failed",
-        updateSuccess: "Prompts updated successfully",
+        subtitle: "Manage system agents",
+        subtitleEdit: "Update the selected agent information",
+        subtitleNew: "Create a new AI agent",
+        title: "Agents",
+        updateError: "Agent update failed",
+        updateSuccess: "Agent updated successfully",
         viewComplete: "View complete",
     },
     questions: {
@@ -700,8 +700,7 @@ const english = {
         createBtn: "Create question",
         createdData: "Creation date",
         createSuccess: "Question created successfully",
-        descriptionOrQuestionId:
-            "Description, ID or enter a new question to register",
+        descriptionOrQuestionId: "Description, ID or enter a new question to register",
         editQuestion: "Edit question",
         editSuccess: "Question edited successfully",
         errors: {
@@ -719,39 +718,31 @@ const english = {
             save: "Save changes",
             title: "Edit question",
         },
-        noMoreQuestionsAvailable:
-            "There are no more questions available",
-        noQuestionsRegistered:
-            "There are no questions registered",
+        noMoreQuestionsAvailable: "There are no more questions available",
+        noQuestionsRegistered: "There are no questions registered",
         noQuestionsWereFound: "No questions were found",
-        noQuestionsWereSelected:
-            "No questions were selected.",
+        noQuestionsWereSelected: "No questions were selected.",
         notFound: "No questions registered",
         numberOfQuestionsHasBeenExceeded:
             "Number of questions has been exceeded. Contact your plan administrator.",
         questionNotFound: "Question not found",
         removeSuccess: "Question removed successfully",
-        removeTitle:
-            "You are about to delete a system question",
+        removeTitle: "You are about to delete a system question",
         searchQuestion: "Search question",
         selectQuestions: "Select questions",
-        selectToDelete:
-            "Select at least one question to perform the deletion.",
+        selectToDelete: "Select at least one question to perform the deletion.",
         sendQuestion: "Send question",
         subtitle: "Manage system questions",
         title: "Questions",
         viewQuestions: "View questions",
-        youAreAboutToDeleteQuestion:
-            "You are about to delete <br/> a question from the system",
+        youAreAboutToDeleteQuestion: "You are about to delete <br/> a question from the system",
     },
     quizzes: {
         applyingQuestionnaire: "Applying questionnaire",
-        applyingQuestionnaireWait:
-            "Applying questionnaire, please wait.",
+        applyingQuestionnaireWait: "Applying questionnaire, please wait.",
         applyQuestionnaire: "Apply questionnaire",
         basicInfo: "Basic Information",
-        basicInfoSubtitle:
-            "Configure the basic information of the quiz",
+        basicInfoSubtitle: "Configure the basic information of the quiz",
         createBtn: "Create quiz",
         createdDate: "Creation date",
         createSuccess: "Quiz created successfully",
@@ -763,8 +754,7 @@ const english = {
             invalid: "Invalid questionnaire",
             removeError: "Error removing the quiz",
         },
-        failedToApplyQuestionnaire:
-            "Failed to apply questionnaire.",
+        failedToApplyQuestionnaire: "Failed to apply questionnaire.",
         formCreate: {
             subtitle: "Save the new quiz information",
             title: "New Quiz",
@@ -776,27 +766,21 @@ const english = {
         formName: "Quiz name",
         formNamePlaceholder: "Enter quiz name",
         formSelect: "Select document type",
-        noQuestionnairesWereFound:
-            "No questionnaires were found",
+        noQuestionnairesWereFound: "No questionnaires were found",
         notFound: "No quizzes registered",
         questionnaireAndAi: "Questionnaire and AI",
-        questionnaireAppliedSuccessfully:
-            "Questionnaire applied successfully, please wait.",
-        questionnaireSearch:
-            "Name, ID , Document type or insert a new questionnaire to register",
+        questionnaireAppliedSuccessfully: "Questionnaire applied successfully, please wait.",
+        questionnaireSearch: "Name, ID , Document type or insert a new questionnaire to register",
         questions: "Questions",
         questionsSection: {
-            subtitle:
-                "Select the questions that will be part of this quiz",
+            subtitle: "Select the questions that will be part of this quiz",
             title: "Question Selection",
         },
         removeSuccess: "Quiz removed successfully",
-        removeTitle:
-            "You are about to delete a quiz from the system",
+        removeTitle: "You are about to delete a quiz from the system",
         searchQuestionnaire: "Search questionnaire",
         selectQuestionnaire: "Select a questionnaire",
-        selectToDelete:
-            "Select at least one questionnaire to perform the deletion.",
+        selectToDelete: "Select at least one questionnaire to perform the deletion.",
         subtitle: "Manage system quizzes",
         tableTitle: "Quiz list",
         thereIsNotEnoughCredit:
@@ -807,62 +791,72 @@ const english = {
             "You are about to delete <br/> a questionnaire from the system",
     },
     template: {
-        addParam: "Add Param",
-        bodySubtitle:
-            "Type '{' to see available variables.",
-        cancelBtn: "Cancel",
-        createBtn: "Save Template",
-        createError: "Error creating template",
-        createSuccess: "Template created successfully",
+        title: "API Templates",
+        tableTitle: "Templates",
+        subtitle: "Manage, test and edit your API request templates.",
         createTemplate: "Create new template",
-        editError: "Error updating template",
-        editSuccess: "Template updated successfully",
-        endpointUrl: "Endpoint URL",
-        endpointUrlPlaceholder:
-            "https://api.example.com/v1/resource",
-        formCreate: {
-            subtitle:
-                "Configure your API request blueprint.",
-            title: "Create Template",
-        },
-        formEdit: {
-            subtitle: "Update your API request blueprint.",
-            title: "Edit Template",
-        },
-        headers: "Headers",
-        importCurl: "Import cURL",
-        invalidJsonFormat: "Invalid JSON format",
-        keyPlaceholder: "Key (value will be {{keyName}})",
+        notFound: "No templates registered",
         method: "Method",
         name: "Name",
-        noQueryParameters:
-            "No query parameters. Add one or type in the URL.",
-        notFound: "No templates registered",
-        queryParameters: "Query Parameters",
-        queryParams: "Query Params",
-        removeError: "Error removing template",
-        removeSuccess: "Template removed successfully",
-        requestBody: "Request Body",
+        url: "URL",
+        createBtn: "Save Template",
+        cancelBtn: "Cancel",
+        importCurl: "Import cURL",
         requestDetails: "Request Details",
-        subtitle:
-            "Manage, test and edit your API request templates.",
-        tableTitle: "Templates",
+        requestBody: "Request Body",
         templateName: "Template Name",
         templateNamePlaceholder: "e.g. User OCR Processing",
-        title: "API Templates",
-        unselected: "Select a template",
-        url: "URL",
+        endpointUrl: "Endpoint URL",
+        endpointUrlPlaceholder: "https://api.example.com/v1/resource",
+        queryParams: "Query Params",
+        headers: "Headers",
+        queryParameters: "Query Parameters",
+        addParam: "Add Param",
+        noQueryParameters: "No query parameters. Add one or type in the URL.",
+        bodySubtitle: "Type '[' to see available variables.",
         variablesTip:
-            "Tip: Use variables like {{ocr}} or {{prompt}} that will be replaced at execution time.",
+            "Tip: Use variables like [ocr] or [prompt] that will be replaced at execution time.",
+        formCreate: {
+            title: "Create Template",
+            subtitle: "Configure your API request blueprint.",
+        },
+        formEdit: {
+            title: "Edit Template",
+            subtitle: "Update your API request blueprint.",
+        },
+        createSuccess: "Template created successfully",
+        createError: "Error creating template",
+        editSuccess: "Template updated successfully",
+        editError: "Error updating template",
+        removeSuccess: "Template removed successfully",
+        removeError: "Error removing template",
+        unselected: "Select a template",
+        keyPlaceholder: "Key",
+        valuePlaceholder: "Enter value",
+        invalidJsonFormat: "Invalid JSON format",
+        variablesOcr: "Digitizer Agent",
+        variablesEmbeddings: "Indexing",
+        variablesPrompt: "Agent",
+        selectTemplate: "Select a Template",
+        selectTemplatePlaceholder: "Choose an API template",
+        fillVariables: "Fill Variables",
+        enterValue: "Enter value for",
+        loadError: "Error loading template",
+        configuration: {
+            title: "Configure API Template",
+            subtitle: "Select and configure an API template",
+            savedSuccessfully: "Template configuration saved successfully",
+            saveError: "Error saving template configuration",
+        },
     },
     tools: {
         createBtn: "New Tool",
         created: "Created on",
         createError: "Error creating tool",
         createSuccess: "Tool created successfully",
-        dependencyRequired:
-            "Prompt tool requires at least one dependency",
+        dependencyRequired: "Agent tool requires at least one dependency",
         dependencyToolNotFound: "Dependency tool not found",
+        duplicated: "Duplicated tool name",
         editBtn: "Save changes",
         editError: "Error updating tool",
         editSuccess: "Tool updated successfully",
@@ -873,8 +867,7 @@ const english = {
             entries: "Input",
             entriesEditable: "Editable input",
             entriesSelect: "Select input type",
-            invalidConnector:
-                "Connector did not respond. Invalid URL or key",
+            invalidConnector: "Connector did not respond. Invalid URL or key",
             name: "Tool Name",
             outputSelect: "Select output type",
             types: "Tool Type",
@@ -883,28 +876,31 @@ const english = {
             validConnector: "Connector is active",
         },
         formCreate: {
-            subtitle:
-                "Create a new tool to process documents",
+            subtitle: "Create a new tool to process documents",
             title: "New Tool",
         },
         formEdit: {
-            subtitle:
-                "Update the selected tool's information",
+            subtitle: "Update the selected tool's information",
             title: "Edit Tool",
         },
         index: "Tools",
         notFound: "No tools registered",
-        ocrDependencyRequired:
-            "Prompt tool requires a dependency on an OCR tool",
+        ocrDependencyRequired: "Agent tool requires a dependency on a Digitizer Agent tool",
         removeError: "Error removing tool",
         removeSuccess: "Tool removed successfully",
-        removeTitle:
-            "You are about to delete a tool from the system",
-        subtitle:
-            "Manage and configure your document processing tools",
+        removeTitle: "You are about to delete a tool from the system",
+        subtitle: "Manage and configure your document processing tools",
         title: "Tools",
         toolNotFound: "Tool not found",
         type: "Type",
+        typeDisplay: {
+            Prompt: "Agent",
+            Embeddings: "Indexing",
+            OCR: "Digitizer Agent",
+            N8N: "N8N",
+            Quiz: "Questionnaire",
+            Api: "API",
+        },
         validationError: "Error validating fields",
     },
     transferListPlaceholder: "Search in list",
@@ -919,20 +915,17 @@ const english = {
             removeError: "Error removing type",
         },
         newType: "Create type",
-        noDocumentTypeWasFound:
-            "No document type was found",
+        noDocumentTypeWasFound: "No document type was found",
         removeSuccess: "Type removed successfully",
         saveTitleType: "Create type",
         saveType: "Create",
         searchTypes: "Search types",
-        selectToDelete:
-            "Select at least one type to perform the exclusion.",
+        selectToDelete: "Select at least one type to perform the exclusion.",
         subtitle: "Manage system document types",
         title: "Types",
         typeDoc: "Document Type",
         typeDocAlreadyExists: "Duplicated Type",
-        typeNameOrId:
-            "Name, ID or enter a new type to register",
+        typeNameOrId: "Name, ID or enter a new type to register",
         youAreAboutToDeleteDocumentType:
             "You are about to delete <br/> a document type from the system",
         youAreAboutToDeleteType: "Delete type",
@@ -940,12 +933,11 @@ const english = {
     unauthorized: {
         returnToHome: "Return",
         title: "You do not have permission to access this screen.",
+        operation: "You do not have permission to perform this action.",
     },
-    unexpectedError:
-        "An unexpected error occurred. Please contact the system administrator.",
+    unexpectedError: "An unexpected error occurred. Please contact the system administrator.",
     validation: {
-        confirmedFieldDiffers:
-            "The confirmed field differs from the original",
+        confirmedFieldDiffers: "The confirmed field differs from the original",
         email: "Invalid email",
         fillInThisField: "Fill in this field.",
         fullname: "Enter at least first and last name",
@@ -954,18 +946,12 @@ const english = {
         min: "Minimum of {limit} characters",
         oneElementArray: "Select at least one option",
         oneStep: "At least one step is required to save",
-        password_confirmed:
-            "Password confirmation does not match.",
-        password_lowercase:
-            "Password must contain at least one lowercase letter.",
-        password_min:
-            "Password must be at least 6 characters.",
-        password_number:
-            "Password must contain at least one number.",
-        password_special:
-            "Password must contain at least one special character.",
-        password_uppercase:
-            "Password must contain at least one uppercase letter.",
+        password_confirmed: "Password confirmation does not match.",
+        password_lowercase: "Password must contain at least one lowercase letter.",
+        password_min: "Password must be at least 6 characters.",
+        password_number: "Password must contain at least one number.",
+        password_special: "Password must contain at least one special character.",
+        password_uppercase: "Password must contain at least one uppercase letter.",
         required: "Required field",
     },
     welcomeMsg: "Welcome",
@@ -979,6 +965,13 @@ const english = {
         associatedTeams: "Associated Teams",
         basicInfo: "Basic Information",
         boardView: "Viewing workflow:",
+        clone: "Clone",
+        cloneConfirm: "Clone",
+        cloneError: "Error cloning workflow",
+        cloneNameLabel: "Name of the new workflow",
+        cloneSuccess: "Workflow cloned successfully",
+        cloneSuffix: "Copy",
+        cloneTitle: "Clone workflow",
         configuredTools: "Configured Tools",
         createBtn: "New Workflow",
         createError: "Error creating workflow",
@@ -993,38 +986,32 @@ const english = {
         error: "Error fetching workflows",
         finalize: "Finalize",
         formCreate: {
-            subtitle:
-                "Follow the steps to configure your workflow.",
+            subtitle: "Follow the steps to configure your workflow.",
             title: "Create Workflow",
         },
         formEdit: {
-            subtitle:
-                "Follow the steps to configure your workflow.",
+            subtitle: "Follow the steps to configure your workflow.",
             title: "Edit Workflow",
         },
         index: "Workflow",
         labelWatchingWorkflow: "Viewing workflow:",
         labelWorkflowBoard: "Document Processing Board",
         labelWorkflowDocs: "Documents Workflow",
-        labelWorkflowSubTitle:
-            "Visualize the flow of documents through processing steps",
+        labelWorkflowSubTitle: "Visualize the flow of documents through processing steps",
         leaveMessage:
             "You made changes in workflow that haven't been saved yet. If you quit now, all edited data will be lost.",
         loadError: "Error loading workflow",
         manage: "Manage workflow:",
-        managementSubtitle:
-            "Manage and configure document processing workflows",
+        managementSubtitle: "Manage and configure document processing workflows",
         managementTitle: "Workflow Management",
         name: "Workflow Name",
         nameAndAssociations: "Name and Associations",
         namePlaceholder: "Ex: Contract Approval",
         next: "Next",
-        noStepsAvailable:
-            "No steps available. Please add steps in the previous phase.",
+        noStepsAvailable: "No steps available. Please add steps in the previous phase.",
         notFound: "No workflow was found",
         phase1Error: "Error saving basic information",
-        phase1Success:
-            "Basic information saved successfully",
+        phase1Success: "Basic information saved successfully",
         phase2Error: "Error saving steps",
         phase2Success: "Steps saved successfully",
         phase3Error: "Error saving tools",
@@ -1050,7 +1037,9 @@ const english = {
             approved: "Approved",
             awaitinganalysis: "Awaiting Analysis",
             done: "Done",
+            finalize: "Finalize",
             waitingforapproval: "Waiting for Approval",
+            rejected: "Rejected",
         },
         stepFlow: "Document Automation",
         stepNamePlaceholder: "Step Name",
@@ -1058,10 +1047,8 @@ const english = {
         stepsTitle: "Workflow Steps",
         stepSubtitle: "Set up rules and responsibilities",
         stepTitle: "Workflow Step",
-        subtitle:
-            "View the flow of documents through the processing stages",
-        subtitleEditor:
-            "Manage and configure document processing workflows",
+        subtitle: "View the flow of documents through the processing stages",
+        subtitleEditor: "Manage and configure document processing workflows",
         teams: "Associated teams",
         title: "Document Processing Board",
         toolFlowsTitle: "Add Tool Flow",

@@ -1,6 +1,7 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Text;
 using WoopiAiHub.Application.Dto;
@@ -357,6 +358,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+
         public static MetaDataAutomationDto FindValidProcessOcrDataAutomationDto()
         {
             var faker = new Faker("pt_BR");
@@ -440,6 +442,47 @@ namespace WoopiAiHub.UnitTests.Fixture
                     KeyMongoAccess = f.Random.String(),
                     TotalPages = f.Random.Int(1, 100),
                     Data = new MetaDataAutomationDto(361, 456)
+                });
+            return faker;
+        }
+
+
+        public static DocumentEmbeddingsQueryResponseDto FindValidDocumentEmbeddingsQueryResponseDto()
+        {
+            var faker = new Faker<DocumentEmbeddingsQueryResponseDto>("pt_BR")
+                .CustomInstantiator(f => new DocumentEmbeddingsQueryResponseDto
+                {
+                    ReferenceFile = f.Random.String(),
+                    KeyMongoAccess = f.Random.String(),
+                    Tenant = f.Random.String(),
+                    Email = f.Random.String(),
+                    Data = JObject.FromObject(new MetaDataAutomationDto(361, 456)),
+                    QuestionsAnswers = new List<QuestionAnswerDto>() {
+                        new QuestionAnswerDto
+                        {
+                            Question = "What is the capital of France?",
+                            Answer = "The capital of France is Paris.",
+                            Usage = new List<QueryUsageDto>
+                            {
+                                new QueryUsageDto
+                                {
+                                    Model = "text-davinci-003",
+                                    Usage_unity = "tokens",
+                                    Prompt_usage = 10,
+                                    Completion_usage = 20,
+                                    Total_usage = 30
+                                },
+                                new QueryUsageDto
+                                {
+                                    Model = "text-davinci-003",
+                                    Usage_unity = "tokens",
+                                    Prompt_usage = 25,
+                                    Completion_usage = 20,
+                                    Total_usage = 52
+                                }
+                            }
+                        }
+                    }
                 });
             return faker;
         }

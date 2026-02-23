@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -243,12 +243,19 @@ namespace WoopiAiHub.Application.Services.Automation
             execution.UpdateStatusExecution(StatusExecution.Running);
             await _stepToolExecutionRepository.UpdateAsync(execution);
 
-            var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
-            var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
+            try
+            {
+                var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
+                var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
 
-            var payload = await BuildPayloadWithDependenciesAsync(stepTool, enrichedDto, input, resolvedCardId, execution);
-
-            await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
+                var payload = await BuildPayloadWithDependenciesAsync(stepTool, enrichedDto, input, resolvedCardId, execution);
+                await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
+            }
+            catch
+            {
+                execution.UpdateStatusExecution(StatusExecution.Pending);
+                await _stepToolExecutionRepository.UpdateAsync(execution);
+            }
         }
 
         /// <summary>
@@ -318,6 +325,10 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task ContinueExecution(AutomationServicesDto automationServicesDto)
         {
+            var card = await _cardRepository.FindByIdWithStatus(automationServicesDto.CardId);
+            if (card != null && card.IsRejected())
+                return;
+
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
             
@@ -431,7 +442,7 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns>Task que representa a operação assíncrona</returns>
         private async Task CheckAndAdvanceAiProfileStepAsync(AutomationServicesDto automationServicesDto, StepTool dependentStepTool)
         {
-            var card = await _cardRepository.FindById(automationServicesDto.CardId);
+            var card = await _cardRepository.FindByIdWithStepAndProfile(automationServicesDto.CardId);
             if (card?.Step?.Profile == null)
                 return;
 
@@ -446,7 +457,7 @@ namespace WoopiAiHub.Application.Services.Automation
                 return;
             }
 
-            card.UpdateStepAndSatus(nextStep.Id, nextStep.StatusId);
+            card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
             var updated = _cardRepository.Update(card);
 
             if (updated)

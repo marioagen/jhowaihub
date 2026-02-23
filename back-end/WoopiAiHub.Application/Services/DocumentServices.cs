@@ -55,9 +55,12 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IUsageDailyServices _usageDailyServices;
+        private readonly IUserRepository _userRepository;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
+        private const int DocumentHistoryTypeInputQuestionnaire = 1;
+        private const int DocumentHistoryTypeDocumentInput = 2;
 
         public DocumentServices(IDocumentRepository documentRepository,
             IValidator<RequestCreateDocumentDto> documentDtoValidator,
@@ -81,7 +84,8 @@ namespace WoopiAiHub.Application.Services
             IWorkflowRepository workflowRepository,
             IStepToolOutputRepository stepToolOutputRepository,
             IStepToolRepository stepToolRepository,
-            IUsageDailyServices usageDailyServices)
+            IUsageDailyServices usageDailyServices,
+            IUserRepository userRepository)
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
@@ -105,6 +109,7 @@ namespace WoopiAiHub.Application.Services
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolRepository = stepToolRepository;
             _usageDailyServices = usageDailyServices;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -182,28 +187,28 @@ namespace WoopiAiHub.Application.Services
 
             var referenceFilesToRemove = _documentRepository.FindHashById(ids).ToList();
             var hashList = referenceFilesToRemove;
-            
+
             _unitOfWork.BeginTransaction();
             try
             {
                 _documentRepository.ClearWorkflowRelationships(ids);
-                
+
                 var cardIds = await _cardRepository.FindCardIdsByDocumentIdsAsync(ids);
                 if (cardIds.Any())
                 {
                     _stepToolExecutionRepository.DeleteByCardIds(cardIds);
                     _stepToolOutputRepository.DeleteByCardIds(cardIds);
                 }
-                
+
                 await _cardRepository.DeleteByDocumentIds(ids);
                 var deleted = _documentRepository.Delete(ids);
                 await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
-                
+
                 if (referenceFilesToRemove.Any())
                 {
                     await DeleteBlobFilesAsync(referenceFilesToRemove, headersDto.Tenant);
                 }
-            
+
                 _unitOfWork.Commit();
                 return deleted;
             }
@@ -243,7 +248,8 @@ namespace WoopiAiHub.Application.Services
                 await this.ProcessRequestCustomQuery(resultRequest,
                     documentQuestionnaireDto.IdDocument,
                     description,
-                    headersDto.EmailCreator);
+                    headersDto.EmailCreator,
+                    isFromQuestionnaire: true);
             }
 
             return true;
@@ -349,7 +355,8 @@ namespace WoopiAiHub.Application.Services
             var textResponse = await this.ProcessRequestCustomQuery(resultRequest,
                 documentInputDto.Id,
                 documentInputDto.Input,
-                headersDto.EmailCreator);
+                headersDto.EmailCreator,
+                isFromQuestionnaire: false);
 
             return textResponse;
         }
@@ -388,6 +395,61 @@ namespace WoopiAiHub.Application.Services
             await UpdateDocumentStatusAsync(dto.ReferenceFile, dto.Email);
 
             return dto.Data;
+        }
+
+        /// <summary>
+        /// Processes the questionnaire result from the tool and saves the result, token usage and history in the database.
+        /// </summary>
+        /// <param name="documentQuestionnaireDto"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        public async Task<Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto)
+        {
+            var documentDb = _documentRepository.FindByReferenceFile(documentQuestionnaireDto.ReferenceFile);
+            if (documentDb == null)
+            {
+                return null;
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                var dataDto = System.Text.Json.JsonSerializer.Deserialize<MetaDataAutomationDto>(documentQuestionnaireDto.Data.ToString());
+
+                var execution = await _stepToolExecutionRepository
+                    .FindByStepToolIdAndCardIdAsync(dataDto.StepToolId, dataDto.CardId);
+
+                await UpdateExecutionAsync(execution!, documentQuestionnaireDto.Email);
+                await SaveStepToolOutputAsync(
+                    execution!, 
+                    System.Text.Json.JsonSerializer.Serialize(
+                        documentQuestionnaireDto
+                            .QuestionsAnswers
+                                .Select(x => new QuestionAnswerDto {
+                                    Id = x.Id,
+                                    Question = x.Question,
+                                    Answer = x.Answer
+                                })
+                                .ToList()));
+
+                var usages = documentQuestionnaireDto.QuestionsAnswers.SelectMany(x => x.Usage)
+                    .ToList();
+
+                await _usageDailyServices.AddByRangeValuesAsync(
+                    MetricNames.Token,
+                    documentQuestionnaireDto.Email,
+                    usages
+                );
+
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+
+            return documentDb;
         }
 
 
@@ -507,22 +569,30 @@ namespace WoopiAiHub.Application.Services
         /// <param name="resultRequest"></param>
         /// <param name="id"></param>
         /// <param name="input"></param>
+        /// <param name="emailCreator"></param>
+        /// <param name="isFromQuestionnaire"></param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
         /// <exception cref="Exception"></exception>
         private async Task<string> ProcessRequestCustomQuery(HttpResponseMessage resultRequest,
             int id,
             string input,
-            string emailCreator)
+            string emailCreator,
+            bool isFromQuestionnaire)
         {
             if (resultRequest.IsSuccessStatusCode)
             {
                 var queryResponse = await resultRequest.Content.ReadAsStringAsync();
                 var queryResponseModel = JsonConvert.DeserializeObject<QueryResponseModelRefitDto>(queryResponse);
 
+                var userId = _userRepository.FindIdByEmail(emailCreator);
+                var userIdOrNull = (userId == Guid.Empty) ? (Guid?)null : userId;
+                var historyType = isFromQuestionnaire ? DocumentHistoryTypeInputQuestionnaire : DocumentHistoryTypeDocumentInput;
                 var documentHistoryForDb = CreateDocumentHistoryForDb(id,
                     queryResponseModel!.response,
-                    input);
+                    input,
+                    historyType,
+                    userIdOrNull);
                 foreach (var usage in queryResponseModel.Usage)
                 {
                     await _usageDailyServices.AddByValuesAsync(MetricNames.Token, emailCreator, usage.Total_usage ?? 0,
@@ -574,10 +644,14 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <param name="output"></param>
         /// <param name="input"></param>
+        /// <param name="type"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         private static DocumentHistory CreateDocumentHistoryForDb(int id,
             string output,
-            string input)
+            string input,
+            int type,
+            Guid? userId)
         {
             return new DocumentHistory
             (
@@ -585,7 +659,9 @@ namespace WoopiAiHub.Application.Services
                 input,
                 output,
                 0,
-                DateTime.Now
+                DateTime.Now,
+                type,
+                userId
             );
         }
 
@@ -1031,5 +1107,6 @@ namespace WoopiAiHub.Application.Services
                     .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
                     .Select(e => e.Text));
         }
+
     }
 }

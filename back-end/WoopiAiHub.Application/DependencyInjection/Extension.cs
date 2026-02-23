@@ -50,12 +50,15 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IStepProfilePermissionsServices, StepProfilePermissionsServices>();
             services.AddScoped<IApiClientFactory, ApiClientFactory>();
             services.AddScoped<IN8NServices, N8NServices>();
+            services.AddScoped<IApiOutputServices, ApiOutputServices>();
             services.AddScoped<IPromptServices, PromptServices>();
             services.AddScoped<IValidatePrompt, ValidatePrompt>();
             services.AddScoped<IToolHandler, EmbeddingsHandler>();
             services.AddScoped<IToolHandler, OcrHandler>();
             services.AddScoped<IToolHandler, PromptHandler>();
             services.AddScoped<IToolHandler, N8NHandler>();
+            services.AddScoped<IToolHandler, ApiHandler>();
+            services.AddScoped<IToolHandler, QuizHandler>();
             services.AddScoped<IEncryptionService, AesGcmEncryptionService>();
             services.AddScoped<IUsageDailyServices, UsageDailyServices>();
             services.AddScoped<IUsageMonthServices, UsageMonthServices>();
@@ -65,12 +68,15 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IUsageLogRepository, UsageLogRepository>();
             services.AddScoped<IApiTemplateServices, ApiTemplateServices>();
             services.AddScoped<ISubscriptionPeriodServices, SubscriptionPeriodServices>();
+            services.AddScoped<IDocumentAnalysisRejectionServices, DocumentAnalysisRejectionServices>();
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();
             services.AddHostedService<PromptConsumer>();
+            services.AddHostedService<QuizConsumer>();
             services.AddHostedService<SubscriptionConsumer>();
             services.AddHostedService<SubscriptionEndPeriodConsumer>();
+            services.AddHostedService<ApiOutputConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();
