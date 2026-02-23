@@ -216,7 +216,7 @@
                                 {{ $t("common.save") }}
                             </button>
                         </div>
-                    </div>                    
+                    </div>
                     <div v-else-if="isQuizTool">
                         <h6>Quiz</h6>
                         <div class="background-div">
@@ -462,7 +462,6 @@
                 this.nodeFlow = selectedNode;
                 this.parameters = selectedNode.data.parameters;
                 this.toolType = selectedNode.data.toolType;
-
                 await this.loadPreviousStepTools(selectedNode);
 
                 this.selectedDependencies = selectedNode.data.dependencies;
@@ -530,9 +529,7 @@
                         name: "PromptSelector",
                     });
                     return;
-                } else if (
-                    this.isTargetTool(ToolType.Quiz)
-                ) {
+                } else if (this.isTargetTool(ToolType.Quiz)) {
                     this.findAllQuizzes();
                     if (this.parameters.length === 0) {
                         this.idSelected = 0;
@@ -543,9 +540,7 @@
                             webhookId: null,
                         });
                     } else {
-                        this.idSelected = parseInt(
-                            this.parameters[0]?.value
-                        );
+                        this.idSelected = parseInt(this.parameters[0]?.value);
                     }
                 } else if (this.parameters.length === 0) {
                     this.parameters.push({
@@ -722,18 +717,14 @@
                 });
             },
             findAllPrompts() {
-                PromptService.getPrompts().then(
-                    (response) => {
-                        this.promptlist = response;
-                    }
-                );
+                PromptService.getPrompts().then((response) => {
+                    this.promptlist = response;
+                });
             },
             findAllQuizzes() {
-                QuizzesService.getQuizzesList().then(
-                    (response) => {
-                        this.quizlist = response;
-                    }
-                );
+                QuizzesService.getQuizzesList().then((response) => {
+                    this.quizlist = response;
+                });
             },
             async loadPreviousStepTools(node) {
                 let workflowSteps = [];
@@ -809,7 +800,6 @@
                 }
 
                 const flowState = JSON.parse(flowStateJson);
-
                 if (flowState.nodes && this.step.stepTools) {
                     flowState.nodes.forEach((node) => {
                         if (node.id === "start") {
@@ -863,12 +853,9 @@
                 localStorage.removeItem("flow_state_params");
             },
             onQuizSelect() {
-                const selectedQuiz = this.quizlist.find(
-                    (q) => q.id === this.idSelected
-                );
+                const selectedQuiz = this.quizlist.find((q) => q.id === this.idSelected);
                 if (selectedQuiz) {
-                    this.nodeFlow.data.subtitle =
-                        selectedQuiz.name;
+                    this.nodeFlow.data.subtitle = selectedQuiz.name;
                 }
             },
         },

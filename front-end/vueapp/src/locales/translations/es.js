@@ -641,6 +641,7 @@ const spanish = {
             workflowStepView: "Ver Pasos",
         },
         groups: {
+            actions: "Acciones",
             dashboard: "Dashboard",
             documents: "Documentos",
             management: "Gestión",
@@ -925,6 +926,7 @@ const spanish = {
     unauthorized: {
         returnToHome: "Volver",
         title: "No tiene permiso para acceder a esta pantalla.",
+        operation: "No tiene permiso para realizar esta acción.",
     },
     unexpectedError:
         "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",
