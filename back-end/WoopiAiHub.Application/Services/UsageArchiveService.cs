@@ -171,7 +171,7 @@ namespace WoopiAiHub.Application.Services
             if (usageByTenant <= 0)
             {
                 _logger.LogInformation("No usage to charge for tenant {TenantName}", tenant.Name);
-                return;
+                await subcriptionPeriodService.UpdateToProcessedAsync(lastPeriod.Id);
             }
 
             var tenantConsumption = new TenantConsumptionDto
