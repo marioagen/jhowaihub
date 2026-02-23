@@ -66,10 +66,11 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "notfound@example.com";
             var group = "Actions";
             var permission = "Read";
+            var profiles = new List<string>();
 
             var userRepositoryMock = _mocker.GetMock<IUserRepository>();
             userRepositoryMock.Setup(repo => repo.FindUserProfilesByEmailAsync(email))
-                .ReturnsAsync((List<string>)null);
+                .ReturnsAsync(profiles);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() =>
@@ -183,6 +184,7 @@ namespace WoopiAiHub.UnitTests.Services
             var group = "Actions";
             var permission = "Read";
             var profiles = new List<string> { "user" };
+            var permissions = new Dictionary<string, List<string>>();
 
             var userRepositoryMock = _mocker.GetMock<IUserRepository>();
             var permissionRepositoryMock = _mocker.GetMock<IPermissionRepository>();
@@ -190,7 +192,7 @@ namespace WoopiAiHub.UnitTests.Services
             userRepositoryMock.Setup(repo => repo.FindUserProfilesByEmailAsync(email))
                 .ReturnsAsync(profiles);
             permissionRepositoryMock.Setup(repo => repo.FindUserPermissionsAsync(email))
-                .ReturnsAsync((Dictionary<string, List<string>>)null);
+                .ReturnsAsync(permissions);
 
             // Act
             var result = await _permissionServices.UserHasPermissionAsync(email, group, permission);
