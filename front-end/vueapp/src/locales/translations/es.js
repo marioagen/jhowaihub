@@ -389,6 +389,8 @@ const spanish = {
                 "El conector del workflow no respondió. Verifica la URL y la clave API de la herramienta",
             createNewPrompt: "Crear nuevo agente",
             dependenciesRequired: "Seleccione al menos una dependencia",
+            dependenciesInvalidOrRemoved:
+                "Una o más dependencias seleccionadas no son válidas o se eliminaron del flujo.",
             editFlowNodeFail: "No se pudo editar el nodo",
             editFlowNodeSuccess: "Nodo editado exitosamente",
             progressFlowFail: "No se pudo insertar el flujo",

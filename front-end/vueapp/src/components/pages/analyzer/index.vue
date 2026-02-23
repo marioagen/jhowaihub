@@ -97,6 +97,8 @@ import LogService from "@/services/log/logService";
 import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
 import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
 import { hasPermission } from "@/utils/permissions";
+import PermissionGroups from "@/constants/PermissionGroups";
+import PermissionNames from "@/constants/PermissionNames";
 
 export default {
     name: "AnalyzerIndex",
@@ -141,7 +143,7 @@ export default {
     },
     computed: {
         canReject() {
-            return hasPermission('Actions', 'DocumentRejection') && this.currentStepOrder > 1;
+            return hasPermission(PermissionGroups.Documents, PermissionNames.Reject) && this.currentStepOrder > 1;
         },
         isRejected() {
             return this.cardStatus?.toLowerCase() === 'rejected';
@@ -268,7 +270,6 @@ export default {
         closeRejectModal() {
         },
         handleRejectSuccess() {
-            this.alertToast(this.$t('analyze.rejection.success'), 'success');
             setTimeout(() => {
                 this.goBack();
             }, 2000);

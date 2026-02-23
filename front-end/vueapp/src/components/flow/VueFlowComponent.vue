@@ -92,7 +92,7 @@
 
     export default {
         name: "VueFlowComponent",
-        emits: ["openNodeConfig"],
+        emits: ["openNodeConfig", "nodeDeleted"],
         props: {
             stepId: {
                 type: Number,
@@ -234,6 +234,7 @@
                 this.edges = this.edges.filter(
                     (edge) => edge.source !== nodeId && edge.target !== nodeId
                 );
+                this.$emit("nodeDeleted", nodeId);
             },
             removeNodeDependency(nodeId) {
                 const idx = this.nodes.findIndex((node) => node.id === nodeId);
@@ -404,7 +405,7 @@
             this.getToolsList();
             this.getFlow();
         },
-        expose: ["updateNodeInput", "buildFlowPayload", "reloadFlow"],
+        expose: ["updateNodeInput", "buildFlowPayload", "reloadFlow", "getNodesOrderedByEdges"],
     };
 </script>
 <style>

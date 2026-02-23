@@ -383,6 +383,8 @@ const english = {
             connectorWorkflowFail: "Workflow connector did not respond. Check tool URL and API key",
             createNewPrompt: "Create new agent",
             dependenciesRequired: "Select at least one dependency",
+            dependenciesInvalidOrRemoved:
+                "One or more selected dependencies are invalid or were removed from the flow.",
             editFlowNodeFail: "Failed to edit node",
             editFlowNodeSuccess: "Node edited successfully",
             progressFlowFail: "Failed to insert flow",
