@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
@@ -84,7 +85,10 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         private async Task<(Card card, Status status)> Validate(CreateDocumentAnalysisRejectionDto dto, string emailCreator)
         {
-            var hasPermission = await _permissionServices.UserHasPermissionAsync(emailCreator, "Actions", "DocumentRejection");
+            var hasPermission = await _permissionServices.UserHasPermissionAsync(
+                emailCreator,
+                PermissionGroups.Documents,
+                PermissionNames.Rejection);
             if (!hasPermission)
             {
                 throw new AppException(ErrorCode.NotFound, "User does not have permission to reject documents", UserLabel.UnauthorizedOperation);
