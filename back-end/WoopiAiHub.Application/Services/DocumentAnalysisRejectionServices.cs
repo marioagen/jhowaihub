@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
@@ -13,28 +14,28 @@ namespace WoopiAiHub.Application.Services
     public class DocumentAnalysisRejectionServices : IDocumentAnalysisRejectionServices
     {
         private readonly IDocumentAnalysisRejectionRepository _repository;
-        private readonly IUserRepository _userRepository;
         private readonly IStepRepository _stepRepository;
-        private readonly IPermissionRepository _permissionRepository;
+        private readonly IPermissionServices _permissionServices;
         private readonly ICardRepository _cardRepository;
         private readonly IStatusRepository _statusRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public DocumentAnalysisRejectionServices(
             IDocumentAnalysisRejectionRepository repository,
-            IUserRepository userRepository,
             IStepRepository stepRepository,
-            IPermissionRepository permissionRepository,
+            IPermissionServices permissionServices,
             ICardRepository cardRepository,
             IStatusRepository statusRepository,
+            IUserRepository userRepository,
             IUnitOfWork unitOfWork)
         {
             _repository = repository;
-            _userRepository = userRepository;
             _stepRepository = stepRepository;
-            _permissionRepository = permissionRepository;
             _cardRepository = cardRepository;
             _statusRepository = statusRepository;
+            _permissionServices = permissionServices;
+            _userRepository = userRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -49,15 +50,15 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if the user is not found or does not have permission to reject documents.</exception>
         public async Task<bool> CreateRejectionAsync(CreateDocumentAnalysisRejectionDto dto, string emailCreator)
         {
-            (Card card, Status status, User user) = await Validate(dto, emailCreator);
-
+            (Card card, Status status) = await Validate(dto, emailCreator);
+            var userId = _userRepository.FindIdByEmail(emailCreator);
             var rejection = new DocumentAnalysisRejection(
                 0,
                 DateTime.Now,
                 dto.Justification,
                 dto.CardId,
                 dto.StepId,
-                user.Id
+                userId
             );
             _unitOfWork.BeginTransaction();
             try
@@ -82,37 +83,33 @@ namespace WoopiAiHub.Application.Services
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private async Task<(Card card, Status status, User user)> Validate(CreateDocumentAnalysisRejectionDto dto, string emailCreator)
+        private async Task<(Card card, Status status)> Validate(CreateDocumentAnalysisRejectionDto dto, string emailCreator)
         {
-            var permissions = await _permissionRepository.FindUserPermissionsAsync(emailCreator);
-            var hasPermission = permissions?.Any(p =>
-                p.Value.Contains("DocumentRejection") && p.Key == "Actions") ?? false;
+            var hasPermission = await _permissionServices.UserHasPermissionAsync(
+                emailCreator,
+                PermissionGroups.Documents,
+                PermissionNames.Rejection);
             if (!hasPermission)
             {
-                throw new AppException(ErrorCode.Conflict, "User does not have permission to reject documents", null);
+                throw new AppException(ErrorCode.NotFound, "User does not have permission to reject documents", UserLabel.UnauthorizedOperation);
             }
             var card = await _cardRepository.FindById(dto.CardId);
             if (card == null)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             }
             var step = await _stepRepository.FindById(dto.StepId);
             if (step == null)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
             }
             var status = await _statusRepository.FindById((int)CardStatus.Rejected);
             if (status == null)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
-            }
-            var user = await _userRepository.FindByEmailAsync(emailCreator);
-            if (user == null)
-            {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found", UserLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
             }
 
-            return (card, status, user);
+            return (card, status);
         }
 
         /// <summary>

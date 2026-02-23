@@ -1,8 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WoopiAiHub.Domain.DTOs;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
@@ -11,5 +6,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     {
         List<GroupedPermissionsDto> FindAll();
         ICollection<PermissionDto> FindWorkflowPermissions();
+        Task<bool> UserHasPermissionAsync(string email, string group, string permission);
     }
 }

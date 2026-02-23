@@ -141,7 +141,7 @@ export default {
     },
     computed: {
         canReject() {
-            return hasPermission('DocumentRejection', 'Actions') && this.currentStepOrder > 1;
+            return hasPermission('Actions', 'DocumentRejection') && this.currentStepOrder > 1;
         },
         isRejected() {
             return this.cardStatus?.toLowerCase() === 'rejected';
@@ -268,7 +268,7 @@ export default {
         closeRejectModal() {
         },
         handleRejectSuccess() {
-            this.alertToast(this.$t('analyze.reject.success'), 'success');
+            this.alertToast(this.$t('analyze.rejection.success'), 'success');
             setTimeout(() => {
                 this.goBack();
             }, 2000);

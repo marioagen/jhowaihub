@@ -1,22 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Repository;
+using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
 {
     public class PermissionServices :  IPermissionServices
     {        
         private readonly IPermissionRepository _permissionRepository;
+        private readonly IUserRepository _userRepository;
 
-        public PermissionServices(IPermissionRepository permissionRepository)
+        public PermissionServices(IPermissionRepository permissionRepository,
+            IUserRepository userRepository)
         {
-            this._permissionRepository = permissionRepository;
+            _permissionRepository = permissionRepository;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -44,6 +45,27 @@ namespace WoopiAiHub.Application.Services
         public ICollection<PermissionDto> FindWorkflowPermissions()
         {
             return _permissionRepository.FindWorkflowPermissions();            
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="group"></param>
+        /// <param name="permission"></param>
+        /// <returns></returns>
+        public async Task<bool> UserHasPermissionAsync(string email, string group, string permission)
+        {
+            var userProfile = await _userRepository.FindUserProfilesByEmailAsync(email);
+            if (userProfile == null || userProfile.Count == 0)
+            {
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found", UserLabel.NotFound);
+            }
+            bool isAdmin = userProfile.Contains("admin");
+            var permissions = await _permissionRepository.FindUserPermissionsAsync(email);
+            var hasPermission = permissions?.Any(p =>
+                p.Value.Contains(permission) && p.Key == group) ?? false;
+            return isAdmin || hasPermission;
         }
     }
 }
