@@ -350,7 +350,7 @@ namespace WoopiAiHub.UnitTests.Services
             var mockMarketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
 
             mockMarketPlaceApi
-                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()))
+                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ReturnsAsync(sendStatus);
             mockSubscriptionPeriodService.Setup(x => x.FindLastUnprocessedAsync())
                 .ReturnsAsync(subscriptionPeriod);
@@ -483,7 +483,7 @@ namespace WoopiAiHub.UnitTests.Services
                     false));
 
             _marketPlaceApiMock
-                .SetupSequence(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()))
+                .SetupSequence(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ThrowsAsync(new HttpRequestException("Network error"))
                 .ThrowsAsync(new HttpRequestException("Network error"))
                 .ReturnsAsync(true);
@@ -503,7 +503,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()), Times.Exactly(3));
+                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Exactly(3));
         }
 
         [Fact(DisplayName = "Resilience pipeline circuit breaker should open after failures")]
@@ -547,7 +547,7 @@ namespace WoopiAiHub.UnitTests.Services
                     false));
 
             _marketPlaceApiMock
-                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()))
+                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ThrowsAsync(new HttpRequestException("Service unavailable"));
 
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
@@ -661,7 +661,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()), Times.Never);
+                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
         }
 
         [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should send usage when subscription expired")]
@@ -707,7 +707,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             _marketPlaceApiMock
-                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()))
+                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ReturnsAsync(true);
 
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
@@ -727,7 +727,7 @@ namespace WoopiAiHub.UnitTests.Services
             _marketPlaceApiMock
                 .Verify(x => x.ProcessConsumption(
                     "test-key", 
-                    It.Is<ExcessManagementTenantDto>(dto => dto.Tenant == "Tenant1" && dto.UsageCount == 150)), 
+                    It.Is<TenantConsumptionDto>(dto => dto.Tenant == "Tenant1" && dto.UsageCount == 150)), 
                     Times.Once);
         }
 
@@ -785,7 +785,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()), Times.Never);
+                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
         }
 
         [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should return early when DateEnd is null")]
@@ -837,7 +837,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<ExcessManagementTenantDto>()), Times.Never);
+                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
         }
     }
 }

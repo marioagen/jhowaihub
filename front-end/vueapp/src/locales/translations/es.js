@@ -21,6 +21,15 @@ const spanish = {
         failedNoResponse: "Falló, no hay respuesta del servidor.",
         failedToLoadHistory: "No se pudo cargar el historial.",
         findingTheBestAnswer: "Encontrar la mejor respuesta",
+        justification: {
+            date: "Fecha",
+            rejectedBy: "Reprobado por",
+            reason: "Motivo de la Reprobación",
+            subtitle:
+                "Este documento fue devuelto para corrección. Vea los detalles a continuación.",
+            title: "Justificación de la Reprobación",
+            viewJustification: "Ver Justificación",
+        },
         nextStep: "Siguiente paso",
         noDataInDocument: "No hay datos disponibles",
         pleaseSelectQuestionnaire: "Por favor, seleccione un cuestionario",
@@ -28,6 +37,22 @@ const spanish = {
         question: "Pregunta",
         questionnaireResults: "SALIDA",
         questionnaireToApply: "CUESTIONARIO A APLICAR",
+        selectQuestionnaire: "Seleccione un cuestionario...",
+        reject: {
+            cancel: "Cancelar",
+            confirm: "Confirmar Reprobación",
+            error: "Error al reprobar el documento.",
+            justification: "Justificación",
+            justificationInstructions:
+                "Proporcione una justificativa e indique para qué etapa se debe devolver el documento.",
+            justificationPlaceholder: "Proporcione una justificativa",
+            reject: "Reprobar",
+            returnToStep: "Volver a la etapa",
+            selectStep: "Seleccione una etapa...",
+            success: "Documento reprobado con éxito.",
+            title: "Reprobar Documento",
+            validationError: "Por favor, complete todos los campos obligatorios.",
+        },
         selectQuestionnaire: "Seleccione un cuestionario...",
         sendQuestion: "Enviar pregunta",
         subtitle: "Gestiona análisis de documentos",
@@ -242,6 +267,7 @@ const spanish = {
         standardizedFullText: "Texto completo normalizado",
         statusList: {
             notAnalyzed: "En espera de análisis",
+            rejected: "Reprobado",
         },
         subtitle: "Gestiona documentos y extrae información",
         teams: "Equipo",
@@ -363,6 +389,8 @@ const spanish = {
                 "El conector del workflow no respondió. Verifica la URL y la clave API de la herramienta",
             createNewPrompt: "Crear nuevo agente",
             dependenciesRequired: "Seleccione al menos una dependencia",
+            dependenciesInvalidOrRemoved:
+                "Una o más dependencias seleccionadas no son válidas o se eliminaron del flujo.",
             editFlowNodeFail: "No se pudo editar el nodo",
             editFlowNodeSuccess: "Nodo editado exitosamente",
             progressFlowFail: "No se pudo insertar el flujo",
@@ -600,6 +628,7 @@ const spanish = {
         descriptions: {
             dashboard: "Ver Dashboard",
             documents: "Ver Documentos",
+            documentRejection: "Rechazar documentos",
             management: "Ver Gestión de tablas",
             profiles: "Ver Perfiles",
             prompts: "Ver Agentes",
@@ -614,6 +643,7 @@ const spanish = {
             workflowStepView: "Ver Pasos",
         },
         groups: {
+            actions: "Acciones",
             dashboard: "Dashboard",
             documents: "Documentos",
             management: "Gestión",
@@ -768,7 +798,7 @@ const spanish = {
     },
     template: {
         addParam: "Agregar Parámetro",
-        bodySubtitle: "Escriba '{' para ver las variables disponibles.",
+        bodySubtitle: "Escriba '[' para ver las variables disponibles.",
         cancelBtn: "Cancelar",
         createBtn: "Guardar Plantilla",
         createError: "Error al crear plantilla",
@@ -789,7 +819,7 @@ const spanish = {
         headers: "Encabezados",
         importCurl: "Importar cURL",
         invalidJsonFormat: "Formato JSON inválido",
-        keyPlaceholder: "Key (el valor será {{nombreKey}})",
+        keyPlaceholder: "Key",
         method: "Método",
         name: "Nombre",
         noQueryParameters: "Sin parámetros de query. Agregue uno o escriba en la URL.",
@@ -811,7 +841,7 @@ const spanish = {
         variablesEmbeddings: "Indexación",
         variablesPrompt: "Agente",
         variablesTip:
-            "Consejo: Use variables como {{ocr}} o {{prompt}} que serán reemplazadas en el momento de la ejecución.",
+            "Consejo: Use variables como [ocr] o [prompt] que serán reemplazadas en el momento de la ejecución.",
     },
     tools: {
         createBtn: "Nueva Herramienta",
@@ -863,6 +893,8 @@ const spanish = {
             Embeddings: "Indexación",
             OCR: "Agente Digitalizador",
             N8N: "N8N",
+            Quiz: "Cuestionario",
+            Api: "API",
         },
         validationError: "Error al validar los campos",
     },
@@ -896,6 +928,7 @@ const spanish = {
     unauthorized: {
         returnToHome: "Volver",
         title: "No tiene permiso para acceder a esta pantalla.",
+        operation: "No tiene permiso para realizar esta acción.",
     },
     unexpectedError:
         "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",
@@ -1004,6 +1037,7 @@ const spanish = {
             done: "Listo",
             finalize: "Terminado",
             waitingforapproval: "En espera de aprobación",
+            rejected: "Rechazado",
         },
         stepFlow: "Automatización de documentos",
         stepNamePlaceholder: "Nombre del paso",

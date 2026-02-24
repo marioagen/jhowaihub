@@ -5,6 +5,14 @@
                 <div class="mb-1 title-text">
                     {{ truncateText(dataCard.name) }}
                     <div
+                        v-if="isCardRejected"
+                        class="badge fr flex-shrink-1 mt-1"
+                        :style="badgeStyle(dataCard.status.color)"
+                    >
+                        {{ $t("workflow.statusList." + dataCard.status.name.toLowerCase()) }}
+                    </div>
+                    <div
+                        v-else
                         class="badge fr flex-shrink-1 mt-1"
                         :style="badgeStyle(dataStep.status.color)"
                     >
@@ -511,6 +519,9 @@
                 const toolName = this.dataCard.toolName.trim();
                 return toolName.length > 10 ? toolName.substring(0, 10) + "..." : toolName;
             },
+            isCardRejected() {
+                return this.dataCard.status.name.toLowerCase() === "rejected";
+            },
         },
     };
 </script>
@@ -558,6 +569,7 @@
         padding: var(--kanban-card-padding) !important;
         font-size: var(--kanban-card-text-size) !important;
     }
+
     .progress-content .progress {
         height: 10px;
     }
@@ -592,6 +604,7 @@
         0% {
             background-position: -400px 0;
         }
+
         100% {
             background-position: 400px 0;
         }

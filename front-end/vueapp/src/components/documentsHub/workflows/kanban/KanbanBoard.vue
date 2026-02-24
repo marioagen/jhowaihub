@@ -14,7 +14,7 @@
                         <span>
                             {{ step.name }}
                             <span class="badge">
-                                {{ step.cards.length }}
+                                {{ toFinalizeCardLength(step.cards) }}
                             </span>
                         </span>
                         <div
@@ -58,11 +58,12 @@
                                 :id="card.id"
                             >
                                 <KanbanCard
+                                    v-if="showFinalized(card.status.id, step)"
                                     :dataCard="card"
                                     :dataStep="step"
                                     :isFirstStep="step.order === minOrder"
                                     :isLoading="isLoading"
-                                    :isLastStep="step.order === maxOrder"
+                                    :isLastStep="isLastStep(step)"
                                     @reload="reloadList"
                                     @cardMoved="handleCardMoved"
                                     @cardUpdated="handleCardUpdated"
@@ -163,6 +164,17 @@
             toggleLastColumnVisibility() {
                 this.isLastColumnVisible = !this.isLastColumnVisible;
                 localStorage.setItem("kanban_last_column_visibility", this.isLastColumnVisible);
+            },
+            isLastStep(step) {
+                return step.order === this.maxOrder;
+            },
+            showFinalized(id, step) {
+                if (id == 6) return false;
+                if (this.isLastStep(step)) return this.isLastColumnVisible;
+                return true;
+            },
+            toFinalizeCardLength(cards) {
+                return cards.filter((card) => card.status.id !== 6).length;
             },
         },
         mounted() {

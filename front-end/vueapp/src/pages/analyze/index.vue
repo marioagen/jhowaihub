@@ -89,6 +89,23 @@
                             <LucideIcon icon="PanelRight" />
                         </label>
                     </div>
+                    <button
+                        v-if="canReject"
+                        class="btn btn-outline-danger btn-sm ms-2"
+                        @click="openRejectModal"
+                        :disabled="!workflowId"
+                    >
+                        <i class="fas fa-times-circle me-1"></i>
+                        {{ $t("analyze.rejection.reject") }}
+                    </button>
+                    <button
+                        v-if="isRejected"
+                        class="btn btn-outline-warning btn-sm ms-2"
+                        @click="openViewRejectionModal"
+                    >
+                        <i class="fas fa-info-circle me-1"></i>
+                        {{ $t("analyze.justification.viewJustification") }}
+                    </button>
                 </div>
                 <ResizeColumnsComponent
                     v-if="viewMode === 'both'"
@@ -156,6 +173,17 @@
             v-if="showLoading"
         />
     </main>
+    <DocumentRejectionModal
+        v-if="canReject"
+        ref="modalReject"
+        :cardId="idCard"
+        :documentId="idAnalyzer"
+        @success="handleRejectSuccess"
+    />
+    <DocumentViewRejectionModal
+        v-if="isRejected"
+        ref="modalViewRejection"
+    />
 </template>
 <script>
     import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
@@ -165,6 +193,8 @@
     import CardsServices from "@/services/cards/CardsServices";
     import AnalyzerService from "@/services/documents/AnalyzerService";
     import LogService from "@/services/log/logService";
+    import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
+    import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
 
     export default {
         name: "AnalyzerIndex",
@@ -199,6 +229,8 @@
             AnalysisStepsSection,
             NormalizeIndex,
             ResizeColumnsComponent,
+            DocumentRejectionModal,
+            DocumentViewRejectionModal,
         },
         methods: {
             normalize(dataView, isReprocessing) {
@@ -247,6 +279,19 @@
                     this.$router.back();
                 }
             },
+            openRejectModal() {
+                if (this.workflowId) {
+                    this.$refs.modalReject.open(this.workflowId);
+                }
+            },
+            handleRejectSuccess() {
+                setTimeout(() => {
+                    this.goBack();
+                }, 2000);
+            },
+            openViewRejectionModal() {
+                this.$refs.modalViewRejection.open(this.idCard);
+            },
         },
         created() {
             this.getDataDocument();
@@ -264,24 +309,39 @@
             display: none;
         }
 
+        .analyze-doc-history,
         #docHistory {
-            display: none;
+            overflow-y: auto;
+            max-height: 70vh;
+            min-height: 300px;
+            height: auto !important;
+        }
+
+        .btn-check:checked + .btn {
+            background-color: #0d6efd !important; /* azul bootstrap */
+            color: white !important;
+            border-color: #0d6efd !important;
+        }
+        .margin-left {
+            margin-left: auto;
         }
     }
 
-    .analyze-doc-history,
     #docHistory {
         overflow-y: auto;
         max-height: 70vh;
         min-height: 300px;
+        /* Opcional: altura mínima para não ficar pequeno demais */
         height: auto !important;
     }
 
     .btn-check:checked + .btn {
-        background-color: #0d6efd !important; /* azul bootstrap */
+        background-color: #0d6efd !important;
+        /* azul bootstrap */
         color: white !important;
         border-color: #0d6efd !important;
     }
+
     .margin-left {
         margin-left: auto;
     }

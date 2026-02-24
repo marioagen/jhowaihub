@@ -139,6 +139,7 @@
                                                 class="form-control"
                                                 :placeholder="$t('template.endpointUrlPlaceholder')"
                                                 id="endpointUrl"
+                                                maxlength="500"
                                                 :class="{
                                                     'is-invalid': errorMessage,
                                                 }"
@@ -320,7 +321,7 @@
                                         {{ $t("template.requestBody") }}
                                     </h6>
                                     <small class="text-muted">
-                                        {{ $t("template.bodySubtitle") }}
+                                        {{ $tBracketsToBraces("template.bodySubtitle") }}
                                     </small>
                                 </div>
                                 <Field
@@ -394,7 +395,7 @@
                                         class="me-2 flex-shrink-0"
                                     />
                                     <small>
-                                        {{ $t("template.variablesTip") }}
+                                        {{ $tBracketsToBraces("template.variablesTip") }}
                                     </small>
                                 </div>
                             </div>
@@ -453,7 +454,7 @@
                 },
                 isSaving: false,
                 isLoading: false,
-                bodyPlaceholder: '{\n  "key": "{{variable}}"\n}',
+                bodyPlaceholder: '{\n  "key": "variable"\n}',
                 jsonError: "",
                 showAutocomplete: false,
                 autocompletePosition: { top: 0, left: 0 },

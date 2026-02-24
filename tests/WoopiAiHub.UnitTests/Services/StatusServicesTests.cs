@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -58,6 +58,71 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.Empty(result);
             _statusRepositoryMock.Verify(repo => repo.FindAll(), Times.Once);
+        }
+
+        [Fact(DisplayName = "Test FindStatusForWorkflowSteps and returns workflow status list")]
+        [Trait("FindStatusForWorkflowSteps", "Success")]
+        public async Task FindStatusForWorkflowSteps_ShouldReturnWorkflowStatusList()
+        {
+            // Arrange
+            var expectedStatus = new List<StatusDto>
+            {
+                new StatusDto { Id = 1, Name = "Pending", Color = "#FFA500" },
+                new StatusDto { Id = 2, Name = "In Progress", Color = "#0000FF" },
+                new StatusDto { Id = 3, Name = "Completed", Color = "#008000" }
+            };
+
+            _statusRepositoryMock.Setup(repo => repo.FindStatusForWorkflowSteps())
+                .ReturnsAsync(expectedStatus);
+
+            // Act
+            var result = await _statusService.FindStatusForWorkflowSteps();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedStatus.Count, result.Count);
+            Assert.Equal(expectedStatus, result);
+            _statusRepositoryMock.Verify(repo => repo.FindStatusForWorkflowSteps(), Times.Once);
+        }
+
+        [Fact(DisplayName = "Test FindStatusForWorkflowSteps and returns empty list")]
+        [Trait("FindStatusForWorkflowSteps", "Success")]
+        public async Task FindStatusForWorkflowSteps_ShouldReturnEmptyList_WhenNoWorkflowStatusesExist()
+        {
+            // Arrange
+            var expectedStatus = new List<StatusDto>();
+
+            _statusRepositoryMock.Setup(repo => repo.FindStatusForWorkflowSteps())
+                .ReturnsAsync(expectedStatus);
+
+            // Act
+            var result = await _statusService.FindStatusForWorkflowSteps();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+            _statusRepositoryMock.Verify(repo => repo.FindStatusForWorkflowSteps(), Times.Once);
+        }
+
+        [Fact(DisplayName = "Test FindStatusForWorkflowSteps verifies repository is called correctly")]
+        [Trait("FindStatusForWorkflowSteps", "Success")]
+        public async Task FindStatusForWorkflowSteps_ShouldCallRepositoryOnce()
+        {
+            // Arrange
+            var expectedStatus = new List<StatusDto>
+            {
+                new StatusDto { Id = 1, Name = "Active", Color = "#00FF00" }
+            };
+
+            _statusRepositoryMock.Setup(repo => repo.FindStatusForWorkflowSteps())
+                .ReturnsAsync(expectedStatus);
+
+            // Act
+            await _statusService.FindStatusForWorkflowSteps();
+
+            // Assert
+            _statusRepositoryMock.Verify(repo => repo.FindStatusForWorkflowSteps(), Times.Once);
+            _statusRepositoryMock.VerifyNoOtherCalls();
         }
     }
 }

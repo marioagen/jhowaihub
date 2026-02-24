@@ -145,6 +145,7 @@ namespace WoopiAiHub.Repository
                     Color = s.Status.Color,
                 },
                 StepTools = s.StepTools
+            .OrderBy(st => st.Order)
             .Select(st => new StepToolDto
             {
                 Id = st.Id,
@@ -490,6 +491,7 @@ namespace WoopiAiHub.Repository
                     },
                     HasStepTools = s.StepTools.Any(),
                     StepTools = s.StepTools
+                        .OrderBy(st => st.Order)
                         .Select(st => new StepToolDto
                         {
                             Id = st.Id,
@@ -564,6 +566,7 @@ namespace WoopiAiHub.Repository
                     },
                     HasStepTools = s.StepTools.Any(),
                     StepTools = s.StepTools
+                        .OrderBy(st => st.Order)
                         .Select(st => new StepToolDto
                         {
                             Id = st.Id,

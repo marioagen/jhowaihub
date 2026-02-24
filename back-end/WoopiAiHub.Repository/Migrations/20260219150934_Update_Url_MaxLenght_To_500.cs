@@ -1,38 +1,34 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace WoopiAiHub.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class IncreasePromptDescriptionTo500 : Migration
+    public partial class Update_Url_MaxLenght_To_500 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Description",
-                table: "Prompts",
-                type: "nvarchar(500)",
-                maxLength: 500,
+                name: "Url",
+                table: "ApiTemplates",
+                type: "varchar(500)",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "varchar(95)",
-                oldMaxLength: 95);
+                oldType: "varchar(100)");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Description",
-                table: "Prompts",
-                type: "varchar(95)",
-                maxLength: 95,
+                name: "Url",
+                table: "ApiTemplates",
+                type: "varchar(100)",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(500)",
-                oldMaxLength: 500);
+                oldType: "varchar(500)");
         }
     }
 }

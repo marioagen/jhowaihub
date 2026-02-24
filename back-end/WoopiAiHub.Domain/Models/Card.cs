@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -50,6 +52,11 @@ namespace WoopiAiHub.Domain.Models
         public void UpdateAssignedUser(Guid? userId)
         {
             AssignedUserId = userId;
+        }
+
+        public bool IsRejected()
+        {
+            return StatusId == this.Status?.Id && this.Status.Name == StatusNames.Rejected;
         }
     }
 }

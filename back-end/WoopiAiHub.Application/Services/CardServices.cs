@@ -101,16 +101,16 @@ namespace WoopiAiHub.Application.Services
         )
         {
             var card = await _cardRepository.FindByIdWithDocument(updateCardStepStatusDto.CardId) ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var previousStepId = card.StepId;
+            var previousStatusId = card.StatusId;
 
             var step = await _stepRepository.FindByOrderAndWorkflowId(
                 updateCardStepStatusDto.NextStepOrder,
                 updateCardStepStatusDto.WorkflowId
             ) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
-            var previousStepId = card.StepId;
-            var previousStatusId = card.StatusId;
-
-            card.UpdateStepAndStatus(step.Id, step.StatusId);
+            var statusId = card.IsRejected() ? previousStatusId : step.StatusId;
+            card.UpdateStepAndStatus(step.Id, statusId);
             var result = _cardRepository.Update(card);
 
             if (result)

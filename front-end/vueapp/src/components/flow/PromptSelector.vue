@@ -139,6 +139,18 @@
                     });
                     return;
                 }
+                const invalid = this.selectedDependencies.filter(
+                    (d) => !this.dependencyExistsInStepTools(d)
+                );
+                if (invalid.length > 0) {
+                    this.$notify({
+                        title: "common.warning",
+                        message: "flow.formFlow.dependenciesInvalidOrRemoved",
+                        variant: "warning",
+                        icon: "TriangleAlert",
+                    });
+                    return;
+                }
                 const nodes = this.flowState.nodes;
                 const nodeIndex = nodes.findIndex((n) => n.id === this.nodeData.id);
 
@@ -198,6 +210,12 @@
                 } catch (error) {
                     LogService.showMessage("Erro ao carregar prompts");
                 }
+            },
+            dependencyExistsInStepTools(dep) {
+                if (!this.previousStepTools?.length) return false;
+                const step = this.previousStepTools.find((s) => s.order === dep.stepOrder);
+                if (!step?.stepTools?.length) return false;
+                return step.stepTools.some((st) => st.order === dep.stepToolOrder);
             },
             loadState() {
                 const stateStr = localStorage.getItem("flow_state_params");

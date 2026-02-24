@@ -221,5 +221,158 @@ namespace WoopiAiHub.UnitTests.Services
             _modelEmbeddingRepositoryMock.Verify(r => r.FindByNameAsync(It.IsAny<string>()), Times.Never);
             _usageDailyRepositoryMock.Verify(r => r.AddAsync(It.IsAny<UsageDaily>()), Times.Once);
         }
+
+        [Fact(DisplayName = "AddRangeAsync should return true when usage dailies are added successfully")]
+        [Trait("AddRangeAsync", "Success")]
+        public async Task AddRangeAsync_ShouldReturnTrue_WhenUsageDailiesAreAdded()
+        {
+            // Arrange
+            var usageDailyDtos = new List<UsageDailyDto>
+            {
+                _fixture.CreateValidUsageDailyDto(),
+                _fixture.CreateValidUsageDailyDto()
+            };
+            _usageDailyRepositoryMock.Setup(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()))
+                                    .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.AddRangeAsync(usageDailyDtos);
+
+            // Assert
+            Assert.True(result);
+            _usageDailyRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "AddRangeAsync should return false when repository fails")]
+        [Trait("AddRangeAsync", "Fail")]
+        public async Task AddRangeAsync_ShouldReturnFalse_WhenRepositoryFails()
+        {
+            // Arrange
+            var usageDailyDtos = new List<UsageDailyDto>
+            {
+                _fixture.CreateValidUsageDailyDto()
+            };
+            _usageDailyRepositoryMock.Setup(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()))
+                                    .ReturnsAsync(false);
+
+            // Act
+            var result = await _service.AddRangeAsync(usageDailyDtos);
+
+            // Assert
+            Assert.False(result);
+            _usageDailyRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "AddByRangeValuesAsync should return true when all dependencies are found")]
+        [Trait("AddByRangeValuesAsync", "Success")]
+        public async Task AddByRangeValuesAsync_ShouldReturnTrue_WhenAllDependenciesAreFound()
+        {
+            // Arrange
+            var usageType = _fixture.CreateValidUsageType();
+            var modelEmbedding = _fixture.CreateValidModelEmbedding();
+            var userId = Guid.NewGuid();
+            var email = "test@example.com";
+            var usages = new List<QueryUsageDto>
+            {
+                new QueryUsageDto { Model = modelEmbedding.Name, Total_usage = 10 }
+            };
+
+            _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
+                                 .ReturnsAsync(usageType);
+            _userServicesMock.Setup(s => s.FindIdByEmail(email))
+                            .Returns(userId);
+            _modelEmbeddingRepositoryMock.Setup(r => r.FindAllByNamesListAsync(new List<string> { modelEmbedding.Name }))
+                                        .ReturnsAsync(new List<ModelEmbedding> { modelEmbedding });
+            _usageDailyRepositoryMock.Setup(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()))
+                                    .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.AddByRangeValuesAsync(usageType.Name, email, usages);
+
+            // Assert
+            Assert.True(result);
+            _usageTypeServicesMock.Verify(s => s.FindByNameAsync(usageType.Name), Times.Once);
+            _userServicesMock.Verify(s => s.FindIdByEmail(email), Times.Once);
+            _modelEmbeddingRepositoryMock.Verify(r => r.FindAllByNamesListAsync(new List<string> { modelEmbedding.Name }), Times.Once);
+            _usageDailyRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "AddByRangeValuesAsync should return false when usage type is not found")]
+        [Trait("AddByRangeValuesAsync", "Fail")]
+        public async Task AddByRangeValuesAsync_ShouldReturnFalse_WhenUsageTypeNotFound()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var usages = new List<QueryUsageDto> { new QueryUsageDto { Model = "Model1", Total_usage = 10 } };
+
+            _usageTypeServicesMock.Setup(s => s.FindByNameAsync(It.IsAny<string>()))
+                                 .ReturnsAsync((UsageType?)null);
+
+            // Act
+            var result = await _service.AddByRangeValuesAsync("InvalidType", email, usages);
+
+            // Assert
+            Assert.False(result);
+            _usageTypeServicesMock.Verify(s => s.FindByNameAsync("InvalidType"), Times.Once);
+            _userServicesMock.Verify(s => s.FindIdByEmail(It.IsAny<string>()), Times.Never);
+            _usageDailyRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "AddByRangeValuesAsync should return false when user is not found")]
+        [Trait("AddByRangeValuesAsync", "Fail")]
+        public async Task AddByRangeValuesAsync_ShouldReturnFalse_WhenUserNotFound()
+        {
+            // Arrange
+            var usageType = _fixture.CreateValidUsageType();
+            var email = "test@example.com";
+            var usages = new List<QueryUsageDto> { new QueryUsageDto { Model = "Model1", Total_usage = 10 } };
+
+            _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
+                                 .ReturnsAsync(usageType);
+            _userServicesMock.Setup(s => s.FindIdByEmail(email))
+                            .Returns(Guid.Empty);
+
+            // Act
+            var result = await _service.AddByRangeValuesAsync(usageType.Name, email, usages);
+
+            // Assert
+            Assert.False(result);
+            _usageTypeServicesMock.Verify(s => s.FindByNameAsync(usageType.Name), Times.Once);
+            _userServicesMock.Verify(s => s.FindIdByEmail(email), Times.Once);
+            _usageDailyRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "AddByRangeValuesAsync should continue when some model embeddings are not found")]
+        [Trait("AddByRangeValuesAsync", "Partial Success")]
+        public async Task AddByRangeValuesAsync_ShouldContinue_WhenModelEmbeddingNotFound()
+        {
+            // Arrange
+            var usageType = _fixture.CreateValidUsageType();
+            var modelEmbedding = _fixture.CreateValidModelEmbedding();
+            var userId = Guid.NewGuid();
+            var email = "test@example.com";
+            var usages = new List<QueryUsageDto>
+            {
+                new QueryUsageDto { Model = modelEmbedding.Name, Total_usage = 10 },
+                new QueryUsageDto { Model = "NonExistentModel", Total_usage = 5 }
+            };
+
+            _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
+                                 .ReturnsAsync(usageType);
+            _userServicesMock.Setup(s => s.FindIdByEmail(email))
+                            .Returns(userId);
+            _modelEmbeddingRepositoryMock.Setup(r => r.FindAllByNamesListAsync(new List<string> { modelEmbedding.Name, "NonExistentModel" }))
+                                        .ReturnsAsync(new List<ModelEmbedding> { modelEmbedding });
+            _usageDailyRepositoryMock.Setup(r => r.AddRangeAsync(It.Is<List<UsageDaily>>(list => list.Count == 1)))
+                                    .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.AddByRangeValuesAsync(usageType.Name, email, usages);
+
+            // Assert
+            Assert.True(result);
+            _modelEmbeddingRepositoryMock.Verify(r => r.FindAllByNamesListAsync(new List<string> {  modelEmbedding.Name, "NonExistentModel" }), Times.Once);
+            _usageDailyRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<List<UsageDaily>>()), Times.Once);
+        }
     }
 }

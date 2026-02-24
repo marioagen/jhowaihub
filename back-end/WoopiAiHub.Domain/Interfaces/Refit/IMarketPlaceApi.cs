@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using Refit;
@@ -56,7 +56,7 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
 
         [Post("/api/Tenant/ProcessConsumption")]
         Task<bool> ProcessConsumption([Header("KeyAccess")] string KeyAccess,
-                                      ExcessManagementTenantDto request);
+                                      TenantConsumptionDto request);
 
         [Get("/api/Tenant/all/{module}")]
         Task<List<TenantListDto>> FindAllTenantsByModuleAsync([Header("KeyAccess")] string KeyAccess,

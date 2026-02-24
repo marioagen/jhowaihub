@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using WoopiAiHub.Domain.Constants;
 
 namespace WoopiAiHub.Domain.Models
@@ -14,7 +14,7 @@ namespace WoopiAiHub.Domain.Models
         [Column("Method", TypeName = "varchar(10)")]
         public string Method { get; private set; }
 
-        [Column("Url", TypeName = "varchar(100)")]
+        [Column("Url", TypeName = "varchar(500)")]
         public string Url { get; private set; }
 
         [Column("QueryTemplate", TypeName = "varchar(max)")]
