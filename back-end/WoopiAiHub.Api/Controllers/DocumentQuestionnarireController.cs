@@ -13,14 +13,14 @@ namespace WoopiAiHub.Api.Controllers
     [ApiController]
     public class DocumentQuestionnarireController : ControllerBase
     {
-        private readonly IDocumentServices _documentServices;
+        private readonly IDocumentQuestionnaireServices _documentQuestionnaireServices;
         private readonly ILogger<DocumentQuestionnarireController> _logger;
 
         public DocumentQuestionnarireController(
-            IDocumentServices documentServices,
+            IDocumentQuestionnaireServices documentQuestionnaireServices,
             ILogger<DocumentQuestionnarireController> logger)
         {
-            _documentServices = documentServices;
+            _documentQuestionnaireServices = documentQuestionnaireServices;
             _logger = logger;
         }
 
@@ -36,7 +36,7 @@ namespace WoopiAiHub.Api.Controllers
         {
             try
             {
-                var result = await _documentServices.InputDocument(documentInputDto,
+                var result = await _documentQuestionnaireServices.InputDocument(documentInputDto,
                                                                    headersDto);
                 return Ok(result);
             }
@@ -69,7 +69,7 @@ namespace WoopiAiHub.Api.Controllers
         {
             try
             {
-                var result = await _documentServices.InputQuestionnaire(documentQuestionnaireDto,
+                var result = await _documentQuestionnaireServices.InputQuestionnaire(documentQuestionnaireDto,
                                                                         headersDto);
                 return Ok(result);
             }

@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Application.Dto;
+using WoopiAiHub.Application.Dto;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs;
@@ -17,12 +17,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         Task ProcessChunks(RequestCreateDocumentDto requestCreateDocumentDto, 
                            string tenant);
-
-        Task<string> InputDocument(DocumentInputDto documentInputDto,
-                                   HeadersDto headersDto);
-
-        Task<bool> InputQuestionnaire(DocumentQuestionnaireDto documentQuestionnaireDto,
-                                      HeadersDto headersDto);
 
         FindByIdAnalyzeDto FindByIdAnalyze(int id,
                                            HeadersDto headersDto);

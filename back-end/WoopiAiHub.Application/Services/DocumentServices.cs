@@ -59,9 +59,6 @@ namespace WoopiAiHub.Application.Services
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
-        private const int DocumentHistoryTypeInputQuestionnaire = 1;
-        private const int DocumentHistoryTypeDocumentInput = 2;
-
         public DocumentServices(IDocumentRepository documentRepository,
             IValidator<RequestCreateDocumentDto> documentDtoValidator,
             ILogger<DocumentServices> logger,
@@ -220,42 +217,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// This method sends a question to questionnaire and gets a response
-        /// It also requests the repository layer to save the question and answer history
-        /// </summary>
-        /// <param name="documentQuestionnaireDto"></param>
-        /// <param name="headersDto"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public async Task<bool> InputQuestionnaire(DocumentQuestionnaireDto documentQuestionnaireDto,
-            HeadersDto headersDto)
-        {
-            var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
-            var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
-
-            foreach (var description in questionnaire.Questions.Select(u => u.Description))
-            {
-                var customQueryRequestDto = await this.CreateCustomQueryRequestDto(description,
-                        headersDto.Tenant,
-                        headersDto.Language);
-                var apikey = _config["IndexerApiKey"]!;
-
-                var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
-                    documentDb.ReferenceFile.ToString(),
-                    customQueryRequestDto,
-                    apikey);
-
-                await this.ProcessRequestCustomQuery(resultRequest,
-                    documentQuestionnaireDto.IdDocument,
-                    description,
-                    headersDto.EmailCreator,
-                    isFromQuestionnaire: true);
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// This sends the id to the repository and returns document information.
         /// FinddocumentDto
         /// </summary>
@@ -327,38 +288,6 @@ namespace WoopiAiHub.Application.Services
         public int FindDocumentCount()
         {
             return _documentRepository.FindDocumentCount();
-        }
-
-        /// <summary>
-        /// This method sends a query to the Embeddings API and gets a response
-        /// It also requests the repository layer to save the question and answer history
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public async Task<string> InputDocument(DocumentInputDto documentInputDto,
-            HeadersDto headersDto)
-        {
-            var documentDb = _documentRepository.FindById(documentInputDto.Id);
-            var customQueryRequestDto = await this.CreateCustomQueryRequestDto(documentInputDto.Input,
-                headersDto.Tenant,
-                headersDto.Language);
-
-            var apikey = _config["IndexerApiKey"]!;
-
-            var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
-                documentDb.ReferenceFile.ToString(),
-                customQueryRequestDto,
-                apikey);
-
-            var textResponse = await this.ProcessRequestCustomQuery(resultRequest,
-                documentInputDto.Id,
-                documentInputDto.Input,
-                headersDto.EmailCreator,
-                isFromQuestionnaire: false);
-
-            return textResponse;
         }
 
         /// <summary>
@@ -561,108 +490,6 @@ namespace WoopiAiHub.Application.Services
                 _unitOfWork.Rollback();
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
-        }
-
-        /// <summary>
-        /// Processes the result of the question request for llmindexer
-        /// </summary>
-        /// <param name="resultRequest"></param>
-        /// <param name="id"></param>
-        /// <param name="input"></param>
-        /// <param name="emailCreator"></param>
-        /// <param name="isFromQuestionnaire"></param>
-        /// <returns></returns>
-        /// <exception cref="FileNotFoundException"></exception>
-        /// <exception cref="Exception"></exception>
-        private async Task<string> ProcessRequestCustomQuery(HttpResponseMessage resultRequest,
-            int id,
-            string input,
-            string emailCreator,
-            bool isFromQuestionnaire)
-        {
-            if (resultRequest.IsSuccessStatusCode)
-            {
-                var queryResponse = await resultRequest.Content.ReadAsStringAsync();
-                var queryResponseModel = JsonConvert.DeserializeObject<QueryResponseModelRefitDto>(queryResponse);
-
-                var userId = _userRepository.FindIdByEmail(emailCreator);
-                var userIdOrNull = (userId == Guid.Empty) ? (Guid?)null : userId;
-                var historyType = isFromQuestionnaire ? DocumentHistoryTypeInputQuestionnaire : DocumentHistoryTypeDocumentInput;
-                var documentHistoryForDb = CreateDocumentHistoryForDb(id,
-                    queryResponseModel!.response,
-                    input,
-                    historyType,
-                    userIdOrNull);
-                foreach (var usage in queryResponseModel.Usage)
-                {
-                    await _usageDailyServices.AddByValuesAsync(MetricNames.Token, emailCreator, usage.Total_usage ?? 0,
-                        usage.Model);
-                }
-
-                _documentHistoryServices.Create(documentHistoryForDb);
-
-                return queryResponseModel.response;
-            }
-            else if (resultRequest.StatusCode.Equals(HttpStatusCode.NotFound))
-            {
-                throw new FileNotFoundException("The file was not found in the llmindexer weaviate");
-            }
-            else
-            {
-                throw new AppException(ErrorCode.RefitApiError, "Error while sending question to Embeddings API", null);
-            }
-        }
-
-        /// <summary>
-        /// Creates an object of type CustomQueryRequestDto
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        private async Task<CustomQueryRequestRefitDto> CreateCustomQueryRequestDto(string input,
-            string tenantName,
-            string language)
-        {
-            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName);
-
-            return new CustomQueryRequestRefitDto
-            {
-                Question = input,
-                Model = tenant!.Model,
-                kValue = tenant.KValue,
-                Temperature = 0,
-                Template = tenant.Template.Replace("{language}", language.ConvertLanguageCodeToName()),
-                Refine_template = tenant.RefineTemplate,
-                Max_tokens = tenant.MaxTokens,
-                SearchMode = tenant.SearchMode,
-                Tenant = tenantName
-            };
-        }
-
-        /// <summary>
-        /// Creates an object of type DocumentHistory
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="output"></param>
-        /// <param name="input"></param>
-        /// <param name="type"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        private static DocumentHistory CreateDocumentHistoryForDb(int id,
-            string output,
-            string input,
-            int type,
-            Guid? userId)
-        {
-            return new DocumentHistory
-            (
-                id,
-                input,
-                output,
-                0,
-                DateTime.Now,
-                type,
-                userId
-            );
         }
 
         /// <summary>
