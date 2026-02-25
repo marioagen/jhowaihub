@@ -138,6 +138,7 @@
         flex-direction: column;
         gap: 1rem;
         overflow-y: auto;
+        height: 100%;
     }
 
     @media (max-width: 768px) {

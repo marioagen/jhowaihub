@@ -377,15 +377,13 @@
 
     #docHistory {
         overflow-y: auto;
-        max-height: 70vh;
+        max-height: calc(100vh - 200px);
         min-height: 300px;
-        /* Opcional: altura mínima para não ficar pequeno demais */
         height: auto !important;
     }
 
     .btn-check:checked + .btn {
         background-color: #0d6efd !important;
-        /* azul bootstrap */
         color: white !important;
         border-color: #0d6efd !important;
     }

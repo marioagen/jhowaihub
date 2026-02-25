@@ -36,8 +36,14 @@
                         <i class="fas fa-pen"></i>
                         {{ $t("common.edited") }}
                     </span>
-                    <span  v-if="field.outputType !== 'Quiz'" @click="open(fields[index].value, field.label, index)">
-                        <LucideIcon icon="Eye" :size="16" />
+                    <span
+                        v-if="field.outputType !== 'Quiz'"
+                        @click="open(fields[index].value, field.label, index)"
+                    >
+                        <LucideIcon
+                            icon="Eye"
+                            :size="16"
+                        />
                     </span>
                 </div>
                 <div
@@ -142,12 +148,16 @@
                             class="form-control mt-2"
                             readonly
                             v-model="fields[index].value"
-                            rows="5"
+                            rows="9"
                         ></textarea>
                     </div>
                 </div>
                 <div v-if="field.outputType == 'Quiz'">
-                    <div v-for="item in getTheValues(field)" :key="item.outputId" class="block">
+                    <div
+                        v-for="item in getTheValues(field)"
+                        :key="item.outputId"
+                        class="block"
+                    >
                         <div class="question">
                             <label class="field-label">{{ item.Question }}</label>
                             <p>{{ item.Answer }}</p>
@@ -276,164 +286,29 @@
                         field: this.fields[index],
                     });
                 }
-            this.currentModalIndex = null;
+                this.currentModalIndex = null;
+            },
+            getTheValues(item) {
+                let parsedValue = [];
+
+                try {
+                    parsedValue = JSON.parse(item.value);
+                } catch (e) {
+                    parsedValue = [];
+                }
+
+                return parsedValue;
+            },
         },
-        getTheValues(item) {
-            let parsedValue = []
-
-            try {
-                parsedValue = JSON.parse(item.value)
-            } catch (e) {
-                parsedValue = []
-            }
-
-            return parsedValue;
-        },
-
-    }
-};
+    };
 </script>
 <style scoped>
-.extracted-fields-container {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.section-title {
-    color: #0073e6;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.no-data-message {
-    text-align: center;
-    color: #666;
-    padding: 2rem;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.fields-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.field-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.field-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.field-label {
-    font-size: 0.85rem;
-    color: #333;
-    font-weight: 500;
-    margin: 0;
-}
-
-.edited-badge {
-    background: #ff9800;
-    color: white;
-    padding: 0.2rem 0.6rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.field-value-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.field-value {
-    flex: 1;
-    padding: 0.6rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    transition: border-color 0.3s ease;
-}
-
-.field-value:focus {
-    outline: none;
-    border-color: #0073e6;
-}
-
-.field-value:read-only {
-    background-color: #f8f9fa;
-}
-
-.edit-button,
-.save-button,
-.cancel-button {
-    width: 32px;
-    height: 32px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.edit-button {
-    background: #0073e6;
-    color: white;
-}
-
-.edit-button:hover {
-    background: #005bb5;
-}
-
-.edit-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.save-button {
-    background: #28a745;
-    color: white;
-}
-
-.save-button:hover {
-    background: #218838;
-}
-
-.cancel-button {
-    background: #6c757d;
-    color: white;
-}
-
-.cancel-button:hover {
-    background: #5a6268;
-}
-
-@media (max-width: 768px) {
     .extracted-fields-container {
         background: white;
         border-radius: 8px;
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        height: 100%;
     }
 
     .section-title {
@@ -565,27 +440,162 @@
 
     @media (max-width: 768px) {
         .extracted-fields-container {
-            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            color: #0073e6;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .no-data-message {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .fields-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .field-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .field-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .field-label {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            color: #333;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .edited-badge {
+            background: #ff9800;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .field-value-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .field-value {
-            padding: 0.5rem;
-            font-size: 0.85rem;
+            flex: 1;
+            padding: 0.6rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .field-value:focus {
+            outline: none;
+            border-color: #0073e6;
+        }
+
+        .field-value:read-only {
+            background-color: #f8f9fa;
+        }
+
+        .edit-button,
+        .save-button,
+        .cancel-button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .edit-button {
+            background: #0073e6;
+            color: white;
+        }
+
+        .edit-button:hover {
+            background: #005bb5;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .save-button {
+            background: #28a745;
+            color: white;
+        }
+
+        .save-button:hover {
+            background: #218838;
+        }
+
+        .cancel-button {
+            background: #6c757d;
+            color: white;
+        }
+
+        .cancel-button:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .extracted-fields-container {
+                padding: 0.75rem;
+            }
+
+            .field-label {
+                font-size: 0.8rem;
+            }
+
+            .field-value {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
         }
     }
-}
 
-.block {
-    margin-bottom: 20px;
-}
+    .block {
+        margin-bottom: 20px;
+    }
 
-.question {
-    padding: 10px;
-    border: 1px solid #ddd;
-    margin-top: 10px;
-}
+    .question {
+        padding: 10px;
+        border: 1px solid #ddd;
+        margin-top: 10px;
+    }
 </style>
