@@ -108,7 +108,7 @@ namespace WoopiAiHub.Application.Services
         {
             var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
 
-            if (embeddingsData?.DocumentEmbeddings == null || !embeddingsData.DocumentEmbeddings.Any())
+            if (embeddingsData?.DocumentEmbeddings == null || embeddingsData.DocumentEmbeddings.Count == 0)
                 return string.Empty;
 
             return string.Join(Environment.NewLine + Environment.NewLine,
