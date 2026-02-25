@@ -217,38 +217,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// This sends the id to the repository and returns document information.
-        /// FinddocumentDto
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public FindByIdAnalyzeDto FindByIdAnalyze(int id,
-            HeadersDto headersDto)
-        {
-            var result = _documentRepository.FindById(id);
-
-            if (result == null)
-            {
-                var ex = new ArgumentException(FindingDocumentErrorMessage);
-                _logger.LogError(ex,
-                    $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindByIdAnalyze)} method");
-                throw ex;
-            }
-
-            var cards = _cardRepository.FindByDocumentIdCardListAsync(id).Result;
-            var activeCard = cards.FirstOrDefault();
-
-            return new FindByIdAnalyzeDto
-            {
-                Name = result.Name,
-                Description = result.Description,
-                ReferenceFile = result.ReferenceFile,
-                CardId = activeCard?.Id
-            };
-        }
-
-        /// <summary>
         /// Return the status and name of an document
         /// </summary>
         /// <param name="id"></param>
@@ -862,77 +830,6 @@ namespace WoopiAiHub.Application.Services
                 ChunkSize = tenant.ChunkSize,
                 Email = processOcrResultDto.Email
             };
-        }
-
-        /// <summary>
-        /// Retrieves the concatenated OCR text for a document by checking if an OCR StepTool execution exists with status "Ready"
-        /// </summary>
-        /// <param name="documentId">The document ID</param>
-        /// <returns>OcrTextResponseDto containing the OCR text if available</returns>
-        public async Task<OcrTextResponseDto> FindOcrTextByDocumentId(int documentId)
-        {
-            var response = new OcrTextResponseDto { HasOcr = false };
-
-            var document = _documentRepository.FindById(documentId);
-            if (document == null)
-                return response;
-
-            response.ReferenceFile = document.ReferenceFile;
-
-            var card = await _cardRepository.FindByDocumentIdCardAsync(documentId);
-            if (card == null)
-                return response;
-
-            var ocrExecution = FindReadyOcrExecution(card);
-            if (ocrExecution == null)
-                return response;
-
-            var outputJson = await _stepToolOutputRepository.FindByStepToolId(ocrExecution.StepToolId, card.Id);
-            if (string.IsNullOrEmpty(outputJson))
-                return response;
-
-            var ocrText = ExtractOcrTextFromOutput(outputJson);
-            if (!string.IsNullOrEmpty(ocrText))
-            {
-                response.Content = ocrText;
-                response.HasOcr = true;
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        /// Finds the OCR execution with Ready status for a card
-        /// </summary>
-        /// <param name="card">The card to search in</param>
-        /// <returns>OCR execution or null if not found</returns>
-        private StepToolExecution? FindReadyOcrExecution(Card card)
-        {
-            return card.Executions
-                .FirstOrDefault(e => e.Status == StatusExecution.Ready &&
-                                     e.StepTool != null &&
-                                     e.StepTool.Tool != null &&
-                                     e.StepTool.Tool.ToolType != null &&
-                                     e.StepTool.Tool.ToolType.Name == HandlersTypes.Ocr);
-        }
-
-        /// <summary>
-        /// Extracts and concatenates OCR text from serialized output
-        /// </summary>
-        /// <param name="outputJson">Serialized StepToolOutput JSON</param>
-        /// <param name="documentId">Document ID for logging</param>
-        /// <returns>Concatenated OCR text or empty string if extraction fails</returns>
-        private string ExtractOcrTextFromOutput(string outputJson)
-        {
-            var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
-
-            if (embeddingsData?.DocumentEmbeddings == null || !embeddingsData.DocumentEmbeddings.Any())
-                return string.Empty;
-
-            return string.Join(Environment.NewLine + Environment.NewLine,
-                embeddingsData.DocumentEmbeddings
-                    .OrderBy(e => (e.Metadata as dynamic)?.PageNumber ?? 0)
-                    .Select(e => e.Text));
         }
 
     }

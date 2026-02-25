@@ -18,9 +18,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task ProcessChunks(RequestCreateDocumentDto requestCreateDocumentDto, 
                            string tenant);
 
-        FindByIdAnalyzeDto FindByIdAnalyze(int id,
-                                           HeadersDto headersDto);
-
         Task<bool> ChangeStatus(int id,
                                 DocumentStatus status,
                                 string emailCreator);
@@ -41,7 +38,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto dto);
         Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto);
-        Task<OcrTextResponseDto> FindOcrTextByDocumentId(int documentId);
         Task<WoopiAiHub.Domain.Models.Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto);
     };
 }

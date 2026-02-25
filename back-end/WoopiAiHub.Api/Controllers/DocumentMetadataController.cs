@@ -16,18 +16,15 @@ namespace WoopiAiHub.Api.Controllers
     {
         private readonly IDocumentMetadataServices _documentMetadataServices;
         private readonly IDocumentNormalizedServices _documentNormalizedServices;
-        private readonly IDocumentServices _documentServices;
         private readonly ILogger<DocumentMetadataController> _logger;
 
         public DocumentMetadataController(
             IDocumentMetadataServices documentMetadataServices,
             IDocumentNormalizedServices documentNormalizedServices,
-            IDocumentServices documentServices,
             ILogger<DocumentMetadataController> logger)
         {
             _documentMetadataServices = documentMetadataServices;
             _documentNormalizedServices = documentNormalizedServices;
-            _documentServices = documentServices;
             _logger = logger;
         }
 
@@ -66,7 +63,7 @@ namespace WoopiAiHub.Api.Controllers
         {
             try
             {
-                var result =  _documentServices.FindByIdAnalyze(id,
+                var result = _documentMetadataServices.FindByIdAnalyze(id,
                                                                 headersDto);
                 return Ok(result);
             }
@@ -89,7 +86,7 @@ namespace WoopiAiHub.Api.Controllers
         {
             try
             {
-                var result = await _documentServices.FindOcrTextByDocumentId(id);
+                var result = await _documentMetadataServices.FindOcrTextByDocumentId(id);
                 return Ok(result);
             }
             catch (Exception ex)
